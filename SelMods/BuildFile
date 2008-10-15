@@ -1,0 +1,9 @@
+# -*- Makefile -*-
+# $Id: BuildFile,v 1.1 2008/10/14 06:13:53 loizides Exp $
+
+<use name=MitAna/TreeMod>
+<use name=MitCommon/MathTools>
+<use root>
+<export>
+   <lib name=MitPhysicsSelMods>
+</export>
