@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.5 2008/10/10 10:54:13 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -239,6 +239,32 @@ void GeneratorMod::Process()
 	}
 	delete dijet;
       }
+      // b quark info
+      if    (GenQuarks->At(i)->AbsPdgId() == 5){
+        hDGenQuarks[5]->Fill(GenQuarks->At(i)->Pt());
+        hDGenQuarks[6]->Fill(GenQuarks->At(i)->Eta());      
+        hDGenQuarks[7]->Fill(GenQuarks->At(i)->Phi());      
+        if(ptMaxLep[0] > 20 && ptMaxLep[1] > 15){
+          if(fabs(GenLeptons->At(idxMaxLep[0])->Eta()) < 2.5 &&
+             fabs(GenLeptons->At(idxMaxLep[1])->Eta()) < 2.5){
+            hDGenQuarks[8]->Fill(GenQuarks->At(i)->Pt());	
+            hDGenQuarks[9]->Fill(GenQuarks->At(i)->Eta());      
+            hDGenQuarks[10]->Fill(GenQuarks->At(i)->Phi());	
+	  }
+	}
+      }
+      // t quark info
+      else if(GenQuarks->At(i)->AbsPdgId() == 6){
+        hDGenQuarks[11]->Fill(GenQuarks->At(i)->Pt());
+        hDGenQuarks[12]->Fill(GenQuarks->At(i)->Eta());      
+        hDGenQuarks[13]->Fill(GenQuarks->At(i)->Phi());      
+      }
+      // light quark info
+      else {
+        hDGenQuarks[14]->Fill(GenQuarks->At(i)->Pt());
+        hDGenQuarks[15]->Fill(GenQuarks->At(i)->Eta());      
+        hDGenQuarks[16]->Fill(GenQuarks->At(i)->Phi());      
+      }
     }
 
     // WBF
@@ -310,7 +336,19 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenQuarks_%d", 2);  hDGenQuarks[2]  = new TH1D(sb,sb,2000,0.0,2000.);
     sprintf(sb,"hDGenQuarks_%d", 3);  hDGenQuarks[3]  = new TH1D(sb,sb,200,0.0,400.); 
     sprintf(sb,"hDGenQuarks_%d", 4);  hDGenQuarks[4]  = new TH1D(sb,sb,2000,0.0,2000.);
-    for(int i=0; i<5; i++) AddOutput(hDGenQuarks[i]);
+    sprintf(sb,"hDGenQuarks_%d", 5);  hDGenQuarks[5]  = new TH1D(sb,sb,200,0.0,400.); 
+    sprintf(sb,"hDGenQuarks_%d", 6);  hDGenQuarks[6]  = new TH1D(sb,sb,200,-10.0,10.); 
+    sprintf(sb,"hDGenQuarks_%d", 7);  hDGenQuarks[7]  = new TH1D(sb,sb,200,-TMath::Pi(),TMath::Pi()); 
+    sprintf(sb,"hDGenQuarks_%d", 8);  hDGenQuarks[8]  = new TH1D(sb,sb,200,0.0,400.); 
+    sprintf(sb,"hDGenQuarks_%d", 9);  hDGenQuarks[9]  = new TH1D(sb,sb,200,-10.0,10.); 
+    sprintf(sb,"hDGenQuarks_%d",10);  hDGenQuarks[10] = new TH1D(sb,sb,200,-TMath::Pi(),TMath::Pi()); 
+    sprintf(sb,"hDGenQuarks_%d",11);  hDGenQuarks[11] = new TH1D(sb,sb,200,0.0,400.); 
+    sprintf(sb,"hDGenQuarks_%d",12);  hDGenQuarks[12] = new TH1D(sb,sb,200,-10.0,10.); 
+    sprintf(sb,"hDGenQuarks_%d",13);  hDGenQuarks[13] = new TH1D(sb,sb,200,-TMath::Pi(),TMath::Pi()); 
+    sprintf(sb,"hDGenQuarks_%d",14);  hDGenQuarks[14] = new TH1D(sb,sb,200,0.0,400.); 
+    sprintf(sb,"hDGenQuarks_%d",15);  hDGenQuarks[15] = new TH1D(sb,sb,200,-10.0,10.); 
+    sprintf(sb,"hDGenQuarks_%d",16);  hDGenQuarks[16] = new TH1D(sb,sb,200,-TMath::Pi(),TMath::Pi()); 
+    for(int i=0; i<17; i++) AddOutput(hDGenQuarks[i]);
 
     // qqH
     sprintf(sb,"hDGenWBF_%d", 0);  hDGenWBF[0]  = new TH1D(sb,sb,90,0.0,180.);
@@ -334,6 +372,8 @@ void GeneratorMod::SlaveTerminate()
 {
   // Run finishing code on the computer (slave) that did the analysis. For this
   // module, we dont do anything here.
+
+  cout << "Total Number of Processed Events: " << fNEventsProcessed << endl;
 
 }
 

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: FwdJetEvtSelMod.h,v 1.1 2008/10/14 06:13:53 loizides Exp $
+// $Id: FwdJetEvtSelMod.h,v 1.1 2008/10/06 16:59:52 ceballos Exp $
 //
 // FwdJetEvtSelMod
 //

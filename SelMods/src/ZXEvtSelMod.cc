@@ -1,4 +1,4 @@
- // $Id: ZXEvtSelMod.cc,v 1.1 2008/10/14 06:13:54 loizides Exp $
+ // $Id: ZXEvtSelMod.cc,v 1.3 2008/10/10 10:54:13 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/ZXEvtSelMod.h"
 #include <TH1D.h>
@@ -287,69 +287,94 @@ void ZXEvtSelMod::Process()
       CompositeParticle *dilepton = new CompositeParticle();
       dilepton->AddDaughter(leptonsWZ[0]);
       dilepton->AddDaughter(leptonsWZ[1]);
+      CompositeParticle *trilepton = new CompositeParticle();
+      trilepton->AddDaughter(leptonsWZ[0]);
+      trilepton->AddDaughter(leptonsWZ[1]);
+      trilepton->AddDaughter(leptonsWZ[2]);
 
       if(dilepton->Charge() != 0) 
          printf("Impossible, nchaZ != 0, nWZType ===> %d\n",nWZType);
 
-      // Sort and count the number of central Jets for vetoing
-      vector<Jet*> sortedJets;
-      for(UInt_t i=0; i<CleanJets->GetEntries(); i++){
-	if(fabs(CleanJets->At(i)->Eta()) < 2.5){
-	  Jet* jet_f = new Jet(CleanJets->At(i)->Px()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
-                               CleanJets->At(i)->Py()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
-                               CleanJets->At(i)->Pz()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
-			       CleanJets->At(i)->E() *CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale());
-	  sortedJets.push_back(jet_f);
-	}
-      }
-      for(UInt_t i=0; i<sortedJets.size(); i++){
-	for(UInt_t j=i+1; j<sortedJets.size(); j++){
-	  if(sortedJets[i]->Pt() < sortedJets[j]->Pt()) {
-	    //swap i and j
-            Jet* tempjet = sortedJets[i];
-            sortedJets[i] = sortedJets[j];
-            sortedJets[j] = tempjet;	
-	  }
-	}
-      }
-      double deltaRJetl = 999.;
-      double deltaRJetMet = 999.;
-      if(sortedJets.size() > 0){
-       for(int i=0; i<3; i++){
-          if(MathUtils::DeltaR(leptonsWZ[i]->Phi(), leptonsWZ[i]->Eta(),
-	                       sortedJets[0]->Phi(), sortedJets[0]->Eta()) < deltaRJetl)
-	    deltaRJetl = MathUtils::DeltaR(leptonsWZ[i]->Phi(), leptonsWZ[i]->Eta(),
-	                                   sortedJets[0]->Phi(), sortedJets[0]->Eta()); 
-	}
-	deltaRJetMet = MathUtils::DeltaPhi(caloMet->Phi(), sortedJets[0]->Phi());
-      }
-      double deltaPhiln = MathUtils::DeltaPhi(leptonsWZ[2]->Phi(), caloMet->Phi());
-      double mTW = TMath::Sqrt(2.0*leptonsWZ[2]->Pt()*caloMet->Pt()*
-                              (1.0 - cos(deltaPhiln)));
-      double deltaRWl[2] = {MathUtils::DeltaR(leptonsWZ[0]->Phi(), leptonsWZ[0]->Eta(),
-	                                      leptonsWZ[2]->Phi(), leptonsWZ[2]->Eta()),
-			    MathUtils::DeltaR(leptonsWZ[1]->Phi(), leptonsWZ[1]->Eta(),
-	                                      leptonsWZ[2]->Phi(), leptonsWZ[2]->Eta())};		    ;
-      hDWZSel[ 0+100*nWZType]->Fill(TMath::Min(caloMet->Pt(),199.999));
-      hDWZSel[ 1+100*nWZType]->Fill(TMath::Min(leptonsWZ[0]->Pt(),199.999));
-      hDWZSel[ 2+100*nWZType]->Fill(TMath::Min(leptonsWZ[1]->Pt(),199.999));
-      hDWZSel[ 3+100*nWZType]->Fill(TMath::Min(leptonsWZ[2]->Pt(),199.999));
-      hDWZSel[ 4+100*nWZType]->Fill(TMath::Min(dilepton->Mass(),199.999));
-      hDWZSel[ 5+100*nWZType]->Fill((double)sortedJets.size());
-      hDWZSel[ 6+100*nWZType]->Fill(caloMet->MetSig());
-      hDWZSel[ 7+100*nWZType]->Fill(caloMet->SumEt());
-      hDWZSel[ 8+100*nWZType]->Fill(TMath::Min(mTW,199.999));
-      hDWZSel[ 9+100*nWZType]->Fill(deltaPhiln * 180./TMath::Pi());
-      hDWZSel[10+100*nWZType]->Fill(TMath::Min(deltaRWl[0],deltaRWl[1]));
-      hDWZSel[11+100*nWZType]->Fill(TMath::Max(deltaRWl[0],deltaRWl[1]));
-      hDWZSel[12+100*nWZType]->Fill(TMath::Min(caloMet->Pt()*deltaPhiln/4.,199.999));
-      if(sortedJets.size() > 0){
-	hDWZSel[13+100*nWZType]->Fill(TMath::Min(sortedJets[0]->Pt(),199.99));
-	hDWZSel[14+100*nWZType]->Fill(deltaRJetl);
-	hDWZSel[15+100*nWZType]->Fill(deltaRJetMet * 180./TMath::Pi());
-      }
-      delete dilepton;
-      for(UInt_t i=0; i<sortedJets.size(); i++) delete sortedJets[i];
+      hDWZSel[ 0+100*nWZType]->Fill(TMath::Min(dilepton->Mass(),199.999));
+      // Z mass requirement
+      if(fabs(dilepton->Mass()-91.1876) < 20){
+        hDWZSel[ 1+100*nWZType]->Fill(TMath::Min(caloMet->Pt(),199.999));
+        // MET requirement
+	if(caloMet->Pt() > 35){
+          // Pt(W->ln) requirement & mTW
+          hDWZSel[ 2+100*nWZType]->Fill(TMath::Min(leptonsWZ[2]->Pt(),199.999));
+	  double deltaPhiln = MathUtils::DeltaPhi(leptonsWZ[2]->Phi(), caloMet->Phi());
+	  double mTW = TMath::Sqrt(2.0*leptonsWZ[2]->Pt()*caloMet->Pt()*
+          			  (1.0 - cos(deltaPhiln)));
+	  if(leptonsWZ[2]->Pt() > 20.0 && mTW > 30.0 && mTW < 120.0){
+	    // Sort and count the number of central Jets for vetoing
+	    vector<Jet*> sortedJets;
+	    for(UInt_t i=0; i<CleanJets->GetEntries(); i++){
+	      if(fabs(CleanJets->At(i)->Eta()) < 2.5){
+		Jet* jet_f = new Jet(CleanJets->At(i)->Px()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
+                        	     CleanJets->At(i)->Py()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
+                        	     CleanJets->At(i)->Pz()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
+				     CleanJets->At(i)->E() *CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale());
+		sortedJets.push_back(jet_f);
+	      }
+	    }
+	    for(UInt_t i=0; i<sortedJets.size(); i++){
+	      for(UInt_t j=i+1; j<sortedJets.size(); j++){
+		if(sortedJets[i]->Pt() < sortedJets[j]->Pt()) {
+		  //swap i and j
+        	  Jet* tempjet = sortedJets[i];
+        	  sortedJets[i] = sortedJets[j];
+        	  sortedJets[j] = tempjet;	
+		}
+	      }
+	    }
+	    double deltaRJetl = 999.;
+	    double deltaRJetMet = 999.;
+	    if(sortedJets.size() > 0){
+	     for(int i=0; i<3; i++){
+        	if(MathUtils::DeltaR(leptonsWZ[i]->Phi(), leptonsWZ[i]->Eta(),
+	                	     sortedJets[0]->Phi(), sortedJets[0]->Eta()) < deltaRJetl)
+		  deltaRJetl = MathUtils::DeltaR(leptonsWZ[i]->Phi(), leptonsWZ[i]->Eta(),
+	                                	 sortedJets[0]->Phi(), sortedJets[0]->Eta()); 
+	      }
+	      deltaRJetMet = MathUtils::DeltaPhi(caloMet->Phi(), sortedJets[0]->Phi());
+	    }
+	    double deltaPhiln = MathUtils::DeltaPhi(leptonsWZ[2]->Phi(), caloMet->Phi());
+	    double mTW = TMath::Sqrt(2.0*leptonsWZ[2]->Pt()*caloMet->Pt()*
+                        	    (1.0 - cos(deltaPhiln)));
+	    double deltaRWl[2] = {MathUtils::DeltaR(leptonsWZ[0]->Phi(), leptonsWZ[0]->Eta(),
+	                                	    leptonsWZ[2]->Phi(), leptonsWZ[2]->Eta()),
+				  MathUtils::DeltaR(leptonsWZ[1]->Phi(), leptonsWZ[1]->Eta(),
+	                                	    leptonsWZ[2]->Phi(), leptonsWZ[2]->Eta())};		    ;
+            double deltaPhiDileptonMet = MathUtils::DeltaPhi(caloMet->Phi(), 
+                                                       dilepton->Phi())* 180./TMath::Pi();
+            double deltaPhiTrileptonMet = MathUtils::DeltaPhi(caloMet->Phi(), 
+                                                       trilepton->Phi())* 180./TMath::Pi();
+	    if(deltaRJetMet * 180./TMath::Pi() < 160 || sortedJets.size() == 0){
+	      hDWZSel[ 3+100*nWZType]->Fill(TMath::Min(leptonsWZ[0]->Pt(),199.999));
+	      hDWZSel[ 4+100*nWZType]->Fill(TMath::Min(leptonsWZ[1]->Pt(),199.999));
+	      hDWZSel[ 5+100*nWZType]->Fill((double)sortedJets.size());
+	      hDWZSel[ 6+100*nWZType]->Fill(caloMet->MetSig());
+	      hDWZSel[ 7+100*nWZType]->Fill(caloMet->SumEt());
+	      hDWZSel[ 8+100*nWZType]->Fill(TMath::Min(mTW,199.999));
+	      hDWZSel[ 9+100*nWZType]->Fill(deltaPhiln * 180./TMath::Pi());
+	      hDWZSel[10+100*nWZType]->Fill(TMath::Min(deltaRWl[0],deltaRWl[1]));
+	      hDWZSel[11+100*nWZType]->Fill(TMath::Max(deltaRWl[0],deltaRWl[1]));
+	      hDWZSel[12+100*nWZType]->Fill(TMath::Min(caloMet->Pt()*deltaPhiln/4.,199.999));
+	      if(sortedJets.size() > 0){
+		hDWZSel[13+100*nWZType]->Fill(TMath::Min(sortedJets[0]->Pt(),199.99));
+		hDWZSel[14+100*nWZType]->Fill(deltaRJetl);
+		hDWZSel[15+100*nWZType]->Fill(deltaRJetMet * 180./TMath::Pi());
+	      }
+	      hDWZSel[16+100*nWZType]->Fill(180.-deltaPhiDileptonMet);
+	      hDWZSel[17+100*nWZType]->Fill(180.-deltaPhiTrileptonMet);
+	    } // deltaRJetMet requirement
+	    delete dilepton;
+	    delete trilepton;
+	    for(UInt_t i=0; i<sortedJets.size(); i++) delete sortedJets[i];
+          } // Pt(W->ln) requirement
+	} // MET requirement
+      } // Z mass requirement
     } // Z Charge == 0
   } // WZ Selection
 
@@ -374,8 +399,6 @@ void ZXEvtSelMod::Process()
         dileptonA->AddDaughter(leptonsMu[1]);
         dileptonB->AddDaughter(leptonsMu[0]);
         dileptonB->AddDaughter(leptonsMu[2]);
-	delete dileptonA;
-	delete dileptonB;
       }
       else if(leptonsMu[0]->Charge() != leptonsMu[1]->Charge() &&
               leptonsMu[0]->Charge() != leptonsMu[3]->Charge()){
@@ -441,6 +464,8 @@ void ZXEvtSelMod::Process()
         leptonsZZ.push_back(leptonsMu[2]);
         nZZType = 6;
       }
+      delete dileptonA;
+      delete dileptonB;
     }
     else if(leptonsEl.size() >= 4){
       CompositeParticle *dileptonA = new CompositeParticle();
@@ -520,6 +545,7 @@ void ZXEvtSelMod::Process()
       delete dileptonA;
       delete dileptonB;
     }
+
     hDZZSel[90]->Fill((double)nZZType);
     if(nZZType >= 0){
       CompositeParticle *dileptonZ1 = new CompositeParticle();
@@ -552,7 +578,10 @@ void ZXEvtSelMod::Process()
         hDZZSel[ 4+100*simpleZZType]->Fill(TMath::Min(dileptonZ2->Mass(),199.99));
         hDZZSel[ 5+100*simpleZZType]->Fill(TMath::Min(dileptonZ1->Mass(),199.99));
       }
-      hDZZSel[ 6+100*simpleZZType]->Fill(TMath::Min(particleH->Mass(),599.99));
+      if(leptonsAll[2]->Pt() > 15 &&
+         dileptonZ1->Mass() > 12 && dileptonZ2->Mass() > 12){
+        hDZZSel[ 6+100*simpleZZType]->Fill(TMath::Min(particleH->Mass(),599.99));
+      }
       delete dileptonZ1;
       delete dileptonZ2;
       delete particleH;
@@ -579,11 +608,11 @@ void ZXEvtSelMod::SlaveBegin()
   // WZ histograms
   for(int j=0; j<4; j++){
     int ind = 100 * j;
-    sprintf(sb,"hDWZSel_%d",ind+0);  hDWZSel[ind+0]  = new TH1D(sb,sb,100,0.0,200.);
-    sprintf(sb,"hDWZSel_%d",ind+1);  hDWZSel[ind+1]  = new TH1D(sb,sb,100,0.0,200.);
-    sprintf(sb,"hDWZSel_%d",ind+2);  hDWZSel[ind+2]  = new TH1D(sb,sb,100,0.0,200.);
-    sprintf(sb,"hDWZSel_%d",ind+3);  hDWZSel[ind+3]  = new TH1D(sb,sb,100,0.0,200.);
-    sprintf(sb,"hDWZSel_%d",ind+4);  hDWZSel[ind+4]  = new TH1D(sb,sb,100,0.0,200.);
+    sprintf(sb,"hDWZSel_%d",ind+0);  hDWZSel[ind+0]  = new TH1D(sb,sb,200,0.0,200.);
+    sprintf(sb,"hDWZSel_%d",ind+1);  hDWZSel[ind+1]  = new TH1D(sb,sb,200,0.0,200.);
+    sprintf(sb,"hDWZSel_%d",ind+2);  hDWZSel[ind+2]  = new TH1D(sb,sb,200,0.0,200.);
+    sprintf(sb,"hDWZSel_%d",ind+3);  hDWZSel[ind+3]  = new TH1D(sb,sb,200,0.0,200.);
+    sprintf(sb,"hDWZSel_%d",ind+4);  hDWZSel[ind+4]  = new TH1D(sb,sb,200,0.0,200.);
     sprintf(sb,"hDWZSel_%d",ind+5);  hDWZSel[ind+5]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDWZSel_%d",ind+6);  hDWZSel[ind+6]  = new TH1D(sb,sb,100,0.0,20.); 
     sprintf(sb,"hDWZSel_%d",ind+7);  hDWZSel[ind+7]  = new TH1D(sb,sb,200,0.0,800.);
@@ -595,9 +624,11 @@ void ZXEvtSelMod::SlaveBegin()
     sprintf(sb,"hDWZSel_%d",ind+13); hDWZSel[ind+13] = new TH1D(sb,sb,100,0.0,200);
     sprintf(sb,"hDWZSel_%d",ind+14); hDWZSel[ind+14] = new TH1D(sb,sb,100,0.0,5.); 
     sprintf(sb,"hDWZSel_%d",ind+15); hDWZSel[ind+15] = new TH1D(sb,sb,90,0.0,180.); 
+    sprintf(sb,"hDWZSel_%d",ind+16); hDWZSel[ind+16] = new TH1D(sb,sb,90,0.0,180.); 
+    sprintf(sb,"hDWZSel_%d",ind+17); hDWZSel[ind+17] = new TH1D(sb,sb,90,0.0,180.); 
   }
 
-  for(int i=0; i<16; i++){
+  for(int i=0; i<18; i++){
     for(int j=0; j<4; j++){
       AddOutput(hDWZSel[i+j*100]);
     }

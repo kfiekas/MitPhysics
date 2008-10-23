@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// $Id: ttEvtSelMod.h,v 1.1 2008/10/14 06:13:53 loizides Exp $
+// $Id: ttEvtSelMod.h,v 1.1 2008/10/06 16:59:52 ceballos Exp $
 //
 // ttEvtSelMod
 //
@@ -37,13 +37,17 @@ namespace mithep
       TString      fPlotType;	    // Type of histograms to make
       TString      fMetName;	    // name of met collection
       TString      fMuonName;	    // name of muon collection
+      TString      fTrackName;      // name of track collection
       TString      fCleanJetsName;  // name of clean central jets collection
-      TString      fMCLeptonsName ; // new lepton coll
+      TString      fMCLeptonsName;  // new lepton coll
       TString      fMCQuarksName;   // new Quarks coll
       MetCol       *fMet;	    // Missing Et
       MuonCol	   *fMuons;	    // Muon branch
-  
+      TrackCol     *fTracks;        // Track branch     
+
       TH1D                    *hDttPresel[300];
+      TH1D                    *hDttJetVeto[10];
+      TH2D                    *hDttPreselAlphaEP;
 
       int                      fNEventsProcessed;
 

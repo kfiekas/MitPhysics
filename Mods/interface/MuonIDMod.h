@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: MuonIDMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
 //
 // MuonIDMod
 //
@@ -38,10 +38,11 @@ namespace mithep
       TString                  fMuonIDType;               //Type of electron ID we impose
       TString                  fMuonIsoType;              //Type of electron Isolation we impose
       MuonCol		      *fMuons;                    //!Muon branch
-      int                      fNEventsProcessed;         // Number of events processed
 
       double                   fTrackIsolationCut;        //Cut value for track isolation
       double                   fCaloIsolationCut;         //Cut value for calo isolation
+
+      int                      fNEventsProcessed;         // Number of events processed
 
       void                     Begin();
       void                     Process();

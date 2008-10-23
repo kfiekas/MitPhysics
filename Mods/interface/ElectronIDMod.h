@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -43,7 +43,6 @@ namespace mithep
       TString                  fElectronIDType;           //Type of electron ID we impose
       TString                  fElectronIsoType;          //Type of electron Isolation we impose
       ElectronCol	      *fElectrons;                //!Electron branch
-      int                      fNEventsProcessed;         // Number of events processed
 
       double                   fElectronPtMin;            //min Pt requirement
       double                   fIDLikelihoodCut;          //Cut value for ID likelihood
@@ -51,6 +50,8 @@ namespace mithep
       double                   fCaloIsolationCut;         //Cut value for calo isolation
       double                   fEcalJurassicIsolationCut; //Cut value for ecal jurassic isolation
       double                   fHcalJurassicIsolationCut; //Cut value for hcal jurassic isolation
+
+      int                      fNEventsProcessed;         // Number of events processed
 
       void        Begin();
       void        Process();
