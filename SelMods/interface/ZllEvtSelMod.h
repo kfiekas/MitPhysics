@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// $Id: ZllEvtSelMod.h,v 1.1 2008/10/06 16:59:52 ceballos Exp $
+// $Id: ZllEvtSelMod.h,v 1.1 2008/10/23 12:21:48 ceballos Exp $
 //
 // ZllEvtSelMod
 //
@@ -15,8 +15,6 @@
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"
-#include "MitWlnu/Util/interface/PlotTrigger.hh"
-#include "MitWlnu/MuonTools/interface/TriggerUtil.hh"
 #include "TRandom.h"
 
 class TH1D;
@@ -48,16 +46,6 @@ namespace mithep
       MuonCol      *fMuons;     	    
       ElectronCol  *fElectrons; 		
       JetCol       *fJets;      	    
-
-      // Trigger info
-      const TriggerTable        *fTrigTable;
-      const TriggerObjectsTable *fTrigObjsTable;
-      BitMask256                *fBits; 
-      TriggerObjectCol          *fTriggers;
-      TString                   fTriggerName;
-      TString                   fTrigBitName;
-      PlotTrigger               *fTrig;
-      TriggerUtil  		*fUTrig;
 
       TH1D         *hDZllMET[300];
       TH1D         *hDZllIso[300];

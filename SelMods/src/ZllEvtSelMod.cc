@@ -1,4 +1,4 @@
-// $Id: ZllEvtSelMod.cc,v 1.3 2008/10/10 10:54:13 ceballos Exp $
+// $Id: ZllEvtSelMod.cc,v 1.1 2008/10/23 12:21:37 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/ZllEvtSelMod.h"
 #include <TH1D.h>
@@ -19,14 +19,6 @@ ZllEvtSelMod::ZllEvtSelMod(const char *name, const char *title) :
   fCaloTowerName(Names::gkCaloTowerBrn),
   fCleanJetsName(Names::gkCleanJetsName),
   fMet(0),
-  fTrigTable       (0),
-  fTrigObjsTable   (0),
-  fBits            (0),
-  fTriggers        (0),
-  fTriggerName     (Names::gkHltObjBrn),
-  fTrigBitName     (Names::gkHltBitBrn),
-  fTrig            (0),
-  fUTrig           (0),
   fNEventsProcessed(0)
 {
   // Constructor.
@@ -58,42 +50,6 @@ void ZllEvtSelMod::Process()
     (FindObjThisEvt(Names::gkCleanMuonsName));
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
-//http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/MitWlnu/Util/src/AnaTrigger.cc?revision=1.1&view=markup
-  LoadBranch(fTrigBitName);
-  //int lCut = 0;
-  fTrig ->loadTrig(  fBits   ,fTrigTable,fTrigObjsTable);
-  fUTrig->loadTrig(  fBits   ,fTrigTable,fTrigObjsTable);
-  //Fill Tables
-  fTrig ->fill(0 ,fBits   ,fTrigTable,fTrigObjsTable);
-  fTrig ->fill(1 ,fBits   ,fTrigTable,fTrigObjsTable);
-  fTrig ->fill(2 ,fBits   ,fTrigTable,fTrigObjsTable);
-  fTrig ->fill(3 ,fBits   ,fTrigTable,fTrigObjsTable);
-  fTrig ->fill(4 ,fBits   ,fTrigTable,fTrigObjsTable);
-
-  //Trigger Util Debug
-  TriggerObject *lTO = fUTrig->triggerMatch(0,fTrigObjsTable,0);
-  TriggerObject *lT1 = fUTrig->triggerMatch(0,fTrigObjsTable,1);
-  TriggerObject *lT2 = fUTrig->triggerMatch(0,fTrigObjsTable,2);
-  TriggerObject *lT3 = fUTrig->triggerMatch(0,fTrigObjsTable,3);
-  TriggerObject *lT4 = fUTrig->triggerMatch(0,fTrigObjsTable,4);
-  int ntrigger = 0;
-  if(lTO != 0) ntrigger = ntrigger + 1;
-  if(lT1 != 0) ntrigger = ntrigger + 10;
-  if(lT2 != 0) ntrigger = ntrigger + 100;
-  if(lT3 != 0) ntrigger = ntrigger + 1000;
-  if(lT4 != 0) ntrigger = ntrigger + 10000;
-  printf("==> ntrigger: %d\n",ntrigger);
-
-  int lNTrig = 1;
-  TriggerObject *lT = fUTrig->triggerMatch(0,fTrigObjsTable,lNTrig);
-  while(lT != 0) {
-    lNTrig++;
-    lT = fUTrig->triggerMatch(0,fTrigObjsTable,lNTrig);
-    if(lNTrig > 10) break;
-  }
-  cout << "Trigger : 0  -- " << (lNTrig-1) << " Times " << endl;
-  lT = fUTrig->triggerMatch(1,fTrigObjsTable,lNTrig);
-  if(lTO != 0) cout << "Trigger : 1  --  Triggered " << endl;
 
   LoadBranch(fMetName);
   Met *caloMet = fMet->At(0);
@@ -269,25 +225,6 @@ void ZllEvtSelMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we typically initialize histograms and other analysis objects and request
   // branches. For this module, we request a branch of the MitTree.
-
-  fTrigTable      = GetHLTTable();
-  fTrigObjsTable  = GetHLTObjectsTable();
-  if(fTrigTable == 0 || fTrigObjsTable == 0){ 
-    cout <<" -----------> Trigger Failure "
-         << fTrigTable << " "
-	 << fTrigObjsTable << endl;
-    assert(0);
-  } 
-  ReqBranch(fTrigBitName, fBits);    
-
-  vector<std::string> lCuts;
-  lCuts.push_back("HLT_Ele10_SW_L1R");
-  lCuts.push_back("HLT_Jet30");
-  lCuts.push_back("HLT_QuadJet30");
-  lCuts.push_back("HLT_Mu3");
-  lCuts.push_back("HLT_IsoMu15");
-  fUTrig   = new TriggerUtil("Trigger",lCuts);
-  fTrig    = new PlotTrigger("Trigger",lCuts);
 
   ReqBranch(fMetName,       fMet);
   ReqBranch(fTrackName,     fTracks);

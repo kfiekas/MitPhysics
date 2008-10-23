@@ -1,9 +1,8 @@
 # -*- Makefile -*-
-# $Id: BuildFile,v 1.2 2008/10/16 04:09:24 loizides Exp $
+# $Id: BuildFile,v 1.3 2008/10/23 12:25:20 ceballos Exp $
 
 <use name=MitAna/TreeMod>
 <use name=MitPhysics/Utils>
-<use name=MitWlnu/Util>
 <use name=MitCommon/MathTools>
 <use root>
 <export>
