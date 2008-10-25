@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.1 2008/10/14 06:13:53 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -19,8 +19,8 @@ ClassImp(mithep::MuonIDMod)
   fMuonIDType("Tight"),
   fMuonIsoType("TrackCalo"),  
   fMuons(0),
-  fTrackIsolationCut(5.0),
-  fCaloIsolationCut(5.0),
+  fTrackIsolationCut(3.0),
+  fCaloIsolationCut(3.0),
   fNEventsProcessed(0)
 {
   // Constructor.
@@ -63,7 +63,7 @@ void MuonIDMod::Process()
 
     //These cuts are from the 1.6.X analysis. I'm waiting for Phil to finalize his Muon ID class
     const int nCuts = 4;
-    double cutValue[nCuts] = {0.1, 3.0, 3.0, 1.5 };
+    double cutValue[nCuts] = {0.2, fTrackIsolationCut, fCaloIsolationCut, 1.5 };
     bool passCut[nCuts] = {false, false, false, false};
     double muonD0 = fabs(mu->BestTrk()->D0());
     if(muonD0 < cutValue[0] &&  MuonClass == 0 ) 
@@ -84,9 +84,7 @@ void MuonIDMod::Process()
          && abs(mu->Eta()) < 2.5
       ) {     
       CleanMuons->Add(mu);
-    }                    
-
-
+    }
   }
 
   //Final Summary Debug Output   
