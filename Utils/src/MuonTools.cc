@@ -21,8 +21,6 @@ MuonTools::MuonTools() :
   fmuon_em_etaEpl(0),
   fmuon_had_etaEpl(0) {}
 MuonTools::~MuonTools() {
-  fPion_templates->Close(); 
-  fMuon_templates->Close();
   delete fpion_em_etaEmi;
   delete fpion_had_etaEmi;
   delete fpion_had_etaTmi;
@@ -65,6 +63,27 @@ double MuonTools::getCaloCompatability(mithep::Muon* iMuon,bool iEMSpecial, bool
     fmuon_had_etaTpl = (TH2D*) fMuon_templates->Get("had_etaTpl");
     fmuon_em_etaEpl  = (TH2D*) fMuon_templates->Get("em_etaEpl");
     fmuon_had_etaEpl = (TH2D*) fMuon_templates->Get("had_etaEpl");
+
+    fpion_em_etaEmi ->SetDirectory(0);
+    fpion_had_etaEmi->SetDirectory(0);
+    fpion_had_etaTmi->SetDirectory(0);
+    fpion_em_etaB   ->SetDirectory(0); 
+    fpion_had_etaB  ->SetDirectory(0); 
+    fpion_ho_etaB   ->SetDirectory(0); 
+    fpion_had_etaTpl->SetDirectory(0); 
+    fpion_em_etaEpl ->SetDirectory(0);  
+    fpion_had_etaEpl->SetDirectory(0);  
+    fmuon_em_etaEmi ->SetDirectory(0);  
+    fmuon_had_etaEmi->SetDirectory(0);  
+    fmuon_had_etaTmi->SetDirectory(0);  
+    fmuon_em_etaB   ->SetDirectory(0);  
+    fmuon_had_etaB  ->SetDirectory(0);  
+    fmuon_ho_etaB   ->SetDirectory(0);  
+    fmuon_had_etaTpl->SetDirectory(0);  
+    fmuon_em_etaEpl ->SetDirectory(0);  
+    fmuon_had_etaEpl->SetDirectory(0);  
+    fPion_templates->Close();
+    fMuon_templates->Close();
   }
   double lEta = -1.; double lP = -1;
   double lEM  = -5.;      double lHad = 0;      double lHO = 0;
