@@ -1,4 +1,4 @@
-#include "MitWlnu/MuonTools/interface/MuonTools.hh"
+#include "MitPhysics/Utils/interface/MuonTools.h"
 using namespace mithep;
 
 MuonTools::MuonTools() :
@@ -45,8 +45,8 @@ MuonTools::~MuonTools() {
 
 double MuonTools::getCaloCompatability(mithep::Muon* iMuon,bool iEMSpecial, bool iCorrectedHCAL) {
   if(fpion_em_etaEmi == 0) {
-    TFile* fPion_templates = new TFile("../../data/PionCaloTemplate.root","READ");
-    TFile* fMuon_templates = new TFile("../../data/MuonCaloTemplate.root","READ");
+    TFile* fPion_templates = new TFile("$CMSSW_BASE/src/MitPhysics/Init/PionCaloTemplate.root","READ");
+    TFile* fMuon_templates = new TFile("$CMSSW_BASE/src/MitPhysics/Init/MuonCaloTemplate.root","READ");
     fpion_em_etaEmi  = (TH2D*) fPion_templates->Get("em_etaEmi");
     fpion_had_etaEmi = (TH2D*) fPion_templates->Get("had_etaEmi");
     fpion_had_etaTmi = (TH2D*) fPion_templates->Get("had_etaTmi");

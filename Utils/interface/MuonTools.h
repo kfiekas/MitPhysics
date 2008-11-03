@@ -1,12 +1,12 @@
-#ifndef MITWLNU_MUONTOOLS_HH
-#define MITWLNU_MUONTOOLS_HH
+#ifndef MITPHYSICS_UTIL_MUONTOOLS_H
+#define MITPHYSICS_UTIL_MUONTOOLS_H
 #include <vector>
 #include <iostream>
 
 #include "TH2D.h"
 #include "TFile.h"
 #include "MitAna/DataTree/interface/Collections.h"
-#include "MitCommon/MathTools/interface/MathUtil.h"
+#include "MitCommon/MathTools/interface/MathUtils.h"
 
 namespace mithep {
   class MuonTools {
