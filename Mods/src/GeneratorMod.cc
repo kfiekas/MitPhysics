@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.5 2008/10/10 10:54:13 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.2 2008/10/23 12:23:44 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -20,6 +20,7 @@ ClassImp(mithep::GeneratorMod)
   fIsMC(true),
   fMCPartName(Names::gkMCPartBrn),
   fMCLeptonsName(Names::gkMCLeptonsName),
+  fMCAllLeptonsName(Names::gkMCAllLeptonsName),
   fMCTausName(Names::gkMCTausName),
   fMCNeutrinosName(Names::gkMCNeutrinosName),
   fMCQuarksName(Names::gkMCQuarksName),
@@ -52,12 +53,13 @@ void GeneratorMod::Process()
   }  
 
   // These arrays will be filled in the loop of particles
-  ObjArray<MCParticle> *GenLeptons   = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenTaus      = new ObjArray<MCParticle>; GenTaus->SetOwner(true);
-  ObjArray<MCParticle> *GenNeutrinos = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenQuarks    = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenqqHs      = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenBosons    = new ObjArray<MCParticle>;
+  ObjArray<MCParticle> *GenLeptons    = new ObjArray<MCParticle>;
+  ObjArray<MCParticle> *GenAllLeptons = new ObjArray<MCParticle>;
+  ObjArray<MCParticle> *GenTaus       = new ObjArray<MCParticle>; GenTaus->SetOwner(true);
+  ObjArray<MCParticle> *GenNeutrinos  = new ObjArray<MCParticle>;
+  ObjArray<MCParticle> *GenQuarks     = new ObjArray<MCParticle>;
+  ObjArray<MCParticle> *GenqqHs       = new ObjArray<MCParticle>;
+  ObjArray<MCParticle> *GenBosons     = new ObjArray<MCParticle>;
 
   if(fIsMC == true){
     // Get Generator Level information branch
@@ -70,6 +72,9 @@ void GeneratorMod::Process()
 
       // muons/electrons from W/Z decays
       if((p->AbsPdgId() == 11 || p->AbsPdgId() == 13) && p->Status() == 1){
+        if(p->Pt() > 3.0 && fabs(p->Eta()) < 3.0){
+	  GenAllLeptons->Add(p);
+	}
 	bool isGoodLepton = false;
         MCParticle* pm = p;
 	while (pm->HasMother() && isGoodLepton == false){
@@ -141,12 +146,13 @@ void GeneratorMod::Process()
   } // IsMC?
 
   //Save Objects for Other Modules to use
-  AddObjThisEvt(GenLeptons,  fMCLeptonsName.Data());  
-  AddObjThisEvt(GenTaus,     fMCTausName.Data());  
-  AddObjThisEvt(GenNeutrinos,fMCNeutrinosName.Data());  
-  AddObjThisEvt(GenQuarks,   fMCQuarksName.Data());  
-  AddObjThisEvt(GenqqHs,     fMCqqHsName.Data());  
-  AddObjThisEvt(GenBosons,   fMCBosonsName.Data());
+  AddObjThisEvt(GenLeptons,   fMCLeptonsName.Data());  
+  AddObjThisEvt(GenAllLeptons,fMCAllLeptonsName.Data());  
+  AddObjThisEvt(GenTaus,      fMCTausName.Data());  
+  AddObjThisEvt(GenNeutrinos, fMCNeutrinosName.Data());  
+  AddObjThisEvt(GenQuarks,    fMCQuarksName.Data());  
+  AddObjThisEvt(GenqqHs,      fMCqqHsName.Data());  
+  AddObjThisEvt(GenBosons,    fMCBosonsName.Data());
   
   // Fill histograms
   if(fFillHist == true){
@@ -200,6 +206,14 @@ void GeneratorMod::Process()
 	  }
 	}
       }
+    }
+
+    // All Leptons
+    hDGenAllLeptons[0]->Fill(GenAllLeptons->GetEntries());
+    for(UInt_t i=0; i<GenAllLeptons->GetEntries(); i++){
+      hDGenAllLeptons[1]->Fill(GenAllLeptons->At(i)->Pt());
+      hDGenAllLeptons[2]->Fill(GenAllLeptons->At(i)->Eta());
+      hDGenAllLeptons[3]->Fill(GenAllLeptons->At(i)->Phi() * 180. / TMath::Pi());
     }
 
     // Taus
@@ -303,6 +317,7 @@ void GeneratorMod::SlaveBegin()
   // Fill histograms
   if(fFillHist == true){
     char sb[200];
+    // Leptons
     sprintf(sb,"hDGenLeptons_%d", 0);  hDGenLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenLeptons_%d", 1);  hDGenLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
     sprintf(sb,"hDGenLeptons_%d", 2);  hDGenLeptons[2]  = new TH1D(sb,sb,50,0.0,5.0); 
@@ -315,6 +330,13 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenLeptons_%d", 9);  hDGenLeptons[9]  = new TH1D(sb,sb,1000,0.0,1000.0); 
     sprintf(sb,"hDGenLeptons_%d",10);  hDGenLeptons[10] = new TH1D(sb,sb,90,0.0,180.0); 
     for(int i=0; i<11; i++) AddOutput(hDGenLeptons[i]);
+
+    // AllLeptons
+    sprintf(sb,"hDGenAllLeptons_%d", 0);  hDGenAllLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
+    sprintf(sb,"hDGenAllLeptons_%d", 1);  hDGenAllLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
+    sprintf(sb,"hDGenAllLeptons_%d", 2);  hDGenAllLeptons[2]  = new TH1D(sb,sb,60,-3.0,3.0); 
+    sprintf(sb,"hDGenAllLeptons_%d", 3);  hDGenAllLeptons[3]  = new TH1D(sb,sb,90,0.0,180.0); 
+    for(int i=0; i<4; i++) AddOutput(hDGenAllLeptons[i]);
 
     // Taus
     sprintf(sb,"hDGenTaus_%d", 0);  hDGenTaus[0]  = new TH1D(sb,sb,10,-0.5,9.5); 

@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.2 2008/10/25 19:25:09 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -21,6 +21,7 @@ ClassImp(mithep::MuonIDMod)
   fMuons(0),
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
+  fMuonPtMin(10),
   fNEventsProcessed(0)
 {
   // Constructor.
@@ -61,28 +62,18 @@ void MuonIDMod::Process()
     else if (mu->TrackerTrk())
       MuonClass = 2;
 
-    //These cuts are from the 1.6.X analysis. I'm waiting for Phil to finalize his Muon ID class
-    const int nCuts = 4;
-    double cutValue[nCuts] = {0.2, fTrackIsolationCut, fCaloIsolationCut, 1.5 };
-    bool passCut[nCuts] = {false, false, false, false};
-    double muonD0 = fabs(mu->BestTrk()->D0());
-    if(muonD0 < cutValue[0] &&  MuonClass == 0 ) 
-      passCut[0] = true;
-    if(mu->IsoR03SumPt() < cutValue[1]) passCut[1] = true;
+    bool allCuts = false;
+
+    if(MuonClass == 0) allCuts = true;
+
+    if(mu->IsoR03SumPt() >= fTrackIsolationCut) allCuts = false;
+
     if(mu->IsoR03EmEt() + 
-       mu->IsoR03HadEt() < cutValue[2]) passCut[2] = true;    
-    if(mu->Pt() > 10)
-      passCut[3] = true;   
-    
-    // Final decision
-    bool allCuts = true;
-    for(int c=0; c<nCuts; c++) {
-      allCuts = allCuts & passCut[c];
-    }       
-    
-    if ( allCuts
-         && abs(mu->Eta()) < 2.5
-      ) {     
+       mu->IsoR03HadEt() >= fCaloIsolationCut) allCuts = false;
+
+    if(mu->Pt() <= fMuonPtMin) allCuts = false;
+        
+    if(allCuts) {     
       CleanMuons->Add(mu);
     }
   }

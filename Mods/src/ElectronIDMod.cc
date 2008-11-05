@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -95,7 +95,7 @@ void ElectronIDMod::Process()
     }
 
     //Pt Cut
-    if(e->Pt() < fElectronPtMin) allCuts = false;
+    if(e->Pt() <= fElectronPtMin) allCuts = false;
 
     //These are Good Electrons
     if ( allCuts ) {    

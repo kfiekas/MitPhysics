@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: GeneratorMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
 //
 // GeneratorMod
 //
@@ -25,22 +25,24 @@ namespace mithep
       GeneratorMod(const char *name="GeneratorMod", 
                    const char *title="generator information");
       ~GeneratorMod() {}
-      void           SetPrintDebug(bool b)	  { fPrintDebug      = b;}
-      void           SetFillHist(bool b)	  { fFillHist	     = b;}
-      void           SetIsMC(bool b)  	          { fIsMC	     = b;}
-      void           SetMCPartName(TString s)	  { fMCPartName      = s;}     
-      void           SetMCLeptonsName(TString s)  { fMCLeptonsName   = s;}     
-      void           SetMCTausName(TString s)	  { fMCTausName      = s;}     
-      void           SetMCNeutrinosName(TString s){ fMCNeutrinosName = s;}     
-      void           SetMCQuarksName(TString s)   { fMCQuarksName    = s;}     
-      void           SetMCqqHsName(TString s)	  { fMCqqHsName      = s;}     
-      void           SetMCBosonsName(TString s)   { fMCBosonsName    = s;}     
+      void           SetPrintDebug(bool b)	   { fPrintDebug       = b;}
+      void           SetFillHist(bool b)	   { fFillHist	       = b;}
+      void           SetIsMC(bool b)  	           { fIsMC	       = b;}
+      void           SetMCPartName(TString s)	   { fMCPartName       = s;}	
+      void           SetMCLeptonsName(TString s)   { fMCLeptonsName    = s;}	
+      void           SetMCAllLeptonsName(TString s){ fMCAllLeptonsName = s;}	
+      void           SetMCTausName(TString s)	   { fMCTausName       = s;}	
+      void           SetMCNeutrinosName(TString s) { fMCNeutrinosName  = s;}	
+      void           SetMCQuarksName(TString s)    { fMCQuarksName     = s;}	
+      void           SetMCqqHsName(TString s)	   { fMCqqHsName       = s;}	
+      void           SetMCBosonsName(TString s)    { fMCBosonsName     = s;}	
     protected:
       bool           fPrintDebug;		// debug output
       bool           fFillHist; 		// Fill histograms?
       bool           fIsMC;			// is MC?
       TString        fMCPartName;		// generator coll
-      TString        fMCLeptonsName ;		// new lepton coll
+      TString        fMCLeptonsName ;		// new lepton coll (From W)
+      TString        fMCAllLeptonsName ;	// new lepton coll (all)
       TString        fMCTausName;		// new tau coll
       TString        fMCNeutrinosName;  	// new Neutrinos coll
       TString        fMCQuarksName;		// new Quarks coll
@@ -50,6 +52,7 @@ namespace mithep
       int            fNEventsProcessed; 	// Number of events
 
       TH1D          *hDGenLeptons[20];
+      TH1D          *hDGenAllLeptons[20];
       TH1D          *hDGenTaus[20];
       TH1D          *hDGenNeutrinos[20];
       TH1D          *hDGenQuarks[20];

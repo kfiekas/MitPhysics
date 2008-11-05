@@ -1,10 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
+// $Id: MuonIDMod.h,v 1.2 2008/10/23 12:23:31 ceballos Exp $
 //
 // MuonIDMod
 //
-// This Module applies electron ID criteria and exports a pointer to a collection
-// of Good Electrons according to some specified ID scheme
+// This Module applies Muon ID criteria and exports a pointer to a collection
+// of Good Muons according to some specified ID scheme
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -26,29 +26,31 @@ namespace mithep
       MuonIDMod(const char *name="MuonIDMod", 
                      const char *title="Example analysis module with all branches");
       ~MuonIDMod() {}
-      void                     SetPrintDebug(bool b)              { fPrintDebug         = b;     }
-      void                     SetMuonIDType(TString type)        { fMuonIDType         = type;  }
-      void                     SetTrackIsolationCut(Double_t cut) { fTrackIsolationCut  = cut;   }
-      void                     SetCaloIsolationCut(Double_t cut)  { fCaloIsolationCut   = cut;   }
-      void                     SetCleanMuonsName(TString s)       { fCleanMuonsName     = s;     }     
+      void     SetPrintDebug(bool b)              { fPrintDebug         = b;     }
+      void     SetMuonIDType(TString type)        { fMuonIDType         = type;  }
+      void     SetTrackIsolationCut(Double_t cut) { fTrackIsolationCut  = cut;   }
+      void     SetCaloIsolationCut(Double_t cut)  { fCaloIsolationCut   = cut;   }
+      void     SetMuonPtMin(double p)             { fMuonPtMin          = p;     }
+      void     SetCleanMuonsName(TString s)       { fCleanMuonsName     = s;     }     
     protected:
-      bool                     fPrintDebug;               //flag for printing debug output
-      TString                  fMuonName;                 //name of muon collection
-      TString                  fCleanMuonsName ;           //name of good muons collection  
-      TString                  fMuonIDType;               //Type of electron ID we impose
-      TString                  fMuonIsoType;              //Type of electron Isolation we impose
-      MuonCol		      *fMuons;                    //!Muon branch
+      bool     fPrintDebug;               //flag for printing debug output
+      TString  fMuonName;                 //name of muon collection
+      TString  fCleanMuonsName ;           //name of good muons collection  
+      TString  fMuonIDType;               //Type of Muon ID we impose
+      TString  fMuonIsoType;              //Type of Muon Isolation we impose
+      MuonCol  *fMuons;                   //!Muon branch
 
-      double                   fTrackIsolationCut;        //Cut value for track isolation
-      double                   fCaloIsolationCut;         //Cut value for calo isolation
+      double   fTrackIsolationCut;        //Cut value for track isolation
+      double   fCaloIsolationCut;         //Cut value for calo isolation
+      double   fMuonPtMin;                //min Pt requirement
 
-      int                      fNEventsProcessed;         // Number of events processed
+      int      fNEventsProcessed;         // Number of events processed
 
-      void                     Begin();
-      void                     Process();
-      void                     SlaveBegin();
-      void                     SlaveTerminate();
-      void                     Terminate();
+      void     Begin();
+      void     Process();
+      void     SlaveBegin();
+      void     SlaveTerminate();
+      void     Terminate();
      
     
       ClassDef(MuonIDMod,1) // TAM example analysis module

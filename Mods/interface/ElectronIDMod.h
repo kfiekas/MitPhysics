@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.2 2008/10/23 12:23:31 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -37,21 +37,21 @@ namespace mithep
       void        SetHcalJurassicIsolationCut(Double_t cut)   { fHcalJurassicIsolationCut = cut;  }
       void        SetGoodElectronsName(TString s)             { fGoodElectronsName        = s;    }   
     protected:
-      bool                     fPrintDebug;               //flag for printing debug output
-      TString                  fElectronName;             //name of electron collection
-      TString                  fGoodElectronsName ;       //name of good electrons collection
-      TString                  fElectronIDType;           //Type of electron ID we impose
-      TString                  fElectronIsoType;          //Type of electron Isolation we impose
-      ElectronCol	      *fElectrons;                //!Electron branch
+      bool        fPrintDebug;  	     //flag for printing debug output
+      TString     fElectronName;	     //name of electron collection
+      TString     fGoodElectronsName ;       //name of good electrons collection
+      TString     fElectronIDType;	     //Type of electron ID we impose
+      TString     fElectronIsoType;	     //Type of electron Isolation we impose
+      ElectronCol *fElectrons;		     //!Electron branch
 
-      double                   fElectronPtMin;            //min Pt requirement
-      double                   fIDLikelihoodCut;          //Cut value for ID likelihood
-      double                   fTrackIsolationCut;        //Cut value for track isolation
-      double                   fCaloIsolationCut;         //Cut value for calo isolation
-      double                   fEcalJurassicIsolationCut; //Cut value for ecal jurassic isolation
-      double                   fHcalJurassicIsolationCut; //Cut value for hcal jurassic isolation
+      double      fElectronPtMin;	     //min Pt requirement
+      double      fIDLikelihoodCut;	     //Cut value for ID likelihood
+      double      fTrackIsolationCut;	     //Cut value for track isolation
+      double      fCaloIsolationCut;	     //Cut value for calo isolation
+      double      fEcalJurassicIsolationCut; //Cut value for ecal jurassic isolation
+      double      fHcalJurassicIsolationCut; //Cut value for hcal jurassic isolation
 
-      int                      fNEventsProcessed;         // Number of events processed
+      int         fNEventsProcessed;	     // Number of events processed
 
       void        Begin();
       void        Process();
