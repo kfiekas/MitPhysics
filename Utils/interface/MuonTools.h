@@ -148,105 +148,104 @@ namespace mithep {
       return false;
     }
     static inline double getCaloCompatabilitySlowly(mithep::Muon* iMuon,bool iEMSpecial, bool iCorrectedHCAL) {
-      //if(fpion_em_etaEmi == 0) {
       std::cout << "Warning Loading Compatability Slowly" << std::endl;
-	TFile* lPion_templates = new TFile("MitCommon/MuonTools/data/PionCaloTemplate.root","READ");
-	TFile* lMuon_templates = new TFile("MitCommon/MuonTools/data/MuonCaloTemplate.root","READ");
-	TH2D* lpion_em_etaEmi  = (TH2D*) lPion_templates->Get("em_etaEmi");
-	TH2D* lpion_had_etaEmi = (TH2D*) lPion_templates->Get("had_etaEmi");
-	TH2D* lpion_had_etaTmi = (TH2D*) lPion_templates->Get("had_etaTmi");
-	TH2D* lpion_em_etaB    = (TH2D*) lPion_templates->Get("em_etaB")   ;
-	TH2D* lpion_had_etaB   = (TH2D*) lPion_templates->Get("had_etaB")  ;
-	TH2D* lpion_ho_etaB    = (TH2D*) lPion_templates->Get("ho_etaB")   ;
-	TH2D* lpion_had_etaTpl = (TH2D*) lPion_templates->Get("had_etaTpl");
-	TH2D* lpion_em_etaEpl  = (TH2D*) lPion_templates->Get("em_etaEpl") ;
-	TH2D* lpion_had_etaEpl = (TH2D*) lPion_templates->Get("had_etaEpl");
-	TH2D* lmuon_em_etaEmi  = (TH2D*) lMuon_templates->Get("em_etaEmi") ;
-	TH2D* lmuon_had_etaEmi = (TH2D*) lMuon_templates->Get("had_etaEmi");
-	TH2D* lmuon_had_etaTmi = (TH2D*) lMuon_templates->Get("had_etaTmi");
-	TH2D* lmuon_em_etaB    = (TH2D*) lMuon_templates->Get("em_etaB")   ;
-	TH2D* lmuon_had_etaB   = (TH2D*) lMuon_templates->Get("had_etaB")  ;
-	TH2D* lmuon_ho_etaB    = (TH2D*) lMuon_templates->Get("ho_etaB")   ;
-	TH2D* lmuon_had_etaTpl = (TH2D*) lMuon_templates->Get("had_etaTpl");
-	TH2D* lmuon_em_etaEpl  = (TH2D*) lMuon_templates->Get("em_etaEpl");
-       	TH2D* lmuon_had_etaEpl = (TH2D*) lMuon_templates->Get("had_etaEpl");
-	//}
-	double lEta = -1.; double lP = -1;
-	double lEM  = -5.;      double lHad = 0;      double lHO = 0;
-	lEta = iMuon->Eta();
-	lP   = iMuon->P(); 
-	if(lP >= 2000.) lP = 1999.9;
-	if(!iEMSpecial || iMuon->EmEnergy() != 0.) lEM  = iMuon->EmEnergy();
-	lHad = iMuon->HadEnergy();
-	lHO  = iMuon->HoEnergy();
-	if(lP < 0. )           return 0.5; 
-	if(fabs(lEta) >  2.5 ) return 0.5; 
-	TH2D* lTMuonHad = NULL;
-	TH2D* lTPionHad = NULL;
-	TH2D* lTMuonHo  = NULL;
-	TH2D* lTPionHo  = NULL;
-	TH2D* lTMuonEm  = NULL;
-	TH2D* lTPionEm  = NULL;
-	
-	if(fabs(lEta) >=  1.27) {
-	  if(iCorrectedHCAL) lHad *= 1.8/2.2;
-	  if(lEta > 0) {
-	    lTPionHad = lpion_had_etaEpl;
-	    lTMuonHad = lmuon_had_etaEpl;
-	  } else {
-	    lTPionHad = lpion_had_etaEmi;
-	    lTMuonHad = lmuon_had_etaEmi;
-	  }
-	}
-	if(fabs(lEta) <  1.27  && fabs(lEta) >=  1.1 ) {
-	  if(iCorrectedHCAL)    lHad *= (1.8/(-2.2*fabs(lEta)+5.5));
-	  if(lEta > 0) {
-	    lTPionHad  = lpion_had_etaTpl;
-	    lTMuonHad  = lmuon_had_etaTpl;
-	  } else {
-	    lTPionHad  = lpion_had_etaTmi;
-	    lTMuonHad  = lmuon_had_etaTmi;
-	  }
-	}
-	if(fabs(lEta) <  1.1) {
-	  if(iCorrectedHCAL)    lHad *= sin(2*atan(exp(iMuon->Eta())));
-	  lTPionHad  = lpion_had_etaB;
-	  lTMuonHad  = lmuon_had_etaB;
-	}
-	if(lEta >  1.479  ) {
-	  lTPionEm  = lpion_em_etaEpl;
-	  lTMuonEm  = lmuon_em_etaEpl;
-	}
-	if(fabs(lEta) <=  1.479) {
-	  lTPionEm  = lpion_em_etaB;
-	  lTMuonEm  = lmuon_em_etaB;
-	}
-	if(lEta < -1.479 ) {
-	  lTPionEm  = lpion_em_etaEmi;
-	  lTMuonEm  = lmuon_em_etaEmi;
-	}
-	if(fabs(lEta) < 1.28) {
-	  lTPionHo  = lpion_ho_etaB;
-	  lTMuonHo  = lmuon_ho_etaB;
-	}
-	
-	double lPBX = 1.;     double lPSX = 1.; 
-	double lPBY = 1.;     double lPSY = 1.; 
-	double lPBZ = 1.;     double lPSZ = 1.; 
-	if(!overflow(lTPionEm, lP,lEM))  lPBX =  lTPionEm ->GetBinContent(lTPionEm ->GetXaxis()->FindBin(lP),lTPionEm ->GetYaxis()->FindBin(lEM) );
-	if(!overflow(lTPionHad,lP,lHad)) lPBY =  lTPionHad->GetBinContent(lTPionHad->GetXaxis()->FindBin(lP),lTPionHad->GetYaxis()->FindBin(lHad));
-	if(!overflow(lTPionHo, lP,lHO))  lPBZ =  lTPionHo ->GetBinContent(lTPionHo ->GetXaxis()->FindBin(lP),lTPionHo ->GetYaxis()->FindBin(lHO) );
-	if(!overflow(lTMuonEm, lP,lEM )) lPSX =  lTMuonEm ->GetBinContent(lTMuonEm ->GetXaxis()->FindBin(lP),lTMuonEm ->GetYaxis()->FindBin(lEM) );
-	if(!overflow(lTMuonHad,lP,lHad)) lPSY =  lTMuonHad->GetBinContent(lTMuonHad->GetXaxis()->FindBin(lP),lTMuonHad->GetYaxis()->FindBin(lHad));
-	if(!overflow(lTMuonHo ,lP,lHO))  lPSZ =  lTMuonHo ->GetBinContent(lTMuonHo ->GetXaxis()->FindBin(lP),lTMuonHo ->GetYaxis()->FindBin(lHO) );
-	
-	if(lPSX == 0. || lPBX == 0. || (lEM <= 0. && !iEMSpecial)) {lPSX = 1.; lPBX = 1.;} 
-	if(lPSY == 0. || lPBY == 0. || lHad == 0.) {lPSY = 1.; lPBY = 1.;}
-	if(lPSZ == 0. || lPBZ == 0. || lHO  == 0.) {lPSZ = 1.; lPBZ = 1.;}
-	lPion_templates->Close();
-	lMuon_templates->Close();
-	if((lPSX*lPSY*lPSZ+lPBX*lPBY*lPBZ) > 0.) return lPSX*lPSY*lPSZ/(lPSX*lPSY*lPSZ+lPBX*lPBY*lPBZ);
-	return 0.5;
+      TFile* lPion_templates = new TFile("MitCommon/MuonTools/data/PionCaloTemplate.root","READ");
+      TFile* lMuon_templates = new TFile("MitCommon/MuonTools/data/MuonCaloTemplate.root","READ");
+      TH2D* lpion_em_etaEmi  = (TH2D*) lPion_templates->Get("em_etaEmi");
+      TH2D* lpion_had_etaEmi = (TH2D*) lPion_templates->Get("had_etaEmi");
+      TH2D* lpion_had_etaTmi = (TH2D*) lPion_templates->Get("had_etaTmi");
+      TH2D* lpion_em_etaB    = (TH2D*) lPion_templates->Get("em_etaB")   ;
+      TH2D* lpion_had_etaB   = (TH2D*) lPion_templates->Get("had_etaB")  ;
+      TH2D* lpion_ho_etaB    = (TH2D*) lPion_templates->Get("ho_etaB")   ;
+      TH2D* lpion_had_etaTpl = (TH2D*) lPion_templates->Get("had_etaTpl");
+      TH2D* lpion_em_etaEpl  = (TH2D*) lPion_templates->Get("em_etaEpl") ;
+      TH2D* lpion_had_etaEpl = (TH2D*) lPion_templates->Get("had_etaEpl");
+      TH2D* lmuon_em_etaEmi  = (TH2D*) lMuon_templates->Get("em_etaEmi") ;
+      TH2D* lmuon_had_etaEmi = (TH2D*) lMuon_templates->Get("had_etaEmi");
+      TH2D* lmuon_had_etaTmi = (TH2D*) lMuon_templates->Get("had_etaTmi");
+      TH2D* lmuon_em_etaB    = (TH2D*) lMuon_templates->Get("em_etaB")   ;
+      TH2D* lmuon_had_etaB   = (TH2D*) lMuon_templates->Get("had_etaB")  ;
+      TH2D* lmuon_ho_etaB    = (TH2D*) lMuon_templates->Get("ho_etaB")   ;
+      TH2D* lmuon_had_etaTpl = (TH2D*) lMuon_templates->Get("had_etaTpl");
+      TH2D* lmuon_em_etaEpl  = (TH2D*) lMuon_templates->Get("em_etaEpl");
+      TH2D* lmuon_had_etaEpl = (TH2D*) lMuon_templates->Get("had_etaEpl");
+
+      double lEta = -1.; double lP = -1;
+      double lEM  = -5.;      double lHad = 0;      double lHO = 0;
+      lEta = iMuon->Eta();
+      lP   = iMuon->P(); 
+      if(lP >= 2000.) lP = 1999.9;
+      if(!iEMSpecial || iMuon->EmEnergy() != 0.) lEM  = iMuon->EmEnergy();
+      lHad = iMuon->HadEnergy();
+      lHO  = iMuon->HoEnergy();
+      if(lP < 0. )	     return 0.5; 
+      if(fabs(lEta) >  2.5 ) return 0.5; 
+      TH2D* lTMuonHad = NULL;
+      TH2D* lTPionHad = NULL;
+      TH2D* lTMuonHo  = NULL;
+      TH2D* lTPionHo  = NULL;
+      TH2D* lTMuonEm  = NULL;
+      TH2D* lTPionEm  = NULL;
+
+      if(fabs(lEta) >=  1.27) {
+        if(iCorrectedHCAL) lHad *= 1.8/2.2;
+        if(lEta > 0) {
+          lTPionHad = lpion_had_etaEpl;
+          lTMuonHad = lmuon_had_etaEpl;
+        } else {
+          lTPionHad = lpion_had_etaEmi;
+          lTMuonHad = lmuon_had_etaEmi;
+        }
+      }
+      if(fabs(lEta) <  1.27  && fabs(lEta) >=  1.1 ) {
+        if(iCorrectedHCAL)    lHad *= (1.8/(-2.2*fabs(lEta)+5.5));
+        if(lEta > 0) {
+          lTPionHad  = lpion_had_etaTpl;
+          lTMuonHad  = lmuon_had_etaTpl;
+        } else {
+          lTPionHad  = lpion_had_etaTmi;
+          lTMuonHad  = lmuon_had_etaTmi;
+        }
+      }
+      if(fabs(lEta) <  1.1) {
+        if(iCorrectedHCAL)    lHad *= sin(2*atan(exp(iMuon->Eta())));
+        lTPionHad  = lpion_had_etaB;
+        lTMuonHad  = lmuon_had_etaB;
+      }
+      if(lEta >  1.479  ) {
+        lTPionEm  = lpion_em_etaEpl;
+        lTMuonEm  = lmuon_em_etaEpl;
+      }
+      if(fabs(lEta) <=  1.479) {
+        lTPionEm  = lpion_em_etaB;
+        lTMuonEm  = lmuon_em_etaB;
+      }
+      if(lEta < -1.479 ) {
+        lTPionEm  = lpion_em_etaEmi;
+        lTMuonEm  = lmuon_em_etaEmi;
+      }
+      if(fabs(lEta) < 1.28) {
+        lTPionHo  = lpion_ho_etaB;
+        lTMuonHo  = lmuon_ho_etaB;
+      }
+
+      double lPBX = 1.;     double lPSX = 1.; 
+      double lPBY = 1.;     double lPSY = 1.; 
+      double lPBZ = 1.;     double lPSZ = 1.; 
+      if(!overflow(lTPionEm, lP,lEM))  lPBX =  lTPionEm ->GetBinContent(lTPionEm ->GetXaxis()->FindBin(lP),lTPionEm ->GetYaxis()->FindBin(lEM) );
+      if(!overflow(lTPionHad,lP,lHad)) lPBY =  lTPionHad->GetBinContent(lTPionHad->GetXaxis()->FindBin(lP),lTPionHad->GetYaxis()->FindBin(lHad));
+      if(!overflow(lTPionHo, lP,lHO))  lPBZ =  lTPionHo ->GetBinContent(lTPionHo ->GetXaxis()->FindBin(lP),lTPionHo ->GetYaxis()->FindBin(lHO) );
+      if(!overflow(lTMuonEm, lP,lEM )) lPSX =  lTMuonEm ->GetBinContent(lTMuonEm ->GetXaxis()->FindBin(lP),lTMuonEm ->GetYaxis()->FindBin(lEM) );
+      if(!overflow(lTMuonHad,lP,lHad)) lPSY =  lTMuonHad->GetBinContent(lTMuonHad->GetXaxis()->FindBin(lP),lTMuonHad->GetYaxis()->FindBin(lHad));
+      if(!overflow(lTMuonHo ,lP,lHO))  lPSZ =  lTMuonHo ->GetBinContent(lTMuonHo ->GetXaxis()->FindBin(lP),lTMuonHo ->GetYaxis()->FindBin(lHO) );
+
+      if(lPSX == 0. || lPBX == 0. || (lEM <= 0. && !iEMSpecial)) {lPSX = 1.; lPBX = 1.;} 
+      if(lPSY == 0. || lPBY == 0. || lHad == 0.) {lPSY = 1.; lPBY = 1.;}
+      if(lPSZ == 0. || lPBZ == 0. || lHO  == 0.) {lPSZ = 1.; lPBZ = 1.;}
+      lPion_templates->Close();
+      lMuon_templates->Close();
+      if((lPSX*lPSY*lPSZ+lPBX*lPBY*lPBZ) > 0.) return lPSX*lPSY*lPSZ/(lPSX*lPSY*lPSZ+lPBX*lPBY*lPBZ);
+      return 0.5;
     }
     static inline float getSegmentCompatability(const mithep::Muon* iMuon) {
       int lNStationsCrossed = 0;

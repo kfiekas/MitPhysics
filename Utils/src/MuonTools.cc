@@ -84,6 +84,8 @@ double MuonTools::getCaloCompatability(mithep::Muon* iMuon,bool iEMSpecial, bool
     fmuon_had_etaEpl->SetDirectory(0);  
     fPion_templates->Close();
     fMuon_templates->Close();
+    delete fPion_templates;
+    delete fMuon_templates;
   }
   double lEta = -1.; double lP = -1;
   double lEM  = -5.;      double lHad = 0;      double lHO = 0;
