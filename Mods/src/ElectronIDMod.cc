@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.2 2008/11/05 14:06:09 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -44,7 +44,7 @@ void ElectronIDMod::Process()
 
   fNEventsProcessed++;
  
-  if (fNEventsProcessed % 1000 == 0 || fPrintDebug) {
+  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
     time_t systime;
     systime = time(NULL);
 

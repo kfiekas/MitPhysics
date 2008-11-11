@@ -1,4 +1,4 @@
-// $Id: ObjectCleaningMod.cc,v 1.1 2008/10/14 06:13:53 loizides Exp $
+// $Id: ObjectCleaningMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ObjectCleaningMod.h"
 #include <TH1D.h>
@@ -51,7 +51,7 @@ void ObjectCleaningMod::Process()
 
   fNEventsProcessed++;
  
-  if (fNEventsProcessed % 1000 == 0 || fPrintDebug) {
+  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
     time_t systime;
     systime = time(NULL);
 
@@ -392,30 +392,30 @@ void ObjectCleaningMod::SlaveBegin()
   // we typically initialize histograms and other analysis objects and request
   // branches. For this module, we request a branch of the MitTree.
 
-  ReqBranch(fMCPartName,                fParticles);
-  ReqBranch(fMuonName,                  fMuons);
-  ReqBranch(fElectronName,              fElectrons);
-  ReqBranch(fJetName,                   fJets);
-  ReqBranch(fSCJetName,                 fSCJets);
-  ReqBranch(fMetName,                   fMet);
+  ReqBranch(fMCPartName,   fParticles);
+  ReqBranch(fMuonName,     fMuons);
+  ReqBranch(fElectronName, fElectrons);
+  ReqBranch(fJetName,      fJets);
+  ReqBranch(fSCJetName,    fSCJets);
+  ReqBranch(fMetName,      fMet);
 
 
-  fAllMuonPtHist                   = new TH1D("hAllMuonPtHist",";p_{t};#",200,0.,200.);
-  fAllMuonEtaHist                  = new TH1D("hAllMuonEtaHist",";#eta;#",100,-5.,5.);
-  fGoodMuonPtHist                  = new TH1D("hGoodMuonPtHist",";p_{t};#",200,0.,200.);
-  fGoodMuonEtaHist                 = new TH1D("hGoodMuonEtaHist",";#eta;#",21,-5.,5.);
-  fMuonSelection                   = new TH1D("hMuonSelection", ";MuonSelection;#",4,-1.5,2.5 ) ;  
+  fAllMuonPtHist              = new TH1D("hAllMuonPtHist",";p_{t};#",200,0.,200.);
+  fAllMuonEtaHist             = new TH1D("hAllMuonEtaHist",";#eta;#",100,-5.,5.);
+  fGoodMuonPtHist             = new TH1D("hGoodMuonPtHist",";p_{t};#",200,0.,200.);
+  fGoodMuonEtaHist            = new TH1D("hGoodMuonEtaHist",";#eta;#",21,-5.,5.);
+  fMuonSelection              = new TH1D("hMuonSelection", ";MuonSelection;#",4,-1.5,2.5 ) ;  
   AddOutput(fAllMuonPtHist);
   AddOutput(fAllMuonEtaHist);
   AddOutput(fGoodMuonPtHist);
   AddOutput(fGoodMuonEtaHist);
   AddOutput(fMuonSelection);
  
-  fAllElectronPtHist                     = new TH1D("hAllElectronPtHist",";p_{t};#",100,0.,200.);  
-  fAllElectronEtaHist                    = new TH1D("hAllElectronEtaHist",";#eta;#",100,-5.,5.);
-  fGoodElectronPtHist                    = new TH1D("hGoodElectronPtHist",";p_{t};#",25,0.,200.);
-  fGoodElectronEtaHist                   = new TH1D("hGoodElectronEtaHist",";#eta;#",21,-5.,5.);
-  fGoodElectronClassification            = new TH1D("hGoodElectronClassification",
+  fAllElectronPtHist          = new TH1D("hAllElectronPtHist",";p_{t};#",100,0.,200.);  
+  fAllElectronEtaHist         = new TH1D("hAllElectronEtaHist",";#eta;#",100,-5.,5.);
+  fGoodElectronPtHist         = new TH1D("hGoodElectronPtHist",";p_{t};#",25,0.,200.);
+  fGoodElectronEtaHist        = new TH1D("hGoodElectronEtaHist",";#eta;#",21,-5.,5.);
+  fGoodElectronClassification = new TH1D("hGoodElectronClassification",
                                                     ";Good Electron Classification;#",51,0,50 ) ; 
   AddOutput(fAllElectronPtHist);
   AddOutput(fAllElectronEtaHist);
@@ -424,10 +424,10 @@ void ObjectCleaningMod::SlaveBegin()
   AddOutput(fGoodElectronClassification);
 
   //Jet Plots
-  fAllJetPtHist                   = new TH1D("hAllJetPtHist",";All Jet p_{t};#",100,0.,200.);
-  fAllJetEtaHist                  = new TH1D("hAllJetEtaHist",";All Jet #eta;#",160,-8.,8.);
-  fCentralJetSelection            = new TH1D("hCentralJetSelection",
-                                             ";CentralJetSelection;#",5,-1.5,3.5 ) ; 
+  fAllJetPtHist             = new TH1D("hAllJetPtHist",";All Jet p_{t};#",100,0.,200.);
+  fAllJetEtaHist            = new TH1D("hAllJetEtaHist",";All Jet #eta;#",160,-8.,8.);
+  fCentralJetSelection      = new TH1D("hCentralJetSelection",
+                                       ";CentralJetSelection;#",5,-1.5,3.5 ) ; 
   AddOutput(fAllJetPtHist);
   AddOutput(fAllJetEtaHist);
   AddOutput(fCentralJetSelection);

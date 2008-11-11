@@ -18,6 +18,7 @@ ZllEvtSelMod::ZllEvtSelMod(const char *name, const char *title) :
   fTrackName(Names::gkTrackBrn),
   fCaloTowerName(Names::gkCaloTowerBrn),
   fCleanJetsName(Names::gkCleanJetsName),
+  fMCLeptonsName(Names::gkMCLeptonsName),
   fMet(0),
   fNEventsProcessed(0)
 {
@@ -37,7 +38,7 @@ void ZllEvtSelMod::Process()
   // Process entries of the tree. For this module, we just load the branches and  
   fNEventsProcessed++;
 
-  if (fNEventsProcessed % 1000 == 0 || fPrintDebug) {
+  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
     time_t systime;
     systime = time(NULL);
     cerr << endl << "ZllEvtSelMod : Process Event " << fNEventsProcessed << "  Time: " << ctime(&systime) << endl;
@@ -51,10 +52,19 @@ void ZllEvtSelMod::Process()
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
 
+  //Get Generator Level information for matching
+  //ObjArray<MCParticle> *GenLeptons = 
+  //  dynamic_cast<ObjArray<MCParticle>*> (FindObjThisEvt(fMCLeptonsName.Data()));
+
+  const TriggerObjectCol *objs = GetHLTObjects(fObjsName);
+
+  if (!objs){
+    //printf("TriggerObjectCol not found\n");
+    //return;
+  }
+
   LoadBranch(fMetName);
   Met *caloMet = fMet->At(0);
-
-  if(caloMet->Pt() < 20000) return;
 
   vector<ChargedParticle*> leptons;
   vector<string> leptonType; 
@@ -91,6 +101,7 @@ void ZllEvtSelMod::Process()
       }
     }
   }
+
   if (fPrintDebug) {
     cout << "Check Lepton Sort\n";
     for(UInt_t i=0; i<leptons.size(); i++)
@@ -106,26 +117,10 @@ void ZllEvtSelMod::Process()
     dilepton->AddDaughter(leptons[1]);
 
     // Sort and count the number of central Jets for vetoing
-    vector<Jet*> sortedJets;
     int nCentralJets = 0;
     for(UInt_t i=0; i<CleanJets->GetEntries(); i++){
       if(fabs(CleanJets->At(i)->Eta()) < 2.5){
         nCentralJets++;
-        Jet* jet_f = new Jet(CleanJets->At(i)->Px()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
-    			     CleanJets->At(i)->Py()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
-    			     CleanJets->At(i)->Pz()*CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale(),
-        		     CleanJets->At(i)->E() *CleanJets->At(i)->L2RelativeCorrectionScale()*CleanJets->At(i)->L3AbsoluteCorrectionScale());
-        sortedJets.push_back(jet_f);
-      }
-    }
-    for(UInt_t i=0; i<sortedJets.size(); i++){
-      for(UInt_t j=i+1; j<sortedJets.size(); j++){
-        if(sortedJets[i]->Pt() < sortedJets[j]->Pt()) {
-          //swap i and j
-    	  Jet* tempjet = sortedJets[i];
-    	  sortedJets[i] = sortedJets[j];
-    	  sortedJets[j] = tempjet;    
-        }
       }
     }
 
@@ -142,6 +137,57 @@ void ZllEvtSelMod::Process()
     	   << leptonType[0] << " - " 
            << leptonType[1] << endl;
     }
+
+    // HLT study
+    if(objs){
+      Int_t ents=objs->GetEntries();
+      double deltaRleptonHLT[2] = {999., 999.};
+      for(Int_t i=0;i<ents;++i) {
+         const TriggerObject* to = objs->At(i);
+
+         if(strcmp(to->TrigName(),"HLT_IsoEle15_L1I")==0)	 hDZllHLT[0+100*pairType]->Fill(0.);
+         if(strcmp(to->TrigName(),"HLT_Ele15_SW_L1R")==0)	 hDZllHLT[0+100*pairType]->Fill(1.);
+         if(strcmp(to->TrigName(),"HLT_IsoEle15_LW_L1I")==0)	 hDZllHLT[0+100*pairType]->Fill(2.);
+         if(strcmp(to->TrigName(),"HLT_IsoEle18_L1R")==0)	 hDZllHLT[0+100*pairType]->Fill(3.);
+         if(strcmp(to->TrigName(),"HLT_Ele15_LW_L1R")==0)	 hDZllHLT[0+100*pairType]->Fill(4.);
+         if(strcmp(to->TrigName(),"HLT_LooseIsoEle15_LW_L1R")==0)hDZllHLT[0+100*pairType]->Fill(5.);
+         if(strcmp(to->TrigName(),"HLT_IsoMu15")==0)		 hDZllHLT[0+100*pairType]->Fill(6.);
+         if(strcmp(to->TrigName(),"HLT_Mu15")==0)		 hDZllHLT[0+100*pairType]->Fill(7.);
+         if(strcmp(to->TrigName(),"HLT_IsoEle15_L1I")!=0 &&
+    	    strcmp(to->TrigName(),"HLT_Ele15_SW_L1R")!=0 &&
+            strcmp(to->TrigName(),"HLT_IsoEle15_LW_L1I")!=0 &&
+            strcmp(to->TrigName(),"HLT_IsoEle18_L1R")!=0 &&
+            strcmp(to->TrigName(),"HLT_Ele15_LW_L1R")!=0 &&
+            strcmp(to->TrigName(),"HLT_LooseIsoEle15_LW_L1R")!=0 &&
+            strcmp(to->TrigName(),"HLT_IsoMu15")!=0 &&
+            strcmp(to->TrigName(),"HLT_Mu15")!=0)		 hDZllHLT[0+100*pairType]->Fill(8.);
+
+        for(int nl=0; nl<2; nl++){
+          if     (leptonType[nl] == "mu" && to->Type() == TriggerObject::TriggerMuon){
+            double DeltaRAux = MathUtils::DeltaR(leptons[nl]->Eta(), leptons[nl]->Phi(),
+        					 to->Eta(),to->Phi());
+    	    if(DeltaRAux < deltaRleptonHLT[nl]) deltaRleptonHLT[nl] = DeltaRAux;
+          }
+          else if(leptonType[nl] == "e" && to->Type() == TriggerObject::TriggerElectron){
+            double DeltaRAux = MathUtils::DeltaR(leptons[nl]->Eta(), leptons[nl]->Phi(),
+        					 to->Eta(),to->Phi());
+    	    if(DeltaRAux < deltaRleptonHLT[nl]) deltaRleptonHLT[nl] = DeltaRAux;
+          }
+        }
+      } // Loop over HLT objects
+      for(int nl=0; nl<2; nl++){
+        if     (leptonType[nl] == "mu")
+          hDZllHLT[1+100*pairType]->Fill(TMath::Min(deltaRleptonHLT[nl],0.999));
+        else if(leptonType[nl] == "e")
+          hDZllHLT[2+100*pairType]->Fill(TMath::Min(deltaRleptonHLT[nl],0.999));
+      }
+      if      (deltaRleptonHLT[0] < 0.1 && deltaRleptonHLT[1] < 0.1)
+        hDZllHLT[3+100*pairType]->Fill(0.0);
+      else if(deltaRleptonHLT[0] < 0.1 || deltaRleptonHLT[1] < 0.1)
+        hDZllHLT[3+100*pairType]->Fill(1.0);
+      else
+        hDZllHLT[3+100*pairType]->Fill(2.0);
+    } // if !objs
 
     hDZllMET[ 0+100*pairType]->Fill((double)leptons.size());
     if(leptons.size() == 2 && dilepton->Charge() == 0)
@@ -214,10 +260,12 @@ void ZllEvtSelMod::Process()
       hDZllIsoEtaIsoEem->Fill(theEta,lIso[1]);
       hDZllIsoEtaIsoHcal->Fill(theEta,lIso[2]);   
       hDZllIsoEtaIsoHo->Fill(theEta,lIso[3]);
+
     } // Nleptons == 2 , Ncharge == 0 and fabs(mll-mz)<30 requirements
     delete dilepton;
   } // Minimun Pt and Nleptons >= 2 requirements 
   leptons.clear();
+  delete objs;
 }
 //--------------------------------------------------------------------------------------------------
 void ZllEvtSelMod::SlaveBegin()
@@ -303,6 +351,20 @@ void ZllEvtSelMod::SlaveBegin()
   AddOutput(hDZllIsoEtaIsoEem);
   AddOutput(hDZllIsoEtaIsoHcal);
   AddOutput(hDZllIsoEtaIsoHo);
+
+  for(int j=0; j<3; j++){
+    int ind = 100 * j;
+    sprintf(sb,"hDZllHLT_%d",ind+0);  hDZllHLT[ind+0]  = new TH1D(sb,sb,9,-0.5,8.5);
+    sprintf(sb,"hDZllHLT_%d",ind+1);  hDZllHLT[ind+1]  = new TH1D(sb,sb,100,0.0,1.0);
+    sprintf(sb,"hDZllHLT_%d",ind+2);  hDZllHLT[ind+2]  = new TH1D(sb,sb,100,0.0,1.0);
+    sprintf(sb,"hDZllHLT_%d",ind+3);  hDZllHLT[ind+3]  = new TH1D(sb,sb,3,-0.5,2.5);
+  }
+
+  for(int i=0; i<4; i++){
+    for(int j=0; j<3; j++){
+      AddOutput(hDZllHLT[i+j*100]);
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------------------------

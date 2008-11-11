@@ -1,4 +1,4 @@
- // $Id: ttEvtSelMod.cc,v 1.3 2008/10/10 10:54:13 ceballos Exp $
+ // $Id: ttEvtSelMod.cc,v 1.2 2008/10/23 12:21:37 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/ttEvtSelMod.h"
 #include <TH1D.h>
@@ -6,6 +6,7 @@
 #include "MitAna/DataTree/interface/Names.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Utils/interface/MuonTools.h"
 
 using namespace mithep;
 ClassImp(mithep::ttEvtSelMod)
@@ -17,8 +18,10 @@ ttEvtSelMod::ttEvtSelMod(const char *name, const char *title) :
   fMetName(Names::gkCaloMetBrn),
   fMuonName(Names::gkMuonBrn),
   fTrackName(Names::gkTrackBrn),
+  fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
   fCleanJetsName(Names::gkCleanJetsName),
   fMCLeptonsName(Names::gkMCLeptonsName),
+  fMCAllLeptonsName(Names::gkMCAllLeptonsName),
   fMCQuarksName(Names::gkMCQuarksName),
   fMet(0),
   fMuons(0),
@@ -40,15 +43,16 @@ void ttEvtSelMod::Process()
   // Process entries of the tree. For this module, we just load the branches and  
   fNEventsProcessed++;
 
-  if (fNEventsProcessed % 1000 == 0 || fPrintDebug) {
+  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
     time_t systime;
     systime = time(NULL);
     cerr << endl << "ttEvtSelMod : Process Event " << fNEventsProcessed << "  Time: " << ctime(&systime) << endl;
   }
 
   //Get Generator Level information for matching
-  //ObjArray<MCParticle> *GenLeptons   = dynamic_cast<ObjArray<MCParticle>* > (FindObjThisEvt(fMCLeptonsName.Data()));
-  ObjArray<MCParticle> *GenQuarks    = dynamic_cast<ObjArray<MCParticle>* > (FindObjThisEvt(fMCQuarksName.Data()));
+  //ObjArray<MCParticle> *GenLeptons    = dynamic_cast<ObjArray<MCParticle>* > (FindObjThisEvt(fMCLeptonsName.Data()));
+  ObjArray<MCParticle> *GenAllLeptons = dynamic_cast<ObjArray<MCParticle>* > (FindObjThisEvt(fMCAllLeptonsName.Data()));
+  ObjArray<MCParticle> *GenQuarks     = dynamic_cast<ObjArray<MCParticle>* > (FindObjThisEvt(fMCQuarksName.Data()));
 
   //Obtain all the good objects from the event cleaning module
   ObjArray<Electron> *CleanElectrons = dynamic_cast<ObjArray<Electron>* >
@@ -64,6 +68,7 @@ void ttEvtSelMod::Process()
   vector<ChargedParticle*> leptons;
   vector<string> leptonType; 
   double zAverage = 0.0;
+  MuonTools myMuonTools;
 
   LoadBranch(fMuonName);
   ObjArray<Muon> *DirtyMuons = new ObjArray<Muon>;
@@ -196,6 +201,7 @@ void ttEvtSelMod::Process()
     if (leptons.size() == 2){
       if(dilepton->Charge() != 0) hDttPresel[ 0+100*pairType]->Fill(dilepton->Mass());
       else			  hDttPresel[ 1+100*pairType]->Fill(dilepton->Mass());
+      LoadBranch(fVertexName);
 
      // Njets == 0, Preselection level
      if(nCentralJets == 0 &&
@@ -216,19 +222,23 @@ void ttEvtSelMod::Process()
     	   hDttJetVeto[1]->Fill(TMath::Min(fabs(zAverage-fTracks->At(i)->Z0()),1.999));
     	   hDttJetVeto[2]->Fill(TMath::Min(fTracks->At(i)->Pt(),49.999));
     	 }
-    	 if(!trackIsLepton && fTracks->At(i)->Pt() > 2.0 && fTracks->At(i)->NHits() >= 8 &&
+    	 if(!trackIsLepton && fTracks->At(i)->Pt() > 3.0 && fTracks->At(i)->NHits() >= 8 &&
     	    fabs(zAverage-fTracks->At(i)->Z0()) < 0.5){
     	   nCleanTracks[0]++;
     	 }
-    	 if(!trackIsLepton && fTracks->At(i)->Pt() > 3.0 && fTracks->At(i)->NHits() >= 8 &&
+    	 if(!trackIsLepton && fTracks->At(i)->Pt() > 3.5 && fTracks->At(i)->NHits() >= 8 &&
     	    fabs(zAverage-fTracks->At(i)->Z0()) < 0.5){
     	   nCleanTracks[1]++;
+	   double d0_real = DecayXY(fTracks->At(i), fVertices);
+	   hDttVert[0]->Fill(TMath::Min(fabs(d0_real),0.999));
+	   hDttVert[1]->Fill(TMath::Min(fabs(d0_real)/fTracks->At(i)->D0Err(),19.999));
+	   hDttSelD0Phi->Fill(fTracks->At(i)->Phi0() * 180./TMath::Pi(), d0_real);
     	 }
     	  if(!trackIsLepton && fTracks->At(i)->Pt() > 4.0 && fTracks->At(i)->NHits() >= 8 &&
     	    fabs(zAverage-fTracks->At(i)->Z0()) < 0.5){
     	   nCleanTracks[2]++;
     	 }
-      }
+       }
        hDttJetVeto[3]->Fill(TMath::Min((double)nCleanTracks[0],19.4999));
        hDttJetVeto[4]->Fill(TMath::Min((double)nCleanTracks[1],19.4999));
        hDttJetVeto[5]->Fill(TMath::Min((double)nCleanTracks[2],19.4999));
@@ -331,11 +341,53 @@ void ttEvtSelMod::Process()
               hDttPresel[33+100*pairType]->Fill((double)DirtyMuons->GetEntries());
               for (UInt_t i=0; i<DirtyMuons->GetEntries(); ++i) {
         	Muon *mu = DirtyMuons->At(i);
-        	hDttPresel[34+100*pairType]->Fill(mu->Pt());
+        	hDttPresel[34+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
         	hDttPresel[35+100*pairType]->Fill(TMath::Min(fabs(mu->GlobalTrk()->D0()),0.3999));
+    		bool isGenLepton = false;
+    		for (UInt_t j=0; j<GenAllLeptons->GetEntries(); ++j) {
+    		  MCParticle *gen = GenAllLeptons->At(j);
+    		  if(MathUtils::DeltaR(gen->Eta(), gen->Phi(), mu->Eta(), mu->Phi()) < 0.1)
+    		    isGenLepton = true;
+    		}
+		if(isGenLepton == true){
+        	  hDttPresel[36+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose))
+		    hDttPresel[37+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight))
+		    hDttPresel[38+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+		    hDttPresel[39+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+		    hDttPresel[40+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) &&
+		     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+		    hDttPresel[41+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight) &&
+		     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+		    hDttPresel[42+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+	        } else {
+        	  hDttPresel[43+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose))
+		    hDttPresel[44+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight))
+		    hDttPresel[45+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+		    hDttPresel[46+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+		    hDttPresel[47+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) &&
+		     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+		    hDttPresel[48+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight) &&
+		     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+		    hDttPresel[49+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
+		}
+	        double d0_real = DecayXY(DirtyMuons->At(i)->GlobalTrk(), fVertices);
+	        hDttVert[2]->Fill(TMath::Min(fabs(d0_real),0.999));
+	        hDttVert[3]->Fill(TMath::Min(fabs(d0_real)/DirtyMuons->At(i)->GlobalTrk()->D0Err(),19.999));
               }
               if(DirtyMuons->GetEntries() > 0){
-        	hDttPresel[36+100*pairType]->Fill((double)nCentralJets);
+        	hDttPresel[50+100*pairType]->Fill((double)nCentralJets);
               }
 
               // Study dijet mass
@@ -355,12 +407,12 @@ void ttEvtSelMod::Process()
         	    delete dijetTemp;
         	  }
         	}
-        	hDttPresel[37+100*pairType]->Fill(dijetMass);
+        	hDttDiJetSel[ 0+100*pairType]->Fill(dijetMass);
         	if(indDiJet[0] == 0 && indDiJet[1] == 1)
-        	  hDttPresel[38+100*pairType]->Fill(dijetMass);
+        	  hDttDiJetSel[ 1+100*pairType]->Fill(dijetMass);
         	else
-        	  hDttPresel[39+100*pairType]->Fill(dijetMass);
-        	hDttPresel[40+100*pairType]->Fill((double)(indDiJet[0]+10*indDiJet[1]));
+        	  hDttPresel[ 2+100*pairType]->Fill(dijetMass);
+        	hDttDiJetSel[ 3+100*pairType]->Fill((double)(indDiJet[0]+10*indDiJet[1]));
               } // Study dijet mass
 
     	      // Njets == 0
@@ -379,9 +431,9 @@ void ttEvtSelMod::Process()
         	    trackIsLepton = true;
 
     		  if(!trackIsLepton && fTracks->At(i)->Pt() > 2.0){
-        	    hDttPresel[41+100*pairType]->Fill(TMath::Min((double)fTracks->At(i)->NHits(),29.499));
-        	    hDttPresel[42+100*pairType]->Fill(TMath::Min(fabs(zAverage-fTracks->At(i)->Z0()),1.999));
-        	    hDttPresel[43+100*pairType]->Fill(TMath::Min(fTracks->At(i)->Pt(),49.999));
+        	    hDttNoJetsSel[ 0+100*pairType]->Fill(TMath::Min((double)fTracks->At(i)->NHits(),29.499));
+        	    hDttNoJetsSel[ 1+100*pairType]->Fill(TMath::Min(fabs(zAverage-fTracks->At(i)->Z0()),1.999));
+        	    hDttNoJetsSel[ 2+100*pairType]->Fill(TMath::Min(fTracks->At(i)->Pt(),49.999));
     		  }
     		  if(!trackIsLepton && fTracks->At(i)->Pt() > 3.0 && fTracks->At(i)->NHits() >= 8 &&
         	     fabs(zAverage-fTracks->At(i)->Z0()) < 0.5){
@@ -389,19 +441,19 @@ void ttEvtSelMod::Process()
         	    nCleanTracks++;
     		  }
     		}
-        	hDttPresel[44+100*pairType]->Fill(TMath::Min((double)nCleanTracks,19.4999));
+        	hDttNoJetsSel[ 3+100*pairType]->Fill(TMath::Min((double)nCleanTracks,19.4999));
         	if(DirtyMuons->GetEntries() == 0)
-		     hDttPresel[45+100*pairType]->Fill(TMath::Min((double)nCleanTracks,19.4999));
+		     hDttNoJetsSel[ 4+100*pairType]->Fill(TMath::Min((double)nCleanTracks,19.4999));
     		//delete CleanTracks;
     	      } // Njets == 0
 
-              for(UInt_t i=0; i<sortedJets.size(); i++) delete sortedJets[i];
             } // mTW min requirement
     	  } // deltaPhiDileptonMet requirement
     	} // MET requirements
       } // Z veto && q1+q2==0 && mass_ll>12
     } // Nleptons==2
     delete dilepton;
+    for(UInt_t i=0; i<sortedJets.size(); i++) delete sortedJets[i];
   } // Minimun Pt, Nleptons>=2 requirements
   delete DirtyMuons;
   leptons.clear();
@@ -416,6 +468,7 @@ void ttEvtSelMod::SlaveBegin()
   ReqBranch(fMetName,    fMet);
   ReqBranch(fMuonName,   fMuons);
   ReqBranch(fTrackName,  fTracks);
+  ReqBranch(fVertexName, fVertices);
 
   char sb[200];
   for(int j=0; j<3; j++){
@@ -456,21 +509,55 @@ void ttEvtSelMod::SlaveBegin()
     sprintf(sb,"hDttPresel_%d",ind+33); hDttPresel[ind+33] = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDttPresel_%d",ind+34); hDttPresel[ind+34] = new TH1D(sb,sb,200,0.0,50.0);
     sprintf(sb,"hDttPresel_%d",ind+35); hDttPresel[ind+35] = new TH1D(sb,sb,200,0.0,0.4); 
-    sprintf(sb,"hDttPresel_%d",ind+36); hDttPresel[ind+36] = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDttPresel_%d",ind+37); hDttPresel[ind+37] = new TH1D(sb,sb,100,0.0,400.0);
-    sprintf(sb,"hDttPresel_%d",ind+38); hDttPresel[ind+38] = new TH1D(sb,sb,100,0.0,400.0);
-    sprintf(sb,"hDttPresel_%d",ind+39); hDttPresel[ind+39] = new TH1D(sb,sb,100,0.0,400.0);
-    sprintf(sb,"hDttPresel_%d",ind+40); hDttPresel[ind+40] = new TH1D(sb,sb,100,-0.5,99.5); 
-    sprintf(sb,"hDttPresel_%d",ind+41); hDttPresel[ind+41] = new TH1D(sb,sb,30,-0.5,29.5); 
-    sprintf(sb,"hDttPresel_%d",ind+42); hDttPresel[ind+42] = new TH1D(sb,sb,200,0.0,2.0);
-    sprintf(sb,"hDttPresel_%d",ind+43); hDttPresel[ind+43] = new TH1D(sb,sb,100,0.0,50.0);
-    sprintf(sb,"hDttPresel_%d",ind+44); hDttPresel[ind+44] = new TH1D(sb,sb,20,-0.5,19.5); 
-    sprintf(sb,"hDttPresel_%d",ind+45); hDttPresel[ind+45] = new TH1D(sb,sb,20,-0.5,19.5); 
+    sprintf(sb,"hDttPresel_%d",ind+36); hDttPresel[ind+36] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+37); hDttPresel[ind+37] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+38); hDttPresel[ind+38] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+39); hDttPresel[ind+39] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+40); hDttPresel[ind+40] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+41); hDttPresel[ind+41] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+42); hDttPresel[ind+42] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+43); hDttPresel[ind+43] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+44); hDttPresel[ind+44] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+45); hDttPresel[ind+45] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+46); hDttPresel[ind+46] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+47); hDttPresel[ind+47] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+48); hDttPresel[ind+48] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+49); hDttPresel[ind+49] = new TH1D(sb,sb,200,0.0,50.0);
+    sprintf(sb,"hDttPresel_%d",ind+50); hDttPresel[ind+50] = new TH1D(sb,sb,10,-0.5,9.5); 
   }
 
-  for(int i=0; i<46; i++){
+  for(int i=0; i<51; i++){
     for(int j=0; j<3; j++){
       AddOutput(hDttPresel[i+j*100]);
+    }
+  }
+
+  for(int j=0; j<3; j++){
+    int ind = 100 * j;
+    sprintf(sb,"hDttDiJetSel_%d",ind+0); hDttDiJetSel[ind+0] = new TH1D(sb,sb,100,0.0,400.0);
+    sprintf(sb,"hDttDiJetSel_%d",ind+1); hDttDiJetSel[ind+1] = new TH1D(sb,sb,100,0.0,400.0);
+    sprintf(sb,"hDttDiJetSel_%d",ind+2); hDttDiJetSel[ind+2] = new TH1D(sb,sb,100,0.0,400.0);
+    sprintf(sb,"hDttDiJetSel_%d",ind+3); hDttDiJetSel[ind+3] = new TH1D(sb,sb,100,-0.5,99.5); 
+  }
+
+  for(int i=0; i<4; i++){
+    for(int j=0; j<3; j++){
+      AddOutput(hDttDiJetSel[i+j*100]);
+    }
+  }
+
+  for(int j=0; j<3; j++){
+    int ind = 100 * j;
+    sprintf(sb,"hDttNoJetsSel_%d",ind+0); hDttNoJetsSel[ind+0] = new TH1D(sb,sb,30,-0.5,29.5); 
+    sprintf(sb,"hDttNoJetsSel_%d",ind+1); hDttNoJetsSel[ind+1] = new TH1D(sb,sb,200,0.0,2.0);
+    sprintf(sb,"hDttNoJetsSel_%d",ind+2); hDttNoJetsSel[ind+2] = new TH1D(sb,sb,100,0.0,50.0);
+    sprintf(sb,"hDttNoJetsSel_%d",ind+3); hDttNoJetsSel[ind+3] = new TH1D(sb,sb,20,-0.5,19.5); 
+    sprintf(sb,"hDttNoJetsSel_%d",ind+4); hDttNoJetsSel[ind+4] = new TH1D(sb,sb,20,-0.5,19.5); 
+  }
+
+  for(int i=0; i<5; i++){
+    for(int j=0; j<3; j++){
+      AddOutput(hDttNoJetsSel[i+j*100]);
     }
   }
 
@@ -490,6 +577,17 @@ void ttEvtSelMod::SlaveBegin()
   for(int i=0; i<9; i++){
     AddOutput(hDttJetVeto[i]);
   }
+
+  sprintf(sb,"hDttVert_%d",0);  hDttVert[0]  = new TH1D(sb,sb,1000,0.0,1.);
+  sprintf(sb,"hDttVert_%d",1);  hDttVert[1]  = new TH1D(sb,sb,200,0.0,20.);
+  sprintf(sb,"hDttVert_%d",2);  hDttVert[2]  = new TH1D(sb,sb,1000,0.0,1.);
+  sprintf(sb,"hDttVert_%d",3);  hDttVert[3]  = new TH1D(sb,sb,200,0.0,20.);
+  for(int i=0; i<4; i++){
+    AddOutput(hDttVert[i]);
+  }
+  sprintf(sb,"hDttSelD0Phi");
+       hDttSelD0Phi = new TH2D(sb,sb,90,-180.0,180.0,200,-0.2,0.2);  
+  AddOutput(hDttSelD0Phi);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -502,4 +600,28 @@ void ttEvtSelMod::SlaveTerminate()
 void ttEvtSelMod::Terminate()
 {
   // Run finishing code on the client computer
+}
+
+//--------------------------------------------------------------------------------------------------
+double ttEvtSelMod::DecayXY(const mithep::Track *lTrack, mithep::Vertex *iVertex) {
+  if(lTrack == 0) return 999999;
+
+  double lXM =  -sin(lTrack->Phi()) * (lTrack->D0());
+  double lYM =  cos(lTrack->Phi()) * (lTrack->D0());
+  double lDX = (lXM + iVertex->X()); 
+  double lDY = (lYM + iVertex->Y());
+  return (lTrack->Px()*lDY - lTrack->Py()*lDX) / lTrack->Pt();
+}
+
+//--------------------------------------------------------------------------------------------------
+double ttEvtSelMod::DecayXY(const mithep::Track *lTrack, mithep::VertexCol *iVertices) {
+  double lD0 = 10000;
+
+  for(uint i0 = 0; i0 < iVertices->GetEntries(); i0++) {
+    double pD0 = DecayXY(lTrack,iVertices->At(i0));
+    if(fabs(pD0) < fabs(lD0)) lD0 = pD0;
+  }
+
+  if(lD0 == 10000) return -1;
+  return lD0;
 }

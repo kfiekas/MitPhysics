@@ -1,4 +1,4 @@
-// $Id: MitAnaPhysicsModLinkDef.h,v 1.1 2008/10/15 06:05:01 loizides Exp $
+// $Id: MitAnaPhysicsModLinkDef.h,v 1.2 2008/10/23 12:25:20 ceballos Exp $
 
 #ifndef MITPHYSICS_SELMODS_LINKDEF_H
 #define MITPHYSICS_SELMODS_LINKDEF_H
@@ -8,6 +8,9 @@
 #include "MitPhysics/SelMods/interface/ZXEvtSelMod.h"
 #include "MitPhysics/SelMods/interface/ttEvtSelMod.h"
 #include "MitPhysics/SelMods/interface/ZllEvtSelMod.h"
+#include "MitPhysics/SelMods/interface/WlnEvtSelMod.h"
+#include "MitPhysics/SelMods/interface/WWEvtSelMod.h"
+#include "MitPhysics/SelMods/interface/simpleEvtSelMod.h"
 #endif
  
 #ifdef __CINT__
@@ -24,4 +27,7 @@
 #pragma link C++ class mithep::ZXEvtSelMod+;
 #pragma link C++ class mithep::ttEvtSelMod+;
 #pragma link C++ class mithep::ZllEvtSelMod+;
+#pragma link C++ class mithep::WlnEvtSelMod+;
+#pragma link C++ class mithep::WWEvtSelMod+;
+#pragma link C++ class mithep::simpleEvtSelMod+;
 #endif

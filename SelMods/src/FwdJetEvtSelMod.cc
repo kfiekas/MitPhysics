@@ -1,4 +1,4 @@
- // $Id: FwdJetEvtSelMod.cc,v 1.3 2008/10/10 10:54:13 ceballos Exp $
+ // $Id: FwdJetEvtSelMod.cc,v 1.2 2008/10/23 12:21:37 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/FwdJetEvtSelMod.h"
 #include <TH1D.h>
@@ -47,7 +47,7 @@ void FwdJetEvtSelMod::Process()
   // Process entries of the tree. For this module, we just load the branches and  
   fNEventsProcessed++;
 
-  if (fNEventsProcessed % 1000 == 0 || fPrintDebug) {
+  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
     time_t systime;
     systime = time(NULL);
     cerr << endl << "FwdJetEvtSelMod : Process Event " << fNEventsProcessed << "  Time: " << ctime(&systime) << endl;

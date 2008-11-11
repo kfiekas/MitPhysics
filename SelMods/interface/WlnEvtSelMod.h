@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
-// $Id: ZllEvtSelMod.h,v 1.1 2008/10/23 12:21:48 ceballos Exp $
+// $Id: WlnEvtSelMod.h,v 1.1 2008/10/23 12:21:48 ceballos Exp $
 //
-// ZllEvtSelMod
+// WlnEvtSelMod
 //
 // A Module for Selecting ttbar events
 // and produces some distributions
@@ -10,8 +10,8 @@
 // Authors: ceballos
 //------------------------------------------------------------------------------
 
-#ifndef HWWMODS_ZLLEVTSELMOD_H
-#define HWWMODS_ZLLEVTSELMOD_H
+#ifndef HWWMODS_WlnEvtSelMod_H
+#define HWWMODS_WlnEvtSelMod_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"
@@ -22,12 +22,12 @@ class TH2D;
 
 namespace mithep 
 {
-  class ZllEvtSelMod : public BaseMod
+  class WlnEvtSelMod : public BaseMod
   {
     public:
-    ZllEvtSelMod(const char *name="ZllEvtSelMod", 
+    WlnEvtSelMod(const char *name="WlnEvtSelMod", 
 		 const char *title="Example analysis module with all branches");
-      ~ZllEvtSelMod() {}
+      ~WlnEvtSelMod() {}
       void         SetPrintDebug(bool b)         { fPrintDebug = b;   }	
       void         SetCleanJetsName (TString s)  { fCleanJetsName = s;}	
       void         SetTrigObjsName(const char *n){ fObjsName = n;     }
@@ -40,6 +40,8 @@ namespace mithep
       TString      fTrackName;      // name of track collection
       TString      fCaloTowerName;  // name of calotower collection
       TString      fCleanJetsName;  // name of clean central jets collection
+      TString      fMuonName;	    // name of muon collection
+      TString      fElectronName;   // name of electron collection
       TString      fMCLeptonsName;  // new lepton coll
       MetCol       *fMet;	    // Missing Et
       TrackCol     *fTracks;        // Track branch     
@@ -51,21 +53,8 @@ namespace mithep
       // Trigger info
       TString      fObjsName;   //name of trigger objects
 
-      TH1D         *hDZllMET[300];
-      TH1D         *hDZllIso[300];
-      TH2D         *hDZllIsoEtaIsoTrack0;  
-      TH2D         *hDZllIsoEtaIsoNTrack0; 
-      TH2D         *hDZllIsoEtaIsoCaloAll0;
-      TH2D         *hDZllIsoEtaIsoEem0;
-      TH2D         *hDZllIsoEtaIsoHcal0;  
-      TH2D         *hDZllIsoEtaIsoHo0;
-      TH2D         *hDZllIsoEtaIsoTrack;  
-      TH2D         *hDZllIsoEtaIsoNTrack; 
-      TH2D         *hDZllIsoEtaIsoCaloAll;
-      TH2D         *hDZllIsoEtaIsoEem;    
-      TH2D         *hDZllIsoEtaIsoHcal;   
-      TH2D         *hDZllIsoEtaIsoHo;
-      TH1D         *hDZllHLT[300];
+      TH1D         *hDWlnSel[300];
+      TH2D         *hDWlnSel2D[10];
     
       int          fNEventsProcessed;
 
@@ -86,7 +75,7 @@ namespace mithep
                                     mithep::CaloTowerCol *iTowers,
 				    double lIso[4]);
 
-      ClassDef(ZllEvtSelMod,1) // TAM example analysis module
+      ClassDef(WlnEvtSelMod,1) // TAM example analysis module
   };
 }
 #endif

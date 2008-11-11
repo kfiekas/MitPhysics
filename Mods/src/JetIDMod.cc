@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: JetIDMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -37,7 +37,7 @@ void JetIDMod::Process()
 
   fNEventsProcessed++;
  
-  if (fNEventsProcessed % 1000 == 0 || fPrintDebug) {
+  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
     time_t systime;
     systime = time(NULL);
 

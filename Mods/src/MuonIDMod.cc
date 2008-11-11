@@ -1,10 +1,11 @@
-// $Id: MuonIDMod.cc,v 1.2 2008/10/25 19:25:09 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.3 2008/11/05 14:06:09 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Utils/interface/MuonTools.h"
 
 using namespace mithep;
 
@@ -21,6 +22,11 @@ ClassImp(mithep::MuonIDMod)
   fMuons(0),
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
+  fCombIsolationCut(-1.0),
+  fTMOneStationLooseCut(false),
+  fTMOneStationTightCut	(false),  
+  fTM2DCompatibilityLooseCut(false),
+  fTM2DCompatibilityTightCut(false),
   fMuonPtMin(10),
   fNEventsProcessed(0)
 {
@@ -41,12 +47,14 @@ void MuonIDMod::Process()
 
   fNEventsProcessed++;
  
-  if (fNEventsProcessed % 1000 == 0 || fPrintDebug) {
+  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
     time_t systime;
     systime = time(NULL);
 
     cerr << endl << "MuonIDMod : Process Event " << fNEventsProcessed << "  Time: " << ctime(&systime) << endl;  
   }  
+
+  MuonTools myMuonTools;
 
   //Get Muons
   LoadBranch(fMuonName);
@@ -64,13 +72,40 @@ void MuonIDMod::Process()
 
     bool allCuts = false;
 
+    // We always want global muons
     if(MuonClass == 0) allCuts = true;
 
-    if(mu->IsoR03SumPt() >= fTrackIsolationCut) allCuts = false;
+    // Isolation requirements
+    if(fCombIsolationCut < 0.0){
+      if(mu->IsoR03SumPt() >= fTrackIsolationCut) allCuts = false;
+      if(mu->IsoR03EmEt() + 
+         mu->IsoR03HadEt() >= fCaloIsolationCut) allCuts = false;
+    }
+    else {
+      if(1.0 * mu->IsoR03SumPt() + 
+         1.0 * mu->IsoR03EmEt() + 
+         1.0 * mu->IsoR03HadEt() >= fCombIsolationCut) allCuts = false;
+      
+    }
 
-    if(mu->IsoR03EmEt() + 
-       mu->IsoR03HadEt() >= fCaloIsolationCut) allCuts = false;
+    // Muon chambers and calo compatibility requirements
+    if(fTMOneStationLooseCut == true &&
+       myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) == false)
+      allCuts = false;
 
+    if(fTMOneStationTightCut == true &&
+       myMuonTools.isGood(mu, MuonTools::TMOneStationTight) == false)
+      allCuts = false;
+
+    if(fTM2DCompatibilityLooseCut == true &&
+       myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose) == false)
+      allCuts = false;
+
+    if(fTM2DCompatibilityTightCut == true &&
+       myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight) == false)
+      allCuts = false;
+
+    // Min Pt requirement
     if(mu->Pt() <= fMuonPtMin) allCuts = false;
         
     if(allCuts) {     

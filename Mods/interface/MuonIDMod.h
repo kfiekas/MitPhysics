@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.2 2008/10/23 12:23:31 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.3 2008/11/05 14:06:06 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -26,25 +26,35 @@ namespace mithep
       MuonIDMod(const char *name="MuonIDMod", 
                      const char *title="Example analysis module with all branches");
       ~MuonIDMod() {}
-      void     SetPrintDebug(bool b)              { fPrintDebug         = b;     }
-      void     SetMuonIDType(TString type)        { fMuonIDType         = type;  }
-      void     SetTrackIsolationCut(Double_t cut) { fTrackIsolationCut  = cut;   }
-      void     SetCaloIsolationCut(Double_t cut)  { fCaloIsolationCut   = cut;   }
-      void     SetMuonPtMin(double p)             { fMuonPtMin          = p;     }
-      void     SetCleanMuonsName(TString s)       { fCleanMuonsName     = s;     }     
+      void     SetPrintDebug(bool b)                { fPrintDebug	         = b;	}
+      void     SetMuonIDType(TString type)          { fMuonIDType	         = type;}
+      void     SetTrackIsolationCut(Double_t cut)   { fTrackIsolationCut         = cut; }
+      void     SetCaloIsolationCut(Double_t cut)    { fCaloIsolationCut          = cut; }
+      void     SetCombIsolationCut(Double_t cut)    { fCombIsolationCut          = cut; }
+      void     SetMuonPtMin(double p)               { fMuonPtMin	         = p;	}
+      void     SetTMOneStationLooseCut(bool b)      { fTMOneStationLooseCut      = b;	}
+      void     SetTMOneStationTightCut(bool b)      { fTMOneStationTightCut      = b;	}
+      void     SetTM2DCompatibilityLooseCut(bool b) { fTM2DCompatibilityLooseCut = b;   }
+      void     SetTM2DCompatibilityTightCut(bool b) { fTM2DCompatibilityTightCut = b;   }
+      void     SetCleanMuonsName(TString s)         { fCleanMuonsName            = s;   }   
     protected:
-      bool     fPrintDebug;               //flag for printing debug output
-      TString  fMuonName;                 //name of muon collection
-      TString  fCleanMuonsName ;           //name of good muons collection  
-      TString  fMuonIDType;               //Type of Muon ID we impose
-      TString  fMuonIsoType;              //Type of Muon Isolation we impose
-      MuonCol  *fMuons;                   //!Muon branch
+      bool     fPrintDebug;                // flag for printing debug output
+      TString  fMuonName;                  // name of muon collection
+      TString  fCleanMuonsName ;           // name of good muons collection  
+      TString  fMuonIDType;                // Type of Muon ID we impose
+      TString  fMuonIsoType;               // Type of Muon Isolation we impose
+      MuonCol  *fMuons;                    // !Muon branch
 
-      double   fTrackIsolationCut;        //Cut value for track isolation
-      double   fCaloIsolationCut;         //Cut value for calo isolation
-      double   fMuonPtMin;                //min Pt requirement
+      double   fTrackIsolationCut;         // Cut value for track isolation
+      double   fCaloIsolationCut;          // Cut value for calo isolation
+      double   fCombIsolationCut;          // Cut value for combined isolation
+      bool     fTMOneStationLooseCut;	   // apply TMOneStationLooseCut?
+      bool     fTMOneStationTightCut;	   // apply TMOneStationTightCut?
+      bool     fTM2DCompatibilityLooseCut; // apply TM2DCompatibilityLooseCut?
+      bool     fTM2DCompatibilityTightCut; // apply TM2DCompatibilityTightCut?
+      double   fMuonPtMin;                 // min Pt requirement
 
-      int      fNEventsProcessed;         // Number of events processed
+      int      fNEventsProcessed;          // Number of events processed
 
       void     Begin();
       void     Process();

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
+// $Id: GeneratorMod.h,v 1.2 2008/11/05 14:06:06 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -51,6 +51,7 @@ namespace mithep
       MCParticleCol *fParticles;		// GenParticle branch
       int            fNEventsProcessed; 	// Number of events
 
+      TH1D          *hDEvents;
       TH1D          *hDGenLeptons[20];
       TH1D          *hDGenAllLeptons[20];
       TH1D          *hDGenTaus[20];

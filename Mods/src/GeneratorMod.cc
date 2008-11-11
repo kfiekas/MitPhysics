@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.2 2008/10/23 12:23:44 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.3 2008/11/05 14:06:09 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -48,7 +48,7 @@ void GeneratorMod::Process()
   if (fNEventsProcessed % 1000 == 0 || fPrintDebug) {
     time_t systime;
     systime = time(NULL);
-    cerr << endl << "GeneratorMod : Process Event " << fNEventsProcessed << "  Time: " 
+    cout << "GeneratorMod : Process Event " << fNEventsProcessed << "  Time: " 
          << ctime(&systime) << endl;  
   }  
 
@@ -60,6 +60,9 @@ void GeneratorMod::Process()
   ObjArray<MCParticle> *GenQuarks     = new ObjArray<MCParticle>;
   ObjArray<MCParticle> *GenqqHs       = new ObjArray<MCParticle>;
   ObjArray<MCParticle> *GenBosons     = new ObjArray<MCParticle>;
+
+  // Counting events
+  hDEvents->Fill(0.0);
 
   if(fIsMC == true){
     // Get Generator Level information branch
@@ -315,8 +318,11 @@ void GeneratorMod::SlaveBegin()
   ReqBranch(fMCPartName, fParticles);
 
   // Fill histograms
+  // All events is always filled
+  char sb[200];
+  sprintf(sb,"hDEvents"); hDEvents = new TH1D(sb,sb,1,-0.5,0.5);
+  AddOutput(hDEvents);
   if(fFillHist == true){
-    char sb[200];
     // Leptons
     sprintf(sb,"hDGenLeptons_%d", 0);  hDGenLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenLeptons_%d", 1);  hDGenLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
