@@ -1,15 +1,16 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.2 2008/11/05 14:06:06 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.3 2008/11/11 21:22:58 ceballos Exp $
 //
 // GeneratorMod
 //
-// This module finds interesting generator information
+// This module collects interesting generator information and publishes collections
+// for subsequent modules.
 //
-// Authors: ceballos
+// Authors: G.Ceballos
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITANA_TREEMOD_GENERATORMOD_H
-#define MITANA_TREEMOD_GENERATORMOD_H
+#ifndef MITPHYSICS_MODS_GENERATORMOD_H
+#define MITPHYSICS_MODS_GENERATORMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"
@@ -23,51 +24,43 @@ namespace mithep
   {
     public:
       GeneratorMod(const char *name="GeneratorMod", 
-                   const char *title="generator information");
+                   const char *title="Generator information module");
       ~GeneratorMod() {}
-      void           SetPrintDebug(bool b)	   { fPrintDebug       = b;}
-      void           SetFillHist(bool b)	   { fFillHist	       = b;}
-      void           SetIsMC(bool b)  	           { fIsMC	       = b;}
-      void           SetMCPartName(TString s)	   { fMCPartName       = s;}	
-      void           SetMCLeptonsName(TString s)   { fMCLeptonsName    = s;}	
-      void           SetMCAllLeptonsName(TString s){ fMCAllLeptonsName = s;}	
-      void           SetMCTausName(TString s)	   { fMCTausName       = s;}	
-      void           SetMCNeutrinosName(TString s) { fMCNeutrinosName  = s;}	
-      void           SetMCQuarksName(TString s)    { fMCQuarksName     = s;}	
-      void           SetMCqqHsName(TString s)	   { fMCqqHsName       = s;}	
-      void           SetMCBosonsName(TString s)    { fMCBosonsName     = s;}	
+
+      void           SetFillHist(bool b)	         { fFillHist	     = b; }
+      void           SetMCPartName(const char *s)	 { fMCPartName       = s; }	
+      void           SetMCLeptonsName(const char * s)    { fMCLeptonsName    = s; }	
+      void           SetMCAllLeptonsName(const char * s) { fMCAllLeptonsName = s; }	
+      void           SetMCTausName(const char *s)	 { fMCTausName       = s; }	
+      void           SetMCNeutrinosName(const char *s)   { fMCNeutrinosName  = s; }	
+      void           SetMCQuarksName(const char *s)      { fMCQuarksName     = s; }	
+      void           SetMCqqHsName(const char *s)	 { fMCqqHsName       = s; }	
+      void           SetMCBosonsName(const char *s)      { fMCBosonsName     = s; }	
+
     protected:
-      bool           fPrintDebug;		// debug output
-      bool           fFillHist; 		// Fill histograms?
-      bool           fIsMC;			// is MC?
-      TString        fMCPartName;		// generator coll
-      TString        fMCLeptonsName ;		// new lepton coll (From W)
-      TString        fMCAllLeptonsName ;	// new lepton coll (all)
-      TString        fMCTausName;		// new tau coll
-      TString        fMCNeutrinosName;  	// new Neutrinos coll
-      TString        fMCQuarksName;		// new Quarks coll
-      TString        fMCqqHsName;		// new qqH coll
-      TString        fMCBosonsName;		// new Bosons coll
-      MCParticleCol *fParticles;		// GenParticle branch
-      int            fNEventsProcessed; 	// Number of events
+      Bool_t         fFillHist; 		//=true then fill histos (def=0)
+      TString        fMCPartName;		//name of MCParticle branch
+      TString        fMCLeptonsName ;		//name of lepton coll (from W)
+      TString        fMCAllLeptonsName ;	//name of lepton coll (all)
+      TString        fMCTausName;		//name of tau coll
+      TString        fMCNeutrinosName;  	//name of neutrinos coll
+      TString        fMCQuarksName;		//name of quarks coll
+      TString        fMCqqHsName;		//name of qqH coll
+      TString        fMCBosonsName;		//name of bosons coll
+      MCParticleCol *fParticles;		//MCParticle branch
+      Int_t          fNEventsProcessed; 	//number of events
+      TH1D          *hDGenLeptons[20];          //!histos for W leptons
+      TH1D          *hDGenAllLeptons[20];       //!histos for all leptons
+      TH1D          *hDGenTaus[20];             //!histos for taus
+      TH1D          *hDGenNeutrinos[20];        //!histos for neutrinos
+      TH1D          *hDGenQuarks[20];           //!histos for quarks
+      TH1D          *hDGenWBF[20];              //!histos for WBF
+      TH1D          *hDGenBosons[20];           //!histos for bosons
 
-      TH1D          *hDEvents;
-      TH1D          *hDGenLeptons[20];
-      TH1D          *hDGenAllLeptons[20];
-      TH1D          *hDGenTaus[20];
-      TH1D          *hDGenNeutrinos[20];
-      TH1D          *hDGenQuarks[20];
-      TH1D          *hDGenWBF[20];
-      TH1D          *hDGenBosons[20];
-
-      void           Begin();
       void           Process();
       void           SlaveBegin();
-      void           SlaveTerminate();
-      void           Terminate();
-     
     
-      ClassDef(GeneratorMod,1) // TAM example analysis module
+      ClassDef(GeneratorMod,1) // Module to gather generator information
   };
 }
 #endif
