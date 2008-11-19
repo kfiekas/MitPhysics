@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.4 2008/11/11 21:22:54 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.5 2008/11/19 15:44:35 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -24,8 +24,7 @@ ClassImp(mithep::GeneratorMod)
   fMCQuarksName(Names::gkMCQuarksName),
   fMCqqHsName(Names::gkMCqqHsName),
   fMCBosonsName(Names::gkMCBosonsName),
-  fParticles(0),
-  fNEventsProcessed(0)
+  fParticles(0)
 {
   // Constructor.
 }
@@ -45,11 +44,10 @@ void GeneratorMod::Process()
   ObjArray<MCParticle> *GenqqHs       = new ObjArray<MCParticle>;
   ObjArray<MCParticle> *GenBosons     = new ObjArray<MCParticle>;
 
-
   // load MCParticle branch
   LoadBranch(fMCPartName);
 
-  bool isqqH = kFALSE;
+  Bool_t isqqH = kFALSE;
   for (UInt_t i=0; i<fParticles->GetEntries(); ++i) {
     MCParticle *p = fParticles->At(i);
 
@@ -60,7 +58,7 @@ void GeneratorMod::Process()
       if (p->Pt() > 3.0 && TMath::Abs(p->Eta()) < 3.0) {
         GenAllLeptons->Add(p);
       }
-      bool isGoodLepton = kFALSE;
+      Bool_t isGoodLepton = kFALSE;
       MCParticle *pm = p;
       while (pm->HasMother() && isGoodLepton == kFALSE) {
         if     (pm->Mother()->AbsPdgId() == 23 || pm->Mother()->AbsPdgId() == 24) {
@@ -129,7 +127,7 @@ void GeneratorMod::Process()
     }
   }
 
-  // save Objects for Other Modules to use
+  // save objects for other modules to use
   AddObjThisEvt(GenLeptons,   fMCLeptonsName.Data());  
   AddObjThisEvt(GenAllLeptons,fMCAllLeptonsName.Data());  
   AddObjThisEvt(GenTaus,      fMCTausName.Data());  
@@ -141,7 +139,7 @@ void GeneratorMod::Process()
   // fill histograms if requested
   if (fFillHist) {
 
-    // Leptons
+    // leptons
     hDGenLeptons[0]->Fill(GenLeptons->GetEntries());
     Int_t   idxMaxLep[2] = {-1, -1};
     Double_t ptMaxLep[2] = {-1, -1};
@@ -156,7 +154,7 @@ void GeneratorMod::Process()
         hDGenLeptons[4]->Fill(dilepton->Mass());
 	delete dilepton;
       }
-      // Selecting the two highest Pt leptons
+      // selecting the two highest pt leptons
       if     (GenLeptons->At(i)->Pt() > ptMaxLep[0]) {
         ptMaxLep[1]  = ptMaxLep[0];
 	idxMaxLep[1] = idxMaxLep[0];
@@ -168,7 +166,7 @@ void GeneratorMod::Process()
 	idxMaxLep[1] = i;
       }
     }
-    // Looking at events with at least two leptons
+    // looking at events with at least two leptons
     if (ptMaxLep[0] > 0 && ptMaxLep[1] > 0) {
       hDGenLeptons[5]->Fill(TMath::Min(TMath::Max(TMath::Abs(GenLeptons->At(idxMaxLep[0])->Eta()),
                                                   TMath::Abs(GenLeptons->At(idxMaxLep[1])->Eta())),
@@ -195,7 +193,7 @@ void GeneratorMod::Process()
       }
     }
 
-    // All Leptons
+    // all leptons
     hDGenAllLeptons[0]->Fill(GenAllLeptons->GetEntries());
     for(UInt_t i=0; i<GenAllLeptons->GetEntries(); i++) {
       hDGenAllLeptons[1]->Fill(GenAllLeptons->At(i)->Pt());
@@ -203,7 +201,7 @@ void GeneratorMod::Process()
       hDGenAllLeptons[3]->Fill(GenAllLeptons->At(i)->PhiDeg());
     }
 
-    // Taus
+    // taus
     hDGenTaus[0]->Fill(GenTaus->GetEntries());
     for(UInt_t i=0; i<GenTaus->GetEntries(); i++) {
       hDGenTaus[1]->Fill(GenTaus->At(i)->Pt());
@@ -211,7 +209,7 @@ void GeneratorMod::Process()
       hDGenTaus[3]->Fill(GenTaus->At(i)->PhiDeg());
     }
 
-    // Neutrinos
+    // neutrinos
     hDGenNeutrinos[0]->Fill(GenNeutrinos->GetEntries());
     CompositeParticle *neutrinoTotal = new CompositeParticle();
     for(UInt_t i=0; i<GenNeutrinos->GetEntries(); i++) {
@@ -225,7 +223,7 @@ void GeneratorMod::Process()
     }
     delete neutrinoTotal;
     
-    // Quarks
+    // quarks
     hDGenQuarks[0]->Fill(GenQuarks->GetEntries());
     for(UInt_t i=0; i<GenQuarks->GetEntries(); i++) {
       for(UInt_t j=i+1; j<GenQuarks->GetEntries(); j++) {
@@ -269,7 +267,7 @@ void GeneratorMod::Process()
       }
     }
 
-    // WBF
+    // wbf
     if (GenqqHs->GetEntries() == 2) {
       hDGenWBF[0]->Fill(MathUtils::DeltaPhi(GenqqHs->At(0)->Phi(),
     					    GenqqHs->At(1)->Phi()) * 180./ TMath::Pi());
@@ -283,7 +281,7 @@ void GeneratorMod::Process()
       delete diqq;
     }
 
-    // Bosons
+    // bosons
     hDGenBosons[0]->Fill(GenBosons->GetEntries());
     for(UInt_t i=0; i<GenBosons->GetEntries(); i++) {
       hDGenBosons[1]->Fill(GenBosons->At(i)->Pt());
@@ -304,7 +302,7 @@ void GeneratorMod::SlaveBegin()
   if (fFillHist == kTRUE) {
     char sb[1024];
 
-    // Leptons
+    // leptons from W
     sprintf(sb,"hDGenLeptons_%d", 0);  hDGenLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenLeptons_%d", 1);  hDGenLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
     sprintf(sb,"hDGenLeptons_%d", 2);  hDGenLeptons[2]  = new TH1D(sb,sb,50,0.0,5.0); 
@@ -318,28 +316,28 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenLeptons_%d",10);  hDGenLeptons[10] = new TH1D(sb,sb,90,0.0,180.0); 
     for(Int_t i=0; i<11; i++) AddOutput(hDGenLeptons[i]);
 
-    // AllLeptons
+    // all leptons
     sprintf(sb,"hDGenAllLeptons_%d", 0);  hDGenAllLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenAllLeptons_%d", 1);  hDGenAllLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
     sprintf(sb,"hDGenAllLeptons_%d", 2);  hDGenAllLeptons[2]  = new TH1D(sb,sb,60,-3.0,3.0); 
     sprintf(sb,"hDGenAllLeptons_%d", 3);  hDGenAllLeptons[3]  = new TH1D(sb,sb,90,0.0,180.0); 
     for(Int_t i=0; i<4; i++) AddOutput(hDGenAllLeptons[i]);
 
-    // Taus
+    // taus
     sprintf(sb,"hDGenTaus_%d", 0);  hDGenTaus[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenTaus_%d", 1);  hDGenTaus[1]  = new TH1D(sb,sb,100,0.0,200.0); 
     sprintf(sb,"hDGenTaus_%d", 2);  hDGenTaus[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
     sprintf(sb,"hDGenTaus_%d", 3);  hDGenTaus[3]  = new TH1D(sb,sb,90,0.0,180.0); 
     for(Int_t i=0; i<4; i++) AddOutput(hDGenTaus[i]);
 
-    // Neutrinos
+    // neutrinos
     sprintf(sb,"hDGenNeutrinos_%d", 0);  hDGenNeutrinos[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenNeutrinos_%d", 1);  hDGenNeutrinos[1]  = new TH1D(sb,sb,100,0.0,200.0); 
     sprintf(sb,"hDGenNeutrinos_%d", 2);  hDGenNeutrinos[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
     sprintf(sb,"hDGenNeutrinos_%d", 3);  hDGenNeutrinos[3]  = new TH1D(sb,sb,90,0.0,180.0); 
     for(Int_t i=0; i<4; i++) AddOutput(hDGenNeutrinos[i]);
 
-    // Quarks
+    // quarks
     sprintf(sb,"hDGenQuarks_%d", 0);  hDGenQuarks[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenQuarks_%d", 1);  hDGenQuarks[1]  = new TH1D(sb,sb,200,0.0,400.); 
     sprintf(sb,"hDGenQuarks_%d", 2);  hDGenQuarks[2]  = new TH1D(sb,sb,2000,0.0,2000.);
@@ -371,7 +369,7 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenWBF_%d", 4);  hDGenWBF[4]  = new TH1D(sb,sb,200,0.0,4000.);
     for(Int_t i=0; i<5; i++) AddOutput(hDGenWBF[i]);
 
-    // Bosons
+    // bosons
     sprintf(sb,"hDGenBosons_%d", 0);  hDGenBosons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenBosons_%d", 1);  hDGenBosons[1]  = new TH1D(sb,sb,200,0.0,400.0); 
     sprintf(sb,"hDGenBosons_%d", 2);  hDGenBosons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.3 2008/11/11 21:22:58 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.4 2008/11/19 15:44:34 loizides Exp $
 //
 // GeneratorMod
 //
@@ -27,7 +27,16 @@ namespace mithep
                    const char *title="Generator information module");
       ~GeneratorMod() {}
 
-      void           SetFillHist(bool b)	         { fFillHist	     = b; }
+      Bool_t         GetFillHist()         const { return fFillHist; }
+      const char    *GetMCPartName()	   const { return fMCPartName; }	
+      const char    *GSetMCLeptonsName()   const { return fMCLeptonsName; }	
+      const char    *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
+      const char    *GetMCTausName()	   const { return fMCTausName; }	
+      const char    *GetMCNeutrinosName()  const { return fMCNeutrinosName; }	
+      const char    *GetMCQuarksName()     const { return fMCQuarksName; }	
+      const char    *GetMCqqHsName()	   const { return fMCqqHsName; }	
+      const char    *GetMCBosonsName()     const { return fMCBosonsName; }	
+      void           SetFillHist(Bool_t b)	         { fFillHist	     = b; }
       void           SetMCPartName(const char *s)	 { fMCPartName       = s; }	
       void           SetMCLeptonsName(const char * s)    { fMCLeptonsName    = s; }	
       void           SetMCAllLeptonsName(const char * s) { fMCAllLeptonsName = s; }	
@@ -48,7 +57,6 @@ namespace mithep
       TString        fMCqqHsName;		//name of qqH coll
       TString        fMCBosonsName;		//name of bosons coll
       MCParticleCol *fParticles;		//MCParticle branch
-      Int_t          fNEventsProcessed; 	//number of events
       TH1D          *hDGenLeptons[20];          //!histos for W leptons
       TH1D          *hDGenAllLeptons[20];       //!histos for all leptons
       TH1D          *hDGenTaus[20];             //!histos for taus
