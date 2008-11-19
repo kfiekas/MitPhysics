@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.1 2008/10/15 06:05:00 loizides Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -8,7 +8,6 @@
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
-#include "MitPhysics/Mods/interface/ObjectCleaningMod.h"
 #endif
 
 #ifdef __CINT__
@@ -25,5 +24,4 @@
 #pragma link C++ class mithep::JetCleaningMod+;
 #pragma link C++ class mithep::JetIDMod+;
 #pragma link C++ class mithep::MuonIDMod+;
-#pragma link C++ class mithep::ObjectCleaningMod+;
 #endif
