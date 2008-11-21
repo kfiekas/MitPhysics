@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: JetIDMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
 //
 // JetIDMod
 //
@@ -30,7 +30,9 @@ namespace mithep
       void                     SetJetIDType(TString type)        { fJetIDType     = type;    }
       void                     SetJetName(TString s)             { fJetName = s;             }  
       void                     SetGoodJetsName(TString s)        { fGoodJetsName = s;        }     
- 
+      void                     SetUseJetCorrection(bool b)       { fUseJetCorrection = b;    }     
+      void                     SetJetEtCut(Double_t x)           { fJetEtCut = x;            }     
+
     protected:
       bool                     fPrintDebug;               //flag for printing debug output
       TString                  fJetName;                  //name of muon collection
@@ -38,6 +40,8 @@ namespace mithep
       TString                  fJetIDType;                //Type of ID we impose
       JetCol		      *fJets;                     //!Jet branch
       int                      fNEventsProcessed;         // Number of events processed
+      bool                     fUseJetCorrection;         //bool to use JetCorrected pt
+      Double_t                 fJetEtCut;                 //value of Jet Et cut
 
       void                     Begin();
       void                     Process();

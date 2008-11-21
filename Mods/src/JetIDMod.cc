@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
+// $Id: JetIDMod.cc,v 1.2 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -18,7 +18,9 @@ ClassImp(mithep::JetIDMod)
   fGoodJetsName(Names::gkGoodJetsName),  
   fJetIDType("HWWJets"),
   fJets(0),
-  fNEventsProcessed(0)
+  fNEventsProcessed(0),
+  fUseJetCorrection(false),
+  fJetEtCut(15.0)
 {
   // Constructor.
 }
@@ -52,14 +54,21 @@ void JetIDMod::Process()
     Jet *jet = fJets->At(i);
     
     const int nCuts = 3;
-    double cutValue[nCuts] = {15., 5.0, 0.2};
     bool passCut[nCuts] = {false, false, false};
     
-    if(jet->Et() > cutValue[0])           passCut[0] = true;
-    if(fabs(jet->Eta()) < cutValue[1])    passCut[1] = true;        
-    if(jet->Alpha() > cutValue[2] ||
-       jet->Et() > 20.) 
-      passCut[2] = true; 
+    if(fUseJetCorrection == false) {
+      if(jet->Et() > fJetEtCut)             passCut[0] = true;
+      if(fabs(jet->Eta()) < 5.0)            passCut[1] = true;        
+      if(jet->Alpha() > 0.2 ||
+         jet->Et() > 20.) 
+        passCut[2] = true; 
+    } else {
+      if(jet->Et()*
+         jet->L2RelativeCorrectionScale()*
+         jet->L3AbsoluteCorrectionScale() > fJetEtCut)            passCut[0] = true;
+      if(fabs(jet->Eta()) < 5.0)                                  passCut[1] = true;   
+                                                                  passCut[2] = true; 
+    }
     
     // Final decision
     bool passAllCuts = true;
