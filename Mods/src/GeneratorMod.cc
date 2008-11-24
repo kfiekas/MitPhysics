@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.5 2008/11/19 15:44:35 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.6 2008/11/19 17:26:53 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -49,92 +49,95 @@ void GeneratorMod::Process()
 
   Bool_t isqqH = kFALSE;
   for (UInt_t i=0; i<fParticles->GetEntries(); ++i) {
-    MCParticle *p = fParticles->At(i);
+    const MCParticle *p = fParticles->At(i);
 
     if (!p->IsGenerated()) continue;
 
     // muons/electrons from W/Z decays
-    if ((p->AbsPdgId() == 11 || p->AbsPdgId() == 13) && p->Status() == 1) {
+    if ((p->Is(MCParticle::kEl) || p->Is(MCParticle::kMu)) && p->Status() == 1) {
       if (p->Pt() > 3.0 && TMath::Abs(p->Eta()) < 3.0) {
         GenAllLeptons->Add(p);
       }
       Bool_t isGoodLepton = kFALSE;
-      MCParticle *pm = p;
+      const MCParticle *pm = p;
       while (pm->HasMother() && isGoodLepton == kFALSE) {
-        if     (pm->Mother()->AbsPdgId() == 23 || pm->Mother()->AbsPdgId() == 24) {
+        if (pm->Mother()->Is(MCParticle::kZ) || pm->Mother()->Is(MCParticle::kW)) {
           GenLeptons->Add(p);
           isGoodLepton = kTRUE;
-        }
-        else if(pm->Mother()->AbsPdgId() == 111 || pm->Mother()->AbsPdgId() == 221) {
-          // this is fake, but it is a trick to get rid of these cases
+          break;
+        } else if(pm->Mother()->Is(MCParticle::kPi0) || pm->Mother()->Is(MCParticle::kEta)) {
+          // this is fake, but it is a trick to get rid of these cases and abort the loop
           isGoodLepton = kTRUE;
-        } else {
-          pm = (MCParticle *)pm->Mother();
-        }
+          break;
+        } 
+        pm = pm->Mother();
       }
     }
 
-    // taus
-    else if(p->AbsPdgId() == 16 && p->Status() == 1) { 
-
-      if (p->DistinctMother()) {
-        MCParticle *pm = (mithep::MCParticle*)p->DistinctMother();
-        if(pm->AbsPdgId() == 15) {
-          MCParticle *pm_f = new MCParticle(*pm);
-          pm_f->SetMom(pm->Px()-p->Px(), pm->Py()-p->Py(),
-                       pm->Pz()-p->Pz(), pm->E()-p->E());
-          GenTaus->Add(pm_f);
+    // hadronic taus
+    else if (p->Is(MCParticle::kTau) && p->Status() == 2) {
+      if (!p->HasDaughter(MCParticle::kEl) && !p->HasDaughter(MCParticle::kMu)) {
+        const MCParticle *tv = p->FindDaughter(MCParticle::kTauNu);
+        if (tv) {
+          MCParticle *pm_f = new MCParticle(*p);
+          pm_f->SetMom(p->Px()-tv->Px(), p->Py()-tv->Py(),
+                       p->Pz()-tv->Pz(), p->E()-tv->E());
+          GenTaus->AddOwned(pm_f);
+        } else {
+          SendError(kWarning, "Process", "Could not find tau neutrino!");
         }
       }
     }
 
     // neutrinos
-    else if (p->Status() == 1 &&
-            (p->AbsPdgId() == 12 || p->AbsPdgId() == 14 || p->AbsPdgId() == 16)) {
+    else if (p->Status() == 1 && p->IsNeutrino()) {
       GenNeutrinos->Add(p);
     }
 
     // quarks from W/Z decays or top particles
-    else if (p->AbsPdgId() >=1 && p->AbsPdgId() <=6 && p->HasMother()) {
-      if(p->Mother()->AbsPdgId() == 23 || p->Mother()->AbsPdgId() == 24 ||
-         p->AbsPdgId() == 6 || p->Mother()->AbsPdgId() == 6) {
+    else if (p->IsQuark() && p->HasMother()) {
+      if (p->Mother()->Is(MCParticle::kZ) || p->Mother()->Is(MCParticle::kW) ||
+          p->Is(MCParticle::kTop)         || p->Mother()->Is(MCParticle::kTop)) {
         GenQuarks->Add(p);
       }
     }
 
     // qqH, information about the forward jets
-    else if(isqqH == kFALSE && p->AbsPdgId() == 25) {
+    else if(isqqH == kFALSE && p->Is(MCParticle::kH)) {
       isqqH = kTRUE;
       MCParticle *pq1 = fParticles->At(i-1);
       MCParticle *pq2 = fParticles->At(i-2);
-
-      if(pq1->HasMother() && pq2->HasMother() &&
-         pq1->Mother()->PdgId() == p->Mother()->PdgId() &&
-         pq2->Mother()->PdgId() == p->Mother()->PdgId() &&
-         pq1->AbsPdgId() < 7 &&  pq2->AbsPdgId() < 7 &&
-         pq1->AbsPdgId() > 0 &&  pq2->AbsPdgId() > 0) {
+      if (!pq1 || !pq2) {
+          SendError(kWarning, "Process", "Could not find quark pair!");
+      } else if(pq1->HasMother() && pq2->HasMother() &&
+                pq1->Mother()->PdgId() == p->Mother()->PdgId() &&
+                pq2->Mother()->PdgId() == p->Mother()->PdgId() &&
+                pq1->AbsPdgId() < 7 &&  pq2->AbsPdgId() < 7 &&
+                pq1->AbsPdgId() > 0 &&  pq2->AbsPdgId() > 0) {
         GenqqHs->Add(pq1);
         GenqqHs->Add(pq2);
       }
+      if (p->Status() == 3)  
+        GenBosons->Add(p); // take higgs boson in  account here rather in next else if 
     }
 
     // information about bosons: W, Z, h, Z', W', H0, A0, H+
-    else if (p->Status() == 2 &&
-            (p->AbsPdgId() == 23 || p->AbsPdgId() == 24 || p->AbsPdgId() == 25 ||
-             p->AbsPdgId() == 32 || p->AbsPdgId() == 34 ||
-             p->AbsPdgId() == 35 || p->AbsPdgId() == 36 || p->AbsPdgId() == 37)) {
+    else if (p->Status() == 3 &&
+             (p->Is(MCParticle::kZ)  || p->Is(MCParticle::kW)   || p->Is(MCParticle::kH) ||
+              p->Is(MCParticle::kZp) || p->Is(MCParticle::kZpp) ||
+              p->Is(MCParticle::kH0) || p->Is(MCParticle::kA0)  || p->Is(MCParticle::kHp))) {
       GenBosons->Add(p);
     }
   }
 
   // save objects for other modules to use
-  AddObjThisEvt(GenLeptons,   fMCLeptonsName.Data());  
-  AddObjThisEvt(GenAllLeptons,fMCAllLeptonsName.Data());  
-  AddObjThisEvt(GenTaus,      fMCTausName.Data());  
-  AddObjThisEvt(GenNeutrinos, fMCNeutrinosName.Data());  
-  AddObjThisEvt(GenQuarks,    fMCQuarksName.Data());  
-  AddObjThisEvt(GenqqHs,      fMCqqHsName.Data());  
-  AddObjThisEvt(GenBosons,    fMCBosonsName.Data());
+  AddObjThisEvt(GenLeptons,   fMCLeptonsName);  
+  AddObjThisEvt(GenAllLeptons,fMCAllLeptonsName);  
+  AddObjThisEvt(GenTaus,      fMCTausName);  
+  AddObjThisEvt(GenNeutrinos, fMCNeutrinosName);  
+  AddObjThisEvt(GenQuarks,    fMCQuarksName);  
+  AddObjThisEvt(GenqqHs,      fMCqqHsName);  
+  AddObjThisEvt(GenBosons,    fMCBosonsName);
   
   // fill histograms if requested
   if (fFillHist) {
