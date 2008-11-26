@@ -1,11 +1,10 @@
-// $Id: MuonIDMod.cc,v 1.3 2008/11/05 14:06:09 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.4 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
-#include "MitPhysics/Utils/interface/MuonTools.h"
 
 using namespace mithep;
 
@@ -17,16 +16,15 @@ ClassImp(mithep::MuonIDMod)
   fPrintDebug(false),
   fMuonName(Names::gkMuonBrn),
   fCleanMuonsName(Names::gkCleanMuonsName),  
-  fMuonIDType("Tight"),
-  fMuonIsoType("TrackCalo"),  
   fMuons(0),
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
   fCombIsolationCut(-1.0),
-  fTMOneStationLooseCut(false),
+  fTMOneStationLooseCut(true),
   fTMOneStationTightCut	(false),  
-  fTM2DCompatibilityLooseCut(false),
+  fTM2DCompatibilityLooseCut(true),
   fTM2DCompatibilityTightCut(false),
+  fMuonSlidingIso(true),  
   fMuonPtMin(10),
   fNEventsProcessed(0)
 {
@@ -54,8 +52,6 @@ void MuonIDMod::Process()
     cerr << endl << "MuonIDMod : Process Event " << fNEventsProcessed << "  Time: " << ctime(&systime) << endl;  
   }  
 
-  MuonTools myMuonTools;
-
   //Get Muons
   LoadBranch(fMuonName);
   ObjArray<Muon> *CleanMuons = new ObjArray<Muon>; 
@@ -76,16 +72,24 @@ void MuonIDMod::Process()
     if(MuonClass == 0) allCuts = true;
 
     // Isolation requirements
-    if(fCombIsolationCut < 0.0){
+    if(fMuonSlidingIso == true){ // Fix version
+      double totalIso = 1.0 * mu->IsoR03SumPt() + 
+          		1.0 * mu->IsoR03EmEt() +
+         		1.0 * mu->IsoR03HadEt();
+      bool theIso = false;
+      if((totalIso < (mu->Pt()-10.0)*5.0/15.0) ||
+         (totalIso < 5.0 && mu->Pt() > 25)) theIso = true;
+      if(theIso == false) allCuts = false;
+    }
+    else if(fCombIsolationCut < 0.0){ // Different tracker and Cal iso
       if(mu->IsoR03SumPt() >= fTrackIsolationCut) allCuts = false;
       if(mu->IsoR03EmEt() + 
          mu->IsoR03HadEt() >= fCaloIsolationCut) allCuts = false;
     }
-    else {
+    else { // Combined iso
       if(1.0 * mu->IsoR03SumPt() + 
          1.0 * mu->IsoR03EmEt() + 
-         1.0 * mu->IsoR03HadEt() >= fCombIsolationCut) allCuts = false;
-      
+         1.0 * mu->IsoR03HadEt() >= fCombIsolationCut) allCuts = false;     
     }
 
     // Muon chambers and calo compatibility requirements

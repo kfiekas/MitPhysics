@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.2 2008/11/05 14:06:09 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.3 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -17,7 +17,7 @@ ClassImp(mithep::ElectronIDMod)
   fElectronName(Names::gkElectronBrn),
   fGoodElectronsName(Names::gkGoodElectronsName),  
   fElectronIDType("Tight"),
-  fElectronIsoType("TrackCalo"),
+  fElectronIsoType("TrackCaloSliding"),
   fElectrons(0),
   fElectronPtMin(10),
   fIDLikelihoodCut(0.9),
@@ -81,13 +81,23 @@ void ElectronIDMod::Process()
     bool passEcalJurassicIsolation = (e->EcalJurassicIsolation() < fEcalJurassicIsolationCut);
     bool passHcalJurassicIsolation = (e->HcalJurassicIsolation() < fHcalJurassicIsolationCut);
     //Decide which Isolation cut to use
-    if (fElectronIsoType.CompareTo("TrackCalo") == 0 )
+    if       (fElectronIsoType.CompareTo("TrackCalo") == 0 ){
       allCuts = (allCuts && passTrackIsolation && passCaloIsolation);
-    else if (fElectronIsoType.CompareTo( "TrackJurassic" ) == 0) {
+
+    } else if(fElectronIsoType.CompareTo( "TrackJurassic" ) == 0) {
       allCuts = (allCuts && passTrackIsolation && 
                  passEcalJurassicIsolation && passHcalJurassicIsolation);
-    }else if (fElectronIsoType.CompareTo("NoIso") == 0 ) {
+
+    } else if(fElectronIsoType.CompareTo( "TrackCaloSliding" ) == 0) {
+      double totalIso = e->TrackIsolation() + e->EcalJurassicIsolation() - 1.5;
+      bool theIso = false;
+      if((totalIso < (e->Pt()-10.0)*6.0/15.0) ||
+         (totalIso < 6.0 && e->Pt() > 25)) theIso = true;
+      allCuts = (allCuts && theIso);
+
+    } else if(fElectronIsoType.CompareTo("NoIso") == 0 ) {
       //Do Nothing here
+
     } else {
       cerr << "The specified electron Isolation type : " << fElectronIDType.Data() 
            << "is invalid. Please specify a correct isolation type. " << endl;
