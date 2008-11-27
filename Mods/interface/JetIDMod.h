@@ -1,16 +1,16 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
+// $Id: JetIDMod.h,v 1.2 2008/11/21 11:05:34 sixie Exp $
 //
 // JetIDMod
 //
-// This Module applies electron ID criteria and exports a pointer to a collection
+// This module applies jet ID criteria and exports a pointer to a collection
 // of Good Electrons according to some specified ID scheme
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITANA_TREEMOD_JETIDMOD_H
-#define MITANA_TREEMOD_JETIDMOD_H
+#ifndef MITPHYSICS_MODS_JETIDMOD_H
+#define MITPHYSICS_MODS_JETIDMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"

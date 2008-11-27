@@ -1,12 +1,11 @@
-// $Id: ElectronCleaningMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
+// $Id: ElectronCleaningMod.cc,v 1.2 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
+#include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Utils/interface/IsolationTools.h"
 #include <TH1D.h>
 #include <TH2D.h>
-#include "MitAna/DataTree/interface/Names.h"
-#include "MitAna/DataCont/interface/ObjArray.h"
-#include "MitPhysics/Utils/interface/IsolationTools.h"
-#include "MitCommon/MathTools/interface/MathUtils.h"
 
 using namespace mithep;
 
@@ -16,9 +15,9 @@ ClassImp(mithep::ElectronCleaningMod)
   ElectronCleaningMod::ElectronCleaningMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fPrintDebug(false),
-  fGoodElectronsName(Names::gkGoodElectronsName),        
-  fCleanMuonsName(Names::gkCleanMuonsName),        
-  fCleanElectronsName(Names::gkCleanElectronsName),        
+  fGoodElectronsName(ModNames::gkGoodElectronsName),        
+  fCleanMuonsName(ModNames::gkCleanMuonsName),        
+  fCleanElectronsName(ModNames::gkCleanElectronsName),        
   fMuons(0),
   fElectrons(0),
   fNEventsProcessed(0)

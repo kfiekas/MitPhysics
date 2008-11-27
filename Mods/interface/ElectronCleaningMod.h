@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronCleaningMod.h,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: ElectronCleaningMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
 //
 // ElectronCleaningMod
 //
@@ -10,8 +10,8 @@
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITANA_TREEMOD_ELECTRONCLEANINGMOD_H
-#define MITANA_TREEMOD_ELECTRONCLEANINGMOD_H
+#ifndef MITPHYSICS_MODS_ELECTRONCLEANINGMOD_H
+#define MITPHYSICS_MODS_ELECTRONCLEANINGMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"

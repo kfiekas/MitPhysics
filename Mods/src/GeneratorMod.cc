@@ -1,10 +1,8 @@
-// $Id: GeneratorMod.cc,v 1.6 2008/11/19 17:26:53 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.7 2008/11/24 14:13:20 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
-#include "MitAna/DataTree/interface/Names.h"
-#include "MitAna/DataCont/interface/ObjArray.h"
-#include "MitAna/DataUtil/interface/Debug.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>
 
@@ -13,17 +11,17 @@ using namespace mithep;
 ClassImp(mithep::GeneratorMod)
 
 //--------------------------------------------------------------------------------------------------
-  GeneratorMod::GeneratorMod(const char *name, const char *title) : 
+GeneratorMod::GeneratorMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fFillHist(kFALSE),
   fMCPartName(Names::gkMCPartBrn),
-  fMCLeptonsName(Names::gkMCLeptonsName),
-  fMCAllLeptonsName(Names::gkMCAllLeptonsName),
-  fMCTausName(Names::gkMCTausName),
-  fMCNeutrinosName(Names::gkMCNeutrinosName),
-  fMCQuarksName(Names::gkMCQuarksName),
-  fMCqqHsName(Names::gkMCqqHsName),
-  fMCBosonsName(Names::gkMCBosonsName),
+  fMCLeptonsName(ModNames::gkMCLeptonsName),
+  fMCAllLeptonsName(ModNames::gkMCAllLeptonsName),
+  fMCTausName(ModNames::gkMCTausName),
+  fMCNeutrinosName(ModNames::gkMCNeutrinosName),
+  fMCQuarksName(ModNames::gkMCQuarksName),
+  fMCqqHsName(ModNames::gkMCqqHsName),
+  fMCBosonsName(ModNames::gkMCBosonsName),
   fParticles(0)
 {
   // Constructor.
@@ -65,7 +63,7 @@ void GeneratorMod::Process()
           GenLeptons->Add(p);
           isGoodLepton = kTRUE;
           break;
-        } else if(pm->Mother()->Is(MCParticle::kPi0) || pm->Mother()->Is(MCParticle::kEta)) {
+        } else if (pm->Mother()->Is(MCParticle::kPi0) || pm->Mother()->Is(MCParticle::kEta)) {
           // this is fake, but it is a trick to get rid of these cases and abort the loop
           isGoodLepton = kTRUE;
           break;
@@ -103,17 +101,16 @@ void GeneratorMod::Process()
     }
 
     // qqH, information about the forward jets
-    else if(isqqH == kFALSE && p->Is(MCParticle::kH)) {
+    else if (isqqH == kFALSE && p->Is(MCParticle::kH)) {
       isqqH = kTRUE;
       MCParticle *pq1 = fParticles->At(i-1);
       MCParticle *pq2 = fParticles->At(i-2);
       if (!pq1 || !pq2) {
           SendError(kWarning, "Process", "Could not find quark pair!");
-      } else if(pq1->HasMother() && pq2->HasMother() &&
-                pq1->Mother()->PdgId() == p->Mother()->PdgId() &&
-                pq2->Mother()->PdgId() == p->Mother()->PdgId() &&
-                pq1->AbsPdgId() < 7 &&  pq2->AbsPdgId() < 7 &&
-                pq1->AbsPdgId() > 0 &&  pq2->AbsPdgId() > 0) {
+      } else if (pq1->IsQuark()   && pq2->IsQuark()   && 
+                 pq1->HasMother() && pq2->HasMother() &&
+                 pq1->Mother()->PdgId() == p->Mother()->PdgId() &&
+                 pq2->Mother()->PdgId() == p->Mother()->PdgId()) {
         GenqqHs->Add(pq1);
         GenqqHs->Add(pq2);
       }
@@ -130,7 +127,7 @@ void GeneratorMod::Process()
     }
   }
 
-  // save objects for other modules to use
+  // add objects to this event for other modules to use
   AddObjThisEvt(GenLeptons,   fMCLeptonsName);  
   AddObjThisEvt(GenAllLeptons,fMCAllLeptonsName);  
   AddObjThisEvt(GenTaus,      fMCTausName);  

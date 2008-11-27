@@ -1,40 +1,33 @@
-// $Id: ElectronIDMod.cc,v 1.3 2008/11/11 21:22:54 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.4 2008/11/26 10:55:51 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
-#include "MitAna/DataTree/interface/Names.h"
-#include "MitAna/DataCont/interface/ObjArray.h"
-#include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitAna/DataUtil/interface/Debug.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Utils/interface/IsolationTools.h"
 
 using namespace mithep;
 
 ClassImp(mithep::ElectronIDMod)
 
 //--------------------------------------------------------------------------------------------------
-  ElectronIDMod::ElectronIDMod(const char *name, const char *title) : 
+ElectronIDMod::ElectronIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
-  fPrintDebug(false),
-  fElectronName(Names::gkElectronBrn),
-  fGoodElectronsName(Names::gkGoodElectronsName),  
+  fElectronBranchName(Names::gkElectronBrn),
+  fGoodElectronsName(ModNames::gkGoodElectronsName),  
   fElectronIDType("Tight"),
   fElectronIsoType("TrackCaloSliding"),
-  fElectrons(0),
   fElectronPtMin(10),
   fIDLikelihoodCut(0.9),
   fTrackIsolationCut(5.0),
   fCaloIsolationCut(5.0),
-  fEcalJurassicIsolationCut(5.0),
-  fHcalJurassicIsolationCut(5.0),
-  fNEventsProcessed(0)
+  fEcalJuraIsoCut(5.0),
+  fHcalIsolationCut(5.0),
+  fElectrons(0),
+  fElIdType(kIdUndef),
+  fElIsoType(kIsoUndef)
 {
   // Constructor.
-}
-
-//--------------------------------------------------------------------------------------------------
-void ElectronIDMod::Begin()
-{
-  // Run startup code on the client machine. For this module, we dont do
-  // anything here.
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -42,116 +35,114 @@ void ElectronIDMod::Process()
 {
   // Process entries of the tree. 
 
-  fNEventsProcessed++;
- 
-  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
-    time_t systime;
-    systime = time(NULL);
-
-    cerr << endl << "ElectronIDMod : Process Event " << fNEventsProcessed << "  Time: " << ctime(&systime) << endl;  
-  }  
-
-  //Get Electrons
-  LoadBranch(fElectronName);
+  LoadBranch(fElectronBranchName);
 
   ObjArray<Electron> *GoodElectrons = new ObjArray<Electron>;
+
   for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {    
-    Electron *e = fElectrons->At(i);        
+    const Electron *e = fElectrons->At(i);        
+
+    if (e->Pt() <= fElectronPtMin) 
+      continue;
     
-    bool allCuts = false;  
-    
-    //Decide which ID scheme to use
-    if(fElectronIDType.CompareTo("Tight") == 0) 
-      allCuts = e->PassTightID();
-    else if (fElectronIDType.CompareTo("Loose") == 0) 
-       allCuts = e->PassLooseID();
-    else if (fElectronIDType.CompareTo("IDLikelihood") == 0) 
-      allCuts = (e->IDLikelihood() > fIDLikelihoodCut);
-    else if (fElectronIDType.CompareTo("CustomMitCuts") == 0)
-      allCuts = false; //we don't have these yet. will have to wait for Phil and Pieter
-    else {
-      cerr << "The specified electron ID type : " << fElectronIDType.Data() 
-           << " is invalid. Please specify a correct ID type. " << endl;
-      allCuts = false;
+    Bool_t idcut = kFALSE;
+    switch (fElIdType) {
+      case kTight:
+        idcut = e->PassTightID();
+        break;
+      case kLoose:
+        idcut = e->PassLooseID();
+       break;
+      case kLikelihood:
+        idcut = (e->IDLikelihood() > fIDLikelihoodCut);
+        break;
+      case kCustomId:
+      default:
+        break;
     }
 
-    //isolation Cuts
-    bool passTrackIsolation = (e->TrackIsolation() < fTrackIsolationCut);
-    bool passCaloIsolation      = (e->CaloIsolation() < fCaloIsolationCut);
-    bool passEcalJurassicIsolation = (e->EcalJurassicIsolation() < fEcalJurassicIsolationCut);
-    bool passHcalJurassicIsolation = (e->HcalJurassicIsolation() < fHcalJurassicIsolationCut);
-    //Decide which Isolation cut to use
-    if       (fElectronIsoType.CompareTo("TrackCalo") == 0 ){
-      allCuts = (allCuts && passTrackIsolation && passCaloIsolation);
+    if (!idcut) 
+      continue;
 
-    } else if(fElectronIsoType.CompareTo( "TrackJurassic" ) == 0) {
-      allCuts = (allCuts && passTrackIsolation && 
-                 passEcalJurassicIsolation && passHcalJurassicIsolation);
-
-    } else if(fElectronIsoType.CompareTo( "TrackCaloSliding" ) == 0) {
-      double totalIso = e->TrackIsolation() + e->EcalJurassicIsolation() - 1.5;
-      bool theIso = false;
-      if((totalIso < (e->Pt()-10.0)*6.0/15.0) ||
-         (totalIso < 6.0 && e->Pt() > 25)) theIso = true;
-      allCuts = (allCuts && theIso);
-
-    } else if(fElectronIsoType.CompareTo("NoIso") == 0 ) {
-      //Do Nothing here
-
-    } else {
-      cerr << "The specified electron Isolation type : " << fElectronIDType.Data() 
-           << "is invalid. Please specify a correct isolation type. " << endl;
-      allCuts = false;
+    Bool_t isocut = kFALSE;
+    switch (fElIsoType) {
+      case kTrackCalo:
+        isocut = (e->TrackIsolation() < fTrackIsolationCut) &&
+                 (e->CaloIsolation() < fCaloIsolationCut);
+        break;
+      case kTrackJura:
+        isocut = (e->TrackIsolation() < fTrackIsolationCut) &&
+                 (e->EcalJurassicIsolation() < fEcalJuraIsoCut) &&
+                 (e->HcalIsolation() < fHcalIsolationCut);
+        break;
+      case kTrackJuraSliding:
+        { 
+          Double_t totalIso = e->TrackIsolation() + e->EcalJurassicIsolation() - 1.5;
+          if ((totalIso < (e->Pt()-10.0)*6.0/15.0) ||
+              (totalIso < 6.0 && e->Pt() > 25)) 
+            isocut = kTRUE;
+        }
+        break;
+      case kNoIso:
+        isocut = kTRUE;
+        break;
+      case kCustomIso:
+      default:
+        break;
     }
 
-    //Pt Cut
-    if(e->Pt() <= fElectronPtMin) allCuts = false;
+    if (!isocut) 
+      continue;
 
-    //These are Good Electrons
-    if ( allCuts ) {    
-      GoodElectrons->Add(fElectrons->At(i));
-    }
-  }   
-  
-  //Final Summary Debug Output   
-  if ( fPrintDebug ) {
-    cerr << "Event Dump: " << fNEventsProcessed << endl;
-    
-    //print out event content to text
-    cerr << "Electrons" << endl;
-    for (UInt_t i = 0; i < GoodElectrons->GetEntries(); i++) {
-      cerr << i << " " << GoodElectrons->At(i)->Pt() << " " << GoodElectrons->At(i)->Eta() 
-           << " " << GoodElectrons->At(i)->Phi() << " " 
-           << GoodElectrons->At(i)->ESuperClusterOverP() << endl;    
-    }       
-  }   
-  
-  //Save Objects for Other Modules to use
-  AddObjThisEvt(GoodElectrons, fGoodElectronsName.Data());  
+    // add good electron
+    GoodElectrons->Add(fElectrons->At(i));
+  }
+
+  // add to event for other modules to use
+  AddObjThisEvt(GoodElectrons, fGoodElectronsName);  
 }
-
 
 //--------------------------------------------------------------------------------------------------
 void ElectronIDMod::SlaveBegin()
 {
   // Run startup code on the computer (slave) doing the actual analysis. Here,
-  // we typically initialize histograms and other analysis objects and request
-  // branches. For this module, we request a branch of the MitTree.
+  // we just request the electron collection branch.
 
-  ReqBranch(fElectronName,              fElectrons);
-}
+  ReqBranch(fElectronBranchName, fElectrons);
 
-//--------------------------------------------------------------------------------------------------
-void ElectronIDMod::SlaveTerminate()
-{
-  // Run finishing code on the computer (slave) that did the analysis. For this
-  // module, we dont do anything here.
+  if (fElectronIDType.CompareTo("Tight") == 0) 
+    fElIdType = kTight;
+  else if (fElectronIDType.CompareTo("Loose") == 0) 
+    fElIdType = kLoose;
+  else if (fElectronIDType.CompareTo("Likelihood") == 0) 
+    fElIdType = kLikelihood;
+  else if (fElectronIDType.CompareTo("Custom") == 0) {
+    fElIdType = kCustomId;
+    SendError(kWarning, "SlaveBegin",
+              "Custom electron identification is not yet implemented.");
+  } else {
+    SendError(kAbortAnalysis, "SlaveBegin",
+              "The specified electron identification %s is not defined.",
+              fElectronIDType.Data());
+    return;
+  }
 
-}
-
-//--------------------------------------------------------------------------------------------------
-void ElectronIDMod::Terminate()
-{
-  // Run finishing code on the client computer. For this module, we dont do
-  // anything here.
+  if (fElectronIsoType.CompareTo("TrackCalo") == 0 )
+    fElIsoType = kTrackCalo;
+  else if (fElectronIsoType.CompareTo("TrackJura") == 0) 
+    fElIsoType = kTrackJura;
+  else if(fElectronIsoType.CompareTo("TrackJuraSliding") == 0)
+    fElIsoType = kTrackJuraSliding;
+  else if (fElectronIsoType.CompareTo("NoIso") == 0 )
+    fElIsoType = kNoIso;
+  else if (fElectronIsoType.CompareTo("Custom") == 0 ) {
+    fElIsoType = kCustomIso;
+    SendError(kWarning, "SlaveBegin",
+              "Custom electron isolation is not yet implemented.");
+  } else {
+    SendError(kAbortAnalysis, "SlaveBegin",
+              "The specified electron isolation %s is not defined.",
+              fElectronIsoType.Data());
+    return;
+  }
 }

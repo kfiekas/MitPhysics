@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.1 2008/10/15 06:05:00 loizides Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.2 2008/11/19 15:44:50 loizides Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -20,8 +20,13 @@
 
 #pragma link C++ class mithep::ElectronCleaningMod+;
 #pragma link C++ class mithep::ElectronIDMod+;
+#pragma link C++ enum mithep::ElectronIDMod::EElIdType;
+#pragma link C++ enum mithep::ElectronIDMod::EElIsoType;
 #pragma link C++ class mithep::GeneratorMod+;
 #pragma link C++ class mithep::JetCleaningMod+;
 #pragma link C++ class mithep::JetIDMod+;
 #pragma link C++ class mithep::MuonIDMod+;
+#pragma link C++ enum mithep::MuonIDMod::EMuIdType;
+#pragma link C++ enum mithep::MuonIDMod::EMuIsoType;
+#pragma link C++ enum mithep::MuonIDMod::EMuClassType;
 #endif

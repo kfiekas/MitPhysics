@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.1 2008/10/14 06:13:52 loizides Exp $
+// $Id: JetCleaningMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
 //
 // JetCleaningMod
 //
@@ -9,8 +9,8 @@
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITANA_TREEMOD_JETCLEANINGMOD_H
-#define MITANA_TREEMOD_JETCLEANINGMOD_H
+#ifndef MITPHYSICS_MODS_JETCLEANINGMOD_H
+#define MITPHYSICS_MODS_JETCLEANINGMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"

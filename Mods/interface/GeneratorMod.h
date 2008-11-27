@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.5 2008/11/19 17:26:53 loizides Exp $
+// $Id: GeneratorMod.h,v 1.6 2008/11/24 14:13:20 loizides Exp $
 //
 // GeneratorMod
 //
@@ -56,7 +56,7 @@ namespace mithep
       TString        fMCQuarksName;		//name of quarks coll
       TString        fMCqqHsName;		//name of qqH coll
       TString        fMCBosonsName;		//name of bosons coll
-      MCParticleCol *fParticles;		//MCParticle branch
+      MCParticleCol *fParticles;		//!MCParticle branch
       TH1D          *hDGenLeptons[20];          //!histos for W leptons
       TH1D          *hDGenAllLeptons[20];       //!histos for all leptons
       TH1D          *hDGenTaus[20];             //!histos for taus

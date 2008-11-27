@@ -1,22 +1,19 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.2 2008/10/23 12:23:31 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.3 2008/11/05 14:06:06 ceballos Exp $
 //
 // ElectronIDMod
 //
-// This Module applies electron ID criteria and exports a pointer to a collection
-// of Good Electrons according to some specified ID scheme
+// This module applies electron identification criteria and exports a pointer to a collection
+// of "good electrons" according to the specified identification scheme. TODO: Pointer to a talk
 //
-// Authors: S.Xie
+// Authors: S.Xie, C.Loizides
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITANA_TREEMOD_ELECTRONIDMOD_H
-#define MITANA_TREEMOD_ELECTRONIDMOD_H
+#ifndef MITPHYSICS_MODS_ELECTRONIDMOD_H
+#define MITPHYSICS_MODS_ELECTRONIDMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"
-
-class TH1D;
-class TH2D;
 
 namespace mithep 
 {
@@ -24,43 +21,55 @@ namespace mithep
   {
     public:
       ElectronIDMod(const char *name="ElectronIDMod", 
-                     const char *title="Example analysis module with all branches");
+                    const char *title="Electron identification module");
       ~ElectronIDMod() {}
-      void        SetPrintDebug(bool b)                       { fPrintDebug               = b;    }
-      void        SetElectronPtMin(double p)                  { fElectronPtMin            = p;    }
-      void        SetElectronIDType(TString type)             { fElectronIDType           = type; }
-      void        SetElectronIsoType(TString type)            { fElectronIsoType          = type; }
-      void        SetIDLikelihoodCut(Double_t cut)            { fIDLikelihoodCut          = cut;  }
-      void        SetTrackIsolationCut(Double_t cut)          { fTrackIsolationCut        = cut;  }
-      void        SetCaloIsolationCut(Double_t cut)           { fCaloIsolationCut         = cut;  }
-      void        SetEcalJurassicIsolationCut(Double_t cut)   { fEcalJurassicIsolationCut = cut;  }
-      void        SetHcalJurassicIsolationCut(Double_t cut)   { fHcalJurassicIsolationCut = cut;  }
-      void        SetGoodElectronsName(TString s)             { fGoodElectronsName        = s;    }   
+
+      void          SetElectronBranchName(const char *n) { fElectronBranchName       = n;    }   
+      void          SetGoodElectronsName(const char *n)  { fGoodElectronsName        = n;    }   
+      void          SetElectronIDType(const char *type)  { fElectronIDType           = type; }
+      void          SetElectronIsoType(const char *type) { fElectronIsoType          = type; }
+      void          SetElectronPtMin(Double_t pt)        { fElectronPtMin            = pt;   }
+      void          SetIDLikelihoodCut(Double_t cut)     { fIDLikelihoodCut          = cut;  }
+      void          SetTrackIsolationCut(Double_t cut)   { fTrackIsolationCut        = cut;  }
+      void          SetCaloIsolationCut(Double_t cut)    { fCaloIsolationCut         = cut;  }
+      void          SetEcalJurIsoCut(Double_t cut)       { fEcalJuraIsoCut           = cut;  }
+      void          SetHcalIsolationCut(Double_t cut)    { fHcalIsolationCut         = cut;  }
+
+      enum EElIdType {
+        kIdUndef = 0,       //not defined
+        kTight,             //"Tight"
+        kLoose,             //"Loose"
+        kLikelihood,        //"Likelihood"
+        kCustomId           //"Custom"
+      };
+      enum EElIsoType {
+        kIsoUndef = 0,      //not defined
+        kTrackCalo,         //"TrackCalo"
+        kTrackJura,         //"TrackJura"
+        kTrackJuraSliding,  //"TrackJuraSliding"
+        kNoIso,             //"NoIso"
+        kCustomIso          //"Custom"
+      };
+
     protected:
-      bool        fPrintDebug;  	     //flag for printing debug output
-      TString     fElectronName;	     //name of electron collection
-      TString     fGoodElectronsName ;       //name of good electrons collection
-      TString     fElectronIDType;	     //Type of electron ID we impose
-      TString     fElectronIsoType;	     //Type of electron Isolation we impose
-      ElectronCol *fElectrons;		     //!Electron branch
+      TString       fElectronBranchName;     //branch name of electron collection
+      TString       fGoodElectronsName;      //name of exported "good electrons" collection
+      TString       fElectronIDType;	     //type of electron ID we impose
+      TString       fElectronIsoType;	     //type of electron Isolation we impose
+      Double_t      fElectronPtMin;	     //min pt cut
+      Double_t      fIDLikelihoodCut;	     //cut value for ID likelihood
+      Double_t      fTrackIsolationCut;	     //cut value for track isolation
+      Double_t      fCaloIsolationCut;	     //cut value for calo isolation
+      Double_t      fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
+      Double_t      fHcalIsolationCut;       //cut value for hcal isolation
+      ElectronCol  *fElectrons;		     //!electron branch
+      EElIdType     fElIdType;               //!identification scheme
+      EElIsoType    fElIsoType;              //!isolation scheme
 
-      double      fElectronPtMin;	     //min Pt requirement
-      double      fIDLikelihoodCut;	     //Cut value for ID likelihood
-      double      fTrackIsolationCut;	     //Cut value for track isolation
-      double      fCaloIsolationCut;	     //Cut value for calo isolation
-      double      fEcalJurassicIsolationCut; //Cut value for ecal jurassic isolation
-      double      fHcalJurassicIsolationCut; //Cut value for hcal jurassic isolation
-
-      int         fNEventsProcessed;	     // Number of events processed
-
-      void        Begin();
-      void        Process();
-      void        SlaveBegin();
-      void        SlaveTerminate();
-      void        Terminate();
-      
+      void          Process();
+      void          SlaveBegin();
     
-      ClassDef(ElectronIDMod,1) // TAM example analysis module
+      ClassDef(ElectronIDMod,1) // TAM module for electron id
   };
 }
 #endif

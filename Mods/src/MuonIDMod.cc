@@ -1,9 +1,10 @@
-// $Id: MuonIDMod.cc,v 1.4 2008/11/11 21:22:54 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.5 2008/11/26 10:55:51 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
-#include "MitAna/DataTree/interface/Names.h"
-#include "MitAna/DataCont/interface/ObjArray.h"
+#include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitPhysics/Utils/interface/MuonTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 using namespace mithep;
@@ -13,122 +14,120 @@ ClassImp(mithep::MuonIDMod)
 //--------------------------------------------------------------------------------------------------
   MuonIDMod::MuonIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
-  fPrintDebug(false),
-  fMuonName(Names::gkMuonBrn),
-  fCleanMuonsName(Names::gkCleanMuonsName),  
-  fMuons(0),
+  fMuonBranchName(Names::gkMuonBrn),
+  fCleanMuonsName(ModNames::gkCleanMuonsName),  
+  fMuonIDType("Tight"),
+  fMuonIsoType("TrackCalo"),  
+  fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
   fCombIsolationCut(-1.0),
-  fTMOneStationLooseCut(true),
-  fTMOneStationTightCut	(false),  
-  fTM2DCompatibilityLooseCut(true),
-  fTM2DCompatibilityTightCut(false),
-  fMuonSlidingIso(true),  
   fMuonPtMin(10),
-  fNEventsProcessed(0)
+  fMuons(0)
 {
   // Constructor.
 }
 
-//--------------------------------------------------------------------------------------------------
-void MuonIDMod::Begin()
-{
-  // Run startup code on the client machine. For this module, we dont do
-  // anything here.
-}
 
 //--------------------------------------------------------------------------------------------------
 void MuonIDMod::Process()
 {
   // Process entries of the tree. 
 
-  fNEventsProcessed++;
- 
-  if (fNEventsProcessed % 1000000 == 0 || fPrintDebug) {
-    time_t systime;
-    systime = time(NULL);
+  LoadBranch(fMuonBranchName);
 
-    cerr << endl << "MuonIDMod : Process Event " << fNEventsProcessed << "  Time: " << ctime(&systime) << endl;  
-  }  
-
-  //Get Muons
-  LoadBranch(fMuonName);
   ObjArray<Muon> *CleanMuons = new ObjArray<Muon>; 
+
   for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
+    //const Muon *mu = fMuons->At(i);
     Muon *mu = fMuons->At(i);
-  
-    Double_t MuonClass = -1;    
-    if (mu->GlobalTrk())      
-      MuonClass = 0;
-    else if (mu->StandaloneTrk())      
-      MuonClass = 1;
-    else if (mu->TrackerTrk())
-      MuonClass = 2;
 
-    bool allCuts = false;
-
-    // We always want global muons
-    if(MuonClass == 0) allCuts = true;
-
-    // Isolation requirements
-    if(fMuonSlidingIso == true){ // Fix version
-      double totalIso = 1.0 * mu->IsoR03SumPt() + 
-          		1.0 * mu->IsoR03EmEt() +
-         		1.0 * mu->IsoR03HadEt();
-      bool theIso = false;
-      if((totalIso < (mu->Pt()-10.0)*5.0/15.0) ||
-         (totalIso < 5.0 && mu->Pt() > 25)) theIso = true;
-      if(theIso == false) allCuts = false;
-    }
-    else if(fCombIsolationCut < 0.0){ // Different tracker and Cal iso
-      if(mu->IsoR03SumPt() >= fTrackIsolationCut) allCuts = false;
-      if(mu->IsoR03EmEt() + 
-         mu->IsoR03HadEt() >= fCaloIsolationCut) allCuts = false;
-    }
-    else { // Combined iso
-      if(1.0 * mu->IsoR03SumPt() + 
-         1.0 * mu->IsoR03EmEt() + 
-         1.0 * mu->IsoR03HadEt() >= fCombIsolationCut) allCuts = false;     
+    Bool_t pass = kFALSE;
+    Double_t pt = -1; // make sure pt is taken from the correct track!
+    switch (fMuClassType) {
+      case kAll:
+        pass = kTRUE;
+        pt = mu->Pt();
+        break;
+      case kGlobal:
+        pass = (mu->GlobalTrk() != 0);
+        if (pass) 
+          pt = mu->GlobalTrk()->Pt();
+        break;
+      case kSta:
+        pass = (mu->StandaloneTrk() != 0);
+        if (pass) 
+          pt = mu->StandaloneTrk()->Pt();
+        break;
+      case kTrackerOnly:
+        pass = (mu->TrackerTrk() != 0);
+        if (pass) 
+          pt = mu->TrackerTrk()->Pt();
+        break;
+      default:
+        break;
     }
 
-    // Muon chambers and calo compatibility requirements
-    if(fTMOneStationLooseCut == true &&
-       myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) == false)
-      allCuts = false;
+    if (!pass)
+      continue;
 
-    if(fTMOneStationTightCut == true &&
-       myMuonTools.isGood(mu, MuonTools::TMOneStationTight) == false)
-      allCuts = false;
+    if (pt <= fMuonPtMin) 
+      continue;
 
-    if(fTM2DCompatibilityLooseCut == true &&
-       myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose) == false)
-      allCuts = false;
-
-    if(fTM2DCompatibilityTightCut == true &&
-       myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight) == false)
-      allCuts = false;
-
-    // Min Pt requirement
-    if(mu->Pt() <= fMuonPtMin) allCuts = false;
-        
-    if(allCuts) {     
-      CleanMuons->Add(mu);
+    Bool_t idpass = kFALSE;
+    switch (fMuIDType) {
+      case kLoose:
+        idpass = fMuonTools->IsGood(mu, MuonTools::kTMOneStationLoose) &&
+                 fMuonTools->IsGood(mu, MuonTools::kTM2DCompatibilityLoose);
+        break;
+      case kTight:
+        idpass = fMuonTools->IsGood(mu, MuonTools::kTMOneStationTight) &&
+                 fMuonTools->IsGood(mu, MuonTools::kTM2DCompatibilityTight);
+        break;
+      default:
+        break;
     }
+
+    if (!idpass)
+      continue;
+
+    Bool_t isopass = kFALSE;
+    switch (fMuIsoType) {
+      case kTrackCalo:
+        isopass = (mu->IsoR03SumPt() < fTrackIsolationCut) &&
+          (mu->IsoR03EmEt() + mu->IsoR03HadEt() < fCaloIsolationCut);
+        break;
+      case kTrackCaloCombined:
+        isopass = (1.0 * mu->IsoR03SumPt() + 1.0 * mu->IsoR03EmEt() + 
+                   1.0 * mu->IsoR03HadEt() < fCombIsolationCut);
+        break;
+      case kTrackCaloSliding:
+        { 
+          Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
+                              1.0 * mu->IsoR03EmEt() + 
+                              1.0 * mu->IsoR03HadEt();
+          if ((totalIso < (mu->Pt()-10.0)*5.0/15.0) ||
+              (totalIso < 5.0 && mu->Pt() > 25)) 
+            isopass = kTRUE;
+        }
+        break;
+        case kNoIso:
+          isopass = kTRUE;
+          break;
+      case kCustomIso:
+      default:
+        break;
+    }
+
+    if (!isopass)
+      continue;
+
+    // add good muon
+    CleanMuons->Add(mu);
   }
 
-  //Final Summary Debug Output   
-  if ( fPrintDebug ) {
-    cerr << "Event Dump: " << fNEventsProcessed << endl;  
-    cerr << "Muons" << endl;
-    for (UInt_t i = 0; i < CleanMuons->GetEntries(); i++) {
-      cerr << i << " " << CleanMuons->At(i)->Pt() << " " << CleanMuons->At(i)->Eta() 
-           << " " << CleanMuons->At(i)->Phi() << endl;    
-    }  
-  }   
-  
-  //Save Objects for Other Modules to use
-  AddObjThisEvt(CleanMuons, fCleanMuonsName.Data());  
+  // add objects for other modules to use
+  AddObjThisEvt(CleanMuons, fCleanMuonsName);  
 }
 
 
@@ -136,23 +135,58 @@ void MuonIDMod::Process()
 void MuonIDMod::SlaveBegin()
 {
   // Run startup code on the computer (slave) doing the actual analysis. Here,
-  // we typically initialize histograms and other analysis objects and request
-  // branches. For this module, we request a branch of the MitTree.
+  // we just request the muon collection branch.
 
-  ReqBranch(fMuonName,              fMuons);
-}
+  ReqBranch(fMuonBranchName, fMuons);
 
-//--------------------------------------------------------------------------------------------------
-void MuonIDMod::SlaveTerminate()
-{
-  // Run finishing code on the computer (slave) that did the analysis. For this
-  // module, we dont do anything here.
+  fMuonTools = new MuonTools;
 
-}
+  if (fMuonIDType.CompareTo("Tight") == 0) 
+    fMuIDType = kTight;
+  else if (fMuonIDType.CompareTo("Loose") == 0) 
+    fMuIDType = kLoose;
+  else if (fMuonIDType.CompareTo("Custom") == 0) {
+    fMuIDType = kCustomId;
+    SendError(kWarning, "SlaveBegin",
+              "Custom muon identification is not yet implemented.");
+  } else {
+    SendError(kAbortAnalysis, "SlaveBegin",
+              "The specified muon identification %s is not defined.",
+              fMuonIDType.Data());
+    return;
+  }
 
-//--------------------------------------------------------------------------------------------------
-void MuonIDMod::Terminate()
-{
-  // Run finishing code on the client computer. For this module, we dont do
-  // anything here.
+  if (fMuonIsoType.CompareTo("TrackCalo") == 0)
+    fMuIsoType = kTrackCalo;
+  else if (fMuonIsoType.CompareTo("TrackCaloCombined") == 0)
+    fMuIsoType = kTrackCaloCombined;
+  else if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0)
+    fMuIsoType = kTrackCaloSliding;
+  else if (fMuonIsoType.CompareTo("NoIso") == 0)
+    fMuIsoType = kNoIso;
+  else if (fMuonIsoType.CompareTo("Custom") == 0) {
+    fMuIsoType = kCustomIso;
+    SendError(kWarning, "SlaveBegin",
+              "Custom muon isolation is not yet implemented.");
+  } else {
+    SendError(kAbortAnalysis, "SlaveBegin",
+              "The specified muon isolation %s is not defined.",
+              fMuonIsoType.Data());
+    return;
+  }
+
+  if (fMuonClassType.CompareTo("All") == 0) 
+    fMuClassType = kAll;
+  else if (fMuonClassType.CompareTo("Global") == 0) 
+    fMuClassType = kGlobal;
+  else if (fMuonClassType.CompareTo("Standalone") == 0) 
+    fMuClassType = kSta;
+  else if (fMuonClassType.CompareTo("TrackerOnly") == 0) 
+    fMuClassType = kTrackerOnly;
+  else {
+    SendError(kAbortAnalysis, "SlaveBegin",
+              "The specified muon class %s is not defined.",
+              fMuonClassType.Data());
+    return;
+  }
 }

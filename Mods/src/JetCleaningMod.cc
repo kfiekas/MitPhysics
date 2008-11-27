@@ -1,10 +1,9 @@
-// $Id: JetCleaningMod.cc,v 1.1 2008/10/15 06:05:00 loizides Exp $
+// $Id: JetCleaningMod.cc,v 1.2 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
-#include "MitAna/DataTree/interface/Names.h"
-#include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;
 
@@ -14,9 +13,9 @@ ClassImp(mithep::JetCleaningMod)
   JetCleaningMod::JetCleaningMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fPrintDebug(false),
-  fCleanElectronsName(Names::gkCleanElectronsName),        
-  fGoodJetsName(Names::gkGoodJetsName),        
-  fCleanJetsName(Names::gkCleanJetsName),        
+  fCleanElectronsName(ModNames::gkCleanElectronsName),        
+  fGoodJetsName(ModNames::gkGoodJetsName),        
+  fCleanJetsName(ModNames::gkCleanJetsName),        
   fElectrons(0),
   fJets(0),
   fNEventsProcessed(0)

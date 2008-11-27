@@ -1,10 +1,8 @@
-// $Id: JetIDMod.cc,v 1.2 2008/11/11 21:22:54 ceballos Exp $
+// $Id: JetIDMod.cc,v 1.3 2008/11/21 11:05:39 sixie Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
-#include "MitAna/DataTree/interface/Names.h"
-#include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
-
+#include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;
 
@@ -15,7 +13,7 @@ ClassImp(mithep::JetIDMod)
   BaseMod(name,title),
   fPrintDebug(false),
   fJetName(Names::gkCaloJetBrn),
-  fGoodJetsName(Names::gkGoodJetsName),  
+  fGoodJetsName(ModNames::gkGoodJetsName),  
   fJetIDType("HWWJets"),
   fJets(0),
   fNEventsProcessed(0),

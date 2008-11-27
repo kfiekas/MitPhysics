@@ -1,23 +1,20 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.4 2008/11/11 21:22:58 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.5 2008/11/26 10:55:32 ceballos Exp $
 //
 // MuonIDMod
 //
-// This Module applies Muon ID criteria and exports a pointer to a collection
-// of Good Muons according to some specified ID scheme
+// This module applies muon identification criteria and exports a pointer to a collection
+// of "good muons" according to the specified ID scheme. TODO: Pointer to a presentation.
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITANA_TREEMOD_MUONIDMOD_H
-#define MITANA_TREEMOD_MUONIDMOD_H
+#ifndef MITPHYSICS_MODS_MUONIDMOD_H
+#define MITPHYSICS_MODS_MUONIDMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
-
-class TH1D;
-class TH2D;
 
 namespace mithep 
 {
@@ -25,47 +22,59 @@ namespace mithep
   {
     public:
       MuonIDMod(const char *name="MuonIDMod", 
-                     const char *title="Example analysis module with all branches");
+                const char *title="Muon identification module");
       ~MuonIDMod() {}
-      void     SetPrintDebug(bool b)                { fPrintDebug	         = b;	}
-      void     SetTrackIsolationCut(Double_t cut)   { fTrackIsolationCut         = cut; }
-      void     SetCaloIsolationCut(Double_t cut)    { fCaloIsolationCut          = cut; }
-      void     SetCombIsolationCut(Double_t cut)    { fCombIsolationCut          = cut; }
-      void     SetMuonPtMin(double p)               { fMuonPtMin	         = p;	}
-      void     SetTMOneStationLooseCut(bool b)      { fTMOneStationLooseCut      = b;	}
-      void     SetTMOneStationTightCut(bool b)      { fTMOneStationTightCut      = b;	}
-      void     SetTM2DCompatibilityLooseCut(bool b) { fTM2DCompatibilityLooseCut = b;   }
-      void     SetTM2DCompatibilityTightCut(bool b) { fTM2DCompatibilityTightCut = b;   }
-      void     SetMuonSlidingIso(bool b)            { fMuonSlidingIso	         = b;   }
-      void     SetCleanMuonsName(TString s)         { fCleanMuonsName            = s;   }   
+
+      void          SetMuonBranchName(const char *name)  { fMuonBranchName    = name; }   
+      void          SetCleanMuonsName(const char *name)  { fCleanMuonsName    = name; }   
+      void          SetMuonIDType(const char *type)      { fMuonIDType	      = type; }
+      void          SetTrackIsolationCut(Double_t cut)   { fTrackIsolationCut = cut;  }
+      void          SetCaloIsolationCut(Double_t cut)    { fCaloIsolationCut  = cut;  }
+      void          SetCombIsolationCut(Double_t cut)    { fCombIsolationCut  = cut;  }
+      void          SetMuonPtMin(Double_t pt)            { fMuonPtMin	       = pt;  }
+
+      enum EMuIdType {
+        kIdUndef = 0,       //not defined
+        kTight,             //"Tight"
+        kLoose,             //"Loose"
+        kCustomId           //"Custom"
+      };
+      enum EMuIsoType {
+        kIsoUndef = 0,      //not defined
+        kTrackCalo,         //"TrackCalo"
+        kTrackCaloCombined, //"TrackCaloCombined"
+        kTrackCaloSliding,  //"TrackCaloSliding"
+        kCustomIso,         //"Custom"
+        kNoIso              //"NoIso"
+      };
+      enum EMuClassType {
+        kClassUndef = 0,    //not defined
+        kAll,               //"All"
+        kGlobal,            //"Global"
+        kSta,               //"Standalone"
+        kTrackerOnly        //"TrackerOnly"
+      };
+
     protected:
-      bool      fPrintDebug;                // flag for printing debug output
-      TString   fMuonName;                  // name of muon collection
-      TString   fCleanMuonsName ;           // name of good muons collection  
-      MuonCol   *fMuons;                    // !Muon branch
+      TString       fMuonBranchName;            //name of muon collection (in branch)
+      TString       fCleanMuonsName;            //name of exported "good muon" collection
+      TString       fMuonIDType;                //type of muon id scheme we impose
+      TString       fMuonIsoType;               //type of muon isolations scheme we impose
+      TString       fMuonClassType;             //type of muon class we impose
+      Double_t      fTrackIsolationCut;         //cut value for track isolation
+      Double_t      fCaloIsolationCut;          //cut value for calo isolation
+      Double_t      fCombIsolationCut;          //cut value for combined isolation
+      Double_t      fMuonPtMin;                 //min muon pt
+      MuonCol      *fMuons;                     //!muon branch
+      MuonTools    *fMuonTools;                 //!muon tool
+      EMuIdType     fMuIDType;                  //!
+      EMuIsoType    fMuIsoType;                  //!
+      EMuClassType  fMuClassType;            //!
 
-      double    fTrackIsolationCut;         // Cut value for track isolation
-      double    fCaloIsolationCut;          // Cut value for calo isolation
-      double    fCombIsolationCut;          // Cut value for combined isolation
-      bool      fTMOneStationLooseCut;	   // apply TMOneStationLooseCut?
-      bool      fTMOneStationTightCut;	   // apply TMOneStationTightCut?
-      bool      fTM2DCompatibilityLooseCut; // apply TM2DCompatibilityLooseCut?
-      bool      fTM2DCompatibilityTightCut; // apply TM2DCompatibilityTightCut?
-      bool      fMuonSlidingIso;            // apply sliding iso?
-      double    fMuonPtMin;                 // min Pt requirement
-
-      int       fNEventsProcessed;          // Number of events processed
-
-      MuonTools myMuonTools;
-
-      void      Begin();
-      void      Process();
-      void      SlaveBegin();
-      void      SlaveTerminate();
-      void      Terminate();
-     
+      void       Process();
+      void       SlaveBegin();
     
-      ClassDef(MuonIDMod,1) // TAM example analysis module
+      ClassDef(MuonIDMod,1) // TAM module for muon id
   };
 }
 #endif
