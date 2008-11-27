@@ -1,9 +1,9 @@
- // $Id: ttEvtSelMod.cc,v 1.2 2008/10/23 12:21:37 ceballos Exp $
+ // $Id: ttEvtSelMod.cc,v 1.3 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/ttEvtSelMod.h"
 #include <TH1D.h>
 #include <TH2D.h>
-#include "MitAna/DataTree/interface/Names.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
@@ -19,10 +19,10 @@ ttEvtSelMod::ttEvtSelMod(const char *name, const char *title) :
   fMuonName(Names::gkMuonBrn),
   fTrackName(Names::gkTrackBrn),
   fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
-  fCleanJetsName(Names::gkCleanJetsName),
-  fMCLeptonsName(Names::gkMCLeptonsName),
-  fMCAllLeptonsName(Names::gkMCAllLeptonsName),
-  fMCQuarksName(Names::gkMCQuarksName),
+  fCleanJetsName(ModNames::gkCleanJetsName),
+  fMCLeptonsName(ModNames::gkMCLeptonsName),
+  fMCAllLeptonsName(ModNames::gkMCAllLeptonsName),
+  fMCQuarksName(ModNames::gkMCQuarksName),
   fMet(0),
   fMuons(0),
   fNEventsProcessed(0)
@@ -56,9 +56,9 @@ void ttEvtSelMod::Process()
 
   //Obtain all the good objects from the event cleaning module
   ObjArray<Electron> *CleanElectrons = dynamic_cast<ObjArray<Electron>* >
-    (FindObjThisEvt(Names::gkCleanElectronsName));
+    (FindObjThisEvt(ModNames::gkCleanElectronsName));
   ObjArray<Muon> *CleanMuons = dynamic_cast<ObjArray<Muon>* >
-    (FindObjThisEvt(Names::gkCleanMuonsName));
+    (FindObjThisEvt(ModNames::gkCleanMuonsName));
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
 
@@ -351,35 +351,35 @@ void ttEvtSelMod::Process()
     		}
 		if(isGenLepton == true){
         	  hDttPresel[36+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose))
 		    hDttPresel[37+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight))
 		    hDttPresel[38+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
 		    hDttPresel[39+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
 		    hDttPresel[40+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) &&
-		     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose) &&
+		     myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
 		    hDttPresel[41+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight) &&
-		     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight) &&
+		     myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
 		    hDttPresel[42+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
 	        } else {
         	  hDttPresel[43+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose))
 		    hDttPresel[44+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight))
 		    hDttPresel[45+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
 		    hDttPresel[46+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
 		    hDttPresel[47+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) &&
-		     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose) &&
+		     myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
 		    hDttPresel[48+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
-		  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight) &&
-		     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+		  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight) &&
+		     myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
 		    hDttPresel[49+100*pairType]->Fill(TMath::Min(mu->Pt(),49.999));
 		}
 	        double d0_real = DecayXY(DirtyMuons->At(i)->GlobalTrk(), fVertices);

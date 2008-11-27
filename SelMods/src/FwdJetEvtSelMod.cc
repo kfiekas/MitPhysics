@@ -1,9 +1,9 @@
- // $Id: FwdJetEvtSelMod.cc,v 1.2 2008/10/23 12:21:37 ceballos Exp $
+ // $Id: FwdJetEvtSelMod.cc,v 1.3 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/FwdJetEvtSelMod.h"
 #include <TH1D.h>
 #include <TH2D.h>
-#include "MitAna/DataTree/interface/Names.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Utils/interface/DiTauSystem.h"
@@ -17,10 +17,10 @@ FwdJetEvtSelMod::FwdJetEvtSelMod(const char *name, const char *title) :
   fPrintDebug(false),
   fFillHist(false),
   fMetName(Names::gkCaloMetBrn),
-  fCleanJetsName(Names::gkCleanJetsName),
-  fCleanFwdJetsName(Names::gkCleanFwdJetsName),
-  fCleanNoFwdJetsName(Names::gkCleanNoFwdJetsName),
-  fMCqqHsName(Names::gkMCqqHsName),
+  fCleanJetsName(ModNames::gkCleanJetsName),
+  fCleanFwdJetsName(ModNames::gkCleanFwdJetsName),
+  fCleanNoFwdJetsName(ModNames::gkCleanNoFwdJetsName),
+  fMCqqHsName(ModNames::gkMCqqHsName),
   fMet(0),
   fUseANN(false),
   fUseHighestPtJets(true),
@@ -59,9 +59,9 @@ void FwdJetEvtSelMod::Process()
 
   //Obtain all the good objects from the event cleaning module
   ObjArray<Electron> *CleanElectrons = dynamic_cast<ObjArray<Electron>* >
-    (FindObjThisEvt(Names::gkCleanElectronsName));
+    (FindObjThisEvt(ModNames::gkCleanElectronsName));
   ObjArray<Muon> *CleanMuons = dynamic_cast<ObjArray<Muon>* >
-    (FindObjThisEvt(Names::gkCleanMuonsName));
+    (FindObjThisEvt(ModNames::gkCleanMuonsName));
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
 

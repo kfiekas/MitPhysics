@@ -1,9 +1,9 @@
- // $Id: ZXEvtSelMod.cc,v 1.2 2008/10/23 12:21:38 ceballos Exp $
+ // $Id: ZXEvtSelMod.cc,v 1.3 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/ZXEvtSelMod.h"
 #include <TH1D.h>
 #include <TH2D.h>
-#include "MitAna/DataTree/interface/Names.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
@@ -15,8 +15,8 @@ ZXEvtSelMod::ZXEvtSelMod(const char *name, const char *title) :
   BaseMod(name,title),
   fPrintDebug(false),
   fMetName(Names::gkCaloMetBrn),
-  fCleanJetsName(Names::gkCleanJetsName),
-  fMCLeptonsName(Names::gkMCLeptonsName),
+  fCleanJetsName(ModNames::gkCleanJetsName),
+  fMCLeptonsName(ModNames::gkMCLeptonsName),
   fMet(0),
   fNEventsProcessed(0)
 {
@@ -48,9 +48,9 @@ void ZXEvtSelMod::Process()
 
   //Obtain all the good objects from the event cleaning module
   ObjArray<Electron> *CleanElectrons = dynamic_cast<ObjArray<Electron>* >
-    (FindObjThisEvt(Names::gkCleanElectronsName));
+    (FindObjThisEvt(ModNames::gkCleanElectronsName));
   ObjArray<Muon> *CleanMuons = dynamic_cast<ObjArray<Muon>* >
-    (FindObjThisEvt(Names::gkCleanMuonsName));
+    (FindObjThisEvt(ModNames::gkCleanMuonsName));
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
 

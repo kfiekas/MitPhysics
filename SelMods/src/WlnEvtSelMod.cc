@@ -1,9 +1,9 @@
-// $Id: WlnEvtSelMod.cc,v 1.1 2008/10/23 12:21:37 ceballos Exp $
+// $Id: WlnEvtSelMod.cc,v 1.1 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/WlnEvtSelMod.h"
 #include <TH1D.h>
 #include <TH2D.h>
-#include "MitAna/DataTree/interface/Names.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
@@ -18,10 +18,10 @@ WlnEvtSelMod::WlnEvtSelMod(const char *name, const char *title) :
   fMetName(Names::gkCaloMetBrn),
   fTrackName(Names::gkTrackBrn),
   fCaloTowerName(Names::gkCaloTowerBrn),
-  fCleanJetsName(Names::gkCleanJetsName),
+  fCleanJetsName(ModNames::gkCleanJetsName),
   fMuonName(Names::gkMuonBrn),
   fElectronName(Names::gkElectronBrn),
-  fMCLeptonsName(Names::gkMCLeptonsName),
+  fMCLeptonsName(ModNames::gkMCLeptonsName),
   fMet(0),
   fNEventsProcessed(0)
 {
@@ -79,94 +79,94 @@ void WlnEvtSelMod::Process()
     if(mu->Pt() > 5){
       if(isGenLepton == true){
 	hDWlnSel[50]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::PromptTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kPromptTight))
           hDWlnSel[51]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose))
           hDWlnSel[52]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight))
           hDWlnSel[53]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMLastStationLoose))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMLastStationLoose))
           hDWlnSel[54]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMLastStationTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMLastStationTight))
           hDWlnSel[55]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+	if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
           hDWlnSel[56]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
           hDWlnSel[57]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) &&
-	   myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose) &&
+	   myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
           hDWlnSel[58]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight) &&
-	   myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight) &&
+	   myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
           hDWlnSel[59]->Fill(TMath::Min(mu->Pt(),99.999));
       } else {
 	hDWlnSel[60]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::PromptTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kPromptTight))
           hDWlnSel[61]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose))
           hDWlnSel[62]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight))
           hDWlnSel[63]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMLastStationLoose))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMLastStationLoose))
           hDWlnSel[64]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMLastStationTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMLastStationTight))
           hDWlnSel[65]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+	if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
           hDWlnSel[66]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
           hDWlnSel[67]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) &&
-	   myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose) &&
+	   myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
           hDWlnSel[68]->Fill(TMath::Min(mu->Pt(),99.999));
-	if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight) &&
-	   myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+	if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight) &&
+	   myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
           hDWlnSel[69]->Fill(TMath::Min(mu->Pt(),99.999));
       }
       if(mu->IsoR03EmEt() + mu->IsoR03HadEt() < 3.0 &&
          mu->IsoR03SumPt() < 3.0){
         if(isGenLepton == true){
 	  hDWlnSel[70]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::PromptTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kPromptTight))
             hDWlnSel[71]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose))
             hDWlnSel[72]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight))
             hDWlnSel[73]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMLastStationLoose))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMLastStationLoose))
             hDWlnSel[74]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMLastStationTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMLastStationTight))
             hDWlnSel[75]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
             hDWlnSel[76]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
             hDWlnSel[77]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) &&
-	     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose) &&
+	     myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
             hDWlnSel[78]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight) &&
-	     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight) &&
+	     myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
             hDWlnSel[79]->Fill(TMath::Min(mu->Pt(),99.999));
         } else {
 	  hDWlnSel[80]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::PromptTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kPromptTight))
             hDWlnSel[81]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose))
             hDWlnSel[82]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight))
             hDWlnSel[83]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMLastStationLoose))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMLastStationLoose))
             hDWlnSel[84]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMLastStationTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMLastStationTight))
             hDWlnSel[85]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
             hDWlnSel[86]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
             hDWlnSel[87]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMOneStationLoose) &&
-	     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityLoose))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationLoose) &&
+	     myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityLoose))
             hDWlnSel[88]->Fill(TMath::Min(mu->Pt(),99.999));
-	  if(myMuonTools.isGood(mu, MuonTools::TMOneStationTight) &&
-	     myMuonTools.isGood(mu, MuonTools::TM2DCompatibilityTight))
+	  if(myMuonTools.IsGood(mu, MuonTools::kTMOneStationTight) &&
+	     myMuonTools.IsGood(mu, MuonTools::kTM2DCompatibilityTight))
             hDWlnSel[89]->Fill(TMath::Min(mu->Pt(),99.999));
 	}
       }

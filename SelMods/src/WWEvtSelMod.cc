@@ -1,9 +1,9 @@
- // $Id: WWEvtSelMod.cc,v 1.2 2008/10/23 12:21:37 ceballos Exp $
+ // $Id: WWEvtSelMod.cc,v 1.1 2008/11/11 21:22:54 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/WWEvtSelMod.h"
 #include <TH1D.h>
 #include <TH2D.h>
-#include "MitAna/DataTree/interface/Names.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
@@ -18,9 +18,9 @@ WWEvtSelMod::WWEvtSelMod(const char *name, const char *title) :
   fMuonName(Names::gkMuonBrn),
   fTrackName(Names::gkTrackBrn),
   fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
-  fCleanJetsName(Names::gkCleanJetsName),
-  fMCLeptonsName(Names::gkMCLeptonsName),
-  fMCNeutrinosName(Names::gkMCNeutrinosName),
+  fCleanJetsName(ModNames::gkCleanJetsName),
+  fMCLeptonsName(ModNames::gkMCLeptonsName),
+  fMCNeutrinosName(ModNames::gkMCNeutrinosName),
   fMet(0),
   fMuons(0),
   fNEventsProcessed(0)
@@ -53,9 +53,9 @@ void WWEvtSelMod::Process()
 
   //Obtain all the good objects from the event cleaning module
   ObjArray<Electron> *CleanElectrons = dynamic_cast<ObjArray<Electron>* >
-    (FindObjThisEvt(Names::gkCleanElectronsName));
+    (FindObjThisEvt(ModNames::gkCleanElectronsName));
   ObjArray<Muon> *CleanMuons = dynamic_cast<ObjArray<Muon>* >
-    (FindObjThisEvt(Names::gkCleanMuonsName));
+    (FindObjThisEvt(ModNames::gkCleanMuonsName));
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
 
