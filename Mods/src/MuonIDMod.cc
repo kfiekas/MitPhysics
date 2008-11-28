@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.6 2008/11/27 16:30:27 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.7 2008/11/28 09:13:50 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -13,12 +13,12 @@ ClassImp(mithep::MuonIDMod)
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
-  fMuonIDType("Tight"),
-  fMuonIsoType("TrackCalo"),  
+  fMuonIDType("Loose"),
+  fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
-  fCombIsolationCut(-1.0),
+  fCombIsolationCut(5.0),
   fMuonPtMin(10),
   fMuons(0)
 {
@@ -37,8 +37,7 @@ void MuonIDMod::Process()
   CleanMuons->SetName(fCleanMuonsName);
 
   for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
-    //const Muon *mu = fMuons->At(i);
-    Muon *mu = fMuons->At(i);
+    const Muon *mu = fMuons->At(i);
 
     Bool_t pass = kFALSE;
     Double_t pt = -1; // make sure pt is taken from the correct track!
