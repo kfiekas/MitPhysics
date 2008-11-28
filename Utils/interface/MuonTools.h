@@ -1,11 +1,17 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.1 2008/10/15 06:02:05 loizides Exp $
+// $Id: MuonTools.h,v 1.3 2008/11/27 16:28:58 loizides Exp $
 //
 // MuonTools
 //
-// Isolation functions to compute various kinds of isolation.
-// http://cmslxr.fnal.gov/lxr/source/RecoMuon/MuonIdentification/
-// http://cmslxr.fnal.gov/lxr/source/DataFormats/MuonReco/
+// This class allows you to classify a given muon according to defined criteria. For this purpose
+// is loads histograms from two ROOT files, specified in the constructor. The main function then
+// is "IsGood(*muon, selection)" which returns true if the given muon fulfills the selection
+// criteria. 
+// 
+// Logically, the code has been put together by Phil who took most of the ideas from
+//  http://cmslxr.fnal.gov/lxr/source/RecoMuon/MuonIdentification/
+//  http://cmslxr.fnal.gov/lxr/source/DataFormats/MuonReco/
+//
 // Authors: P.Harris, C.Loizides
 //--------------------------------------------------------------------------------------------------
 
@@ -24,14 +30,14 @@ namespace mithep {
       ~MuonTools();
 
       enum ESelType { 
-        kAllArbitrated,
-        kPromptTight,
-        kTMLastStationLoose,
-        kTMLastStationTight,
-        kTMOneStationLoose,
-        kTMOneStationTight,
-        kTM2DCompatibilityLoose,
-        kTM2DCompatibilityTight
+        kAllArbitrated,          // todo by phil
+        kPromptTight,            //
+        kTMLastStationLoose,     //
+        kTMLastStationTight,     //
+        kTMOneStationLoose,      //
+        kTMOneStationTight,      //
+        kTM2DCompatibilityLoose, //
+        kTM2DCompatibilityTight  //
       };
 
       Bool_t      Init(const char *mutemp, const char *pitemp);
@@ -46,8 +52,8 @@ namespace mithep {
       Double_t    SigWeight(Double_t iVal0, Double_t iVal1)                      const;
 
     private:
-      Bool_t      fIsInit;              //!
-      TH2D       *fmuon_em_etaEmi;      //!
+      Bool_t      fIsInit;              //!=true if histograms are loaded
+      TH2D       *fmuon_em_etaEmi;      //!todo by phil
       TH2D       *fmuon_had_etaEmi;     //!
       TH2D       *fmuon_had_etaTmi;     //!
       TH2D       *fmuon_em_etaB;        //!
@@ -73,7 +79,7 @@ namespace mithep {
 //--------------------------------------------------------------------------------------------------
 inline Double_t mithep::MuonTools::SigWeight(Double_t iVal0, Double_t iVal1) const
 {
-  //
+  // todo
 
   if (iVal1 < 1.) 
     return 1.;
@@ -103,35 +109,3 @@ inline Bool_t mithep::MuonTools::Overflow(const TH2D *iHist, Double_t lVal0, Dou
   return kFALSE;
 }
 #endif
-
-#if 0
-    static inline MCParticle* etaPhiMatch(MCParticleCol* iMCParts,Muon *iMuon) {
-      mithep::MCParticle *lMC = 0; Double_t lDR = 1.; Double_t lPt = -1.;
-      for(unsigned Int_t i0 = 0; i0 < iMCParts->GetEntries(); i0++) {
-	mithep::MCParticle* pMC = iMCParts->At(i0);
-	if(pMC->Status() != 1) continue;
-	Double_t pDR = mithep::MathUtils::DeltaR(pMC->Mom(),iMuon->Mom());
-	if(pDR > lDR && pDR > 0.01) continue;
-	if(fabs(pMC->Pt()) < lPt)   continue;
-	lDR = pDR;
-	lMC = pMC;
-	lPt = pMC->Pt();
-      }
-      return lMC;
-    }
-    static inline Muon* match(MuonCol* iMuons,Track *iTrack) {
-      mithep::Muon *lMuon = 0; Double_t lDR = 1.; Double_t lPt = -1.;
-      for(unsigned Int_t i0 = 0; i0 < iMuons->GetEntries(); i0++) {
-	mithep::Muon* pMuon = iMuons->At(i0);
-	Double_t pDR = mithep::MathUtils::DeltaR(pMuon->Mom(),iTrack->Mom4(0.109));
-	if(pDR > lDR && pDR > 0.01) continue;
-	if(fabs(pMuon->Pt()) < lPt)   continue;
-	lDR   = pDR;
-	lMuon = pMuon;
-	lPt   = pMuon->Pt();
-      }
-      return lMuon;
-    }
-#endif
-
-

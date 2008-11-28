@@ -1,4 +1,4 @@
-// $Id:$
+// $Id: MuonTools.cc,v 1.5 2008/11/27 16:28:58 loizides Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -311,7 +311,7 @@ Bool_t MuonTools::IsGood(const mithep::Muon *iMuon, ESelType iSel) const
 //--------------------------------------------------------------------------------------------------
 Double_t MuonTools::GetSegmentCompatability(const mithep::Muon *iMuon) const
 {
-  // todo phil
+  // todo
 
   Int_t lNStationsCrossed = 0;
   Int_t lNStationsSegment = 0;
