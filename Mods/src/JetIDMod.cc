@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.4 2008/11/27 16:30:27 loizides Exp $
+// $Id: JetIDMod.cc,v 1.5 2008/11/28 09:13:50 loizides Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -41,7 +41,7 @@ void JetIDMod::Process()
     if (fUseJetCorrection)
       jetet *= jet->L2RelativeCorrectionScale() * jet->L3AbsoluteCorrectionScale();
 
-    if (jetet > fJetEtCut)
+    if (jetet < fJetEtCut)
       continue;
     
     // add good jet to collection
