@@ -1,10 +1,11 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DiTauSystem.h,v 1.1 2008/10/15 06:02:05 loizides Exp $
+// $Id: DiTauSystem.h,v 1.2 2008/11/28 10:29:24 loizides Exp $
 //
 // DiTauSystem
 //
 // Class to calculate the mass to the di-tau system. It is assumed that the tau is boosted 
 // and that the neutrinos have the same flight direction as the tau. 
+// CMS note 2006/082
 //
 // Authors: G.Ceballos 
 //--------------------------------------------------------------------------------------------------
@@ -38,12 +39,12 @@ namespace mithep
       ChargedParticle *fT1;       //first tau
       ChargedParticle *fT2;       //second tau
       Met             *fMet;      //missing et
-      Double_t         fXTau[2];  //
-      Double_t         fRecoMass; //
-      Double_t         fVisMass;  //
-      Double_t         fMT;       //
-      Double_t         fETll;     //
-      Double_t         fETnn;     //
+      Double_t         fXTau[2];  //visible fraction of the tau momenta
+      Double_t         fRecoMass; //higgs mass
+      Double_t         fVisMass;  //visible mass
+      Double_t         fMT;       //transverse visible mass
+      Double_t         fETll;     //transverse energy of tau products
+      Double_t         fETnn;     //transverse missing energy
   };
 }
 #endif
