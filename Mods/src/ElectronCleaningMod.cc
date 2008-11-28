@@ -1,4 +1,4 @@
-// $Id: ElectronCleaningMod.cc,v 1.3 2008/11/27 16:30:27 loizides Exp $
+// $Id: ElectronCleaningMod.cc,v 1.4 2008/11/28 09:13:50 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -72,7 +72,7 @@ void ElectronCleaningMod::Process()
       if (!isElectronOverlap) {
         Double_t deltaR = MathUtils::DeltaR(CleanElTemp[j]->Mom(), mom);
         if (deltaR < 0.1)
-          isElectronOverlap = true;        
+          isElectronOverlap = kTRUE;        
       }
 
       if (isElectronOverlap) {
