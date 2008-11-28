@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.7 2008/11/28 09:13:50 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.8 2008/11/28 09:56:42 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -103,8 +103,9 @@ void MuonIDMod::Process()
           Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
                               1.0 * mu->IsoR03EmEt() + 
                               1.0 * mu->IsoR03HadEt();
-          if ((totalIso < (mu->Pt()-10.0)*5.0/15.0) ||
-              (totalIso < 5.0 && mu->Pt() > 25)) 
+          if ((totalIso < (mu->Pt()-10.0)*5.0/15.0 && mu->Pt() <= 25) ||
+              (totalIso < 5.0 && mu->Pt() > 25) ||
+	       totalIso <= 0) 
             isopass = kTRUE;
         }
         break;

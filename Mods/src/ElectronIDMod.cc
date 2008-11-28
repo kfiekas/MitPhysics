@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.5 2008/11/27 16:30:27 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.6 2008/11/28 09:13:50 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -76,8 +76,9 @@ void ElectronIDMod::Process()
       case kTrackJuraSliding:
         { 
           Double_t totalIso = e->TrackIsolation() + e->EcalJurassicIsolation() - 1.5;
-          if ((totalIso < (e->Pt()-10.0)*6.0/15.0) ||
-              (totalIso < 6.0 && e->Pt() > 25)) 
+          if ((totalIso < (e->Pt()-10.0)*6.0/15.0 && e->Pt() <= 25) ||
+              (totalIso < 6.0 && e->Pt() > 25) ||
+	       totalIso <= 0)
             isocut = kTRUE;
         }
         break;
