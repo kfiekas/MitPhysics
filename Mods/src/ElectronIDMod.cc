@@ -1,10 +1,7 @@
-// $Id: ElectronIDMod.cc,v 1.4 2008/11/26 10:55:51 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.5 2008/11/27 16:30:27 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
-#include "MitAna/DataUtil/interface/Debug.h"
-#include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Init/interface/ModNames.h"
-#include "MitPhysics/Utils/interface/IsolationTools.h"
 
 using namespace mithep;
 
@@ -37,7 +34,8 @@ void ElectronIDMod::Process()
 
   LoadBranch(fElectronBranchName);
 
-  ObjArray<Electron> *GoodElectrons = new ObjArray<Electron>;
+  ElectronOArr *GoodElectrons = new ElectronOArr;
+  GoodElectrons->SetName(fGoodElectronsName);
 
   for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {    
     const Electron *e = fElectrons->At(i);        
@@ -99,7 +97,7 @@ void ElectronIDMod::Process()
   }
 
   // add to event for other modules to use
-  AddObjThisEvt(GoodElectrons, fGoodElectronsName);  
+  AddObjThisEvt(GoodElectrons);  
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.5 2008/11/26 10:55:32 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.6 2008/11/27 16:30:26 loizides Exp $
 //
 // MuonIDMod
 //
 // This module applies muon identification criteria and exports a pointer to a collection
-// of "good muons" according to the specified ID scheme. TODO: Pointer to a presentation.
+// of "good muons" according to the specified ID scheme.
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -68,13 +68,13 @@ namespace mithep
       MuonCol      *fMuons;                     //!muon branch
       MuonTools    *fMuonTools;                 //!muon tool
       EMuIdType     fMuIDType;                  //!
-      EMuIsoType    fMuIsoType;                  //!
-      EMuClassType  fMuClassType;            //!
+      EMuIsoType    fMuIsoType;                 //!
+      EMuClassType  fMuClassType;               //!
 
       void       Process();
       void       SlaveBegin();
     
-      ClassDef(MuonIDMod,1) // TAM module for muon id
+      ClassDef(MuonIDMod,1) // Muon identification module
   };
 }
 #endif

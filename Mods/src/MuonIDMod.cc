@@ -1,11 +1,8 @@
-// $Id: MuonIDMod.cc,v 1.5 2008/11/26 10:55:51 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.6 2008/11/27 16:30:27 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Init/interface/ModNames.h"
-#include "MitPhysics/Utils/interface/IsolationTools.h"
-#include "MitPhysics/Utils/interface/MuonTools.h"
-#include "MitCommon/MathTools/interface/MathUtils.h"
 
 using namespace mithep;
 
@@ -36,7 +33,8 @@ void MuonIDMod::Process()
 
   LoadBranch(fMuonBranchName);
 
-  ObjArray<Muon> *CleanMuons = new ObjArray<Muon>; 
+  MuonOArr *CleanMuons = new MuonOArr;
+  CleanMuons->SetName(fCleanMuonsName);
 
   for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
     //const Muon *mu = fMuons->At(i);
@@ -127,7 +125,7 @@ void MuonIDMod::Process()
   }
 
   // add objects for other modules to use
-  AddObjThisEvt(CleanMuons, fCleanMuonsName);  
+  AddObjThisEvt(CleanMuons);  
 }
 
 

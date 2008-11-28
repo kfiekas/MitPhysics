@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.7 2008/11/24 14:13:20 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.8 2008/11/27 16:30:27 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -33,14 +33,14 @@ void GeneratorMod::Process()
   // Process entries of the tree.
 
   // these arrays will be filled in the loop of particles
-  ObjArray<MCParticle> *GenLeptons    = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenAllLeptons = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenTaus       = new ObjArray<MCParticle>; 
+  MCParticleOArr *GenLeptons    = new MCParticleOArr;
+  MCParticleOArr *GenAllLeptons = new MCParticleOArr;
+  MCParticleOArr *GenTaus       = new MCParticleOArr; 
   GenTaus->SetOwner(true);
-  ObjArray<MCParticle> *GenNeutrinos  = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenQuarks     = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenqqHs       = new ObjArray<MCParticle>;
-  ObjArray<MCParticle> *GenBosons     = new ObjArray<MCParticle>;
+  MCParticleOArr *GenNeutrinos  = new MCParticleOArr;
+  MCParticleOArr *GenQuarks     = new MCParticleOArr;
+  MCParticleOArr *GenqqHs       = new MCParticleOArr;
+  MCParticleOArr *GenBosons     = new MCParticleOArr;
 
   // load MCParticle branch
   LoadBranch(fMCPartName);

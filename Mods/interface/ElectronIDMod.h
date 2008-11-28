@@ -1,10 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.3 2008/11/05 14:06:06 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.4 2008/11/27 16:30:26 loizides Exp $
 //
 // ElectronIDMod
 //
 // This module applies electron identification criteria and exports a pointer to a collection
-// of "good electrons" according to the specified identification scheme. TODO: Pointer to a talk
+// of "good electrons" according to the specified identification scheme.
 //
 // Authors: S.Xie, C.Loizides
 //--------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ namespace mithep
       void          Process();
       void          SlaveBegin();
     
-      ClassDef(ElectronIDMod,1) // TAM module for electron id
+      ClassDef(ElectronIDMod,1) // Electron identification module
   };
 }
 #endif

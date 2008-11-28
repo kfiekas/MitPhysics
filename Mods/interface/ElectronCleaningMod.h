@@ -1,11 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronCleaningMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
+// $Id: ElectronCleaningMod.h,v 1.2 2008/11/27 16:30:26 loizides Exp $
 //
 // ElectronCleaningMod
 //
-// This Module performs cleaning of objects including, removal of
-// duplicate objects, removal of good muons from the good electrons,
-// removal of good isolated electrons from good jets
+// This Module performs cleaning of electrons, ie. it removes duplicate objects and good muons 
+// from the good electrons.
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -16,40 +15,26 @@
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"
 
-class TH1D;
-class TH2D;
-
 namespace mithep 
 {
   class ElectronCleaningMod : public BaseMod
   {
     public:
       ElectronCleaningMod(const char *name="ElectronCleaningMod", 
-                     const char *title="Example analysis module with all branches");
+                     const char *title="Electron cleaning module");
       ~ElectronCleaningMod() {}
-      void               SetPrintDebug(bool b)            { fPrintDebug = b;         }   
-      void               SetGoodElectronsName(TString s)  { fGoodElectronsName = s;  }        
-      void               SetCleanMuonsName(TString s)     { fCleanMuonsName = s;     }        
-      void               SetCleanElectronsName(TString s) { fCleanElectronsName = s; }        
 
+      void               SetGoodElectronsName(const char *name)  { fGoodElectronsName  = name; }
+      void               SetCleanMuonsName(const char *name)     { fCleanMuonsName     = name; }
+      void               SetCleanElectronsName(const char *name) { fCleanElectronsName = name; }
     protected:
-      bool                     fPrintDebug;      
-      TString                  fGoodElectronsName ;       //name of electrons passing ID
-      TString                  fCleanMuonsName ;          //name of clean muons
-      TString                  fCleanElectronsName ;      //name of clean electrons  
-      MuonCol		      *fMuons;                    //!Muon branch
-      ElectronCol	      *fElectrons;                //!Electron branch
- 
-      int                      fNEventsProcessed;         // Number of events processed
+      TString            fGoodElectronsName;  //name of good electrons (input)
+      TString            fCleanMuonsName;     //name of clean muons (input)
+      TString            fCleanElectronsName; //name of clean electrons (output)
 
-      void               Begin();
       void               Process();
-      void               SlaveBegin();
-      void               SlaveTerminate();
-      void               Terminate();
-
     
-      ClassDef(ElectronCleaningMod,1) // TAM example analysis module
+      ClassDef(ElectronCleaningMod,1) // Electron cleaning module
   };
 }
 #endif

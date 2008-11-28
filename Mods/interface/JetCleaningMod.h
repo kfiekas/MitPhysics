@@ -1,10 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.1 2008/10/15 06:04:59 loizides Exp $
+// $Id: JetCleaningMod.h,v 1.2 2008/11/27 16:30:26 loizides Exp $
 //
 // JetCleaningMod
 //
-// This Module performs cleaning of jets. Removes jets which point 
-// in the same direction as a clean isolated electron
+// This Module performs cleaning of jets, ie it removes jets which point 
+// in the same direction as a clean isolated electrons.
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -21,31 +21,21 @@ namespace mithep
   {
     public:
       JetCleaningMod(const char *name="JetCleaningMod", 
-                     const char *title="Example analysis module with all branches");
+                     const char *title="Jet cleaning module");
       ~JetCleaningMod() {}
-      void               SetPrintDebug(bool b)              { fPrintDebug           = b;   }   
-      void               SetCleanElectronsName(TString s)   { fCleanElectronsName   = s;   }        
-      void               SetGoodJetsName(TString s)         { fGoodJetsName         = s;   }  
-      void               SetCleanJetsName(TString s)        { fCleanJetsName        = s;   }
+
+      void               SetCleanElectronsName(const char *name) { fCleanElectronsName = name; }
+      void               SetGoodJetsName(const char *name)       { fGoodJetsName       = name; }  
+      void               SetCleanJetsName(const char *name)      { fCleanJetsName      = name; }
  
     protected:
-      bool                     fPrintDebug;      
-      TString                  fCleanElectronsName ;        
-      TString                  fGoodJetsName;        
-      TString                  fCleanJetsName;        
+      TString            fCleanElectronsName; //name of clean electrons (input)
+      TString            fGoodJetsName;       //name of good jets (input)
+      TString            fCleanJetsName;      //name of clean jets (output)
 
-      ElectronCol	      *fElectrons;                //!Electron branch
-      JetCol                  *fJets;                     //!IC5 Jet branch
-
-      int                      fNEventsProcessed;              // Number of events processed
-
-      void               Begin();
       void               Process();
-      void               SlaveBegin();
-      void               SlaveTerminate();
-      void               Terminate();
    
-      ClassDef(JetCleaningMod,1) // TAM example analysis module
+      ClassDef(JetCleaningMod,1) // Jet cleaning module
   };
 }
 #endif
