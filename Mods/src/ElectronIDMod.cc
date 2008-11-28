@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.6 2008/11/28 09:13:50 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.7 2008/11/28 10:31:38 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -13,7 +13,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronBranchName(Names::gkElectronBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
   fElectronIDType("Tight"),
-  fElectronIsoType("TrackCaloSliding"),
+  fElectronIsoType("TrackJuraSliding"),
   fElectronPtMin(10),
   fIDLikelihoodCut(0.9),
   fTrackIsolationCut(5.0),
