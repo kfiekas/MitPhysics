@@ -1,51 +1,49 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DiTauSystem.h,v 1.1 2008/10/14 06:13:55 loizides Exp $
+// $Id: DiTauSystem.h,v 1.1 2008/10/15 06:02:05 loizides Exp $
 //
-// to calculate the mass to the di-tau system, I 
-// assume that the tau is boosted and that the 
-// neutrinos have the same flight direction as the
-// tau. 
+// DiTauSystem
 //
-// Authors: ceballos 
+// Class to calculate the mass to the di-tau system. It is assumed that the tau is boosted 
+// and that the neutrinos have the same flight direction as the tau. 
+//
+// Authors: G.Ceballos 
 //--------------------------------------------------------------------------------------------------
 
-// TODO: Needs cleanup CL
-
 #ifndef MITPHYSICS_UTILS_DITAUSYSTEM_H
-#define MITPHYSICSUTILS_DITAUSYSTEM_H
+#define MITPHYSICS_UTILS_DITAUSYSTEM_H
 
-#include "MitAna/DataTree/interface/Collections.h"
+#include <Rtypes.h>
 
 namespace mithep
 {
+  class ChargedParticle;
+  class Met;
+
   class DiTauSystem {
     public:
+      DiTauSystem(ChargedParticle *t1, ChargedParticle *t2, Met *met);
+      ~DiTauSystem() {}
 
-  DiTauSystem(ChargedParticle *t1, ChargedParticle *t2, Met *met);
-  ~DiTauSystem() {};
-
-  double        RecoMass()       {return fRecoMass;}
-  double        VisMass()        {return fVisMass;}
-  double        XTau1()          {return fXTau[0];}
-  double        XTau2()          {return fXTau[1];}
-  double        TransverseMass() {return fMT;}
-  double        TransverseEll()  {return fETll;}
-  double        TransverseEnn()  {return fETnn;}
+      Double_t         RecoMass()        const { return fRecoMass;}
+      Double_t         TransverseMass()  const { return fMT;      }
+      Double_t         TransverseEll()   const { return fETll;    }
+      Double_t         TransverseEnn()   const { return fETnn;    }
+      Double_t         VisMass()         const { return fVisMass; }
+      Double_t         XTau1()           const { return fXTau[0]; }
+      Double_t         XTau2()           const { return fXTau[1]; }
   
- private:
-  void          init();
+    private:
+      void             Init();
   
-  ChargedParticle *fT1;
-  ChargedParticle *fT2;
-  Met             *fMet;
-  
-  // derived data members
-  double        fXTau[2];
-  double        fRecoMass;
-  double        fVisMass;
-  double        fMT;
-  double        fETll;
-  double        fETnn;
-};
+      ChargedParticle *fT1;       //first tau
+      ChargedParticle *fT2;       //second tau
+      Met             *fMet;      //missing et
+      Double_t         fXTau[2];  //
+      Double_t         fRecoMass; //
+      Double_t         fVisMass;  //
+      Double_t         fMT;       //
+      Double_t         fETll;     //
+      Double_t         fETnn;     //
+  };
 }
 #endif
