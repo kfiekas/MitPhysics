@@ -1,4 +1,4 @@
-// $Id: JetCleaningMod.cc,v 1.3 2008/11/27 16:30:27 loizides Exp $
+// $Id: JetCleaningMod.cc,v 1.4 2008/11/28 09:13:50 loizides Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -12,8 +12,11 @@ ClassImp(mithep::JetCleaningMod)
 JetCleaningMod::JetCleaningMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fCleanElectronsName(ModNames::gkCleanElectronsName),        
+  fCleanPhotonsName(ModNames::gkCleanPhotonsName),        
   fGoodJetsName(ModNames::gkGoodJetsName),        
-  fCleanJetsName(ModNames::gkCleanJetsName)
+  fCleanJetsName(ModNames::gkCleanJetsName),
+  fMinDeltaRToElectron(0.3),
+  fMinDeltaRToPhoton(0.3)
 {
   // Constructor.
 }
@@ -25,28 +28,43 @@ void JetCleaningMod::Process()
 
   // get input collections
   ElectronOArr *CleanElectrons = GetObjThisEvt<ElectronOArr>(fCleanElectronsName);
+  PhotonOArr *CleanPhotons = GetObjThisEvt<PhotonOArr>(fCleanPhotonsName);
   JetOArr *GoodJets = GetObjThisEvt<JetOArr>(fGoodJetsName);
 
   // create output collection
   JetOArr *CleanJets = new JetOArr;
   CleanJets->SetName(fCleanJetsName);
 
-  // Remove any jet that overlaps in eta, phi with an isolated electron.
+  // Remove any jet that overlaps in eta, phi with an isolated electron.    
   for (UInt_t i=0; i<GoodJets->GetEntries(); ++i) {
     const Jet *jet = GoodJets->At(i);        
 
     Bool_t isElectronOverlap =  false;
-     
+    Bool_t isPhotonOverlap =  false;
+
     //Check for overlap with an electron
-    for (UInt_t j=0; j<CleanElectrons->Entries(); j++) {
-      Double_t deltaR = MathUtils::DeltaR(CleanElectrons->At(j)->Mom(),jet->Mom());  
-      if (deltaR < 0.3) {
-	isElectronOverlap = kTRUE;
-	break;	 	 
-      }      
+    if (CleanElectrons) {
+      for (UInt_t j=0; j<CleanElectrons->Entries(); j++) {
+        Double_t deltaR = MathUtils::DeltaR(CleanElectrons->At(j)->Mom(),jet->Mom());  
+        if (deltaR < fMinDeltaRToElectron) {
+          isElectronOverlap = kTRUE;
+          break;	 	 
+        }      
+      }
     }
 
-    if (isElectronOverlap)
+    //Check for overlap with a photon
+    if (CleanPhotons) {
+      for (UInt_t j=0; j<CleanPhotons->Entries(); j++) {
+        Double_t deltaR = MathUtils::DeltaR(CleanPhotons->At(j)->Mom(),jet->Mom());  
+        if (deltaR < fMinDeltaRToPhoton) {
+          isPhotonOverlap = kTRUE;
+          break;	 	 
+        }      
+      }
+    }
+
+    if (isElectronOverlap || isPhotonOverlap)
       continue;
 
     CleanJets->Add(jet);     

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.2 2008/11/27 16:30:26 loizides Exp $
+// $Id: JetCleaningMod.h,v 1.3 2008/11/28 09:13:50 loizides Exp $
 //
 // JetCleaningMod
 //
@@ -24,14 +24,20 @@ namespace mithep
                      const char *title="Jet cleaning module");
       ~JetCleaningMod() {}
 
-      void               SetCleanElectronsName(const char *name) { fCleanElectronsName = name; }
-      void               SetGoodJetsName(const char *name)       { fGoodJetsName       = name; }  
-      void               SetCleanJetsName(const char *name)      { fCleanJetsName      = name; }
- 
+      void               SetCleanElectronsName(const char *name)  { fCleanElectronsName = name; }
+      void               SetCleanPhotonsName(const char *name)    { fCleanPhotonsName = name; }
+      void               SetGoodJetsName(const char *name)        { fGoodJetsName       = name; }  
+      void               SetCleanJetsName(const char *name)       { fCleanJetsName      = name; }
+      void               SetMinDeltaRToElectron(const Double_t x) { fMinDeltaRToElectron   = x; }
+      void               SetMinDeltaRToPhoton(const Double_t x)   { fMinDeltaRToPhoton   = x;   }
+
     protected:
-      TString            fCleanElectronsName; //name of clean electrons (input)
-      TString            fGoodJetsName;       //name of good jets (input)
-      TString            fCleanJetsName;      //name of clean jets (output)
+      TString            fCleanElectronsName;   //name of clean electrons (input)
+      TString            fCleanPhotonsName;     //name of clean photons   (input)
+      TString            fGoodJetsName;         //name of good jets       (input)
+      TString            fCleanJetsName;        //name of clean jets      (output)
+      Double_t           fMinDeltaRToElectron;  //delta R threshold for separating electrons from jets
+      Double_t           fMinDeltaRToPhoton;    //delta R threshold for separating photons from jets
 
       void               Process();
    
