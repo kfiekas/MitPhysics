@@ -1,4 +1,4 @@
-// $Id: JetCleaningMod.cc,v 1.4 2008/11/28 09:13:50 loizides Exp $
+// $Id: JetCleaningMod.cc,v 1.5 2008/11/29 18:45:43 sixie Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -39,8 +39,8 @@ void JetCleaningMod::Process()
   for (UInt_t i=0; i<GoodJets->GetEntries(); ++i) {
     const Jet *jet = GoodJets->At(i);        
 
-    Bool_t isElectronOverlap =  false;
-    Bool_t isPhotonOverlap =  false;
+    Bool_t isElectronOverlap = kFALSE;
+    Bool_t isPhotonOverlap = kFALSE;
 
     //Check for overlap with an electron
     if (CleanElectrons) {
@@ -53,6 +53,8 @@ void JetCleaningMod::Process()
       }
     }
 
+    if (isElectronOverlap) continue;
+
     //Check for overlap with a photon
     if (CleanPhotons) {
       for (UInt_t j=0; j<CleanPhotons->Entries(); j++) {
@@ -64,8 +66,7 @@ void JetCleaningMod::Process()
       }
     }
 
-    if (isElectronOverlap || isPhotonOverlap)
-      continue;
+    if (isPhotonOverlap) continue;
 
     CleanJets->Add(jet);     
   }
