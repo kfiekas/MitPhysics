@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.10 2008/12/01 11:36:31 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.11 2008/12/01 11:38:48 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -128,9 +128,9 @@ void GeneratorMod::Process()
       GenBosons->Add(p);
     }
 
-    // photons, only with Pt > 15 and |eta| < 2.5
+    // photons, only with Pt > 15
     else if (p->Status() == 1 && p->Is(MCParticle::kGamma) &&
-             p->Pt() > 15 && p->AbsEta() < 2.5) {
+             p->Pt() > 15) {
       GenPhotons->Add(p);
     }
 
