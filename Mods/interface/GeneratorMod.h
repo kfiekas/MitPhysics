@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.6 2008/11/24 14:13:20 loizides Exp $
+// $Id: GeneratorMod.h,v 1.7 2008/11/27 16:30:26 loizides Exp $
 //
 // GeneratorMod
 //
@@ -36,6 +36,7 @@ namespace mithep
       const char    *GetMCQuarksName()     const { return fMCQuarksName; }	
       const char    *GetMCqqHsName()	   const { return fMCqqHsName; }	
       const char    *GetMCBosonsName()     const { return fMCBosonsName; }	
+      const char    *GetMCPhotonsName()    const { return fMCPhotonsName; }	
       void           SetFillHist(Bool_t b)	         { fFillHist	     = b; }
       void           SetMCPartName(const char *s)	 { fMCPartName       = s; }	
       void           SetMCLeptonsName(const char * s)    { fMCLeptonsName    = s; }	
@@ -45,6 +46,7 @@ namespace mithep
       void           SetMCQuarksName(const char *s)      { fMCQuarksName     = s; }	
       void           SetMCqqHsName(const char *s)	 { fMCqqHsName       = s; }	
       void           SetMCBosonsName(const char *s)      { fMCBosonsName     = s; }	
+      void           SetMCPhotonsName(const char *s)     { fMCPhotonsName    = s; }	
 
     protected:
       Bool_t         fFillHist; 		//=true then fill histos (def=0)
@@ -56,6 +58,7 @@ namespace mithep
       TString        fMCQuarksName;		//name of quarks coll
       TString        fMCqqHsName;		//name of qqH coll
       TString        fMCBosonsName;		//name of bosons coll
+      TString        fMCPhotonsName;		//name of photons coll
       MCParticleCol *fParticles;		//!MCParticle branch
       TH1D          *hDGenLeptons[20];          //!histos for W leptons
       TH1D          *hDGenAllLeptons[20];       //!histos for all leptons
@@ -64,6 +67,7 @@ namespace mithep
       TH1D          *hDGenQuarks[20];           //!histos for quarks
       TH1D          *hDGenWBF[20];              //!histos for WBF
       TH1D          *hDGenBosons[20];           //!histos for bosons
+      TH1D          *hDGenPhotons[20];          //!histos for photons
 
       void           Process();
       void           SlaveBegin();
