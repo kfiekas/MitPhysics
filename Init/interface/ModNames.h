@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: Names.h,v 1.22 2008/11/23 13:35:24 sixie Exp $
+// $Id: ModNames.h,v 1.1 2008/11/27 16:28:34 loizides Exp $
 //
 // Names
 //
@@ -38,6 +38,7 @@ namespace mithep
       static const char *gkMCQuarksName;
       static const char *gkMCqqHsName;
       static const char *gkMCBosonsName;
+      static const char *gkMCPhotonsName;
   };
 }
 #endif

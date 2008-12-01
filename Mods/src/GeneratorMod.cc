@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.8 2008/11/27 16:30:27 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.9 2008/11/28 09:13:50 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -22,6 +22,7 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fMCQuarksName(ModNames::gkMCQuarksName),
   fMCqqHsName(ModNames::gkMCqqHsName),
   fMCBosonsName(ModNames::gkMCBosonsName),
+  fMCPhotonsName(ModNames::gkMCPhotonsName),
   fParticles(0)
 {
   // Constructor.
@@ -41,6 +42,7 @@ void GeneratorMod::Process()
   MCParticleOArr *GenQuarks     = new MCParticleOArr;
   MCParticleOArr *GenqqHs       = new MCParticleOArr;
   MCParticleOArr *GenBosons     = new MCParticleOArr;
+  MCParticleOArr *GenPhotons    = new MCParticleOArr;
 
   // load MCParticle branch
   LoadBranch(fMCPartName);
@@ -125,6 +127,13 @@ void GeneratorMod::Process()
               p->Is(MCParticle::kH0) || p->Is(MCParticle::kA0)  || p->Is(MCParticle::kHp))) {
       GenBosons->Add(p);
     }
+
+    // photons (only for photons with Pt > 15 and |eta| < 2.5
+    else if (p->Status() == 1 && p->Is(MCParticle::kGamma) &&
+             p->Pt() > 15 && p->AbsEta() < 2.5) {
+      GenPhotons->Add(p);
+    }
+
   }
 
   // add objects to this event for other modules to use
@@ -135,7 +144,8 @@ void GeneratorMod::Process()
   AddObjThisEvt(GenQuarks,    fMCQuarksName);  
   AddObjThisEvt(GenqqHs,      fMCqqHsName);  
   AddObjThisEvt(GenBosons,    fMCBosonsName);
-  
+  AddObjThisEvt(GenPhotons,   fMCPhotonsName);
+
   // fill histograms if requested
   if (fFillHist) {
 
@@ -288,6 +298,13 @@ void GeneratorMod::Process()
       hDGenBosons[2]->Fill(GenBosons->At(i)->Eta());
       hDGenBosons[3]->Fill(GenBosons->At(i)->Mass());
     } 
+
+    // photons
+    hDGenPhotons[0]->Fill(GenPhotons->GetEntries());
+    for(UInt_t i=0; i<GenPhotons->GetEntries(); i++) {
+      hDGenPhotons[1]->Fill(GenPhotons->At(i)->Pt());
+      hDGenPhotons[2]->Fill(GenPhotons->At(i)->Eta());
+    } 
   }
 }
 
@@ -375,5 +392,11 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenBosons_%d", 2);  hDGenBosons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
     sprintf(sb,"hDGenBosons_%d", 3);  hDGenBosons[3]  = new TH1D(sb,sb,2000,0.0,2000.0); 
     for(Int_t i=0; i<4; i++) AddOutput(hDGenBosons[i]);
+
+    // photons
+    sprintf(sb,"hDGenPhotons_%d", 0);  hDGenPhotons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
+    sprintf(sb,"hDGenPhotons_%d", 1);  hDGenPhotons[1]  = new TH1D(sb,sb,200,0.0,400.0); 
+    sprintf(sb,"hDGenPhotons_%d", 2);  hDGenPhotons[2]  = new TH1D(sb,sb,50,-2.5,2.5); 
+    for(Int_t i=0; i<3; i++) AddOutput(hDGenPhotons[i]);
   }
 }
