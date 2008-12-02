@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.11 2008/12/01 11:38:48 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.12 2008/12/01 11:44:34 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -35,14 +35,22 @@ void GeneratorMod::Process()
 
   // these arrays will be filled in the loop of particles
   MCParticleOArr *GenLeptons    = new MCParticleOArr;
+  GenLeptons->SetName(fMCLeptonsName);
   MCParticleOArr *GenAllLeptons = new MCParticleOArr;
+  GenAllLeptons->SetName(fMCAllLeptonsName);
   MCParticleOArr *GenTaus       = new MCParticleOArr; 
-  GenTaus->SetOwner(true);
+  GenTaus->SetName(fMCTausName);
+  GenTaus->SetOwner(kTRUE);
   MCParticleOArr *GenNeutrinos  = new MCParticleOArr;
+  GenNeutrinos->SetName(fMCNeutrinosName);
   MCParticleOArr *GenQuarks     = new MCParticleOArr;
+  GenQuarks->SetName(fMCQuarksName);
   MCParticleOArr *GenqqHs       = new MCParticleOArr;
+  GenqqHs->SetName(fMCqqHsName);
   MCParticleOArr *GenBosons     = new MCParticleOArr;
+  GenBosons->SetName(fMCBosonsName);
   MCParticleOArr *GenPhotons    = new MCParticleOArr;
+  GenPhotons->SetName(fMCPhotonsName);
 
   // load MCParticle branch
   LoadBranch(fMCPartName);
@@ -137,14 +145,14 @@ void GeneratorMod::Process()
   }
 
   // add objects to this event for other modules to use
-  AddObjThisEvt(GenLeptons,   fMCLeptonsName);  
-  AddObjThisEvt(GenAllLeptons,fMCAllLeptonsName);  
-  AddObjThisEvt(GenTaus,      fMCTausName);  
-  AddObjThisEvt(GenNeutrinos, fMCNeutrinosName);  
-  AddObjThisEvt(GenQuarks,    fMCQuarksName);  
-  AddObjThisEvt(GenqqHs,      fMCqqHsName);  
-  AddObjThisEvt(GenBosons,    fMCBosonsName);
-  AddObjThisEvt(GenPhotons,   fMCPhotonsName);
+  AddObjThisEvt(GenLeptons);  
+  AddObjThisEvt(GenAllLeptons);
+  AddObjThisEvt(GenTaus);
+  AddObjThisEvt(GenNeutrinos);
+  AddObjThisEvt(GenQuarks);
+  AddObjThisEvt(GenqqHs);
+  AddObjThisEvt(GenBosons);
+  AddObjThisEvt(GenPhotons);
 
   // fill histograms if requested
   if (fFillHist) {
