@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.12 2008/12/01 11:44:34 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.13 2008/12/02 09:35:54 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -23,7 +23,11 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fMCqqHsName(ModNames::gkMCqqHsName),
   fMCBosonsName(ModNames::gkMCBosonsName),
   fMCPhotonsName(ModNames::gkMCPhotonsName),
-  fParticles(0)
+  fParticles(0),
+  fPtLeptonMin(0.0),
+  fEtaLeptonMax(5.0),
+  fPtPhotonMin(0.0),
+  fEtaPhotonMax(5.0)
 {
   // Constructor.
 }
@@ -63,7 +67,7 @@ void GeneratorMod::Process()
 
     // muons/electrons from W/Z decays
     if ((p->Is(MCParticle::kEl) || p->Is(MCParticle::kMu)) && p->Status() == 1) {
-      if (p->Pt() > 3.0 && TMath::Abs(p->Eta()) < 3.0) {
+      if (p->Pt() > fPtLeptonMin && p->AbsEta() < fEtaLeptonMax) {
         GenAllLeptons->Add(p);
       }
       Bool_t isGoodLepton = kFALSE;
@@ -136,9 +140,9 @@ void GeneratorMod::Process()
       GenBosons->Add(p);
     }
 
-    // photons, only with Pt > 15
+    // photons
     else if (p->Status() == 1 && p->Is(MCParticle::kGamma) &&
-             p->Pt() > 15) {
+             p->Pt() > fPtPhotonMin && p->AbsEta() < fEtaPhotonMax) {
       GenPhotons->Add(p);
     }
 
@@ -344,7 +348,7 @@ void GeneratorMod::SlaveBegin()
     // all leptons
     sprintf(sb,"hDGenAllLeptons_%d", 0);  hDGenAllLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenAllLeptons_%d", 1);  hDGenAllLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenAllLeptons_%d", 2);  hDGenAllLeptons[2]  = new TH1D(sb,sb,60,-3.0,3.0); 
+    sprintf(sb,"hDGenAllLeptons_%d", 2);  hDGenAllLeptons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
     sprintf(sb,"hDGenAllLeptons_%d", 3);  hDGenAllLeptons[3]  = new TH1D(sb,sb,90,0.0,180.0); 
     for(Int_t i=0; i<4; i++) AddOutput(hDGenAllLeptons[i]);
 
@@ -404,7 +408,7 @@ void GeneratorMod::SlaveBegin()
     // photons
     sprintf(sb,"hDGenPhotons_%d", 0);  hDGenPhotons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenPhotons_%d", 1);  hDGenPhotons[1]  = new TH1D(sb,sb,200,0.0,400.0); 
-    sprintf(sb,"hDGenPhotons_%d", 2);  hDGenPhotons[2]  = new TH1D(sb,sb,50,-2.5,2.5); 
+    sprintf(sb,"hDGenPhotons_%d", 2);  hDGenPhotons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
     for(Int_t i=0; i<3; i++) AddOutput(hDGenPhotons[i]);
   }
 }

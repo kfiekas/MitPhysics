@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.7 2008/11/27 16:30:26 loizides Exp $
+// $Id: GeneratorMod.h,v 1.8 2008/12/01 11:36:35 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -47,27 +47,37 @@ namespace mithep
       void           SetMCqqHsName(const char *s)	 { fMCqqHsName       = s; }	
       void           SetMCBosonsName(const char *s)      { fMCBosonsName     = s; }	
       void           SetMCPhotonsName(const char *s)     { fMCPhotonsName    = s; }	
+      void           SetPtLeptonMin(Float_t x)           { fPtLeptonMin      = x; }     
+      void           SetEtaLeptonMax(Float_t x)          { fEtaLeptonMax     = x; }     
+      void           SetPtPhotonMin(Float_t x)           { fPtPhotonMin      = x; }     
+      void           SetEtaPhotonMax(Float_t x)          { fEtaPhotonMax     = x; }	  
 
     protected:
-      Bool_t         fFillHist; 		//=true then fill histos (def=0)
-      TString        fMCPartName;		//name of MCParticle branch
-      TString        fMCLeptonsName ;		//name of lepton coll (from W)
-      TString        fMCAllLeptonsName ;	//name of lepton coll (all)
-      TString        fMCTausName;		//name of tau coll (hadronic decays)
-      TString        fMCNeutrinosName;  	//name of neutrinos coll
-      TString        fMCQuarksName;		//name of quarks coll
-      TString        fMCqqHsName;		//name of qqH coll
-      TString        fMCBosonsName;		//name of bosons coll
-      TString        fMCPhotonsName;		//name of photons coll
-      MCParticleCol *fParticles;		//!MCParticle branch
-      TH1D          *hDGenLeptons[20];          //!histos for W leptons
-      TH1D          *hDGenAllLeptons[20];       //!histos for all leptons
-      TH1D          *hDGenTaus[20];             //!histos for taus
-      TH1D          *hDGenNeutrinos[20];        //!histos for neutrinos
-      TH1D          *hDGenQuarks[20];           //!histos for quarks
-      TH1D          *hDGenWBF[20];              //!histos for WBF
-      TH1D          *hDGenBosons[20];           //!histos for bosons
-      TH1D          *hDGenPhotons[20];          //!histos for photons
+      Bool_t         fFillHist; 	  //=true then fill histos (def=0)
+      TString        fMCPartName;	  //name of MCParticle branch
+      TString        fMCLeptonsName ;	  //name of lepton coll (from W)
+      TString        fMCAllLeptonsName;   //name of lepton coll (all)
+      TString        fMCTausName;	  //name of tau coll (hadronic decays)
+      TString        fMCNeutrinosName;    //name of neutrinos coll
+      TString        fMCQuarksName;	  //name of quarks coll
+      TString        fMCqqHsName;	  //name of qqH coll
+      TString        fMCBosonsName;	  //name of bosons coll
+      TString        fMCPhotonsName;	  //name of photons coll
+      MCParticleCol *fParticles;	  //!MCParticle branch
+      Float_t        fPtLeptonMin;        // pt min for leptons
+      Float_t        fEtaLeptonMax;       // eta max for leptons
+      Float_t        fPtPhotonMin;        // pt min for photons
+      Float_t        fEtaPhotonMax;       // eta max for photons
+      
+
+      TH1D          *hDGenLeptons[20];    //!histos for W leptons
+      TH1D          *hDGenAllLeptons[20]; //!histos for all leptons
+      TH1D          *hDGenTaus[20];       //!histos for taus
+      TH1D          *hDGenNeutrinos[20];  //!histos for neutrinos
+      TH1D          *hDGenQuarks[20];     //!histos for quarks
+      TH1D          *hDGenWBF[20];        //!histos for WBF
+      TH1D          *hDGenBosons[20];     //!histos for bosons
+      TH1D          *hDGenPhotons[20];    //!histos for photons
 
       void           Process();
       void           SlaveBegin();
