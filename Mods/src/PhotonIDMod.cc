@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.1 2008/11/29 18:42:13 sixie Exp $
+// $Id: PhotonIDMod.cc,v 1.2 2008/12/03 09:52:56 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -95,7 +95,7 @@ void PhotonIDMod::Process()
 void PhotonIDMod::SlaveBegin()
 {
   // Run startup code on the computer (slave) doing the actual analysis. Here,
-  // we just request the electron collection branch.
+  // we just request the photon collection branch.
 
   ReqBranch(fPhotonBranchName, fPhotons);
 

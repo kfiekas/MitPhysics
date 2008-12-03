@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.1 2008/11/29 18:42:01 sixie Exp $
+// $Id: PhotonIDMod.h,v 1.2 2008/12/03 09:52:55 ceballos Exp $
 //
 // PhotonIDMod
 //
@@ -21,7 +21,7 @@ namespace mithep
   {
     public:
       PhotonIDMod(const char *name="PhotonIDMod", 
-                    const char *title="Photon identification module");
+                  const char *title="Photon identification module");
       ~PhotonIDMod() {}
 
       void          SetPhotonBranchName(const char *n) { fPhotonBranchName= n;      }   
@@ -53,9 +53,9 @@ namespace mithep
       TString       fPhotonIDType;	   //type of electron ID we impose
       TString       fPhotonIsoType;	   //type of electron Isolation we impose
       Double_t      fPhotonPtMin;	   //min pt cut
-      Double_t      fHadOverEmMax;         //!HadOverEm Max
-      Bool_t        fApplyPixelSeed;       //!apply PixelSeed?
-      PhotonCol    *fPhotons;		   //!electron branch
+      Double_t      fHadOverEmMax;         //!maximum of hadronic/em energy
+      Bool_t        fApplyPixelSeed;       //!=true then apply PixelSeed
+      PhotonCol    *fPhotons;		   //!photon branch
       EPhIdType     fPhIdType;             //!identification scheme
       EPhIsoType    fPhIsoType;            //!isolation scheme
 

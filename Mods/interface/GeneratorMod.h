@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.8 2008/12/01 11:36:35 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.9 2008/12/03 09:52:11 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -47,10 +47,10 @@ namespace mithep
       void           SetMCqqHsName(const char *s)	 { fMCqqHsName       = s; }	
       void           SetMCBosonsName(const char *s)      { fMCBosonsName     = s; }	
       void           SetMCPhotonsName(const char *s)     { fMCPhotonsName    = s; }	
-      void           SetPtLeptonMin(Float_t x)           { fPtLeptonMin      = x; }     
-      void           SetEtaLeptonMax(Float_t x)          { fEtaLeptonMax     = x; }     
-      void           SetPtPhotonMin(Float_t x)           { fPtPhotonMin      = x; }     
-      void           SetEtaPhotonMax(Float_t x)          { fEtaPhotonMax     = x; }	  
+      void           SetPtLeptonMin(Double_t x)           { fPtLeptonMin      = x; }     
+      void           SetEtaLeptonMax(Double_t x)          { fEtaLeptonMax     = x; }     
+      void           SetPtPhotonMin(Double_t x)           { fPtPhotonMin      = x; }     
+      void           SetEtaPhotonMax(Double_t x)          { fEtaPhotonMax     = x; }	  
 
     protected:
       Bool_t         fFillHist; 	  //=true then fill histos (def=0)
@@ -63,13 +63,11 @@ namespace mithep
       TString        fMCqqHsName;	  //name of qqH coll
       TString        fMCBosonsName;	  //name of bosons coll
       TString        fMCPhotonsName;	  //name of photons coll
+      Double_t       fPtLeptonMin;        //pt min for leptons
+      Double_t       fEtaLeptonMax;       //eta max for leptons
+      Double_t       fPtPhotonMin;        //pt min for photons
+      Double_t       fEtaPhotonMax;       //eta max for photons
       MCParticleCol *fParticles;	  //!MCParticle branch
-      Float_t        fPtLeptonMin;        // pt min for leptons
-      Float_t        fEtaLeptonMax;       // eta max for leptons
-      Float_t        fPtPhotonMin;        // pt min for photons
-      Float_t        fEtaPhotonMax;       // eta max for photons
-      
-
       TH1D          *hDGenLeptons[20];    //!histos for W leptons
       TH1D          *hDGenAllLeptons[20]; //!histos for all leptons
       TH1D          *hDGenTaus[20];       //!histos for taus

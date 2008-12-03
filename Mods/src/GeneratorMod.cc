@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.13 2008/12/02 09:35:54 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.14 2008/12/03 09:52:11 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -23,11 +23,11 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fMCqqHsName(ModNames::gkMCqqHsName),
   fMCBosonsName(ModNames::gkMCBosonsName),
   fMCPhotonsName(ModNames::gkMCPhotonsName),
-  fParticles(0),
   fPtLeptonMin(0.0),
   fEtaLeptonMax(5.0),
   fPtPhotonMin(0.0),
-  fEtaPhotonMax(5.0)
+  fEtaPhotonMax(5.0),
+  fParticles(0)
 {
   // Constructor.
 }
