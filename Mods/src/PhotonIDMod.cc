@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.8 2008/11/28 11:35:29 ceballos Exp $
+// $Id: PhotonIDMod.cc,v 1.1 2008/11/29 18:42:13 sixie Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -13,8 +13,10 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPhotonBranchName(Names::gkPhotonBrn),
   fGoodPhotonsName(ModNames::gkGoodPhotonsName),  
   fPhotonIDType("Tight"),
-  fPhotonIsoType("NoIso"),
+  fPhotonIsoType("CombinedIso"),
   fPhotonPtMin(15.0),
+  fHadOverEmMax(0.05),
+  fApplyPixelSeed(kTRUE),
   fPhotons(0),
   fPhIdType(kIdUndef),
   fPhIsoType(kIsoUndef)
@@ -36,6 +38,13 @@ void PhotonIDMod::Process()
     const Photon *ph = fPhotons->At(i);        
 
     if (ph->Pt() <= fPhotonPtMin) 
+      continue;
+    
+    if (ph->HadOverEm() >= fHadOverEmMax) 
+      continue;
+    
+    if (fApplyPixelSeed == kTRUE &&
+        ph->HasPixelSeed() == kTRUE) 
       continue;
     
     Bool_t idcut = kFALSE;
@@ -61,6 +70,10 @@ void PhotonIDMod::Process()
     switch (fPhIsoType) {      
       case kNoIso:
         isocut = kTRUE;
+        break;
+      case kCombinedIso:
+        isocut = ph->HollowConeTrkIso() + 
+	         ph->HcalRecHitIso() < 7.0;
         break;
       case kCustomIso:
       default:
@@ -95,23 +108,25 @@ void PhotonIDMod::SlaveBegin()
   else if (fPhotonIDType.CompareTo("Custom") == 0) {
     fPhIdType = kCustomId;
     SendError(kWarning, "SlaveBegin",
-              "Custom electron identification is not yet implemented.");
+              "Custom photon identification is not yet implemented.");
   } else {
     SendError(kAbortAnalysis, "SlaveBegin",
-              "The specified electron identification %s is not defined.",
+              "The specified photon identification %s is not defined.",
               fPhotonIDType.Data());
     return;
   }
 
   if (fPhotonIsoType.CompareTo("NoIso") == 0 )
     fPhIsoType = kNoIso;
+  else if (fPhotonIsoType.CompareTo("CombinedIso") == 0 )
+    fPhIsoType = kCombinedIso;
   else if (fPhotonIsoType.CompareTo("Custom") == 0 ) {
     fPhIsoType = kCustomIso;
     SendError(kWarning, "SlaveBegin",
-              "Custom electron isolation is not yet implemented.");
+              "Custom photon isolation is not yet implemented.");
   } else {
     SendError(kAbortAnalysis, "SlaveBegin",
-              "The specified electron isolation %s is not defined.",
+              "The specified photon isolation %s is not defined.",
               fPhotonIsoType.Data());
     return;
   }
