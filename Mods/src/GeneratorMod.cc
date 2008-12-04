@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.14 2008/12/03 09:52:11 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.15 2008/12/03 10:19:13 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -146,6 +146,78 @@ void GeneratorMod::Process()
       GenPhotons->Add(p);
     }
 
+    // W/Z -> lnu for Magraph
+    if((p->IsQuark() || p->PdgId() == MCParticle::kGlu) && p->NDaughters() == 2){
+      CompositeParticle *diBoson = new CompositeParticle();
+      diBoson->AddDaughter(p->Daughter(0));
+      diBoson->AddDaughter(p->Daughter(1));
+      if(p->HasDaughter(MCParticle::kMu) && p->HasDaughter(MCParticle::kMuNu)){
+        if (fFillHist) hDVMass[0]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        GenLeptons->Add(p->FindDaughter(MCParticle::kMu));
+      }
+      else if(p->HasDaughter(MCParticle::kEl) && p->HasDaughter(MCParticle::kElNu)){
+        hDVMass[1]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        GenLeptons->Add(p->FindDaughter(MCParticle::kEl));
+      }
+      else if(p->HasDaughter(MCParticle::kTau) && p->HasDaughter(MCParticle::kTauNu)){
+        if (fFillHist) hDVMass[2]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        const MCParticle *Tau = p->FindDaughter(MCParticle::kTau);
+        if (Tau->HasDaughter(MCParticle::kMu)) GenLeptons->Add(Tau->FindDaughter(MCParticle::kMu));
+        if (Tau->HasDaughter(MCParticle::kEl)) GenLeptons->Add(Tau->FindDaughter(MCParticle::kEl));
+      }
+      else if(p->Daughter(0)->AbsPdgId() == MCParticle::kMu && p->Daughter(1)->AbsPdgId() == MCParticle::kMu){
+        if (fFillHist) hDVMass[3]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        GenLeptons->Add(p->Daughter(0));
+        GenLeptons->Add(p->Daughter(1));
+      }
+      else if(p->Daughter(0)->AbsPdgId() == MCParticle::kEl && p->Daughter(1)->AbsPdgId() == MCParticle::kEl){
+        if (fFillHist) hDVMass[4]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        GenLeptons->Add(p->Daughter(0));
+        GenLeptons->Add(p->Daughter(1));
+      }
+      else if(p->Daughter(0)->AbsPdgId() == MCParticle::kTau && p->Daughter(1)->AbsPdgId() == MCParticle::kTau){
+        if (fFillHist) hDVMass[5]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        const MCParticle *Tau0 = p->Daughter(0);
+        if (Tau0->HasDaughter(MCParticle::kMu)) GenLeptons->Add(Tau0->FindDaughter(MCParticle::kMu));
+        if (Tau0->HasDaughter(MCParticle::kEl)) GenLeptons->Add(Tau0->FindDaughter(MCParticle::kEl));
+        const MCParticle *Tau1 = p->Daughter(1);
+        if (Tau1->HasDaughter(MCParticle::kMu)) GenLeptons->Add(Tau1->FindDaughter(MCParticle::kMu));
+        if (Tau1->HasDaughter(MCParticle::kEl)) GenLeptons->Add(Tau1->FindDaughter(MCParticle::kEl));
+      }
+      delete diBoson;
+    }
+
+    // t -> lnu for Magraph
+    if(p->PdgId() == MCParticle::kTop){
+      CompositeParticle *diBoson = new CompositeParticle();
+      if(p->HasDaughter(MCParticle::kMu) && p->HasDaughter(MCParticle::kMuNu)){
+        diBoson->AddDaughter(p->FindDaughter(MCParticle::kMu));
+        diBoson->AddDaughter(p->FindDaughter(MCParticle::kMuNu));
+        if (fFillHist) hDVMass[6]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        GenLeptons->Add(p->FindDaughter(MCParticle::kMu));
+      }    
+      else if(p->HasDaughter(MCParticle::kEl) && p->HasDaughter(MCParticle::kElNu)){
+        diBoson->AddDaughter(p->FindDaughter(MCParticle::kEl));
+        diBoson->AddDaughter(p->FindDaughter(MCParticle::kElNu));
+        if (fFillHist) hDVMass[7]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        GenLeptons->Add(p->FindDaughter(MCParticle::kEl));
+      }    
+      else if(p->HasDaughter(MCParticle::kTau) && p->HasDaughter(MCParticle::kTauNu)){
+        diBoson->AddDaughter(p->FindDaughter(MCParticle::kTau));
+        diBoson->AddDaughter(p->FindDaughter(MCParticle::kTauNu));
+        if (fFillHist) hDVMass[8]->Fill(TMath::Min(diBoson->Mass(),199.999));
+        const MCParticle *Tau = p->FindDaughter(MCParticle::kTau);
+        if (Tau->HasDaughter(MCParticle::kMu)) GenLeptons->Add(Tau->FindDaughter(MCParticle::kMu));
+        if (Tau->HasDaughter(MCParticle::kEl)) GenLeptons->Add(Tau->FindDaughter(MCParticle::kEl));
+      }
+      else if(!p->HasDaughter(MCParticle::kW)){
+        for(UInt_t nd=0; nd<p->NDaughters(); nd++)
+          if(p->Daughter(nd)->AbsPdgId() != MCParticle::kBottom &&
+             p->Daughter(nd)->AbsPdgId() != MCParticle::kGamma) diBoson->AddDaughter(p->Daughter(nd));
+        if (fFillHist) hDVMass[9]->Fill(TMath::Min(diBoson->Mass(),199.999));
+      }
+      delete diBoson;
+    }
   }
 
   // add objects to this event for other modules to use
@@ -157,7 +229,7 @@ void GeneratorMod::Process()
   AddObjThisEvt(GenqqHs);
   AddObjThisEvt(GenBosons);
   AddObjThisEvt(GenPhotons);
-
+  
   // fill histograms if requested
   if (fFillHist) {
 
@@ -410,5 +482,18 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenPhotons_%d", 1);  hDGenPhotons[1]  = new TH1D(sb,sb,200,0.0,400.0); 
     sprintf(sb,"hDGenPhotons_%d", 2);  hDGenPhotons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
     for(Int_t i=0; i<3; i++) AddOutput(hDGenPhotons[i]);
+
+    // auxiliar
+    sprintf(sb,"hDVMass_%d", 0);  hDVMass[0]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 1);  hDVMass[1]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 2);  hDVMass[2]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 3);  hDVMass[3]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 4);  hDVMass[4]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 5);  hDVMass[5]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 6);  hDVMass[6]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 7);  hDVMass[7]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 8);  hDVMass[8]  = new TH1D(sb,sb,200,0.,200.); 
+    sprintf(sb,"hDVMass_%d", 9);  hDVMass[9]  = new TH1D(sb,sb,200,0.,200.);
+    for(Int_t i=0; i<10; i++) AddOutput(hDVMass[i]);
   }
 }

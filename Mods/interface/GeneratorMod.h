@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.9 2008/12/03 09:52:11 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.10 2008/12/03 10:19:13 loizides Exp $
 //
 // GeneratorMod
 //
@@ -76,6 +76,7 @@ namespace mithep
       TH1D          *hDGenWBF[20];        //!histos for WBF
       TH1D          *hDGenBosons[20];     //!histos for bosons
       TH1D          *hDGenPhotons[20];    //!histos for photons
+      TH1D          *hDVMass[20];         //!histos for auxiliar work
 
       void           Process();
       void           SlaveBegin();
