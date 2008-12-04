@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonCleaningMod.h,v 1.3 2008/11/28 09:13:50 loizides Exp $
+// $Id: PhotonCleaningMod.h,v 1.1 2008/11/29 18:43:42 sixie Exp $
 //
 // PhotonCleaningMod
 //
@@ -24,19 +24,18 @@ namespace mithep
                      const char *title="Photon cleaning module");
       ~PhotonCleaningMod() {}
 
-      void   SetCleanElectronsName(const char *name)    { fCleanElectronsName    = name; }
-      void   SetGoodPhotonsName(const char *name)       { fGoodPhotonsName       = name; }  
-      void   SetCleanPhotonsName(const char *name)      { fCleanPhotonsName      = name; }
-      void   SetMinDeltaRToElectron(const Double_t x)   { fMinDeltaRToElectron   = x;    }
+      void             SetCleanElectronsName(const char *name)    { fCleanElectronsName    = name; }
+      void             SetGoodPhotonsName(const char *name)       { fGoodPhotonsName       = name; } 
+      void             SetCleanPhotonsName(const char *name)      { fCleanPhotonsName      = name; }
+      void             SetMinDeltaRToElectron(const Double_t x)   { fMinDeltaRToElectron   = x;    }
 
     protected:
-      TString            fCleanElectronsName;   //name of clean electrons (input)
-      TString            fGoodPhotonsName;      //name of good jets (input)
-      TString            fCleanPhotonsName;     //name of clean jets (output)
-      Double_t           fMinDeltaRToElectron;  //delta R threshold for separating 
-                                                //electrons from photons
+      TString          fCleanElectronsName;   //name of clean electrons (input)
+      TString          fGoodPhotonsName;      //name of good jets (input)
+      TString          fCleanPhotonsName;     //name of clean jets (output)
+      Double_t         fMinDeltaRToElectron;  //delta R threshold for separating electrons/photons
 
-      void               Process();
+      void             Process();
    
       ClassDef(PhotonCleaningMod,1) // Photon cleaning module
   };

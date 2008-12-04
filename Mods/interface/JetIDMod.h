@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.3 2008/11/27 16:30:26 loizides Exp $
+// $Id: JetIDMod.h,v 1.4 2008/11/28 09:13:50 loizides Exp $
 //
 // JetIDMod
 //
@@ -31,10 +31,10 @@ namespace mithep
 
     protected:
       TString           fJetBranchName;         //name of muon collection
-      TString           fGoodJetsName ;         //name of good jets collection  
+      TString           fGoodJetsName;          //name of good jets collection  
       Bool_t            fUseJetCorrection;      //=true then use corrected energy
       Double_t          fJetEtCut;              //value of Jet Et cut
-      JetCol           *fJets;                  //!jet branch
+      const JetCol     *fJets;                  //!jet branch
 
       void              Process();
       void              SlaveBegin();

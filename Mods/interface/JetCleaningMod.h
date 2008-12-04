@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.3 2008/11/28 09:13:50 loizides Exp $
+// $Id: JetCleaningMod.h,v 1.4 2008/11/29 18:45:36 sixie Exp $
 //
 // JetCleaningMod
 //
@@ -36,8 +36,8 @@ namespace mithep
       TString            fCleanPhotonsName;     //name of clean photons   (input)
       TString            fGoodJetsName;         //name of good jets       (input)
       TString            fCleanJetsName;        //name of clean jets      (output)
-      Double_t           fMinDeltaRToElectron;  //delta R threshold for separating electrons from jets
-      Double_t           fMinDeltaRToPhoton;    //delta R threshold for separating photons from jets
+      Double_t           fMinDeltaRToElectron;  //delta R for separating electrons from jets
+      Double_t           fMinDeltaRToPhoton;    //delta R for separating photons from jets
 
       void               Process();
    

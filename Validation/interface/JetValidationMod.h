@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetValidationMod.h,v 1.1 2008/10/14 06:13:56 loizides Exp $
+// $Id: JetValidationMod.h,v 1.1 2008/10/15 06:05:02 loizides Exp $
 //
 // JetValidationMod
 //
@@ -26,7 +26,7 @@ namespace mithep
   {
     public:
       JetValidationMod(const char *name="JetValidationMod", 
-                     const char *title="Example analysis module with all branches");
+                       const char *title="Jet validation module");
       ~JetValidationMod() {}
 
     protected:
@@ -35,12 +35,10 @@ namespace mithep
       TString                  fSC5GenJetName;      
       TString                  fIC5JetName;         
       TString                  fSC5JetName;         
-
-      JetCol                  *fIC5Jets;              //!Jet branch
-      JetCol                  *fSC5Jets;              //!Jet branch
-      GenJetCol               *fIC5GenJets;           //!GenJet branch
-      GenJetCol               *fSC5GenJets;           //!GenJet branch
-
+      const JetCol            *fIC5Jets;              //!Jet branch
+      const JetCol            *fSC5Jets;              //!Jet branch
+      const GenJetCol         *fIC5GenJets;           //!GenJet branch
+      const GenJetCol         *fSC5GenJets;           //!GenJet branch
       TH1D                    *fIC5GenJetRecoJetDeltaR;
       TH1D                    *fIC5GenJetRecoJetDeltaEta;
       TH1D                    *fIC5GenJetRecoJetDeltaPhi;
@@ -92,13 +90,8 @@ namespace mithep
       TH2D                    *fSC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt;
       TH1D                    *fSC5NCaloJets;
 
-      int                      fNEventsProcessed;
-
-      void                     Begin();
       void                     Process();
       void                     SlaveBegin();
-      void                     SlaveTerminate();
-      void                     Terminate();      
 
       ClassDef(JetValidationMod,1) // TAM example analysis module
   };

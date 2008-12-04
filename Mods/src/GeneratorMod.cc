@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.15 2008/12/03 10:19:13 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.16 2008/12/04 11:55:19 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -117,8 +117,8 @@ void GeneratorMod::Process()
     // qqH, information about the forward jets
     else if (isqqH == kFALSE && p->Is(MCParticle::kH)) {
       isqqH = kTRUE;
-      MCParticle *pq1 = fParticles->At(i-1);
-      MCParticle *pq2 = fParticles->At(i-2);
+      const MCParticle *pq1 = fParticles->At(i-1);
+      const MCParticle *pq2 = fParticles->At(i-2);
       if (!pq1 || !pq2) {
           SendError(kWarning, "Process", "Could not find quark pair!");
       } else if (pq1->IsQuark()   && pq2->IsQuark()   && 

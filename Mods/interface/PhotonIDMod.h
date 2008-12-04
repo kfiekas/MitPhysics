@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.2 2008/12/03 09:52:55 ceballos Exp $
+// $Id: PhotonIDMod.h,v 1.3 2008/12/03 10:19:13 loizides Exp $
 //
 // PhotonIDMod
 //
@@ -24,13 +24,13 @@ namespace mithep
                   const char *title="Photon identification module");
       ~PhotonIDMod() {}
 
-      void          SetPhotonBranchName(const char *n) { fPhotonBranchName= n;      }   
-      void          SetGoodPhotonsName(const char *n)  { fGoodPhotonsName = n;      }   
-      void          SetPhotonIDType(const char *type)  { fPhotonIDType    = type;   }
-      void          SetPhotonIsoType(const char *type) { fPhotonIsoType   = type;   }
-      void          SetPhotonPtMin(Double_t pt)        { fPhotonPtMin     = pt;     }
-      void          SetHadOverEmMax(Double_t hovere)   { fHadOverEmMax    = hovere; }
-      void          SetPhotonPtMin(Bool_t b)           { fApplyPixelSeed  = b;      }
+      void                SetPhotonBranchName(const char *n) { fPhotonBranchName= n;      }   
+      void                SetGoodPhotonsName(const char *n)  { fGoodPhotonsName = n;      }   
+      void                SetPhotonIDType(const char *type)  { fPhotonIDType    = type;   }
+      void                SetPhotonIsoType(const char *type) { fPhotonIsoType   = type;   }
+      void                SetPhotonPtMin(Double_t pt)        { fPhotonPtMin     = pt;     }
+      void                SetHadOverEmMax(Double_t hovere)   { fHadOverEmMax    = hovere; }
+      void                SetPhotonPtMin(Bool_t b)           { fApplyPixelSeed  = b;      }
 
 
       enum EPhIdType {
@@ -48,16 +48,16 @@ namespace mithep
       };
 
     protected:
-      TString       fPhotonBranchName;     //branch name of electron collection
-      TString       fGoodPhotonsName;      //name of exported "good electrons" collection
-      TString       fPhotonIDType;	   //type of electron ID we impose
-      TString       fPhotonIsoType;	   //type of electron Isolation we impose
-      Double_t      fPhotonPtMin;	   //min pt cut
-      Double_t      fHadOverEmMax;         //!maximum of hadronic/em energy
-      Bool_t        fApplyPixelSeed;       //!=true then apply PixelSeed
-      PhotonCol    *fPhotons;		   //!photon branch
-      EPhIdType     fPhIdType;             //!identification scheme
-      EPhIsoType    fPhIsoType;            //!isolation scheme
+      TString             fPhotonBranchName;     //branch name of electron collection
+      TString             fGoodPhotonsName;      //name of exported "good electrons" collection
+      TString             fPhotonIDType;         //type of electron ID we impose
+      TString             fPhotonIsoType;        //type of electron Isolation we impose
+      Double_t            fPhotonPtMin;          //min pt cut
+      Double_t            fHadOverEmMax;         //!maximum of hadronic/em energy
+      Bool_t              fApplyPixelSeed;       //!=true then apply PixelSeed
+      const PhotonCol    *fPhotons;              //!photon branch
+      EPhIdType           fPhIdType;             //!identification scheme
+      EPhIsoType          fPhIsoType;            //!isolation scheme
 
       void          Process();
       void          SlaveBegin();

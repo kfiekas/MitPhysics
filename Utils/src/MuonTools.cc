@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.5 2008/11/27 16:28:58 loizides Exp $
+// $Id: MuonTools.cc,v 1.6 2008/11/28 09:13:35 loizides Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -144,7 +144,7 @@ Double_t MuonTools::GetCaloCompatability(const Muon *iMuon,
 
   if (aEta < 1.1) {
     if(iCorrectedHCAL)    
-      lHad *= TMath::Sin(2*TMath::ATan(TMath::Exp(lEta))); //todo ask!
+      lHad *= TMath::Sin(2*TMath::ATan(TMath::Exp(lEta)));
     lTPionHad  = fpion_had_etaB;
     lTMuonHad  = fmuon_had_etaB;
   }
@@ -332,7 +332,7 @@ Double_t MuonTools::GetSegmentCompatability(const mithep::Muon *iMuon) const
     } else
       lStCrossed[i0]  = 0;
 
-    if(iMuon->GetDX(i0) < 999999.) { //Use iMuon->GetSegmentX--> CHECK
+    if(iMuon->GetDX(i0) < 999999.) {
       lNStationsSegment++;
       lStSegmentmatch[i0] = 1;
     } else

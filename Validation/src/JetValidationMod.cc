@@ -1,4 +1,4 @@
-// $Id: JetValidationMod.cc,v 1.1 2008/10/14 06:13:56 loizides Exp $
+// $Id: JetValidationMod.cc,v 1.1 2008/10/15 06:05:02 loizides Exp $
 
 #include "MitPhysics/Validation/interface/JetValidationMod.h"
 #include <TH1D.h>
@@ -24,17 +24,9 @@ ClassImp(mithep::JetValidationMod)
   fIC5Jets(0),
   fSC5Jets(0),
   fIC5GenJets(0),
-  fSC5GenJets(0),
-  fNEventsProcessed(0)
+  fSC5GenJets(0)
 {
   // Constructor.
-}
-
-//--------------------------------------------------------------------------------------------------
-void JetValidationMod::Begin()
-{
-  // Run startup code on the client machine. For this module, we dont do
-  // anything here.
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -42,10 +34,6 @@ void JetValidationMod::Process()
 {
   // Process entries of the tree. 
 
-  fNEventsProcessed++;
-  if (fNEventsProcessed % 1000 == 0 || fPrintDebug)
-    cerr << endl << "Process Event " << fNEventsProcessed << endl;
-    
   //************************************************************************************************
   //
   // For IterativeCone 0.5 Jets
@@ -285,7 +273,6 @@ void JetValidationMod::Process()
 
 }
 
-
 //--------------------------------------------------------------------------------------------------
 void JetValidationMod::SlaveBegin()
 {
@@ -298,18 +285,20 @@ void JetValidationMod::SlaveBegin()
   ReqBranch(fIC5JetName,                fIC5Jets);
   ReqBranch(fSC5JetName,                fSC5Jets);
 
-  fIC5GenJetRecoJetDeltaR = new TH1D("hIC5GenJetRecoJetDeltaR",";IC5GenJetRecoJetDeltaR;#",100,0.,1.0);
-  fIC5GenJetRecoJetDeltaEta = new TH1D("hIC5GenJetRecoJetDeltaEta",";IC5GenJetRecoJetDeltaEta;#",100,0.,0.5);
-  fIC5GenJetRecoJetDeltaPhi = new TH1D("hIC5GenJetRecoJetDeltaPhi",";IC5GenJetRecoJetDeltaPhi;#",100,0.,0.5);
+  fIC5GenJetRecoJetDeltaR = 
+    new TH1D("hIC5GenJetRecoJetDeltaR",";IC5GenJetRecoJetDeltaR;#",100,0.,1.0);
+  fIC5GenJetRecoJetDeltaEta = 
+    new TH1D("hIC5GenJetRecoJetDeltaEta",";IC5GenJetRecoJetDeltaEta;#",100,0.,0.5);
+  fIC5GenJetRecoJetDeltaPhi = 
+    new TH1D("hIC5GenJetRecoJetDeltaPhi",";IC5GenJetRecoJetDeltaPhi;#",100,0.,0.5);
 
   fIC5JetResponseVsGenJetPtInBarrel = new TH2D("hIC5JetResponseVsGenJetPtInBarrel",";IC5JetResponseVsGenJetPtInBarrel;#",500,0.,5.0,5000,0,5000);
   fIC5JetResponseVsGenJetPtInEndcap = new TH2D("hIC5JetResponseVsGenJetPtInEndcap",";IC5JetResponseVsGenJetPtInEndcap;#",500,0.,5.0,5000,0,5000);
   fIC5JetResponseVsGenJetPtForward = new TH2D("hIC5JetResponseVsGenJetPtForward",";IC5JetResponseVsGenJetPtForward;#",500,0.,5.0,5000,0,5000);
   fIC5JetResponseVsCaloJetEta = new TH2D("hIC5JetResponseVsCaloJetEta",";IC5JetResponseVsCaloJetEta;#",500,0.,5.0,100,-5,5);
-
-
   
-  fIC5CentralGenJetRecoJetDeltaR = new TH1D("hIC5CentralGenJetRecoJetDeltaR",";IC5CentralGenJetRecoJetDeltaR;#",100,0.,1.0);
+  fIC5CentralGenJetRecoJetDeltaR = 
+    new TH1D("hIC5CentralGenJetRecoJetDeltaR",";IC5CentralGenJetRecoJetDeltaR;#",100,0.,1.0);
   fIC5ForwardGenJetRecoJetDeltaR = new TH1D("hIC5ForwardGenJetRecoJetDeltaR",";IC5ForwardGenJetRecoJetDeltaR;#",100,0.,1.0); 
   
   fIC5NMatchedCaloJetsVsGenJetPt = new TH1D("hIC5NMatchedCaloJetsVsGenJetPt",";IC5GenJetPt;#",5000,0.,5000);
@@ -418,20 +407,4 @@ void JetValidationMod::SlaveBegin()
   AddOutput(fSC5NUnmatchedCalojetsVsCorrectedCaloJetEta);  
   AddOutput(fSC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt);  
   AddOutput(fSC5NCaloJets);
-}
-
-//--------------------------------------------------------------------------------------------------
-void JetValidationMod::SlaveTerminate()
-{
-  // Run finishing code on the computer (slave) that did the analysis. For this
-  // module, we dont do anything here.
-  cout << "Events Processed: " << fNEventsProcessed << endl;
-
-}
-
-//--------------------------------------------------------------------------------------------------
-void JetValidationMod::Terminate()
-{
-  // Run finishing code on the client computer. For this module, we dont do
-  // anything here.
 }
