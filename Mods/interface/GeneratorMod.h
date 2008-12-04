@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.11 2008/12/04 11:55:19 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.12 2008/12/04 13:53:33 loizides Exp $
 //
 // GeneratorMod
 //
@@ -53,7 +53,6 @@ namespace mithep
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
 
     protected:
-<<<<<<< GeneratorMod.h
       Bool_t               fFillHist;           //=true then fill histos (def=0)
       TString              fMCPartName;         //name of MCParticle branch
       TString              fMCLeptonsName;      //name of lepton coll (from W)
@@ -77,32 +76,7 @@ namespace mithep
       TH1D                *hDGenWBF[20];        //!histos for WBF
       TH1D                *hDGenBosons[20];     //!histos for bosons
       TH1D                *hDGenPhotons[20];    //!histos for photons
-=======
-      Bool_t         fFillHist; 	  //=true then fill histos (def=0)
-      TString        fMCPartName;	  //name of MCParticle branch
-      TString        fMCLeptonsName ;	  //name of lepton coll (from W)
-      TString        fMCAllLeptonsName;   //name of lepton coll (all)
-      TString        fMCTausName;	  //name of tau coll (hadronic decays)
-      TString        fMCNeutrinosName;    //name of neutrinos coll
-      TString        fMCQuarksName;	  //name of quarks coll
-      TString        fMCqqHsName;	  //name of qqH coll
-      TString        fMCBosonsName;	  //name of bosons coll
-      TString        fMCPhotonsName;	  //name of photons coll
-      Double_t       fPtLeptonMin;        //pt min for leptons
-      Double_t       fEtaLeptonMax;       //eta max for leptons
-      Double_t       fPtPhotonMin;        //pt min for photons
-      Double_t       fEtaPhotonMax;       //eta max for photons
-      MCParticleCol *fParticles;	  //!MCParticle branch
-      TH1D          *hDGenLeptons[20];    //!histos for W leptons
-      TH1D          *hDGenAllLeptons[20]; //!histos for all leptons
-      TH1D          *hDGenTaus[20];       //!histos for taus
-      TH1D          *hDGenNeutrinos[20];  //!histos for neutrinos
-      TH1D          *hDGenQuarks[20];     //!histos for quarks
-      TH1D          *hDGenWBF[20];        //!histos for WBF
-      TH1D          *hDGenBosons[20];     //!histos for bosons
-      TH1D          *hDGenPhotons[20];    //!histos for photons
-      TH1D          *hDVMass[20];         //!histos for auxiliar work
->>>>>>> 1.11
+      TH1D                *hDVMass[20];         //!histos for auxiliar work
 
       void                 Process();
       void                 SlaveBegin();
