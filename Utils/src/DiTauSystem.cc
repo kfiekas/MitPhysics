@@ -1,4 +1,4 @@
-// $Id: DiTauSystem.cc,v 1.1 2008/10/15 06:02:05 loizides Exp $
+// $Id: DiTauSystem.cc,v 1.2 2008/11/28 10:29:25 loizides Exp $
 
 #include "MitPhysics/Utils/interface/DiTauSystem.h"
 #include "MitAna/DataTree/interface/CompositeParticle.h"
@@ -8,7 +8,8 @@
 using namespace mithep;
 
 //--------------------------------------------------------------------------------------------------
-DiTauSystem::DiTauSystem(ChargedParticle *t1, ChargedParticle *t2, Met *met) :
+DiTauSystem::DiTauSystem(ChargedParticle *t1, ChargedParticle *t2, 
+                         const Met *met) :
   fT1(t1),
   fT2(t2),
   fMet(met),
