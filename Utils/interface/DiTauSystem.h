@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DiTauSystem.h,v 1.3 2008/11/28 10:46:28 ceballos Exp $
+// $Id: DiTauSystem.h,v 1.4 2008/12/05 09:35:01 ceballos Exp $
 //
 // DiTauSystem
 //
@@ -38,7 +38,7 @@ namespace mithep
   
       ChargedParticle *fT1;       //first tau
       ChargedParticle *fT2;       //second tau
-      Met             *fMet;      //missing et
+      const Met       *fMet;      //missing et
       Double_t         fXTau[2];  //visible fraction of the tau momenta
       Double_t         fRecoMass; //higgs mass
       Double_t         fVisMass;  //visible mass
