@@ -1,4 +1,4 @@
- // $Id: HwwEvtPreSelMod.cc,v 1.1 2008/10/15 06:05:01 loizides Exp $
+ // $Id: HwwEvtPreSelMod.cc,v 1.2 2008/11/28 13:40:18 loizides Exp $
 
 #include "MitPhysics/SelMods/interface/HwwEvtPreSelMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -10,7 +10,7 @@ ClassImp(mithep::HwwEvtPreSelMod)
 
 //--------------------------------------------------------------------------------------------------
 HwwEvtPreSelMod::HwwEvtPreSelMod(const char *name, const char *title) : 
-  BaseMod(name,title),
+  BaseSelMod(name,title),
   fMuonName(Names::gkMuonBrn),
   fElectronName(Names::gkElectronBrn),
   fNLeptonsMin(2),

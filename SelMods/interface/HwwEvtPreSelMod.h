@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: HwwEvtPreSelMod.h,v 1.3 2008/12/04 13:53:34 loizides Exp $
+// $Id: HwwEvtPreSelMod.h,v 1.4 2008/12/10 11:44:34 loizides Exp $
 //
 // HwwEvtSelMod
 //
@@ -12,12 +12,12 @@
 #ifndef MITPHYSICS_MODS_HWWEVTPRESELMOD_H
 #define MITPHYSICS_MODS_HWWEVTPRESELMOD_H
 
-#include "MitAna/TreeMod/interface/BaseMod.h" 
+#include "MitAna/TreeMod/interface/BaseSelMod.h" 
 #include "MitAna/DataTree/interface/Collections.h"
 
 namespace mithep 
 {
-  class HwwEvtPreSelMod : public BaseMod
+  class HwwEvtPreSelMod : public BaseSelMod
   {
     public:
       HwwEvtPreSelMod(const char *name="HwwEvtPreSelMod", 
