@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.14 2008/12/10 11:44:33 loizides Exp $
+// $Id: GeneratorMod.h,v 1.15 2008/12/10 12:47:22 loizides Exp $
 //
 // GeneratorMod
 //
@@ -79,7 +79,7 @@ namespace mithep
       TH1D                *hDGenPhotons[20];    //!histos for photons
       TH1D                *hDVMass[20];         //!histos for auxiliar work
     
-    ClassDef(GeneratorMod,1) // Module to gather generator information
+    ClassDef(GeneratorMod, 1) // Module to gather generator information
   };
 }
 #endif
