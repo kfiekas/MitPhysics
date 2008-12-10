@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.13 2008/12/04 14:04:22 loizides Exp $
+// $Id: GeneratorMod.h,v 1.14 2008/12/10 11:44:33 loizides Exp $
 //
 // GeneratorMod
 //
@@ -27,7 +27,6 @@ namespace mithep
                    const char *title="Generator information module");
       ~GeneratorMod() {}
 
-      Bool_t               GetFillHist()         const { return fFillHist; }
       const char          *GetMCPartName()	 const { return fMCPartName; }	
       const char          *GSetMCLeptonsName()   const { return fMCLeptonsName; }	
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
@@ -37,7 +36,6 @@ namespace mithep
       const char          *GetMCqqHsName()	 const { return fMCqqHsName; }	
       const char          *GetMCBosonsName()     const { return fMCBosonsName; }	
       const char          *GetMCPhotonsName()    const { return fMCPhotonsName; }	
-      void                 SetFillHist(Bool_t b)	       { fFillHist	   = b; }
       void                 SetMCPartName(const char *s)	       { fMCPartName       = s; }	
       void                 SetMCLeptonsName(const char * s)    { fMCLeptonsName    = s; }	
       void                 SetMCAllLeptonsName(const char * s) { fMCAllLeptonsName = s; }	
