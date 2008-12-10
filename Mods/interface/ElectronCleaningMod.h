@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronCleaningMod.h,v 1.3 2008/11/28 09:13:50 loizides Exp $
+// $Id: ElectronCleaningMod.h,v 1.4 2008/12/10 11:44:32 loizides Exp $
 //
 // ElectronCleaningMod
 //
@@ -21,12 +21,19 @@ namespace mithep
   {
     public:
       ElectronCleaningMod(const char *name="ElectronCleaningMod", 
-                     const char *title="Electron cleaning module");
+                          const char *title="Electron cleaning module");
       ~ElectronCleaningMod() {}
 
-      void               SetGoodElectronsName(const char *name)  { fGoodElectronsName  = name; }
-      void               SetCleanMuonsName(const char *name)     { fCleanMuonsName     = name; }
-      void               SetCleanElectronsName(const char *name) { fCleanElectronsName = name; }
+      const char        *GetCleanElectronsName() const { return fCleanElectronsName;     }
+      const char        *GetCleanName()          const { return GetCleanElectronsName(); }
+      const char        *GetCleanMuonsName()     const { return fCleanMuonsName;         }
+      const char        *GetGoodElectronsName()  const { return fGoodElectronsName;      }
+      const char        *GetOutputName()         const { return GetCleanElectronsName(); }
+      void               SetCleanElectronsName(const char *name) { fCleanElectronsName = name;  }
+      void               SetCleanName(const char *name)          { SetCleanElectronsName(name); }
+      void               SetCleanMuonsName(const char *name)     { fCleanMuonsName     = name;  }
+      void               SetGoodElectronsName(const char *name)  { fGoodElectronsName  = name;  }
+      void               SetOutputName(const char *name)         { SetCleanElectronsName(name); }
 
     protected:
       void               Process();
@@ -35,7 +42,7 @@ namespace mithep
       TString            fCleanMuonsName;     //name of clean muons (input)
       TString            fCleanElectronsName; //name of clean electrons (output)
     
-      ClassDef(ElectronCleaningMod,1) // Electron cleaning module
+      ClassDef(ElectronCleaningMod, 1) // Electron cleaning module
   };
 }
 #endif

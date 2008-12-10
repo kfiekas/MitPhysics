@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.6 2008/11/28 13:07:38 ceballos Exp $
+// $Id: MergeLeptonsMod.cc,v 1.1 2008/12/10 11:44:33 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -26,7 +26,7 @@ void mithep::MergeLeptonsMod::Process()
   // Merge the two input collections and publish merged collection. 
 
   fElIn = GetObjThisEvt<ElectronCol>(fElName);
-  fMuIn = GetObjThisEvt<MuonCol>(fElName);
+  fMuIn = GetObjThisEvt<MuonCol>(fMuName);
 
   UInt_t nents = 0;
   if (fElIn) 

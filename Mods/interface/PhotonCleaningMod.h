@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonCleaningMod.h,v 1.2 2008/12/04 13:53:33 loizides Exp $
+// $Id: PhotonCleaningMod.h,v 1.3 2008/12/10 11:44:33 loizides Exp $
 //
 // PhotonCleaningMod
 //
@@ -24,10 +24,18 @@ namespace mithep
                      const char *title="Photon cleaning module");
       ~PhotonCleaningMod() {}
 
-      void             SetCleanElectronsName(const char *name)    { fCleanElectronsName    = name; }
-      void             SetGoodPhotonsName(const char *name)       { fGoodPhotonsName       = name; } 
-      void             SetCleanPhotonsName(const char *name)      { fCleanPhotonsName      = name; }
-      void             SetMinDeltaRToElectron(const Double_t x)   { fMinDeltaRToElectron   = x;    }
+      const char      *GetCleanElectronsName()   const { return fCleanElectronsName;   }
+      const char      *GetCleanName()            const { return GetCleanPhotonsName(); }
+      const char      *GetCleanPhotonsName()     const { return fCleanPhotonsName;     }
+      const char      *GetGoodPhotonsName()      const { return fGoodPhotonsName;      } 
+      Double_t         GetMinDeltaRToElectron()  const { return fMinDeltaRToElectron;  }
+      const char      *GetOutputName()           const { return GetCleanPhotonsName(); }
+      void             SetCleanElectronsName(const char *name)  { fCleanElectronsName    = name; }
+      void             SetCleanName(const char *name)           { SetCleanPhotonsName(name);     }
+      void             SetCleanPhotonsName(const char *name)    { fCleanPhotonsName      = name; }
+      void             SetGoodPhotonsName(const char *name)     { fGoodPhotonsName       = name; } 
+      void             SetMinDeltaRToElectron(Double_t dr)      { fMinDeltaRToElectron   = dr;   }
+      void             SetOutputName(const char *name)          { SetCleanPhotonsName(name);     }
 
     protected:
       void             Process();
@@ -37,7 +45,7 @@ namespace mithep
       TString          fCleanPhotonsName;     //name of clean jets (output)
       Double_t         fMinDeltaRToElectron;  //delta R threshold for separating electrons/photons
    
-    ClassDef(PhotonCleaningMod,1) // Photon cleaning module
+    ClassDef(PhotonCleaningMod, 1) // Photon cleaning module
   };
 }
 #endif

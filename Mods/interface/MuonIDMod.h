@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.9 2008/12/04 13:53:33 loizides Exp $
+// $Id: MuonIDMod.h,v 1.10 2008/12/10 11:44:33 loizides Exp $
 //
 // MuonIDMod
 //
@@ -25,24 +25,28 @@ namespace mithep
                 const char *title="Muon identification module");
       ~MuonIDMod() {}
 
-      const char    *GetMuonBranchName(const char *name) const { return fMuonBranchName;    }   
-      const char    *GetCleanMuonsName(const char *name) const { return fCleanMuonsName;    }   
-      const char    *GetMuonIDType(const char *type)     const { return fMuonIDType;	   }
-      const char    *GetMuonIsoType(const char *type)    const { return fMuonIsoType;	   }
-      const char    *GetMuonClassType(const char *type)  const { return fMuonClassType;     }
-      Double_t       GetTrackIsolationCut(Double_t cut)  const { return fTrackIsolationCut; }
-      Double_t       GetCaloIsolationCut(Double_t cut)   const { return fCaloIsolationCut;  }
-      Double_t       GetCombIsolationCut(Double_t cut)   const { return fCombIsolationCut;  }
-      Double_t       GetMuonPtMin(Double_t pt)           const { return fMuonPtMin;         }
-      void           SetMuonBranchName(const char *name)       { fMuonBranchName    = name; }   
-      void           SetCleanMuonsName(const char *name)       { fCleanMuonsName    = name; }   
-      void           SetMuonIDType(const char *type)           { fMuonIDType	   = type; }
-      void           SetMuonIsoType(const char *type)          { fMuonIsoType	   = type; }
-      void           SetMuonClassType(const char *type)        { fMuonClassType     = type; }
-      void           SetTrackIsolationCut(Double_t cut)        { fTrackIsolationCut = cut;  }
-      void           SetCaloIsolationCut(Double_t cut)         { fCaloIsolationCut  = cut;  }
-      void           SetCombIsolationCut(Double_t cut)         { fCombIsolationCut  = cut;  }
-      void           SetMuonPtMin(Double_t pt)                 { fMuonPtMin	    = pt;  }
+      Double_t           GetCaloIsoCut()                const { return fCaloIsolationCut;   }
+      const char        *GetClassType()                 const { return fMuonClassType;      }
+      const char        *GetCleanName()                 const { return GetCleanMuonsName(); }   
+      const char        *GetCleanMuonsName()            const { return fCleanMuonsName;     }   
+      Double_t           GetCombIsoCut()                const { return fCombIsolationCut;   }
+      const char        *GetIDType()                    const { return fMuonIDType;         }
+      const char        *GetInputName()                 const { return fMuonBranchName;     }   
+      const char        *GetIsoType()                   const { return fMuonIsoType;        }
+      const char        *GetOutputName()                const { return GetCleanMuonsName(); }   
+      Double_t           GetPtMin(Double_t pt)          const { return fMuonPtMin;          }
+      Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
+      void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
+      void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
+      void               SetClassType(const char *type)       { fMuonClassType     = type;  }
+      void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
+      void               SetCleanMuonsName(const char *name)  { fCleanMuonsName    = name;  }   
+      void               SetIDType(const char *type)          { fMuonIDType        = type;  }
+      void               SetInputName(const char *name)       { fMuonBranchName    = name;  }   
+      void               SetIsoType(const char *type)         { fMuonIsoType       = type;  }
+      void               SetOutputName(const char *name)      { SetCleanMuonsName(name);    }   
+      void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
+      void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
 
       enum EMuIdType {
         kIdUndef = 0,       //not defined
@@ -67,25 +71,25 @@ namespace mithep
       };
 
     protected:
-      void           Process();
-      void           SlaveBegin();
+      void               Process();
+      void               SlaveBegin();
 
-      TString        fMuonBranchName;            //name of muon collection (in branch)
-      TString        fCleanMuonsName;            //name of exported "good muon" collection
-      TString        fMuonIDType;                //type of muon id scheme we impose
-      TString        fMuonIsoType;               //type of muon isolations scheme we impose
-      TString        fMuonClassType;             //type of muon class we impose
-      Double_t       fTrackIsolationCut;         //cut value for track isolation
-      Double_t       fCaloIsolationCut;          //cut value for calo isolation
-      Double_t       fCombIsolationCut;          //cut value for combined isolation
-      Double_t       fMuonPtMin;                 //min muon pt
-      const MuonCol *fMuons;                     //!muon branch
-      MuonTools     *fMuonTools;                 //!muon tool
-      EMuIdType      fMuIDType;                  //!muon id type (imposed)
-      EMuIsoType     fMuIsoType;                 //!muon iso type (imposed)
-      EMuClassType   fMuClassType;               //!muon class type (imposed)
+      TString            fMuonBranchName;      //name of muon collection (input)
+      TString            fCleanMuonsName;      //name of exported "good muon" collection
+      TString            fMuonIDType;          //type of muon id scheme we impose
+      TString            fMuonIsoType;         //type of muon isolations scheme we impose
+      TString            fMuonClassType;       //type of muon class we impose
+      Double_t           fTrackIsolationCut;   //cut value for track isolation
+      Double_t           fCaloIsolationCut;    //cut value for calo isolation
+      Double_t           fCombIsolationCut;    //cut value for combined isolation
+      Double_t           fMuonPtMin;           //min muon pt
+      const MuonCol     *fMuons;               //!muon collection
+      MuonTools         *fMuonTools;           //!muon tool
+      EMuIdType          fMuIDType;            //!muon id type (imposed)
+      EMuIsoType         fMuIsoType;           //!muon iso type (imposed)
+      EMuClassType       fMuClassType;         //!muon class type (imposed)
     
-    ClassDef(MuonIDMod,1) // Muon identification module
+    ClassDef(MuonIDMod, 1) // Muon identification module
   };
 }
 #endif

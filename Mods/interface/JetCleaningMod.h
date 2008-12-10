@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.5 2008/12/04 13:53:33 loizides Exp $
+// $Id: JetCleaningMod.h,v 1.6 2008/12/10 11:44:33 loizides Exp $
 //
 // JetCleaningMod
 //
@@ -24,12 +24,22 @@ namespace mithep
                      const char *title="Jet cleaning module");
       ~JetCleaningMod() {}
 
-      void               SetCleanElectronsName(const char *name)  { fCleanElectronsName = name; }
-      void               SetCleanPhotonsName(const char *name)    { fCleanPhotonsName = name; }
-      void               SetGoodJetsName(const char *name)        { fGoodJetsName       = name; }  
-      void               SetCleanJetsName(const char *name)       { fCleanJetsName      = name; }
-      void               SetMinDeltaRToElectron(const Double_t x) { fMinDeltaRToElectron   = x; }
-      void               SetMinDeltaRToPhoton(const Double_t x)   { fMinDeltaRToPhoton   = x;   }
+      const char        *GetCleanElectronsName()  const { return fCleanElectronsName;  }
+      const char        *GetCleanJetsName()       const { return fCleanJetsName;       }
+      const char        *GetCleanName()           const { return GetCleanJetsName();   }
+      const char        *GetCleanPhotonsName()    const { return fCleanPhotonsName;    }
+      const char        *GetGoodJetsName()        const { return fGoodJetsName;        }  
+      Double_t           GetMinDeltaRToElectron() const { return fMinDeltaRToElectron; }
+      Double_t           GetMinDeltaRToPhoton()   const { return fMinDeltaRToPhoton;   }
+      const char        *GetOutputName()          const { return GetCleanJetsName();   }
+      void               SetCleanElectronsName(const char *name) { fCleanElectronsName  = name; }
+      void               SetCleanJetsName(const char *name)      { fCleanJetsName       = name; }
+      void               SetCleanName(const char *name)          { SetCleanJetsName(name);      }
+      void               SetCleanPhotonsName(const char *name)   { fCleanPhotonsName    = name; }
+      void               SetGoodJetsName(const char *name)       { fGoodJetsName        = name; }  
+      void               SetMinDeltaRToElectron(Double_t dr)     { fMinDeltaRToElectron = dr;   }
+      void               SetMinDeltaRToPhoton(Double_t dr)       { fMinDeltaRToPhoton   = dr;   }
+      void               SetOutputName(const char *name)         { SetCleanJetsName(name);      }
 
     protected:
       void               Process();
@@ -41,7 +51,7 @@ namespace mithep
       Double_t           fMinDeltaRToElectron;  //delta R for separating electrons from jets
       Double_t           fMinDeltaRToPhoton;    //delta R for separating photons from jets
    
-    ClassDef(JetCleaningMod,1) // Jet cleaning module
+    ClassDef(JetCleaningMod, 1) // Jet cleaning module
   };
 }
 #endif
