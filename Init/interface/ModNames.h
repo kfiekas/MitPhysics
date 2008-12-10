@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ModNames.h,v 1.1 2008/11/27 16:28:34 loizides Exp $
+// $Id: ModNames.h,v 1.2 2008/12/01 11:36:35 ceballos Exp $
 //
 // Names
 //
@@ -19,11 +19,6 @@ namespace mithep
   class ModNames 
   {
     public:
-      static const char *gkGoodElectronsName;
-      static const char *gkGoodMuonsName;
-      static const char *gkGoodPhotonsName;
-      static const char *gkGoodTausName;
-      static const char *gkGoodJetsName;
       static const char *gkCleanElectronsName;
       static const char *gkCleanMuonsName;
       static const char *gkCleanPhotonsName;
@@ -31,6 +26,11 @@ namespace mithep
       static const char *gkCleanJetsName;
       static const char *gkCleanFwdJetsName;
       static const char *gkCleanNoFwdJetsName;
+      static const char *gkGoodElectronsName;
+      static const char *gkGoodMuonsName;
+      static const char *gkGoodPhotonsName;
+      static const char *gkGoodTausName;
+      static const char *gkGoodJetsName;
       static const char *gkMCLeptonsName;
       static const char *gkMCAllLeptonsName;
       static const char *gkMCTausName;
@@ -39,6 +39,7 @@ namespace mithep
       static const char *gkMCqqHsName;
       static const char *gkMCBosonsName;
       static const char *gkMCPhotonsName;
+      static const char *gkMergedLeptonsName;
   };
 }
 #endif
