@@ -1,4 +1,4 @@
-// $Id: ElectronCleaningMod.cc,v 1.5 2008/11/28 10:01:43 ceballos Exp $
+// $Id: ElectronCleaningMod.cc,v 1.6 2008/12/10 11:44:33 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -24,8 +24,8 @@ void ElectronCleaningMod::Process()
   // Process entries of the tree. 
 
   // get input collection
-  MuonOArr *CleanMuons = GetObjThisEvt<MuonOArr>(fCleanMuonsName);
-  ElectronOArr *GoodElectrons =  GetObjThisEvt<ElectronOArr>(fGoodElectronsName);
+  const MuonCol     *CleanMuons    = GetObjThisEvt<MuonCol>(fCleanMuonsName);
+  const ElectronCol *GoodElectrons = GetObjThisEvt<ElectronCol>(fGoodElectronsName);
 
   // Go through all electrons and remove electron overlaps with muons and duplicates.
   std::vector<const Electron*> CleanElTemp;
@@ -38,7 +38,8 @@ void ElectronCleaningMod::Process()
     // Check whether it overlaps with a good muon: If the muon and electron both have
     // tracker tracks then compare the tracks, otherwise
     Bool_t isMuonOverlap = kFALSE;
-    for (UInt_t j=0; j<CleanMuons->GetEntries(); ++j) {
+    UInt_t n = CleanMuons->GetEntries();
+    for (UInt_t j=0; j<n; ++j) {
       
       if (trtrack && CleanMuons->At(j)->TrackerTrk()) {
         if (CleanMuons->At(j)->TrackerTrk() == trtrack) {

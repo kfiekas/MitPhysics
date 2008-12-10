@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.9 2008/11/28 10:31:38 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.10 2008/12/10 11:44:33 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -24,7 +24,6 @@ ClassImp(mithep::MuonIDMod)
 {
   // Constructor.
 }
-
 
 //--------------------------------------------------------------------------------------------------
 void MuonIDMod::Process()
@@ -130,7 +129,6 @@ void MuonIDMod::Process()
   // add objects for other modules to use
   AddObjThisEvt(CleanMuons);  
 }
-
 
 //--------------------------------------------------------------------------------------------------
 void MuonIDMod::SlaveBegin()

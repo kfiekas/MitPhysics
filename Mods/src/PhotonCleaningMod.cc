@@ -1,4 +1,4 @@
-// $Id: PhotonCleaningMod.cc,v 1.1 2008/11/29 18:43:25 sixie Exp $
+// $Id: PhotonCleaningMod.cc,v 1.2 2008/12/10 11:44:33 loizides Exp $
 
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -25,22 +25,24 @@ void PhotonCleaningMod::Process()
   // Process entries of the tree.
 
   // get input collections
-  ElectronOArr *CleanElectrons = GetObjThisEvt<ElectronOArr>(fCleanElectronsName);
-  PhotonOArr *GoodPhotons = GetObjThisEvt<PhotonOArr>(fGoodPhotonsName);
+  const PhotonCol   *GoodPhotons    = GetObjThisEvt<PhotonCol>(fGoodPhotonsName);
+  const ElectronCol *CleanElectrons = GetObjThisEvt<ElectronCol>(fCleanElectronsName);
 
   // create output collection
   PhotonOArr *CleanPhotons = new PhotonOArr;
   CleanPhotons->SetName(fCleanPhotonsName);
 
   // Remove any photon that overlaps in eta, phi with an isolated electron.
-  for (UInt_t i=0; i<GoodPhotons->GetEntries(); ++i) {
+  UInt_t n = GoodPhotons->GetEntries();
+  for (UInt_t i=0; i<n; ++i) {
     const Photon *ph = GoodPhotons->At(i);        
 
     Bool_t isElectronOverlap =  false;
      
     //Check for overlap with an electron
     if (CleanElectrons) {
-      for (UInt_t j=0; j<CleanElectrons->Entries(); j++) {
+      UInt_t n2 = CleanElectrons->GetEntries();
+      for (UInt_t j=0; j<n2; j++) {
         Double_t deltaR = MathUtils::DeltaR(CleanElectrons->At(j)->Mom(),ph->Mom());  
         if (deltaR < fMinDeltaRToElectron) {
           isElectronOverlap = kTRUE;
