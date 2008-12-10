@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.17 2008/12/04 13:53:34 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.18 2008/12/08 15:48:31 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -238,6 +238,16 @@ void GeneratorMod::Process()
       delete diBoson;
     }
   }
+
+  // sort according to pt
+  GenLeptons->Sort();
+  GenAllLeptons->Sort();
+  GenTaus->Sort();
+  GenNeutrinos->Sort();
+  GenQuarks->Sort();
+  GenqqHs->Sort();
+  GenBosons->Sort();
+  GenPhotons->Sort();
 
   // add objects to this event for other modules to use
   AddObjThisEvt(GenLeptons);  

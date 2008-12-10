@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonCleaningMod.h,v 1.1 2008/11/29 18:43:42 sixie Exp $
+// $Id: PhotonCleaningMod.h,v 1.2 2008/12/04 13:53:33 loizides Exp $
 //
 // PhotonCleaningMod
 //
@@ -30,14 +30,14 @@ namespace mithep
       void             SetMinDeltaRToElectron(const Double_t x)   { fMinDeltaRToElectron   = x;    }
 
     protected:
+      void             Process();
+
       TString          fCleanElectronsName;   //name of clean electrons (input)
       TString          fGoodPhotonsName;      //name of good jets (input)
       TString          fCleanPhotonsName;     //name of clean jets (output)
       Double_t         fMinDeltaRToElectron;  //delta R threshold for separating electrons/photons
-
-      void             Process();
    
-      ClassDef(PhotonCleaningMod,1) // Photon cleaning module
+    ClassDef(PhotonCleaningMod,1) // Photon cleaning module
   };
 }
 #endif

@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.7 2008/11/28 10:31:38 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.8 2008/11/28 11:35:29 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -96,6 +96,9 @@ void ElectronIDMod::Process()
     // add good electron
     GoodElectrons->Add(fElectrons->At(i));
   }
+
+  // sort according to pt
+  GoodElectrons->Sort();
 
   // add to event for other modules to use
   AddObjThisEvt(GoodElectrons);  

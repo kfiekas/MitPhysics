@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.5 2008/11/28 09:13:50 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.6 2008/12/04 13:53:33 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -52,6 +52,9 @@ namespace mithep
       };
 
     protected:
+      void                Process();
+      void                SlaveBegin();
+
       TString             fElectronBranchName;     //branch name of electron collection
       TString             fGoodElectronsName;      //name of exported "good electrons" collection
       TString             fElectronIDType;         //type of electron ID we impose
@@ -65,11 +68,8 @@ namespace mithep
       const ElectronCol  *fElectrons;              //!electron branch
       EElIdType           fElIdType;               //!identification scheme
       EElIsoType          fElIsoType;              //!isolation scheme
-
-      void                Process();
-      void                SlaveBegin();
     
-      ClassDef(ElectronIDMod,1) // Electron identification module
+    ClassDef(ElectronIDMod,1) // Electron identification module
   };
 }
 #endif

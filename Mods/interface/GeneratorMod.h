@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.12 2008/12/04 13:53:33 loizides Exp $
+// $Id: GeneratorMod.h,v 1.13 2008/12/04 14:04:22 loizides Exp $
 //
 // GeneratorMod
 //
@@ -53,6 +53,9 @@ namespace mithep
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
 
     protected:
+      void                 Process();
+      void                 SlaveBegin();
+
       Bool_t               fFillHist;           //=true then fill histos (def=0)
       TString              fMCPartName;         //name of MCParticle branch
       TString              fMCLeptonsName;      //name of lepton coll (from W)
@@ -77,11 +80,8 @@ namespace mithep
       TH1D                *hDGenBosons[20];     //!histos for bosons
       TH1D                *hDGenPhotons[20];    //!histos for photons
       TH1D                *hDVMass[20];         //!histos for auxiliar work
-
-      void                 Process();
-      void                 SlaveBegin();
     
-      ClassDef(GeneratorMod,1) // Module to gather generator information
+    ClassDef(GeneratorMod,1) // Module to gather generator information
   };
 }
 #endif

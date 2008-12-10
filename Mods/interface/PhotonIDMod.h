@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.3 2008/12/03 10:19:13 loizides Exp $
+// $Id: PhotonIDMod.h,v 1.4 2008/12/04 13:53:33 loizides Exp $
 //
 // PhotonIDMod
 //
@@ -48,6 +48,9 @@ namespace mithep
       };
 
     protected:
+      void                Process();
+      void                SlaveBegin();
+
       TString             fPhotonBranchName;     //branch name of electron collection
       TString             fGoodPhotonsName;      //name of exported "good electrons" collection
       TString             fPhotonIDType;         //type of electron ID we impose
@@ -58,11 +61,8 @@ namespace mithep
       const PhotonCol    *fPhotons;              //!photon branch
       EPhIdType           fPhIdType;             //!identification scheme
       EPhIsoType          fPhIsoType;            //!isolation scheme
-
-      void          Process();
-      void          SlaveBegin();
     
-      ClassDef(PhotonIDMod,1) // Photon identification module
+    ClassDef(PhotonIDMod,1) // Photon identification module
   };
 }
 #endif

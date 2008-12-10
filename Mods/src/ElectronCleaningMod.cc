@@ -1,4 +1,4 @@
-// $Id: ElectronCleaningMod.cc,v 1.4 2008/11/28 09:13:50 loizides Exp $
+// $Id: ElectronCleaningMod.cc,v 1.5 2008/11/28 10:01:43 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -97,6 +97,7 @@ void ElectronCleaningMod::Process()
 
   for (UInt_t j=0; j<CleanElTemp.size(); ++j) 
     CleanElectrons->Add(CleanElTemp[j]);
+  CleanElectrons->Sort();
        
   // add to event for other modules to use
   AddObjThisEvt(CleanElectrons);  

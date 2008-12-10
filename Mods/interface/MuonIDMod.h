@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.8 2008/11/28 20:12:09 loizides Exp $
+// $Id: MuonIDMod.h,v 1.9 2008/12/04 13:53:33 loizides Exp $
 //
 // MuonIDMod
 //
@@ -67,6 +67,9 @@ namespace mithep
       };
 
     protected:
+      void           Process();
+      void           SlaveBegin();
+
       TString        fMuonBranchName;            //name of muon collection (in branch)
       TString        fCleanMuonsName;            //name of exported "good muon" collection
       TString        fMuonIDType;                //type of muon id scheme we impose
@@ -81,11 +84,8 @@ namespace mithep
       EMuIdType      fMuIDType;                  //!muon id type (imposed)
       EMuIsoType     fMuIsoType;                 //!muon iso type (imposed)
       EMuClassType   fMuClassType;               //!muon class type (imposed)
-
-      void           Process();
-      void           SlaveBegin();
     
-      ClassDef(MuonIDMod,1) // Muon identification module
+    ClassDef(MuonIDMod,1) // Muon identification module
   };
 }
 #endif

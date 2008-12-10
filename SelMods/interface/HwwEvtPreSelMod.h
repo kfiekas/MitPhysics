@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: HwwEvtPreSelMod.h,v 1.2 2008/11/28 13:40:17 loizides Exp $
+// $Id: HwwEvtPreSelMod.h,v 1.3 2008/12/04 13:53:34 loizides Exp $
 //
 // HwwEvtSelMod
 //
@@ -38,6 +38,10 @@ namespace mithep
       void               SetLoadBranch(Bool_t b)           { fLoadBranch = b;       }
 
     protected:
+      void               Process();
+      void               SlaveBegin();
+      void               SlaveTerminate();
+
       TString            fMuonName;             //name of muon collection
       TString            fElectronName;         //name of electron collection
       Int_t              fNLeptonsMin;          //minimum number of leptons (def=2)
@@ -47,11 +51,7 @@ namespace mithep
       const MuonCol     *fMuons;                //!muon branch
       const ElectronCol *fElectrons;            //!electron branch
 
-      void               Process();
-      void               SlaveBegin();
-      void               SlaveTerminate();
-
-      ClassDef(HwwEvtPreSelMod,1) // Pre-selection module for HWW analysis
+    ClassDef(HwwEvtPreSelMod,1) // Pre-selection module for HWW analysis
   };
 }
 #endif

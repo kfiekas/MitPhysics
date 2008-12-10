@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.8 2008/11/28 09:56:42 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.9 2008/11/28 10:31:38 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -123,6 +123,9 @@ void MuonIDMod::Process()
     // add good muon
     CleanMuons->Add(mu);
   }
+
+  // sort according to pt
+  CleanMuons->Sort();
 
   // add objects for other modules to use
   AddObjThisEvt(CleanMuons);  

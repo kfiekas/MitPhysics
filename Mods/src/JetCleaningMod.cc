@@ -1,4 +1,4 @@
-// $Id: JetCleaningMod.cc,v 1.5 2008/11/29 18:45:43 sixie Exp $
+// $Id: JetCleaningMod.cc,v 1.6 2008/12/01 08:15:53 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -70,6 +70,9 @@ void JetCleaningMod::Process()
 
     CleanJets->Add(jet);     
   }
+
+  // sort according to pt
+  CleanJets->Sort();
 
   // add to event for other modules to use
   AddObjThisEvt(CleanJets);

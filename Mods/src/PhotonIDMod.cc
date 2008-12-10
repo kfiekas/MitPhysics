@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.2 2008/12/03 09:52:56 ceballos Exp $
+// $Id: PhotonIDMod.cc,v 1.3 2008/12/03 10:19:13 loizides Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -86,6 +86,9 @@ void PhotonIDMod::Process()
     // add good electron
     GoodPhotons->Add(fPhotons->At(i));
   }
+
+  // sort according to pt
+  GoodPhotons->Sort();
 
   // add to event for other modules to use
   AddObjThisEvt(GoodPhotons);  

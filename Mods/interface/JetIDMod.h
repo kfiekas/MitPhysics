@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.4 2008/11/28 09:13:50 loizides Exp $
+// $Id: JetIDMod.h,v 1.5 2008/12/04 13:53:33 loizides Exp $
 //
 // JetIDMod
 //
@@ -30,14 +30,14 @@ namespace mithep
       void              SetJetEtCut(Double_t cut)          { fJetEtCut = cut;       }     
 
     protected:
+      void              Process();
+      void              SlaveBegin();
+
       TString           fJetBranchName;         //name of muon collection
       TString           fGoodJetsName;          //name of good jets collection  
       Bool_t            fUseJetCorrection;      //=true then use corrected energy
       Double_t          fJetEtCut;              //value of Jet Et cut
       const JetCol     *fJets;                  //!jet branch
-
-      void              Process();
-      void              SlaveBegin();
 
       ClassDef(JetIDMod,1) // Jet identification module
   };

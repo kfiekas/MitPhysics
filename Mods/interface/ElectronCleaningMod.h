@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronCleaningMod.h,v 1.2 2008/11/27 16:30:26 loizides Exp $
+// $Id: ElectronCleaningMod.h,v 1.3 2008/11/28 09:13:50 loizides Exp $
 //
 // ElectronCleaningMod
 //
@@ -27,12 +27,13 @@ namespace mithep
       void               SetGoodElectronsName(const char *name)  { fGoodElectronsName  = name; }
       void               SetCleanMuonsName(const char *name)     { fCleanMuonsName     = name; }
       void               SetCleanElectronsName(const char *name) { fCleanElectronsName = name; }
+
     protected:
+      void               Process();
+
       TString            fGoodElectronsName;  //name of good electrons (input)
       TString            fCleanMuonsName;     //name of clean muons (input)
       TString            fCleanElectronsName; //name of clean electrons (output)
-
-      void               Process();
     
       ClassDef(ElectronCleaningMod,1) // Electron cleaning module
   };
