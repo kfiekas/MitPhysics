@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.4 2008/11/29 18:44:14 sixie Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.5 2008/12/10 11:44:33 loizides Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -8,6 +8,7 @@
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
+#include "MitPhysics/Mods/interface/MergerMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
@@ -29,6 +30,10 @@
 #pragma link C++ class mithep::JetCleaningMod+;
 #pragma link C++ class mithep::JetIDMod+;
 #pragma link C++ class mithep::MergeLeptonsMod+;
+#pragma link C++ class mithep::MergerMod<TObject>+;
+#pragma link C++ class mithep::MergerMod<mithep::DataBase>+;
+#pragma link C++ class mithep::MergerMod<mithep::DataObject>+;
+#pragma link C++ class mithep::MergerMod<mithep::Particle>+;
 #pragma link C++ class mithep::MuonIDMod+;
 #pragma link C++ enum mithep::MuonIDMod::EMuClassType;
 #pragma link C++ enum mithep::MuonIDMod::EMuIdType;
