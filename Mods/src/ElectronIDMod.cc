@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.8 2008/11/28 11:35:29 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.9 2008/12/10 11:44:33 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -118,6 +118,8 @@ void ElectronIDMod::SlaveBegin()
     fElIdType = kLoose;
   else if (fElectronIDType.CompareTo("Likelihood") == 0) 
     fElIdType = kLikelihood;
+  else if (fElectronIDType.CompareTo("NoId") == 0) 
+    fElIdType = kNoId;
   else if (fElectronIDType.CompareTo("Custom") == 0) {
     fElIdType = kCustomId;
     SendError(kWarning, "SlaveBegin",

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.10 2008/12/10 11:44:33 loizides Exp $
+// $Id: MuonIDMod.h,v 1.11 2008/12/10 17:28:22 loizides Exp $
 //
 // MuonIDMod
 //
@@ -52,6 +52,7 @@ namespace mithep
         kIdUndef = 0,       //not defined
         kTight,             //"Tight"
         kLoose,             //"Loose"
+        kNoId,              //"NoId"
         kCustomId           //"Custom"
       };
       enum EMuIsoType {

@@ -1,11 +1,11 @@
-// $Id: skimtest.C,v 1.1 2008/12/04 14:14:59 loizides Exp $
+// $Id: runSingleLeptonSkim.C,v 1.1 2008/12/10 17:31:35 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
+#include "MitAna/DataTree/interface/Names.h"
 #include "MitAna/TreeMod/interface/Analysis.h"
 #include "MitAna/TreeMod/interface/OutputMod.h"
 #include "MitAna/PhysicsMod//interface/PlotKineMod.h"
-#include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
@@ -20,57 +20,61 @@ void runSingleLeptonSkim(const char *files, UInt_t nTestEvs=0)
   gDebugMask  = Debug::kAnalysis;
   gDebugLevel = 1;
 
-  const Double_t ptmin = 20;
+  const char *muInput  = Names::gkMuonBrn;
+  const char *elInput  = Names::gkElectronBrn;
+  const Double_t ptMin = 20;
 
-  MuonIDMod *muId = new MuonIDMod;  
+  MuonIDMod *muId = new MuonIDMod;
+  muId->SetInputName(muInput);
   muId->SetIDType("Loose");
   muId->SetIsoType("TrackCalo");
-  muId->SetTrackIsoCut(3.0);
-  muId->SetCaloIsoCut(3.0);
-  muId->SetPtMin(ptmin);
+  muId->SetTrackIsoCut(10.0);
+  muId->SetCaloIsoCut(100.0);
+  muId->SetPtMin(ptMin);
 
   ElectronIDMod *elId = new ElectronIDMod;
-  elId->SetIDType("Loose");
+  elId->SetInputName(elInput);
+  elId->SetIDType("NoId");
   elId->SetIsoType("TrackCalo");
-  elId->SetTrackIsoCut(3.0); //def is 5?
-  elId->SetCaloIsoCut(3.0);  //def is 5?
-  elId->SetPtMin(ptmin);
+  elId->SetTrackIsoCut(10.0);
+  elId->SetCaloIsoCut(100.0);
+  elId->SetPtMin(ptMin);
 
   ElectronCleaningMod *elCl = new ElectronCleaningMod;
   elCl->SetGoodElectronsName(elId->GetOutputName());
-  elCl->SetCleanMuonsName(muId->GetCleanName());
+  elCl->SetCleanMuonsName(muId->GetOutputName());
   elId->Add(elCl);
 
   MergeLeptonsMod *merger = new MergeLeptonsMod;
   merger->SetMuonsName(muId->GetOutputName());
   merger->SetElectronsName(elCl->GetOutputName());
 
-  GenericSelMod<Particle> *selmod = new GenericSelMod<Particle>;
-  selmod->SetPtMin(ptmin);
-  selmod->SetColName(merger->GetOutputName());
-  merger->Add(selmod);
+  GenericSelMod<Particle> *selMod = new GenericSelMod<Particle>;
+  selMod->SetPtMin(ptMin);
+  selMod->SetColName(merger->GetOutputName());
+  merger->Add(selMod);
 
-  OutputMod *omod = new OutputMod;
-  omod->Keep("*");
-  omod->SetFileName("single_lepton_skim");
-  omod->SetPathName(".");
-  selmod->Add(omod);
+  OutputMod *outMod = new OutputMod;
+  outMod->Keep("*");
+  outMod->SetFileName("single_lepton_skim");
+  outMod->SetPathName(".");
+  selMod->Add(outMod);
 
   if (nTestEvs) {
-    PlotKineMod<Muon> *plotmus = new PlotKineMod<Muon>("PlotMuons");
-    plotmus->SetPtMin(ptmin);
-    plotmus->SetInputName(muId->GetInputName());
-    muId->Add(plotmus);
+    PlotKineMod<Muon> *plotMus = new PlotKineMod<Muon>("PlotMus");
+    plotMus->SetPtMin(ptMin);
+    plotMus->SetInputName(muId->GetInputName());
+    muId->Add(plotMus);
 
-    PlotKineMod<Electron> *plotels = new PlotKineMod<Electron>("PlotEls");
-    plotels->SetPtMin(ptmin);
-    plotels->SetInputName(elId->GetInputName());
-    elCl->Add(plotels);
-    
-    PlotKineMod<Particle> *plotmerged = new PlotKineMod<Particle>("PlotMergedLeptons");
-    plotmerged->SetLoadBranch(0);
-    plotmerged->SetInputName(merger->GetOutputName());
-    merger->Add(plotmerged);
+    PlotKineMod<Electron> *plotEls = new PlotKineMod<Electron>("PlotEls");
+    plotEls->SetPtMin(ptMin);
+    plotEls->SetInputName(elId->GetInputName());
+    elCl->Add(plotEls);
+
+    PlotKineMod<Particle> *plotMerged = new PlotKineMod<Particle>("PlotMerged");
+    plotMerged->SetLoadBranch(0);
+    plotMerged->SetInputName(merger->GetOutputName());
+    merger->Add(plotMerged);
   }
 
   // set up analysis

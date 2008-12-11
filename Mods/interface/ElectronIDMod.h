@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.7 2008/12/10 11:44:32 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.8 2008/12/10 17:28:22 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -54,6 +54,7 @@ namespace mithep
         kTight,             //"Tight"
         kLoose,             //"Loose"
         kLikelihood,        //"Likelihood"
+        kNoId,              //"NoId"
         kCustomId           //"Custom"
       };
       enum EElIsoType {

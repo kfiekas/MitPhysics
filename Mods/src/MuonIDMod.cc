@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.10 2008/12/10 11:44:33 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.11 2008/12/10 21:19:25 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -144,6 +144,8 @@ void MuonIDMod::SlaveBegin()
     fMuIDType = kTight;
   else if (fMuonIDType.CompareTo("Loose") == 0) 
     fMuIDType = kLoose;
+  else if (fMuonIDType.CompareTo("NoId") == 0) 
+    fMuIDType = kNoId;
   else if (fMuonIDType.CompareTo("Custom") == 0) {
     fMuIDType = kCustomId;
     SendError(kWarning, "SlaveBegin",
