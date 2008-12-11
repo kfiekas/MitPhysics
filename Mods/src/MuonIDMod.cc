@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.11 2008/12/10 21:19:25 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.12 2008/12/11 10:55:44 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -108,9 +108,9 @@ void MuonIDMod::Process()
             isopass = kTRUE;
         }
         break;
-        case kNoIso:
-          isopass = kTRUE;
-          break;
+      case kNoIso:
+        isopass = kTRUE;
+        break;
       case kCustomIso:
       default:
         break;

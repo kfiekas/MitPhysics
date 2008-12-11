@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.9 2008/12/10 11:44:33 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.10 2008/12/11 10:55:44 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -53,6 +53,9 @@ void ElectronIDMod::Process()
        break;
       case kLikelihood:
         idcut = (e->IDLikelihood() > fIDLikelihoodCut);
+        break;
+      case kNoId:
+        idcut = kTRUE;
         break;
       case kCustomId:
       default:
