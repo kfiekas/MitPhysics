@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenericSelMod.h,v 1.1 2008/12/09 10:18:19 loizides Exp $
+// $Id: GenericSelMod.h,v 1.1 2008/12/10 17:27:28 loizides Exp $
 //
 // GenericSelMod
 // 
@@ -29,25 +29,28 @@ namespace mithep
       Double_t                 GetEtaMax()               const { return fEtaMax;      }
       const char              *GetInputName()            const { return GetColName(); }
       UInt_t                   GetMinCounts()            const { return fMinCounts;   }
+      Double_t                 GetMinPtMax()             const { return fMinMaxPt;    }
       Double_t                 GetPtMin()                const { return fPtMin;       }
       Double_t                 GetPtMax()                const { return fPtMax;       }
       void                     SetColName(const char *n)       { fColName=n;          }
       void                     SetEtaMin(Double_t e)           { fEtaMin = e;         }
       void                     SetEtaMax(Double_t e)           { fEtaMax = e;         }
       void                     SetInputName(const char *n)     { SetColName(n);       }
+      void                     SetMinMaxPt(Double_t pt)        { fMinMaxPt= pt;       }
+      void                     SetMinCounts(UInt_t c)          { fMinCounts = c;      }
       void                     SetPtMin(Double_t pt)           { fPtMin = pt;         }
       void                     SetPtMax(Double_t pt)           { fPtMax = pt;         }
-      void                     SetMinCounts(UInt_t c)          { fMinCounts = c;      }
 
     protected:
       void                     Process();
 
       TString                  fColName;    //name of input collection
-      Double_t                 fPtMin;      //minimum pt required  (def=0 GeV)
-      Double_t                 fPtMax;      //maximum pt required  (def=5000 GeV)
-      Double_t                 fEtaMin;     //minimum eta required (def=-10)
-      Double_t                 fEtaMax;     //maximum eta required (def=+10) 
-      UInt_t                   fMinCounts;  //minimum number of particles required to accept event
+      Double_t                 fPtMin;      //minimum pt required                  (def = 0 GeV)
+      Double_t                 fPtMax;      //maximum pt required                  (def = 5000 GeV)
+      Double_t                 fEtaMin;     //minimum eta required                 (def = -10)
+      Double_t                 fEtaMax;     //maximum eta required                 (def = +10) 
+      Double_t                 fMinMaxPt;   //minimum pt required for maximum pt   (def = 0GeV)
+      UInt_t                   fMinCounts;  //minimum number of particles required (def = 1)
       const Collection<T>     *fCol;        //!pointer to collection 
 
       ClassDefT(GenericSelMod,1) // Generic selection module
