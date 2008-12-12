@@ -1,9 +1,8 @@
-// $Id: MitAnaPhysicsModLinkDef.h,v 1.4 2008/11/28 13:40:18 loizides Exp $
+// $Id: MitPhysicsSelModsLinkDef.h,v 1.1 2008/12/10 19:51:05 loizides Exp $
 
 #ifndef MITPHYSICS_SELMODS_LINKDEF_H
 #define MITPHYSICS_SELMODS_LINKDEF_H
 #include "MitPhysics/SelMods/interface/GenericSelMod.h"
-#include "MitPhysics/SelMods/interface/HwwEvtPreSelMod.h"
 #endif
  
 #ifdef __CINT__
@@ -26,6 +25,4 @@
 #pragma link C++ class mithep::GenericSelMod<mithep::Photon>+;
 #pragma link C++ class mithep::GenericSelMod<mithep::Track>+;
 #pragma link C++ class mithep::GenericSelMod<mithep::TriggerObject>+;
-
-#pragma link C++ class mithep::HwwEvtPreSelMod+;
 #endif
