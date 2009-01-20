@@ -1,4 +1,4 @@
-// $Id: PhotonCleaningMod.cc,v 1.2 2008/12/10 11:44:33 loizides Exp $
+// $Id: PhotonCleaningMod.cc,v 1.3 2008/12/10 21:19:25 loizides Exp $
 
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -32,14 +32,14 @@ void PhotonCleaningMod::Process()
   PhotonOArr *CleanPhotons = new PhotonOArr;
   CleanPhotons->SetName(fCleanPhotonsName);
 
-  // Remove any photon that overlaps in eta, phi with an isolated electron.
+  // remove any photon that overlaps in eta, phi with an isolated electron.
   UInt_t n = GoodPhotons->GetEntries();
   for (UInt_t i=0; i<n; ++i) {
     const Photon *ph = GoodPhotons->At(i);        
 
     Bool_t isElectronOverlap =  false;
      
-    //Check for overlap with an electron
+    // check for overlap with an electron
     if (CleanElectrons) {
       UInt_t n2 = CleanElectrons->GetEntries();
       for (UInt_t j=0; j<n2; j++) {
