@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.19 2008/12/10 11:44:33 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.20 2008/12/10 12:47:06 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -72,13 +72,14 @@ void GeneratorMod::Process()
       Bool_t isGoodLepton = kFALSE;
       const MCParticle *pm = p;
       while (pm->HasMother() && isGoodLepton == kFALSE) {
+        if (pm->PdgId() == 92) // string reached, terminate loop
+          break;
         if (pm->Mother()->Is(MCParticle::kZ) || pm->Mother()->Is(MCParticle::kW)) {
           GenLeptons->Add(p);
           isGoodLepton = kTRUE;
           break;
         } else if (pm->Mother()->Is(MCParticle::kPi0) || pm->Mother()->Is(MCParticle::kEta)) {
           // this is fake, but it is a trick to get rid of these cases and abort the loop
-          isGoodLepton = kTRUE;
           break;
         } 
         pm = pm->Mother();
