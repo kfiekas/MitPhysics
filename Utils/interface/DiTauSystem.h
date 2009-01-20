@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DiTauSystem.h,v 1.5 2008/12/05 09:41:15 ceballos Exp $
+// $Id: DiTauSystem.h,v 1.6 2008/12/11 20:29:35 ceballos Exp $
 //
 // DiTauSystem
 //
@@ -22,7 +22,7 @@ namespace mithep
 
   class DiTauSystem {
     public:
-      DiTauSystem(Particle *t1, Particle *t2, const Met *met);
+      DiTauSystem(const Particle *t1, const Particle *t2, const Met *met);
       ~DiTauSystem() {}
 
       Double_t         RecoMass()        const { return fRecoMass;}
@@ -36,8 +36,8 @@ namespace mithep
     private:
       void             Init();
   
-      Particle        *fT1;       //first tau
-      Particle        *fT2;       //second tau
+      const Particle  *fT1;       //first tau
+      const Particle  *fT2;       //second tau
       const Met       *fMet;      //missing et
       Double_t         fXTau[2];  //visible fraction of the tau momenta
       Double_t         fRecoMass; //higgs mass
