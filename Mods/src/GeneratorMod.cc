@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.20 2008/12/10 12:47:06 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.21 2009/01/20 10:27:55 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -264,8 +264,6 @@ void GeneratorMod::Process()
 
     // leptons
     hDGenLeptons[0]->Fill(GenLeptons->GetEntries());
-    Int_t   idxMaxLep[2] = {-1, -1};
-    Double_t ptMaxLep[2] = {-1, -1};
     for(UInt_t i=0; i<GenLeptons->GetEntries(); i++) {
       hDGenLeptons[1]->Fill(GenLeptons->At(i)->Pt());
       hDGenLeptons[2]->Fill(TMath::Abs(GenLeptons->At(i)->Eta()));
@@ -277,40 +275,148 @@ void GeneratorMod::Process()
         hDGenLeptons[4]->Fill(dilepton->Mass());
 	delete dilepton;
       }
-      // selecting the two highest pt leptons
-      if     (GenLeptons->At(i)->Pt() > ptMaxLep[0]) {
-        ptMaxLep[1]  = ptMaxLep[0];
-	idxMaxLep[1] = idxMaxLep[0];
-        ptMaxLep[0]  = GenLeptons->At(i)->Pt();
-	idxMaxLep[0] = i;
-      }
-      else if (GenLeptons->At(i)->Pt() > ptMaxLep[1]) {
-        ptMaxLep[1]  = GenLeptons->At(i)->Pt();
-	idxMaxLep[1] = i;
+    }
+    // looking at events with two leptons
+    if (GenLeptons->GetEntries() == 2) {
+      hDGenLeptons[5]->Fill(TMath::Min(TMath::Max(TMath::Abs(GenLeptons->At(0)->Eta()),
+                                                  TMath::Abs(GenLeptons->At(1)->Eta())),
+                                       4.999));
+      hDGenLeptons[6]->Fill(TMath::Min(TMath::Min(TMath::Abs(GenLeptons->At(0)->Eta()),
+                                                  TMath::Abs(GenLeptons->At(1)->Eta())),
+                                       4.999));
+      if (TMath::Abs(GenLeptons->At(0)->Eta()) < 2.5 &&
+          TMath::Abs(GenLeptons->At(1)->Eta()) < 2.5) {
+        hDGenLeptons[7]->Fill(TMath::Min(GenLeptons->At(0)->Pt(),199.999));
+        if (GenLeptons->At(0)->Pt() > 20.0) {
+          hDGenLeptons[8]->Fill(TMath::Min(GenLeptons->At(1)->Pt(),199.999));
+          if (GenLeptons->At(1)->Pt() > 10.0) {
+            CompositeParticle *dilepton = new CompositeParticle();
+            dilepton->AddDaughter(GenLeptons->At(0));
+            dilepton->AddDaughter(GenLeptons->At(1));
+            hDGenLeptons[9]->Fill(TMath::Min(dilepton->Mass(),999.999));
+	    if(dilepton->Mass() > 12.0){
+	      hDGenLeptons[10]->Fill(MathUtils::DeltaPhi(GenLeptons->At(0)->Phi(),
+	                                                 GenLeptons->At(1)->Phi())
+						         * 180./ TMath::Pi());
+	      hDGenLeptons[11]->Fill(MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
+	                                               GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi()));
+	    }
+	    delete dilepton;
+	  }
+	}
       }
     }
-    // looking at events with at least two leptons
-    if (ptMaxLep[0] > 0 && ptMaxLep[1] > 0) {
-      hDGenLeptons[5]->Fill(TMath::Min(TMath::Max(TMath::Abs(GenLeptons->At(idxMaxLep[0])->Eta()),
-                                                  TMath::Abs(GenLeptons->At(idxMaxLep[1])->Eta())),
-                                       4.999));
-      hDGenLeptons[6]->Fill(TMath::Min(TMath::Min(TMath::Abs(GenLeptons->At(idxMaxLep[0])->Eta()),
-                                                  TMath::Abs(GenLeptons->At(idxMaxLep[1])->Eta())),
-                                       4.999));
-      if (TMath::Abs(GenLeptons->At(idxMaxLep[0])->Eta()) < 2.5 &&
-          TMath::Abs(GenLeptons->At(idxMaxLep[1])->Eta()) < 2.5) {
-        hDGenLeptons[7]->Fill(TMath::Min(GenLeptons->At(idxMaxLep[0])->Pt(),199.999));
-        if (GenLeptons->At(idxMaxLep[0])->Pt() > 20.0) {
-          hDGenLeptons[8]->Fill(TMath::Min(GenLeptons->At(idxMaxLep[1])->Pt(),199.999));
-          if (GenLeptons->At(idxMaxLep[1])->Pt() > 10.0) {
-            CompositeParticle *dilepton = new CompositeParticle();
-            dilepton->AddDaughter(GenLeptons->At(idxMaxLep[0]));
-            dilepton->AddDaughter(GenLeptons->At(idxMaxLep[1]));
-            hDGenLeptons[9]->Fill(TMath::Min(dilepton->Mass(),999.999));
-	    hDGenLeptons[10]->Fill(MathUtils::DeltaPhi(GenLeptons->At(idxMaxLep[0])->Phi(),
-	                                               GenLeptons->At(idxMaxLep[1])->Phi())
-						       * 180./ TMath::Pi());
-	    delete dilepton;
+    // looking at events with three leptons
+    if (GenLeptons->GetEntries() == 3) {
+      if (TMath::Abs(GenLeptons->At(0)->Eta()) < 2.5 &&
+          TMath::Abs(GenLeptons->At(1)->Eta()) < 2.5 &&
+          TMath::Abs(GenLeptons->At(2)->Eta()) < 2.5) {
+        hDGenLeptons[12]->Fill(TMath::Min(GenLeptons->At(0)->Pt(),199.999));
+        if (GenLeptons->At(0)->Pt() > 20.0) {
+          hDGenLeptons[13]->Fill(TMath::Min(GenLeptons->At(1)->Pt(),199.999));
+          hDGenLeptons[14]->Fill(TMath::Min(GenLeptons->At(2)->Pt(),199.999));
+          if (GenLeptons->At(1)->Pt() > 10.0 && GenLeptons->At(2)->Pt() > 10.0) {
+            CompositeParticle *dilepton01 = new CompositeParticle();
+            dilepton01->AddDaughter(GenLeptons->At(0));
+            dilepton01->AddDaughter(GenLeptons->At(1));
+            CompositeParticle *dilepton02 = new CompositeParticle();
+            dilepton02->AddDaughter(GenLeptons->At(0));
+            dilepton02->AddDaughter(GenLeptons->At(2));
+            CompositeParticle *dilepton12 = new CompositeParticle();
+            dilepton12->AddDaughter(GenLeptons->At(1));
+            dilepton12->AddDaughter(GenLeptons->At(2));
+            hDGenLeptons[15]->Fill(TMath::Min(dilepton01->Mass(),999.999));
+            hDGenLeptons[15]->Fill(TMath::Min(dilepton02->Mass(),999.999));
+            hDGenLeptons[15]->Fill(TMath::Min(dilepton12->Mass(),999.999));
+            CompositeParticle *trilepton = new CompositeParticle();
+            trilepton->AddDaughter(GenLeptons->At(0));
+            trilepton->AddDaughter(GenLeptons->At(1));
+            trilepton->AddDaughter(GenLeptons->At(2));
+            hDGenLeptons[16]->Fill(TMath::Min(trilepton->Mass(),999.999));
+	    double deltaR[3] = {MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
+	                                          GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi()),
+			        MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
+	                         		  GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi()),
+			        MathUtils::DeltaR(GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi(),
+	                        		  GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi())};
+	    double deltaRMin = deltaR[0];
+            for(int i=1; i<3; i++) if(deltaRMin > deltaR[i]) deltaRMin = deltaR[i];
+            hDGenLeptons[17]->Fill(deltaRMin);
+
+	    delete dilepton01;
+	    delete dilepton02;
+	    delete dilepton12;
+	    delete trilepton;
+	  }
+	}
+      }
+    }
+    // looking at events with four leptons
+    if (GenLeptons->GetEntries() == 4) {
+      if (TMath::Abs(GenLeptons->At(0)->Eta()) < 2.5 &&
+          TMath::Abs(GenLeptons->At(1)->Eta()) < 2.5 &&
+          TMath::Abs(GenLeptons->At(2)->Eta()) < 2.5 &&
+          TMath::Abs(GenLeptons->At(3)->Eta()) < 2.5) {
+        hDGenLeptons[18]->Fill(TMath::Min(GenLeptons->At(0)->Pt(),199.999));
+        if (GenLeptons->At(0)->Pt() > 20.0) {
+          hDGenLeptons[19]->Fill(TMath::Min(GenLeptons->At(1)->Pt(),199.999));
+          hDGenLeptons[20]->Fill(TMath::Min(GenLeptons->At(2)->Pt(),199.999));
+          hDGenLeptons[21]->Fill(TMath::Min(GenLeptons->At(3)->Pt(),199.999));
+          if (GenLeptons->At(1)->Pt() > 10.0 && GenLeptons->At(2)->Pt() > 10.0 &&
+	      GenLeptons->At(3)->Pt() > 10.0) {
+            CompositeParticle *dilepton01 = new CompositeParticle();
+            dilepton01->AddDaughter(GenLeptons->At(0));
+            dilepton01->AddDaughter(GenLeptons->At(1));
+            CompositeParticle *dilepton02 = new CompositeParticle();
+            dilepton02->AddDaughter(GenLeptons->At(0));
+            dilepton02->AddDaughter(GenLeptons->At(2));
+            CompositeParticle *dilepton03 = new CompositeParticle();
+            dilepton03->AddDaughter(GenLeptons->At(0));
+            dilepton03->AddDaughter(GenLeptons->At(3));
+            CompositeParticle *dilepton12 = new CompositeParticle();
+            dilepton12->AddDaughter(GenLeptons->At(1));
+            dilepton12->AddDaughter(GenLeptons->At(2));
+            CompositeParticle *dilepton13 = new CompositeParticle();
+            dilepton13->AddDaughter(GenLeptons->At(1));
+            dilepton13->AddDaughter(GenLeptons->At(3));
+            CompositeParticle *dilepton23 = new CompositeParticle();
+            dilepton23->AddDaughter(GenLeptons->At(2));
+            dilepton23->AddDaughter(GenLeptons->At(3));
+            hDGenLeptons[22]->Fill(TMath::Min(dilepton01->Mass(),999.999));
+            hDGenLeptons[22]->Fill(TMath::Min(dilepton02->Mass(),999.999));
+            hDGenLeptons[22]->Fill(TMath::Min(dilepton03->Mass(),999.999));
+            hDGenLeptons[22]->Fill(TMath::Min(dilepton12->Mass(),999.999));
+            hDGenLeptons[22]->Fill(TMath::Min(dilepton13->Mass(),999.999));
+            hDGenLeptons[22]->Fill(TMath::Min(dilepton23->Mass(),999.999));
+            CompositeParticle *fourlepton = new CompositeParticle();
+            fourlepton->AddDaughter(GenLeptons->At(0));
+            fourlepton->AddDaughter(GenLeptons->At(1));
+            fourlepton->AddDaughter(GenLeptons->At(2));
+            fourlepton->AddDaughter(GenLeptons->At(3));
+            hDGenLeptons[23]->Fill(TMath::Min(fourlepton->Mass(),999.999));
+	    double deltaR[6] = {MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
+	                                          GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi()),
+			        MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
+	                         		  GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi()),
+			        MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
+	                        		  GenLeptons->At(3)->Eta(), GenLeptons->At(3)->Phi()),
+				MathUtils::DeltaR(GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi(),
+	                                          GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi()),
+			        MathUtils::DeltaR(GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi(),
+	                         		  GenLeptons->At(3)->Eta(), GenLeptons->At(3)->Phi()),
+			        MathUtils::DeltaR(GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi(),
+	                        		  GenLeptons->At(3)->Eta(), GenLeptons->At(3)->Phi())};
+	    double deltaRMin = deltaR[0];
+            for(int i=1; i<6; i++) if(deltaRMin > deltaR[i]) deltaRMin = deltaR[i];
+            hDGenLeptons[24]->Fill(deltaRMin);
+
+	    delete dilepton01;
+	    delete dilepton02;
+	    delete dilepton03;
+	    delete dilepton12;
+	    delete dilepton13;
+	    delete dilepton23;
+	    delete fourlepton;
 	  }
 	}
       }
@@ -367,9 +473,11 @@ void GeneratorMod::Process()
         hDGenQuarks[5]->Fill(GenQuarks->At(i)->Pt());
         hDGenQuarks[6]->Fill(GenQuarks->At(i)->Eta());      
         hDGenQuarks[7]->Fill(GenQuarks->At(i)->Phi());      
-        if (ptMaxLep[0] > 20 && ptMaxLep[1] > 15) {
-          if (TMath::Abs(GenLeptons->At(idxMaxLep[0])->Eta()) < 2.5 &&
-              TMath::Abs(GenLeptons->At(idxMaxLep[1])->Eta()) < 2.5) {
+        if (GenLeptons->GetEntries() >= 2 && 
+	    GenLeptons->At(0)->Pt() > 20  &&
+	    GenLeptons->At(1)->Pt() > 15) {
+          if (TMath::Abs(GenLeptons->At(0)->Eta()) < 2.5 &&
+              TMath::Abs(GenLeptons->At(1)->Eta()) < 2.5) {
             hDGenQuarks[8]->Fill(GenQuarks->At(i)->Pt());	
             hDGenQuarks[9]->Fill(GenQuarks->At(i)->Eta());      
             hDGenQuarks[10]->Fill(GenQuarks->At(i)->Phi());	
@@ -443,7 +551,21 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenLeptons_%d", 8);  hDGenLeptons[8]  = new TH1D(sb,sb,100,0.0,200.0); 
     sprintf(sb,"hDGenLeptons_%d", 9);  hDGenLeptons[9]  = new TH1D(sb,sb,1000,0.0,1000.0); 
     sprintf(sb,"hDGenLeptons_%d",10);  hDGenLeptons[10] = new TH1D(sb,sb,90,0.0,180.0); 
-    for(Int_t i=0; i<11; i++) AddOutput(hDGenLeptons[i]);
+    sprintf(sb,"hDGenLeptons_%d",11);  hDGenLeptons[11] = new TH1D(sb,sb,100,0.0,5.0); 
+    sprintf(sb,"hDGenLeptons_%d",12);  hDGenLeptons[12] = new TH1D(sb,sb,100,0.0,200.0); 
+    sprintf(sb,"hDGenLeptons_%d",13);  hDGenLeptons[13] = new TH1D(sb,sb,100,0.0,200.0); 
+    sprintf(sb,"hDGenLeptons_%d",14);  hDGenLeptons[14] = new TH1D(sb,sb,100,0.0,200.0); 
+    sprintf(sb,"hDGenLeptons_%d",15);  hDGenLeptons[15] = new TH1D(sb,sb,1000,0.0,1000.0); 
+    sprintf(sb,"hDGenLeptons_%d",16);  hDGenLeptons[16] = new TH1D(sb,sb,1000,0.0,1000.0); 
+    sprintf(sb,"hDGenLeptons_%d",17);  hDGenLeptons[17] = new TH1D(sb,sb,100,0.0,5.0); 
+    sprintf(sb,"hDGenLeptons_%d",18);  hDGenLeptons[18] = new TH1D(sb,sb,100,0.0,200.0); 
+    sprintf(sb,"hDGenLeptons_%d",19);  hDGenLeptons[19] = new TH1D(sb,sb,100,0.0,200.0); 
+    sprintf(sb,"hDGenLeptons_%d",20);  hDGenLeptons[20] = new TH1D(sb,sb,100,0.0,200.0); 
+    sprintf(sb,"hDGenLeptons_%d",21);  hDGenLeptons[21] = new TH1D(sb,sb,100,0.0,200.0); 
+    sprintf(sb,"hDGenLeptons_%d",22);  hDGenLeptons[22] = new TH1D(sb,sb,1000,0.0,1000.0); 
+    sprintf(sb,"hDGenLeptons_%d",23);  hDGenLeptons[23] = new TH1D(sb,sb,1000,0.0,1000.0); 
+    sprintf(sb,"hDGenLeptons_%d",24);  hDGenLeptons[24] = new TH1D(sb,sb,100,0.0,5.0); 
+    for(Int_t i=0; i<25; i++) AddOutput(hDGenLeptons[i]);
 
     // all leptons
     sprintf(sb,"hDGenAllLeptons_%d", 0);  hDGenAllLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.15 2008/12/10 12:47:22 loizides Exp $
+// $Id: GeneratorMod.h,v 1.16 2008/12/10 15:18:38 loizides Exp $
 //
 // GeneratorMod
 //
@@ -69,7 +69,7 @@ namespace mithep
       Double_t             fPtPhotonMin;        //pt min for photons
       Double_t             fEtaPhotonMax;       //eta max for photons
       const MCParticleCol *fParticles;	        //!MCParticle branch
-      TH1D                *hDGenLeptons[20];    //!histos for W leptons
+      TH1D                *hDGenLeptons[40];    //!histos for W leptons
       TH1D                *hDGenAllLeptons[20]; //!histos for all leptons
       TH1D                *hDGenTaus[20];       //!histos for taus
       TH1D                *hDGenNeutrinos[20];  //!histos for neutrinos
@@ -78,7 +78,7 @@ namespace mithep
       TH1D                *hDGenBosons[20];     //!histos for bosons
       TH1D                *hDGenPhotons[20];    //!histos for photons
       TH1D                *hDVMass[20];         //!histos for auxiliar work
-    
+
     ClassDef(GeneratorMod, 1) // Module to gather generator information
   };
 }
