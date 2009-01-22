@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.7 2008/12/10 11:44:33 loizides Exp $
+// $Id: JetIDMod.cc,v 1.8 2009/01/20 12:39:49 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -14,7 +14,7 @@ JetIDMod::JetIDMod(const char *name, const char *title) :
   fJetBranchName(Names::gkCaloJetBrn),
   fGoodJetsName(ModNames::gkGoodJetsName),  
   fUseJetCorrection(kTRUE),
-  fJetEtCut(35.0),
+  fJetEtCut(20.0),
   fJets(0)
 {
   // Constructor.

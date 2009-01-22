@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.21 2009/01/20 10:27:55 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.22 2009/01/20 12:56:46 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -123,11 +123,16 @@ void GeneratorMod::Process()
           SendError(kWarning, "Process", "Could not find quark pair!");
       } else if (pq1->IsQuark()   && pq2->IsQuark()   && 
                  pq1->HasMother() && pq2->HasMother() &&
-                 pq1->Mother()->PdgId() == p->Mother()->PdgId() &&
-                 pq2->Mother()->PdgId() == p->Mother()->PdgId()) {
+                 pq1->Mother()->PdgId() == pq2->Mother()->PdgId()) {
         GenqqHs->Add(pq1);
         GenqqHs->Add(pq2);
+      } else if (pq1->IsQuark()   && pq2->IsQuark()   && 
+                 pq1->HasMother() && pq2->HasMother()) {
+        printf("mother q1(%d - %d) != mother q2 (%d - %d)\n",
+	       pq1->PdgId(),pq1->Mother()->PdgId(),
+	       pq2->PdgId(),pq2->Mother()->PdgId());
       }
+
       if (p->Status() == 3)  
         GenBosons->Add(p); // take higgs boson in  account here rather in next else if 
     }
