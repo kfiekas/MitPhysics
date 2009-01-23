@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.6 2008/12/10 11:44:33 loizides Exp $
+// $Id: JetIDMod.h,v 1.7 2008/12/10 17:28:22 loizides Exp $
 //
 // JetIDMod
 //
@@ -24,13 +24,13 @@ namespace mithep
                const char *title="Jed identification module");
       ~JetIDMod() {}
 
-      Double_t          GetEtCut()                     const { return fJetEtCut;          }     
+      Double_t          GetEtCut()                     const { return fJetPtCut;          }     
       const char       *GetInputName()                 const { return fJetBranchName;     }   
       const char       *GetGoodName()                  const { return GetGoodJetsName();  }     
       const char       *GetGoodJetsName()              const { return fGoodJetsName;      }     
       const char       *GetOutputName()                const { return GetGoodJetsName();  }     
       Bool_t            GetUseCorrection()             const { return fUseJetCorrection;  }     
-      void              SetEtCut(Double_t cut)               { fJetEtCut = cut;           }     
+      void              SetPtCut(Double_t cut)               { fJetPtCut = cut;           }     
       void              SetGoodJetsName(const char *name)    { fGoodJetsName = name;      }     
       void              SetGoodName(const char *name)        { SetGoodJetsName(name);     }     
       void              SetInputName(const char *name)       { fJetBranchName = name;     }  
@@ -44,7 +44,7 @@ namespace mithep
       TString           fJetBranchName;         //name of jet collection (input)
       TString           fGoodJetsName;          //name of good jets collection (output)
       Bool_t            fUseJetCorrection;      //=true then use corrected energy
-      Double_t          fJetEtCut;              //jet et cut
+      Double_t          fJetPtCut;              //jet pt cut
       const JetCol     *fJets;                  //!jet collection
 
       ClassDef(JetIDMod, 1) // Jet identification module

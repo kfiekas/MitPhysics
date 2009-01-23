@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.8 2009/01/20 12:39:49 ceballos Exp $
+// $Id: JetIDMod.cc,v 1.9 2009/01/22 22:25:27 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -14,7 +14,7 @@ JetIDMod::JetIDMod(const char *name, const char *title) :
   fJetBranchName(Names::gkCaloJetBrn),
   fGoodJetsName(ModNames::gkGoodJetsName),  
   fUseJetCorrection(kTRUE),
-  fJetEtCut(20.0),
+  fJetPtCut(20.0),
   fJets(0)
 {
   // Constructor.
@@ -37,11 +37,11 @@ void JetIDMod::Process()
     if (jet->AbsEta() > 5.0) 
       continue;
     
-    Double_t jetet = jet->Et();
+    Double_t jetpt = jet->Pt();
     if (fUseJetCorrection)
-      jetet *= jet->L2RelativeCorrectionScale() * jet->L3AbsoluteCorrectionScale();
+      jetpt *= jet->L2RelativeCorrectionScale() * jet->L3AbsoluteCorrectionScale();
 
-    if (jetet < fJetEtCut)
+    if (jetpt < fJetPtCut)
       continue;
     
     // add good jet to collection
