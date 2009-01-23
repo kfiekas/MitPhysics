@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.7 2008/12/10 17:28:22 loizides Exp $
+// $Id: JetIDMod.h,v 1.8 2009/01/23 09:27:46 ceballos Exp $
 //
 // JetIDMod
 //
@@ -24,17 +24,17 @@ namespace mithep
                const char *title="Jed identification module");
       ~JetIDMod() {}
 
-      Double_t          GetEtCut()                     const { return fJetPtCut;          }     
       const char       *GetInputName()                 const { return fJetBranchName;     }   
       const char       *GetGoodName()                  const { return GetGoodJetsName();  }     
       const char       *GetGoodJetsName()              const { return fGoodJetsName;      }     
       const char       *GetOutputName()                const { return GetGoodJetsName();  }     
+      Double_t          GetPtCut()                     const { return fJetPtCut;          }     
       Bool_t            GetUseCorrection()             const { return fUseJetCorrection;  }     
-      void              SetPtCut(Double_t cut)               { fJetPtCut = cut;           }     
       void              SetGoodJetsName(const char *name)    { fGoodJetsName = name;      }     
       void              SetGoodName(const char *name)        { SetGoodJetsName(name);     }     
       void              SetInputName(const char *name)       { fJetBranchName = name;     }  
       void              SetOutputName(const char *name)      { SetGoodJetsName(name);     }     
+      void              SetPtCut(Double_t cut)               { fJetPtCut = cut;           }     
       void              SetUseCorrection(Bool_t b)           { fUseJetCorrection = b;     }     
 
     protected:
