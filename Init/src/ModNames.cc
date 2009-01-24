@@ -1,4 +1,4 @@
-// $Id: ModNames.cc,v 1.3 2008/12/10 08:49:11 loizides Exp $
+// $Id: ModNames.cc,v 1.4 2008/12/12 16:04:04 loizides Exp $
 
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -11,14 +11,14 @@ const char *ModNames::gkCleanElectronsName     = "CleanElectrons";
 const char *ModNames::gkCleanMuonsName         = "CleanMuons";
 const char *ModNames::gkCleanPhotonsName       = "CleanPhotons";
 const char *ModNames::gkCleanTausName          = "CleanTaus";
-const char *ModNames::gkCleanJetsName          = "CleanIC5Jets";
-const char *ModNames::gkCleanFwdJetsName       = "CleanFwdIC5Jets";
-const char *ModNames::gkCleanNoFwdJetsName     = "CleanNoFwdIC5Jets";
+const char *ModNames::gkCleanJetsName          = "CleanSC5Jets";
+const char *ModNames::gkCleanFwdJetsName       = "CleanFwdSC5Jets";
+const char *ModNames::gkCleanNoFwdJetsName     = "CleanNoFwdSC5Jets";
 const char *ModNames::gkGoodElectronsName      = "GoodElectrons";
 const char *ModNames::gkGoodMuonsName          = "GoodMuons";
 const char *ModNames::gkGoodPhotonsName        = "GoodPhotons";
 const char *ModNames::gkGoodTausName           = "GoodTaus";
-const char *ModNames::gkGoodJetsName           = "GoodIC5Jets";
+const char *ModNames::gkGoodJetsName           = "GoodSC5Jets";
 const char *ModNames::gkMCLeptonsName          = "MCLeptons";
 const char *ModNames::gkMCAllLeptonsName       = "MCAllLeptons";
 const char *ModNames::gkMCTausName             = "MCTaus";
