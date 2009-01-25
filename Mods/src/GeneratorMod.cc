@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.23 2009/01/22 22:25:27 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.24 2009/01/23 08:50:04 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -123,14 +123,11 @@ void GeneratorMod::Process()
           SendError(kWarning, "Process", "Could not find quark pair!");
       } else if (pq1->IsQuark()   && pq2->IsQuark()   && 
                  pq1->HasMother() && pq2->HasMother() &&
-                 pq1->Mother()->PdgId() == pq2->Mother()->PdgId()) {
+                 pq1->Mother() == pq2->Mother() &&
+		 pq1->Mother() != p->Mother() &&
+		 pq1->Mother() != p->Mother()) {
         GenqqHs->Add(pq1);
         GenqqHs->Add(pq2);
-      } else if (pq1->IsQuark()   && pq2->IsQuark()   && 
-                 pq1->HasMother() && pq2->HasMother()) {
-        SendError(kWarning, "Process", "Mother q1(%d - %d) != mother q2 (%d - %d)!",
-                  pq1->PdgId(),pq1->Mother()->PdgId(),
-                  pq2->PdgId(),pq2->Mother()->PdgId());
       }
 
       if (p->Status() == 3)  
