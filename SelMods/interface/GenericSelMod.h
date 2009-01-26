@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenericSelMod.h,v 1.1 2008/12/10 17:27:28 loizides Exp $
+// $Id: GenericSelMod.h,v 1.2 2008/12/12 16:04:44 loizides Exp $
 //
 // GenericSelMod
 // 
@@ -13,6 +13,7 @@
 #define MITPHYSICS_SELMODS_GENERICSELMOD_H
 
 #include "MitAna/TreeMod/interface/BaseSelMod.h" 
+#include <TH1D.h>
 
 namespace mithep 
 {
@@ -43,15 +44,17 @@ namespace mithep
 
     protected:
       void                     Process();
+      void                     SlaveBegin();
 
-      TString                  fColName;    //name of input collection
-      Double_t                 fPtMin;      //minimum pt required                  (def = 0 GeV)
-      Double_t                 fPtMax;      //maximum pt required                  (def = 5000 GeV)
-      Double_t                 fEtaMin;     //minimum eta required                 (def = -10)
-      Double_t                 fEtaMax;     //maximum eta required                 (def = +10) 
-      Double_t                 fMinMaxPt;   //minimum pt required for maximum pt   (def = 0GeV)
-      UInt_t                   fMinCounts;  //minimum number of particles required (def = 1)
-      const Collection<T>     *fCol;        //!pointer to collection 
+      TString                  fColName;      //name of input collection
+      Double_t                 fPtMin;        //minimum pt required    (def = 0 GeV)
+      Double_t                 fPtMax;        //maximum pt required    (def = 5000 GeV)
+      Double_t                 fEtaMin;       //minimum eta required   (def = -10)
+      Double_t                 fEtaMax;       //maximum eta required        (def = +10) 
+      Double_t                 fMinMaxPt;     //min pt required for max pt  (def = 0GeV)
+      UInt_t                   fMinCounts;    //min number of particles required (def = 1)
+      const Collection<T>     *fCol;          //!pointer to collection 
+      TH1D                    *fNAccCounters; //!acceptance histogram
 
       ClassDefT(GenericSelMod,1) // Generic selection module
   };
@@ -66,6 +69,7 @@ mithep::GenericSelMod<T>::GenericSelMod(const char *name, const char *title) :
   fPtMax(5000),
   fEtaMin(-10),
   fEtaMax(10),
+  fMinMaxPt(0),
   fMinCounts(1),
   fCol(0)
 {
@@ -76,7 +80,9 @@ mithep::GenericSelMod<T>::GenericSelMod(const char *name, const char *title) :
 template<class T>
 void mithep::GenericSelMod<T>::Process()
 {
-  // Process entries of the tree: Just load the branch and fill the histograms.
+  // Process entries of the tree.
+
+  fNAccCounters->Fill(0);
 
   fCol = GetObjThisEvt<Collection<T> >(GetColName());
   if (!fCol) {
@@ -84,6 +90,8 @@ void mithep::GenericSelMod<T>::Process()
                     "Could not obtain collection with name %s!", GetColName());
     return;
   }
+
+  fNAccCounters->Fill(1);
 
   UInt_t counter = 0;
   UInt_t ents=this->fCol->GetEntries();
@@ -100,11 +108,42 @@ void mithep::GenericSelMod<T>::Process()
      if (eta>this->fEtaMax)
        continue;
 
+     if (i==0) { // check particle with largest pt
+         if (pt<fMinMaxPt) {
+         this->SkipEvent();
+         return;
+       }
+     }
      ++counter;
   }
 
+  fNAccCounters->Fill(2);
+
   // skip event if not enough particles are found in kinematic region
-  if (counter<GetMinCounts())
+  if (counter<GetMinCounts()) {
     this->SkipEvent();
+    return;
+  }
+
+  fNAccCounters->Fill(3);
+}
+
+//--------------------------------------------------------------------------------------------------
+template<class T>
+void mithep::GenericSelMod<T>::SlaveBegin()
+{
+  // Setup acceptence histogram.
+
+  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",25,-0.5,24.5);
+  if (1) {
+    TAxis *xa = fNAccCounters->GetXaxis();
+    for(Int_t i=1;i<=fNAccCounters->GetNbinsX();++i)
+      xa->SetBinLabel(i,"unused");
+    xa->SetBinLabel(1,"Enter");
+    xa->SetBinLabel(2,"Objs");
+    xa->SetBinLabel(3,"MinMax");
+    xa->SetBinLabel(4,"Counts");
+    xa->SetRangeUser(0,3);
+  }
 }
 #endif
