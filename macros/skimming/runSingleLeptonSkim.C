@@ -1,4 +1,4 @@
-// $Id: runSingleLeptonSkim.C,v 1.1 2008/12/10 17:31:35 loizides Exp $
+// $Id: runSingleLeptonSkim.C,v 1.2 2008/12/11 10:55:44 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -14,7 +14,7 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runSingleLeptonSkim(const char *files, UInt_t nTestEvs=0)
+void runSingleLeptonSkim(const char *files=0, UInt_t nTestEvs=0)
 {
   using namespace mithep;
   gDebugMask  = Debug::kAnalysis;
@@ -85,6 +85,7 @@ void runSingleLeptonSkim(const char *files, UInt_t nTestEvs=0)
 
   if (nTestEvs)
     ana->SetProcessNEvents(nTestEvs);
-  ana->AddFile(files);
+  if (files)
+    ana->AddFile(files);
   ana->Run(nTestEvs>0);
 }
