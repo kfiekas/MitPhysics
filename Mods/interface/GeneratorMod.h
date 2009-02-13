@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.17 2009/01/20 12:56:44 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.18 2009/02/13 12:51:10 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -28,7 +28,7 @@ namespace mithep
       ~GeneratorMod() {}
 
       const char          *GetMCPartName()	 const { return fMCPartName; }	
-      const char          *GSetMCLeptonsName()   const { return fMCLeptonsName; }	
+      const char          *GetMCLeptonsName()    const { return fMCLeptonsName; }	
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
       const char          *GetMCTausName()	 const { return fMCTausName; }	
       const char          *GetMCNeutrinosName()  const { return fMCNeutrinosName; }	
@@ -49,7 +49,7 @@ namespace mithep
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
       void                 SetPtPhotonMin(Double_t x)          { fPtPhotonMin      = x; }     
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
-      void                 SetPdgIdCut(Int_t d)	               { fPdgIdCut         = d; }	 
+      void                 SetPdgIdCut(UInt_t d)	       { fPdgIdCut         = d; }	 
       void                 SetMassMinCut(Double_t x)	       { fMassMinCut       = x; }	 
       void                 SetMassMaxCut(Double_t x)	       { fMassMaxCut	   = x; }	 
 
@@ -71,9 +71,9 @@ namespace mithep
       Double_t             fEtaLeptonMax;       //eta max for leptons
       Double_t             fPtPhotonMin;        //pt min for photons
       Double_t             fEtaPhotonMax;       //eta max for photons
-      Int_t                fPdgIdCut;           //PdgId particle used to cut on its mass
-      Double_t             fMassMinCut;	        //mass min for PdgId particle
-      Double_t             fMassMaxCut;	        //mass max for PdgId particle
+      UInt_t               fPdgIdCut;           //pdg id for particle used to select on mass (0=off)
+      Double_t             fMassMinCut;	        //mass min for given PdgId particle 
+      Double_t             fMassMaxCut;	        //mass max for given PdgId particle
       const MCParticleCol *fParticles;	        //!MCParticle branch
 
       TH1D                *hDGenLeptons[40];    //!histos for W leptons

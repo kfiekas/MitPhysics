@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.25 2009/01/25 22:45:47 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.26 2009/02/13 12:51:10 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -26,9 +26,9 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fEtaLeptonMax(5.0),
   fPtPhotonMin(0.0),
   fEtaPhotonMax(5.0),
-  fPdgIdCut(MCParticle::kZ),
-  fMassMinCut(-1.0),
-  fMassMaxCut(999999.0),
+  fPdgIdCut(0),
+  fMassMinCut(-FLT_MAX),
+  fMassMaxCut(FLT_MAX),
   fParticles(0)
 {
   // Constructor.
@@ -243,14 +243,14 @@ void GeneratorMod::Process()
       delete diBoson;
     }
     
-    // Mass cut for Z bosons
-    if(p->Is(fPdgIdCut) && 
+    // mass cut for given pid
+    if(fPdgIdCut && p->Is(fPdgIdCut) && 
        (p->Mass() < fMassMinCut || p->Mass() > fMassMaxCut)) {
       SkipEvent();
       return;
     }
 
-  } // End loop of particles
+  } // end loop of particles
 
   // sort according to pt
   GenLeptons->Sort();
@@ -346,14 +346,20 @@ void GeneratorMod::Process()
             trilepton->AddDaughter(GenLeptons->At(1));
             trilepton->AddDaughter(GenLeptons->At(2));
             hDGenLeptons[16]->Fill(TMath::Min(trilepton->Mass(),999.999));
-	    double deltaR[3] = {MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
-	                                          GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi()),
-			        MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
-	                         		  GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi()),
-			        MathUtils::DeltaR(GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi(),
-	                        		  GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi())};
-	    double deltaRMin = deltaR[0];
-            for(int i=1; i<3; i++) if(deltaRMin > deltaR[i]) deltaRMin = deltaR[i];
+	    Double_t deltaR[3] = {MathUtils::DeltaR(GenLeptons->At(0)->Eta(), 
+                                                    GenLeptons->At(0)->Phi(),
+                                                    GenLeptons->At(1)->Eta(), 
+                                                    GenLeptons->At(1)->Phi()),
+                                  MathUtils::DeltaR(GenLeptons->At(0)->Eta(), 
+                                                    GenLeptons->At(0)->Phi(),
+                                                    GenLeptons->At(2)->Eta(), 
+                                                    GenLeptons->At(2)->Phi()),
+                                  MathUtils::DeltaR(GenLeptons->At(1)->Eta(), 
+                                                    GenLeptons->At(1)->Phi(),
+                                                    GenLeptons->At(2)->Eta(), 
+                                                    GenLeptons->At(2)->Phi())};
+	    Double_t deltaRMin = deltaR[0];
+            for(Int_t i=1; i<3; i++) if(deltaRMin > deltaR[i]) deltaRMin = deltaR[i];
             hDGenLeptons[17]->Fill(deltaRMin);
 
 	    delete dilepton01;
@@ -407,20 +413,32 @@ void GeneratorMod::Process()
             fourlepton->AddDaughter(GenLeptons->At(2));
             fourlepton->AddDaughter(GenLeptons->At(3));
             hDGenLeptons[23]->Fill(TMath::Min(fourlepton->Mass(),999.999));
-	    double deltaR[6] = {MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
-	                                          GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi()),
-			        MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
-	                         		  GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi()),
-			        MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
-	                        		  GenLeptons->At(3)->Eta(), GenLeptons->At(3)->Phi()),
-				MathUtils::DeltaR(GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi(),
-	                                          GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi()),
-			        MathUtils::DeltaR(GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi(),
-	                         		  GenLeptons->At(3)->Eta(), GenLeptons->At(3)->Phi()),
-			        MathUtils::DeltaR(GenLeptons->At(2)->Eta(), GenLeptons->At(2)->Phi(),
-	                        		  GenLeptons->At(3)->Eta(), GenLeptons->At(3)->Phi())};
-	    double deltaRMin = deltaR[0];
-            for(int i=1; i<6; i++) if(deltaRMin > deltaR[i]) deltaRMin = deltaR[i];
+	    Double_t deltaR[6] = {MathUtils::DeltaR(GenLeptons->At(0)->Eta(),
+                                                    GenLeptons->At(0)->Phi(),
+                                                    GenLeptons->At(1)->Eta(), 
+                                                    GenLeptons->At(1)->Phi()),
+                                  MathUtils::DeltaR(GenLeptons->At(0)->Eta(), 
+                                                    GenLeptons->At(0)->Phi(),
+                                                    GenLeptons->At(2)->Eta(), 
+                                                    GenLeptons->At(2)->Phi()),
+                                  MathUtils::DeltaR(GenLeptons->At(0)->Eta(), 
+                                                    GenLeptons->At(0)->Phi(),
+                                                    GenLeptons->At(3)->Eta(), 
+                                                    GenLeptons->At(3)->Phi()),
+                                  MathUtils::DeltaR(GenLeptons->At(1)->Eta(), 
+                                                    GenLeptons->At(1)->Phi(),
+                                                    GenLeptons->At(2)->Eta(), 
+                                                    GenLeptons->At(2)->Phi()),
+                                  MathUtils::DeltaR(GenLeptons->At(1)->Eta(), 
+                                                    GenLeptons->At(1)->Phi(),
+                                                    GenLeptons->At(3)->Eta(), 
+                                                    GenLeptons->At(3)->Phi()),
+                                  MathUtils::DeltaR(GenLeptons->At(2)->Eta(), 
+                                                    GenLeptons->At(2)->Phi(),
+                                                    GenLeptons->At(3)->Eta(), 
+                                                    GenLeptons->At(3)->Phi())};
+	    Double_t deltaRMin = deltaR[0];
+            for(Int_t i=1; i<6; i++) if(deltaRMin > deltaR[i]) deltaRMin = deltaR[i];
             hDGenLeptons[24]->Fill(deltaRMin);
 
 	    delete dilepton01;
