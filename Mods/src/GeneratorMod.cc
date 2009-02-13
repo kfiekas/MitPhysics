@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.24 2009/01/23 08:50:04 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.25 2009/01/25 22:45:47 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -26,6 +26,9 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fEtaLeptonMax(5.0),
   fPtPhotonMin(0.0),
   fEtaPhotonMax(5.0),
+  fPdgIdCut(MCParticle::kZ),
+  fMassMinCut(-1.0),
+  fMassMaxCut(999999.0),
   fParticles(0)
 {
   // Constructor.
@@ -239,7 +242,15 @@ void GeneratorMod::Process()
       }
       delete diBoson;
     }
-  }
+    
+    // Mass cut for Z bosons
+    if(p->Is(fPdgIdCut) && 
+       (p->Mass() < fMassMinCut || p->Mass() > fMassMaxCut)) {
+      SkipEvent();
+      return;
+    }
+
+  } // End loop of particles
 
   // sort according to pt
   GenLeptons->Sort();

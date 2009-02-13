@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.16 2008/12/10 15:18:38 loizides Exp $
+// $Id: GeneratorMod.h,v 1.17 2009/01/20 12:56:44 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -49,6 +49,9 @@ namespace mithep
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
       void                 SetPtPhotonMin(Double_t x)          { fPtPhotonMin      = x; }     
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
+      void                 SetPdgIdCut(Int_t d)	               { fPdgIdCut         = d; }	 
+      void                 SetMassMinCut(Double_t x)	       { fMassMinCut       = x; }	 
+      void                 SetMassMaxCut(Double_t x)	       { fMassMaxCut	   = x; }	 
 
     protected:
       void                 Process();
@@ -68,7 +71,11 @@ namespace mithep
       Double_t             fEtaLeptonMax;       //eta max for leptons
       Double_t             fPtPhotonMin;        //pt min for photons
       Double_t             fEtaPhotonMax;       //eta max for photons
+      Int_t                fPdgIdCut;           //PdgId particle used to cut on its mass
+      Double_t             fMassMinCut;	        //mass min for PdgId particle
+      Double_t             fMassMaxCut;	        //mass max for PdgId particle
       const MCParticleCol *fParticles;	        //!MCParticle branch
+
       TH1D                *hDGenLeptons[40];    //!histos for W leptons
       TH1D                *hDGenAllLeptons[20]; //!histos for all leptons
       TH1D                *hDGenTaus[20];       //!histos for taus
