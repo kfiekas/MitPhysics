@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.1 2008/10/14 06:13:55 loizides Exp $
+// $Id: IsolationTools.cc,v 1.1 2008/10/15 06:02:05 loizides Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -8,16 +8,13 @@ using namespace mithep;
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::TrackIsolation(const Track *p, Double_t extRadius, Double_t intRadius,
                                         Double_t ptLow, Double_t maxVtxZDist, 
-                                        Collection<Track> *tracks) 
+                                        const Collection<Track> *tracks) 
 {
   //Computes the Track Isolation: Summed Transverse Momentum of all tracks inside an 
   //annulus around the electron seed track.  
 
   Double_t ptSum =0.;  
   for (UInt_t i=0; i<tracks->GetEntries();i++) {   
-    ThreeVector *tmpTrackMomentum = new ThreeVector(tracks->At(i)->Mom().X(),
-                                                    tracks->At(i)->Mom().Y(),
-                                                    tracks->At(i)->Mom().Z());
     Double_t tmpPt = tracks->At(i)->Pt();
     Double_t deltaZ = fabs(p->Z0() - tracks->At(i)->Z0());
 
@@ -28,8 +25,7 @@ Double_t IsolationTools::TrackIsolation(const Track *p, Double_t extRadius, Doub
     if (deltaZ > maxVtxZDist) 
       continue;
            
-    Double_t dr = MathUtils::DeltaR(p->Mom().Phi(),p->Mom().Eta(),tmpTrackMomentum->Phi(),
-                                  tmpTrackMomentum->Eta());
+    Double_t dr = MathUtils::DeltaR(p->Phi(),p->Eta(),tracks->At(i)->Phi(), tracks->At(i)->Eta());
     //add the track pt if it is inside the annulus
     if ( dr < extRadius && 
 	 dr >= intRadius ) {
@@ -41,13 +37,12 @@ Double_t IsolationTools::TrackIsolation(const Track *p, Double_t extRadius, Doub
 
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::EcalIsolation(const SuperCluster *sc, Double_t coneSize, Double_t etLow, 
-                                       Collection<BasicCluster> *basicClusters) 
+                                       const Collection<BasicCluster> *basicClusters) 
 {
   //Computes the Ecal Isolation: Summed Transverse Energy of all Basic Clusters inside a  
   //cone around the electron, excluding those that are inside the electron super cluster.
 
   Double_t ecalIsol=0.;
-  ThreeVector *SClusterPosition = new ThreeVector (sc->X(),sc->Y(),sc->Z());    
   const BasicCluster *basicCluster= 0;
   for (UInt_t i=0; i<basicClusters->GetEntries();i++) {    
     basicCluster = basicClusters->At(i);    
@@ -70,11 +65,8 @@ Double_t IsolationTools::EcalIsolation(const SuperCluster *sc, Double_t coneSize
       }
       
       if (!inSuperCluster) {	    
-        ThreeVector *basicClusterPosition = new ThreeVector(basicCluster->X(),
-                                                            basicCluster->Y(),
-                                                            basicCluster->Z());
-        Double_t dr = MathUtils::DeltaR(SClusterPosition->Phi(), SClusterPosition->Eta(),
-                                      basicClusterPosition->Phi(),basicClusterPosition->Eta());
+        Double_t dr = MathUtils::DeltaR(sc->Phi(), sc->Eta(),
+                                      basicCluster->Phi(),basicCluster->Eta());
         if(dr < coneSize) {
           ecalIsol += basicClusterEt;
         }
@@ -87,7 +79,7 @@ Double_t IsolationTools::EcalIsolation(const SuperCluster *sc, Double_t coneSize
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::CaloTowerHadIsolation(const ThreeVector *p, Double_t extRadius, 
                                                Double_t intRadius, Double_t etLow, 
-                                               Collection<CaloTower> *caloTowers) 
+                                               const Collection<CaloTower> *caloTowers) 
 {
   //Computes the CaloTower Had Et Isolation: Summed Hadronic Transverse Energy of all Calo Towers 
   //inside an annulus around the electron super cluster position.
@@ -107,7 +99,7 @@ Double_t IsolationTools::CaloTowerHadIsolation(const ThreeVector *p, Double_t ex
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::CaloTowerEmIsolation(const ThreeVector *p, Double_t extRadius, 
                                               Double_t intRadius, Double_t etLow, 
-                                              Collection<CaloTower> *caloTowers) 
+                                              const Collection<CaloTower> *caloTowers) 
 {
   //Computes the CaloTower Em Et Isolation: Summed Hadronic Transverse Energy of all Calo Towers 
   //inside an annulus around the electron super cluster position.
