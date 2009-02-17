@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.1 2008/10/15 06:02:05 loizides Exp $
+// $Id: IsolationTools.h,v 1.2 2008/11/27 16:28:58 loizides Exp $
 //
 // IsolationTools
 //
@@ -23,15 +23,16 @@ namespace mithep
     public:
       static Double_t TrackIsolation(const mithep::Track *p, Double_t extRadius, 
                                      Double_t intRadius, Double_t ptLow, Double_t maxVtxZDist, 
-                                     mithep::Collection<mithep::Track> *tracks); 
+                                     const mithep::Collection<mithep::Track> *tracks); 
       static Double_t EcalIsolation(const SuperCluster *sc, Double_t coneSize, Double_t etLow, 
-                                    mithep::Collection<mithep::BasicCluster> *basicClusters);
+                                    const mithep::Collection<mithep::BasicCluster> *basicClusters);
       static Double_t CaloTowerHadIsolation(const ThreeVector *p,  Double_t extRadius, 
                                             Double_t intRadius, Double_t etLow, 
-                                            mithep::Collection<mithep::CaloTower> *caloTowers);
+                                            const mithep::Collection<mithep::CaloTower> 
+                                            *caloTowers);
       static Double_t CaloTowerEmIsolation(const ThreeVector *p, Double_t extRadius, 
                                            Double_t intRadius, Double_t etLow, 
-                                           mithep::Collection<mithep::CaloTower> *caloTowers);
+                                           const mithep::Collection<mithep::CaloTower> *caloTowers);
   };
 }
 #endif
