@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MergeParticlesMod.h,v 1.2 2008/12/10 17:28:22 loizides Exp $
+// $Id: MergerMod.h,v 1.1 2008/12/11 17:37:29 loizides Exp $
 //
 // MergerMod
 //
@@ -35,7 +35,7 @@ namespace mithep
       void                     SlaveBegin();
       void                     Process();
 
-      StringVec                fInList;        //list of to be merged objects (input)
+      std::vector<std::string> fInList;        //list of to be merged objects (input)
       TString                  fMergedName;    //name of merged collection (output)
 
     ClassDefT(MergerMod, 1) // Merger module
@@ -59,7 +59,7 @@ void mithep::MergerMod<T>::AddInputName(const char *n)
 
   if (!n)
     return;
-  fInList.AddCopy(std::string(n));
+  fInList.push_back(std::string(n));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -71,9 +71,9 @@ void mithep::MergerMod<T>::Process()
   ObjArray<T> *colout = new mithep::ObjArray<T>(0);
   colout->SetName(GetMergedName());
 
-  UInt_t n = fInList.GetEntries();
+  UInt_t n = fInList.size();
   for (UInt_t i=0; i<n; ++i) {
-    const TObject *in = GetObjThisEvt<TObject>(fInList.At(i)->c_str());
+    const TObject *in = GetObjThisEvt<TObject>(fInList.at(i).c_str());
     if (!in)
       continue;
 
