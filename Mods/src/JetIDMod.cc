@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.11 2009/01/23 09:53:19 loizides Exp $
+// $Id: JetIDMod.cc,v 1.12 2009/01/24 12:42:08 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -37,9 +37,11 @@ void JetIDMod::Process()
     if (jet->AbsEta() > 5.0) 
       continue;
     
-    Double_t jetpt = jet->Pt();
+    Double_t jetpt;
     if (fUseJetCorrection)
-      jetpt *= jet->L2RelativeCorrectionScale() * jet->L3AbsoluteCorrectionScale();
+      jetpt = jet->Pt();
+    else
+      jetpt = jet->RawMom().Pt();
 
     if (jetpt < fJetPtCut)
       continue;
