@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.1 2008/10/15 06:02:05 loizides Exp $
+// $Id: IsolationTools.cc,v 1.2 2009/02/17 06:49:28 phedex Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -46,12 +46,11 @@ Double_t IsolationTools::EcalIsolation(const SuperCluster *sc, Double_t coneSize
   const BasicCluster *basicCluster= 0;
   for (UInt_t i=0; i<basicClusters->GetEntries();i++) {    
     basicCluster = basicClusters->At(i);    
-    Double_t basicClusterChi2 = basicCluster->ChiSq();
     Double_t basicClusterEnergy    = basicCluster->Energy();
     Double_t basicClusterEta  = basicCluster->Eta();
     Double_t basicClusterEt   = basicClusterEnergy*sin(2*atan(exp(basicClusterEta)));           
 
-    if (basicClusterEt > etLow	&& basicClusterChi2 < 30. && basicCluster->AlgoId()==0) {            
+    if (basicClusterEt > etLow) {            
       bool inSuperCluster = false;	  
       
       // loop over the basic clusters of the supercluster
