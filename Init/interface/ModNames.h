@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ModNames.h,v 1.3 2008/12/10 08:49:11 loizides Exp $
+// $Id: ModNames.h,v 1.4 2008/12/12 16:04:04 loizides Exp $
 //
 // Names
 //
@@ -19,6 +19,7 @@ namespace mithep
   class ModNames 
   {
     public:
+      static const char *gkPubJetsName;
       static const char *gkCleanCaloMetName;
       static const char *gkCleanElectronsName;
       static const char *gkCleanMuonsName;

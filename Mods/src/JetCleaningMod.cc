@@ -1,4 +1,4 @@
-// $Id: JetCleaningMod.cc,v 1.7 2008/12/10 11:44:33 loizides Exp $
+// $Id: JetCleaningMod.cc,v 1.8 2008/12/10 21:18:50 loizides Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -27,7 +27,7 @@ void JetCleaningMod::Process()
   // Process entries of the tree.
 
   // get input collections
-  const JetCol      *GoodJets       = GetObjThisEvt<JetCol>(fGoodJetsName);
+  const JetCol  *GoodJets       = GetObjThisEvt<JetCol>(fGoodJetsName);
   const ElectronCol *CleanElectrons = 0;
   if (!fCleanElectronsName.IsNull())
     CleanElectrons = GetObjThisEvt<ElectronCol>(fCleanElectronsName);

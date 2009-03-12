@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.12 2009/01/24 12:42:08 ceballos Exp $
+// $Id: JetIDMod.cc,v 1.13 2009/03/03 21:47:34 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -11,11 +11,10 @@ ClassImp(mithep::JetIDMod)
 //--------------------------------------------------------------------------------------------------
 JetIDMod::JetIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
-  fJetBranchName(Names::gkSC5JetBrn),
+  fJetsName(ModNames::gkPubJetsName),
   fGoodJetsName(ModNames::gkGoodJetsName),  
   fUseJetCorrection(kTRUE),
-  fJetPtCut(35.0),
-  fJets(0)
+  fJetPtCut(35.0)
 {
   // Constructor.
 }
@@ -25,14 +24,14 @@ void JetIDMod::Process()
 {
   // Process entries of the tree. 
 
-  LoadBranch(fJetBranchName);
+  const JetCol  *inJets       = GetObjThisEvt<JetCol>(fJetsName);
 
   JetOArr *GoodJets = new JetOArr; 
   GoodJets->SetName(fGoodJetsName);
 
   // loop over jets
-  for (UInt_t i=0; i<fJets->GetEntries(); ++i) {
-    const Jet *jet = fJets->At(i);
+  for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
+    const Jet *jet = inJets->At(i);
 
     if (jet->AbsEta() > 5.0) 
       continue;
@@ -60,8 +59,6 @@ void JetIDMod::Process()
 //--------------------------------------------------------------------------------------------------
 void JetIDMod::SlaveBegin()
 {
-  // Run startup code on the computer (slave) doing the actual analysis. Here,
-  // we just request the jet collection branch.
+  // Run startup code on the computer (slave) doing the actual analysis.
 
-  ReqBranch(fJetBranchName, fJets);
 }

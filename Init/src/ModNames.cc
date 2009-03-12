@@ -1,4 +1,4 @@
-// $Id: ModNames.cc,v 1.4 2008/12/12 16:04:04 loizides Exp $
+// $Id: ModNames.cc,v 1.5 2009/01/24 12:42:08 ceballos Exp $
 
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -6,6 +6,7 @@ using namespace mithep;
 
 //--------------------------------------------------------------------------------------------------
 
+const char *ModNames::gkPubJetsName            = "PubJets";
 const char *ModNames::gkCleanCaloMetName       = "CleanCaloMet";
 const char *ModNames::gkCleanElectronsName     = "CleanElectrons";
 const char *ModNames::gkCleanMuonsName         = "CleanMuons";

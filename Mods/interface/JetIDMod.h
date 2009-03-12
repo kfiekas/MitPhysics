@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.8 2009/01/23 09:27:46 ceballos Exp $
+// $Id: JetIDMod.h,v 1.9 2009/01/23 09:53:19 loizides Exp $
 //
 // JetIDMod
 //
@@ -24,7 +24,7 @@ namespace mithep
                const char *title="Jed identification module");
       ~JetIDMod() {}
 
-      const char       *GetInputName()                 const { return fJetBranchName;     }   
+      const char       *GetInputName()                 const { return fJetsName;     }   
       const char       *GetGoodName()                  const { return GetGoodJetsName();  }     
       const char       *GetGoodJetsName()              const { return fGoodJetsName;      }     
       const char       *GetOutputName()                const { return GetGoodJetsName();  }     
@@ -32,7 +32,7 @@ namespace mithep
       Bool_t            GetUseCorrection()             const { return fUseJetCorrection;  }     
       void              SetGoodJetsName(const char *name)    { fGoodJetsName = name;      }     
       void              SetGoodName(const char *name)        { SetGoodJetsName(name);     }     
-      void              SetInputName(const char *name)       { fJetBranchName = name;     }  
+      void              SetInputName(const char *name)       { fJetsName = name;          }  
       void              SetOutputName(const char *name)      { SetGoodJetsName(name);     }     
       void              SetPtCut(Double_t cut)               { fJetPtCut = cut;           }     
       void              SetUseCorrection(Bool_t b)           { fUseJetCorrection = b;     }     
@@ -41,11 +41,10 @@ namespace mithep
       void              Process();
       void              SlaveBegin();
 
-      TString           fJetBranchName;         //name of jet collection (input)
+      TString           fJetsName;               //name of jet collection (input)
       TString           fGoodJetsName;          //name of good jets collection (output)
       Bool_t            fUseJetCorrection;      //=true then use corrected energy
       Double_t          fJetPtCut;              //jet pt cut
-      const JetCol     *fJets;                  //!jet collection
 
       ClassDef(JetIDMod, 1) // Jet identification module
   };
