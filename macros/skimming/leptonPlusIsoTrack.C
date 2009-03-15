@@ -1,4 +1,4 @@
-// $Id: $
+// $Id: leptonPlusIsoTrack.C,v 1.1 2009/03/13 13:02:49 sixie Exp $
 //root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/leptonPlusIsoTrack.C+\(\"0000\",\"s8-wm-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -33,7 +33,7 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   const char     *muInput  = Names::gkMuonBrn;
   const char     *elInput  = Names::gkElectronBrn;
-  const Double_t  ptMin    = 20;
+  const Double_t  ptMin    = 10;
 
   MuonIDMod *muId = new MuonIDMod;  
   muId->SetInputName  (muInput);
