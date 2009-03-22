@@ -1,28 +1,28 @@
-// $Id $
+// $Id: $
 
-#include "MitPhysics/SelMods/interface/LeptonPlusIsolatedTrackSelMod.h"
+#include "MitPhysics/SelMods/interface/PhotonPlusIsoTrackSelMod.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 using namespace mithep;
 
-ClassImp(mithep::LeptonPlusIsolatedTrackSelMod)
+ClassImp(mithep::PhotonPlusIsoTrackSelMod)
 
 //--------------------------------------------------------------------------------------------------
-mithep::LeptonPlusIsolatedTrackSelMod::LeptonPlusIsolatedTrackSelMod(const char *name, const char *title) : 
+mithep::PhotonPlusIsoTrackSelMod::PhotonPlusIsoTrackSelMod(const char *name, const char *title) : 
   BaseSelMod(name,title),
-  fLeptonColName("SetMe"),
+  fPhotonColName("SetMe"),
   fTrackerTrackColName("SetMe"),
   fGsfTrackColName("SetMe"),
-  fLeptonPtMin(0),
-  fLeptonPtMax(5000),
-  fLeptonEtaMin(-10),
-  fLeptonEtaMax(10),
+  fPhotonPtMin(0),
+  fPhotonPtMax(5000),
+  fPhotonEtaMin(-10),
+  fPhotonEtaMax(10),
   fTrackPtMin(0),
   fTrackPtMax(5000),
   fTrackEtaMin(-10),
   fTrackEtaMax(10),
-  fLeptonCol(0),
+  fPhotonCol(0),
   fTrackerTrackCol(0),
   fGsfTrackCol(0)
 {
@@ -30,7 +30,7 @@ mithep::LeptonPlusIsolatedTrackSelMod::LeptonPlusIsolatedTrackSelMod(const char 
 }
 
 //--------------------------------------------------------------------------------------------------
-void mithep::LeptonPlusIsolatedTrackSelMod::Process()
+void mithep::PhotonPlusIsoTrackSelMod::Process()
 {
   // Process entries of the tree.
 
@@ -40,14 +40,14 @@ void mithep::LeptonPlusIsolatedTrackSelMod::Process()
 
   fNAccCounters->Fill(0);
 
-  fLeptonCol = GetObjThisEvt<Collection<Particle> >(GetLeptonColName());
-  if (!fLeptonCol ) {
+  fPhotonCol = GetObjThisEvt<Collection<Photon> >(GetPhotonColName());
+  if (!fPhotonCol ) {
     this->SendError(kAbortModule, "Process", 
-                    "Could not obtain collection with name %s!", GetLeptonColName());
+                    "Could not obtain collection with name %s!", GetPhotonColName());
     return;
   }
 
-  if (!fLeptonCol && !fGsfTrackCol) {
+  if (!fPhotonCol && !fGsfTrackCol) {
     this->SendError(kAbortModule, "Process", 
                     "Could not obtain either collections with names %s , %s!", 
                     GetTrackerTrackColName(), GetGsfTrackColName());
@@ -56,13 +56,15 @@ void mithep::LeptonPlusIsolatedTrackSelMod::Process()
 
   fNAccCounters->Fill(1);
 
-  UInt_t LeptonCounter = 0;
-  for(UInt_t i=0;i<fLeptonCol->GetEntries();i++) {
-    if (fLeptonCol->At(i)->Pt() >= fLeptonPtMin && fLeptonCol->At(i)->Pt() <= fLeptonPtMax &&
-        fLeptonCol->At(i)->Eta() >= fLeptonEtaMin && fLeptonCol->At(i)->Eta() <= fLeptonEtaMax)
-      LeptonCounter++;
+  UInt_t PhotonCounter = 0;
+  for(UInt_t i=0;i<fPhotonCol->GetEntries();++i) {
+    if (fPhotonCol->At(i)->Pt() >= fPhotonPtMin   && 
+        fPhotonCol->At(i)->Pt() <= fPhotonPtMax   &&
+        fPhotonCol->At(i)->Eta() >= fPhotonEtaMin && 
+        fPhotonCol->At(i)->Eta() <= fPhotonEtaMax)
+      PhotonCounter++;
   }
-  if (LeptonCounter == 0) {
+  if (PhotonCounter == 0) {
     this->SkipEvent();
     return;
   }
@@ -70,27 +72,32 @@ void mithep::LeptonPlusIsolatedTrackSelMod::Process()
   fNAccCounters->Fill(2);
 
   UInt_t TrackCounter = 0;
-  for(UInt_t i=0;i<fTrackerTrackCol->GetEntries();i++) {
+  for(UInt_t i=0;i<fTrackerTrackCol->GetEntries();++i) {
     const Track *trk = fTrackerTrackCol->At(i);
-    if (trk->Pt() >= fTrackPtMin && trk->Pt() <= fTrackPtMax &&
-        trk->Eta() >= fTrackEtaMin && trk->Eta() <= fTrackEtaMax) {
+    if (trk->Pt() >= fTrackPtMin   && 
+        trk->Pt() <= fTrackPtMax   &&
+        trk->Eta() >= fTrackEtaMin && 
+        trk->Eta() <= fTrackEtaMax) {
       Double_t iso = IsolationTools::TrackIsolation(trk,0.3, 0.015,1.0,1000.0,fTrackerTrackCol);
       if (iso < 10.0) {
         //require that the track is not the same object as one of the leptons
-        if (MathUtils::DeltaR(trk->Phi(), trk->Eta(),fLeptonCol->At(0)->Phi(), 
-                              fLeptonCol->At(0)->Eta()) >= 0.3)
+        if (MathUtils::DeltaR(trk->Phi(), trk->Eta(),
+                              fPhotonCol->At(0)->Phi(), fPhotonCol->At(0)->Eta()) >= 0.3)
           TrackCounter++;
       }        
     }
   }
-  for(UInt_t i=0;i<fGsfTrackCol->GetEntries();i++) {
+
+  for(UInt_t i=0;i<fGsfTrackCol->GetEntries();++i) {
     const Track *trk = fGsfTrackCol->At(i);
-    if (trk->Pt() >= fTrackPtMin && trk->Pt() <= fTrackPtMax &&
-        trk->Eta() >= fTrackEtaMin && trk->Eta() <= fTrackEtaMax) {
+    if (trk->Pt() >= fTrackPtMin   && 
+        trk->Pt() <= fTrackPtMax   &&
+        trk->Eta() >= fTrackEtaMin && 
+        trk->Eta() <= fTrackEtaMax) {
       Double_t iso = IsolationTools::TrackIsolation(trk,0.3, 0.015,1.0,1000.0,fTrackerTrackCol);
       if (iso < 10.0) {
-        if (MathUtils::DeltaR(trk->Phi(), trk->Eta(),fLeptonCol->At(0)->Phi(), 
-                              fLeptonCol->At(0)->Eta()) >= 0.3)
+        if (MathUtils::DeltaR(trk->Phi(), trk->Eta(),
+                              fPhotonCol->At(0)->Phi(), fPhotonCol->At(0)->Eta()) >= 0.3)
           TrackCounter++;
       }
     }
@@ -105,7 +112,7 @@ void mithep::LeptonPlusIsolatedTrackSelMod::Process()
 }
 
 //--------------------------------------------------------------------------------------------------
-void mithep::LeptonPlusIsolatedTrackSelMod::SlaveBegin()
+void mithep::PhotonPlusIsoTrackSelMod::SlaveBegin()
 {
   // Setup acceptence histogram.
   ReqBranch(GetTrackerTrackColName(),          fTrackerTrackCol);
@@ -118,7 +125,7 @@ void mithep::LeptonPlusIsolatedTrackSelMod::SlaveBegin()
       xa->SetBinLabel(i,"unused");
     xa->SetBinLabel(1,"Enter");
     xa->SetBinLabel(2,"Objs");
-    xa->SetBinLabel(3,"AtLeastOneLepton");
+    xa->SetBinLabel(3,"AtLeastOnePhoton");
     xa->SetBinLabel(4,"IsolatedTrack");
     xa->SetRangeUser(0,3);
   }

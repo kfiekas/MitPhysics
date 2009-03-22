@@ -1,5 +1,4 @@
-// $Id: leptonPlusIsoTrack.C,v 1.2 2009/03/15 18:47:02 phedex Exp $
-//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/leptonPlusIsoTrack.C+\(\"0000\",\"s8-wm-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
+// $Id: $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -13,17 +12,17 @@
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
-#include "MitPhysics/SelMods/interface/LeptonPlusIsoTrackSelMod.h"
+#include "MitPhysics/SelMods/interface/GenericSelMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void leptonPlusIsoTrack(const char *fileset    = "",
-                        const char *dataset    = "s8-wm-id9",
-                        const char *book       = "mit/filler/006",
-                        const char *catalogDir = "/home/mitprod/catalog",
-                        int         nEvents    = 999999999)
+void singlelepton(const char *fileset    = "",
+		  const char *dataset    = "s8-incmu_15-id9",
+		  const char *book       = "mit/filler/006",
+		  const char *catalogDir = "/home/mitprod/catalog",
+		  int         nEvents    = 999999999)
 {
-  TString skimName("leptonPlusIsoTrack");
+  TString skimName("singlelepton");
   using namespace mithep;
   gDebugMask  = Debug::kAnalysis;
   gDebugLevel = 1;
@@ -31,10 +30,9 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   // organize selection
   //------------------------------------------------------------------------------------------------
-  const char     *muInput   = Names::gkMuonBrn;
-  const char     *elInput   = Names::gkElectronBrn;
-  const char     *gsfTracks = "GsfTracks";
-  const Double_t  ptMin     = 10;
+  const char     *muInput  = Names::gkMuonBrn;
+  const char     *elInput  = Names::gkElectronBrn;
+  const Double_t  ptMin    = 20;
 
   MuonIDMod *muId = new MuonIDMod;  
   muId->SetInputName  (muInput);
@@ -61,12 +59,9 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   merger->SetMuonsName    (muId->GetOutputName());
   merger->SetElectronsName(elCl->GetOutputName());
 
-  LeptonPlusIsoTrackSelMod *selMod = new LeptonPlusIsoTrackSelMod;
-  selMod->SetLeptonPtMin(ptMin);
-  selMod->SetTrackPtMin(ptMin);
-  selMod->SetLeptonColName(merger->GetOutputName());
-  selMod->SetTrackerTrackColName(Names::gkTrackBrn);
-  selMod->SetGsfTrackColName(gsfTracks);
+  GenericSelMod<Particle> *selMod = new GenericSelMod<Particle>;
+  selMod->SetPtMin(ptMin);
+  selMod->SetColName(merger->GetOutputName());
   merger->Add(selMod);
 
   //------------------------------------------------------------------------------------------------

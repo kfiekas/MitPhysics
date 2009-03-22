@@ -1,5 +1,5 @@
-// $Id: leptonPlusIsoTrack.C,v 1.2 2009/03/15 18:47:02 phedex Exp $
-//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/leptonPlusIsoTrack.C+\(\"0000\",\"s8-wm-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
+// $Id: photonPlusIsoTrack.C,v 1.1 2009/03/13 13:02:49 sixie Exp $
+//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/photonPlusIsoTrack.C+\(\"0000\",\"s8-pj80-mg-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -12,18 +12,19 @@
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
-#include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
-#include "MitPhysics/SelMods/interface/LeptonPlusIsoTrackSelMod.h"
+#include "MitPhysics/Mods/interface/PhotonIDMod.h"
+#include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
+#include "MitPhysics/SelMods/interface/PhotonPlusIsoTrackSelMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void leptonPlusIsoTrack(const char *fileset    = "",
+void photonPlusIsoTrack(const char *fileset    = "",
                         const char *dataset    = "s8-wm-id9",
                         const char *book       = "mit/filler/006",
                         const char *catalogDir = "/home/mitprod/catalog",
                         int         nEvents    = 999999999)
 {
-  TString skimName("leptonPlusIsoTrack");
+  TString skimName("photonPlusIsoTrack");
   using namespace mithep;
   gDebugMask  = Debug::kAnalysis;
   gDebugLevel = 1;
@@ -33,6 +34,7 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   const char     *muInput   = Names::gkMuonBrn;
   const char     *elInput   = Names::gkElectronBrn;
+  const char     *phInput   = Names::gkPhotonBrn;
   const char     *gsfTracks = "GsfTracks";
   const Double_t  ptMin     = 10;
 
@@ -52,22 +54,35 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   elId->SetCaloIsoCut (100.0);
   elId->SetPtMin      (ptMin);
 
+  PhotonIDMod *photonId = new PhotonIDMod;  
+  photonId->SetInputName  (phInput);
+  photonId->SetIDType     ("Loose");
+  photonId->SetIsoType    ("CombinedIso");
+  photonId->SetHadOverEmMax(0.1);
+  photonId->SetPtMin      (ptMin);
+  photonId->SetApplyPixelSeed(kFALSE);
+
   ElectronCleaningMod *elCl = new ElectronCleaningMod;
   elCl->SetGoodElectronsName(elId->GetOutputName());
   elCl->SetCleanMuonsName   (muId->GetOutputName());
   elId->Add(elCl);
 
-  MergeLeptonsMod *merger = new MergeLeptonsMod;
-  merger->SetMuonsName    (muId->GetOutputName());
-  merger->SetElectronsName(elCl->GetOutputName());
+  PhotonCleaningMod *photonCl = new PhotonCleaningMod;
+  photonCl->SetCleanElectronsName(elCl->GetOutputName());
+  photonCl->SetGoodPhotonsName(photonId->GetOutputName());
+  photonId->Add(photonCl);
 
-  LeptonPlusIsoTrackSelMod *selMod = new LeptonPlusIsoTrackSelMod;
-  selMod->SetLeptonPtMin(ptMin);
+  PhotonPlusIsoTrackSelMod *selMod = new PhotonPlusIsoTrackSelMod;
+  selMod->SetPhotonPtMin(ptMin);
   selMod->SetTrackPtMin(ptMin);
-  selMod->SetLeptonColName(merger->GetOutputName());
+  selMod->SetPhotonColName(photonCl->GetOutputName());
   selMod->SetTrackerTrackColName(Names::gkTrackBrn);
   selMod->SetGsfTrackColName(gsfTracks);
-  merger->Add(selMod);
+
+  //------------------------------------------------------------------------------------------------
+  // link modules together
+  //------------------------------------------------------------------------------------------------
+  
 
   //------------------------------------------------------------------------------------------------
   // organize output
@@ -88,7 +103,8 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   Analysis *ana = new Analysis;
   ana->AddSuperModule(muId);
   ana->AddSuperModule(elId);
-  ana->AddSuperModule(merger);
+  ana->AddSuperModule(photonId);
+  ana->AddSuperModule(selMod);
   ana->SetProcessNEvents(nEvents);
 
   //------------------------------------------------------------------------------------------------

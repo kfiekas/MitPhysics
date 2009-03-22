@@ -1,9 +1,11 @@
-// $Id: MitPhysicsSelModsLinkDef.h,v 1.2 2008/12/12 16:09:54 loizides Exp $
+// $Id: MitPhysicsSelModsLinkDef.h,v 1.3 2009/03/13 13:02:01 sixie Exp $
 
 #ifndef MITPHYSICS_SELMODS_LINKDEF_H
 #define MITPHYSICS_SELMODS_LINKDEF_H
 #include "MitPhysics/SelMods/interface/GenericSelMod.h"
-#include "MitPhysics/SelMods/interface/LeptonPlusIsolatedTrackSelMod.h"
+#include "MitPhysics/SelMods/interface/JetPlusIsoTrackSelMod.h"
+#include "MitPhysics/SelMods/interface/LeptonPlusIsoTrackSelMod.h"
+#include "MitPhysics/SelMods/interface/PhotonPlusIsoTrackSelMod.h"
 #endif
  
 #ifdef __CINT__
@@ -26,5 +28,7 @@
 #pragma link C++ class mithep::GenericSelMod<mithep::Photon>+;
 #pragma link C++ class mithep::GenericSelMod<mithep::Track>+;
 #pragma link C++ class mithep::GenericSelMod<mithep::TriggerObject>+;
-#pragma link C++ class mithep::LeptonPlusIsolatedTrackSelMod+;
+#pragma link C++ class mithep::JetPlusIsoTrackSelMod+;
+#pragma link C++ class mithep::LeptonPlusIsoTrackSelMod+;
+#pragma link C++ class mithep::PhotonPlusIsoTrackSelMod+;
 #endif

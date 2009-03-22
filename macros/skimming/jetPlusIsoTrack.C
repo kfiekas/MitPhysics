@@ -1,5 +1,7 @@
-// $Id: leptonPlusIsoTrack.C,v 1.2 2009/03/15 18:47:02 phedex Exp $
-//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/leptonPlusIsoTrack.C+\(\"0000\",\"s8-wm-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
+// $Id: jetPlusIsoTrack.C,v 1.1 2009/03/13 13:02:49 sixie Exp $
+//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/jetPlusIsoTrack.C+\(\"0000\",\"s8-qcd_250_500-mg-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
+//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/jetPlusIsoTrack.C+\(\"0000\",\"s8-qcdem_30_80-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
+//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/jetPlusIsoTrack.C+\(\"0000\",\"s8-qcdbc_30_80-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -12,18 +14,19 @@
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
-#include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
-#include "MitPhysics/SelMods/interface/LeptonPlusIsoTrackSelMod.h"
+#include "MitPhysics/Mods/interface/JetIDMod.h"
+#include "MitPhysics/Mods/interface/JetCleaningMod.h"
+#include "MitPhysics/SelMods/interface/JetPlusIsoTrackSelMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void leptonPlusIsoTrack(const char *fileset    = "",
-                        const char *dataset    = "s8-wm-id9",
-                        const char *book       = "mit/filler/006",
-                        const char *catalogDir = "/home/mitprod/catalog",
-                        int         nEvents    = 999999999)
+void jetPlusIsoTrack(const char *fileset    = "",
+                     const char *dataset    = "s8-wm-id9",
+                     const char *book       = "mit/filler/006",
+                     const char *catalogDir = "/home/mitprod/catalog",
+                     int         nEvents    = 999999999)
 {
-  TString skimName("leptonPlusIsoTrack");
+  TString skimName("jetPlusIsoTrack");
   using namespace mithep;
   gDebugMask  = Debug::kAnalysis;
   gDebugLevel = 1;
@@ -31,44 +34,27 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   // organize selection
   //------------------------------------------------------------------------------------------------
-  const char     *muInput   = Names::gkMuonBrn;
-  const char     *elInput   = Names::gkElectronBrn;
+  const char     *jetInput  = Names::gkSC5JetBrn;
   const char     *gsfTracks = "GsfTracks";
-  const Double_t  ptMin     = 10;
+  const Double_t  jetPtMin    = 30;
+  const Double_t  trackPtMin    = 10;
 
-  MuonIDMod *muId = new MuonIDMod;  
-  muId->SetInputName  (muInput);
-  muId->SetIDType     ("Loose");
-  muId->SetIsoType    ("TrackCalo");
-  muId->SetTrackIsoCut( 10.0);
-  muId->SetCaloIsoCut (100.0);
-  muId->SetPtMin      (ptMin);
+  JetIDMod *jetId = new JetIDMod;  
+  jetId->SetInputName  (jetInput);
+  jetId->SetUseCorrection(kFALSE);
+  jetId->SetPtCut      (jetPtMin); 
 
-  ElectronIDMod *elId = new ElectronIDMod;
-  elId->SetInputName  (elInput);
-  elId->SetIDType     ("NoId");
-  elId->SetIsoType    ("TrackCalo");
-  elId->SetTrackIsoCut( 10.0);
-  elId->SetCaloIsoCut (100.0);
-  elId->SetPtMin      (ptMin);
-
-  ElectronCleaningMod *elCl = new ElectronCleaningMod;
-  elCl->SetGoodElectronsName(elId->GetOutputName());
-  elCl->SetCleanMuonsName   (muId->GetOutputName());
-  elId->Add(elCl);
-
-  MergeLeptonsMod *merger = new MergeLeptonsMod;
-  merger->SetMuonsName    (muId->GetOutputName());
-  merger->SetElectronsName(elCl->GetOutputName());
-
-  LeptonPlusIsoTrackSelMod *selMod = new LeptonPlusIsoTrackSelMod;
-  selMod->SetLeptonPtMin(ptMin);
-  selMod->SetTrackPtMin(ptMin);
-  selMod->SetLeptonColName(merger->GetOutputName());
+  JetPlusIsoTrackSelMod *selMod = new JetPlusIsoTrackSelMod;
+  //selMod->SetJetPtMin(jetPtMin); //don't use this for now. rely on jetID pt cut.
+  selMod->SetTrackPtMin(trackPtMin);
+  selMod->SetJetColName(jetId->GetOutputName());
   selMod->SetTrackerTrackColName(Names::gkTrackBrn);
   selMod->SetGsfTrackColName(gsfTracks);
-  merger->Add(selMod);
 
+  //------------------------------------------------------------------------------------------------
+  // link modules together
+  //------------------------------------------------------------------------------------------------
+  
   //------------------------------------------------------------------------------------------------
   // organize output
   //------------------------------------------------------------------------------------------------
@@ -86,9 +72,8 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   // set up analysis
   //------------------------------------------------------------------------------------------------
   Analysis *ana = new Analysis;
-  ana->AddSuperModule(muId);
-  ana->AddSuperModule(elId);
-  ana->AddSuperModule(merger);
+  ana->AddSuperModule(jetId);
+  ana->AddSuperModule(selMod);
   ana->SetProcessNEvents(nEvents);
 
   //------------------------------------------------------------------------------------------------

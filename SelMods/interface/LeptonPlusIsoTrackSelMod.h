@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------------------
-// $Id $
+// $Id: $
 //
-// LeptonPlusIsolatedTrackSelMod
+// LeptonPlusIsoTrackSelMod
 // 
 // This module selects events containing one lepton and one isolated track
 // Both gsfTracks and tracker tracks are considered.
@@ -9,20 +9,20 @@
 // Authors: S. Xie
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITPHYSICS_SELMODS_LEPTONPLUSISOLATEDTRACKSELMOD_H
-#define MITPHYSICS_SELMODS_LEPTONPLUSISOLATEDTRACKSELMOD_H
+#ifndef MITPHYSICS_SELMODS_LEPTONPLUSISOTRACKSELMOD_H
+#define MITPHYSICS_SELMODS_LEPTONPLUSISOTRACKSELMOD_H
 
 #include "MitAna/TreeMod/interface/BaseSelMod.h" 
 #include <TH1D.h>
 
 namespace mithep 
 {
-  class LeptonPlusIsolatedTrackSelMod : public BaseSelMod
+  class LeptonPlusIsoTrackSelMod : public BaseSelMod
   {
     public:
-      LeptonPlusIsolatedTrackSelMod(const char *name="LeptonPlusIsolatedTrackSelMod", 
+      LeptonPlusIsoTrackSelMod(const char *name="LeptonPlusIsoTrackSelMod", 
                     const char *title="Lepton plus isolated track selection module");
-      ~LeptonPlusIsolatedTrackSelMod() {}
+      ~LeptonPlusIsoTrackSelMod() {}
 
       const char              *GetLeptonColName()       const { return fLeptonColName;            }
       const char              *GetTrackerTrackColName() const { return fTrackerTrackColName;      }
@@ -48,26 +48,26 @@ namespace mithep
       void                     SetTrackPtMax(Double_t pt)            { fTrackPtMax = pt;          }
 
     protected:
-      void                      Process();
-      void                      SlaveBegin();
+      void                     Process();
+      void                     SlaveBegin();
 
-      TString                   fLeptonColName;        //name of input lepton collection
-      TString                   fTrackerTrackColName;  //name of input lepton collection
-      TString                   fGsfTrackColName;      //name of input lepton collection
-      Double_t                  fLeptonPtMin;          //minimum pt required   (def = 0 GeV)
-      Double_t                  fLeptonPtMax;          //maximum pt required    (def = 5000 GeV)
-      Double_t                  fLeptonEtaMin;         //minimum eta required   (def = -10)
-      Double_t                  fLeptonEtaMax;         //maximum eta required   (def = +10) 
-      Double_t                  fTrackPtMin;           //minimum pt required    (def = 0 GeV)
-      Double_t                  fTrackPtMax;           //maximum pt required    (def = 5000 GeV)
-      Double_t                  fTrackEtaMin;          //minimum eta required   (def = -10)
-      Double_t                  fTrackEtaMax;          //maximum eta required   (def = +10) 
-      const ParticleCol        *fLeptonCol;            //!pointer to collection 
-      const TrackCol           *fTrackerTrackCol;      //!pointer to collection 
-      const TrackCol           *fGsfTrackCol;          //!pointer to collection 
-      TH1D                     *fNAccCounters;         //!acceptance histogram
+      TString                  fLeptonColName;        //name of input lepton collection
+      TString                  fTrackerTrackColName;  //name of input lepton collection
+      TString                  fGsfTrackColName;      //name of input lepton collection
+      Double_t                 fLeptonPtMin;          //minimum pt required   (def = 0 GeV)
+      Double_t                 fLeptonPtMax;          //maximum pt required    (def = 5000 GeV)
+      Double_t                 fLeptonEtaMin;         //minimum eta required   (def = -10)
+      Double_t                 fLeptonEtaMax;         //maximum eta required   (def = +10) 
+      Double_t                 fTrackPtMin;           //minimum pt required    (def = 0 GeV)
+      Double_t                 fTrackPtMax;           //maximum pt required    (def = 5000 GeV)
+      Double_t                 fTrackEtaMin;          //minimum eta required   (def = -10)
+      Double_t                 fTrackEtaMax;          //maximum eta required   (def = +10) 
+      const ParticleCol       *fLeptonCol;            //!pointer to collection 
+      const TrackCol          *fTrackerTrackCol;      //!pointer to collection 
+      const TrackCol          *fGsfTrackCol;          //!pointer to collection 
+      TH1D                    *fNAccCounters;         //!acceptance histogram
 
-      ClassDef(LeptonPlusIsolatedTrackSelMod,1) // Generic selection module
+      ClassDef(LeptonPlusIsoTrackSelMod,1) // Lepton plus isolated track selection module
   };
 }
 #endif
