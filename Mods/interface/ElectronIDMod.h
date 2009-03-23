@@ -1,10 +1,12 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.9 2008/12/11 10:55:43 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.10 2009/03/23 14:23:06 loizides Exp $
 //
 // ElectronIDMod
 //
 // This module applies electron identification criteria and exports a pointer to a collection
 // of "good electrons" according to the specified identification scheme.
+//
+// See http://indico.cern.ch/contributionDisplay.py?contribId=1&confId=42251
 //
 // Authors: S.Xie, C.Loizides
 //--------------------------------------------------------------------------------------------------

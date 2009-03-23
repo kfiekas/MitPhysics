@@ -1,12 +1,15 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.12 2008/12/11 10:55:43 loizides Exp $
+// $Id: MuonIDMod.h,v 1.13 2009/03/23 14:23:06 loizides Exp $
 //
 // MuonIDMod
 //
 // This module applies muon identification criteria and exports a pointer to a collection
 // of "good muons" according to the specified ID scheme.
 //
-// Authors: S.Xie
+// See http://indico.cern.ch/contributionDisplay.py?contribId=1&confId=45945
+// See http://indico.cern.ch/getFile.py/access?contribId=1&resId=0&materialId=slides&confId=42229
+//
+// Authors: S.Xie,C.Loizides
 //--------------------------------------------------------------------------------------------------
 
 #ifndef MITPHYSICS_MODS_MUONIDMOD_H
