@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.6 2008/11/28 09:13:35 loizides Exp $
+// $Id: MuonTools.cc,v 1.7 2008/12/04 13:53:34 loizides Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -91,7 +91,7 @@ void MuonTools::DeleteHistos()
 Double_t MuonTools::GetCaloCompatability(const Muon *iMuon,
                                          Bool_t iEMSpecial, Bool_t iCorrectedHCAL) const
 {
-  // todo
+  // Get calo compatibility value for given muon.
 
   Double_t lEta = iMuon->Eta();
   Double_t aEta = TMath::Abs(lEta);
@@ -276,7 +276,7 @@ Bool_t MuonTools::IsGood(const mithep::Muon *iMuon, ESelType iSel) const
       return iMuon->PromptTight(Muon::kAny);
       break;
     case kTMOneStationLoose:
-      return iMuon->TMOneStation(99999,999999);
+      return iMuon->TMOneStation(999999,999999);
       break;
     case kTMOneStationTight:
       return iMuon->TMOneStation();
@@ -298,20 +298,22 @@ Bool_t MuonTools::IsGood(const mithep::Muon *iMuon, ESelType iSel) const
       break;
   }
 
-  Double_t lVal = 1.2*GetSegmentCompatability(iMuon); 
-  if (lVal/1.2 == 0.5) 
+  Double_t lVal = GetSegmentCompatability(iMuon); 
+  if (lVal == 0.5) // exclude this border case
     return kFALSE;
 
+  lVal *= 1.2;
   lVal += 0.8*GetCaloCompatability(iMuon,kTRUE,kTRUE);
   if (lVal > tm2dcut) 
     return kTRUE;
+
   return kFALSE;
 }
 
 //--------------------------------------------------------------------------------------------------
 Double_t MuonTools::GetSegmentCompatability(const mithep::Muon *iMuon) const
 {
-  // todo
+  // Get segment compatability for given muon.
 
   Int_t lNStationsCrossed = 0;
   Int_t lNStationsSegment = 0;
