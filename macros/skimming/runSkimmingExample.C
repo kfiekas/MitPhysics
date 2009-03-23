@@ -1,7 +1,8 @@
-// $Id: runSkimmingExample.C,v 1.1 2008/12/10 17:31:35 loizides Exp $
+// $Id: runSkimmingExample.C,v 1.2 2009/03/11 10:14:52 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
-#include <TROOT.h>
+#include <TSystem.h>
+#include <TRandom.h>
 #include "MitAna/DataUtil/interface/Debug.h"
 #include "MitAna/TreeMod/interface/Analysis.h"
 #include "MitAna/TreeMod/interface/OutputMod.h"
@@ -11,36 +12,39 @@ namespace mithep
 {
   class Sel : public BaseMod
   {
+    public:
+      Sel(Int_t r=10) : fRand(r) {}
     protected:
-      void Process() {SkipEvent(); }
-
+      void       Process() { if (gRandom->Rndm()>1./fRand) SkipEvent(); }
+      Int_t      fRand;
     ClassDef(Sel, 1)
   };
 }
 
 //--------------------------------------------------------------------------------------------------
-void runSkimmingExample(const char *files, UInt_t nev=0)
+void runSkimmingExample(const char *files, const char *prefix="skimtest", UInt_t nev=0)
 {
   using namespace mithep;
   gDebugMask  = Debug::kAnalysis;
   gDebugLevel = 1;
 
-  Sel *selmod = new Sel;
+  Sel *smod = new Sel(3);
   OutputMod *omod = new OutputMod;
+  omod->SetFileName(prefix);
   omod->Keep("*");
-//  omod->Drop("*");
-//  omod->Keep("Muons");
-//  omod->Keep("MCParticles");
-  // omod->Keep("Electrons");
-  // omod->Keep("*Tracks*");
-  //omod->Keep("*Clusters*");
-  //omod->Drop("*Conversion*");
-  //omod->Drop("ProtonRefitTracks");
-  selmod->Add(omod);
+  if (0) {
+    omod->Drop("*");
+    omod->Keep("Muons");
+    omod->Keep("MCParticles");
+    omod->Keep("Electrons");
+    omod->Keep("*Tracks*");
+    omod->Keep("*Clusters*");
+  }
+  smod->Add(omod);
 
   // set up analysis
   Analysis *ana = new Analysis;
-  ana->SetSuperModule(selmod);
+  ana->SetSuperModule(smod);
   if (nev)
     ana->SetProcessNEvents(nev);
   ana->AddFile(files);
