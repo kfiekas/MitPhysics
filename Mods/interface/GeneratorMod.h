@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.18 2009/02/13 12:51:10 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.19 2009/02/13 14:33:31 loizides Exp $
 //
 // GeneratorMod
 //
@@ -25,7 +25,6 @@ namespace mithep
     public:
       GeneratorMod(const char *name="GeneratorMod", 
                    const char *title="Generator information module");
-      ~GeneratorMod() {}
 
       const char          *GetMCPartName()	 const { return fMCPartName; }	
       const char          *GetMCLeptonsName()    const { return fMCLeptonsName; }	

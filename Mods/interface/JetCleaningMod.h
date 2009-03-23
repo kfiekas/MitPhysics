@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.6 2008/12/10 11:44:33 loizides Exp $
+// $Id: JetCleaningMod.h,v 1.7 2008/12/10 17:28:22 loizides Exp $
 //
 // JetCleaningMod
 //
@@ -22,7 +22,6 @@ namespace mithep
     public:
       JetCleaningMod(const char *name="JetCleaningMod", 
                      const char *title="Jet cleaning module");
-      ~JetCleaningMod() {}
 
       const char        *GetCleanElectronsName()  const { return fCleanElectronsName;  }
       const char        *GetCleanJetsName()       const { return fCleanJetsName;       }

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MergeLeptonsMod.h,v 1.1 2008/12/10 11:44:33 loizides Exp $
+// $Id: MergeLeptonsMod.h,v 1.2 2008/12/10 17:28:22 loizides Exp $
 //
 // MergeLeptonsMod
 //
@@ -22,7 +22,6 @@ namespace mithep
     public:
       MergeLeptonsMod(const char *name="MergeLeptonsMod", 
                       const char *title="Merging leptons module");
-      ~MergeLeptonsMod() {}
 
       const char              *GetElectronsName()           const { return fElName;         }
       const char              *GetMergedName()              const { return fMergedName;     }

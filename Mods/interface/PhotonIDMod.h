@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.5 2008/12/10 11:44:33 loizides Exp $
+// $Id: PhotonIDMod.h,v 1.6 2008/12/10 17:28:22 loizides Exp $
 //
 // PhotonIDMod
 //
@@ -22,7 +22,6 @@ namespace mithep
     public:
       PhotonIDMod(const char *name="PhotonIDMod", 
                   const char *title="Photon identification module");
-      ~PhotonIDMod() {}
 
       Bool_t              GetApplyPixelSeed()         const { return fApplyPixelSeed;      }
       const char         *GetGoodName()               const { return GetGoodPhotonsName(); }   

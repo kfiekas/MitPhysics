@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MergerMod.h,v 1.1 2008/12/11 17:37:29 loizides Exp $
+// $Id: MergerMod.h,v 1.2 2009/03/02 13:27:17 loizides Exp $
 //
 // MergerMod
 //
@@ -23,7 +23,6 @@ namespace mithep
     public:
       MergerMod(const char *name="MergerMod", 
                 const char *title="Merger module");
-      ~MergerMod() {}
 
       void                     AddInputName(const char *n);
       const char              *GetMergedName()              const { return fMergedName;     }

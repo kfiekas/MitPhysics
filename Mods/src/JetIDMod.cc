@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.13 2009/03/03 21:47:34 bendavid Exp $
+// $Id: JetIDMod.cc,v 1.14 2009/03/12 16:00:46 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -24,7 +24,13 @@ void JetIDMod::Process()
 {
   // Process entries of the tree. 
 
-  const JetCol  *inJets       = GetObjThisEvt<JetCol>(fJetsName);
+  const JetCol *inJets = GetObjThisEvt<JetCol>(fJetsName);
+  if (!inJets) {
+    SendError(kAbortModule, "Process", 
+              "Pointer to input jet collection %s is null.",
+              fJetsName.Data());
+    return;
+  }
 
   JetOArr *GoodJets = new JetOArr; 
   GoodJets->SetName(fGoodJetsName);
@@ -56,9 +62,3 @@ void JetIDMod::Process()
   AddObjThisEvt(GoodJets);  
 }
 
-//--------------------------------------------------------------------------------------------------
-void JetIDMod::SlaveBegin()
-{
-  // Run startup code on the computer (slave) doing the actual analysis.
-
-}

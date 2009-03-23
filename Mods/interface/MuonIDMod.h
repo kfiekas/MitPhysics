@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.11 2008/12/10 17:28:22 loizides Exp $
+// $Id: MuonIDMod.h,v 1.12 2008/12/11 10:55:43 loizides Exp $
 //
 // MuonIDMod
 //
@@ -23,7 +23,6 @@ namespace mithep
     public:
       MuonIDMod(const char *name="MuonIDMod", 
                 const char *title="Muon identification module");
-      ~MuonIDMod() {}
 
       Double_t           GetCaloIsoCut()                const { return fCaloIsolationCut;   }
       const char        *GetClassType()                 const { return fMuonClassType;      }

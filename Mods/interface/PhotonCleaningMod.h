@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonCleaningMod.h,v 1.3 2008/12/10 11:44:33 loizides Exp $
+// $Id: PhotonCleaningMod.h,v 1.4 2008/12/10 17:28:22 loizides Exp $
 //
 // PhotonCleaningMod
 //
@@ -21,8 +21,7 @@ namespace mithep
   {
     public:
       PhotonCleaningMod(const char *name="PhotonCleaningMod", 
-                     const char *title="Photon cleaning module");
-      ~PhotonCleaningMod() {}
+                        const char *title="Photon cleaning module");
 
       const char      *GetCleanElectronsName()   const { return fCleanElectronsName;   }
       const char      *GetCleanName()            const { return GetCleanPhotonsName(); }

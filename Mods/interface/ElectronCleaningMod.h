@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronCleaningMod.h,v 1.4 2008/12/10 11:44:32 loizides Exp $
+// $Id: ElectronCleaningMod.h,v 1.5 2008/12/10 17:28:22 loizides Exp $
 //
 // ElectronCleaningMod
 //
@@ -22,7 +22,6 @@ namespace mithep
     public:
       ElectronCleaningMod(const char *name="ElectronCleaningMod", 
                           const char *title="Electron cleaning module");
-      ~ElectronCleaningMod() {}
 
       const char        *GetCleanElectronsName() const { return fCleanElectronsName;     }
       const char        *GetCleanName()          const { return GetCleanElectronsName(); }

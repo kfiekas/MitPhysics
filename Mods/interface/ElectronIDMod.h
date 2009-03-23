@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.8 2008/12/10 17:28:22 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.9 2008/12/11 10:55:43 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -22,7 +22,6 @@ namespace mithep
     public:
       ElectronIDMod(const char *name="ElectronIDMod", 
                     const char *title="Electron identification module");
-      ~ElectronIDMod() {}
 
       Double_t            GetCaloIsoCut()             const { return fCaloIsolationCut;       }
       Double_t            GetEcalJurIsoCut()          const { return fEcalJuraIsoCut;         }
