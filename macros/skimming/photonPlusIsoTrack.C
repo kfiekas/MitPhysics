@@ -1,5 +1,4 @@
-// $Id: photonPlusIsoTrack.C,v 1.1 2009/03/13 13:02:49 sixie Exp $
-//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/photonPlusIsoTrack.C+\(\"0000\",\"s8-pj80-mg-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
+// $Id: photonPlusIsoTrack.C,v 1.1 2009/03/22 09:04:13 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -22,7 +21,7 @@ void photonPlusIsoTrack(const char *fileset    = "",
                         const char *dataset    = "s8-wm-id9",
                         const char *book       = "mit/filler/006",
                         const char *catalogDir = "/home/mitprod/catalog",
-                        int         nEvents    = 999999999)
+                        Int_t       nEvents    = -1)
 {
   TString skimName("photonPlusIsoTrack");
   using namespace mithep;
@@ -80,11 +79,6 @@ void photonPlusIsoTrack(const char *fileset    = "",
   selMod->SetGsfTrackColName(gsfTracks);
 
   //------------------------------------------------------------------------------------------------
-  // link modules together
-  //------------------------------------------------------------------------------------------------
-  
-
-  //------------------------------------------------------------------------------------------------
   // organize output
   //------------------------------------------------------------------------------------------------
   OutputMod *outMod = new OutputMod;
@@ -105,7 +99,8 @@ void photonPlusIsoTrack(const char *fileset    = "",
   ana->AddSuperModule(elId);
   ana->AddSuperModule(photonId);
   ana->AddSuperModule(selMod);
-  ana->SetProcessNEvents(nEvents);
+  if (nEvents>0)
+    ana->SetProcessNEvents(nEvents);
 
   //------------------------------------------------------------------------------------------------
   // organize input
@@ -119,5 +114,5 @@ void photonPlusIsoTrack(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   // run the analysis after successful initialisation
   //------------------------------------------------------------------------------------------------
-  ana->Run(true);
+  ana->Run(kFALSE);
 }

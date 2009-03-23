@@ -1,5 +1,4 @@
-// $Id: leptonPlusIsoTrack.C,v 1.2 2009/03/15 18:47:02 phedex Exp $
-//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/leptonPlusIsoTrack.C+\(\"0000\",\"s8-wm-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
+// $Id: leptonPlusIsoTrack.C,v 1.3 2009/03/22 09:04:13 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -21,7 +20,7 @@ void leptonPlusIsoTrack(const char *fileset    = "",
                         const char *dataset    = "s8-wm-id9",
                         const char *book       = "mit/filler/006",
                         const char *catalogDir = "/home/mitprod/catalog",
-                        int         nEvents    = 999999999)
+                        Int_t       nEvents    = -1)
 {
   TString skimName("leptonPlusIsoTrack");
   using namespace mithep;
@@ -89,7 +88,8 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   ana->AddSuperModule(muId);
   ana->AddSuperModule(elId);
   ana->AddSuperModule(merger);
-  ana->SetProcessNEvents(nEvents);
+  if (nEvents>0)
+    ana->SetProcessNEvents(nEvents);
 
   //------------------------------------------------------------------------------------------------
   // organize input
@@ -103,5 +103,5 @@ void leptonPlusIsoTrack(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   // run the analysis after successful initialisation
   //------------------------------------------------------------------------------------------------
-  ana->Run(true);
+  ana->Run(kFALSE);
 }

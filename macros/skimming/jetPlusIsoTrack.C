@@ -1,7 +1,4 @@
-// $Id: jetPlusIsoTrack.C,v 1.1 2009/03/13 13:02:49 sixie Exp $
-//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/jetPlusIsoTrack.C+\(\"0000\",\"s8-qcd_250_500-mg-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
-//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/jetPlusIsoTrack.C+\(\"0000\",\"s8-qcdem_30_80-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
-//root -l $CMSSW_BASE/src/MitPhysics/macros/skimming/jetPlusIsoTrack.C+\(\"0000\",\"s8-qcdbc_30_80-id9\",\"mit/filler/006\",\"/home/mitprod/catalog\",999999999\)
+// $Id: jetPlusIsoTrack.C,v 1.1 2009/03/22 09:04:13 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -24,7 +21,7 @@ void jetPlusIsoTrack(const char *fileset    = "",
                      const char *dataset    = "s8-wm-id9",
                      const char *book       = "mit/filler/006",
                      const char *catalogDir = "/home/mitprod/catalog",
-                     int         nEvents    = 999999999)
+                     Int_t       nEvents    = -1)
 {
   TString skimName("jetPlusIsoTrack");
   using namespace mithep;
@@ -34,10 +31,10 @@ void jetPlusIsoTrack(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   // organize selection
   //------------------------------------------------------------------------------------------------
-  const char     *jetInput  = Names::gkSC5JetBrn;
-  const char     *gsfTracks = "GsfTracks";
-  const Double_t  jetPtMin    = 30;
-  const Double_t  trackPtMin    = 10;
+  const char     *jetInput   = Names::gkSC5JetBrn;
+  const char     *gsfTracks  = "GsfTracks";
+  const Double_t  jetPtMin   = 30;
+  const Double_t  trackPtMin = 10;
 
   JetIDMod *jetId = new JetIDMod;  
   jetId->SetInputName  (jetInput);
@@ -45,7 +42,6 @@ void jetPlusIsoTrack(const char *fileset    = "",
   jetId->SetPtCut      (jetPtMin); 
 
   JetPlusIsoTrackSelMod *selMod = new JetPlusIsoTrackSelMod;
-  //selMod->SetJetPtMin(jetPtMin); //don't use this for now. rely on jetID pt cut.
   selMod->SetTrackPtMin(trackPtMin);
   selMod->SetJetColName(jetId->GetOutputName());
   selMod->SetTrackerTrackColName(Names::gkTrackBrn);
@@ -74,7 +70,8 @@ void jetPlusIsoTrack(const char *fileset    = "",
   Analysis *ana = new Analysis;
   ana->AddSuperModule(jetId);
   ana->AddSuperModule(selMod);
-  ana->SetProcessNEvents(nEvents);
+  if (nEvents>0)
+    ana->SetProcessNEvents(nEvents);
 
   //------------------------------------------------------------------------------------------------
   // organize input
@@ -88,5 +85,5 @@ void jetPlusIsoTrack(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   // run the analysis after successful initialisation
   //------------------------------------------------------------------------------------------------
-  ana->Run(true);
+  ana->Run(kFALSE);
 }

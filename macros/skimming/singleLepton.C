@@ -1,4 +1,4 @@
-// $Id: $
+// $Id: singleLepton.C,v 1.1 2009/03/22 09:04:14 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -20,7 +20,7 @@ void singlelepton(const char *fileset    = "",
 		  const char *dataset    = "s8-incmu_15-id9",
 		  const char *book       = "mit/filler/006",
 		  const char *catalogDir = "/home/mitprod/catalog",
-		  int         nEvents    = 999999999)
+		  Int_t       nEvents    = -1)
 {
   TString skimName("singlelepton");
   using namespace mithep;
@@ -84,7 +84,8 @@ void singlelepton(const char *fileset    = "",
   ana->AddSuperModule(muId);
   ana->AddSuperModule(elId);
   ana->AddSuperModule(merger);
-  ana->SetProcessNEvents(nEvents);
+  if (nEvents>0)
+    ana->SetProcessNEvents(nEvents);
 
   //------------------------------------------------------------------------------------------------
   // organize input
@@ -98,5 +99,5 @@ void singlelepton(const char *fileset    = "",
   //------------------------------------------------------------------------------------------------
   // run the analysis after successful initialisation
   //------------------------------------------------------------------------------------------------
-  ana->Run(true);
+  ana->Run(kFALSE);
 }

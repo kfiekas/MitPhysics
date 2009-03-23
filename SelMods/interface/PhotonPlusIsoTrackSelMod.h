@@ -21,8 +21,7 @@ namespace mithep
   {
     public:
       PhotonPlusIsoTrackSelMod(const char *name="PhotonPlusIsoTrackSelMod", 
-                    const char *title="Photon plus isolated track selection module");
-      ~PhotonPlusIsoTrackSelMod() {}
+                               const char *title="Photon plus isolated track selection module");
 
       const char              *GetPhotonColName()       const { return fPhotonColName;            }
       const char              *GetTrackerTrackColName() const { return fTrackerTrackColName;      }
@@ -48,24 +47,24 @@ namespace mithep
       void                     SetTrackPtMax(Double_t pt)            { fTrackPtMax = pt;          }
 
     protected:
-      void                      Process();
-      void                      SlaveBegin();
+      void                     Process();
+      void                     SlaveBegin();
 
-      TString                   fPhotonColName;        //name of input lepton collection
-      TString                   fTrackerTrackColName;  //name of input lepton collection
-      TString                   fGsfTrackColName;      //name of input lepton collection
-      Double_t                  fPhotonPtMin;          //minimum pt required   (def = 0 GeV)
-      Double_t                  fPhotonPtMax;          //maximum pt required    (def = 5000 GeV)
-      Double_t                  fPhotonEtaMin;         //minimum eta required   (def = -10)
-      Double_t                  fPhotonEtaMax;         //maximum eta required   (def = +10) 
-      Double_t                  fTrackPtMin;           //minimum pt required    (def = 0 GeV)
-      Double_t                  fTrackPtMax;           //maximum pt required    (def = 5000 GeV)
-      Double_t                  fTrackEtaMin;          //minimum eta required   (def = -10)
-      Double_t                  fTrackEtaMax;          //maximum eta required   (def = +10) 
-      const PhotonCol          *fPhotonCol;            //!pointer to collection 
-      const TrackCol           *fTrackerTrackCol;      //!pointer to collection 
-      const TrackCol           *fGsfTrackCol;          //!pointer to collection 
-      TH1D                     *fNAccCounters;         //!acceptance histogram
+      TString                  fPhotonColName;        //name of input lepton collection
+      TString                  fTrackerTrackColName;  //name of input lepton collection
+      TString                  fGsfTrackColName;      //name of input lepton collection
+      Double_t                 fPhotonPtMin;          //minimum pt required   (def = 0 GeV)
+      Double_t                 fPhotonPtMax;          //maximum pt required    (def = 5000 GeV)
+      Double_t                 fPhotonEtaMin;         //minimum eta required   (def = -10)
+      Double_t                 fPhotonEtaMax;         //maximum eta required   (def = +10) 
+      Double_t                 fTrackPtMin;           //minimum pt required    (def = 0 GeV)
+      Double_t                 fTrackPtMax;           //maximum pt required    (def = 5000 GeV)
+      Double_t                 fTrackEtaMin;          //minimum eta required   (def = -10)
+      Double_t                 fTrackEtaMax;          //maximum eta required   (def = +10) 
+      const PhotonCol         *fPhotonCol;            //!pointer to collection 
+      const TrackCol          *fTrackerTrackCol;      //!pointer to collection 
+      const TrackCol          *fGsfTrackCol;          //!pointer to collection 
+      TH1D                    *fNAccCounters;         //!acceptance histogram
 
       ClassDef(PhotonPlusIsoTrackSelMod,1) // Generic selection module
   };

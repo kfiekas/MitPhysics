@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: LeptonPlusIsoTrackSelMod.h,v 1.1 2009/03/22 09:04:13 loizides Exp $
 //
 // LeptonPlusIsoTrackSelMod
 // 
@@ -22,7 +22,6 @@ namespace mithep
     public:
       LeptonPlusIsoTrackSelMod(const char *name="LeptonPlusIsoTrackSelMod", 
                     const char *title="Lepton plus isolated track selection module");
-      ~LeptonPlusIsoTrackSelMod() {}
 
       const char              *GetLeptonColName()       const { return fLeptonColName;            }
       const char              *GetTrackerTrackColName() const { return fTrackerTrackColName;      }

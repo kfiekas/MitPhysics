@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.3 2008/11/27 16:28:58 loizides Exp $
+// $Id: MuonTools.h,v 1.4 2008/11/28 09:13:35 loizides Exp $
 //
 // MuonTools
 //
@@ -30,7 +30,7 @@ namespace mithep {
       ~MuonTools();
 
       enum ESelType { 
-        kAllArbitrated,          // todo by phil
+        kAllArbitrated,          //
         kPromptTight,            //
         kTMLastStationLoose,     //
         kTMLastStationTight,     //

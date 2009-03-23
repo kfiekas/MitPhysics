@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: TracksValMod.h,v 1.1 2009/03/17 15:44:07 loizides Exp $
+// $Id: TracksValMod.h,v 1.1 2009/03/23 09:09:12 loizides Exp $
 //
 //
 // Authors: C.Loizides
@@ -20,7 +20,6 @@ namespace mithep
     public:
       TracksValMod(const char *name="TracksValMod", 
                    const char *title="Tracks analysis module");
-      ~TracksValMod() {}
 
       const char              *GetTrackName()              const { return fTrackName; }
       void                     SetTrackName(const char *n)       { fTrackName=n;      }

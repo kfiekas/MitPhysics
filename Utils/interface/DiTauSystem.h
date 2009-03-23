@@ -1,11 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DiTauSystem.h,v 1.6 2008/12/11 20:29:35 ceballos Exp $
+// $Id: DiTauSystem.h,v 1.7 2009/01/20 10:28:36 loizides Exp $
 //
 // DiTauSystem
 //
 // Class to calculate the mass to the di-tau system. It is assumed that the tau is boosted 
-// and that the neutrinos have the same flight direction as the tau. 
-// CMS note 2006/082
+// and that the neutrinos have the same flight direction as the tau. See CMS note 2006/082.
 //
 // Authors: G.Ceballos 
 //--------------------------------------------------------------------------------------------------

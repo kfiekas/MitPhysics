@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: JetPlusIsoTrackSelMod.h,v 1.1 2009/03/22 09:04:13 loizides Exp $
 //
 // JetPlusIsoTrackSelMod
 // 
@@ -22,7 +22,6 @@ namespace mithep
     public:
       JetPlusIsoTrackSelMod(const char *name="JetPlusIsoTrackSelMod", 
                             const char *title="Jet plus isolated track selection module");
-      ~JetPlusIsoTrackSelMod() {}
 
       const char              *GetJetColName()          const { return fJetColName;               }
       const char              *GetTrackerTrackColName() const { return fTrackerTrackColName;      }

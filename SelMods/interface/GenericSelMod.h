@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenericSelMod.h,v 1.2 2008/12/12 16:04:44 loizides Exp $
+// $Id: GenericSelMod.h,v 1.3 2009/01/26 13:19:24 loizides Exp $
 //
 // GenericSelMod
 // 
@@ -23,7 +23,6 @@ namespace mithep
     public:
       GenericSelMod(const char *name="GenericSelMod", 
                     const char *title="Generic selection module");
-      ~GenericSelMod() {}
 
       const char              *GetColName()              const { return fColName;     }
       Double_t                 GetEtaMin()               const { return fEtaMin;      }

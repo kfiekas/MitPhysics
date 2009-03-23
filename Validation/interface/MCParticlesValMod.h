@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MCParticlesValMod.h,v 1.1 2009/03/17 15:44:07 loizides Exp $
+// $Id: MCParticlesValMod.h,v 1.1 2009/03/23 09:09:11 loizides Exp $
 //
 //
 // Authors: C.Loizides
@@ -20,7 +20,6 @@ namespace mithep
     public:
       MCParticlesValMod(const char *name="MCParticlesValMod", 
                         const char *title="MCParticles analysis module");
-      ~MCParticlesValMod() {}
 
       const char              *GetPartName()              const { return fPartName; }
       void                     SetPartName(const char *n)       { fPartName=n;      }
