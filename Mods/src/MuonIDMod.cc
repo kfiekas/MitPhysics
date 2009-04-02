@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.12 2008/12/11 10:55:44 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.13 2008/12/11 15:53:03 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -13,6 +13,7 @@ ClassImp(mithep::MuonIDMod)
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
+  fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
   fMuonIDType("Loose"),
   fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
@@ -20,7 +21,8 @@ ClassImp(mithep::MuonIDMod)
   fCaloIsolationCut(3.0),
   fCombIsolationCut(5.0),
   fMuonPtMin(10),
-  fMuons(0)
+  fMuons(0),
+  fD0Cut(0.025)
 {
   // Constructor.
 }
@@ -31,6 +33,7 @@ void MuonIDMod::Process()
   // Process entries of the tree. 
 
   LoadBranch(fMuonBranchName);
+  LoadBranch(fVertexName);
 
   MuonOArr *CleanMuons = new MuonOArr;
   CleanMuons->SetName(fCleanMuonsName);
@@ -119,6 +122,14 @@ void MuonIDMod::Process()
     if (!isopass)
       continue;
 
+    // d0 cut
+    double d0_real = 99999;
+    for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+      double pD0 = mu->GlobalTrk()->D0Corrected(*fVertices->At(i0));
+      if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
+    }
+    if(d0_real >= fD0Cut) continue;
+
     // add good muon
     CleanMuons->Add(mu);
   }
@@ -137,6 +148,7 @@ void MuonIDMod::SlaveBegin()
   // we just request the muon collection branch.
 
   ReqBranch(fMuonBranchName, fMuons);
+  ReqBranch(fVertexName, fVertices);
 
   fMuonTools = new MuonTools;
 

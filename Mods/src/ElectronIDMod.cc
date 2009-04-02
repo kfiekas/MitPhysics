@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.10 2008/12/11 10:55:44 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.11 2008/12/11 15:53:03 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -11,7 +11,9 @@ ClassImp(mithep::ElectronIDMod)
 ElectronIDMod::ElectronIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fElectronBranchName(Names::gkElectronBrn),
+  fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
+  fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
   fElectronIDType("Tight"),
   fElectronIsoType("TrackJuraSliding"),
   fElectronPtMin(10),
@@ -22,7 +24,9 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fHcalIsolationCut(5.0),
   fElectrons(0),
   fElIdType(kIdUndef),
-  fElIsoType(kIsoUndef)
+  fElIsoType(kIsoUndef),
+  fApplyConversionFilter(kTRUE),
+  fD0Cut(0.025)
 {
   // Constructor.
 }
@@ -79,8 +83,8 @@ void ElectronIDMod::Process()
       case kTrackJuraSliding:
         { 
           Double_t totalIso = e->TrackIsolation() + e->EcalJurassicIsolation() - 1.5;
-          if ((totalIso < (e->Pt()-10.0)*6.0/15.0 && e->Pt() <= 25) ||
-              (totalIso < 6.0 && e->Pt() > 25) ||
+          if ((totalIso < (e->Pt()-10.0)*5.0/15.0 && e->Pt() <= 25) ||
+              (totalIso < 5.0 && e->Pt() > 25) ||
 	       totalIso <= 0)
             isocut = kTRUE;
         }
@@ -96,8 +100,68 @@ void ElectronIDMod::Process()
     if (!isocut) 
       continue;
 
+    // Apply Conversion Filter
+    Bool_t isGoodConversion = kFALSE;
+    if (fApplyConversionFilter) {
+      LoadBranch(fConversionBranchName);
+      for (UInt_t ifc=0; ifc<fConversions->GetEntries(); ifc++) {
+        
+	Bool_t ConversionMatchFound = kFALSE;
+        for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
+          const Track *trk = dynamic_cast<const ChargedParticle*>
+	               (fConversions->At(ifc)->Daughter(d))->Trk();
+          if (e->TrackerTrk() == trk) {
+            ConversionMatchFound = kTRUE;
+            break;
+          }
+        }
+
+        // if match between the e-track and one of the conversion legs
+        if (ConversionMatchFound == kTRUE){
+          isGoodConversion =  (fConversions->At(ifc)->Prob() > 0.005) &&
+                              (fConversions->At(ifc)->Lxy() > 0) &&
+                              (fConversions->At(ifc)->Lz() > 0);
+
+          if (isGoodConversion == kTRUE) {
+	    for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
+              const Track *trk = dynamic_cast<const ChargedParticle*>
+	                   (fConversions->At(ifc)->Daughter(d))->Trk();
+            	      
+              if (trk) {
+                // These requirements are not used for the GSF track (i == 1)
+            	if (!(trk->NHits() > 8 && trk->Prob() > 0.005 && i == 0))
+            	  isGoodConversion = kFALSE;
+              
+            	const StableData *sd = dynamic_cast<const StableData*>
+		                  (fConversions->At(ifc)->DaughterDat(d));
+            	if (sd->NWrongHits() != 0)
+            	  isGoodConversion = kFALSE;
+              
+              } else {
+            	isGoodConversion = kFALSE;
+              }
+            }
+	  }
+        }
+
+        if (isGoodConversion == kTRUE) break;
+
+      } // loop over all conversions 
+      
+    }
+    if (isGoodConversion == kTRUE) continue;
+
+    LoadBranch(fVertexName);
+    // d0 cut
+    double d0_real = 99999;
+    for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+      double pD0 = e->GsfTrk()->D0Corrected(*fVertices->At(i0));
+      if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
+    }
+    if(d0_real >= fD0Cut) continue;
+
     // add good electron
-    GoodElectrons->Add(fElectrons->At(i));
+    GoodElectrons->Add(e);
   }
 
   // sort according to pt
@@ -114,6 +178,8 @@ void ElectronIDMod::SlaveBegin()
   // we just request the electron collection branch.
 
   ReqBranch(fElectronBranchName, fElectrons);
+  ReqBranch(fConversionBranchName, fConversions);
+  ReqBranch(fVertexName, fVertices);
 
   if (fElectronIDType.CompareTo("Tight") == 0) 
     fElIdType = kTight;

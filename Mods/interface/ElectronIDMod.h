@@ -1,12 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.10 2009/03/23 14:23:06 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.9 2008/12/11 10:55:43 loizides Exp $
 //
 // ElectronIDMod
 //
 // This module applies electron identification criteria and exports a pointer to a collection
 // of "good electrons" according to the specified identification scheme.
-//
-// See http://indico.cern.ch/contributionDisplay.py?contribId=1&confId=42251
 //
 // Authors: S.Xie, C.Loizides
 //--------------------------------------------------------------------------------------------------
@@ -24,7 +22,9 @@ namespace mithep
     public:
       ElectronIDMod(const char *name="ElectronIDMod", 
                     const char *title="Electron identification module");
+      ~ElectronIDMod() {}
 
+      Bool_t              GetApplyConversionFilter()  const { return fApplyConversionFilter;  }
       Double_t            GetCaloIsoCut()             const { return fCaloIsolationCut;       }
       Double_t            GetEcalJurIsoCut()          const { return fEcalJuraIsoCut;         }
       const char         *GetGoodName()               const { return GetGoodElectronsName();  }   
@@ -37,6 +37,7 @@ namespace mithep
       const char         *GetOutputName()             const { return GetGoodElectronsName();  }
       Double_t            GetPtMin()                  const { return fElectronPtMin;          }
       Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
+      void                SetApplyConversionFilter(Bool_t b)    { fApplyConversionFilter  = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
       void                SetEcalJurIsoCut(Double_t cut)        { fEcalJuraIsoCut     = cut;  }
       void                SetGoodName(const char *n)            { SetGoodElectronsName(n);    }   
@@ -49,6 +50,7 @@ namespace mithep
       void                SetOutputName(const char *n)          { SetGoodElectronsName(n);    }   
       void                SetPtMin(Double_t pt)                 { fElectronPtMin      = pt;   }
       void                SetTrackIsoCut(Double_t cut)          { fTrackIsolationCut  = cut;  }
+      void                SetD0Cut(Double_t cut)                { fD0Cut = cut;               }
 
       enum EElIdType {
         kIdUndef = 0,       //not defined
@@ -68,22 +70,28 @@ namespace mithep
       };
 
     protected:
-      void                Process();
-      void                SlaveBegin();
+      void                    Process();
+      void                    SlaveBegin();
 
-      TString             fElectronBranchName;     //name of electron collection (input)
-      TString             fGoodElectronsName;      //name of exported "good electrons" collection
-      TString             fElectronIDType;         //type of electron ID we impose
-      TString             fElectronIsoType;        //type of electron Isolation we impose
-      Double_t            fElectronPtMin;          //min pt cut
-      Double_t            fIDLikelihoodCut;        //cut value for ID likelihood
-      Double_t            fTrackIsolationCut;      //cut value for track isolation
-      Double_t            fCaloIsolationCut;       //cut value for calo isolation
-      Double_t            fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
-      Double_t            fHcalIsolationCut;       //cut value for hcal isolation
-      const ElectronCol  *fElectrons;              //!electron collection
-      EElIdType           fElIdType;               //!identification scheme
-      EElIsoType          fElIsoType;              //!isolation scheme
+      TString                 fElectronBranchName;     //name of electron collection (input)
+      TString                 fConversionBranchName;   //name of electron collection (input)
+      TString                 fGoodElectronsName;      //name of exported "good electrons" collection
+      TString                 fVertexName;	       //name of vertex collection
+      TString                 fElectronIDType;         //type of electron ID we impose
+      TString                 fElectronIsoType;        //type of electron Isolation we impose
+      Double_t                fElectronPtMin;	       //min pt cut
+      Double_t                fIDLikelihoodCut;        //cut value for ID likelihood
+      Double_t                fTrackIsolationCut;      //cut value for track isolation
+      Double_t                fCaloIsolationCut;       //cut value for calo isolation
+      Double_t                fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
+      Double_t                fHcalIsolationCut;       //cut value for hcal isolation
+      const ElectronCol      *fElectrons;              //!electron collection
+      const DecayParticleCol *fConversions;            //!conversion collection
+      const VertexCol        *fVertices;               // Vertices branches
+      EElIdType               fElIdType;               //!identification scheme
+      EElIsoType              fElIsoType;              //!isolation scheme
+      Bool_t                  fApplyConversionFilter;  //!whether remove conversions
+      Double_t                fD0Cut;                  //max d0
     
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };
