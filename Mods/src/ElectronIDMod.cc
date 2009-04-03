@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.11 2008/12/11 15:53:03 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.12 2009/04/02 09:20:53 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -110,7 +110,7 @@ void ElectronIDMod::Process()
         for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
           const Track *trk = dynamic_cast<const ChargedParticle*>
 	               (fConversions->At(ifc)->Daughter(d))->Trk();
-          if (e->TrackerTrk() == trk) {
+          if (e->GsfTrk() == trk) {
             ConversionMatchFound = kTRUE;
             break;
           }
