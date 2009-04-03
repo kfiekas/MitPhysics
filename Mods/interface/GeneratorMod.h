@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.19 2009/02/13 14:33:31 loizides Exp $
+// $Id: GeneratorMod.h,v 1.20 2009/03/23 14:23:06 loizides Exp $
 //
 // GeneratorMod
 //
@@ -27,6 +27,7 @@ namespace mithep
                    const char *title="Generator information module");
 
       const char          *GetMCPartName()	 const { return fMCPartName; }	
+      const char          *GetMCMETName()        const { return fMCMETName; }	
       const char          *GetMCLeptonsName()    const { return fMCLeptonsName; }	
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
       const char          *GetMCTausName()	 const { return fMCTausName; }	
@@ -36,6 +37,7 @@ namespace mithep
       const char          *GetMCBosonsName()     const { return fMCBosonsName; }	
       const char          *GetMCPhotonsName()    const { return fMCPhotonsName; }	
       void                 SetMCPartName(const char *s)	       { fMCPartName       = s; }	
+      void                 SetMCMETName(const char * s)        { fMCMETName        = s; }	
       void                 SetMCLeptonsName(const char * s)    { fMCLeptonsName    = s; }	
       void                 SetMCAllLeptonsName(const char * s) { fMCAllLeptonsName = s; }	
       void                 SetMCTausName(const char *s)	       { fMCTausName       = s; }	
@@ -58,7 +60,8 @@ namespace mithep
 
       Bool_t               fFillHist;           //=true then fill histos (def=0)
       TString              fMCPartName;         //name of MCParticle branch
-      TString              fMCLeptonsName;      //name of lepton coll (from W)
+      TString              fMCMETName;          //name of met coll
+      TString              fMCLeptonsName;      //name of lepton coll (from W/Z/H)
       TString              fMCAllLeptonsName;   //name of lepton coll (all)
       TString              fMCTausName;         //name of tau coll (hadronic decays)
       TString              fMCNeutrinosName;    //name of neutrinos coll
@@ -75,7 +78,8 @@ namespace mithep
       Double_t             fMassMaxCut;	        //mass max for given PdgId particle
       const MCParticleCol *fParticles;	        //!MCParticle branch
 
-      TH1D                *hDGenLeptons[40];    //!histos for W leptons
+      TH1D                *hDGenMet[10];        //!histos for gen MET
+      TH1D                *hDGenLeptons[40];    //!histos for W/Z/H leptons
       TH1D                *hDGenAllLeptons[20]; //!histos for all leptons
       TH1D                *hDGenTaus[20];       //!histos for taus
       TH1D                *hDGenNeutrinos[20];  //!histos for neutrinos

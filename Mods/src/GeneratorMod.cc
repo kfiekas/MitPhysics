@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.28 2009/03/24 16:13:21 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.29 2009/03/30 12:40:05 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -14,6 +14,7 @@ ClassImp(mithep::GeneratorMod)
 GeneratorMod::GeneratorMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fMCPartName(Names::gkMCPartBrn),
+  fMCMETName(ModNames::gkMCMETName),
   fMCLeptonsName(ModNames::gkMCLeptonsName),
   fMCAllLeptonsName(ModNames::gkMCAllLeptonsName),
   fMCTausName(ModNames::gkMCTausName),
@@ -40,6 +41,9 @@ void GeneratorMod::Process()
   // Process entries of the tree.
 
   // these arrays will be filled in the loop of particles
+  MetOArr *GenMet               = new MetOArr;
+  GenMet->SetName(fMCMETName);
+  GenMet->SetOwner(kTRUE);
   MCParticleOArr *GenLeptons    = new MCParticleOArr;
   GenLeptons->SetName(fMCLeptonsName);
   MCParticleOArr *GenAllLeptons = new MCParticleOArr;
@@ -61,9 +65,17 @@ void GeneratorMod::Process()
   // load MCParticle branch
   LoadBranch(fMCPartName);
 
+  Double_t totalMET[3] = {0.0, 0.0, 0.0};
   Bool_t isqqH = kFALSE;
   for (UInt_t i=0; i<fParticles->GetEntries(); ++i) {
     const MCParticle *p = fParticles->At(i);
+    
+    // MET computation at generation level
+    if (p->Status() == 1 && !p->IsNeutrino()) {
+      totalMET[0] = totalMET[0] + p->Px();
+      totalMET[1] = totalMET[1] + p->Py();
+      totalMET[2] = totalMET[2] + p->Pz();
+    }
 
     if (!p->IsGenerated()) continue;
 
@@ -269,6 +281,10 @@ void GeneratorMod::Process()
 
   } // end loop of particles
 
+  Met *theMET = new Met(totalMET[0], totalMET[1]);
+  theMET->SetElongitudinal(totalMET[2]);
+  GenMet->AddOwned(theMET);
+
   // sort according to pt
   GenLeptons->Sort();
   GenAllLeptons->Sort();
@@ -280,6 +296,7 @@ void GeneratorMod::Process()
   GenPhotons->Sort();
 
   // add objects to this event for other modules to use
+  AddObjThisEvt(GenMet);  
   AddObjThisEvt(GenLeptons);  
   AddObjThisEvt(GenAllLeptons);
   AddObjThisEvt(GenTaus);
@@ -291,6 +308,12 @@ void GeneratorMod::Process()
   
   // fill histograms if requested
   if (GetFillHist()) {
+
+    // MET
+    hDGenMet[0]->Fill(GenMet->At(0)->Pt());
+    hDGenMet[1]->Fill(GenMet->At(0)->Px());
+    hDGenMet[2]->Fill(GenMet->At(0)->Py());
+    hDGenMet[3]->Fill(GenMet->At(0)->Elongitudinal());
 
     // leptons
     hDGenLeptons[0]->Fill(GenLeptons->GetEntries());
@@ -587,6 +610,13 @@ void GeneratorMod::SlaveBegin()
   // fill histograms
   if (GetFillHist()) {
     char sb[1024];
+    // MET
+    sprintf(sb,"hDGenMet_%d", 0);  hDGenMet[0]  = new TH1D(sb,sb,200,0,200); 
+    sprintf(sb,"hDGenMet_%d", 1);  hDGenMet[1]  = new TH1D(sb,sb,400,-200,200); 
+    sprintf(sb,"hDGenMet_%d", 2);  hDGenMet[2]  = new TH1D(sb,sb,400,-200,200); 
+    sprintf(sb,"hDGenMet_%d", 3);  hDGenMet[3]  = new TH1D(sb,sb,400,-1000,1000); 
+    for(Int_t i=0; i<4; i++) AddOutput(hDGenMet[i]);
+
     // leptons from W
     sprintf(sb,"hDGenLeptons_%d", 0);  hDGenLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenLeptons_%d", 1);  hDGenLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
