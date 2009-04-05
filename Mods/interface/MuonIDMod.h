@@ -1,10 +1,13 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.12 2008/12/11 10:55:43 loizides Exp $
+// $Id: MuonIDMod.h,v 1.15 2009/04/02 09:20:53 ceballos Exp $
 //
 // MuonIDMod
 //
 // This module applies muon identification criteria and exports a pointer to a collection
 // of "good muons" according to the specified ID scheme.
+//
+// See http://indico.cern.ch/contributionDisplay.py?contribId=1&confId=45945
+// See http://indico.cern.ch/getFile.py/access?contribId=1&resId=0&materialId=slides&confId=42229
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -23,7 +26,6 @@ namespace mithep
     public:
       MuonIDMod(const char *name="MuonIDMod", 
                 const char *title="Muon identification module");
-      ~MuonIDMod() {}
 
       Double_t           GetCaloIsoCut()                const { return fCaloIsolationCut;   }
       const char        *GetClassType()                 const { return fMuonClassType;      }
@@ -86,13 +88,13 @@ namespace mithep
       Double_t           fCaloIsolationCut;    //cut value for calo isolation
       Double_t           fCombIsolationCut;    //cut value for combined isolation
       Double_t           fMuonPtMin;           //min muon pt
-      const MuonCol     *fMuons;               //!muon collection
-      const VertexCol   *fVertices;            // Vertices branches
-      MuonTools         *fMuonTools;           //!muon tool
+      Double_t           fD0Cut;               //max d0
       EMuIdType          fMuIDType;            //!muon id type (imposed)
       EMuIsoType         fMuIsoType;           //!muon iso type (imposed)
       EMuClassType       fMuClassType;         //!muon class type (imposed)
-      Double_t           fD0Cut;               //max d0
+      const MuonCol     *fMuons;               //!muon collection
+      const VertexCol   *fVertices;            //!vertices branch
+      MuonTools         *fMuonTools;           //!muon tool
     
     ClassDef(MuonIDMod, 1) // Muon identification module
   };

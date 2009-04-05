@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.20 2009/03/23 14:23:06 loizides Exp $
+// $Id: GeneratorMod.h,v 1.21 2009/04/03 22:42:59 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -77,7 +77,6 @@ namespace mithep
       Double_t             fMassMinCut;	        //mass min for given PdgId particle 
       Double_t             fMassMaxCut;	        //mass max for given PdgId particle
       const MCParticleCol *fParticles;	        //!MCParticle branch
-
       TH1D                *hDGenMet[10];        //!histos for gen MET
       TH1D                *hDGenLeptons[40];    //!histos for W/Z/H leptons
       TH1D                *hDGenAllLeptons[20]; //!histos for all leptons

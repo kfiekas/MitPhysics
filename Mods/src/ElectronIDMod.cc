@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.12 2009/04/02 09:20:53 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.13 2009/04/03 17:19:24 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -22,11 +22,13 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fCaloIsolationCut(5.0),
   fEcalJuraIsoCut(5.0),
   fHcalIsolationCut(5.0),
-  fElectrons(0),
+  fApplyConvFilter(kTRUE),
+  fD0Cut(0.025),
   fElIdType(kIdUndef),
   fElIsoType(kIsoUndef),
-  fApplyConversionFilter(kTRUE),
-  fD0Cut(0.025)
+  fElectrons(0),
+  fConversions(0),
+  fVertices(0)
 {
   // Constructor.
 }
@@ -100,9 +102,9 @@ void ElectronIDMod::Process()
     if (!isocut) 
       continue;
 
-    // Apply Conversion Filter
+    // apply conversion filter
     Bool_t isGoodConversion = kFALSE;
-    if (fApplyConversionFilter) {
+    if (fApplyConvFilter) {
       LoadBranch(fConversionBranchName);
       for (UInt_t ifc=0; ifc<fConversions->GetEntries(); ifc++) {
         

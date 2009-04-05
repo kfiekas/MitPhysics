@@ -1,10 +1,12 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.9 2008/12/11 10:55:43 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.12 2009/04/02 09:20:53 ceballos Exp $
 //
 // ElectronIDMod
 //
 // This module applies electron identification criteria and exports a pointer to a collection
 // of "good electrons" according to the specified identification scheme.
+//
+// See http://indico.cern.ch/contributionDisplay.py?contribId=1&confId=42251
 //
 // Authors: S.Xie, C.Loizides
 //--------------------------------------------------------------------------------------------------
@@ -22,9 +24,8 @@ namespace mithep
     public:
       ElectronIDMod(const char *name="ElectronIDMod", 
                     const char *title="Electron identification module");
-      ~ElectronIDMod() {}
 
-      Bool_t              GetApplyConversionFilter()  const { return fApplyConversionFilter;  }
+      Bool_t              GetApplyConversionFilter()  const { return fApplyConvFilter;        }
       Double_t            GetCaloIsoCut()             const { return fCaloIsolationCut;       }
       Double_t            GetEcalJurIsoCut()          const { return fEcalJuraIsoCut;         }
       const char         *GetGoodName()               const { return GetGoodElectronsName();  }   
@@ -37,7 +38,7 @@ namespace mithep
       const char         *GetOutputName()             const { return GetGoodElectronsName();  }
       Double_t            GetPtMin()                  const { return fElectronPtMin;          }
       Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
-      void                SetApplyConversionFilter(Bool_t b)    { fApplyConversionFilter  = b;    }
+      void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
       void                SetEcalJurIsoCut(Double_t cut)        { fEcalJuraIsoCut     = cut;  }
       void                SetGoodName(const char *n)            { SetGoodElectronsName(n);    }   
@@ -85,13 +86,13 @@ namespace mithep
       Double_t                fCaloIsolationCut;       //cut value for calo isolation
       Double_t                fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
       Double_t                fHcalIsolationCut;       //cut value for hcal isolation
-      const ElectronCol      *fElectrons;              //!electron collection
-      const DecayParticleCol *fConversions;            //!conversion collection
-      const VertexCol        *fVertices;               // Vertices branches
+      Bool_t                  fApplyConvFilter;        //whether remove conversions
+      Double_t                fD0Cut;                  //max d0
       EElIdType               fElIdType;               //!identification scheme
       EElIsoType              fElIsoType;              //!isolation scheme
-      Bool_t                  fApplyConversionFilter;  //!whether remove conversions
-      Double_t                fD0Cut;                  //max d0
+      const ElectronCol      *fElectrons;              //!electron collection
+      const DecayParticleCol *fConversions;            //!conversion collection
+      const VertexCol        *fVertices;               //!vertices branch
     
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.13 2008/12/11 15:53:03 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.14 2009/04/02 09:20:53 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -13,7 +13,7 @@ ClassImp(mithep::MuonIDMod)
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
-  fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
+  fVertexName("PrimaryVertexesBeamSpot"),
   fMuonIDType("Loose"),
   fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
@@ -21,8 +21,13 @@ ClassImp(mithep::MuonIDMod)
   fCaloIsolationCut(3.0),
   fCombIsolationCut(5.0),
   fMuonPtMin(10),
+  fD0Cut(0.025),
+  fMuIDType(kIdUndef),
+  fMuIsoType(kIsoUndef),
+  fMuClassType(kClassUndef),
   fMuons(0),
-  fD0Cut(0.025)
+  fVertices(0),
+  fMuonTools(0)
 {
   // Constructor.
 }

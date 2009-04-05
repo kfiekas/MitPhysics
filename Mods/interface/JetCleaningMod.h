@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.8 2009/03/23 14:23:06 loizides Exp $
+// $Id: JetCleaningMod.h,v 1.9 2009/04/02 12:40:16 ceballos Exp $
 //
 // JetCleaningMod
 //
@@ -34,13 +34,13 @@ namespace mithep
       Double_t           GetMinDeltaRToPhoton()   const { return fMinDeltaRToPhoton;   }
       const char        *GetOutputName()          const { return GetCleanJetsName();   }
       void               SetCleanElectronsName(const char *name) { fCleanElectronsName  = name; }
-      void               SetCleanMuonsName(const char *name)     { fCleanMuonsName  = name; }
       void               SetCleanJetsName(const char *name)      { fCleanJetsName       = name; }
+      void               SetCleanMuonsName(const char *name)     { fCleanMuonsName      = name; }
       void               SetCleanName(const char *name)          { SetCleanJetsName(name);      }
       void               SetCleanPhotonsName(const char *name)   { fCleanPhotonsName    = name; }
       void               SetGoodJetsName(const char *name)       { fGoodJetsName        = name; }  
       void               SetMinDeltaRToElectron(Double_t dr)     { fMinDeltaRToElectron = dr;   }
-      void               SetMinDeltaRToMuon(Double_t dr)         { fMinDeltaRToMuon = dr;   }
+      void               SetMinDeltaRToMuon(Double_t dr)         { fMinDeltaRToMuon     = dr;   }
       void               SetMinDeltaRToPhoton(Double_t dr)       { fMinDeltaRToPhoton   = dr;   }
       void               SetOutputName(const char *name)         { SetCleanJetsName(name);      }
 
