@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.13 2009/04/05 18:36:26 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.14 2009/04/06 10:41:03 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -90,17 +90,13 @@ namespace mithep
       Double_t                fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
       Double_t                fHcalIsolationCut;       //cut value for hcal isolation
       Bool_t                  fApplyConvFilter;        //whether remove conversions
+      Bool_t                  fApplyD0Cut;             //!whether apply d0 cut
       Double_t                fD0Cut;                  //max d0
       EElIdType               fElIdType;               //!identification scheme
       EElIsoType              fElIsoType;              //!isolation scheme
       const ElectronCol      *fElectrons;              //!electron collection
       const DecayParticleCol *fConversions;            //!conversion collection
       const VertexCol        *fVertices;               // Vertices branches
-      EElIdType               fElIdType;               //!identification scheme
-      EElIsoType              fElIsoType;              //!isolation scheme
-      Bool_t                  fApplyConversionFilter;  //!whether remove conversions
-      Bool_t                  fApplyD0Cut;             //!whether apply d0 cut
-      Double_t                fD0Cut;                  //max d0
     
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

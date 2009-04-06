@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.14 2009/04/05 18:36:26 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.15 2009/04/06 10:40:55 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -182,7 +182,7 @@ void ElectronIDMod::SlaveBegin()
   // we just request the electron collection branch.
 
   ReqBranch(fElectronBranchName, fElectrons);
-  if (fApplyConversionFilter)
+  if (fApplyConvFilter)
     ReqBranch(fConversionBranchName, fConversions);
   if (fApplyD0Cut)
     ReqBranch(fVertexName, fVertices);
