@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.13 2009/04/03 17:19:24 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.14 2009/04/05 18:36:26 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -153,14 +153,16 @@ void ElectronIDMod::Process()
     }
     if (isGoodConversion == kTRUE) continue;
 
-    LoadBranch(fVertexName);
-    // d0 cut
-    double d0_real = 99999;
-    for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-      double pD0 = e->GsfTrk()->D0Corrected(*fVertices->At(i0));
-      if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
+    if (fApplyD0Cut) {
+      LoadBranch(fVertexName);
+      // d0 cut
+      double d0_real = 99999;
+      for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+	double pD0 = e->GsfTrk()->D0Corrected(*fVertices->At(i0));
+	if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
+      }
+      if(d0_real >= fD0Cut) continue;
     }
-    if(d0_real >= fD0Cut) continue;
 
     // add good electron
     GoodElectrons->Add(e);
@@ -180,8 +182,10 @@ void ElectronIDMod::SlaveBegin()
   // we just request the electron collection branch.
 
   ReqBranch(fElectronBranchName, fElectrons);
-  ReqBranch(fConversionBranchName, fConversions);
-  ReqBranch(fVertexName, fVertices);
+  if (fApplyConversionFilter)
+    ReqBranch(fConversionBranchName, fConversions);
+  if (fApplyD0Cut)
+    ReqBranch(fVertexName, fVertices);
 
   if (fElectronIDType.CompareTo("Tight") == 0) 
     fElIdType = kTight;

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.12 2009/04/02 09:20:53 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.13 2009/04/05 18:36:26 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -26,6 +26,7 @@ namespace mithep
                     const char *title="Electron identification module");
 
       Bool_t              GetApplyConversionFilter()  const { return fApplyConvFilter;        }
+      Bool_t              GetApplyD0Cut()             const { return fApplyD0Cut;             }
       Double_t            GetCaloIsoCut()             const { return fCaloIsolationCut;       }
       Double_t            GetEcalJurIsoCut()          const { return fEcalJuraIsoCut;         }
       const char         *GetGoodName()               const { return GetGoodElectronsName();  }   
@@ -38,7 +39,9 @@ namespace mithep
       const char         *GetOutputName()             const { return GetGoodElectronsName();  }
       Double_t            GetPtMin()                  const { return fElectronPtMin;          }
       Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
+
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
+      void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
       void                SetEcalJurIsoCut(Double_t cut)        { fEcalJuraIsoCut     = cut;  }
       void                SetGoodName(const char *n)            { SetGoodElectronsName(n);    }   
@@ -92,7 +95,12 @@ namespace mithep
       EElIsoType              fElIsoType;              //!isolation scheme
       const ElectronCol      *fElectrons;              //!electron collection
       const DecayParticleCol *fConversions;            //!conversion collection
-      const VertexCol        *fVertices;               //!vertices branch
+      const VertexCol        *fVertices;               // Vertices branches
+      EElIdType               fElIdType;               //!identification scheme
+      EElIsoType              fElIsoType;              //!isolation scheme
+      Bool_t                  fApplyConversionFilter;  //!whether remove conversions
+      Bool_t                  fApplyD0Cut;             //!whether apply d0 cut
+      Double_t                fD0Cut;                  //max d0
     
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };
