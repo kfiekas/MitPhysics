@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.4 2008/11/28 09:13:35 loizides Exp $
+// $Id: MuonTools.h,v 1.5 2009/03/23 22:17:04 loizides Exp $
 //
 // MuonTools
 //
@@ -19,6 +19,7 @@
 #define MITPHYSICS_UTIL_MUONTOOLS_H
 
 #include "MitAna/DataTree/interface/Muon.h"
+#include "MitAna/DataTree/interface/Collections.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "TH2D.h"
 
@@ -30,47 +31,47 @@ namespace mithep {
       ~MuonTools();
 
       enum ESelType { 
-        kAllArbitrated,          //
-        kPromptTight,            //
-        kTMLastStationLoose,     //
-        kTMLastStationTight,     //
-        kTMOneStationLoose,      //
-        kTMOneStationTight,      //
-        kTM2DCompatibilityLoose, //
-        kTM2DCompatibilityTight  //
+        kAllArbitrated,          //All Arbitration(DT/CSC/RPC Hits) put on at least One Segements given a global Muon
+        kPromptTight,            //Standard Global Muon Id
+        kTMLastStationLoose,     //Loose matching requirements on lastmost muon station of reco 
+        kTMLastStationTight,     //Tight matching requirements on lastmost muon station of reco 
+        kTMOneStationLoose,      //Loose matching requirements on at least one muon station of reco 
+        kTMOneStationTight,      //Tight matching requirements on at least one muon station of reco 
+        kTM2DCompatibilityLoose, //Loose requirement on sum of compatabiliity variables ===> 1.2 Segment Compatability + 0.8 Calo Compatability > 0.8
+        kTM2DCompatibilityTight  //Tight requirement on sum of compatabiliity variables ===> 1.2 Segment Compatability + 0.8 Calo Compatability > 1.2
       };
 
       Bool_t      Init(const char *mutemp, const char *pitemp);
-      Bool_t      IsGood(const mithep::Muon *iMuon, ESelType iSel) const;
+      Bool_t      IsGood(const mithep::Muon *iMuon, ESelType iSel) const;               //Muon Id boolean which performs Id test above
 
+      Double_t    GetCaloCompatability(const mithep::Muon *iMuon,                       //Compataibility varible of Muon to be muon based on Calorimeter Templates
+                                       Bool_t iEMSpecial, Bool_t iCorrectedHCAL) const; //EM Special => different arrangement of ECAL for compat
+      Double_t    GetSegmentCompatability(const mithep::Muon *iMuon)             const; //Compatability variable based on likelihood of well define track through chamnbers
     protected:
       void        DeleteHistos();
-      Double_t    GetCaloCompatability(const mithep::Muon *iMuon, 
-                                       Bool_t iEMSpecial, Bool_t iCorrectedHCAL) const;
-      Double_t    GetSegmentCompatability(const mithep::Muon *iMuon)             const;
-      Bool_t      Overflow(const TH2D *iHist, Double_t lVal0, Double_t lVal1)    const;
-      Double_t    SigWeight(Double_t iVal0, Double_t iVal1)                      const;
-
+      Bool_t      Overflow(const TH2D *iHist, Double_t lVal0, Double_t lVal1)    const; 
+      Double_t    SigWeight(Double_t iVal0, Double_t iVal1)                      const; 
+   
     private:
       Bool_t      fIsInit;              //!=true if histograms are loaded
-      TH2D       *fmuon_em_etaEmi;      //!todo by phil
-      TH2D       *fmuon_had_etaEmi;     //!
-      TH2D       *fmuon_had_etaTmi;     //!
-      TH2D       *fmuon_em_etaB;        //!
-      TH2D       *fmuon_had_etaB;       //!
-      TH2D       *fmuon_ho_etaB;        //!
-      TH2D       *fmuon_had_etaTpl;     //!
-      TH2D       *fmuon_em_etaEpl;      //!
-      TH2D       *fmuon_had_etaEpl;     //!
-      TH2D       *fpion_em_etaEmi;      //!
-      TH2D       *fpion_had_etaEmi;     //!
-      TH2D       *fpion_had_etaTmi;     //!
-      TH2D       *fpion_em_etaB;        //!
-      TH2D       *fpion_had_etaB;       //!
-      TH2D       *fpion_ho_etaB;        //!
-      TH2D       *fpion_had_etaTpl;     //!
-      TH2D       *fpion_em_etaEpl;      //!
-      TH2D       *fpion_had_etaEpl;     //!
+      TH2D       *fmuon_em_etaEmi;      //!=Minus Endcap EM       Calorimeter Deposit Template for Muons
+      TH2D       *fmuon_had_etaEmi;     //!=Minus Endcap Hadronic Calorimeter Deposit Template for Muons
+      TH2D       *fmuon_had_etaTmi;     //!=Minus Transition Hadronic Calorimeter Deposit Template for Muons
+      TH2D       *fmuon_em_etaB;        //!=      Barrel EM       Calorimeter Deposit Template for Muons
+      TH2D       *fmuon_had_etaB;       //!=      Barrel Hadronic Calorimeter Deposit Template for Muons
+      TH2D       *fmuon_ho_etaB;        //!=      Barrel HO       Calorimeter Deposit Template for Muons
+      TH2D       *fmuon_had_etaTpl;     //!=Plus  Transition Hadronic Calorimeter Deposit Template for Muons
+      TH2D       *fmuon_em_etaEpl;      //!=Plus  Endcap EM       Calorimeter Deposit Template for Muons
+      TH2D       *fmuon_had_etaEpl;     //!=Plus  Endcap Hadronic Calorimeter Deposit Template for Muons
+      TH2D       *fpion_em_etaEmi;      //!=Minus Endcap EM       Calorimeter Deposit Template for Pions
+      TH2D       *fpion_had_etaEmi;     //!=Minus Endcap Hadronic Calorimeter Deposit Template for Pions
+      TH2D       *fpion_had_etaTmi;     //!=Minus Transition Hadronic Calorimeter Deposit Template for Pions
+      TH2D       *fpion_em_etaB;        //!=      Barrel EM       Calorimeter Deposit Template for Pions
+      TH2D       *fpion_had_etaB;       //!=      Barrel Hadronic Calorimeter Deposit Template for Pions
+      TH2D       *fpion_ho_etaB;        //!=      Barrel HO       Calorimeter Deposit Template for Pions
+      TH2D       *fpion_had_etaTpl;     //!=Plus  Transition Hadronic Calorimeter Deposit Template for Pions
+      TH2D       *fpion_em_etaEpl;      //!=Plus  Endcap EM       Calorimeter Deposit Template for Pions
+      TH2D       *fpion_had_etaEpl;     //!=Plus  Endcap Hadronic Calorimeter Deposit Template for Pions
 
       TH2D       *LoadHisto(const char *fname, TFile *file)                      const;
   };
@@ -79,19 +80,18 @@ namespace mithep {
 //--------------------------------------------------------------------------------------------------
 inline Double_t mithep::MuonTools::SigWeight(Double_t iVal0, Double_t iVal1) const
 {
-  // todo
+  //Returns Weighted uncertainty given segment matching uncertainty=iVal0,segment matching Pull=iVal1
 
-  if (iVal1 < 1.) 
+  if (iVal1 < 1.)  ///if Pull defined and within range
     return 1.;
-  if (iVal0 < 3. && iVal1 > 3.) {
+  if (iVal0 < 3. && iVal1 > 3.) {      //If Pull not well defined and uncertainty defined
     Double_t lVal = TMath::Max(iVal0,1.);
     return 1./TMath::Power(lVal,0.25);
   }
 
-  Double_t lVal = TMath::Max(iVal1,1.);
+  Double_t lVal = TMath::Max(iVal1,1.); //If Pull > 1 and Pull < 3 return 1/Pull^4
   return 1./TMath::Power(lVal,0.25);
 }
-
 //--------------------------------------------------------------------------------------------------
 inline Bool_t mithep::MuonTools::Overflow(const TH2D *iHist, Double_t lVal0, Double_t lVal1) const
 {
