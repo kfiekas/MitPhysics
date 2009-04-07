@@ -1,4 +1,4 @@
-// $Id: JetValidationMod.cc,v 1.1 2008/10/15 06:05:02 loizides Exp $
+// $Id: JetValidationMod.cc,v 1.2 2008/12/04 13:53:35 loizides Exp $
 
 #include "MitPhysics/Validation/interface/JetValidationMod.h"
 #include <TH1D.h>
@@ -61,17 +61,23 @@ void JetValidationMod::Process()
 
   std::map <GenJet*, Jet*> IC5GenJetToIC5JetMap;  
   for (UInt_t i=0; i<GoodIC5GenJets->GetEntries(); ++i) {
-    double minDR = 5000;
+    Double_t  minDR = 5000;
     int closestMatchIndex = -1;
     for (UInt_t j=0; j<GoodIC5Jets->GetEntries(); j++) {
-      double tempDR = MathUtils::DeltaR(GoodIC5GenJets->At(i)->Mom(), GoodIC5Jets->At(j)->Mom());
+      Double_t  tempDR = MathUtils::DeltaR(GoodIC5GenJets->At(i)->Mom(), GoodIC5Jets->At(j)->Mom());
       if (tempDR < minDR) {
         closestMatchIndex = j;
         minDR = tempDR;
       }
     }
     if (closestMatchIndex > -1)
-      if (fPrintDebug) cerr << "GoodIC5GenJets->At(i) " << GoodIC5GenJets->At(i)->Pt() << " " << GoodIC5GenJets->At(i)->Eta() << " " << GoodIC5GenJets->At(i)->Phi() << "   GoodIC5Jets->At(" << closestMatchIndex << ") " << GoodIC5Jets->At(closestMatchIndex)->Pt() << " " << GoodIC5Jets->At(closestMatchIndex)->Eta() << " " << GoodIC5Jets->At(closestMatchIndex)->Phi() << "    DR = " << minDR << endl;
+      if (fPrintDebug) cerr << "GoodIC5GenJets->At(i) " << GoodIC5GenJets->At(i)->Pt() << " " 
+                            << GoodIC5GenJets->At(i)->Eta() << " " << GoodIC5GenJets->At(i)->Phi() 
+                            << "   GoodIC5Jets->At(" << closestMatchIndex << ") " 
+                            << GoodIC5Jets->At(closestMatchIndex)->Pt() << " " 
+                            << GoodIC5Jets->At(closestMatchIndex)->Eta() << " " 
+                            << GoodIC5Jets->At(closestMatchIndex)->Phi() << "    DR = " 
+                            << minDR << endl;
     if (minDR < 0.5)
     {
       IC5GenJetToIC5JetMap[GoodIC5GenJets->At(i)] = GoodIC5Jets->At(closestMatchIndex);      
@@ -80,10 +86,10 @@ void JetValidationMod::Process()
 
   std::map <Jet*, GenJet*> IC5JetToIC5GenJetMap;  
   for (UInt_t i=0; i<GoodIC5Jets->GetEntries(); ++i) {
-    double minDR = 5000;
+    Double_t  minDR = 5000;
     int closestMatchIndex = -1;
     for (UInt_t j=0; j<GoodIC5GenJets->GetEntries(); j++) {
-      double tempDR = MathUtils::DeltaR(GoodIC5Jets->At(i)->Mom(), GoodIC5GenJets->At(j)->Mom());
+      Double_t  tempDR = MathUtils::DeltaR(GoodIC5Jets->At(i)->Mom(), GoodIC5GenJets->At(j)->Mom());
       if (tempDR < minDR) {
         closestMatchIndex = j;
         minDR = tempDR;
@@ -107,7 +113,7 @@ void JetValidationMod::Process()
     map<GenJet*, Jet*>::iterator iter = 
       IC5GenJetToIC5JetMap.find(GoodIC5GenJets->At(i));      
     if (iter != IC5GenJetToIC5JetMap.end()) {          
-      double dR = MathUtils::DeltaR(GoodIC5GenJets->At(i)->Mom(), iter->second->Mom());
+      Double_t  dR = MathUtils::DeltaR(GoodIC5GenJets->At(i)->Mom(), iter->second->Mom());
       
       fIC5GenJetRecoJetDeltaR->Fill(dR);
       fIC5GenJetRecoJetDeltaEta->Fill(fabs(GoodIC5GenJets->At(i)->Eta() - iter->second->Eta()));
@@ -182,17 +188,23 @@ void JetValidationMod::Process()
 
   std::map <GenJet*, Jet*> SC5GenJetToSC5JetMap;  
   for (UInt_t i=0; i<GoodSC5GenJets->GetEntries(); ++i) {
-    double minDR = 5000;
+    Double_t  minDR = 5000;
     int closestMatchIndex = -1;
     for (UInt_t j=0; j<GoodSC5Jets->GetEntries(); j++) {
-      double tempDR = MathUtils::DeltaR(GoodSC5GenJets->At(i)->Mom(), GoodSC5Jets->At(j)->Mom());
+      Double_t  tempDR = MathUtils::DeltaR(GoodSC5GenJets->At(i)->Mom(), GoodSC5Jets->At(j)->Mom());
       if (tempDR < minDR) {
         closestMatchIndex = j;
         minDR = tempDR;
       }
     }
     if (closestMatchIndex > -1)
-      if (fPrintDebug) cerr << "GoodSC5GenJets->At(i) " << GoodSC5GenJets->At(i)->Pt() << " " << GoodSC5GenJets->At(i)->Eta() << " " << GoodSC5GenJets->At(i)->Phi() << "   GoodSC5Jets->At(" << closestMatchIndex << ") " << GoodSC5Jets->At(closestMatchIndex)->Pt() << " " << GoodSC5Jets->At(closestMatchIndex)->Eta() << " " << GoodSC5Jets->At(closestMatchIndex)->Phi() << "    DR = " << minDR << endl;
+      if (fPrintDebug) cerr << "GoodSC5GenJets->At(i) " << GoodSC5GenJets->At(i)->Pt() << " " 
+                            << GoodSC5GenJets->At(i)->Eta() << " " << GoodSC5GenJets->At(i)->Phi() 
+                            << "   GoodSC5Jets->At(" << closestMatchIndex << ") " 
+                            << GoodSC5Jets->At(closestMatchIndex)->Pt() << " " 
+                            << GoodSC5Jets->At(closestMatchIndex)->Eta() << " " 
+                            << GoodSC5Jets->At(closestMatchIndex)->Phi() << "    DR = " 
+                            << minDR << endl;
     if (minDR < 0.5)
     {
       SC5GenJetToSC5JetMap[GoodSC5GenJets->At(i)] = GoodSC5Jets->At(closestMatchIndex);      
@@ -200,10 +212,10 @@ void JetValidationMod::Process()
   }
   std::map <Jet*, GenJet*> SC5JetToSC5GenJetMap;  
   for (UInt_t i=0; i<GoodSC5Jets->GetEntries(); ++i) {
-    double minDR = 5000;
+    Double_t  minDR = 5000;
     int closestMatchIndex = -1;
     for (UInt_t j=0; j<GoodSC5GenJets->GetEntries(); j++) {
-      double tempDR = MathUtils::DeltaR(GoodSC5Jets->At(i)->Mom(), GoodSC5GenJets->At(j)->Mom());
+      Double_t  tempDR = MathUtils::DeltaR(GoodSC5Jets->At(i)->Mom(), GoodSC5GenJets->At(j)->Mom());
       if (tempDR < minDR) {
         closestMatchIndex = j;
         minDR = tempDR;
@@ -226,21 +238,26 @@ void JetValidationMod::Process()
     map<GenJet*, Jet*>::iterator iter = 
       SC5GenJetToSC5JetMap.find(GoodSC5GenJets->At(i));      
     if (iter != SC5GenJetToSC5JetMap.end()) {          
-      double dR = MathUtils::DeltaR(GoodSC5GenJets->At(i)->Mom(), iter->second->Mom());
+      Double_t  dR = MathUtils::DeltaR(GoodSC5GenJets->At(i)->Mom(), iter->second->Mom());
       
       fSC5GenJetRecoJetDeltaR->Fill(dR);
       fSC5GenJetRecoJetDeltaEta->Fill(fabs(GoodSC5GenJets->At(i)->Eta() - iter->second->Eta()));
-      fSC5GenJetRecoJetDeltaPhi->Fill(MathUtils::DeltaPhi(GoodSC5GenJets->At(i)->Phi(),iter->second->Phi()));
+      fSC5GenJetRecoJetDeltaPhi->Fill(MathUtils::DeltaPhi(GoodSC5GenJets->At(i)->Phi(),
+                                                          iter->second->Phi()));
       
       if (fabs(iter->second->Eta()) <= 1.4)
-        fSC5JetResponseVsGenJetPtInBarrel->Fill(iter->second->Et()/GoodSC5GenJets->At(i)->Et(),GoodSC5GenJets->At(i)->Pt());
+        fSC5JetResponseVsGenJetPtInBarrel->Fill(iter->second->Et()/GoodSC5GenJets->At(i)->Et(),
+                                                GoodSC5GenJets->At(i)->Pt());
       else if (fabs(iter->second->Eta()) <= 3.0)
-        fSC5JetResponseVsGenJetPtInEndcap->Fill(iter->second->Et()/GoodSC5GenJets->At(i)->Et(),GoodSC5GenJets->At(i)->Pt());
+        fSC5JetResponseVsGenJetPtInEndcap->Fill(iter->second->Et()/GoodSC5GenJets->At(i)->Et(),
+                                                GoodSC5GenJets->At(i)->Pt());
       else if (fabs(iter->second->Eta()) <= 5.0)
-        fSC5JetResponseVsGenJetPtForward->Fill(iter->second->Et()/GoodSC5GenJets->At(i)->Et(),GoodSC5GenJets->At(i)->Pt());
+        fSC5JetResponseVsGenJetPtForward->Fill(iter->second->Et()/GoodSC5GenJets->At(i)->Et(),
+                                               GoodSC5GenJets->At(i)->Pt());
       //avoid the low pt region
       if (iter->second->Pt() > 30)
-        fSC5JetResponseVsCaloJetEta->Fill(iter->second->Et()/GoodSC5GenJets->At(i)->Et(),iter->second->Eta());
+        fSC5JetResponseVsCaloJetEta->Fill(iter->second->Et()/GoodSC5GenJets->At(i)->Et(),
+                                          iter->second->Eta());
             
       if (fabs(iter->second->Eta()) <= 3.0) {
         fSC5CentralGenJetRecoJetDeltaR->Fill(dR);
@@ -257,7 +274,10 @@ void JetValidationMod::Process()
         fSC5NMatchedCaloJetsVsGenJetEta_Pt30To40->Fill(GoodSC5GenJets->At(i)->Eta());
       if (GoodSC5GenJets->At(i)->Pt() > 60.0 && GoodSC5GenJets->At(i)->Pt() < 80.0)
         fSC5NMatchedCaloJetsVsGenJetEta_Pt60To80->Fill(GoodSC5GenJets->At(i)->Eta());
-      fSC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt->Fill(iter->second->Pt() * iter->second->L2RelativeCorrectionScale() * iter->second->L3AbsoluteCorrectionScale() / GoodSC5GenJets->At(i)->Pt(), GoodSC5GenJets->At(i)->Pt());
+      fSC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt->Fill(
+        iter->second->Pt() * iter->second->L2RelativeCorrectionScale() * 
+        iter->second->L3AbsoluteCorrectionScale() / GoodSC5GenJets->At(i)->Pt(), 
+        GoodSC5GenJets->At(i)->Pt());
     }         
   }
   
@@ -266,7 +286,9 @@ void JetValidationMod::Process()
       SC5JetToSC5GenJetMap.find(GoodSC5Jets->At(i));      
     //unmatched ones
     if (iter == SC5JetToSC5GenJetMap.end()) {          
-      fSC5NUnmatchedCaloJetsVsCorrectedCaloJetPt->Fill(GoodSC5Jets->At(i)->Pt() * GoodSC5Jets->At(i)->L2RelativeCorrectionScale() * GoodSC5Jets->At(i)->L3AbsoluteCorrectionScale());
+      fSC5NUnmatchedCaloJetsVsCorrectedCaloJetPt->Fill(
+        GoodSC5Jets->At(i)->Pt() * GoodSC5Jets->At(i)->L2RelativeCorrectionScale() * 
+        GoodSC5Jets->At(i)->L3AbsoluteCorrectionScale());
       fSC5NUnmatchedCalojetsVsCorrectedCaloJetEta->Fill(GoodSC5Jets->At(i)->Eta());
     }
   }
@@ -292,69 +314,104 @@ void JetValidationMod::SlaveBegin()
   fIC5GenJetRecoJetDeltaPhi = 
     new TH1D("hIC5GenJetRecoJetDeltaPhi",";IC5GenJetRecoJetDeltaPhi;#",100,0.,0.5);
 
-  fIC5JetResponseVsGenJetPtInBarrel = new TH2D("hIC5JetResponseVsGenJetPtInBarrel",";IC5JetResponseVsGenJetPtInBarrel;#",500,0.,5.0,5000,0,5000);
-  fIC5JetResponseVsGenJetPtInEndcap = new TH2D("hIC5JetResponseVsGenJetPtInEndcap",";IC5JetResponseVsGenJetPtInEndcap;#",500,0.,5.0,5000,0,5000);
-  fIC5JetResponseVsGenJetPtForward = new TH2D("hIC5JetResponseVsGenJetPtForward",";IC5JetResponseVsGenJetPtForward;#",500,0.,5.0,5000,0,5000);
-  fIC5JetResponseVsCaloJetEta = new TH2D("hIC5JetResponseVsCaloJetEta",";IC5JetResponseVsCaloJetEta;#",500,0.,5.0,100,-5,5);
-  
+  fIC5JetResponseVsGenJetPtInBarrel = new TH2D("hIC5JetResponseVsGenJetPtInBarrel",
+                                               ";IC5JetResponseVsGenJetPtInBarrel;#",
+                                               500,0.,5.0,5000,0,5000);
+  fIC5JetResponseVsGenJetPtInEndcap = new TH2D("hIC5JetResponseVsGenJetPtInEndcap",
+                                               ";IC5JetResponseVsGenJetPtInEndcap;#",
+                                               500,0.,5.0,5000,0,5000);
+  fIC5JetResponseVsGenJetPtForward = new TH2D("hIC5JetResponseVsGenJetPtForward",
+                                              ";IC5JetResponseVsGenJetPtForward;#",
+                                              500,0.,5.0,5000,0,5000);
+  fIC5JetResponseVsCaloJetEta = new TH2D("hIC5JetResponseVsCaloJetEta",
+                                         ";IC5JetResponseVsCaloJetEta;#",500,0.,5.0,100,-5,5);
   fIC5CentralGenJetRecoJetDeltaR = 
     new TH1D("hIC5CentralGenJetRecoJetDeltaR",";IC5CentralGenJetRecoJetDeltaR;#",100,0.,1.0);
-  fIC5ForwardGenJetRecoJetDeltaR = new TH1D("hIC5ForwardGenJetRecoJetDeltaR",";IC5ForwardGenJetRecoJetDeltaR;#",100,0.,1.0); 
-  
-  fIC5NMatchedCaloJetsVsGenJetPt = new TH1D("hIC5NMatchedCaloJetsVsGenJetPt",";IC5GenJetPt;#",5000,0.,5000);
-  fIC5NMatchedCaloJetsVsGenJetEta = new TH1D("hIC5NMatchedCaloJetsVsGenJetEta",";IC5GenJetEta;#",100,-5.0,5.0);
-  fIC5NMatchedCaloJetsVsGenJetEta_Pt20To30 = new TH1D("hIC5NMatchedCaloJetsVsGenJetEta_Pt20To30",";IC5GenJetEta;#",100,-5.0,5.0);
-  fIC5NMatchedCaloJetsVsGenJetEta_Pt30To40 = new TH1D("hIC5NMatchedCaloJetsVsGenJetEta_Pt30To40",";IC5GenJetEta;#",100,-5.0,5.0);
-  fIC5NMatchedCaloJetsVsGenJetEta_Pt60To80 = new TH1D("hIC5NMatchedCaloJetsVsGenJetEta_Pt60To80",";IC5GenJetEta;#",100,-5.0,5.0);
+  fIC5ForwardGenJetRecoJetDeltaR = new TH1D("hIC5ForwardGenJetRecoJetDeltaR",
+                                            ";IC5ForwardGenJetRecoJetDeltaR;#",100,0.,1.0); 
+  fIC5NMatchedCaloJetsVsGenJetPt = new TH1D("hIC5NMatchedCaloJetsVsGenJetPt",
+                                            ";IC5GenJetPt;#",5000,0.,5000);
+  fIC5NMatchedCaloJetsVsGenJetEta = new TH1D("hIC5NMatchedCaloJetsVsGenJetEta",
+                                             ";IC5GenJetEta;#",100,-5.0,5.0);
+  fIC5NMatchedCaloJetsVsGenJetEta_Pt20To30 = new TH1D("hIC5NMatchedCaloJetsVsGenJetEta_Pt20To30",
+                                                      ";IC5GenJetEta;#",100,-5.0,5.0);
+  fIC5NMatchedCaloJetsVsGenJetEta_Pt30To40 = new TH1D("hIC5NMatchedCaloJetsVsGenJetEta_Pt30To40",
+                                                      ";IC5GenJetEta;#",100,-5.0,5.0);
+  fIC5NMatchedCaloJetsVsGenJetEta_Pt60To80 = new TH1D("hIC5NMatchedCaloJetsVsGenJetEta_Pt60To80",
+                                                      ";IC5GenJetEta;#",100,-5.0,5.0);
   fIC5NGenJetsVsGenJetPt = new TH1D("hIC5NGenJetsVsGenJetPt",";IC5GenJetPt;#",5000,0.,5000);
   fIC5NGenJetsVsGenJetEta = new TH1D("hIC5NGenJetsVsGenJetEta",";IC5GenJetEta;#",100,-5.,5.0);
-  fIC5NGenJetsVsGenJetEta_Pt20To30 = new TH1D("hIC5NGenJetsVsGenJetEta_Pt20To30",";IC5GenJetEta;#",100,-5.,5.0);
-  fIC5NGenJetsVsGenJetEta_Pt30To40 = new TH1D("hIC5NGenJetsVsGenJetEta_Pt30To40",";IC5GenJetEta;#",100,-5.,5.0);
-  fIC5NGenJetsVsGenJetEta_Pt60To80 = new TH1D("hIC5NGenJetsVsGenJetEta_Pt60To80",";IC5GenJetEta;#",100,-5.,5.0);
-
+  fIC5NGenJetsVsGenJetEta_Pt20To30 = new TH1D("hIC5NGenJetsVsGenJetEta_Pt20To30",
+                                              ";IC5GenJetEta;#",100,-5.,5.0);
+  fIC5NGenJetsVsGenJetEta_Pt30To40 = new TH1D("hIC5NGenJetsVsGenJetEta_Pt30To40",
+                                              ";IC5GenJetEta;#",100,-5.,5.0);
+  fIC5NGenJetsVsGenJetEta_Pt60To80 = new TH1D("hIC5NGenJetsVsGenJetEta_Pt60To80",
+                                              ";IC5GenJetEta;#",100,-5.,5.0);
   fIC5CaloJetsPt = new TH1D("hIC5CaloJetsPt",";IC5CaloJetPt;#",5000,0.,5000);
   fIC5CaloJetsEta = new TH1D("hIC5CaloJetsEta",";IC5CaloJetEta;#",100,-5.0,5.0);
-  fIC5NUnmatchedCaloJetsVsCorrectedCaloJetPt = new TH1D("hIC5NUnmatchedCaloJetsVsCorrectedCaloJetPt",";IC5CorrectedCaloJetPt;#",5000,0.0,5000.0);
-  fIC5NUnmatchedCalojetsVsCorrectedCaloJetEta = new TH1D("hIC5NUnmatchedCalojetsVsCorrectedCaloJetEta",";IC5CorrectedCaloJetEta;#",100,-5.0,5.0);
-  
-  fIC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt = new TH2D("hIC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt",";IC5GenJetPt;#",1000,0,1000.0, 100,0.0,5.0);
-  
+  fIC5NUnmatchedCaloJetsVsCorrectedCaloJetPt = 
+    new TH1D("hIC5NUnmatchedCaloJetsVsCorrectedCaloJetPt",
+             ";IC5CorrectedCaloJetPt;#",5000,0.0,5000.0);
+  fIC5NUnmatchedCalojetsVsCorrectedCaloJetEta = 
+    new TH1D("hIC5NUnmatchedCalojetsVsCorrectedCaloJetEta",
+             ";IC5CorrectedCaloJetEta;#",100,-5.0,5.0);
+  fIC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt = 
+    new TH2D("hIC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt",
+             ";IC5GenJetPt;#",1000,0,1000.0, 100,0.0,5.0);
   fIC5NCaloJets = new TH1D("hIC5NCaloJets",";IC5NCaloJets;#",100,0.,15);
+  fSC5GenJetRecoJetDeltaR = new TH1D("hSC5GenJetRecoJetDeltaR",
+                                     ";SC5GenJetRecoJetDeltaR;#",100,0.,1.0);
+  fSC5GenJetRecoJetDeltaEta = new TH1D("hSC5GenJetRecoJetDeltaEta",
+                                       ";SC5GenJetRecoJetDeltaEta;#",100,0.,0.5);
+  fSC5GenJetRecoJetDeltaPhi = new TH1D("hSC5GenJetRecoJetDeltaPhi",
+                                       ";SC5GenJetRecoJetDeltaPhi;#",100,0.,0.5);
+  fSC5JetResponseVsGenJetPtInBarrel = 
+    new TH2D("hSC5JetResponseVsGenJetPtInBarrel",
+             ";SC5JetResponseVsGenJetPtInBarrel;#",500,0.,5.0,5000,0,5000);
+  fSC5JetResponseVsGenJetPtInEndcap = 
+    new TH2D("hSC5JetResponseVsGenJetPtInEndcap",
+             ";SC5JetResponseVsGenJetPtInEndcap;#",500,0.,5.0,5000,0,5000);
+  fSC5JetResponseVsGenJetPtForward = 
+    new TH2D("hSC5JetResponseVsGenJetPtForward",
+             ";SC5JetResponseVsGenJetPtForward;#",500,0.,5.0,5000,0,5000);
 
-
-  fSC5GenJetRecoJetDeltaR = new TH1D("hSC5GenJetRecoJetDeltaR",";SC5GenJetRecoJetDeltaR;#",100,0.,1.0);
-  fSC5GenJetRecoJetDeltaEta = new TH1D("hSC5GenJetRecoJetDeltaEta",";SC5GenJetRecoJetDeltaEta;#",100,0.,0.5);
-  fSC5GenJetRecoJetDeltaPhi = new TH1D("hSC5GenJetRecoJetDeltaPhi",";SC5GenJetRecoJetDeltaPhi;#",100,0.,0.5);
-
-  fSC5JetResponseVsGenJetPtInBarrel = new TH2D("hSC5JetResponseVsGenJetPtInBarrel",";SC5JetResponseVsGenJetPtInBarrel;#",500,0.,5.0,5000,0,5000);
-  fSC5JetResponseVsGenJetPtInEndcap = new TH2D("hSC5JetResponseVsGenJetPtInEndcap",";SC5JetResponseVsGenJetPtInEndcap;#",500,0.,5.0,5000,0,5000);
-  fSC5JetResponseVsGenJetPtForward = new TH2D("hSC5JetResponseVsGenJetPtForward",";SC5JetResponseVsGenJetPtForward;#",500,0.,5.0,5000,0,5000);
-
-  fSC5JetResponseVsCaloJetEta = new TH2D("hSC5JetResponseVsCaloJetEta",";SC5JetResponseVsCaloJetEta;#",500,0.,5.0,100,-5,5);
-
-
-  
-  fSC5CentralGenJetRecoJetDeltaR = new TH1D("hSC5CentralGenJetRecoJetDeltaR",";SC5CentralGenJetRecoJetDeltaR;#",100,0.,1.0);
-  fSC5ForwardGenJetRecoJetDeltaR = new TH1D("hSC5ForwardGenJetRecoJetDeltaR",";SC5ForwardGenJetRecoJetDeltaR;#",100,0.,1.0); 
-  
-  fSC5NMatchedCaloJetsVsGenJetPt = new TH1D("hSC5NMatchedCaloJetsVsGenJetPt",";SC5GenJetPt;#",5000,0.,5000);
-  fSC5NMatchedCaloJetsVsGenJetEta = new TH1D("hSC5NMatchedCaloJetsVsGenJetEta",";SC5GenJetEta;#",100,-5.0,5.0);
-  fSC5NMatchedCaloJetsVsGenJetEta_Pt20To30 = new TH1D("hSC5NMatchedCaloJetsVsGenJetEta_Pt20To30",";SC5GenJetEta;#",100,-5.0,5.0);
-  fSC5NMatchedCaloJetsVsGenJetEta_Pt30To40 = new TH1D("hSC5NMatchedCaloJetsVsGenJetEta_Pt30To40",";SC5GenJetEta;#",100,-5.0,5.0);
-  fSC5NMatchedCaloJetsVsGenJetEta_Pt60To80 = new TH1D("hSC5NMatchedCaloJetsVsGenJetEta_Pt60To80",";SC5GenJetEta;#",100,-5.0,5.0);
+  fSC5JetResponseVsCaloJetEta = new TH2D("hSC5JetResponseVsCaloJetEta",
+                                         ";SC5JetResponseVsCaloJetEta;#",500,0.,5.0,100,-5,5);
+  fSC5CentralGenJetRecoJetDeltaR = 
+    new TH1D("hSC5CentralGenJetRecoJetDeltaR",
+             ";SC5CentralGenJetRecoJetDeltaR;#",100,0.,1.0);
+  fSC5ForwardGenJetRecoJetDeltaR = 
+    new TH1D("hSC5ForwardGenJetRecoJetDeltaR",
+             ";SC5ForwardGenJetRecoJetDeltaR;#",100,0.,1.0); 
+  fSC5NMatchedCaloJetsVsGenJetPt = 
+    new TH1D("hSC5NMatchedCaloJetsVsGenJetPt",";SC5GenJetPt;#",5000,0.,5000);
+  fSC5NMatchedCaloJetsVsGenJetEta = 
+    new TH1D("hSC5NMatchedCaloJetsVsGenJetEta",";SC5GenJetEta;#",100,-5.0,5.0);
+  fSC5NMatchedCaloJetsVsGenJetEta_Pt20To30 = 
+    new TH1D("hSC5NMatchedCaloJetsVsGenJetEta_Pt20To30",";SC5GenJetEta;#",100,-5.0,5.0);
+  fSC5NMatchedCaloJetsVsGenJetEta_Pt30To40 = 
+    new TH1D("hSC5NMatchedCaloJetsVsGenJetEta_Pt30To40",";SC5GenJetEta;#",100,-5.0,5.0);
+  fSC5NMatchedCaloJetsVsGenJetEta_Pt60To80 = 
+    new TH1D("hSC5NMatchedCaloJetsVsGenJetEta_Pt60To80",";SC5GenJetEta;#",100,-5.0,5.0);
   fSC5NGenJetsVsGenJetPt = new TH1D("hSC5NGenJetsVsGenJetPt",";SC5GenJetPt;#",5000,0.,5000);
   fSC5NGenJetsVsGenJetEta = new TH1D("hSC5NGenJetsVsGenJetEta",";SC5GenJetEta;#",100,-5.,5.0);
-  fSC5NGenJetsVsGenJetEta_Pt20To30 = new TH1D("hSC5NGenJetsVsGenJetEta_Pt20To30",";SC5GenJetEta;#",100,-5.,5.0);
-  fSC5NGenJetsVsGenJetEta_Pt30To40 = new TH1D("hSC5NGenJetsVsGenJetEta_Pt30To40",";SC5GenJetEta;#",100,-5.,5.0);
-  fSC5NGenJetsVsGenJetEta_Pt60To80 = new TH1D("hSC5NGenJetsVsGenJetEta_Pt60To80",";SC5GenJetEta;#",100,-5.,5.0);
-  
+  fSC5NGenJetsVsGenJetEta_Pt20To30 = 
+    new TH1D("hSC5NGenJetsVsGenJetEta_Pt20To30",";SC5GenJetEta;#",100,-5.,5.0);
+  fSC5NGenJetsVsGenJetEta_Pt30To40 = 
+    new TH1D("hSC5NGenJetsVsGenJetEta_Pt30To40",";SC5GenJetEta;#",100,-5.,5.0);
+  fSC5NGenJetsVsGenJetEta_Pt60To80 = 
+    new TH1D("hSC5NGenJetsVsGenJetEta_Pt60To80",";SC5GenJetEta;#",100,-5.,5.0);
   fSC5CaloJetsPt = new TH1D("hSC5CaloJetsPt",";SC5CaloJetPt;#",5000,0.,5000);
   fSC5CaloJetsEta = new TH1D("hSC5CaloJetsEta",";SC5CaloJetEta;#",100,-5.0,5.0);
-  fSC5NUnmatchedCaloJetsVsCorrectedCaloJetPt = new TH1D("hSC5NUnmatchedCaloJetsVsCorrectedCaloJetPt",";SC5CorrectedCaloJetPt;#",5000,0.0,5000.0);
-  fSC5NUnmatchedCalojetsVsCorrectedCaloJetEta = new TH1D("hSC5NUnmatchedCalojetsVsCorrectedCaloJetEta",";SC5CorrectedCaloJetEta;#",100,-5.0,5.0);
-  
-  fSC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt = new TH2D("hSC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt",";SC5GenJetPt;#",1000,0,1000.0, 100,0.0,5.0);
-  
+  fSC5NUnmatchedCaloJetsVsCorrectedCaloJetPt = 
+    new TH1D("hSC5NUnmatchedCaloJetsVsCorrectedCaloJetPt",
+             ";SC5CorrectedCaloJetPt;#",5000,0.0,5000.0);
+  fSC5NUnmatchedCalojetsVsCorrectedCaloJetEta = 
+    new TH1D("hSC5NUnmatchedCalojetsVsCorrectedCaloJetEta",
+             ";SC5CorrectedCaloJetEta;#",100,-5.0,5.0);
+  fSC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt = 
+    new TH2D("hSC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt",
+             ";SC5GenJetPt;#",1000,0,1000.0, 100,0.0,5.0);
   fSC5NCaloJets = new TH1D("hSC5NCaloJets",";SC5NCaloJets;#",100,0.,15);
 
   AddOutput(fIC5GenJetRecoJetDeltaR);

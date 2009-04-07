@@ -1,16 +1,20 @@
 //------------------------------------------------------------------------------
-// $Id: HWWKFactorList.h,v 1.01 2009/04/03 22:42:59 ceballos Exp $
+// $Id: HWWKFactorList.h,v 1.1 2009/04/06 10:43:58 ceballos Exp $
 //
 // HWWKFactorList
 //
-// brief Resolution Map
-// Basically just a TH1D with text I/O
+// Brief resolution map copied over from CMSSW. 
+// It basically is just a TH1D with text I/O. 
 //
-// Authors: G. Gomez-Ceballos
+// NOTE: Since this class is a one-to-one copy from 
+//       HiggsAnalysis/HiggsToWW2Leptons/plugins 
+//       it does not fulfill our coding style conventions!!!
+//
+// Authors: G.Ceballos
 //------------------------------------------------------------------------------
 
-#ifndef MITPHYSICS_MODS_HWWKFactorList_H
-#define MITPHYSICS_MODS_HWWKFactorList_H
+#ifndef MITPHYSICS_MODS_HWWKFACTORLIST_H
+#define MITPHYSICS_MODS_HWWKFACTORLIST_H
 
 #include <TH1.h>
 

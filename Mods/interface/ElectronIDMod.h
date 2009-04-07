@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.14 2009/04/06 10:41:03 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.15 2009/04/06 11:00:22 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -39,7 +39,6 @@ namespace mithep
       const char         *GetOutputName()             const { return GetGoodElectronsName();  }
       Double_t            GetPtMin()                  const { return fElectronPtMin;          }
       Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
-
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
@@ -79,7 +78,7 @@ namespace mithep
 
       TString                 fElectronBranchName;     //name of electron collection (input)
       TString                 fConversionBranchName;   //name of electron collection (input)
-      TString                 fGoodElectronsName;      //name of exported "good electrons" collection
+      TString                 fGoodElectronsName;      //name of exported "good electrons" col
       TString                 fVertexName;	       //name of vertex collection
       TString                 fElectronIDType;         //type of electron ID we impose
       TString                 fElectronIsoType;        //type of electron Isolation we impose
@@ -90,13 +89,13 @@ namespace mithep
       Double_t                fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
       Double_t                fHcalIsolationCut;       //cut value for hcal isolation
       Bool_t                  fApplyConvFilter;        //whether remove conversions
-      Bool_t                  fApplyD0Cut;             //!whether apply d0 cut
+      Bool_t                  fApplyD0Cut;             //whether apply d0 cut
       Double_t                fD0Cut;                  //max d0
       EElIdType               fElIdType;               //!identification scheme
       EElIsoType              fElIsoType;              //!isolation scheme
       const ElectronCol      *fElectrons;              //!electron collection
       const DecayParticleCol *fConversions;            //!conversion collection
-      const VertexCol        *fVertices;               // Vertices branches
+      const VertexCol        *fVertices;               //!vertices branches
     
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

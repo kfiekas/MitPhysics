@@ -1,13 +1,12 @@
-//------------------------------------------------------------------------------
-// $Id: HKFactorProducer.h,v 1.21 2009/04/03 22:42:59 ceballos Exp $
+//--------------------------------------------------------------------------------------------------
+// $Id: HKFactorProducer.h,v 1.1 2009/04/06 10:43:58 ceballos Exp $
 //
 // HKFactorProducer
 //
-// Produces K Factors from LO to NNLO
-//
+// Produces the k factors from LO to NNLO.
 //
 // Authors: G. Gomez-Ceballos
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 
 #ifndef MITPHYSICS_MODS_HKFACTORPRODUCER_H
 #define MITPHYSICS_MODS_HKFACTORPRODUCER_H
@@ -28,31 +27,24 @@ namespace mithep
                    const char *title="KFactor information module");
       ~HKFactorProducer();
 
-      void     SetDebug(Bool_t b)	       { fDebug 	   = b; }
-      void     SetFillHist(Bool_t b)	       { fFillHist 	   = b; }
-      void     SetProcessID(Int_t d)	       { fProcessID	   = d; }
-      void     SetInputFilename(const char *s) { fInputFilename    = s; }
-
-      void     SetMCBosonsName(const char *s)  { fMCBosonsName     = s; }
-      void     SetMCPhotonsName(const char *s) { fMCEventInfoName  = s; }
+      void               SetProcessID(Int_t d)	           { fProcessID     = d; }
+      void               SetInputFilename(const char *s)   { fInputFileName = s; }
+      void               SetMCBosonsName(const char *s)    { fMCBosonsName  = s; }
+      void               SetMCEventInfoName(const char *s) { fMCEvInfoName  = s; }
 
     protected:
-      void     Process();
-      void     SlaveBegin();
+      void               Process();
+      void               SlaveBegin();
 
-      Bool_t fDebug;
-      Bool_t fFillHist;
-      HWWKfactorList* fPt_histo;
-      Int_t  fProcessID;
-      std::string fInputFilename;
+      Int_t              fProcessID;        //process id (from pythia)
+      TString            fInputFileName;    //input file name
+      TString            fMCBosonsName;     //boson collection input name
+      TString            fMCEvInfoName;     //event info branch name
+      HWWKfactorList    *fPt_histo;         //!histogram with weights read from input file
+      const MCEventInfo *fMCEventInfo;      //!event info branch pointer
+      TH1D              *hDHKFactor[10];    //!output histograms
 
-      TString               fMCBosonsName;
-      TString               fMCEventInfoName;
-      const MCEventInfo    *fMCEventInfo;
-
-      TH1D                 *hDHKFactor[10];
-
-    ClassDef(HKFactorProducer, 1) // Module to gather generator information
+    ClassDef(HKFactorProducer, 1) // Module to produce k factors
   };
 }
 #endif

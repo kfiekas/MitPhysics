@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.7 2008/12/04 13:53:34 loizides Exp $
+// $Id: MuonTools.cc,v 1.8 2009/03/23 14:48:08 loizides Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -91,7 +91,8 @@ void MuonTools::DeleteHistos()
 Double_t MuonTools::GetCaloCompatability(const Muon *iMuon,
                                          Bool_t iEMSpecial, Bool_t iCorrectedHCAL) const
 {
-  // Get calo compatibility value for given muon.
+  // Get calo compatibility value for given muon based on calorimeter templates.
+  // If iEMSpecial is true, then a use different arrangement of ECAL for compatibility.
 
   Double_t lEta = iMuon->Eta();
   Double_t aEta = TMath::Abs(lEta);
@@ -313,7 +314,8 @@ Bool_t MuonTools::IsGood(const mithep::Muon *iMuon, ESelType iSel) const
 //--------------------------------------------------------------------------------------------------
 Double_t MuonTools::GetSegmentCompatability(const mithep::Muon *iMuon) const
 {
-  // Get segment compatability for given muon.
+  // Get segment compatability for given muon based on likelihood of well defined 
+  // track through chambers.
 
   Int_t lNStationsCrossed = 0;
   Int_t lNStationsSegment = 0;
