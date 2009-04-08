@@ -1,4 +1,4 @@
-// $Id: TauIDMod.cc,v 1.1 2009/04/08 10:11:44 ceballos Exp $
+// $Id: TauIDMod.cc,v 1.2 2009/04/08 11:06:35 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/TauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -18,7 +18,8 @@ TauIDMod::TauIDMod(const char *name, const char *title) :
   fNSignalTracksMax(3),
   fNIsoTracksMax(0),
   fSignalTracksMassMax(2.0),
-  fIsoTrackPtSumMax(5.0)
+  fIsoTrackPtSumMax(5.0),
+  fEnergyFractionEmMax(0.98)
 {
   // Constructor.
 }
@@ -52,6 +53,9 @@ void TauIDMod::Process()
       continue;
 
     if (tau->IsoTrackPtSum() > fIsoTrackPtSumMax)
+      continue;
+
+    if (tau->SourceCaloJet()->EnergyFractionEm() > fEnergyFractionEmMax)
       continue;
 
     // Always apply this requirement

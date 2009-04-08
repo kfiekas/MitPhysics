@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: TauIDMod.h,v 1.7 2009/03/23 14:23:06 loizides Exp $
+// $Id: TauIDMod.h,v 1.1 2009/04/08 10:11:44 ceballos Exp $
 //
 // TauIDMod
 //
@@ -26,11 +26,12 @@ namespace mithep
       const char         *GetCaloTausName()        const { return fCaloTausName;        }   
       const char         *GetGoodTausName()        const { return fGoodTausName;        }   
       Double_t            GetPtMin()               const { return fTauPtMin;            }
-      Double_t            GetJetPtMin()            const { return fTauJetPtMin;            }
+      Double_t            GetJetPtMin()            const { return fTauJetPtMin;         }
       UInt_t              GetNSignalTracksMax()    const { return fNSignalTracksMax;	}
       UInt_t              GetNIsoTracksMax()	   const { return fNIsoTracksMax;	}
       Double_t            GetSignalTracksMassMax() const { return fSignalTracksMassMax; }
       Double_t            GetIsoTrackPtSumMax()    const { return fIsoTrackPtSumMax;    }
+      Double_t            GetEnergyFractionEmMax() const { return fEnergyFractionEmMax; }
 
       void                SetCaloTausName(const char *n)    { fCaloTausName	   = n; } 
       void                SetGoodTausName(const char *n)    { fGoodTausName	   = n; } 
@@ -40,6 +41,7 @@ namespace mithep
       void                SetNIsoTracksMax(Int_t d)         { fNIsoTracksMax	   = d; }
       void                SetSignalTracksMassMax(Double_t x){ fSignalTracksMassMax = x; }
       void                SetIsoTrackPtSumMax(Double_t x)   { fIsoTrackPtSumMax    = x; }
+      void                SetEnergyFractionEmMax(Double_t x){ fEnergyFractionEmMax = x; }
 
     protected:
       void                Process();
@@ -54,6 +56,7 @@ namespace mithep
       UInt_t              fNIsoTracksMax;	//maximum of iso tracks
       Double_t            fSignalTracksMassMax; //maximum of mass for signal tracks
       Double_t            fIsoTrackPtSumMax;    //maximum of Pt iso tracks
+      Double_t            fEnergyFractionEmMax; //maximum of EnergyFractionEm
     
     ClassDef(TauIDMod, 1) // Tau identification module
   };

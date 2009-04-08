@@ -1,4 +1,4 @@
-// $Id: TauCleaningMod.cc,v 1.4 2009/01/20 10:28:02 loizides Exp $
+// $Id: TauCleaningMod.cc,v 1.1 2009/04/08 10:11:44 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -46,7 +46,8 @@ void TauCleaningMod::Process()
     if (CleanElectrons) {
       UInt_t n1 = CleanElectrons->GetEntries();
       for (UInt_t j=0; j<n1; j++) {
-        Double_t deltaR = MathUtils::DeltaR(CleanElectrons->At(j)->Mom(),tau->Mom());  
+        Double_t deltaR = MathUtils::DeltaR(CleanElectrons->At(j)->Mom(),
+	                                    tau->SourceCaloJet()->Mom());  
         if (deltaR < fMinDeltaRToElectron) {
           isElectronOverlap = kTRUE;
           break;	 	 
@@ -63,7 +64,8 @@ void TauCleaningMod::Process()
     if (CleanMuons) {
       UInt_t n2 = CleanMuons->GetEntries();
       for (UInt_t j=0; j<n2; j++) {
-        Double_t deltaR = MathUtils::DeltaR(CleanMuons->At(j)->Mom(),tau->Mom());  
+        Double_t deltaR = MathUtils::DeltaR(CleanMuons->At(j)->Mom(),
+	                                    tau->SourceCaloJet()->Mom());  
         if (deltaR < fMinDeltaRToMuon) {
           isMuonOverlap = kTRUE;
           break;	 	 
