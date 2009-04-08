@@ -1,4 +1,4 @@
-// $Id: TauIDMod.cc,v 1.4 2008/12/10 11:44:33 loizides Exp $
+// $Id: TauIDMod.cc,v 1.1 2009/04/08 10:11:44 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/TauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -55,11 +55,7 @@ void TauIDMod::Process()
       continue;
 
     // Always apply this requirement
-    Double_t nCharge = 0;
-    for (UInt_t j=0; j<tau->NSignalTracks(); ++j) {
-      nCharge += tau->SignalTrack(j)->Charge();
-    }
-    if (TMath::Abs(nCharge) != 1)
+    if (TMath::Abs(tau->Charge()) != 1)
       continue;
 
     // add good electron
