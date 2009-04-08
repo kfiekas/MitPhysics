@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.7 2009/04/06 10:41:20 ceballos Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.8 2009/04/07 15:37:09 loizides Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -13,6 +13,9 @@
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
+#include "MitPhysics/Mods/interface/HKFactorProducer.h"
+#include "MitPhysics/Mods/interface/TauIDMod.h"
+#include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #endif
 
 #ifdef __CINT__
@@ -42,4 +45,7 @@
 #pragma link C++ enum mithep::MuonIDMod::EMuIsoType;
 #pragma link C++ class mithep::PhotonCleaningMod+;
 #pragma link C++ class mithep::PhotonIDMod+;
+#pragma link C++ class mithep::HKFactorProducer+;
+#pragma link C++ class mithep::TauIDMod+;
+#pragma link C++ class mithep::TauCleaningMod+;
 #endif
