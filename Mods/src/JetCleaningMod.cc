@@ -1,4 +1,4 @@
-// $Id: JetCleaningMod.cc,v 1.9 2009/03/12 16:00:46 bendavid Exp $
+// $Id: JetCleaningMod.cc,v 1.10 2009/04/02 12:40:16 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -14,11 +14,14 @@ JetCleaningMod::JetCleaningMod(const char *name, const char *title) :
   fCleanElectronsName(ModNames::gkCleanElectronsName),        
   fCleanMuonsName(ModNames::gkCleanMuonsName),        
   fCleanPhotonsName(ModNames::gkCleanPhotonsName),        
+  fCleanTausName(ModNames::gkCleanTausName),        
   fGoodJetsName(ModNames::gkGoodJetsName),        
   fCleanJetsName(ModNames::gkCleanJetsName),
   fMinDeltaRToElectron(0.3),
   fMinDeltaRToMuon(0.3),
-  fMinDeltaRToPhoton(0.3)
+  fMinDeltaRToPhoton(0.3),
+  fMinDeltaRToTau(0.3),
+  fApplyTauRemoval(kFALSE)
 {
   // Constructor.
 }
@@ -39,6 +42,9 @@ void JetCleaningMod::Process()
   const PhotonCol   *CleanPhotons   = 0;
   if (!fCleanPhotonsName.IsNull())
   CleanPhotons    = GetObjThisEvt<PhotonCol>(fCleanPhotonsName);
+  const TauCol   *CleanTaus   = 0;
+  if (fApplyTauRemoval && !fCleanTausName.IsNull())
+  CleanTaus    = GetObjThisEvt<TauCol>(fCleanTausName);
 
   // create output collection
   JetOArr *CleanJets = new JetOArr;
@@ -92,6 +98,21 @@ void JetCleaningMod::Process()
     }
 
     if (isPhotonOverlap) continue;
+
+    // check for overlap with a tau
+    Bool_t isTauOverlap = kFALSE;
+    if (fApplyTauRemoval && CleanTaus) {
+      UInt_t n = CleanTaus->GetEntries();
+      for (UInt_t j=0; j<n; ++j) {
+        Double_t deltaR = MathUtils::DeltaR(CleanTaus->At(j)->Mom(),jet->Mom());  
+        if (deltaR < fMinDeltaRToTau) {
+          isTauOverlap = kTRUE;
+          break;	 	 
+        }      
+      }
+    }
+
+    if (isTauOverlap) continue;
 
     CleanJets->Add(jet);     
   }
