@@ -1,11 +1,10 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.8 2009/04/07 15:37:09 loizides Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.9 2009/04/08 10:13:37 ceballos Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
-#include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
@@ -31,7 +30,6 @@
 #pragma link C++ enum mithep::ElectronIDMod::EElIdType;
 #pragma link C++ enum mithep::ElectronIDMod::EElIsoType;
 #pragma link C++ class mithep::GeneratorMod+;
-#pragma link C++ class mithep::HKFactorProducer+;
 #pragma link C++ class mithep::JetCleaningMod+;
 #pragma link C++ class mithep::JetIDMod+;
 #pragma link C++ class mithep::MergeLeptonsMod+;
