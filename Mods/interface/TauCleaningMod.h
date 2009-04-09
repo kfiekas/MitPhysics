@@ -1,12 +1,12 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: TauCleaningMod.h,v 1.5 2009/03/23 14:23:06 loizides Exp $
+// $Id: TauCleaningMod.h,v 1.1 2009/04/08 10:11:44 ceballos Exp $
 //
 // TauCleaningMod
 //
-// This Module performs cleaning of taus, ie it removes jets which point 
-// in the same direction as a clean isolated electrons or muons
+// This Module performs cleaning of taus, ie it removes taus which point 
+// in the same direction as a clean isolated muons or electrons.
 //
-// Authors: S.Xie
+// Authors: G.Ceballos
 //--------------------------------------------------------------------------------------------------
 
 #ifndef MITPHYSICS_MODS_TAUCLEANINGMOD_H
@@ -43,12 +43,12 @@ namespace mithep
     protected:
       void             Process();
 
-      TString          fCleanElectronsName;   //name of clean electrons (input)
-      TString          fCleanMuonsName;   //name of clean muons (input)
-      TString          fGoodTausName;      //name of good jets (input)
-      TString          fCleanCaloTausName;     //name of clean jets (output)
-      Double_t         fMinDeltaRToElectron;  //delta R threshold for separating electrons/taus
-      Double_t         fMinDeltaRToMuon;  //delta R threshold for separating muons/taus
+      TString          fCleanElectronsName;  //name of clean electrons (input)
+      TString          fCleanMuonsName;      //name of clean muons (input)
+      TString          fGoodTausName;        //name of good taus (input)
+      TString          fCleanCaloTausName;   //name of clean taus (output)
+      Double_t         fMinDeltaRToElectron; //delta R threshold for separating electrons/taus
+      Double_t         fMinDeltaRToMuon;     //delta R threshold for separating muons/taus
    
     ClassDef(TauCleaningMod, 1) // Tau cleaning module
   };

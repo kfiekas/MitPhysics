@@ -1,4 +1,4 @@
-// $Id: TauCleaningMod.cc,v 1.1 2009/04/08 10:11:44 ceballos Exp $
+// $Id: TauCleaningMod.cc,v 1.2 2009/04/08 17:48:13 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -27,7 +27,7 @@ void TauCleaningMod::Process()
   // Process entries of the tree.
 
   // get input collections
-  const CaloTauCol *GoodTaus = GetObjThisEvt<CaloTauCol>(fGoodTausName);
+  const CaloTauCol  *GoodTaus = GetObjThisEvt<CaloTauCol>(fGoodTausName);
   const ElectronCol *CleanElectrons = GetObjThisEvt<ElectronCol>(fCleanElectronsName);
   const MuonCol *CleanMuons = GetObjThisEvt<MuonCol>(fCleanMuonsName);
 

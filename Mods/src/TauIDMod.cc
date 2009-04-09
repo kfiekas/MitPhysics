@@ -1,4 +1,4 @@
-// $Id: TauIDMod.cc,v 1.2 2009/04/08 11:06:35 ceballos Exp $
+// $Id: TauIDMod.cc,v 1.3 2009/04/08 17:48:13 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/TauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -11,7 +11,6 @@ ClassImp(mithep::TauIDMod)
 TauIDMod::TauIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fCaloTausName(Names::gkCaloTauBrn),
-  fCaloTaus(0),
   fGoodTausName(ModNames::gkGoodTausName),
   fTauPtMin(10.0),
   fTauJetPtMin(20.0),
@@ -19,7 +18,8 @@ TauIDMod::TauIDMod(const char *name, const char *title) :
   fNIsoTracksMax(0),
   fSignalTracksMassMax(2.0),
   fIsoTrackPtSumMax(5.0),
-  fEnergyFractionEmMax(0.98)
+  fEnergyFractionEmMax(0.98),
+  fCaloTaus(0)
 {
   // Constructor.
 }
@@ -58,11 +58,11 @@ void TauIDMod::Process()
     if (tau->SourceCaloJet()->EnergyFractionEm() > fEnergyFractionEmMax)
       continue;
 
-    // Always apply this requirement
+    // always apply this requirement
     if (TMath::Abs(tau->Charge()) != 1)
       continue;
 
-    // add good electron
+    // add good tau to output collection
     GoodTaus->Add(tau);
   }
 
@@ -80,5 +80,4 @@ void TauIDMod::SlaveBegin()
   // we just request the Tau collection branch.
 
   ReqBranch(fCaloTausName, fCaloTaus);
-
 }

@@ -1,12 +1,12 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: TauIDMod.h,v 1.1 2009/04/08 10:11:44 ceballos Exp $
+// $Id: TauIDMod.h,v 1.2 2009/04/08 17:48:12 ceballos Exp $
 //
 // TauIDMod
 //
-// This module applies Tau identification criteria and exports a pointer to a collection
+// This module applies tau identification criteria and exports a pointer to a collection
 // of "good Taus" according to the specified identification scheme.
 //
-// Authors: S.Xie, C.Loizides
+// Authors: G.Ceballos
 //--------------------------------------------------------------------------------------------------
 
 #ifndef MITPHYSICS_MODS_TauIDMOD_H
@@ -21,35 +21,33 @@ namespace mithep
   {
     public:
       TauIDMod(const char *name="TauIDMod", 
-                  const char *title="Tau identification module");
+               const char *title="Tau identification module");
 
       const char         *GetCaloTausName()        const { return fCaloTausName;        }   
-      const char         *GetGoodTausName()        const { return fGoodTausName;        }   
-      Double_t            GetPtMin()               const { return fTauPtMin;            }
-      Double_t            GetJetPtMin()            const { return fTauJetPtMin;         }
-      UInt_t              GetNSignalTracksMax()    const { return fNSignalTracksMax;	}
-      UInt_t              GetNIsoTracksMax()	   const { return fNIsoTracksMax;	}
-      Double_t            GetSignalTracksMassMax() const { return fSignalTracksMassMax; }
-      Double_t            GetIsoTrackPtSumMax()    const { return fIsoTrackPtSumMax;    }
       Double_t            GetEnergyFractionEmMax() const { return fEnergyFractionEmMax; }
-
+      const char         *GetGoodTausName()        const { return fGoodTausName;        }   
+      Double_t            GetIsoTrackPtSumMax()    const { return fIsoTrackPtSumMax;    }
+      Double_t            GetJetPtMin()            const { return fTauJetPtMin;         }
+      UInt_t              GetNIsoTracksMax()	   const { return fNIsoTracksMax;	}
+      UInt_t              GetNSignalTracksMax()    const { return fNSignalTracksMax;	}
+      Double_t            GetPtMin()               const { return fTauPtMin;            }
+      Double_t            GetSignalTracksMassMax() const { return fSignalTracksMassMax; }
       void                SetCaloTausName(const char *n)    { fCaloTausName	   = n; } 
-      void                SetGoodTausName(const char *n)    { fGoodTausName	   = n; } 
-      void                SetPtMin(Double_t x)              { fTauPtMin 	   = x; }
-      void                SetJetPtMin(Double_t x)           { fTauJetPtMin 	   = x; }
-      void                SetNSignalTracksMax(Int_t d)      { fNSignalTracksMax    = d; }
-      void                SetNIsoTracksMax(Int_t d)         { fNIsoTracksMax	   = d; }
-      void                SetSignalTracksMassMax(Double_t x){ fSignalTracksMassMax = x; }
-      void                SetIsoTrackPtSumMax(Double_t x)   { fIsoTrackPtSumMax    = x; }
       void                SetEnergyFractionEmMax(Double_t x){ fEnergyFractionEmMax = x; }
+      void                SetGoodTausName(const char *n)    { fGoodTausName	   = n; } 
+      void                SetIsoTrackPtSumMax(Double_t x)   { fIsoTrackPtSumMax    = x; }
+      void                SetJetPtMin(Double_t x)           { fTauJetPtMin 	   = x; }
+      void                SetNIsoTracksMax(Int_t d)         { fNIsoTracksMax	   = d; }
+      void                SetNSignalTracksMax(Int_t d)      { fNSignalTracksMax    = d; }
+      void                SetPtMin(Double_t x)              { fTauPtMin 	   = x; }
+      void                SetSignalTracksMassMax(Double_t x){ fSignalTracksMassMax = x; }
 
     protected:
       void                Process();
       void                SlaveBegin();
 
-      TString             fCaloTausName;        //name of Tau collection (input)
-      const CaloTauCol   *fCaloTaus;            //!Tau branch
-      TString             fGoodTausName;        //name of exported "good Tau" collection
+      TString             fCaloTausName;        //name of tau collection (input)
+      TString             fGoodTausName;        //name of exported "good Tau" collection (output)
       Double_t            fTauPtMin;            //min pt cut
       Double_t            fTauJetPtMin;         //min jet pt cut
       UInt_t              fNSignalTracksMax;	//maximum of signal tracks
@@ -57,6 +55,7 @@ namespace mithep
       Double_t            fSignalTracksMassMax; //maximum of mass for signal tracks
       Double_t            fIsoTrackPtSumMax;    //maximum of Pt iso tracks
       Double_t            fEnergyFractionEmMax; //maximum of EnergyFractionEm
+      const CaloTauCol   *fCaloTaus;            //!tau branch
     
     ClassDef(TauIDMod, 1) // Tau identification module
   };
