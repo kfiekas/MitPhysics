@@ -1,4 +1,4 @@
-// $Id: TauIDMod.cc,v 1.3 2009/04/08 17:48:13 ceballos Exp $
+// $Id: TauIDMod.cc,v 1.4 2009/04/09 08:45:49 loizides Exp $
 
 #include "MitPhysics/Mods/interface/TauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -12,13 +12,15 @@ TauIDMod::TauIDMod(const char *name, const char *title) :
   BaseMod(name,title),
   fCaloTausName(Names::gkCaloTauBrn),
   fGoodTausName(ModNames::gkGoodTausName),
-  fTauPtMin(10.0),
-  fTauJetPtMin(20.0),
+  fPtMin(10.0),
+  fJetPtMin(20.0),
+  fLeadTrackPtMin(6.0),
   fNSignalTracksMax(3),
   fNIsoTracksMax(0),
   fSignalTracksMassMax(2.0),
   fIsoTrackPtSumMax(5.0),
-  fEnergyFractionEmMax(0.98),
+  fEnergyFractionEmMax(0.95),
+  fHCalEtOverPtMin(0.1),
   fCaloTaus(0)
 {
   // Constructor.
@@ -37,13 +39,16 @@ void TauIDMod::Process()
   for (UInt_t i=0; i<fCaloTaus->GetEntries(); ++i) {    
     const CaloTau *tau = fCaloTaus->At(i);        
 
-    if (tau->Pt() <= fTauPtMin)
+    if (tau->Pt() <= fPtMin)
       continue;
     
-    if (tau->SourceCaloJet()->Pt() <= fTauJetPtMin)
+    if (tau->SourceCaloJet()->Pt() <= fJetPtMin)
       continue;
     
     if (tau->NSignalTracks() == 0 || tau->NSignalTracks() > fNSignalTracksMax)
+      continue;
+    
+    if (!tau->LeadTrack() || tau->LeadTrack()->Pt() < fLeadTrackPtMin)
       continue;
     
     if (tau->NIsoTracks() > fNIsoTracksMax)
@@ -58,8 +63,14 @@ void TauIDMod::Process()
     if (tau->SourceCaloJet()->EnergyFractionEm() > fEnergyFractionEmMax)
       continue;
 
-    // always apply this requirement
+    if (tau->LeadTrack3x3HCalEt()/tau->LeadTrack()->Pt() < fHCalEtOverPtMin)
+      continue;
+
+    // Always apply these requirement:
     if (TMath::Abs(tau->Charge()) != 1)
+      continue;
+
+    if (TMath::Abs(TMath::Abs(tau->Eta())-1.53) < 0.02)
       continue;
 
     // add good tau to output collection
