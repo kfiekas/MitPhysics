@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: TauIDMod.h,v 1.3 2009/04/09 08:45:48 loizides Exp $
+// $Id: TauIDMod.h,v 1.4 2009/04/09 10:25:02 ceballos Exp $
 //
 // TauIDMod
 //
@@ -52,7 +52,7 @@ namespace mithep
 
       TString             fCaloTausName;        //name of tau collection (input)
       TString             fGoodTausName;        //name of exported "good Tau" collection (output)
-      Double_t            fPtMin;               //min pt cut
+      Double_t            fPtMin;               //min tau pt cut
       Double_t            fJetPtMin;            //min jet pt cut
       Double_t            fLeadTrackPtMin;      //min leading track pt cut
       UInt_t              fNSignalTracksMax;	//maximum of signal tracks
@@ -61,7 +61,6 @@ namespace mithep
       Double_t            fIsoTrackPtSumMax;    //maximum of Pt iso tracks
       Double_t            fEnergyFractionEmMax; //maximum of EnergyFractionEm
       Double_t            fHCalEtOverPtMin;     //minimum of HCalEt over Pt for the leading track
-
       const CaloTauCol   *fCaloTaus;            //!tau branch
     
     ClassDef(TauIDMod, 1) // Tau identification module

@@ -1,4 +1,4 @@
-// $Id: TauIDMod.cc,v 1.5 2009/04/09 10:25:02 ceballos Exp $
+// $Id: TauIDMod.cc,v 1.6 2009/04/09 10:45:18 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/TauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -66,7 +66,7 @@ void TauIDMod::Process()
     if (tau->LeadTrack3x3HCalEt()/tau->LeadTrack()->Pt() < fHCalEtOverPtMin)
       continue;
 
-    // Always apply these requirements
+    // always apply these requirements
     if (TMath::Abs(tau->Charge()) != 1)
       continue;
 
