@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.16 2009/04/06 11:00:22 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.17 2009/04/07 15:37:09 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -23,6 +23,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fEcalJuraIsoCut(5.0),
   fHcalIsolationCut(5.0),
   fApplyConvFilter(kTRUE),
+  fApplyD0Cut(kTRUE),
   fD0Cut(0.025),
   fElIdType(kIdUndef),
   fElIsoType(kIsoUndef),
@@ -43,7 +44,7 @@ void ElectronIDMod::Process()
   ElectronOArr *GoodElectrons = new ElectronOArr;
   GoodElectrons->SetName(fGoodElectronsName);
 
-  for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {    
+  for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
     const Electron *e = fElectrons->At(i);        
 
     if (e->Pt() <= fElectronPtMin) 
@@ -83,7 +84,7 @@ void ElectronIDMod::Process()
                  (e->HcalIsolation() < fHcalIsolationCut);
         break;
       case kTrackJuraSliding:
-        { 
+        {
           Double_t totalIso = e->TrackIsolation() + e->EcalJurassicIsolation() - 1.5;
           if ((totalIso < (e->Pt()-10.0)*5.0/15.0 && e->Pt() <= 25) ||
               (totalIso < 5.0 && e->Pt() > 25) ||
