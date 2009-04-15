@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.6 2008/12/10 17:28:22 loizides Exp $
+// $Id: PhotonIDMod.h,v 1.7 2009/03/23 14:23:06 loizides Exp $
 //
 // PhotonIDMod
 //
@@ -41,6 +41,7 @@ namespace mithep
       void                SetIsoType(const char *type)      { fPhotonIsoType   = type;     }
       void                SetOutputName(const char *n)      { SetGoodPhotonsName(n);       }    
       void                SetPtMin(Double_t pt)             { fPhotonPtMin     = pt;       }
+      void                SetR9Min(Double_t x)              { fPhotonR9Min     = x;       }
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -67,6 +68,7 @@ namespace mithep
       Double_t            fPhotonPtMin;          //min pt cut
       Double_t            fHadOverEmMax;         //maximum of hadronic/em energy
       Bool_t              fApplyPixelSeed;       //=true then apply pixel seed constraint
+      Double_t            fPhotonR9Min;          //min R9 value
       const PhotonCol    *fPhotons;              //!photon branch
       EPhIdType           fPhIdType;             //!identification scheme
       EPhIsoType          fPhIsoType;            //!isolation scheme

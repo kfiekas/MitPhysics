@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.3 2008/12/03 10:19:13 loizides Exp $
+// $Id: PhotonIDMod.cc,v 1.4 2008/12/10 11:44:33 loizides Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -12,11 +12,12 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   BaseMod(name,title),
   fPhotonBranchName(Names::gkPhotonBrn),
   fGoodPhotonsName(ModNames::gkGoodPhotonsName),  
-  fPhotonIDType("Tight"),
+  fPhotonIDType("Custom"),
   fPhotonIsoType("CombinedIso"),
   fPhotonPtMin(15.0),
-  fHadOverEmMax(0.05),
+  fHadOverEmMax(0.03),
   fApplyPixelSeed(kTRUE),
+  fPhotonR9Min(0.8),
   fPhotons(0),
   fPhIdType(kIdUndef),
   fPhIsoType(kIsoUndef)
@@ -59,6 +60,7 @@ void PhotonIDMod::Process()
         idcut = ph->IsLooseEM();
         break;
       case kCustomId:
+        idcut = kTRUE;
       default:
         break;
     }
@@ -73,7 +75,7 @@ void PhotonIDMod::Process()
         break;
       case kCombinedIso:
         isocut = ph->HollowConeTrkIso() + 
-	         ph->HcalRecHitIso() < 7.0;
+	         ph->HcalRecHitIso() < 5.0;
         break;
       case kCustomIso:
       default:
@@ -81,6 +83,9 @@ void PhotonIDMod::Process()
     }
 
     if (!isocut) 
+      continue;
+
+    if (ph->R9() <= fPhotonR9Min) 
       continue;
 
     // add good electron
@@ -110,8 +115,6 @@ void PhotonIDMod::SlaveBegin()
     fPhIdType = kLooseEM;
   else if (fPhotonIDType.CompareTo("Custom") == 0) {
     fPhIdType = kCustomId;
-    SendError(kWarning, "SlaveBegin",
-              "Custom photon identification is not yet implemented.");
   } else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified photon identification %s is not defined.",
