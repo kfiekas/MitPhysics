@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.17 2009/04/07 15:37:09 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.18 2009/04/12 13:56:30 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -121,7 +121,7 @@ void ElectronIDMod::Process()
 
         // if match between the e-track and one of the conversion legs
         if (ConversionMatchFound == kTRUE){
-          isGoodConversion =  (fConversions->At(ifc)->Prob() > 0.005) &&
+          isGoodConversion =  (fConversions->At(ifc)->Prob() > 0.0005) &&
                               (fConversions->At(ifc)->Lxy() > 0) &&
                               (fConversions->At(ifc)->Lz() > 0);
 
