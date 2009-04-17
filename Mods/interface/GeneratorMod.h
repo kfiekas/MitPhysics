@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.21 2009/04/03 22:42:59 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.22 2009/04/05 18:36:26 loizides Exp $
 //
 // GeneratorMod
 //
@@ -26,6 +26,7 @@ namespace mithep
       GeneratorMod(const char *name="GeneratorMod", 
                    const char *title="Generator information module");
 
+      const Bool_t         GetPrintDebug()	 const { return fPrintDebug; }	
       const char          *GetMCPartName()	 const { return fMCPartName; }	
       const char          *GetMCMETName()        const { return fMCMETName; }	
       const char          *GetMCLeptonsName()    const { return fMCLeptonsName; }	
@@ -36,6 +37,9 @@ namespace mithep
       const char          *GetMCqqHsName()	 const { return fMCqqHsName; }	
       const char          *GetMCBosonsName()     const { return fMCBosonsName; }	
       const char          *GetMCPhotonsName()    const { return fMCPhotonsName; }	
+      const char          *GetMCRadPhotonsName() const { return fMCRadPhotonsName; }	
+      const char          *GetMCISRPhotonsName() const { return fMCISRPhotonsName; }	
+      void                 SetPrintDebug(bool b)               { fPrintDebug       = b; }   
       void                 SetMCPartName(const char *s)	       { fMCPartName       = s; }	
       void                 SetMCMETName(const char * s)        { fMCMETName        = s; }	
       void                 SetMCLeptonsName(const char * s)    { fMCLeptonsName    = s; }	
@@ -46,10 +50,14 @@ namespace mithep
       void                 SetMCqqHsName(const char *s)	       { fMCqqHsName       = s; }	
       void                 SetMCBosonsName(const char *s)      { fMCBosonsName     = s; }	
       void                 SetMCPhotonsName(const char *s)     { fMCPhotonsName    = s; }	
+      void                 SetMCRadPhotonsName(const char *s)  { fMCRadPhotonsName = s; }	
+      void                 SetMCISRPhotonsName(const char *s)  { fMCISRPhotonsName = s; }	
       void                 SetPtLeptonMin(Double_t x)          { fPtLeptonMin      = x; }     
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
       void                 SetPtPhotonMin(Double_t x)          { fPtPhotonMin      = x; }     
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
+      void                 SetPtRadPhotonMin(Double_t x)       { fPtRadPhotonMin   = x; }     
+      void                 SetEtaRadPhotonMax(Double_t x)      { fEtaRadPhotonMax  = x; }	  
       void                 SetPdgIdCut(UInt_t d)	       { fPdgIdCut         = d; }	 
       void                 SetMassMinCut(Double_t x)	       { fMassMinCut       = x; }	 
       void                 SetMassMaxCut(Double_t x)	       { fMassMaxCut	   = x; }	 
@@ -58,6 +66,7 @@ namespace mithep
       void                 Process();
       void                 SlaveBegin();
 
+      Bool_t               fPrintDebug;         //debug info
       Bool_t               fFillHist;           //=true then fill histos (def=0)
       TString              fMCPartName;         //name of MCParticle branch
       TString              fMCMETName;          //name of met coll
@@ -69,10 +78,14 @@ namespace mithep
       TString              fMCqqHsName;         //name of qqH coll
       TString              fMCBosonsName;       //name of bosons coll
       TString              fMCPhotonsName;      //name of photons coll
+      TString              fMCRadPhotonsName;   //name of Rad photons coll
+      TString              fMCISRPhotonsName;   //name of ISR photons coll
       Double_t             fPtLeptonMin;        //pt min for leptons
       Double_t             fEtaLeptonMax;       //eta max for leptons
       Double_t             fPtPhotonMin;        //pt min for photons
       Double_t             fEtaPhotonMax;       //eta max for photons
+      Double_t             fPtRadPhotonMin;     //pt min for rad photons
+      Double_t             fEtaRadPhotonMax;    //eta max for rad photons
       UInt_t               fPdgIdCut;           //pdg id for particle used to select on mass (0=off)
       Double_t             fMassMinCut;	        //mass min for given PdgId particle 
       Double_t             fMassMaxCut;	        //mass max for given PdgId particle
@@ -86,6 +99,8 @@ namespace mithep
       TH1D                *hDGenWBF[20];        //!histos for WBF
       TH1D                *hDGenBosons[20];     //!histos for bosons
       TH1D                *hDGenPhotons[20];    //!histos for photons
+      TH1D                *hDGenRadPhotons[20]; //!histos for Rad photons
+      TH1D                *hDGenISRPhotons[20]; //!histos for ISR photons
       TH1D                *hDVMass[20];         //!histos for auxiliar work
 
     ClassDef(GeneratorMod, 1) // Module to gather generator information

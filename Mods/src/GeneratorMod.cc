@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.29 2009/03/30 12:40:05 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.31 2009/04/04 09:40:35 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -13,6 +13,7 @@ ClassImp(mithep::GeneratorMod)
 //--------------------------------------------------------------------------------------------------
 GeneratorMod::GeneratorMod(const char *name, const char *title) : 
   BaseMod(name,title),
+  fPrintDebug(kFALSE),
   fMCPartName(Names::gkMCPartBrn),
   fMCMETName(ModNames::gkMCMETName),
   fMCLeptonsName(ModNames::gkMCLeptonsName),
@@ -23,10 +24,14 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fMCqqHsName(ModNames::gkMCqqHsName),
   fMCBosonsName(ModNames::gkMCBosonsName),
   fMCPhotonsName(ModNames::gkMCPhotonsName),
+  fMCRadPhotonsName(ModNames::gkMCRadPhotonsName),
+  fMCISRPhotonsName(ModNames::gkMCISRPhotonsName),
   fPtLeptonMin(0.0),
   fEtaLeptonMax(5.0),
   fPtPhotonMin(0.0),
   fEtaPhotonMax(5.0),
+  fPtRadPhotonMin(0.0),
+  fEtaRadPhotonMax(5.0),
   fPdgIdCut(0),
   fMassMinCut(-FLT_MAX),
   fMassMaxCut(FLT_MAX),
@@ -61,6 +66,12 @@ void GeneratorMod::Process()
   GenBosons->SetName(fMCBosonsName);
   MCParticleOArr *GenPhotons    = new MCParticleOArr;
   GenPhotons->SetName(fMCPhotonsName);
+  MCParticleOArr *GenRadPhotons = new MCParticleOArr;
+  GenRadPhotons->SetName(fMCRadPhotonsName);
+  MCParticleOArr *GenISRPhotons = new MCParticleOArr;
+  GenISRPhotons->SetName(fMCISRPhotonsName);
+
+  if(fPrintDebug) printf("\n************ Next Event ************\n\n");
 
   // load MCParticle branch
   LoadBranch(fMCPartName);
@@ -69,7 +80,21 @@ void GeneratorMod::Process()
   Bool_t isqqH = kFALSE;
   for (UInt_t i=0; i<fParticles->GetEntries(); ++i) {
     const MCParticle *p = fParticles->At(i);
-    
+
+    if(fPrintDebug) p->Print("l");
+
+    // Rad photons
+    if(p->Is(MCParticle::kGamma) && p->HasMother() &&
+       (p->Mother()->Is(MCParticle::kEl) || p->Mother()->Is(MCParticle::kMu)) &&
+       p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax) {
+      GenRadPhotons->Add(p);
+    }
+
+    // ISR photons
+    if(p->Is(MCParticle::kGamma) && p->HasMother() && p->Mother()->IsQuark()) {
+      GenISRPhotons->Add(p);
+    }
+
     // MET computation at generation level
     if (p->Status() == 1 && !p->IsNeutrino()) {
       totalMET[0] = totalMET[0] + p->Px();
@@ -294,6 +319,8 @@ void GeneratorMod::Process()
   GenqqHs->Sort();
   GenBosons->Sort();
   GenPhotons->Sort();
+  GenRadPhotons->Sort();
+  GenISRPhotons->Sort();
 
   // add objects to this event for other modules to use
   AddObjThisEvt(GenMet);  
@@ -305,7 +332,9 @@ void GeneratorMod::Process()
   AddObjThisEvt(GenqqHs);
   AddObjThisEvt(GenBosons);
   AddObjThisEvt(GenPhotons);
-  
+  AddObjThisEvt(GenRadPhotons);
+  AddObjThisEvt(GenISRPhotons);
+
   // fill histograms if requested
   if (GetFillHist()) {
 
@@ -597,6 +626,33 @@ void GeneratorMod::Process()
       hDGenPhotons[1]->Fill(GenPhotons->At(i)->Pt());
       hDGenPhotons[2]->Fill(GenPhotons->At(i)->Eta());
     } 
+
+    // Rad photons
+    hDGenRadPhotons[0]->Fill(GenRadPhotons->GetEntries());
+    for(UInt_t i=0; i<GenRadPhotons->GetEntries(); i++) {
+      hDGenRadPhotons[1]->Fill(TMath::Min(GenRadPhotons->At(i)->Pt(),199.999));
+      hDGenRadPhotons[2]->Fill(TMath::Min(GenRadPhotons->At(i)->AbsEta(),4.999));
+      hDGenRadPhotons[3]->Fill(TMath::Min((double)GenRadPhotons->At(i)->Mother()->Status(),19.499));
+      hDGenRadPhotons[4]->Fill(GenRadPhotons->At(i)->IsGenerated()+2*GenRadPhotons->At(i)->IsSimulated());
+      hDGenRadPhotons[5]->Fill(TMath::Min(
+                               MathUtils::DeltaR(GenRadPhotons->At(i)->Eta(), GenRadPhotons->At(i)->Phi(),
+	                                         GenRadPhotons->At(i)->Mother()->Eta(), GenRadPhotons->At(i)->Mother()->Phi()),4.999));
+      Int_t Mother = 0;
+      if(GenRadPhotons->At(i)->Mother()->Is(MCParticle::kMu)) Mother = 1;
+      hDGenRadPhotons[6]->Fill(Mother);
+    }
+
+    // ISR photons
+    hDGenISRPhotons[0]->Fill(GenISRPhotons->GetEntries());
+    for(UInt_t i=0; i<GenISRPhotons->GetEntries(); i++) {
+      hDGenISRPhotons[1]->Fill(TMath::Min(GenISRPhotons->At(i)->Pt(),199.999));
+      hDGenISRPhotons[2]->Fill(TMath::Min(GenISRPhotons->At(i)->AbsEta(),4.999));
+      hDGenISRPhotons[3]->Fill(TMath::Min((double)GenISRPhotons->At(i)->Mother()->Status(),19.499));
+      hDGenISRPhotons[4]->Fill(GenISRPhotons->At(i)->IsGenerated()+2*GenISRPhotons->At(i)->IsSimulated());
+      hDGenISRPhotons[5]->Fill(TMath::Min(
+                               MathUtils::DeltaR(GenISRPhotons->At(i)->Eta(), GenISRPhotons->At(i)->Phi(),
+	                                         GenISRPhotons->At(i)->Mother()->Eta(), GenISRPhotons->At(i)->Mother()->Phi()),4.999));
+    }
   }
 }
 
@@ -710,6 +766,25 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenPhotons_%d", 1);  hDGenPhotons[1]  = new TH1D(sb,sb,200,0.0,400.0); 
     sprintf(sb,"hDGenPhotons_%d", 2);  hDGenPhotons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
     for(Int_t i=0; i<3; i++) AddOutput(hDGenPhotons[i]);
+
+    //  Rad photons
+    sprintf(sb,"hDGenRadPhotons_%d", 0);  hDGenRadPhotons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
+    sprintf(sb,"hDGenRadPhotons_%d", 1);  hDGenRadPhotons[1]  = new TH1D(sb,sb,400,0.0,200.0); 
+    sprintf(sb,"hDGenRadPhotons_%d", 2);  hDGenRadPhotons[2]  = new TH1D(sb,sb,100,0.0,5.0); 
+    sprintf(sb,"hDGenRadPhotons_%d", 3);  hDGenRadPhotons[3]  = new TH1D(sb,sb,20,-0.5,19.5); 
+    sprintf(sb,"hDGenRadPhotons_%d", 4);  hDGenRadPhotons[4]  = new TH1D(sb,sb,4,-0.5,3.5); 
+    sprintf(sb,"hDGenRadPhotons_%d", 5);  hDGenRadPhotons[5]  = new TH1D(sb,sb,500,0.0,5.0); 
+    sprintf(sb,"hDGenRadPhotons_%d", 6);  hDGenRadPhotons[6]  = new TH1D(sb,sb,2,-0.5,1.5); 
+    for(Int_t i=0; i<7; i++) AddOutput(hDGenRadPhotons[i]);
+
+    //  ISR photons
+    sprintf(sb,"hDGenISRPhotons_%d", 0);  hDGenISRPhotons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
+    sprintf(sb,"hDGenISRPhotons_%d", 1);  hDGenISRPhotons[1]  = new TH1D(sb,sb,400,0.0,200.0); 
+    sprintf(sb,"hDGenISRPhotons_%d", 2);  hDGenISRPhotons[2]  = new TH1D(sb,sb,100,0.0,5.0); 
+    sprintf(sb,"hDGenISRPhotons_%d", 3);  hDGenISRPhotons[3]  = new TH1D(sb,sb,20,-0.5,19.5); 
+    sprintf(sb,"hDGenISRPhotons_%d", 4);  hDGenISRPhotons[4]  = new TH1D(sb,sb,4,-0.5,3.5); 
+    sprintf(sb,"hDGenISRPhotons_%d", 5);  hDGenISRPhotons[5]  = new TH1D(sb,sb,500,0.0,5.0); 
+    for(Int_t i=0; i<6; i++) AddOutput(hDGenISRPhotons[i]);
 
     // auxiliar
     sprintf(sb,"hDVMass_%d", 0);  hDVMass[0]  = new TH1D(sb,sb,200,0.,200.); 
