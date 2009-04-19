@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.31 2009/04/04 09:40:35 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.32 2009/04/17 13:45:22 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -85,7 +85,8 @@ void GeneratorMod::Process()
 
     // Rad photons
     if(p->Is(MCParticle::kGamma) && p->HasMother() &&
-       (p->Mother()->Is(MCParticle::kEl) || p->Mother()->Is(MCParticle::kMu)) &&
+       (p->Mother()->Is(MCParticle::kEl) || p->Mother()->Is(MCParticle::kMu) ||
+        p->HasMother(MCParticle::kTau, kFALSE)) &&
        p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax) {
       GenRadPhotons->Add(p);
     }
