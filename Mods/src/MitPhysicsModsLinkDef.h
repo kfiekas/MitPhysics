@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.10 2009/04/08 10:35:54 ceballos Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.11 2009/04/09 08:45:49 loizides Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -15,6 +15,7 @@
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitPhysics/Mods/interface/TauIDMod.h"
+#include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
 #endif
 
 #ifdef __CINT__
@@ -46,4 +47,5 @@
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::TauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;
+#pragma link C++ class mithep::PartonFlavorHistoryMod+;
 #endif
