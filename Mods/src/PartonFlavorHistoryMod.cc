@@ -6,7 +6,6 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>
-#include "MitPhysics/Utils/interface/GeneratorTools.h"
 
 using namespace mithep;
 
