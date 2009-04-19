@@ -28,7 +28,7 @@ namespace mithep
 
       enum MCType {
         kMCTypeUndef = 0,    //not defined
-        kMCTypeWLightJets,   //W+Light Jets
+        kMCTypeVLightJets,   //W+Light Jets
         kMCTypeWc,           //W+c
         kMCTypeVQQ           //V+2 heavy flavor jets
       };

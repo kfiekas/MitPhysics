@@ -271,7 +271,7 @@ void PartonFlavorHistoryMod::Process()
   //***********************************************************************************************
   if (fApplyPartonFlavorFilter) {
     //For WJets only accept 5,6,11. Light flavor + bb/cc from gluon splitting at small angle
-    if (fMCType == kMCTypeWLightJets ) {
+    if (fMCType == kMCTypeVLightJets ) {
       if (!(FlavorClassification == 5 || FlavorClassification == 6 
             || FlavorClassification == 11 )
         ) {
@@ -319,8 +319,8 @@ void PartonFlavorHistoryMod::SlaveBegin()
     cout << "Warning: MCSampleType is not set. Parton Flavor Filter will not be applied.\n";
   }
 
-  if (string(fMCSampleType.Data()) == "kMCTypeWLightJets") {
-    fMCType = kMCTypeWLightJets;
+  if (string(fMCSampleType.Data()) == "kMCTypeVLightJets") {
+    fMCType = kMCTypeVLightJets;
   } else if (string(fMCSampleType.Data()) == "kMCTypeWc") {
     fMCType = kMCTypeWc;
   } else if (string(fMCSampleType.Data()) == "kMCTypeVQQ") {
