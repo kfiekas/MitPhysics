@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.33 2009/04/19 12:42:54 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.34 2009/04/19 13:55:34 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -234,14 +234,30 @@ void GeneratorMod::Process()
       else if (p->Daughter(0)->Is(MCParticle::kMu) && p->Daughter(1)->Is(MCParticle::kMu)) {
         if (GetFillHist()) 
           hDVMass[3]->Fill(TMath::Min(diBoson->Mass(),199.999));
-        GenLeptons->Add(p->Daughter(0));
-        GenLeptons->Add(p->Daughter(1));
+        const MCParticle *tmp_mu0 = p->Daughter(0);
+        while (tmp_mu0->HasDaughter(MCParticle::kMu) && 
+               tmp_mu0->FindDaughter(MCParticle::kMu)->IsGenerated())
+          tmp_mu0 = tmp_mu0->FindDaughter(MCParticle::kMu);       
+        const MCParticle *tmp_mu1 = p->Daughter(1);
+        while (tmp_mu1->HasDaughter(MCParticle::kMu) && 
+               tmp_mu1->FindDaughter(MCParticle::kMu)->IsGenerated())
+          tmp_mu1 = tmp_mu1->FindDaughter(MCParticle::kMu);       
+        GenLeptons->Add(tmp_mu0);
+        GenLeptons->Add(tmp_mu1);
       }
       else if (p->Daughter(0)->Is(MCParticle::kEl) && p->Daughter(1)->Is(MCParticle::kEl)) {
         if (GetFillHist()) 
           hDVMass[4]->Fill(TMath::Min(diBoson->Mass(),199.999));
-        GenLeptons->Add(p->Daughter(0));
-        GenLeptons->Add(p->Daughter(1));
+        const MCParticle *tmp_e0 = p->Daughter(0);
+        while (tmp_e0->HasDaughter(MCParticle::kEl) && 
+               tmp_e0->FindDaughter(MCParticle::kEl)->IsGenerated())
+          tmp_e0 = tmp_e0->FindDaughter(MCParticle::kEl);       
+        const MCParticle *tmp_e1 = p->Daughter(1);
+        while (tmp_e1->HasDaughter(MCParticle::kEl) && 
+               tmp_e1->FindDaughter(MCParticle::kEl)->IsGenerated())
+          tmp_e1 = tmp_e1->FindDaughter(MCParticle::kEl);       
+       GenLeptons->Add(tmp_e0);
+       GenLeptons->Add(tmp_e1);
       }
       else if (p->Daughter(0)->Is(MCParticle::kTau) && p->Daughter(1)->Is(MCParticle::kTau)) {
         if (GetFillHist()) 
@@ -256,6 +272,20 @@ void GeneratorMod::Process()
           GenLeptons->Add(tau1->FindDaughter(MCParticle::kMu));
         if (tau1->HasDaughter(MCParticle::kEl)) 
           GenLeptons->Add(tau1->FindDaughter(MCParticle::kEl));
+        if (tau0->HasDaughter(MCParticle::kTau)) {
+          const MCParticle *tau0_second = tau0->FindDaughter(MCParticle::kTau);
+          if (tau0_second->HasDaughter(MCParticle::kMu)) 
+            GenLeptons->Add(tau0_second->FindDaughter(MCParticle::kMu));
+          if (tau0_second->HasDaughter(MCParticle::kEl)) 
+            GenLeptons->Add(tau0_second->FindDaughter(MCParticle::kEl));
+        }
+        if (tau1->HasDaughter(MCParticle::kTau)) {
+          const MCParticle *tau1_second = tau1->FindDaughter(MCParticle::kTau);
+          if (tau1_second->HasDaughter(MCParticle::kMu)) 
+            GenLeptons->Add(tau1_second->FindDaughter(MCParticle::kMu));
+          if (tau1_second->HasDaughter(MCParticle::kEl)) 
+            GenLeptons->Add(tau1_second->FindDaughter(MCParticle::kEl));
+        }        
       }
       delete diBoson;
     }
@@ -304,8 +334,7 @@ void GeneratorMod::Process()
        (p->Mass() < fMassMinCut || p->Mass() > fMassMaxCut)) {
       SkipEvent();
       return;
-    }
-    
+    }   
   } // end loop of particles
 
   Met *theMET = new Met(totalMET[0], totalMET[1]);
