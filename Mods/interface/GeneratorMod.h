@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.22 2009/04/05 18:36:26 loizides Exp $
+// $Id: GeneratorMod.h,v 1.23 2009/04/17 13:45:21 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -39,6 +39,7 @@ namespace mithep
       const char          *GetMCPhotonsName()    const { return fMCPhotonsName; }	
       const char          *GetMCRadPhotonsName() const { return fMCRadPhotonsName; }	
       const char          *GetMCISRPhotonsName() const { return fMCISRPhotonsName; }	
+      Bool_t               GetApplyISRFilter()   const { return fApplyISRFilter; }	
       void                 SetPrintDebug(bool b)               { fPrintDebug       = b; }   
       void                 SetMCPartName(const char *s)	       { fMCPartName       = s; }	
       void                 SetMCMETName(const char * s)        { fMCMETName        = s; }	
@@ -61,6 +62,7 @@ namespace mithep
       void                 SetPdgIdCut(UInt_t d)	       { fPdgIdCut         = d; }	 
       void                 SetMassMinCut(Double_t x)	       { fMassMinCut       = x; }	 
       void                 SetMassMaxCut(Double_t x)	       { fMassMaxCut	   = x; }	 
+      void                 SetApplyISRFilter(Bool_t b)	       { fApplyISRFilter   = b; }	 
 
     protected:
       void                 Process();
@@ -89,6 +91,8 @@ namespace mithep
       UInt_t               fPdgIdCut;           //pdg id for particle used to select on mass (0=off)
       Double_t             fMassMinCut;	        //mass min for given PdgId particle 
       Double_t             fMassMaxCut;	        //mass max for given PdgId particle
+      Bool_t               fApplyISRFilter;     //=true then apply ISR filter (def=0)
+
       const MCParticleCol *fParticles;	        //!MCParticle branch
       TH1D                *hDGenMet[10];        //!histos for gen MET
       TH1D                *hDGenLeptons[40];    //!histos for W/Z/H leptons

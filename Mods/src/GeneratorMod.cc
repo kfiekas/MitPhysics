@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.32 2009/04/17 13:45:22 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.33 2009/04/19 12:42:54 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -35,6 +35,7 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fPdgIdCut(0),
   fMassMinCut(-FLT_MAX),
   fMassMaxCut(FLT_MAX),
+  fApplyISRFilter(kFALSE),
   fParticles(0)
 {
   // Constructor.
@@ -84,9 +85,9 @@ void GeneratorMod::Process()
     if(fPrintDebug) p->Print("l");
 
     // Rad photons
-    if(p->Is(MCParticle::kGamma) && p->HasMother() &&
+    if(p->Is(MCParticle::kGamma) && p->HasMother() && p->Mother()->Status() == 3 &&
        (p->Mother()->Is(MCParticle::kEl) || p->Mother()->Is(MCParticle::kMu) ||
-        p->HasMother(MCParticle::kTau, kFALSE)) &&
+        p->Mother()->Is(MCParticle::kTau)) &&
        p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax) {
       GenRadPhotons->Add(p);
     }
@@ -304,7 +305,7 @@ void GeneratorMod::Process()
       SkipEvent();
       return;
     }
-
+    
   } // end loop of particles
 
   Met *theMET = new Met(totalMET[0], totalMET[1]);
@@ -654,6 +655,11 @@ void GeneratorMod::Process()
                                MathUtils::DeltaR(GenISRPhotons->At(i)->Eta(), GenISRPhotons->At(i)->Phi(),
 	                                         GenISRPhotons->At(i)->Mother()->Eta(), GenISRPhotons->At(i)->Mother()->Phi()),4.999));
     }
+  }
+
+  // Apply ISR filter (but filling all histograms)
+  if(fApplyISRFilter == kTRUE && GenISRPhotons->GetEntries() > 0){
+    SkipEvent();
   }
 }
 
