@@ -271,8 +271,8 @@ void PartonFlavorHistoryMod::Process()
   if (fApplyPartonFlavorFilter) {
     //For WJets only accept 5,6,11. Light flavor + bb/cc from gluon splitting at small angle
     if (fMCType == kMCTypeVLightJets ) {
-      if (!(FlavorClassification == 5 || FlavorClassification == 6 
-            || FlavorClassification == 11 )
+      if (!(FlavorClassification ==  5 || FlavorClassification == 6 
+         || FlavorClassification == 11 || FlavorClassification == 0)
         ) {
         SkipEvent();
         return;
@@ -281,7 +281,7 @@ void PartonFlavorHistoryMod::Process()
     //For VQQ only accept 1,2,3,4. bb/cc from matrix element at large angle
     else if (fMCType == kMCTypeVQQ) {
       if (!(FlavorClassification == 1 || FlavorClassification == 2
-            || FlavorClassification == 3 || FlavorClassification == 4)
+         || FlavorClassification == 3 || FlavorClassification == 4)
         ) {
         SkipEvent();
         return;
