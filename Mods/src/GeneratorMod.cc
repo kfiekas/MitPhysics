@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.35 2009/04/19 15:57:26 sixie Exp $
+// $Id: GeneratorMod.cc,v 1.36 2009/04/21 09:14:54 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -685,7 +685,8 @@ void GeneratorMod::Process()
   }
 
   // Apply ISR filter (but filling all histograms)
-  if(fApplyISRFilter == kTRUE && GenISRPhotons->GetEntries() > 0){
+  if(fApplyISRFilter == kTRUE && GenISRPhotons->GetEntries() > 0 &&
+     GenISRPhotons->At(i)->Pt() > 15.0){
     SkipEvent();
   }
 }
