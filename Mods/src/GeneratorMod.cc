@@ -686,7 +686,7 @@ void GeneratorMod::Process()
 
   // Apply ISR filter (but filling all histograms)
   if(fApplyISRFilter == kTRUE && GenISRPhotons->GetEntries() > 0 &&
-     GenISRPhotons->At(i)->Pt() > 15.0){
+     GenISRPhotons->At(0)->Pt() > 15.0){
     SkipEvent();
   }
 }
