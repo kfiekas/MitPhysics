@@ -272,7 +272,8 @@ void PartonFlavorHistoryMod::Process()
     //For WJets only accept 5,6,11. Light flavor + bb/cc from gluon splitting at small angle
     if (fMCType == kMCTypeVLightJets ) {
       if (!(FlavorClassification ==  5 || FlavorClassification == 6 
-         || FlavorClassification == 11 || FlavorClassification == 0)
+         || FlavorClassification == 11 || FlavorClassification == 0 
+         || FlavorClassification ==  4)
         ) {
         SkipEvent();
         return;
