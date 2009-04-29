@@ -1,7 +1,8 @@
-// $Id: MitPhysicsSelModsLinkDef.h,v 1.3 2009/03/13 13:02:01 sixie Exp $
+// $Id: MitPhysicsSelModsLinkDef.h,v 1.4 2009/03/22 09:04:13 loizides Exp $
 
 #ifndef MITPHYSICS_SELMODS_LINKDEF_H
 #define MITPHYSICS_SELMODS_LINKDEF_H
+#include "MitPhysics/SelMods/interface/DilepSelMod.h"
 #include "MitPhysics/SelMods/interface/GenericSelMod.h"
 #include "MitPhysics/SelMods/interface/JetPlusIsoTrackSelMod.h"
 #include "MitPhysics/SelMods/interface/LeptonPlusIsoTrackSelMod.h"
@@ -16,6 +17,7 @@
 #pragma link C++ nestedtypedef;
 #pragma link C++ namespace mithep;
 
+#pragma link C++ class mithep::DilepSelMod+;
 #pragma link C++ class mithep::GenericSelMod<mithep::Particle>+;
 #pragma link C++ class mithep::GenericSelMod<mithep::CompositeParticle>+;
 #pragma link C++ class mithep::GenericSelMod<mithep::Conversion>+;
