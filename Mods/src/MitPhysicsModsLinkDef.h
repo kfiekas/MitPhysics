@@ -1,7 +1,8 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.11 2009/04/09 08:45:49 loizides Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.12 2009/04/19 12:25:18 ceballos Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
+#include "MitPhysics/Mods/interface/EffMod.h"
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
@@ -26,6 +27,7 @@
 #pragma link C++ nestedtypedef;
 #pragma link C++ namespace mithep;
 
+#pragma link C++ class mithep::EffMod+;
 #pragma link C++ class mithep::ElectronCleaningMod+;
 #pragma link C++ class mithep::ElectronIDMod+;
 #pragma link C++ enum mithep::ElectronIDMod::EElIdType;
