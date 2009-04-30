@@ -1,4 +1,4 @@
-// $Id: singleLepton.C,v 1.1 2009/03/22 09:04:14 loizides Exp $
+// $Id: singleLepton.C,v 1.2 2009/03/23 22:17:07 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -6,7 +6,7 @@
 #include "MitAna/Catalog/interface/Catalog.h"
 #include "MitAna/TreeMod/interface/Analysis.h"
 #include "MitAna/TreeMod/interface/OutputMod.h"
-#include "MitAna/PhysicsMod//interface/PlotKineMod.h"
+#include "MitAna/PhysicsMod/interface/PlotKineMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
@@ -16,9 +16,9 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void singlelepton(const char *fileset    = "",
-		  const char *dataset    = "s8-incmu_15-id9",
-		  const char *book       = "mit/filler/006",
+void singleLepton(const char *fileset    = "0000",
+		  const char *dataset    = "w09-fast-wlnu-id11",
+		  const char *book       = "mit/filler/009",
 		  const char *catalogDir = "/home/mitprod/catalog",
 		  Int_t       nEvents    = -1)
 {
@@ -36,19 +36,12 @@ void singlelepton(const char *fileset    = "",
 
   MuonIDMod *muId = new MuonIDMod;  
   muId->SetInputName  (muInput);
-  muId->SetIDType     ("Loose");
-  muId->SetIsoType    ("TrackCalo");
-  muId->SetTrackIsoCut( 10.0);
-  muId->SetCaloIsoCut (100.0);
   muId->SetPtMin      (ptMin);
 
   ElectronIDMod *elId = new ElectronIDMod;
-  elId->SetInputName  (elInput);
-  elId->SetIDType     ("NoId");
-  elId->SetIsoType    ("TrackCalo");
-  elId->SetTrackIsoCut( 10.0);
-  elId->SetCaloIsoCut (100.0);
-  elId->SetPtMin      (ptMin);
+  elId->SetInputName            (elInput);
+  elId->SetPtMin                (ptMin);
+  elId->SetApplyConversionFilter(kFALSE);
 
   ElectronCleaningMod *elCl = new ElectronCleaningMod;
   elCl->SetGoodElectronsName(elId->GetOutputName());
