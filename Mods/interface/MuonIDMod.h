@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.15 2009/04/02 09:20:53 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.16 2009/04/05 18:36:26 loizides Exp $
 //
 // MuonIDMod
 //
@@ -38,6 +38,7 @@ namespace mithep
       const char        *GetOutputName()                const { return GetCleanMuonsName(); }   
       Double_t           GetPtMin(Double_t pt)          const { return fMuonPtMin;          }
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
+      Bool_t             GetReverseIsoCut()             const { return fReverseIsoCut;      }
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
       void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
       void               SetClassType(const char *type)       { fMuonClassType     = type;  }
@@ -50,6 +51,7 @@ namespace mithep
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
       void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
       void               SetD0Cut(Double_t cut)               { fD0Cut = cut;               }
+      void               SetReverseIsoCut(Bool_t b)           { fReverseIsoCut = b;         }
 
       enum EMuIdType {
         kIdUndef = 0,       //not defined
@@ -95,6 +97,7 @@ namespace mithep
       const MuonCol     *fMuons;               //!muon collection
       const VertexCol   *fVertices;            //!vertices branch
       MuonTools         *fMuonTools;           //!muon tool
+      Bool_t             fReverseIsoCut;       //!apply reversion iso cut
     
     ClassDef(MuonIDMod, 1) // Muon identification module
   };

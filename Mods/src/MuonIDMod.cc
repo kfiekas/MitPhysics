@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.14 2009/04/02 09:20:53 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.15 2009/04/05 18:36:26 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -27,7 +27,8 @@ ClassImp(mithep::MuonIDMod)
   fMuClassType(kClassUndef),
   fMuons(0),
   fVertices(0),
-  fMuonTools(0)
+  fMuonTools(0),
+  fReverseIsoCut(kTRUE)
 {
   // Constructor.
 }
@@ -124,7 +125,8 @@ void MuonIDMod::Process()
         break;
     }
 
-    if (!isopass)
+    if ((isopass == kFALSE && fReverseIsoCut == kFALSE) ||
+        (isopass == kTRUE  && fReverseIsoCut == kTRUE))
       continue;
 
     // d0 cut

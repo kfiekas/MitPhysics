@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.19 2009/04/15 18:21:33 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.20 2009/04/17 13:44:40 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -29,7 +29,8 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElIsoType(kIsoUndef),
   fElectrons(0),
   fConversions(0),
-  fVertices(0)
+  fVertices(0),
+  fReverseIsoCut(kTRUE)
 {
   // Constructor.
 }
@@ -100,7 +101,8 @@ void ElectronIDMod::Process()
         break;
     }
 
-    if (!isocut) 
+    if ((isocut == kFALSE && fReverseIsoCut == kFALSE) ||
+        (isocut == kTRUE  && fReverseIsoCut == kTRUE))
       continue;
 
     // apply conversion filter
