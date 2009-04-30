@@ -1,4 +1,4 @@
-// $Id: ModNames.cc,v 1.8 2009/04/05 18:36:25 loizides Exp $
+// $Id: ModNames.cc,v 1.9 2009/04/17 13:45:10 ceballos Exp $
 
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -21,13 +21,13 @@ const char *ModNames::gkGoodPhotonsName        = "GoodPhotons";
 const char *ModNames::gkGoodTausName           = "GoodTaus";
 const char *ModNames::gkMCAllLeptonsName       = "MCAllLeptons";
 const char *ModNames::gkMCBosonsName           = "MCBosons";
+const char *ModNames::gkMCISRPhotonsName       = "MCISRPhotons";
 const char *ModNames::gkMCLeptonsName          = "MCLeptons";
 const char *ModNames::gkMCMETName              = "MCMET";
 const char *ModNames::gkMCNeutrinosName        = "MCNeutrinos";
 const char *ModNames::gkMCPhotonsName          = "MCPhotons";
-const char *ModNames::gkMCRadPhotonsName       = "MCRadPhotons";
-const char *ModNames::gkMCISRPhotonsName       = "MCISRPhotons";
 const char *ModNames::gkMCQuarksName           = "MCQuarks";
+const char *ModNames::gkMCRadPhotonsName       = "MCRadPhotons";
 const char *ModNames::gkMCTausName             = "MCTaus";
 const char *ModNames::gkMCqqHsName             = "MCqqHs";
 const char *ModNames::gkMergedLeptonsName      = "MergedLeptons";

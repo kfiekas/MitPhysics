@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.38 2009/04/22 11:02:55 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.39 2009/04/23 10:50:59 phedex Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -72,7 +72,8 @@ void GeneratorMod::Process()
   MCParticleOArr *GenISRPhotons = new MCParticleOArr;
   GenISRPhotons->SetName(fMCISRPhotonsName);
 
-  if(fPrintDebug) printf("\n************ Next Event ************\n\n");
+  if(fPrintDebug) 
+    printf("\n************ Next Event ************\n\n");
 
   // load MCParticle branch
   LoadBranch(fMCPartName);
@@ -82,9 +83,10 @@ void GeneratorMod::Process()
   for (UInt_t i=0; i<fParticles->GetEntries(); ++i) {
     const MCParticle *p = fParticles->At(i);
 
-    if(fPrintDebug) p->Print("l");
+    if(fPrintDebug) 
+      p->Print("l");
 
-    // Rad photons
+    // rad photons
     if(p->Is(MCParticle::kGamma) && p->HasMother() && p->Mother()->Status() == 3 &&
        (p->Mother()->Is(MCParticle::kEl) || p->Mother()->Is(MCParticle::kMu) ||
         p->Mother()->Is(MCParticle::kTau)) &&
@@ -419,8 +421,8 @@ void GeneratorMod::Process()
 	      hDGenLeptons[10]->Fill(MathUtils::DeltaPhi(GenLeptons->At(0)->Phi(),
 	                                                 GenLeptons->At(1)->Phi())
 						         * 180./ TMath::Pi());
-	      hDGenLeptons[11]->Fill(MathUtils::DeltaR(GenLeptons->At(0)->Eta(), GenLeptons->At(0)->Phi(),
-	                                               GenLeptons->At(1)->Eta(), GenLeptons->At(1)->Phi()));
+	      hDGenLeptons[11]->Fill(MathUtils::DeltaR(*GenLeptons->At(0), 
+                                                       *GenLeptons->At(1)));
 	    }
 	    delete dilepton;
 	  }
@@ -454,20 +456,16 @@ void GeneratorMod::Process()
             trilepton->AddDaughter(GenLeptons->At(1));
             trilepton->AddDaughter(GenLeptons->At(2));
             hDGenLeptons[16]->Fill(TMath::Min(trilepton->Mass(),999.999));
-	    Double_t deltaR[3] = {MathUtils::DeltaR(GenLeptons->At(0)->Eta(), 
-                                                    GenLeptons->At(0)->Phi(),
-                                                    GenLeptons->At(1)->Eta(), 
-                                                    GenLeptons->At(1)->Phi()),
-                                  MathUtils::DeltaR(GenLeptons->At(0)->Eta(), 
-                                                    GenLeptons->At(0)->Phi(),
-                                                    GenLeptons->At(2)->Eta(), 
-                                                    GenLeptons->At(2)->Phi()),
-                                  MathUtils::DeltaR(GenLeptons->At(1)->Eta(), 
-                                                    GenLeptons->At(1)->Phi(),
-                                                    GenLeptons->At(2)->Eta(), 
-                                                    GenLeptons->At(2)->Phi())};
+	    Double_t deltaR[3] = {MathUtils::DeltaR(*GenLeptons->At(0),
+                                                    *GenLeptons->At(1)),
+                                  MathUtils::DeltaR(*GenLeptons->At(0), 
+                                                    *GenLeptons->At(2)), 
+                                  MathUtils::DeltaR(*GenLeptons->At(1), 
+                                                    *GenLeptons->At(2))};
 	    Double_t deltaRMin = deltaR[0];
-            for(Int_t i=1; i<3; i++) if(deltaRMin > deltaR[i]) deltaRMin = deltaR[i];
+            for(Int_t i=1; i<3; i++) 
+              if(deltaRMin > deltaR[i]) 
+                deltaRMin = deltaR[i];
             hDGenLeptons[17]->Fill(deltaRMin);
 
 	    delete dilepton01;
@@ -521,32 +519,22 @@ void GeneratorMod::Process()
             fourlepton->AddDaughter(GenLeptons->At(2));
             fourlepton->AddDaughter(GenLeptons->At(3));
             hDGenLeptons[23]->Fill(TMath::Min(fourlepton->Mass(),999.999));
-	    Double_t deltaR[6] = {MathUtils::DeltaR(GenLeptons->At(0)->Eta(),
-                                                    GenLeptons->At(0)->Phi(),
-                                                    GenLeptons->At(1)->Eta(), 
-                                                    GenLeptons->At(1)->Phi()),
-                                  MathUtils::DeltaR(GenLeptons->At(0)->Eta(), 
-                                                    GenLeptons->At(0)->Phi(),
-                                                    GenLeptons->At(2)->Eta(), 
-                                                    GenLeptons->At(2)->Phi()),
-                                  MathUtils::DeltaR(GenLeptons->At(0)->Eta(), 
-                                                    GenLeptons->At(0)->Phi(),
-                                                    GenLeptons->At(3)->Eta(), 
-                                                    GenLeptons->At(3)->Phi()),
-                                  MathUtils::DeltaR(GenLeptons->At(1)->Eta(), 
-                                                    GenLeptons->At(1)->Phi(),
-                                                    GenLeptons->At(2)->Eta(), 
-                                                    GenLeptons->At(2)->Phi()),
-                                  MathUtils::DeltaR(GenLeptons->At(1)->Eta(), 
-                                                    GenLeptons->At(1)->Phi(),
-                                                    GenLeptons->At(3)->Eta(), 
-                                                    GenLeptons->At(3)->Phi()),
-                                  MathUtils::DeltaR(GenLeptons->At(2)->Eta(), 
-                                                    GenLeptons->At(2)->Phi(),
-                                                    GenLeptons->At(3)->Eta(), 
-                                                    GenLeptons->At(3)->Phi())};
+	    Double_t deltaR[6] = {MathUtils::DeltaR(*GenLeptons->At(0),
+                                                    *GenLeptons->At(1)),
+                                  MathUtils::DeltaR(*GenLeptons->At(0), 
+                                                    *GenLeptons->At(2)),
+                                  MathUtils::DeltaR(*GenLeptons->At(0), 
+                                                    *GenLeptons->At(3)), 
+                                  MathUtils::DeltaR(*GenLeptons->At(1), 
+                                                    *GenLeptons->At(2)),
+                                  MathUtils::DeltaR(*GenLeptons->At(1), 
+                                                    *GenLeptons->At(3)),
+                                  MathUtils::DeltaR(*GenLeptons->At(2), 
+                                                    *GenLeptons->At(3))};
 	    Double_t deltaRMin = deltaR[0];
-            for(Int_t i=1; i<6; i++) if(deltaRMin > deltaR[i]) deltaRMin = deltaR[i];
+            for(Int_t i=1; i<6; i++) 
+              if(deltaRMin > deltaR[i]) 
+                deltaRMin = deltaR[i];
             hDGenLeptons[24]->Fill(deltaRMin);
 
 	    delete dilepton01;
@@ -672,10 +660,12 @@ void GeneratorMod::Process()
       hDGenRadPhotons[1]->Fill(TMath::Min(GenRadPhotons->At(i)->Pt(),199.999));
       hDGenRadPhotons[2]->Fill(TMath::Min(GenRadPhotons->At(i)->AbsEta(),4.999));
       hDGenRadPhotons[3]->Fill(TMath::Min((double)GenRadPhotons->At(i)->Mother()->Status(),19.499));
-      hDGenRadPhotons[4]->Fill(GenRadPhotons->At(i)->IsGenerated()+2*GenRadPhotons->At(i)->IsSimulated());
+      hDGenRadPhotons[4]->Fill(GenRadPhotons->At(i)->IsGenerated() + 
+                               2*GenRadPhotons->At(i)->IsSimulated());
       hDGenRadPhotons[5]->Fill(TMath::Min(
-                               MathUtils::DeltaR(GenRadPhotons->At(i)->Eta(), GenRadPhotons->At(i)->Phi(),
-	                                         GenRadPhotons->At(i)->Mother()->Eta(), GenRadPhotons->At(i)->Mother()->Phi()),4.999));
+                                 MathUtils::DeltaR(*GenRadPhotons->At(i),
+                                                   *GenRadPhotons->At(i)->Mother()),
+                                 4.999));
       Int_t Mother = 0;
       if(GenRadPhotons->At(i)->Mother()->Is(MCParticle::kMu)) Mother = 1;
       hDGenRadPhotons[6]->Fill(Mother);
@@ -686,11 +676,13 @@ void GeneratorMod::Process()
     for(UInt_t i=0; i<GenISRPhotons->GetEntries(); i++) {
       hDGenISRPhotons[1]->Fill(TMath::Min(GenISRPhotons->At(i)->Pt(),199.999));
       hDGenISRPhotons[2]->Fill(TMath::Min(GenISRPhotons->At(i)->AbsEta(),4.999));
-      hDGenISRPhotons[3]->Fill(TMath::Min((double)GenISRPhotons->At(i)->Mother()->Status(),19.499));
-      hDGenISRPhotons[4]->Fill(GenISRPhotons->At(i)->IsGenerated()+2*GenISRPhotons->At(i)->IsSimulated());
+      hDGenISRPhotons[3]->Fill(TMath::Min((Double_t)GenISRPhotons->At(i)->Mother()->Status(),
+                                          19.499));
+      hDGenISRPhotons[4]->Fill(GenISRPhotons->At(i)->IsGenerated() + 
+                               2*GenISRPhotons->At(i)->IsSimulated());
       hDGenISRPhotons[5]->Fill(TMath::Min(
-                               MathUtils::DeltaR(GenISRPhotons->At(i)->Eta(), GenISRPhotons->At(i)->Phi(),
-	                                         GenISRPhotons->At(i)->Mother()->Eta(), GenISRPhotons->At(i)->Mother()->Phi()),4.999));
+                               MathUtils::DeltaR(*GenISRPhotons->At(i),
+	                                         *GenISRPhotons->At(i)->Mother()),4.999));
     }
   }
 
@@ -812,7 +804,7 @@ void GeneratorMod::SlaveBegin()
     sprintf(sb,"hDGenPhotons_%d", 2);  hDGenPhotons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
     for(Int_t i=0; i<3; i++) AddOutput(hDGenPhotons[i]);
 
-    //  Rad photons
+    //  rad photons
     sprintf(sb,"hDGenRadPhotons_%d", 0);  hDGenRadPhotons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
     sprintf(sb,"hDGenRadPhotons_%d", 1);  hDGenRadPhotons[1]  = new TH1D(sb,sb,400,0.0,200.0); 
     sprintf(sb,"hDGenRadPhotons_%d", 2);  hDGenRadPhotons[2]  = new TH1D(sb,sb,100,0.0,5.0); 

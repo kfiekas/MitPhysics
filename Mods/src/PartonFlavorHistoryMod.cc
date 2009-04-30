@@ -1,4 +1,4 @@
-// $Id $
+// $Id: $
 
 #include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -31,22 +31,21 @@ void PartonFlavorHistoryMod::Process()
   // load MCParticle branch
   LoadBranch(fMCPartName);
 
-
-  //***********************************************************************************************
+  //**************************************
   //Parton Flavor Classification For WJets
-  //***********************************************************************************************
-  vector <string> FlavorSources;
+  //**************************************
   MCParticleOArr *ClassificationPartons = new MCParticleOArr;
-  vector <MCParticle*> SisterPartons;
+  vector<string> FlavorSources;
+  vector<MCParticle*> SisterPartons;
   for (UInt_t i=0; i<fParticles->GetEntries(); ++i) {
     const MCParticle *p = fParticles->At(i);
     string FlavorSource = "NULL";  
-    bool FoundProgenitor = false;
+    Bool_t FoundProgenitor = kFALSE;
 
     //look for status 2 quarks with daughters - denoted "the quark"
-    if (p->Status() == 2 
-        && (p->IsQuark() && p->AbsPdgId() != 6)
-        && p->NDaughters() > 0 ) {
+    if ((p->Status() == 2) && 
+        (p->IsQuark() && p->AbsPdgId() != 6) && 
+        (p->NDaughters() > 0)) {
       
       //make collection of all parents
       MCParticleOArr *parents = new MCParticleOArr;
@@ -56,7 +55,7 @@ void PartonFlavorHistoryMod::Process()
         temp = temp->Mother();
       }
       
-      MDB(kAnalysis, 8) {
+      MDB(kAnalysis, 4) {
         cout << "quark: " << i << " " << p->PdgId() << " " 
              << p->Status() << " " 
              << p->Pt() << " " 
@@ -74,8 +73,7 @@ void PartonFlavorHistoryMod::Process()
 
       //loop over all parents of the quark.
       for (UInt_t j=0; j<parents->GetEntries(); ++j) {
-
-        int parentIndex = -1;
+        Int_t parentIndex = -1;
         for (UInt_t k=0; k<fParticles->GetEntries(); ++k) {
           if (fParticles->At(k) == parents->At(j)) {
             parentIndex = k;
@@ -83,38 +81,42 @@ void PartonFlavorHistoryMod::Process()
           }
         }
         
-        MDB(kAnalysis, 8) {
+        MDB(kAnalysis, 4) {
           cout << "parents: " << j << " " << parents->At(j)->PdgId() << " " 
                << parents->At(j)->Status() << " " 
                << parents->At(j)->Pt() << " " 
                << parents->At(j)->Eta() << " " 
                << parents->At(j)->Phi() << " " 
                << parentIndex << endl;
-        }       
+        }
         
         //matrix element          
-        if (parentIndex > 5 && parents->At(j)->Status() == 3 && 
-            parents->At(j)->PdgId() == p->PdgId()
-          ) {            
-          if (FlavorSource == "NULL") FlavorSource = "MatrixElement";  
-          FoundProgenitor = true;
-        } else if (parents->At(j)->IsGluon() 
-                   || (parents->At(j)->IsQuark() && parents->At(j)->AbsPdgId() != 6)
-          ) {
+        if ((parentIndex > 5) && 
+            (parents->At(j)->Status() == 3) && 
+            (parents->At(j)->PdgId() == p->PdgId())) {            
+          if (FlavorSource == "NULL") 
+            FlavorSource = "MatrixElement";  
+          FoundProgenitor = kTRUE;
+        } else if ((parents->At(j)->IsGluon()) || 
+                   (parents->At(j)->IsQuark() && parents->At(j)->AbsPdgId() != 6)) {
           //gluon splitting
-          if (FlavorSource == "NULL") FlavorSource = "GluonSplitting";
-          FoundProgenitor = true;
+          if (FlavorSource == "NULL") 
+            FlavorSource = "GluonSplitting";
+          FoundProgenitor = kTRUE;
         } else if (parents->At(j)->AbsPdgId() == 2212) {
-          if (FlavorSource == "NULL") FlavorSource = "InitialState";
+          if (FlavorSource == "NULL") 
+            FlavorSource = "InitialState";
         } else if (!parents->At(j)->IsGluon()) {
           //parent is not a gluon or light quark
-          if (FlavorSource == "NULL") FlavorSource = "FlavorDecay";
-          FoundProgenitor = true;
+          if (FlavorSource == "NULL") 
+            FlavorSource = "FlavorDecay";
+          FoundProgenitor = kTRUE;
         }        
       } //end for all parents
       
-      MDB(kAnalysis, 8) { cout << "FlavorSource : " << FlavorSource << " " 
-                               << FoundProgenitor << endl; }
+      MDB(kAnalysis, 4) { 
+        cout << "FlavorSource : " << FlavorSource << " " << FoundProgenitor << endl; 
+      }
   
       ClassificationPartons->Add(p);
       FlavorSources.push_back(FlavorSource);
@@ -125,9 +127,8 @@ void PartonFlavorHistoryMod::Process()
   for (UInt_t i=0; i<ClassificationPartons->GetEntries(); ++i) {
     MCParticle *sister = 0;
     for (UInt_t j=0; j<ClassificationPartons->GetEntries(); ++j) {
-      
-      if (ClassificationPartons->At(i)->PdgId() == -1*ClassificationPartons->At(j)->PdgId()
-          && ClassificationPartons->At(i)->Status() == ClassificationPartons->At(j)->Status()) {
+      if ((ClassificationPartons->At(i)->PdgId() == -1*ClassificationPartons->At(j)->PdgId()) &&
+          (ClassificationPartons->At(i)->Status() == ClassificationPartons->At(j)->Status())) {
         sister = ClassificationPartons->At(j);
         break;
       }
@@ -135,20 +136,19 @@ void PartonFlavorHistoryMod::Process()
     SisterPartons.push_back(sister);
   }
 
-
-  //***********************************************************************************************
-  //Count number of B and C quarks, and find sisters.
-  //***********************************************************************************************
-  Int_t NumberOfBQuarks = 0;
-  Int_t NumberOfCQuarks = 0;
-  Int_t NumberOfBQuarksFromMatrixElement = 0;
-  Int_t NumberOfBQuarksFromGluonSplitting = 0;
-  Int_t NumberOfCQuarksFromMatrixElement = 0;
-  Int_t NumberOfCQuarksFromGluonSplitting = 0;
-  Double_t maxDRForBSistersFromMatrixElement = 0.0;
-  Double_t minDRForBSistersFromMatrixElement = -1.0;
-  Double_t maxDRForCSistersFromMatrixElement = 0.0;
-  Double_t minDRForCSistersFromMatrixElement = -1.0;
+  //************************************************
+  //Count number of B and C quarks, and find sisters
+  //************************************************
+  Int_t NumberOfBQuarks                       = 0;
+  Int_t NumberOfCQuarks                       = 0;
+  Int_t NumberOfBQuarksFromMatrixElement      = 0;
+  Int_t NumberOfBQuarksFromGluonSplitting     = 0;
+  Int_t NumberOfCQuarksFromMatrixElement      = 0;
+  Int_t NumberOfCQuarksFromGluonSplitting     = 0;
+  Double_t maxDRForBSistersFromMatrixElement  = 0.0;
+  Double_t minDRForBSistersFromMatrixElement  = -1.0;
+  Double_t maxDRForCSistersFromMatrixElement  = 0.0;
+  Double_t minDRForCSistersFromMatrixElement  = -1.0;
   Double_t maxDRForBSistersFromGluonSplitting = 0.0;
   Double_t minDRForBSistersFromGluonSplitting = -1.0;
   Double_t maxDRForCSistersFromGluonSplitting = 0.0;
@@ -164,8 +164,9 @@ void PartonFlavorHistoryMod::Process()
   }
 
   for (UInt_t i=0; i<ClassificationPartons->GetEntries(); ++i) {
-    MDB(kAnalysis, 8) {
-      cout << "Classification Partons: " << ClassificationPartons->At(i)->PdgId() << " " 
+    MDB(kAnalysis, 4) {
+      cout << "Classification Partons: " 
+           << ClassificationPartons->At(i)->PdgId() << " " 
            << ClassificationPartons->At(i)->Status() << " " 
            << ClassificationPartons->At(i)->Pt() << " " 
            << ClassificationPartons->At(i)->Eta() << " " 
@@ -175,18 +176,21 @@ void PartonFlavorHistoryMod::Process()
 
     Double_t dr = -1.0;
     if (SisterPartons[i]) {
-      MDB(kAnalysis, 8) {
-        cout << " : Sister : " << SisterPartons[i]->PdgId() << " "
+      MDB(kAnalysis, 4) {
+        cout << " : Sister : " 
+             << SisterPartons[i]->PdgId() << " "
              << SisterPartons[i]->Status() << " "
              << SisterPartons[i]->Pt() << " "
              << SisterPartons[i]->Eta() << " "
              << SisterPartons[i]->Phi() << " ";
       }
-      dr = MathUtils::DeltaR(ClassificationPartons->At(i)->Phi(),
-                             ClassificationPartons->At(i)->Eta(),
-                             SisterPartons[i]->Phi(),SisterPartons[i]->Eta());
+      dr = MathUtils::DeltaR(*ClassificationPartons->At(i),
+                             *SisterPartons[i]);
     }
-    MDB(kAnalysis, 8) { cout << endl; }
+
+    MDB(kAnalysis, 4) { 
+      cout << endl; 
+    }
 
     if (ClassificationPartons->At(i)->AbsPdgId() == 5) {
       NumberOfBQuarks++;
@@ -196,17 +200,20 @@ void PartonFlavorHistoryMod::Process()
           if (dr > maxDRForBSistersFromGluonSplitting) {
             maxDRForBSistersFromGluonSplitting = dr;
           }
-          if (dr < minDRForBSistersFromGluonSplitting || minDRForBSistersFromGluonSplitting < 0.0) {
+          if ((dr < minDRForBSistersFromGluonSplitting) || 
+              (minDRForBSistersFromGluonSplitting < 0.0)) {
             minDRForBSistersFromGluonSplitting = dr;
           }
         }
-      } else if (FlavorSources[i] == "MatrixElement" || FlavorSources[i] == "FlavorExcitation") {
+      } else if ((FlavorSources[i] == "MatrixElement") || 
+                 (FlavorSources[i] == "FlavorExcitation")) {
         NumberOfBQuarksFromMatrixElement++;
         if (dr > -1.0) {
           if (dr > maxDRForBSistersFromMatrixElement) {
             maxDRForBSistersFromMatrixElement = dr;
           }
-          if (dr < minDRForBSistersFromMatrixElement || minDRForBSistersFromMatrixElement < 0.0) {
+          if ((dr < minDRForBSistersFromMatrixElement) || 
+              (minDRForBSistersFromMatrixElement < 0.0)) {
             minDRForBSistersFromMatrixElement = dr;
           }
         }
@@ -221,17 +228,20 @@ void PartonFlavorHistoryMod::Process()
           if (dr > maxDRForCSistersFromGluonSplitting) {
             maxDRForCSistersFromGluonSplitting = dr;
           }
-          if (dr < minDRForCSistersFromGluonSplitting || minDRForCSistersFromGluonSplitting < 0.0) {
+          if ((dr < minDRForCSistersFromGluonSplitting) || 
+              (minDRForCSistersFromGluonSplitting < 0.0)) {
             minDRForCSistersFromGluonSplitting = dr;
           }
         }
-      } else if (FlavorSources[i] == "MatrixElement" || FlavorSources[i] == "FlavorExcitation") {
+      } else if ((FlavorSources[i] == "MatrixElement") || 
+                 (FlavorSources[i] == "FlavorExcitation")) {
         NumberOfCQuarksFromMatrixElement++;
         if (dr > -1.0) {
           if (dr > maxDRForCSistersFromMatrixElement) {
             maxDRForCSistersFromMatrixElement = dr;
           }
-          if (dr < minDRForCSistersFromMatrixElement || minDRForCSistersFromMatrixElement < 0.0) {
+          if ((dr < minDRForCSistersFromMatrixElement) || 
+              (minDRForCSistersFromMatrixElement < 0.0)) {
             minDRForCSistersFromMatrixElement = dr;
           }
         }
@@ -239,9 +249,9 @@ void PartonFlavorHistoryMod::Process()
     }
   }
 
-  //***********************************************************************************************
+  //*******************************
   //Determine Flavor Classification
-  //***********************************************************************************************
+  //*******************************
   Int_t FlavorClassification = -1;
 
   if (NumberOfBQuarks == 0 && NumberOfCQuarks == 0) {
@@ -265,9 +275,9 @@ void PartonFlavorHistoryMod::Process()
   delete ClassificationPartons;
   fFlavorClassification->Fill(FlavorClassification);
 
-  //***********************************************************************************************
+  //**********************************
   //Filter Events based on sample type
-  //***********************************************************************************************
+  //**********************************
   if (fApplyPartonFlavorFilter) {
     //For WJets only accept 5,6,11. Light flavor + bb/cc from gluon splitting at small angle
     if (fMCType == kMCTypeVLightJets ) {

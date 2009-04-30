@@ -1,10 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id $
+// $Id: $
 //
 // PartonFlavorHistoryMod
 //
 // This module looks at the generator information and determines the flavor history of partons.
-// It is based on the FlavorHistory modules from CMSSW
+// It is based on the FlavorHistory modules from CMSSW.
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ namespace mithep
   {
     public:
       PartonFlavorHistoryMod(const char *name="PartonFlavorHistoryMod", 
-                   const char *title="FlavorHistory information module");
+                             const char *title="FlavorHistory information module");
 
       enum MCType {
         kMCTypeUndef = 0,    //not defined
@@ -48,10 +48,9 @@ namespace mithep
       TString              fMCPartName;               //name of MCParticle branch
       TString              fMCSampleType;             //name of MCSampleType
       Bool_t               fApplyPartonFlavorFilter;  //=true then we apply the filter
-      MCType               fMCType;                   //Type of MC 
-
-      const MCParticleCol *fParticles;	          //!MCParticle branch
-      TH1D                *fFlavorClassification; //!histos for flavor history
+      MCType               fMCType;                   //!type of MC 
+      const MCParticleCol *fParticles;	              //!MCParticle branch
+      TH1D                *fFlavorClassification;     //!histos for flavor history
 
     ClassDef(PartonFlavorHistoryMod, 1) // Module to gather generator information
   };

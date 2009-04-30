@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.12 2009/04/19 12:25:18 ceballos Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.13 2009/04/29 15:06:42 loizides Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -12,11 +12,11 @@
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
 #include "MitPhysics/Mods/interface/MergerMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
+#include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitPhysics/Mods/interface/TauIDMod.h"
-#include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
 #endif
 
 #ifdef __CINT__
@@ -45,9 +45,9 @@
 #pragma link C++ enum mithep::MuonIDMod::EMuClassType;
 #pragma link C++ enum mithep::MuonIDMod::EMuIdType;
 #pragma link C++ enum mithep::MuonIDMod::EMuIsoType;
+#pragma link C++ class mithep::PartonFlavorHistoryMod+;
 #pragma link C++ class mithep::PhotonCleaningMod+;
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::TauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;
-#pragma link C++ class mithep::PartonFlavorHistoryMod+;
 #endif

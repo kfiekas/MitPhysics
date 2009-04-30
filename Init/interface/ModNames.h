@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ModNames.h,v 1.7 2009/04/05 18:36:25 loizides Exp $
+// $Id: ModNames.h,v 1.8 2009/04/17 13:45:10 ceballos Exp $
 //
 // Names
 //
@@ -34,13 +34,13 @@ namespace mithep
       static const char *gkGoodTausName;
       static const char *gkMCAllLeptonsName;
       static const char *gkMCBosonsName;
+      static const char *gkMCISRPhotonsName;
       static const char *gkMCLeptonsName;
       static const char *gkMCMETName;
       static const char *gkMCNeutrinosName;
       static const char *gkMCPhotonsName;
-      static const char *gkMCRadPhotonsName;
-      static const char *gkMCISRPhotonsName;
       static const char *gkMCQuarksName;
+      static const char *gkMCRadPhotonsName;
       static const char *gkMCTausName;
       static const char *gkMCqqHsName;
       static const char *gkMergedLeptonsName;

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.7 2009/03/23 14:23:06 loizides Exp $
+// $Id: PhotonIDMod.h,v 1.8 2009/04/15 17:53:14 ceballos Exp $
 //
 // PhotonIDMod
 //
@@ -41,7 +41,7 @@ namespace mithep
       void                SetIsoType(const char *type)      { fPhotonIsoType   = type;     }
       void                SetOutputName(const char *n)      { SetGoodPhotonsName(n);       }    
       void                SetPtMin(Double_t pt)             { fPhotonPtMin     = pt;       }
-      void                SetR9Min(Double_t x)              { fPhotonR9Min     = x;       }
+      void                SetR9Min(Double_t x)              { fPhotonR9Min     = x;         }
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
