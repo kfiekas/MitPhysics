@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.16 2009/04/05 18:36:26 loizides Exp $
+// $Id: MuonIDMod.h,v 1.17 2009/04/30 06:34:02 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -40,18 +40,18 @@ namespace mithep
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
       Bool_t             GetReverseIsoCut()             const { return fReverseIsoCut;      }
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
-      void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
       void               SetClassType(const char *type)       { fMuonClassType     = type;  }
-      void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
       void               SetCleanMuonsName(const char *name)  { fCleanMuonsName    = name;  }   
+      void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
+      void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
+      void               SetD0Cut(Double_t cut)               { fD0Cut = cut;               }
       void               SetIDType(const char *type)          { fMuonIDType        = type;  }
       void               SetInputName(const char *name)       { fMuonBranchName    = name;  }   
       void               SetIsoType(const char *type)         { fMuonIsoType       = type;  }
       void               SetOutputName(const char *name)      { SetCleanMuonsName(name);    }   
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
-      void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
-      void               SetD0Cut(Double_t cut)               { fD0Cut = cut;               }
       void               SetReverseIsoCut(Bool_t b)           { fReverseIsoCut = b;         }
+      void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
 
       enum EMuIdType {
         kIdUndef = 0,       //not defined

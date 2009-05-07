@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.16 2009/04/30 06:34:09 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.17 2009/04/30 08:10:11 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -89,6 +89,9 @@ void MuonIDMod::Process()
         idpass = fMuonTools->IsGood(mu, MuonTools::kTMOneStationTight) &&
                  fMuonTools->IsGood(mu, MuonTools::kTM2DCompatibilityTight);
         break;
+      case kNoId:
+        idpass = kTRUE;
+        break;
       default:
         break;
     }
@@ -130,12 +133,13 @@ void MuonIDMod::Process()
       continue;
 
     // d0 cut
-    double d0_real = 99999;
-    for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-      double pD0 = mu->GlobalTrk()->D0Corrected(*fVertices->At(i0));
+    Double_t d0_real = 99999;
+    for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+      Double_t pD0 = mu->GlobalTrk()->D0Corrected(*fVertices->At(i0));
       if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
     }
-    if(d0_real >= fD0Cut) continue;
+    if(d0_real >= fD0Cut) 
+      continue;
 
     // add good muon
     CleanMuons->Add(mu);
