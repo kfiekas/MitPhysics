@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.17 2009/04/30 08:10:11 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.18 2009/05/07 20:27:07 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -48,24 +48,25 @@ void MuonIDMod::Process()
     const Muon *mu = fMuons->At(i);
 
     Bool_t pass = kFALSE;
-    Double_t pt = -1; // make sure pt is taken from the correct track!
+    Double_t pt = 0; // make sure pt is taken from the correct track!
     switch (fMuClassType) {
       case kAll:
         pass = kTRUE;
-        pt = mu->Pt();
+        if (mu->HasTrk())
+          pt = mu->Pt();
         break;
       case kGlobal:
-        pass = (mu->GlobalTrk() != 0);
+        pass = mu->HasGlobalTrk();
         if (pass) 
           pt = mu->GlobalTrk()->Pt();
         break;
       case kSta:
-        pass = (mu->StandaloneTrk() != 0);
+        pass = mu->HasStandaloneTrk();
         if (pass) 
           pt = mu->StandaloneTrk()->Pt();
         break;
       case kTrackerOnly:
-        pass = (mu->TrackerTrk() != 0);
+        pass = mu->HasTrackerTrk();
         if (pass) 
           pt = mu->TrackerTrk()->Pt();
         break;
@@ -114,7 +115,7 @@ void MuonIDMod::Process()
           Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
                               1.0 * mu->IsoR03EmEt() + 
                               1.0 * mu->IsoR03HadEt();
-          if ((totalIso < (mu->Pt()-10.0)*5.0/15.0 && mu->Pt() <= 25) ||
+          if ((totalIso < (pt-10.0)*5.0/15.0 && pt <= 25) ||
               (totalIso < 5.0 && mu->Pt() > 25) ||
 	       totalIso <= 0) 
             isopass = kTRUE;
@@ -132,14 +133,17 @@ void MuonIDMod::Process()
         (isopass == kTRUE  && fReverseIsoCut == kTRUE))
       continue;
 
-    // d0 cut
-    Double_t d0_real = 99999;
-    for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-      Double_t pD0 = mu->GlobalTrk()->D0Corrected(*fVertices->At(i0));
-      if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
+    // d0 cut only for global muons
+    if (fMuClassType == kGlobal) {
+      Double_t d0_real = 1e30;
+      for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+        Double_t pD0 = mu->GlobalTrk()->D0Corrected(*fVertices->At(i0));
+        if(TMath::Abs(pD0) < TMath::Abs(d0_real)) 
+          d0_real = TMath::Abs(pD0);
+      }
+      if(d0_real >= fD0Cut) 
+        continue;
     }
-    if(d0_real >= fD0Cut) 
-      continue;
 
     // add good muon
     CleanMuons->Add(mu);
