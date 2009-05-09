@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.14 2009/03/12 16:00:46 bendavid Exp $
+// $Id: JetIDMod.cc,v 1.15 2009/03/23 14:23:06 loizides Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -14,7 +14,8 @@ JetIDMod::JetIDMod(const char *name, const char *title) :
   fJetsName(ModNames::gkPubJetsName),
   fGoodJetsName(ModNames::gkGoodJetsName),  
   fUseJetCorrection(kTRUE),
-  fJetPtCut(35.0)
+  fJetPtCut(35.0),
+  fJetEtaMaxCut(5.0)
 {
   // Constructor.
 }
@@ -39,7 +40,7 @@ void JetIDMod::Process()
   for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
     const Jet *jet = inJets->At(i);
 
-    if (jet->AbsEta() > 5.0) 
+    if (jet->AbsEta() > fJetEtaMaxCut) 
       continue;
     
     Double_t jetpt;

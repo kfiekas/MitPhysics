@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.10 2009/03/12 16:00:46 bendavid Exp $
+// $Id: JetIDMod.h,v 1.11 2009/03/23 14:23:06 loizides Exp $
 //
 // JetIDMod
 //
@@ -29,12 +29,14 @@ namespace mithep
       const char       *GetOutputName()                const { return GetGoodJetsName();  }     
       Double_t          GetPtCut()                     const { return fJetPtCut;          }     
       Bool_t            GetUseCorrection()             const { return fUseJetCorrection;  }     
+      Double_t          GetEtaMaxCut()                 const { return fJetEtaMaxCut;      }     
       void              SetGoodJetsName(const char *name)    { fGoodJetsName = name;      }     
       void              SetGoodName(const char *name)        { SetGoodJetsName(name);     }     
       void              SetInputName(const char *name)       { fJetsName = name;          }  
       void              SetOutputName(const char *name)      { SetGoodJetsName(name);     }     
       void              SetPtCut(Double_t cut)               { fJetPtCut = cut;           }     
       void              SetUseCorrection(Bool_t b)           { fUseJetCorrection = b;     }     
+      void              SetEtaMaxCut(Double_t cut)           { fJetEtaMaxCut = cut;       }     
 
     protected:
       void              Process();
@@ -43,6 +45,7 @@ namespace mithep
       TString           fGoodJetsName;          //name of good jets collection (output)
       Bool_t            fUseJetCorrection;      //=true then use corrected energy
       Double_t          fJetPtCut;              //jet pt cut
+      Double_t          fJetEtaMaxCut;          //jet eta max cut
 
       ClassDef(JetIDMod, 1) // Jet identification module
   };
