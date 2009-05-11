@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.17 2009/04/30 06:34:02 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.18 2009/05/07 20:27:07 loizides Exp $
 //
 // MuonIDMod
 //
@@ -91,13 +91,13 @@ namespace mithep
       Double_t           fCombIsolationCut;    //cut value for combined isolation
       Double_t           fMuonPtMin;           //min muon pt
       Double_t           fD0Cut;               //max d0
+      Bool_t             fReverseIsoCut;       //apply reversion iso cut (default=0)
       EMuIdType          fMuIDType;            //!muon id type (imposed)
       EMuIsoType         fMuIsoType;           //!muon iso type (imposed)
       EMuClassType       fMuClassType;         //!muon class type (imposed)
       const MuonCol     *fMuons;               //!muon collection
       const VertexCol   *fVertices;            //!vertices branch
       MuonTools         *fMuonTools;           //!muon tool
-      Bool_t             fReverseIsoCut;       //!apply reversion iso cut
     
     ClassDef(MuonIDMod, 1) // Muon identification module
   };

@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.18 2009/05/07 20:27:07 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.19 2009/05/08 11:53:04 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -22,13 +22,13 @@ ClassImp(mithep::MuonIDMod)
   fCombIsolationCut(5.0),
   fMuonPtMin(10),
   fD0Cut(0.025),
+  fReverseIsoCut(kFALSE),
   fMuIDType(kIdUndef),
   fMuIsoType(kIsoUndef),
   fMuClassType(kClassUndef),
   fMuons(0),
   fVertices(0),
-  fMuonTools(0),
-  fReverseIsoCut(kFALSE)
+  fMuonTools(0)
 {
   // Constructor.
 }
@@ -133,17 +133,18 @@ void MuonIDMod::Process()
         (isopass == kTRUE  && fReverseIsoCut == kTRUE))
       continue;
 
-    // d0 cut only for global muons
-    if (fMuClassType == kGlobal) {
-      Double_t d0_real = 1e30;
-      for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-        Double_t pD0 = mu->GlobalTrk()->D0Corrected(*fVertices->At(i0));
-        if(TMath::Abs(pD0) < TMath::Abs(d0_real)) 
-          d0_real = TMath::Abs(pD0);
-      }
-      if(d0_real >= fD0Cut) 
-        continue;
+    // d0 cut only for muons that have a track
+    const Track *mt = mu->BestTrk();
+    if (!mt)
+      continue;
+    Double_t d0_real = 1e30;
+    for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+      Double_t pD0 = mt->D0Corrected(*fVertices->At(i0));
+      if(TMath::Abs(pD0) < TMath::Abs(d0_real)) 
+        d0_real = TMath::Abs(pD0);
     }
+    if(d0_real >= fD0Cut) 
+      continue;
 
     // add good muon
     CleanMuons->Add(mu);
