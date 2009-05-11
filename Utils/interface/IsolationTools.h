@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.2 2008/11/27 16:28:58 loizides Exp $
+// $Id: IsolationTools.h,v 1.3 2009/02/17 06:49:01 phedex Exp $
 //
 // IsolationTools
 //
@@ -8,8 +8,8 @@
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITANA_UTILS_ISOLATIONTOOLS_H
-#define MITANA_UTILS_ISOLATIONTOOLS_H
+#ifndef MITPHYSICS_UTILS_ISOLATIONTOOLS_H
+#define MITPHYSICS_UTILS_ISOLATIONTOOLS_H
 
 #include <TMath.h>
 #include "MitAna/DataTree/interface/Track.h"

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.6 2009/04/06 13:35:35 pharris Exp $
+// $Id: MuonTools.h,v 1.7 2009/04/07 15:37:09 loizides Exp $
 //
 // MuonTools
 //
@@ -15,8 +15,8 @@
 // Authors: P.Harris, C.Loizides
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITPHYSICS_UTIL_MUONTOOLS_H
-#define MITPHYSICS_UTIL_MUONTOOLS_H
+#ifndef MITPHYSICS_UTILS_MUONTOOLS_H
+#define MITPHYSICS_UTILS_MUONTOOLS_H
 
 #include "MitAna/DataTree/interface/Muon.h"
 #include "MitAna/DataTree/interface/Collections.h"
