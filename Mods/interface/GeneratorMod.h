@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.24 2009/04/19 13:55:55 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.25 2009/04/30 08:09:32 loizides Exp $
 //
 // GeneratorMod
 //
@@ -69,7 +69,6 @@ namespace mithep
       void                 SlaveBegin();
 
       Bool_t               fPrintDebug;         //=true then print debug info
-      Bool_t               fFillHist;           //=true then fill histos (def=0)
       TString              fMCPartName;         //name of MCParticle branch
       TString              fMCMETName;          //name of met coll
       TString              fMCLeptonsName;      //name of lepton coll (from W/Z/H)
