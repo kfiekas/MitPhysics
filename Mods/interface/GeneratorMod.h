@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.25 2009/04/30 08:09:32 loizides Exp $
+// $Id: GeneratorMod.h,v 1.26 2009/05/13 14:15:36 loizides Exp $
 //
 // GeneratorMod
 //
@@ -26,43 +26,43 @@ namespace mithep
       GeneratorMod(const char *name="GeneratorMod", 
                    const char *title="Generator information module");
 
-      const Bool_t         GetPrintDebug()	 const { return fPrintDebug;       }	
-      const char          *GetMCPartName()	 const { return fMCPartName;       } 	
-      const char          *GetMCMETName()        const { return fMCMETName;        }	
-      const char          *GetMCLeptonsName()    const { return fMCLeptonsName;    }	
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
-      const char          *GetMCTausName()	 const { return fMCTausName;       }	
-      const char          *GetMCNeutrinosName()  const { return fMCNeutrinosName;  }
-      const char          *GetMCQuarksName()     const { return fMCQuarksName;     }	
-      const char          *GetMCqqHsName()	 const { return fMCqqHsName;       }	
       const char          *GetMCBosonsName()     const { return fMCBosonsName;     }
-      const char          *GetMCPhotonsName()    const { return fMCPhotonsName;    }
-      const char          *GetMCRadPhotonsName() const { return fMCRadPhotonsName; }	
       const char          *GetMCISRPhotonsName() const { return fMCISRPhotonsName; }	
+      const char          *GetMCLeptonsName()    const { return fMCLeptonsName;    }	
+      const char          *GetMCMETName()        const { return fMCMETName;        }	
+      const char          *GetMCNeutrinosName()  const { return fMCNeutrinosName;  }
+      const char          *GetMCPartName()	 const { return fMCPartName;       } 	
+      const char          *GetMCPhotonsName()    const { return fMCPhotonsName;    }
+      const char          *GetMCQuarksName()     const { return fMCQuarksName;     }	
+      const char          *GetMCRadPhotonsName() const { return fMCRadPhotonsName; }	
+      const char          *GetMCTausName()	 const { return fMCTausName;       }	
+      const char          *GetMCqqHsName()	 const { return fMCqqHsName;       }	
+      const Bool_t         GetPrintDebug()	 const { return fPrintDebug;       }	
       Bool_t               GetApplyISRFilter()   const { return fApplyISRFilter;   }
-      void                 SetPrintDebug(bool b)               { fPrintDebug       = b; }   
-      void                 SetMCPartName(const char *s)	       { fMCPartName       = s; }	
-      void                 SetMCMETName(const char * s)        { fMCMETName        = s; }	
-      void                 SetMCLeptonsName(const char * s)    { fMCLeptonsName    = s; }	
-      void                 SetMCAllLeptonsName(const char * s) { fMCAllLeptonsName = s; }	
-      void                 SetMCTausName(const char *s)	       { fMCTausName       = s; }	
-      void                 SetMCNeutrinosName(const char *s)   { fMCNeutrinosName  = s; }	
-      void                 SetMCQuarksName(const char *s)      { fMCQuarksName     = s; }	
-      void                 SetMCqqHsName(const char *s)	       { fMCqqHsName       = s; }	
-      void                 SetMCBosonsName(const char *s)      { fMCBosonsName     = s; }	
-      void                 SetMCPhotonsName(const char *s)     { fMCPhotonsName    = s; }	
-      void                 SetMCRadPhotonsName(const char *s)  { fMCRadPhotonsName = s; }	
-      void                 SetMCISRPhotonsName(const char *s)  { fMCISRPhotonsName = s; }	
-      void                 SetPtLeptonMin(Double_t x)          { fPtLeptonMin      = x; }     
-      void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
-      void                 SetPtPhotonMin(Double_t x)          { fPtPhotonMin      = x; }     
-      void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
-      void                 SetPtRadPhotonMin(Double_t x)       { fPtRadPhotonMin   = x; }     
-      void                 SetEtaRadPhotonMax(Double_t x)      { fEtaRadPhotonMax  = x; }	  
-      void                 SetPdgIdCut(UInt_t d)	       { fPdgIdCut         = d; }	 
-      void                 SetMassMinCut(Double_t x)	       { fMassMinCut       = x; }	 
-      void                 SetMassMaxCut(Double_t x)	       { fMassMaxCut	   = x; }	 
       void                 SetApplyISRFilter(Bool_t b)	       { fApplyISRFilter   = b; }	 
+      void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
+      void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
+      void                 SetEtaRadPhotonMax(Double_t x)      { fEtaRadPhotonMax  = x; }	  
+      void                 SetMCAllLeptonsName(const char * s) { fMCAllLeptonsName = s; }	
+      void                 SetMCBosonsName(const char *s)      { fMCBosonsName     = s; }	
+      void                 SetMCISRPhotonsName(const char *s)  { fMCISRPhotonsName = s; }	
+      void                 SetMCLeptonsName(const char * s)    { fMCLeptonsName    = s; }	
+      void                 SetMCMETName(const char * s)        { fMCMETName        = s; }	
+      void                 SetMCNeutrinosName(const char *s)   { fMCNeutrinosName  = s; }	
+      void                 SetMCPartName(const char *s)	       { fMCPartName       = s; }	
+      void                 SetMCPhotonsName(const char *s)     { fMCPhotonsName    = s; }	
+      void                 SetMCQuarksName(const char *s)      { fMCQuarksName     = s; }	
+      void                 SetMCRadPhotonsName(const char *s)  { fMCRadPhotonsName = s; }	
+      void                 SetMCTausName(const char *s)	       { fMCTausName       = s; }	
+      void                 SetMCqqHsName(const char *s)	       { fMCqqHsName       = s; }	
+      void                 SetMassMaxCut(Double_t x)	       { fMassMaxCut	   = x; }	 
+      void                 SetMassMinCut(Double_t x)	       { fMassMinCut       = x; }	 
+      void                 SetPdgIdCut(UInt_t d)	       { fPdgIdCut         = d; }	 
+      void                 SetPrintDebug(bool b)               { fPrintDebug       = b; }   
+      void                 SetPtLeptonMin(Double_t x)          { fPtLeptonMin      = x; }     
+      void                 SetPtPhotonMin(Double_t x)          { fPtPhotonMin      = x; }     
+      void                 SetPtRadPhotonMin(Double_t x)       { fPtRadPhotonMin   = x; }     
 
     protected:
       void                 Process();
