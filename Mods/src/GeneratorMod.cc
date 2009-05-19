@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.39 2009/04/23 10:50:59 phedex Exp $
+// $Id: GeneratorMod.cc,v 1.40 2009/04/30 08:09:32 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -76,7 +76,7 @@ void GeneratorMod::Process()
     printf("\n************ Next Event ************\n\n");
 
   // load MCParticle branch
-  LoadBranch(fMCPartName);
+  LoadEventObject(fMCPartName, fParticles);
 
   Double_t totalMET[3] = {0.0, 0.0, 0.0};
   Bool_t isqqH = kFALSE;
@@ -698,7 +698,7 @@ void GeneratorMod::SlaveBegin()
 {
   // Book branch and histograms if wanted.
 
-  ReqBranch(fMCPartName, fParticles);
+  ReqEventObject(fMCPartName, fParticles, kTRUE);
 
   // fill histograms
   if (GetFillHist()) {

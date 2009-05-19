@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.4 2008/12/10 11:44:33 loizides Exp $
+// $Id: PhotonIDMod.cc,v 1.5 2009/04/15 17:53:14 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -30,7 +30,7 @@ void PhotonIDMod::Process()
 {
   // Process entries of the tree. 
 
-  LoadBranch(fPhotonBranchName);
+  LoadEventObject(fPhotonBranchName, fPhotons);
 
   PhotonOArr *GoodPhotons = new PhotonOArr;
   GoodPhotons->SetName(fGoodPhotonsName);
@@ -105,7 +105,7 @@ void PhotonIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the photon collection branch.
 
-  ReqBranch(fPhotonBranchName, fPhotons);
+  ReqEventObject(fPhotonBranchName, fPhotons, kTRUE);
 
   if (fPhotonIDType.CompareTo("Tight") == 0) 
     fPhIdType = kTight;

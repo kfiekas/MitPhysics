@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.21 2009/04/30 06:34:09 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.22 2009/04/30 08:10:11 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -40,7 +40,7 @@ void ElectronIDMod::Process()
 {
   // Process entries of the tree. 
 
-  LoadBranch(fElectronBranchName);
+  LoadEventObject(fElectronBranchName, fElectrons);
 
   ElectronOArr *GoodElectrons = new ElectronOArr;
   GoodElectrons->SetName(fGoodElectronsName);
@@ -184,13 +184,13 @@ void ElectronIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the electron collection branch.
 
-  ReqBranch(fElectronBranchName, fElectrons);
+  ReqEventObject(fElectronBranchName, fElectrons, kTRUE);
 
   if (fApplyConvFilter)
-    ReqBranch(fConversionBranchName, fConversions);
+    ReqEventObject(fConversionBranchName, fConversions, kTRUE);
 
   if (fApplyD0Cut)
-    ReqBranch(fVertexName, fVertices);
+    ReqEventObject(fVertexName, fVertices, kTRUE);
 
   if (fElectronIDType.CompareTo("Tight") == 0) 
     fElIdType = kTight;

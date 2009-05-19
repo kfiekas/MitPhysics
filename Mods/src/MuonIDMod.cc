@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.19 2009/05/08 11:53:04 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.20 2009/05/11 08:02:43 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -21,6 +21,7 @@ ClassImp(mithep::MuonIDMod)
   fCaloIsolationCut(3.0),
   fCombIsolationCut(5.0),
   fMuonPtMin(10),
+  fApplyD0Cut(kTRUE),
   fD0Cut(0.025),
   fReverseIsoCut(kFALSE),
   fMuIDType(kIdUndef),
@@ -38,8 +39,8 @@ void MuonIDMod::Process()
 {
   // Process entries of the tree. 
 
-  LoadBranch(fMuonBranchName);
-  LoadBranch(fVertexName);
+  LoadEventObject(fMuonBranchName, fMuons);
+  LoadEventObject(fVertexName,     fVertices);
 
   MuonOArr *CleanMuons = new MuonOArr;
   CleanMuons->SetName(fCleanMuonsName);
@@ -133,18 +134,19 @@ void MuonIDMod::Process()
         (isopass == kTRUE  && fReverseIsoCut == kTRUE))
       continue;
 
-    // d0 cut only for muons that have a track
-    const Track *mt = mu->BestTrk();
-    if (!mt)
-      continue;
-    Double_t d0_real = 1e30;
-    for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-      Double_t pD0 = mt->D0Corrected(*fVertices->At(i0));
-      if(TMath::Abs(pD0) < TMath::Abs(d0_real)) 
-        d0_real = TMath::Abs(pD0);
+    if (fApplyD0Cut) {
+      const Track *mt = mu->BestTrk();
+      if (!mt)
+        continue;
+      Double_t d0_real = 1e30;
+      for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+        Double_t pD0 = mt->D0Corrected(*fVertices->At(i0));
+        if(TMath::Abs(pD0) < TMath::Abs(d0_real)) 
+          d0_real = TMath::Abs(pD0);
+      }
+      if(d0_real >= fD0Cut) 
+        continue;
     }
-    if(d0_real >= fD0Cut) 
-      continue;
 
     // add good muon
     CleanMuons->Add(mu);
@@ -163,8 +165,10 @@ void MuonIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the muon collection branch.
 
-  ReqBranch(fMuonBranchName, fMuons);
-  ReqBranch(fVertexName, fVertices);
+  ReqEventObject(fMuonBranchName, fMuons, kTRUE);
+
+  if (fApplyD0Cut)
+    ReqEventObject(fVertexName, fVertices, kTRUE);
 
   fMuonTools = new MuonTools;
 

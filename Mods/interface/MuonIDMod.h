@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.18 2009/05/07 20:27:07 loizides Exp $
+// $Id: MuonIDMod.h,v 1.19 2009/05/11 08:02:43 loizides Exp $
 //
 // MuonIDMod
 //
@@ -37,20 +37,21 @@ namespace mithep
       const char        *GetIsoType()                   const { return fMuonIsoType;        }
       const char        *GetOutputName()                const { return GetCleanMuonsName(); }   
       Double_t           GetPtMin(Double_t pt)          const { return fMuonPtMin;          }
-      Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
       Bool_t             GetReverseIsoCut()             const { return fReverseIsoCut;      }
+      Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
+      void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
       void               SetClassType(const char *type)       { fMuonClassType     = type;  }
       void               SetCleanMuonsName(const char *name)  { fCleanMuonsName    = name;  }   
       void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
       void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
-      void               SetD0Cut(Double_t cut)               { fD0Cut = cut;               }
+      void               SetD0Cut(Double_t cut)               { fD0Cut             = cut;   }
       void               SetIDType(const char *type)          { fMuonIDType        = type;  }
       void               SetInputName(const char *name)       { fMuonBranchName    = name;  }   
       void               SetIsoType(const char *type)         { fMuonIsoType       = type;  }
       void               SetOutputName(const char *name)      { SetCleanMuonsName(name);    }   
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
-      void               SetReverseIsoCut(Bool_t b)           { fReverseIsoCut = b;         }
+      void               SetReverseIsoCut(Bool_t b)           { fReverseIsoCut     = b;     }
       void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
 
       enum EMuIdType {
@@ -90,6 +91,7 @@ namespace mithep
       Double_t           fCaloIsolationCut;    //cut value for calo isolation
       Double_t           fCombIsolationCut;    //cut value for combined isolation
       Double_t           fMuonPtMin;           //min muon pt
+      Bool_t             fApplyD0Cut;          //=true then apply d0 cut (def=1)
       Double_t           fD0Cut;               //max d0
       Bool_t             fReverseIsoCut;       //apply reversion iso cut (default=0)
       EMuIdType          fMuIDType;            //!muon id type (imposed)
