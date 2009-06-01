@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.22 2009/04/30 08:10:11 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.23 2009/05/19 11:42:20 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -30,7 +30,8 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectrons(0),
   fConversions(0),
   fVertices(0),
-  fReverseIsoCut(kFALSE)
+  fReverseIsoCut(kFALSE),
+  fReverseD0Cut(kFALSE)
 {
   // Constructor.
 }
@@ -91,6 +92,12 @@ void ElectronIDMod::Process()
               (totalIso < 5.0 && e->Pt() > 25) ||
 	       totalIso <= 0)
             isocut = kTRUE;
+        
+	  if     (fReverseIsoCut == kTRUE &&
+	          isocut == kFALSE && totalIso < 10)
+	    isocut = kTRUE;
+          else if(fReverseIsoCut == kTRUE)
+	    isocut = kFALSE;
         }
         break;
       case kNoIso:
@@ -101,8 +108,7 @@ void ElectronIDMod::Process()
         break;
     }
 
-    if ((isocut == kFALSE && fReverseIsoCut == kFALSE) ||
-        (isocut == kTRUE  && fReverseIsoCut == kTRUE))
+    if (isocut == kFALSE)
       continue;
 
     // apply conversion filter
@@ -157,6 +163,7 @@ void ElectronIDMod::Process()
     if (isGoodConversion == kTRUE) continue;
 
     if (fApplyD0Cut) {
+      Bool_t d0cut = kFALSE;
       LoadBranch(fVertexName);
       // d0 cut
       double d0_real = 99999;
@@ -164,7 +171,16 @@ void ElectronIDMod::Process()
 	double pD0 = e->GsfTrk()->D0Corrected(*fVertices->At(i0));
 	if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
       }
-      if(d0_real >= fD0Cut) continue;
+      if(d0_real < fD0Cut) d0cut = kTRUE;
+
+      if     (fReverseD0Cut == kTRUE &&
+              d0cut == kFALSE && d0_real < 0.05)
+	d0cut = kTRUE;
+      else if(fReverseD0Cut == kTRUE)
+	d0cut = kFALSE;
+
+      if (d0cut == kFALSE)
+        continue;
     }
 
     // add good electron

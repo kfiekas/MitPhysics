@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.20 2009/05/11 08:02:43 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.21 2009/05/19 11:42:20 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -24,6 +24,7 @@ ClassImp(mithep::MuonIDMod)
   fApplyD0Cut(kTRUE),
   fD0Cut(0.025),
   fReverseIsoCut(kFALSE),
+  fReverseD0Cut(kFALSE),
   fMuIDType(kIdUndef),
   fMuIsoType(kIsoUndef),
   fMuClassType(kClassUndef),
@@ -101,14 +102,14 @@ void MuonIDMod::Process()
     if (!idpass)
       continue;
 
-    Bool_t isopass = kFALSE;
+    Bool_t isocut = kFALSE;
     switch (fMuIsoType) {
       case kTrackCalo:
-        isopass = (mu->IsoR03SumPt() < fTrackIsolationCut) &&
+        isocut = (mu->IsoR03SumPt() < fTrackIsolationCut) &&
           (mu->IsoR03EmEt() + mu->IsoR03HadEt() < fCaloIsolationCut);
         break;
       case kTrackCaloCombined:
-        isopass = (1.0 * mu->IsoR03SumPt() + 1.0 * mu->IsoR03EmEt() + 
+        isocut = (1.0 * mu->IsoR03SumPt() + 1.0 * mu->IsoR03EmEt() + 
                    1.0 * mu->IsoR03HadEt() < fCombIsolationCut);
         break;
       case kTrackCaloSliding:
@@ -119,22 +120,28 @@ void MuonIDMod::Process()
           if ((totalIso < (pt-10.0)*5.0/15.0 && pt <= 25) ||
               (totalIso < 5.0 && mu->Pt() > 25) ||
 	       totalIso <= 0) 
-            isopass = kTRUE;
-        }
+            isocut = kTRUE;
+
+	  if     (fReverseIsoCut == kTRUE &&
+    	          isocut == kFALSE && totalIso < 10)
+	    isocut = kTRUE;
+          else if(fReverseIsoCut == kTRUE)
+	    isocut = kFALSE;
+	}
         break;
       case kNoIso:
-        isopass = kTRUE;
+        isocut = kTRUE;
         break;
       case kCustomIso:
       default:
         break;
     }
 
-    if ((isopass == kFALSE && fReverseIsoCut == kFALSE) ||
-        (isopass == kTRUE  && fReverseIsoCut == kTRUE))
+    if (isocut == kFALSE)
       continue;
 
     if (fApplyD0Cut) {
+      Bool_t d0cut = kFALSE;
       const Track *mt = mu->BestTrk();
       if (!mt)
         continue;
@@ -144,7 +151,15 @@ void MuonIDMod::Process()
         if(TMath::Abs(pD0) < TMath::Abs(d0_real)) 
           d0_real = TMath::Abs(pD0);
       }
-      if(d0_real >= fD0Cut) 
+      if(d0_real < fD0Cut) d0cut = kTRUE;
+
+      if     (fReverseD0Cut == kTRUE &&
+              d0cut == kFALSE && d0_real < 0.05)
+	d0cut = kTRUE;
+      else if(fReverseD0Cut == kTRUE)
+	d0cut = kFALSE;
+
+      if (d0cut == kFALSE)
         continue;
     }
 

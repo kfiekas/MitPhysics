@@ -1,4 +1,4 @@
-// $Id: JetCleaningMod.cc,v 1.10 2009/04/02 12:40:16 ceballos Exp $
+// $Id: JetCleaningMod.cc,v 1.11 2009/04/08 10:12:22 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -114,7 +114,7 @@ void JetCleaningMod::Process()
 
     if (isTauOverlap) continue;
 
-    CleanJets->Add(jet);     
+    CleanJets->Add(jet);
   }
 
   // sort according to pt

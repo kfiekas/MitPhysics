@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.16 2009/04/07 15:37:09 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.17 2009/04/30 06:34:02 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -40,6 +40,7 @@ namespace mithep
       Double_t            GetPtMin()                  const { return fElectronPtMin;          }
       Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
       Bool_t              GetReverseIsoCut()          const { return fReverseIsoCut;          }
+      Bool_t              GetReverseD0Cut()           const { return fReverseD0Cut;           }
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
@@ -56,6 +57,7 @@ namespace mithep
       void                SetTrackIsoCut(Double_t cut)          { fTrackIsolationCut  = cut;  }
       void                SetD0Cut(Double_t cut)                { fD0Cut = cut;               }
       void                SetReverseIsoCut(Bool_t b)            { fReverseIsoCut = b;         }
+      void                SetReverseD0Cut(Bool_t b)             { fReverseD0Cut = b;          }
 
       enum EElIdType {
         kIdUndef = 0,       //not defined
@@ -98,7 +100,8 @@ namespace mithep
       const ElectronCol      *fElectrons;              //!electron collection
       const DecayParticleCol *fConversions;            //!conversion collection
       const VertexCol        *fVertices;               //!vertices branches
-      Bool_t                  fReverseIsoCut;          //!apply reversion iso cut
+      Bool_t                  fReverseIsoCut;          //!apply reversion iso cut (default=0)
+      Bool_t                  fReverseD0Cut;           //!apply reversion d0 cut (default=0)
 
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

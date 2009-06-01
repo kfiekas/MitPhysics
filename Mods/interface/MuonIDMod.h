@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.19 2009/05/11 08:02:43 loizides Exp $
+// $Id: MuonIDMod.h,v 1.20 2009/05/19 11:42:20 loizides Exp $
 //
 // MuonIDMod
 //
@@ -38,6 +38,7 @@ namespace mithep
       const char        *GetOutputName()                const { return GetCleanMuonsName(); }   
       Double_t           GetPtMin(Double_t pt)          const { return fMuonPtMin;          }
       Bool_t             GetReverseIsoCut()             const { return fReverseIsoCut;      }
+      Bool_t             GetReverseD0Cut()              const { return fReverseD0Cut;       }
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
       void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
@@ -52,6 +53,7 @@ namespace mithep
       void               SetOutputName(const char *name)      { SetCleanMuonsName(name);    }   
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
       void               SetReverseIsoCut(Bool_t b)           { fReverseIsoCut     = b;     }
+      void               SetReverseD0Cut(Bool_t b)            { fReverseD0Cut      = b;     }
       void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
 
       enum EMuIdType {
@@ -94,6 +96,7 @@ namespace mithep
       Bool_t             fApplyD0Cut;          //=true then apply d0 cut (def=1)
       Double_t           fD0Cut;               //max d0
       Bool_t             fReverseIsoCut;       //apply reversion iso cut (default=0)
+      Bool_t             fReverseD0Cut;        //apply reversion d0 cut (default=0)
       EMuIdType          fMuIDType;            //!muon id type (imposed)
       EMuIsoType         fMuIsoType;           //!muon iso type (imposed)
       EMuClassType       fMuClassType;         //!muon class type (imposed)
