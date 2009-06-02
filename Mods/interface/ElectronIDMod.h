@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.17 2009/04/30 06:34:02 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.18 2009/06/01 17:31:38 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -95,13 +95,13 @@ namespace mithep
       Bool_t                  fApplyConvFilter;        //whether remove conversions
       Bool_t                  fApplyD0Cut;             //whether apply d0 cut
       Double_t                fD0Cut;                  //max d0
+      Bool_t                  fReverseIsoCut;          //apply reversion iso cut (default=0)
+      Bool_t                  fReverseD0Cut;           //apply reversion d0 cut (default=0)
       EElIdType               fElIdType;               //!identification scheme
       EElIsoType              fElIsoType;              //!isolation scheme
       const ElectronCol      *fElectrons;              //!electron collection
       const DecayParticleCol *fConversions;            //!conversion collection
       const VertexCol        *fVertices;               //!vertices branches
-      Bool_t                  fReverseIsoCut;          //!apply reversion iso cut (default=0)
-      Bool_t                  fReverseD0Cut;           //!apply reversion d0 cut (default=0)
 
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

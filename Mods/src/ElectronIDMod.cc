@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.23 2009/05/19 11:42:20 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.24 2009/06/01 17:31:38 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -25,13 +25,13 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyConvFilter(kTRUE),
   fApplyD0Cut(kTRUE),
   fD0Cut(0.025),
+  fReverseIsoCut(kFALSE),
+  fReverseD0Cut(kFALSE),
   fElIdType(kIdUndef),
   fElIsoType(kIsoUndef),
   fElectrons(0),
   fConversions(0),
-  fVertices(0),
-  fReverseIsoCut(kFALSE),
-  fReverseD0Cut(kFALSE)
+  fVertices(0)
 {
   // Constructor.
 }
