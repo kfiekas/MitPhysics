@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DiTauSystem.h,v 1.7 2009/01/20 10:28:36 loizides Exp $
+// $Id: DiTauSystem.h,v 1.8 2009/03/23 22:17:04 loizides Exp $
 //
 // DiTauSystem
 //
@@ -22,7 +22,6 @@ namespace mithep
   class DiTauSystem {
     public:
       DiTauSystem(const Particle *t1, const Particle *t2, const Met *met);
-      ~DiTauSystem() {}
 
       Double_t         RecoMass()        const { return fRecoMass;}
       Double_t         TransverseMass()  const { return fMT;      }

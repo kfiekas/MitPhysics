@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: EffMod.h,v 1.2 2009/02/03 20:02:43 loizides Exp $
+// $Id: EffMod.h,v 1.1 2009/04/29 15:06:41 loizides Exp $
 //
 // EffMod
 //
@@ -24,7 +24,6 @@ namespace mithep
     public:
       EffMod(const char *name="EffMod", 
              const char *title="Efficiency analysis module");
-      ~EffMod() {}
 
       void                     SetCol1Name(const char *n)       { fCol1Name = n;  }
       void                     SetCol2Name(const char *n)       { fCol2Name = n;  }

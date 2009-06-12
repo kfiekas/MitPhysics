@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DilepSelMod.h,v 1.3 2009/01/29 10:05:38 loizides Exp $
+// $Id: DilepSelMod.h,v 1.1 2009/04/29 15:07:12 loizides Exp $
 //
 // DilepSelMod
 // 
@@ -24,7 +24,6 @@ namespace mithep
     public:
       DilepSelMod(const char *name="DilepSelMod", 
                   const char *title="Dilepton selection module");
-      ~DilepSelMod() {}
 
       void         SetCleanLeptonsName(const char *n)  { fCleanLeptonsName = n; }
       void         SetIgnoreElCharge(Bool_t b)         { fIgnoreElCharge = b;   }
