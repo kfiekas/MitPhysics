@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.8 2009/04/15 17:53:14 ceballos Exp $
+// $Id: PhotonIDMod.h,v 1.9 2009/04/30 08:09:32 loizides Exp $
 //
 // PhotonIDMod
 //
@@ -13,7 +13,7 @@
 #define MITPHYSICS_MODS_PHOTONIDMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/PhotonFwd.h"
 
 namespace mithep 
 {
@@ -69,9 +69,9 @@ namespace mithep
       Double_t            fHadOverEmMax;         //maximum of hadronic/em energy
       Bool_t              fApplyPixelSeed;       //=true then apply pixel seed constraint
       Double_t            fPhotonR9Min;          //min R9 value
-      const PhotonCol    *fPhotons;              //!photon branch
       EPhIdType           fPhIdType;             //!identification scheme
       EPhIsoType          fPhIsoType;            //!isolation scheme
+      const PhotonCol    *fPhotons;              //!photon branch
     
     ClassDef(PhotonIDMod, 1) // Photon identification module
   };

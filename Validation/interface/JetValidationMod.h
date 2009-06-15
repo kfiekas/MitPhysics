@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetValidationMod.h,v 1.2 2008/12/04 13:53:34 loizides Exp $
+// $Id: JetValidationMod.h,v 1.3 2009/03/23 22:17:06 loizides Exp $
 //
 // JetValidationMod
 //
@@ -14,7 +14,8 @@
 #define MITANA_VALIDATION_JETVALIDATIONMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/JetFwd.h"
+#include "MitAna/DataTree/interface/GenJetFwd.h"
 
 class TH1D;
 class TH2D;

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: EffMod.h,v 1.1 2009/04/29 15:06:41 loizides Exp $
+// $Id: EffMod.h,v 1.2 2009/06/12 12:40:09 loizides Exp $
 //
 // EffMod
 //
@@ -13,7 +13,7 @@
 #define MITMODS_MODS_EFFMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/MCParticle.h"
 
 class TH1D;
 

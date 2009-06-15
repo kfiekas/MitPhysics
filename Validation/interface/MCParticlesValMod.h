@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MCParticlesValMod.h,v 1.1 2009/03/23 09:09:11 loizides Exp $
+// $Id: MCParticlesValMod.h,v 1.2 2009/03/23 22:17:06 loizides Exp $
 //
 //
 // Authors: C.Loizides
@@ -9,7 +9,7 @@
 #define MITPHYSICS_VALIDATION_MCPARTICLESVALMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/MCParticleFwd.h"
 
 class TH1D;
 

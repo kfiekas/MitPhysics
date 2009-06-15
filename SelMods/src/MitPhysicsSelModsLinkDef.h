@@ -1,7 +1,20 @@
-// $Id: MitPhysicsSelModsLinkDef.h,v 1.4 2009/03/22 09:04:13 loizides Exp $
+// $Id: MitPhysicsSelModsLinkDef.h,v 1.5 2009/04/29 15:07:12 loizides Exp $
 
 #ifndef MITPHYSICS_SELMODS_LINKDEF_H
 #define MITPHYSICS_SELMODS_LINKDEF_H
+
+#include "MitAna/DataCont/interface/Collection.h"
+#include "MitAna/DataTree/interface/CompositeParticle.h"
+#include "MitAna/DataTree/interface/Conversion.h"
+#include "MitAna/DataTree/interface/Electron.h"
+#include "MitAna/DataTree/interface/GenJet.h"
+#include "MitAna/DataTree/interface/Jet.h"
+#include "MitAna/DataTree/interface/Met.h"
+#include "MitAna/DataTree/interface/Muon.h"
+#include "MitAna/DataTree/interface/Particle.h"
+#include "MitAna/DataTree/interface/Photon.h"
+#include "MitAna/DataTree/interface/Track.h"
+#include "MitAna/DataTree/interface/TriggerObject.h"
 #include "MitPhysics/SelMods/interface/DilepSelMod.h"
 #include "MitPhysics/SelMods/interface/GenericSelMod.h"
 #include "MitPhysics/SelMods/interface/JetPlusIsoTrackSelMod.h"

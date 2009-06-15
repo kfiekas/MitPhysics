@@ -1,7 +1,9 @@
-// $Id: DilepSelMod.cc,v 1.3 2009/01/29 10:05:39 loizides Exp $
+// $Id: DilepSelMod.cc,v 1.1 2009/04/29 15:07:12 loizides Exp $
 
 #include "MitPhysics/SelMods/interface/DilepSelMod.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
+#include "MitAna/DataTree/interface/CompositeParticle.h"
+#include "MitAna/DataTree/interface/ParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include <TH1D.h>

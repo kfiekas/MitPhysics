@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.11 2009/03/23 14:23:06 loizides Exp $
+// $Id: JetIDMod.h,v 1.12 2009/05/09 18:35:57 ceballos Exp $
 //
 // JetIDMod
 //
@@ -13,7 +13,6 @@
 #define MITPHYSICS_MODS_JETIDMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
 
 namespace mithep 
 {

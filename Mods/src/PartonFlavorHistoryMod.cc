@@ -1,8 +1,9 @@
-// $Id: $
+// $Id: PartonFlavorHistoryMod.cc,v 1.6 2009/04/30 08:09:32 loizides Exp $
 
 #include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
 #include "MitAna/DataUtil/interface/Debug.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: LeptonPlusIsoTrackSelMod.h,v 1.1 2009/03/22 09:04:13 loizides Exp $
+// $Id: LeptonPlusIsoTrackSelMod.h,v 1.2 2009/03/23 22:17:04 loizides Exp $
 //
 // LeptonPlusIsoTrackSelMod
 // 
@@ -13,7 +13,9 @@
 #define MITPHYSICS_SELMODS_LEPTONPLUSISOTRACKSELMOD_H
 
 #include "MitAna/TreeMod/interface/BaseSelMod.h" 
-#include <TH1D.h>
+#include "MitAna/DataTree/interface/ParticleFwd.h"
+#include "MitAna/DataTree/interface/TrackFwd.h"
+class TH1D;
 
 namespace mithep 
 {

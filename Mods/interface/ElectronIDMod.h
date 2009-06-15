@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.18 2009/06/01 17:31:38 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.19 2009/06/02 05:30:44 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -15,7 +15,9 @@
 #define MITPHYSICS_MODS_ELECTRONIDMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/ElectronFwd.h"
+#include "MitAna/DataTree/interface/VertexFwd.h"
+#include "MitAna/DataTree/interface/DecayParticleFwd.h"
 
 namespace mithep 
 {

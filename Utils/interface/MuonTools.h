@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.7 2009/04/07 15:37:09 loizides Exp $
+// $Id: MuonTools.h,v 1.8 2009/05/11 08:01:31 loizides Exp $
 //
 // MuonTools
 //
@@ -19,7 +19,6 @@
 #define MITPHYSICS_UTILS_MUONTOOLS_H
 
 #include "MitAna/DataTree/interface/Muon.h"
-#include "MitAna/DataTree/interface/Collections.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "TH2D.h"
 

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenericSelMod.h,v 1.3 2009/01/26 13:19:24 loizides Exp $
+// $Id: GenericSelMod.h,v 1.4 2009/03/23 22:17:03 loizides Exp $
 //
 // GenericSelMod
 // 
@@ -12,6 +12,7 @@
 #ifndef MITPHYSICS_SELMODS_GENERICSELMOD_H
 #define MITPHYSICS_SELMODS_GENERICSELMOD_H
 
+#include "MitAna/DataCont/interface/Collection.h" 
 #include "MitAna/TreeMod/interface/BaseSelMod.h" 
 #include <TH1D.h>
 

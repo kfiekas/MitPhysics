@@ -1,6 +1,11 @@
-// $Id: JetCleaningMod.cc,v 1.11 2009/04/08 10:12:22 ceballos Exp $
+// $Id: JetCleaningMod.cc,v 1.12 2009/06/01 17:31:38 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
+#include "MitAna/DataTree/interface/JetCol.h"
+#include "MitAna/DataTree/interface/PhotonCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/TauCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -41,10 +46,10 @@ void JetCleaningMod::Process()
     CleanMuons = GetObjThisEvt<MuonCol>(fCleanMuonsName);
   const PhotonCol   *CleanPhotons   = 0;
   if (!fCleanPhotonsName.IsNull())
-  CleanPhotons    = GetObjThisEvt<PhotonCol>(fCleanPhotonsName);
+    CleanPhotons    = GetObjThisEvt<PhotonCol>(fCleanPhotonsName);
   const TauCol   *CleanTaus   = 0;
   if (fApplyTauRemoval && !fCleanTausName.IsNull())
-  CleanTaus    = GetObjThisEvt<TauCol>(fCleanTausName);
+    CleanTaus    = GetObjThisEvt<TauCol>(fCleanTausName);
 
   // create output collection
   JetOArr *CleanJets = new JetOArr;

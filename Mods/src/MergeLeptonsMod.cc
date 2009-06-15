@@ -1,6 +1,9 @@
-// $Id: MergeLeptonsMod.cc,v 1.1 2008/12/10 11:44:33 loizides Exp $
+// $Id: MergeLeptonsMod.cc,v 1.2 2008/12/10 17:28:23 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/ParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;

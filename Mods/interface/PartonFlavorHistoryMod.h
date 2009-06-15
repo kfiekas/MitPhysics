@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: PartonFlavorHistoryMod.h,v 1.3 2009/04/30 08:09:32 loizides Exp $
 //
 // PartonFlavorHistoryMod
 //
@@ -13,7 +13,7 @@
 #define MITPHYSICS_MODS_PARTONFLAVORHISTORYMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/MCParticleFwd.h"
 
 class TH1D;
 class TH2D;
@@ -33,13 +33,13 @@ namespace mithep
         kMCTypeVQQ           //V+2 heavy flavor jets
       };
 
-      const char   *GetMCPartName()                 const { return fMCPartName;                }
-      const char   *GetMCSampleType()               const { return fMCSampleType;              }
-      const Bool_t  GetApplyPartonFlavorFilter()    const { return fApplyPartonFlavorFilter;   }
+      const char          *GetMCPartName()               const { return fMCPartName;              }
+      const char          *GetMCSampleType()             const { return fMCSampleType;            }
+      const Bool_t         GetApplyPartonFlavorFilter()  const { return fApplyPartonFlavorFilter; }
 
-      void          SetMCPartName(const char *s)	  { fMCPartName                = s;    }
-      void          SetMCSampleType(const char *s)	  { fMCSampleType              = s;    }
-      void          SetApplyPartonFlavorFilter(Bool_t b)  { fApplyPartonFlavorFilter   = b;    }
+      void                 SetMCPartName(const char *s)	        { fMCPartName              = s;   }
+      void                 SetMCSampleType(const char *s)       { fMCSampleType            = s;   }
+      void                 SetApplyPartonFlavorFilter(Bool_t b) { fApplyPartonFlavorFilter = b;   }
        
     protected:
       void                 Process();

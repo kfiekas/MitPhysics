@@ -1,7 +1,10 @@
-// $Id: TauCleaningMod.cc,v 1.2 2009/04/08 17:48:13 ceballos Exp $
+// $Id: TauCleaningMod.cc,v 1.3 2009/04/09 08:45:49 loizides Exp $
 
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/CaloTauCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;

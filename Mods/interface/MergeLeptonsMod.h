@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MergeLeptonsMod.h,v 1.2 2008/12/10 17:28:22 loizides Exp $
+// $Id: MergeLeptonsMod.h,v 1.3 2009/03/23 14:23:06 loizides Exp $
 //
 // MergeLeptonsMod
 //
@@ -13,7 +13,9 @@
 #define MITPHYSICS_MODS_MERGELEPTONSMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/ElectronFwd.h"
+#include "MitAna/DataTree/interface/MuonFwd.h"
+#include "MitAna/DataTree/interface/ParticleFwd.h"
 
 namespace mithep 
 {

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronCleaningMod.h,v 1.5 2008/12/10 17:28:22 loizides Exp $
+// $Id: ElectronCleaningMod.h,v 1.6 2009/03/23 14:23:06 loizides Exp $
 //
 // ElectronCleaningMod
 //
@@ -13,7 +13,6 @@
 #define MITPHYSICS_MODS_ELECTRONCLEANINGMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
 
 namespace mithep 
 {

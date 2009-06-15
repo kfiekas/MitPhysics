@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DilepSelMod.h,v 1.1 2009/04/29 15:07:12 loizides Exp $
+// $Id: DilepSelMod.h,v 1.2 2009/06/12 12:40:52 loizides Exp $
 //
 // DilepSelMod
 // 
@@ -13,7 +13,6 @@
 #define MITPHYSICS_SELMODS_DILEPSELMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
 
 class TH1D;
 

@@ -1,6 +1,7 @@
-// $Id: PhotonIDMod.cc,v 1.5 2009/04/15 17:53:14 ceballos Exp $
+// $Id: PhotonIDMod.cc,v 1.6 2009/05/19 11:42:20 loizides Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
+#include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;
@@ -18,9 +19,9 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fHadOverEmMax(0.03),
   fApplyPixelSeed(kTRUE),
   fPhotonR9Min(0.8),
-  fPhotons(0),
   fPhIdType(kIdUndef),
-  fPhIsoType(kIsoUndef)
+  fPhIsoType(kIsoUndef),
+  fPhotons(0)
 {
   // Constructor.
 }

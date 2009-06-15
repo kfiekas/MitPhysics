@@ -1,7 +1,8 @@
-// $Id: TauIDMod.cc,v 1.6 2009/04/09 10:45:18 ceballos Exp $
+// $Id: TauIDMod.cc,v 1.7 2009/04/09 11:24:58 loizides Exp $
 
 #include "MitPhysics/Mods/interface/TauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitAna/DataTree/interface/CaloTauCol.h"
 
 using namespace mithep;
 

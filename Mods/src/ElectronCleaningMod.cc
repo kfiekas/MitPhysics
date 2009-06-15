@@ -1,7 +1,10 @@
-// $Id: ElectronCleaningMod.cc,v 1.7 2008/12/10 21:19:25 loizides Exp $
+// $Id: ElectronCleaningMod.cc,v 1.8 2009/02/18 15:52:33 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/Track.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;

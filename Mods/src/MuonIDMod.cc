@@ -1,7 +1,9 @@
-// $Id: MuonIDMod.cc,v 1.21 2009/05/19 11:42:20 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.22 2009/06/01 17:31:38 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;

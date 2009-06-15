@@ -1,8 +1,11 @@
-// $Id: $
+// $Id: PhotonPlusIsoTrackSelMod.cc,v 1.1 2009/03/22 09:04:13 loizides Exp $
 
 #include "MitPhysics/SelMods/interface/PhotonPlusIsoTrackSelMod.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/PhotonCol.h" 
+#include "MitAna/DataTree/interface/TrackCol.h" 
+#include <TH1D.h>
 
 using namespace mithep;
 

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MergerMod.h,v 1.2 2009/03/02 13:27:17 loizides Exp $
+// $Id: MergerMod.h,v 1.3 2009/03/23 14:23:06 loizides Exp $
 //
 // MergerMod
 //
@@ -13,7 +13,7 @@
 #define MITPHYSICS_MODS_MERGERMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataCont/interface/ObjArray.h"
 
 namespace mithep 
 {

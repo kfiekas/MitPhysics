@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.10 2009/04/05 18:36:26 loizides Exp $
+// $Id: JetCleaningMod.h,v 1.11 2009/04/08 10:12:21 ceballos Exp $
 //
 // JetCleaningMod
 //
@@ -13,7 +13,6 @@
 #define MITPHYSICS_MODS_JETCLEANINGMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
 
 namespace mithep 
 {

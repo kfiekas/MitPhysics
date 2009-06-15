@@ -1,8 +1,11 @@
-// $Id: $
+// $Id: JetPlusIsoTrackSelMod.cc,v 1.1 2009/03/22 09:04:13 loizides Exp $
 
 #include "MitPhysics/SelMods/interface/JetPlusIsoTrackSelMod.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/JetCol.h"
+#include "MitAna/DataTree/interface/TrackCol.h"
+#include <TH1D.h>
 
 using namespace mithep;
 

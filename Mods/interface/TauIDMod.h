@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: TauIDMod.h,v 1.4 2009/04/09 10:25:02 ceballos Exp $
+// $Id: TauIDMod.h,v 1.5 2009/04/09 11:24:58 loizides Exp $
 //
 // TauIDMod
 //
@@ -13,7 +13,7 @@
 #define MITPHYSICS_MODS_TauIDMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/CaloTauFwd.h"
 
 namespace mithep 
 {

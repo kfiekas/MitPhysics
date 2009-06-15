@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.20 2009/05/19 11:42:20 loizides Exp $
+// $Id: MuonIDMod.h,v 1.21 2009/06/01 17:31:38 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -16,7 +16,8 @@
 #define MITPHYSICS_MODS_MUONIDMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/MuonFwd.h"
+#include "MitAna/DataTree/interface/VertexFwd.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
 
 namespace mithep 

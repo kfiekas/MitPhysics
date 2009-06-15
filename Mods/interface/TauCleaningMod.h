@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: TauCleaningMod.h,v 1.1 2009/04/08 10:11:44 ceballos Exp $
+// $Id: TauCleaningMod.h,v 1.2 2009/04/09 08:45:48 loizides Exp $
 //
 // TauCleaningMod
 //
@@ -13,7 +13,6 @@
 #define MITPHYSICS_MODS_TAUCLEANINGMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
 
 namespace mithep 
 {

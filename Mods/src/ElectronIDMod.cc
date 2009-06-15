@@ -1,6 +1,10 @@
-// $Id: ElectronIDMod.cc,v 1.24 2009/06/01 17:31:38 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.25 2009/06/02 05:30:44 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
+#include "MitAna/DataTree/interface/StableData.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/VertexCol.h"
+#include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;

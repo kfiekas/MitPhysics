@@ -1,7 +1,8 @@
-// $Id: JetIDMod.cc,v 1.15 2009/03/23 14:23:06 loizides Exp $
+// $Id: JetIDMod.cc,v 1.16 2009/05/09 18:35:57 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/JetCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;

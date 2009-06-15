@@ -1,7 +1,8 @@
-// $Id: HKFactorProducer.cc,v 1.1 2009/04/06 10:43:58 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.2 2009/04/07 15:37:09 loizides Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>

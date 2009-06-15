@@ -13,7 +13,9 @@
 #define MITPHYSICS_SELMODS_PHOTONPLUSISOTRACKSELMOD_H
 
 #include "MitAna/TreeMod/interface/BaseSelMod.h" 
-#include <TH1D.h>
+#include "MitAna/DataTree/interface/PhotonFwd.h" 
+#include "MitAna/DataTree/interface/TrackFwd.h" 
+class TH1D;
 
 namespace mithep 
 {
