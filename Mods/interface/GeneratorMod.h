@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.28 2009/06/11 13:16:53 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.29 2009/06/15 15:00:21 loizides Exp $
 //
 // GeneratorMod
 //
@@ -13,7 +13,7 @@
 #define MITPHYSICS_MODS_GENERATORMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/MCParticleFwd.h"
+#include "MitAna/DataTree/interface/Collections.h"
 
 class TH1D;
 class TH2D;
@@ -104,6 +104,7 @@ namespace mithep
       TH1D                *hDGenRadPhotons[20]; //!histos for rad photons
       TH1D                *hDGenISRPhotons[20]; //!histos for ISR photons
       TH1D                *hDVMass[20];         //!histos for auxiliar MG work
+      TH1D                *hDVVMass[50];        //!histos for auxiliar VV work
 
     ClassDef(GeneratorMod, 1) // Module to gather generator information
   };

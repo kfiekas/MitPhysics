@@ -1,9 +1,7 @@
-// $Id: GeneratorMod.cc,v 1.42 2009/06/11 13:16:53 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.43 2009/06/15 15:00:21 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
-#include "MitAna/DataTree/interface/MetCol.h"
-#include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>
@@ -505,6 +503,294 @@ void GeneratorMod::Process()
 
   delete GenTempMG0;
 
+  // --------------------------------
+  // Begin special study about VVjets
+  // --------------------------------
+  if(sumV[0] + 4*sumV[1] == 2 || sumV[0] + 4*sumV[1] == 5 || sumV[0] + 4*sumV[1] == 8){
+    MCParticleOArr *GenTempMG1    = new MCParticleOArr;
+    Double_t diBosonMass[2] = {0., 0.};
+    for (UInt_t i=0; i<fParticles->GetEntries(); ++i) {
+      const MCParticle *p = fParticles->At(i);
+
+      if (p->IsParton() && p->NDaughters() >= 2) {
+	CompositeParticle *diBoson = new CompositeParticle();
+	if (p->HasDaughter(MCParticle::kMu) && p->HasDaughter(MCParticle::kMuNu)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kMu) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kMu));
+	    diBoson->AddDaughter(p->FindDaughter(MCParticle::kMu));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kMuNu));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 2)
+              hDVVMass[0]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[1]->Fill(TMath::Min(diBoson->Mass(),199.999));
+	  }
+	}
+	if (p->HasDaughter(MCParticle::kEl) && p->HasDaughter(MCParticle::kElNu)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kEl) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kEl));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kEl));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kElNu));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 2)
+              hDVVMass[2]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[3]->Fill(TMath::Min(diBoson->Mass(),199.999));
+          }
+	}
+	if (p->HasDaughter(MCParticle::kTau) && p->HasDaughter(MCParticle::kTauNu)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kTau) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kTau));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kTau));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kTauNu));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 2)
+              hDVVMass[4]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[5]->Fill(TMath::Min(diBoson->Mass(),199.999));
+	  }
+	}
+	if (p->HasDaughter(MCParticle::kMu,kTRUE) && p->HasDaughter(-1*MCParticle::kMu,kTRUE)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kMu,kTRUE) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kMu,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kMu,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(-1*MCParticle::kMu,kTRUE));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[6]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 8)
+              hDVVMass[7]->Fill(TMath::Min(diBoson->Mass(),199.999));
+	  }
+	}
+	if (p->HasDaughter(MCParticle::kEl,kTRUE) && p->HasDaughter(-1*MCParticle::kEl,kTRUE)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kEl,kTRUE) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kEl,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kEl,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(-1*MCParticle::kEl,kTRUE));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[8]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 8)
+              hDVVMass[9]->Fill(TMath::Min(diBoson->Mass(),199.999));
+	  }
+	}
+	if (p->HasDaughter(MCParticle::kTau,kTRUE) && p->HasDaughter(-1*MCParticle::kTau,kTRUE)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kTau,kTRUE) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kTau,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kTau,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(-1*MCParticle::kTau,kTRUE));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[10]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 8)
+              hDVVMass[11]->Fill(TMath::Min(diBoson->Mass(),199.999));
+	  }
+	}
+	if (p->HasDaughter(MCParticle::kMuNu,kTRUE) && p->HasDaughter(-1*MCParticle::kMuNu,kTRUE)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kMuNu,kTRUE) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kMuNu,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kMuNu,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(-1*MCParticle::kMuNu,kTRUE));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[12]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 8)
+              hDVVMass[13]->Fill(TMath::Min(diBoson->Mass(),199.999));
+	  }
+	}
+	if (p->HasDaughter(MCParticle::kElNu,kTRUE) && p->HasDaughter(-1*MCParticle::kElNu,kTRUE)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kElNu,kTRUE) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kElNu,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kElNu,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(-1*MCParticle::kElNu,kTRUE));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[14]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 8)
+              hDVVMass[15]->Fill(TMath::Min(diBoson->Mass(),199.999));
+	  }
+	}
+	if (p->HasDaughter(MCParticle::kTauNu,kTRUE) && p->HasDaughter(-1*MCParticle::kTauNu,kTRUE)) {
+          isOld = kFALSE;
+	  for(UInt_t nl = 0; nl < GenTempMG1->GetEntries(); nl++){
+	    if(p->FindDaughter(MCParticle::kTauNu,kTRUE) == GenTempMG1->At(nl)) {
+	      isOld = kTRUE;
+	      break;
+	    }
+	  }
+	  if(isOld == kFALSE){
+	    GenTempMG1->Add(p->FindDaughter(MCParticle::kTauNu,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(MCParticle::kTauNu,kTRUE));
+            diBoson->AddDaughter(p->FindDaughter(-1*MCParticle::kTauNu,kTRUE));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 5)
+              hDVVMass[16]->Fill(TMath::Min(diBoson->Mass(),199.999));
+            if (GetFillHist() && sumV[0] + 4*sumV[1] == 8)
+              hDVVMass[17]->Fill(TMath::Min(diBoson->Mass(),199.999));
+	  }
+	}
+	if     (diBoson && diBosonMass[0] <= 0) diBosonMass[0] = diBoson->Mass();
+	else if(diBoson && diBosonMass[1] <= 0) diBosonMass[1] = diBoson->Mass();
+	delete diBoson;
+      }
+      else if (p->Status() == 3 && (p->Is(MCParticle::kZ)  || p->Is(MCParticle::kW))) {
+	if     (diBosonMass[0] <= 0) diBosonMass[0] = p->Mass();
+	else if(diBosonMass[1] <= 0) diBosonMass[1] = p->Mass();
+        if (GetFillHist()) {
+	  if     (sumV[0] + 4*sumV[1] == 2 && p->Is(MCParticle::kW) && p->HasDaughter(MCParticle::kMu)  && p->HasDaughter(MCParticle::kMuNu))
+	    hDVVMass[0]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 2 && p->Is(MCParticle::kW) && p->HasDaughter(MCParticle::kEl)  && p->HasDaughter(MCParticle::kElNu))
+	    hDVVMass[2]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 2 && p->Is(MCParticle::kW) && p->HasDaughter(MCParticle::kTau) && p->HasDaughter(MCParticle::kTauNu))
+	    hDVVMass[4]->Fill(TMath::Min(p->Mass(),199.999));
+
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kW) && p->HasDaughter(MCParticle::kMu)  && p->HasDaughter(MCParticle::kMuNu))
+	    hDVVMass[1]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kW) && p->HasDaughter(MCParticle::kEl)  && p->HasDaughter(MCParticle::kElNu))
+	    hDVVMass[3]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kW) && p->HasDaughter(MCParticle::kTau) && p->HasDaughter(MCParticle::kTauNu))
+	    hDVVMass[5]->Fill(TMath::Min(p->Mass(),199.999));
+
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kMu,kTRUE) && p->HasDaughter(-1*MCParticle::kMu,kTRUE))
+	    hDVVMass[6]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kEl,kTRUE) && p->HasDaughter(-1*MCParticle::kEl,kTRUE))
+	    hDVVMass[8]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kTau,kTRUE) && p->HasDaughter(-1*MCParticle::kTau,kTRUE))
+	    hDVVMass[10]->Fill(TMath::Min(p->Mass(),199.999));
+
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kMuNu,kTRUE) && p->HasDaughter(-1*MCParticle::kMuNu,kTRUE))
+	    hDVVMass[12]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kElNu,kTRUE) && p->HasDaughter(-1*MCParticle::kElNu,kTRUE))
+	    hDVVMass[14]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kTauNu,kTRUE) && p->HasDaughter(-1*MCParticle::kTauNu,kTRUE))
+	    hDVVMass[16]->Fill(TMath::Min(p->Mass(),199.999));
+
+	  else if(sumV[0] + 4*sumV[1] == 8 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kMu,kTRUE) && p->HasDaughter(-1*MCParticle::kMu,kTRUE))
+	    hDVVMass[7]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 8 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kEl,kTRUE) && p->HasDaughter(-1*MCParticle::kEl,kTRUE))
+	    hDVVMass[9]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 8 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kTau,kTRUE) && p->HasDaughter(-1*MCParticle::kTau,kTRUE))
+	    hDVVMass[11]->Fill(TMath::Min(p->Mass(),199.999));
+
+	  else if(sumV[0] + 4*sumV[1] == 8 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kMuNu,kTRUE) && p->HasDaughter(-1*MCParticle::kMuNu,kTRUE))
+	    hDVVMass[13]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 8 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kElNu,kTRUE) && p->HasDaughter(-1*MCParticle::kElNu,kTRUE))
+	    hDVVMass[15]->Fill(TMath::Min(p->Mass(),199.999));
+	  else if(sumV[0] + 4*sumV[1] == 8 && p->Is(MCParticle::kZ) && p->HasDaughter(MCParticle::kTauNu,kTRUE) && p->HasDaughter(-1*MCParticle::kTauNu,kTRUE))
+	    hDVVMass[17]->Fill(TMath::Min(p->Mass(),199.999));
+	}
+      }
+    } // end loop of particles
+    if(diBosonMass[0] > 70 && diBosonMass[0] < 110 && diBosonMass[1] > 70 && diBosonMass[1] < 110){
+      if(sumV[0] + 4*sumV[1] == 2){
+	if     (sumVVFlavor[0] == 2)    		    hDVVMass[18]->Fill(0.);
+	else if(sumVVFlavor[1] == 2)    		    hDVVMass[18]->Fill(1.);
+	else if(sumVVFlavor[2] == 2)                        hDVVMass[18]->Fill(2.);
+	else if(sumVVFlavor[0] == 1 && sumVVFlavor[1] == 1) hDVVMass[18]->Fill(3.);
+	else if(sumVVFlavor[0] == 1 && sumVVFlavor[2] == 1) hDVVMass[18]->Fill(4.);
+	else if(sumVVFlavor[1] == 1 && sumVVFlavor[2] == 1) hDVVMass[18]->Fill(5.);
+	else                                                hDVVMass[18]->Fill(6.);
+      }
+      if(sumV[0] + 4*sumV[1] == 5){
+	if     (sumVVFlavor[3] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(0.);
+	else if(sumVVFlavor[3] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(1.);
+	else if(sumVVFlavor[3] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(2.);
+	else if(sumVVFlavor[4] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(3.);
+	else if(sumVVFlavor[4] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(4.);
+	else if(sumVVFlavor[4] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(5.);
+	else if(sumVVFlavor[5] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(6.);
+	else if(sumVVFlavor[5] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(7.);
+	else if(sumVVFlavor[5] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(8.);
+	else                           			    hDVVMass[19]->Fill(9.);
+      }
+      if(sumV[0] + 4*sumV[1] == 8 &&
+         sumVVFlavor[3] + sumVVFlavor[4] +sumVVFlavor[5] == 2){
+	if     (sumVVFlavor[3] == 2)  			     hDVVMass[20]->Fill(0.);
+	else if(sumVVFlavor[4] == 2)  			     hDVVMass[20]->Fill(1.);
+	else if(sumVVFlavor[5] == 2)  			     hDVVMass[20]->Fill(2.);
+	else if(sumVVFlavor[3] == 1 && sumVVFlavor[4] == 1)  hDVVMass[20]->Fill(3.);
+	else if(sumVVFlavor[3] == 1 && sumVVFlavor[5] == 1)  hDVVMass[20]->Fill(4.);
+	else if(sumVVFlavor[4] == 1 && sumVVFlavor[5] == 1)  hDVVMass[20]->Fill(5.);
+	else                                                 hDVVMass[20]->Fill(6.);
+      }
+      else if(sumV[0] + 4*sumV[1] == 8){
+	if     (sumVVFlavor[6] == 2)  			     hDVVMass[21]->Fill(0.);
+	else if(sumVVFlavor[7] == 2)  			     hDVVMass[21]->Fill(1.);
+	else if(sumVVFlavor[8] == 2)  			     hDVVMass[21]->Fill(2.);
+	else if(sumVVFlavor[3] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(3.);
+	else if(sumVVFlavor[3] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(4.);
+	else if(sumVVFlavor[3] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(5.);
+	else if(sumVVFlavor[4] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(6.);
+	else if(sumVVFlavor[4] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(7.);
+	else if(sumVVFlavor[4] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(8.);
+	else if(sumVVFlavor[5] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(9.);
+	else if(sumVVFlavor[5] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(10.);
+	else if(sumVVFlavor[5] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(11.);
+	else if(sumVVFlavor[6] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(12.);
+	else if(sumVVFlavor[6] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(13.);
+	else if(sumVVFlavor[7] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(14.);
+	else                                                 hDVVMass[21]->Fill(15.);
+      }
+    } // 60<mV1/2<120
+    if(sumV[0] + 4*sumV[1] == 2) hDVVMass[22]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
+    if(sumV[0] + 4*sumV[1] == 2) hDVVMass[23]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
+    if(sumV[0] + 4*sumV[1] == 5) hDVVMass[24]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
+    if(sumV[0] + 4*sumV[1] == 5) hDVVMass[25]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
+    if(sumV[0] + 4*sumV[1] == 8) hDVVMass[26]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
+    if(sumV[0] + 4*sumV[1] == 8) hDVVMass[27]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
+    delete GenTempMG1;
+  } // WW, WZ or ZZ
+  // --------------------------------
+  // End special study about VVjets
+  // --------------------------------
+
   Met *theMET = new Met(totalMET[0], totalMET[1]);
   theMET->SetElongitudinal(totalMET[2]);
   GenMet->AddOwned(theMET);
@@ -533,11 +819,6 @@ void GeneratorMod::Process()
   AddObjThisEvt(GenPhotons);
   AddObjThisEvt(GenRadPhotons);
   AddObjThisEvt(GenISRPhotons);
-
-  //if(GenqqHs->GetEntries() == 0) {
-  //  SkipEvent();
-  //  return;
-  //}
 
   // fill histograms if requested
   if (GetFillHist()) {
@@ -873,146 +1154,158 @@ void GeneratorMod::SlaveBegin()
 
   // fill histograms
   if (GetFillHist()) {
-    char sb[1024];
     // MET
-    sprintf(sb,"hDGenMet_%d", 0);  hDGenMet[0]  = new TH1D(sb,sb,200,0,200); 
-    sprintf(sb,"hDGenMet_%d", 1);  hDGenMet[1]  = new TH1D(sb,sb,400,-200,200); 
-    sprintf(sb,"hDGenMet_%d", 2);  hDGenMet[2]  = new TH1D(sb,sb,400,-200,200); 
-    sprintf(sb,"hDGenMet_%d", 3);  hDGenMet[3]  = new TH1D(sb,sb,400,-1000,1000); 
-    for(Int_t i=0; i<4; i++) AddOutput(hDGenMet[i]);
+    AddTH1(hDGenMet[0],"hDGenMet_0","Gen MET Pt;p_{t};#",200,0,200);
+    AddTH1(hDGenMet[1],"hDGenMet_1","Gen MET Px;p_{x};#",400,-200,200); 
+    AddTH1(hDGenMet[2],"hDGenMet_2","Gen MET Py;p_{y};#",400,-200,200); 
+    AddTH1(hDGenMet[3],"hDGenMet_3","Gen MET Pz;p_{z};#",400,-1000,1000);
 
     // leptons from W
-    sprintf(sb,"hDGenLeptons_%d", 0);  hDGenLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenLeptons_%d", 1);  hDGenLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d", 2);  hDGenLeptons[2]  = new TH1D(sb,sb,50,0.0,5.0); 
-    sprintf(sb,"hDGenLeptons_%d", 3);  hDGenLeptons[3]  = new TH1D(sb,sb,90,0.0,180.0); 
-    sprintf(sb,"hDGenLeptons_%d", 4);  hDGenLeptons[4]  = new TH1D(sb,sb,1000,0.0,1000.0); 
-    sprintf(sb,"hDGenLeptons_%d", 5);  hDGenLeptons[5]  = new TH1D(sb,sb,50,0.0,5.0); 
-    sprintf(sb,"hDGenLeptons_%d", 6);  hDGenLeptons[6]  = new TH1D(sb,sb,50,0.0,5.0); 
-    sprintf(sb,"hDGenLeptons_%d", 7);  hDGenLeptons[7]  = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d", 8);  hDGenLeptons[8]  = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d", 9);  hDGenLeptons[9]  = new TH1D(sb,sb,1000,0.0,1000.0); 
-    sprintf(sb,"hDGenLeptons_%d",10);  hDGenLeptons[10] = new TH1D(sb,sb,90,0.0,180.0); 
-    sprintf(sb,"hDGenLeptons_%d",11);  hDGenLeptons[11] = new TH1D(sb,sb,100,0.0,5.0); 
-    sprintf(sb,"hDGenLeptons_%d",12);  hDGenLeptons[12] = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d",13);  hDGenLeptons[13] = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d",14);  hDGenLeptons[14] = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d",15);  hDGenLeptons[15] = new TH1D(sb,sb,1000,0.0,1000.0); 
-    sprintf(sb,"hDGenLeptons_%d",16);  hDGenLeptons[16] = new TH1D(sb,sb,1000,0.0,1000.0); 
-    sprintf(sb,"hDGenLeptons_%d",17);  hDGenLeptons[17] = new TH1D(sb,sb,100,0.0,5.0); 
-    sprintf(sb,"hDGenLeptons_%d",18);  hDGenLeptons[18] = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d",19);  hDGenLeptons[19] = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d",20);  hDGenLeptons[20] = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d",21);  hDGenLeptons[21] = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenLeptons_%d",22);  hDGenLeptons[22] = new TH1D(sb,sb,1000,0.0,1000.0); 
-    sprintf(sb,"hDGenLeptons_%d",23);  hDGenLeptons[23] = new TH1D(sb,sb,1000,0.0,1000.0); 
-    sprintf(sb,"hDGenLeptons_%d",24);  hDGenLeptons[24] = new TH1D(sb,sb,100,0.0,5.0); 
-    for(Int_t i=0; i<25; i++) AddOutput(hDGenLeptons[i]);
+    AddTH1(hDGenLeptons[0] ,"hDGenLeptons_0","Number of leptons from W/Z;N_{leptons};#",10,-0.5,9.5); 
+    AddTH1(hDGenLeptons[1] ,"hDGenLeptons_1","Pt leptons from W/Z;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[2] ,"hDGenLeptons_2","Eta leptons from W/Z;#eta;#",50,0.0,5.0); 
+    AddTH1(hDGenLeptons[3] ,"hDGenLeptons_3","Phi leptons from W/Z;#phi;#",90,0.0,180.0); 
+    AddTH1(hDGenLeptons[4] ,"hDGenLeptons_4","Dilepton mass from W/Z;m_{ll};#",1000,0.0,1000.0);
+    AddTH1(hDGenLeptons[5] ,"hDGenLeptons_5","Eta Max for 2 lepton case;#eta;#",50,0.0,5.0); 
+    AddTH1(hDGenLeptons[6] ,"hDGenLeptons_6","Eta Min for 2 lepton case;#eta;#",50,0.0,5.0); 
+    AddTH1(hDGenLeptons[7] ,"hDGenLeptons_7","Pt Max for 2 lepton case;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[8] ,"hDGenLeptons_8","Pt Min for 2 lepton case;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[9] ,"hDGenLeptons_9","DiLepton mass for 2 lepton case;p_{t};#",1000,0.0,1000.0);
+    AddTH1(hDGenLeptons[10],"hDGenLeptons_10","Delta Phi ll for 2 lepton case;#Delta#phi_{ll};#",90,0.0,180.0); 
+    AddTH1(hDGenLeptons[11],"hDGenLeptons_11","Delta R ll;#Delta R_{ll};#",100,0.0,5.0); 
+    AddTH1(hDGenLeptons[12],"hDGenLeptons_12","Pt Max for 3 lepton case;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[13],"hDGenLeptons_13","Pt 2nd for 3 lepton case;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[14],"hDGenLeptons_14","Pt Min for 3 lepton case;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[15],"hDGenLeptons_15","Dilepton mass for 3 lepton case;m_{ll};#",1000,0.0,1000.0); 
+    AddTH1(hDGenLeptons[16],"hDGenLeptons_16","Trilepton mass for 3 lepton case;m_{lll};#",1000,0.0,1000.0); 
+    AddTH1(hDGenLeptons[17],"hDGenLeptons_17","Delta R Minimum between leptons for 3 lepton case;#Delta R_{ll};#",100,0.0,5.0); 
+    AddTH1(hDGenLeptons[18],"hDGenLeptons_18","Pt Max for 4 lepton case;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[19],"hDGenLeptons_19","Pt 2nd for 4 lepton case;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[20],"hDGenLeptons_20","Pt 3rd for 4 lepton case;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[21],"hDGenLeptons_21","Pt 4th for 4 lepton case;#",100,0.0,200.0); 
+    AddTH1(hDGenLeptons[22],"hDGenLeptons_22","Dilepton mass for 4 lepton case;m_{ll};#",1000,0.0,1000.0); 
+    AddTH1(hDGenLeptons[23],"hDGenLeptons_23","Fourlepton mass for 3 lepton case;m_{llll};#",1000,0.0,1000.0); 
+    AddTH1(hDGenLeptons[24],"hDGenLeptons_24","Delta R Minimum between leptons for 4 lepton case;#Delta R_{ll}#",100,0.0,5.0); 
 
     // all leptons
-    sprintf(sb,"hDGenAllLeptons_%d", 0);  hDGenAllLeptons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenAllLeptons_%d", 1);  hDGenAllLeptons[1]  = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenAllLeptons_%d", 2);  hDGenAllLeptons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
-    sprintf(sb,"hDGenAllLeptons_%d", 3);  hDGenAllLeptons[3]  = new TH1D(sb,sb,90,0.0,180.0); 
-    for(Int_t i=0; i<4; i++) AddOutput(hDGenAllLeptons[i]);
+    AddTH1(hDGenAllLeptons[0] ,"hDGenAllLeptons_0","Number of all leptons;N_{leptons};#",10,-0.5,9.5); 
+    AddTH1(hDGenAllLeptons[1] ,"hDGenAllLeptons_1","Pt all leptons;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenAllLeptons[2] ,"hDGenAllLeptons_2","Eta all leptons;#eta;#",50,0.0,5.0); 
+    AddTH1(hDGenAllLeptons[3] ,"hDGenAllLeptons_3","Phi all leptons;#phi;#",90,0.0,180.0); 
 
     // taus
-    sprintf(sb,"hDGenTaus_%d", 0);  hDGenTaus[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenTaus_%d", 1);  hDGenTaus[1]  = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenTaus_%d", 2);  hDGenTaus[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
-    sprintf(sb,"hDGenTaus_%d", 3);  hDGenTaus[3]  = new TH1D(sb,sb,90,0.0,180.0); 
-    for(Int_t i=0; i<4; i++) AddOutput(hDGenTaus[i]);
+    AddTH1(hDGenTaus[0] ,"hDGenTaus_0","Number of taus;N_{tau};#",10,-0.5,9.5); 
+    AddTH1(hDGenTaus[1] ,"hDGenTaus_1","Pt taus;p_{t};#",100,0.0,200.0); 
+    AddTH1(hDGenTaus[2] ,"hDGenTaus_2","Eta taus;#eta;#",50,0.0,5.0); 
+    AddTH1(hDGenTaus[3] ,"hDGenTaus_3","Phi taus;#phi;#",90,0.0,180.0); 
 
     // neutrinos
-    sprintf(sb,"hDGenNeutrinos_%d", 0);  hDGenNeutrinos[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenNeutrinos_%d", 1);  hDGenNeutrinos[1]  = new TH1D(sb,sb,100,0.0,200.0); 
-    sprintf(sb,"hDGenNeutrinos_%d", 2);  hDGenNeutrinos[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
-    sprintf(sb,"hDGenNeutrinos_%d", 3);  hDGenNeutrinos[3]  = new TH1D(sb,sb,90,0.0,180.0); 
-    for(Int_t i=0; i<4; i++) AddOutput(hDGenNeutrinos[i]);
+    AddTH1(hDGenNeutrinos[0] ,"hDGenNeutrinos_0","Number of neutrinos;N_{#nu};#",10,-0.5,9.5); 
+    AddTH1(hDGenNeutrinos[1] ,"hDGenNeutrinos_1","Pt neutrinos;p_{t};#",100,0.0,200.0);
+    AddTH1(hDGenNeutrinos[2] ,"hDGenNeutrinos_2","Eta neutrinos;#eta;#",100,-5.0,5.0); 
+    AddTH1(hDGenNeutrinos[3] ,"hDGenNeutrinos_3","Phi neutrinos;#phi;#",90,0.0,180.0); 
 
     // quarks
-    sprintf(sb,"hDGenQuarks_%d", 0);  hDGenQuarks[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenQuarks_%d", 1);  hDGenQuarks[1]  = new TH1D(sb,sb,200,0.0,400.); 
-    sprintf(sb,"hDGenQuarks_%d", 2);  hDGenQuarks[2]  = new TH1D(sb,sb,2000,0.0,2000.);
-    sprintf(sb,"hDGenQuarks_%d", 3);  hDGenQuarks[3]  = new TH1D(sb,sb,200,0.0,400.); 
-    sprintf(sb,"hDGenQuarks_%d", 4);  hDGenQuarks[4]  = new TH1D(sb,sb,2000,0.0,2000.);
-    sprintf(sb,"hDGenQuarks_%d", 5);  hDGenQuarks[5]  = new TH1D(sb,sb,200,0.0,400.); 
-    sprintf(sb,"hDGenQuarks_%d", 6);  hDGenQuarks[6]  = new TH1D(sb,sb,200,-10.0,10.); 
-    sprintf(sb,"hDGenQuarks_%d", 7);  hDGenQuarks[7]  = new TH1D(sb,sb,200,-TMath::Pi(),
-                                                                 TMath::Pi()); 
-    sprintf(sb,"hDGenQuarks_%d", 8);  hDGenQuarks[8]  = new TH1D(sb,sb,200,0.0,400.); 
-    sprintf(sb,"hDGenQuarks_%d", 9);  hDGenQuarks[9]  = new TH1D(sb,sb,200,-10.0,10.); 
-    sprintf(sb,"hDGenQuarks_%d",10);  hDGenQuarks[10] = new TH1D(sb,sb,200,-TMath::Pi(),
-                                                                 TMath::Pi()); 
-    sprintf(sb,"hDGenQuarks_%d",11);  hDGenQuarks[11] = new TH1D(sb,sb,200,0.0,400.); 
-    sprintf(sb,"hDGenQuarks_%d",12);  hDGenQuarks[12] = new TH1D(sb,sb,200,-10.0,10.); 
-    sprintf(sb,"hDGenQuarks_%d",13);  hDGenQuarks[13] = new TH1D(sb,sb,200,-TMath::Pi(),
-                                                                 TMath::Pi()); 
-    sprintf(sb,"hDGenQuarks_%d",14);  hDGenQuarks[14] = new TH1D(sb,sb,200,0.0,400.); 
-    sprintf(sb,"hDGenQuarks_%d",15);  hDGenQuarks[15] = new TH1D(sb,sb,200,-10.0,10.); 
-    sprintf(sb,"hDGenQuarks_%d",16);  hDGenQuarks[16] = new TH1D(sb,sb,200,-TMath::Pi(),
-                                                                 TMath::Pi()); 
-    for(Int_t i=0; i<17; i++) AddOutput(hDGenQuarks[i]);
+    AddTH1(hDGenQuarks[0] ,"hDGenQuarks_0" ,"Number of quarks;N_{quarks};#",10,-0.5,9.5); 
+    AddTH1(hDGenQuarks[1] ,"hDGenQuarks_1" ,"dijet pt for quarks;p_{t};#",200,0.0,400.); 
+    AddTH1(hDGenQuarks[2] ,"hDGenQuarks_2" ,"dijet mass for quarks;m_{jj};#",2000,0.0,2000.);
+    AddTH1(hDGenQuarks[3] ,"hDGenQuarks_3" ,"dijet pt for quarks with |eta|<2.5;p_{t};#",200,0.0,400.); 
+    AddTH1(hDGenQuarks[4] ,"hDGenQuarks_4" ,"dijet mass for quarks with |eta|<2.5;m_{jj};#",2000,0.0,2000.);
+    AddTH1(hDGenQuarks[5] ,"hDGenQuarks_5" ,"Pt for b quarks;p_{t};#",200,0.0,400.); 
+    AddTH1(hDGenQuarks[6] ,"hDGenQuarks_6" ,"Eta for b quarks;#eta;#",200,-10.0,10.); 
+    AddTH1(hDGenQuarks[7] ,"hDGenQuarks_7" ,"Phi for b quarks;#Phi;#",200,-TMath::Pi(),TMath::Pi());
+    AddTH1(hDGenQuarks[8] ,"hDGenQuarks_8" ,"Pt for b quarks with |eta|<2.5;p_{t};#",200,0.0,400.); 
+    AddTH1(hDGenQuarks[9] ,"hDGenQuarks_9" ,"Eta for b quarks with |eta|<2.5;#eta;#",200,-10.0,10.); 
+    AddTH1(hDGenQuarks[10],"hDGenQuarks_10","Phi for b quarks with |eta|<2.5;#Phi;#",200,-TMath::Pi(),TMath::Pi());
+    AddTH1(hDGenQuarks[11],"hDGenQuarks_11","Pt for t quarks;p_{t};#",200,0.0,400.); 
+    AddTH1(hDGenQuarks[12],"hDGenQuarks_12","Eta for t quarks;#eta;#",200,-10.0,10.); 
+    AddTH1(hDGenQuarks[13],"hDGenQuarks_13","Phi for t quarks;#Phi;#",200,-TMath::Pi(),TMath::Pi());
+    AddTH1(hDGenQuarks[14],"hDGenQuarks_14","Pt for light quarks;p_{t};#",200,0.0,400.); 
+    AddTH1(hDGenQuarks[15],"hDGenQuarks_15","Eta for light quarks;#eta;#",200,-10.0,10.); 
+    AddTH1(hDGenQuarks[16],"hDGenQuarks_16","Phi for light quarks;#Phi;#",200,-TMath::Pi(),TMath::Pi());
 
     // qqH
-    sprintf(sb,"hDGenWBF_%d", 0);  hDGenWBF[0]  = new TH1D(sb,sb,90,0.0,180.);
-    sprintf(sb,"hDGenWBF_%d", 1);  hDGenWBF[1]  = new TH1D(sb,sb,100,0.0,10.);   
-    sprintf(sb,"hDGenWBF_%d", 2);  hDGenWBF[2]  = new TH1D(sb,sb,200,0.0,400.); 
-    sprintf(sb,"hDGenWBF_%d", 3);  hDGenWBF[3]  = new TH1D(sb,sb,200,0.0,400.);
-    sprintf(sb,"hDGenWBF_%d", 4);  hDGenWBF[4]  = new TH1D(sb,sb,200,0.0,4000.);
-    for(Int_t i=0; i<5; i++) AddOutput(hDGenWBF[i]);
+    AddTH1(hDGenWBF[0] ,"hDGenWBF_0" ,"Delta Phi jj for WBF quarks;#Delta Phi_{jj};#",90,0.0,180.);
+    AddTH1(hDGenWBF[1] ,"hDGenWBF_1" ,"Delta Eta jj for WBF quarks;#Delta #eta_{jj};#",100,0.0,10.);  
+    AddTH1(hDGenWBF[2] ,"hDGenWBF_2" ,"Pt max for WBF quarks;p_{t};#",200,0.0,400.); 
+    AddTH1(hDGenWBF[3] ,"hDGenWBF_3" ,"Pt min for WBF quarks;p_{t};#",200,0.0,400.);
+    AddTH1(hDGenWBF[4] ,"hDGenWBF_4" ,"dijet mass for WBF quarks;m_{jj};#",200,0.0,4000.);
 
     // bosons
-    sprintf(sb,"hDGenBosons_%d", 0);  hDGenBosons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenBosons_%d", 1);  hDGenBosons[1]  = new TH1D(sb,sb,200,0.0,400.0); 
-    sprintf(sb,"hDGenBosons_%d", 2);  hDGenBosons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
-    sprintf(sb,"hDGenBosons_%d", 3);  hDGenBosons[3]  = new TH1D(sb,sb,2000,0.0,2000.0);
-    sprintf(sb,"hDGenBosons_%d", 4);  hDGenBosons[4]  = new TH1D(sb,sb,200,0.0,200.0);
-    sprintf(sb,"hDGenBosons_%d", 5);  hDGenBosons[5]  = new TH1D(sb,sb,200,0.0,200.0);
-    sprintf(sb,"hDGenBosons_%d", 6);  hDGenBosons[6]  = new TH1D(sb,sb,200,0.0,200.0);
-    sprintf(sb,"hDGenBosons_%d", 7);  hDGenBosons[7]  = new TH1D(sb,sb,13,-0.5,12.5); 
-    for(Int_t i=0; i<8; i++) AddOutput(hDGenBosons[i]);
+    AddTH1(hDGenBosons[0] ,"hDGenBosons_0" ,"Number of bosons;N_{bosons};#",10,-0.5,9.5); 
+    AddTH1(hDGenBosons[1] ,"hDGenBosons_1" ,"Pt of bosons;p_{t};#",200,0.0,400.0); 
+    AddTH1(hDGenBosons[2] ,"hDGenBosons_2" ,"Eta of bosons;#eta;#",100,-5.0,5.0); 
+    AddTH1(hDGenBosons[3] ,"hDGenBosons_3" ,"Phi of bosons;#Phi;#",2000,0.0,2000.0);
+    AddTH1(hDGenBosons[4] ,"hDGenBosons_4" ,"Mass of bosons;m_{V};#",200,0.0,200.0);
+    AddTH1(hDGenBosons[5] ,"hDGenBosons_5" ,"Mass of W bosons;m_{W};#",200,0.0,200.0);
+    AddTH1(hDGenBosons[6] ,"hDGenBosons_6" ,"Mass of Z bosons;m_{Z};#",200,0.0,200.0);
+    AddTH1(hDGenBosons[7] ,"hDGenBosons_7" ,"Number of W bosons + 4 * Z bosons;Number;#",13,-0.5,12.5); 
 
     // photons
-    sprintf(sb,"hDGenPhotons_%d", 0);  hDGenPhotons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenPhotons_%d", 1);  hDGenPhotons[1]  = new TH1D(sb,sb,200,0.0,400.0); 
-    sprintf(sb,"hDGenPhotons_%d", 2);  hDGenPhotons[2]  = new TH1D(sb,sb,100,-5.0,5.0); 
-    for(Int_t i=0; i<3; i++) AddOutput(hDGenPhotons[i]);
+    AddTH1(hDGenPhotons[0] ,"hDGenPhotons_0" ,"Number of photons;N_{photons};#",10,-0.5,9.5); 
+    AddTH1(hDGenPhotons[1] ,"hDGenPhotons_1" ,"Pt of photons;p_{t};#",200,0.0,400.0); 
+    AddTH1(hDGenPhotons[2] ,"hDGenPhotons_2" ,"Eta of photons;#eta;#",100,-5.0,5.0); 
 
     //  rad photons
-    sprintf(sb,"hDGenRadPhotons_%d", 0);  hDGenRadPhotons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenRadPhotons_%d", 1);  hDGenRadPhotons[1]  = new TH1D(sb,sb,400,0.0,200.0); 
-    sprintf(sb,"hDGenRadPhotons_%d", 2);  hDGenRadPhotons[2]  = new TH1D(sb,sb,100,0.0,5.0); 
-    sprintf(sb,"hDGenRadPhotons_%d", 3);  hDGenRadPhotons[3]  = new TH1D(sb,sb,20,-0.5,19.5); 
-    sprintf(sb,"hDGenRadPhotons_%d", 4);  hDGenRadPhotons[4]  = new TH1D(sb,sb,4,-0.5,3.5); 
-    sprintf(sb,"hDGenRadPhotons_%d", 5);  hDGenRadPhotons[5]  = new TH1D(sb,sb,500,0.0,5.0); 
-    sprintf(sb,"hDGenRadPhotons_%d", 6);  hDGenRadPhotons[6]  = new TH1D(sb,sb,2,-0.5,1.5); 
-    for(Int_t i=0; i<7; i++) AddOutput(hDGenRadPhotons[i]);
+    AddTH1(hDGenRadPhotons[0] ,"hDGenRadPhotons_0" ,"Number of radiative photons;N_{photons};#",10,-0.5,9.5); 
+    AddTH1(hDGenRadPhotons[1] ,"hDGenRadPhotons_1" ,"Pt of radiative photons;p_{t};#",400,0.0,200.0);
+    AddTH1(hDGenRadPhotons[2] ,"hDGenRadPhotons_2" ,"Eta of radiative photons;#eta;#",100,0.0,5.0); 
+    AddTH1(hDGenRadPhotons[3] ,"hDGenRadPhotons_3" ,"Status of mother of radiative photons;#eta;#",20,-0.5,19.5); 
+    AddTH1(hDGenRadPhotons[4] ,"hDGenRadPhotons_4" ,"IsGenerated+2*IsSimulated of radiative photons;IsGenerated+2*IsSimulated;#",4,-0.5,3.5); 
+    AddTH1(hDGenRadPhotons[5] ,"hDGenRadPhotons_5" ,"Delta R between photon and mother of radiative photons;#Delta R;#",500,0.0,5.0); 
+    AddTH1(hDGenRadPhotons[6] ,"hDGenRadPhotons_6" ,"Number of radiative photon with muon as a mother;Status;#",2,-0.5,1.5); 
 
     //  ISR photons
-    sprintf(sb,"hDGenISRPhotons_%d", 0);  hDGenISRPhotons[0]  = new TH1D(sb,sb,10,-0.5,9.5); 
-    sprintf(sb,"hDGenISRPhotons_%d", 1);  hDGenISRPhotons[1]  = new TH1D(sb,sb,400,0.0,200.0); 
-    sprintf(sb,"hDGenISRPhotons_%d", 2);  hDGenISRPhotons[2]  = new TH1D(sb,sb,100,0.0,5.0); 
-    sprintf(sb,"hDGenISRPhotons_%d", 3);  hDGenISRPhotons[3]  = new TH1D(sb,sb,20,-0.5,19.5); 
-    sprintf(sb,"hDGenISRPhotons_%d", 4);  hDGenISRPhotons[4]  = new TH1D(sb,sb,4,-0.5,3.5); 
-    sprintf(sb,"hDGenISRPhotons_%d", 5);  hDGenISRPhotons[5]  = new TH1D(sb,sb,500,0.0,5.0); 
-    for(Int_t i=0; i<6; i++) AddOutput(hDGenISRPhotons[i]);
+    AddTH1(hDGenISRPhotons[0] ,"hDGenISRPhotons_0" ,"Number of ISR photons;N_{photons};#",10,-0.5,9.5); 
+    AddTH1(hDGenISRPhotons[1] ,"hDGenISRPhotons_1" ,"Pt of ISR photons;p_{t};#",400,0.0,200.0);
+    AddTH1(hDGenISRPhotons[2] ,"hDGenISRPhotons_2" ,"Eta of ISR photons;#eta;#",100,0.0,5.0); 
+    AddTH1(hDGenISRPhotons[3] ,"hDGenISRPhotons_3" ,"Status of mother of radiative photons;#eta;#",20,-0.5,19.5);
+    AddTH1(hDGenISRPhotons[4] ,"hDGenISRPhotons_4" ,"IsGenerated+2*IsSimulated of radiative photons;IsGenerated+2*IsSimulated;#",4,-0.5,3.5); 
+    AddTH1(hDGenISRPhotons[5] ,"hDGenISRPhotons_5" ,"Delta R between photon and mother of ISR photons;#Delta R;#",500,0.0,5.0); 
 
     // auxiliar for MG studies
-    sprintf(sb,"hDVMass_%d", 0);  hDVMass[0]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 1);  hDVMass[1]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 2);  hDVMass[2]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 3);  hDVMass[3]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 4);  hDVMass[4]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 5);  hDVMass[5]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 6);  hDVMass[6]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 7);  hDVMass[7]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 8);  hDVMass[8]  = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d", 9);  hDVMass[9]  = new TH1D(sb,sb,200,0.,200.);
-    sprintf(sb,"hDVMass_%d",10);  hDVMass[10] = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d",11);  hDVMass[11] = new TH1D(sb,sb,200,0.,200.); 
-    sprintf(sb,"hDVMass_%d",12);  hDVMass[12] = new TH1D(sb,sb,200,0.,200.); 
-    for(Int_t i=0; i<13; i++) AddOutput(hDVMass[i]);
+    AddTH1(hDVMass[0] ,"hDVMass_0" ,"Mass of munu candidates  ;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[1] ,"hDVMass_1" ,"Mass of elnu candidates  ;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[2] ,"hDVMass_2" ,"Mass of taunu candidates ;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[3] ,"hDVMass_3" ,"Mass of mumu candidates  ;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[4] ,"hDVMass_4" ,"Mass of ee candidates    ;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[5] ,"hDVMass_5" ,"Mass of tautau candidates;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[6] ,"hDVMass_6" ,"Mass of numunumu candidates;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[7] ,"hDVMass_7" ,"Mass of nuenue candidates;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[8] ,"hDVMass_8" ,"Mass of nutaunutau candidates;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[9] ,"hDVMass_9" ,"Mass of munu candidates for t events ;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[10],"hDVMass_10","Mass of elnu candidates for t events ;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[11],"hDVMass_11","Mass of taunu candidates for t events;Mass;#",200,0.,200.);
+    AddTH1(hDVMass[12],"hDVMass_12","Mass of qq candidates for t events;Mass;#",200,0.,200.);
 
+    // Special study about VVjets
+    AddTH1(hDVVMass[0] ,"hDVVMass_0" ,"Mass of munu for WW events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[1] ,"hDVVMass_1" ,"Mass of munu WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[2] ,"hDVVMass_2" ,"Mass of elnu WW events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[3] ,"hDVVMass_3" ,"Mass of elnu WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[4] ,"hDVVMass_4" ,"Mass of taunu WW events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[5] ,"hDVVMass_5" ,"Mass of taunu WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[6] ,"hDVVMass_6" ,"Mass of mumu WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[7] ,"hDVVMass_7" ,"Mass of mumu ZZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[8] ,"hDVVMass_8" ,"Mass of ee WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[9] ,"hDVVMass_9" ,"Mass of ee ZZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[10],"hDVVMass_10","Mass of tautau WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[11],"hDVVMass_11","Mass of tautau ZZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[12],"hDVVMass_12","Mass of numunumu WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[13],"hDVVMass_13","Mass of numunumu ZZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[14],"hDVVMass_14","Mass of nuenue WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[15],"hDVVMass_15","Mass of nuenue ZZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[16],"hDVVMass_16","Mass of nutaunutau WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[17],"hDVVMass_17","Mass of nutaunutau ZZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[18],"hDVVMass_18","Ratios for WW events;Type;#",7,-0.5,6.5); 
+    AddTH1(hDVVMass[19],"hDVVMass_19","Ratios for WZ events;Type;#",10,-0.5,9.5); 
+    AddTH1(hDVVMass[20],"hDVVMass_20","Ratios for ZZ2l events;Type;#",7,-0.5,6.5); 
+    AddTH1(hDVVMass[21],"hDVVMass_21","Ratios for ZZ4l events;Type;#",16,-0.5,15.5);
+    AddTH1(hDVVMass[22],"hDVVMass_22","Maximum mass for WW events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[23],"hDVVMass_23","Minimum mass for WW events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[24],"hDVVMass_24","Maximum mass for WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[25],"hDVVMass_25","Minimum mass for WZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[26],"hDVVMass_26","Maximum mass for ZZ events;Mass;#",200,0.,200.);
+    AddTH1(hDVVMass[27],"hDVVMass_27","Minimum mass for ZZ events;Mass;#",200,0.,200.);
   }
 }
