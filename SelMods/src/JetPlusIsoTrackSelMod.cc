@@ -1,4 +1,4 @@
-// $Id: JetPlusIsoTrackSelMod.cc,v 1.1 2009/03/22 09:04:13 loizides Exp $
+// $Id: JetPlusIsoTrackSelMod.cc,v 1.2 2009/06/15 15:00:22 loizides Exp $
 
 #include "MitPhysics/SelMods/interface/JetPlusIsoTrackSelMod.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
@@ -118,7 +118,7 @@ void mithep::JetPlusIsoTrackSelMod::SlaveBegin()
   ReqBranch(GetTrackerTrackColName(),          fTrackerTrackCol);
   ReqBranch(GetGsfTrackColName(),              fGsfTrackCol);
 
-  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",25,-0.5,24.5);
+  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",5,-0.5,4.5);
   if (1) {
     TAxis *xa = fNAccCounters->GetXaxis();
     for(Int_t i=1;i<=fNAccCounters->GetNbinsX();++i)

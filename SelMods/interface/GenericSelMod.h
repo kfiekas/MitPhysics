@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenericSelMod.h,v 1.5 2009/06/15 15:00:22 loizides Exp $
+// $Id: GenericSelMod.h,v 1.6 2009/06/17 11:50:28 loizides Exp $
 //
 // GenericSelMod
 // 
@@ -47,11 +47,11 @@ namespace mithep
       void                     SlaveBegin();
 
       TString                  fColName;      //name of input collection
-      Double_t                 fPtMin;        //minimum pt required    (def = 0 GeV)
-      Double_t                 fPtMax;        //maximum pt required    (def = 5000 GeV)
-      Double_t                 fEtaMin;       //minimum eta required   (def = -10)
-      Double_t                 fEtaMax;       //maximum eta required        (def = +10) 
-      Double_t                 fMinMaxPt;     //min pt required for max pt  (def = 0GeV)
+      Double_t                 fPtMin;        //minimum pt required  (def = 0 GeV)
+      Double_t                 fPtMax;        //maximum pt required  (def = 5000 GeV)
+      Double_t                 fEtaMin;       //minimum eta required (def = -10)
+      Double_t                 fEtaMax;       //maximum eta required (def = +10) 
+      Double_t                 fMinMaxPt;     //min pt required for max pt (def = 0GeV)
       UInt_t                   fMinCounts;    //min number of particles required (def = 1)
       const Collection<T>     *fCol;          //!pointer to collection 
       TH1D                    *fNAccCounters; //!acceptance histogram
@@ -134,7 +134,7 @@ void mithep::GenericSelMod<T>::SlaveBegin()
 {
   // Setup acceptence histogram.
 
-  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",25,-0.5,24.5);
+  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",5,-0.5,4.5);
   if (1) {
     TAxis *xa = fNAccCounters->GetXaxis();
     for(Int_t i=1;i<=fNAccCounters->GetNbinsX();++i)

@@ -1,4 +1,4 @@
-// $Id: DilepSelMod.cc,v 1.1 2009/04/29 15:07:12 loizides Exp $
+// $Id: DilepSelMod.cc,v 1.2 2009/06/15 15:00:22 loizides Exp $
 
 #include "MitPhysics/SelMods/interface/DilepSelMod.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
@@ -183,7 +183,7 @@ void DilepSelMod::SlaveBegin()
 {
   // Create and add histograms to the output list.
 
-  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",25,-0.5,24.5);
+  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",6,-0.5,5.5);
   if (1) {
     TAxis *xa = fNAccCounters->GetXaxis();
     for(Int_t i=1;i<=fNAccCounters->GetNbinsX();++i)
