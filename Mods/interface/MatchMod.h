@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MatchMod.h,v 1.5 2009/06/15 15:00:22 loizides Exp $
+// $Id: MatchMod.h,v 1.1 2009/06/17 08:42:28 loizides Exp $
 //
 // MatchMod
 // 
@@ -28,6 +28,7 @@ namespace mithep
       MatchMod(const char *name="MatchMod", 
                const char *title="Generic matching module");
 
+      Bool_t                   GetAddPairs(Bool_t b)     const { return fAddPairs;     }
       const char              *GetColNameA()             const { return fColNameA;     }
       const char              *GetColNameB()             const { return fColNameB;     }
       const char              *GetColNameC()             const { return fColNameC;     }
@@ -42,9 +43,11 @@ namespace mithep
       void                     SetInputNameB(const char *n)    { SetColNameB(n);       }
       void                     SetOutputName(const char *n)    { SetColNameC(n);       }
       void                     SetMatchRadius(Double_t m)      { fMaxR     = m;        }
+      void                     SetAddPairs(Bool_t b)           { fAddPairs = b;        }
 
     protected:
       void                     Process();
+      void                     SlaveBegin();
 
       TString                  fColNameA;     //name of input  collection A
       TString                  fColNameB;     //name of input  collection B
@@ -115,6 +118,30 @@ void mithep::MatchMod<ClA,ClB>::Process()
         continue;
       out->Add(pA);
     }
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+template<class ClA, class ClB>
+void mithep::MatchMod<ClA,ClB>::SlaveBegin()
+{
+  // Run starting code on the client to do some consistency checks.
+
+
+  if (fColNameA.IsNull()) {
+    SendError(kAbortModule, "SlaveBegin", "No name given for input collection A.");
+    return;
+  }
+
+  if (fColNameB.IsNull()) {
+    SendError(kAbortModule, "SlaveBegin", "No name given for input collection B.");
+    return;
+  }
+
+  if (fColNameC.IsNull()) {
+    fColNameC="Matched";
+    fColNameC+=fColNameA;
+    fColNameC+=fColNameB;
   }
 }
 #endif
