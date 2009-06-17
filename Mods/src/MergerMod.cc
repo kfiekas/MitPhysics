@@ -1,7 +1,7 @@
-// $Id: MergeLeptonsMod.cc,v 1.2 2008/12/10 17:28:23 loizides Exp $
+// $Id: MergerMod.cc,v 1.1 2008/12/11 17:37:29 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MergerMod.h"
 
 using namespace mithep;
 
-ClassImpT(mithep::MergerMod, T)
+templateClassImp(mithep::MergerMod)

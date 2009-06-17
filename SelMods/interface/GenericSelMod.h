@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenericSelMod.h,v 1.4 2009/03/23 22:17:03 loizides Exp $
+// $Id: GenericSelMod.h,v 1.5 2009/06/15 15:00:22 loizides Exp $
 //
 // GenericSelMod
 // 
@@ -56,7 +56,7 @@ namespace mithep
       const Collection<T>     *fCol;          //!pointer to collection 
       TH1D                    *fNAccCounters; //!acceptance histogram
 
-      ClassDefT(GenericSelMod,1) // Generic selection module
+      ClassDef(GenericSelMod,1) // Generic selection module
   };
 }
 
