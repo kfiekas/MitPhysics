@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MatchMod.h,v 1.1 2009/06/17 08:42:28 loizides Exp $
+// $Id: MatchMod.h,v 1.2 2009/06/17 14:52:47 loizides Exp $
 //
 // MatchMod
 // 
@@ -118,6 +118,7 @@ void mithep::MatchMod<ClA,ClB>::Process()
         continue;
       out->Add(pA);
     }
+    AddObjThisEvt(out);
   }
 }
 
