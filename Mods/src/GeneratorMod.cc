@@ -1,7 +1,9 @@
-// $Id: GeneratorMod.cc,v 1.43 2009/06/15 15:00:21 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.44 2009/06/17 16:45:34 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/MetCol.h" 	 
+#include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>

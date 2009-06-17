@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.29 2009/06/15 15:00:21 loizides Exp $
+// $Id: GeneratorMod.h,v 1.30 2009/06/17 16:46:17 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -13,7 +13,7 @@
 #define MITPHYSICS_MODS_GENERATORMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/MCParticleFwd.h"
 
 class TH1D;
 class TH2D;
