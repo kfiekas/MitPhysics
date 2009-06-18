@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MatchingTools.h,v 1.1 2009/05/11 08:01:51 loizides Exp $
+// $Id: MatchingTools.h,v 1.2 2009/05/18 06:31:23 loizides Exp $
 //
 // MatchingTools
 //
@@ -22,13 +22,13 @@ namespace mithep
     public:
       template<class V1, class V2> 
       static const V2 *Closest(const V1 *v1, const Collection<V2> &col, Double_t maxR, 
-                               Bool_t self=kTRUE);
+                               Bool_t self=kFALSE);
       template<class V1, class V2> 
       static const V2 *ClosestRPt(const V1 *v1, const Collection<V2> &col, Double_t max,
-                                  Bool_t self=kTRUE);
+                                  Bool_t self=kFALSE);
       template<class V1, class V2> 
       static TObjArray *Closests(const V1 *v1, const Collection<V2> &col, Double_t maxR,
-                                 Bool_t self=kTRUE);
+                                 Bool_t self=kFALSE);
   };
 
   //------------------------------------------------------------------------------------------------
