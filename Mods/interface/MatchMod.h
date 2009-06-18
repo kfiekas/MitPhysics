@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MatchMod.h,v 1.2 2009/06/17 14:52:47 loizides Exp $
+// $Id: MatchMod.h,v 1.3 2009/06/17 15:32:04 loizides Exp $
 //
 // MatchMod
 // 
@@ -143,6 +143,8 @@ void mithep::MatchMod<ClA,ClB>::SlaveBegin()
     fColNameC="Matched";
     fColNameC+=fColNameA;
     fColNameC+=fColNameB;
+    SendError(kWarning, "SlaveBegin", "No name given for output collection,"
+              " will use \"%s\"", fColNameC.Data());
   }
 }
 #endif
