@@ -1,4 +1,4 @@
-// $Id: EffMod.cc,v 1.1 2008/12/17 17:57:13 loizides Exp $
+// $Id: EffMod.cc,v 1.1 2009/04/29 15:06:42 loizides Exp $
 
 #include "MitPhysics/Mods/interface/EffMod.h"
 #include "MitAna/DataCont/interface/BaseCollection.h"
@@ -128,19 +128,21 @@ void EffMod::Terminate()
 {
   // Create and add ratio histograms to the output list.
 
-  TH1D *pteff = static_cast<TH1D*>(fCol2Pt->Clone("hPtEff"));
-  pteff->Divide(fCol1Pt);
-  AddOutput(pteff);
+  if (gROOT->IsBatch()) {
+    TH1D *pteff = static_cast<TH1D*>(fCol2Pt->Clone("hPtEff"));
+    pteff->Divide(fCol1Pt);
+    AddOutput(pteff);
 
-  TH1D *etaeff = static_cast<TH1D*>(fCol2Eta->Clone("hEtaEff"));
-  etaeff->Divide(fCol1Eta);
-  AddOutput(etaeff);
+    TH1D *etaeff = static_cast<TH1D*>(fCol2Eta->Clone("hEtaEff"));
+    etaeff->Divide(fCol1Eta);
+    AddOutput(etaeff);
 
-  TH1D *ptfrate = static_cast<TH1D*>(fFakePt->Clone("hPtFakeRate"));
-  ptfrate->Divide(fGoodPt);
-  AddOutput(ptfrate);
+    TH1D *ptfrate = static_cast<TH1D*>(fFakePt->Clone("hPtFakeRate"));
+    ptfrate->Divide(fGoodPt);
+    AddOutput(ptfrate);
 
-  TH1D *etafrate = static_cast<TH1D*>(fFakeEta->Clone("hEtaFakeRate"));
-  etafrate->Divide(fGoodEta);
-  AddOutput(etafrate);
+    TH1D *etafrate = static_cast<TH1D*>(fFakeEta->Clone("hEtaFakeRate"));
+    etafrate->Divide(fGoodEta);
+    AddOutput(etafrate);
+  }
 }
