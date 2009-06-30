@@ -1,14 +1,12 @@
- // $Id: $
+ // $Id: FakeLeptonExampleAnaMod.cc,v 1.1 2009/06/30 10:47:17 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeLeptonExampleAnaMod.h"
 #include "MitAna/DataUtil/interface/Debug.h"
 #include "MitAna/DataTree/interface/Names.h"
-//#include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/FakeMods/interface/FakeObject.h"
 #include "MitPhysics/FakeMods/interface/FakeEventHeader.h"
-//#include "MitPhysics/Utils/interface/IsolationTools.h"
 #include <TH1D.h>
 #include <TH2D.h>
 
