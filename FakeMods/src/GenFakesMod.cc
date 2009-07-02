@@ -1,4 +1,4 @@
-// $Id: $
+// $Id: GenFakesMod.cc,v 1.1 2009/06/30 10:47:17 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakesMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -25,8 +25,8 @@ GenFakesMod::GenFakesMod(const char *name, const char *title) :
   fCleanMuonsName(ModNames::gkCleanMuonsName),        
   fCleanPhotonsName(ModNames::gkCleanPhotonsName),        
   fCleanJetsName(ModNames::gkCleanJetsName),
-  fElectronFakeableObjectsName(ModNames::gkElFakeableObjsName),
-  fMuonFakeableObjectsName(ModNames::gkMuFakeableObjsName),
+  fElFakeableObjsName(ModNames::gkElFakeableObjsName),
+  fMuFakeableObjsName(ModNames::gkMuFakeableObjsName),
   fMCLeptonsName(ModNames::gkMCLeptonsName),
   fMCTausName(ModNames::gkMCTausName),
   fFakeEventHeadersName(ModNames::gkFakeEventHeadersName)
@@ -51,12 +51,12 @@ void GenFakesMod::Process()
   // Process entries of the tree.
 
   // get input Fakeable object collections
-   const ElectronCol *ElectronFakeableObjects = 0;
-   if (!fElectronFakeableObjectsName.IsNull())
-     ElectronFakeableObjects = GetObjThisEvt<ElectronCol>(fElectronFakeableObjectsName);
-   const MuonCol *MuonFakeableObjects = 0;
-   if (!fMuonFakeableObjectsName.IsNull())
-     MuonFakeableObjects = GetObjThisEvt<MuonCol>(fMuonFakeableObjectsName);
+   const ElectronCol *ElFakeableObjs = 0;
+   if (!fElFakeableObjsName.IsNull())
+     ElFakeableObjs = GetObjThisEvt<ElectronCol>(fElFakeableObjsName);
+   const MuonCol *MuFakeableObjs = 0;
+   if (!fMuFakeableObjsName.IsNull())
+     MuFakeableObjs = GetObjThisEvt<MuonCol>(fMuFakeableObjsName);
 
   // get input clean object collections
   const ElectronCol *CleanElectrons = 0;
@@ -106,7 +106,7 @@ void GenFakesMod::Process()
   // Fake into Muons
   // Loop through all Muon Fakeable objects and consider the fake possibility.
   // *****************************************************************************************
-  for (UInt_t n = 0; n < MuonFakeableObjects->GetEntries();n++) {
+  for (UInt_t n = 0; n < MuFakeableObjs->GetEntries();n++) {
 
     //make temporary fake event headers array
     ObjArray <FakeEventHeader> *tempFakeEventHeaders = new ObjArray <FakeEventHeader> ;
@@ -120,8 +120,8 @@ void GenFakesMod::Process()
       // *****************************************************************************************
       Bool_t isCleanLepton = false;
       for (UInt_t j = 0; j < CleanLeptons->GetEntries() ; j++) {
-        Double_t deltaR = MathUtils::DeltaR(MuonFakeableObjects->At(n)->Phi(),
-                                            MuonFakeableObjects->At(n)->Eta(),
+        Double_t deltaR = MathUtils::DeltaR(MuFakeableObjs->At(n)->Phi(),
+                                            MuFakeableObjs->At(n)->Eta(),
                                             CleanLeptons->At(j)->Phi(), CleanLeptons->At(j)->Eta());
 
         if (deltaR < 0.3) {
@@ -135,7 +135,7 @@ void GenFakesMod::Process()
       // *****************************************************************************************
       Bool_t isGenMuon = false;
       for (UInt_t l=0; l<GenLeptonsAndTaus->GetEntries(); l++) {
-        if (MathUtils::DeltaR(MuonFakeableObjects->At(n)->Phi(), MuonFakeableObjects->At(n)->Eta(),
+        if (MathUtils::DeltaR(MuFakeableObjs->At(n)->Phi(), MuFakeableObjs->At(n)->Eta(),
                               GenLeptonsAndTaus->At(l)->Phi(), 
                               GenLeptonsAndTaus->At(l)->Eta()) < 0.3) {
           isGenMuon = true;
@@ -155,7 +155,7 @@ void GenFakesMod::Process()
       double minDR = 5000;
       for (UInt_t jj=0;jj<FakeEventHeaders->At(i)->NJets();jj++) {
         Double_t deltaR = MathUtils::DeltaR(FakeEventHeaders->At(i)->UnfakedJet(jj)->Mom(),
-                                            MuonFakeableObjects->At(n)->Mom());
+                                            MuFakeableObjs->At(n)->Mom());
         if (deltaR < minDR) {
           minDR = deltaR;
           fakeToJetMatch = jj;
@@ -170,15 +170,15 @@ void GenFakesMod::Process()
       Double_t muonFakeProbLowError = 0.0;
       Double_t muonFakeProbHighError = 0.0;
       if(fFakeRate) {
-        muonFakeProb = fFakeRate->MuonFakeRate(MuonFakeableObjects->At(n)->Et(),
-                                               MuonFakeableObjects->At(n)->Eta(),
-                                               MuonFakeableObjects->At(n)->Phi());
-        muonFakeProbLowError = fFakeRate->MuonFakeRateError(MuonFakeableObjects->At(n)->Et(),
-                                                            MuonFakeableObjects->At(n)->Eta(),
-                                                            MuonFakeableObjects->At(n)->Phi());
-        muonFakeProbHighError = fFakeRate->MuonFakeRateError(MuonFakeableObjects->At(n)->Et(),
-                                                             MuonFakeableObjects->At(n)->Eta(),
-                                                             MuonFakeableObjects->At(n)->Phi());                
+        muonFakeProb = fFakeRate->MuonFakeRate(MuFakeableObjs->At(n)->Et(),
+                                               MuFakeableObjs->At(n)->Eta(),
+                                               MuFakeableObjs->At(n)->Phi());
+        muonFakeProbLowError = fFakeRate->MuonFakeRateError(MuFakeableObjs->At(n)->Et(),
+                                                            MuFakeableObjs->At(n)->Eta(),
+                                                            MuFakeableObjs->At(n)->Phi());
+        muonFakeProbHighError = fFakeRate->MuonFakeRateError(MuFakeableObjs->At(n)->Et(),
+                                                             MuFakeableObjs->At(n)->Eta(),
+                                                             MuFakeableObjs->At(n)->Phi());                
       } else {
         cerr << "Error: fFakeRate is a NULL pointer.\n";
         assert(false);
@@ -212,7 +212,7 @@ void GenFakesMod::Process()
           fakeMuonEvent->AddFakeObject(FakeEventHeaders->At(i)->FakeObj(f));        
         }
         //add new fake
-        fakeMuonEvent->AddFakeObject(MuonFakeableObjects->At(n),kMuon,isCleanLepton,isGenMuon);
+        fakeMuonEvent->AddFakeObject(MuFakeableObjs->At(n),kMuon,isCleanLepton,isGenMuon);
 
         //add all previous jets except the one matching to the new fake
         for (UInt_t jj=0;jj<FakeEventHeaders->At(i)->NJets();jj++) {
@@ -256,7 +256,7 @@ void GenFakesMod::Process()
   // Fake into Electrons
   // Loop through all Electron Fakeable objects and consider the fake possibility.
   // *****************************************************************************************
-  for (UInt_t n = 0; n < ElectronFakeableObjects->GetEntries();n++) {
+  for (UInt_t n = 0; n < ElFakeableObjs->GetEntries();n++) {
 
     //make temporary fake event headers array
     ObjArray <FakeEventHeader> *tempFakeEventHeaders = new ObjArray <FakeEventHeader> ;
@@ -270,8 +270,8 @@ void GenFakesMod::Process()
       // *****************************************************************************************
       Bool_t isCleanLepton = false;
       for (UInt_t j = 0; j < CleanLeptons->GetEntries() ; j++) {
-        Double_t deltaR = MathUtils::DeltaR(ElectronFakeableObjects->At(n)->Phi(),
-                                            ElectronFakeableObjects->At(n)->Eta(),
+        Double_t deltaR = MathUtils::DeltaR(ElFakeableObjs->At(n)->Phi(),
+                                            ElFakeableObjs->At(n)->Eta(),
                                             CleanLeptons->At(j)->Phi(), CleanLeptons->At(j)->Eta());
 
         if (deltaR < 0.3) {
@@ -285,8 +285,8 @@ void GenFakesMod::Process()
       // *****************************************************************************************
       Bool_t isGenElectron = false;
       for (UInt_t l=0; l<GenLeptonsAndTaus->GetEntries(); l++) {
-        if (MathUtils::DeltaR(ElectronFakeableObjects->At(n)->Phi(), 
-                              ElectronFakeableObjects->At(n)->Eta(),
+        if (MathUtils::DeltaR(ElFakeableObjs->At(n)->Phi(), 
+                              ElFakeableObjs->At(n)->Eta(),
                               GenLeptonsAndTaus->At(l)->Phi(), 
                               GenLeptonsAndTaus->At(l)->Eta()) < 0.3) {
           isGenElectron = true;
@@ -306,7 +306,7 @@ void GenFakesMod::Process()
       Bool_t alreadyFaked = false;
       for (UInt_t f = 0; f < FakeEventHeaders->At(i)->FakeObjsSize() ; f++) {
         double deltaR = MathUtils::DeltaR(FakeEventHeaders->At(i)->FakeObj(f)->Mom(),
-                                          ElectronFakeableObjects->At(n)->Mom());
+                                          ElFakeableObjs->At(n)->Mom());
         if (deltaR < 0.3)
           alreadyFaked = true;
       }
@@ -321,7 +321,7 @@ void GenFakesMod::Process()
         double minDR = 5000;
         for (UInt_t jj=0;jj<FakeEventHeaders->At(i)->NJets();jj++) {          
           Double_t deltaR = MathUtils::DeltaR(FakeEventHeaders->At(i)->UnfakedJet(jj)->Mom(),
-                                              ElectronFakeableObjects->At(n)->Mom());
+                                              ElFakeableObjs->At(n)->Mom());
           if (deltaR < minDR) {
             minDR = deltaR;
             fakeToJetMatch = jj;
@@ -336,17 +336,17 @@ void GenFakesMod::Process()
         Double_t electronFakeProbLowError = 0.0;
         Double_t electronFakeProbHighError = 0.0;
         if(fFakeRate) {
-          electronFakeProb = fFakeRate->ElectronFakeRate(ElectronFakeableObjects->At(n)->Et(),
-                                                         ElectronFakeableObjects->At(n)->Eta(),
-                                                         ElectronFakeableObjects->At(n)->Phi());
+          electronFakeProb = fFakeRate->ElectronFakeRate(ElFakeableObjs->At(n)->Et(),
+                                                         ElFakeableObjs->At(n)->Eta(),
+                                                         ElFakeableObjs->At(n)->Phi());
           electronFakeProbLowError = fFakeRate->ElectronFakeRateError(
-            ElectronFakeableObjects->At(n)->Et(),
-            ElectronFakeableObjects->At(n)->Eta(),
-            ElectronFakeableObjects->At(n)->Phi());
+            ElFakeableObjs->At(n)->Et(),
+            ElFakeableObjs->At(n)->Eta(),
+            ElFakeableObjs->At(n)->Phi());
           electronFakeProbHighError = fFakeRate->ElectronFakeRateError(
-            ElectronFakeableObjects->At(n)->Et(),
-            ElectronFakeableObjects->At(n)->Eta(),
-            ElectronFakeableObjects->At(n)->Phi());                          
+            ElFakeableObjs->At(n)->Et(),
+            ElFakeableObjs->At(n)->Eta(),
+            ElFakeableObjs->At(n)->Phi());                          
         } else {
           cerr << "Error: fFakeRate is a NULL pointer.\n";
           assert(false);
@@ -380,7 +380,7 @@ void GenFakesMod::Process()
             fakeElectronEvent->AddFakeObject(FakeEventHeaders->At(i)->FakeObj(f));
           }
           //add the new fake
-          fakeElectronEvent->AddFakeObject(ElectronFakeableObjects->At(n),
+          fakeElectronEvent->AddFakeObject(ElFakeableObjs->At(n),
                                            kElectron,isCleanLepton,isGenElectron);
           //add previous jets that do not match to the new fake
           for (UInt_t jj=0;jj<FakeEventHeaders->At(i)->NJets();jj++) {

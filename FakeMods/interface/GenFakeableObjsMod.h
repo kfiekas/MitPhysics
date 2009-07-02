@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: GenFakeableObjsMod.h,v 1.1 2009/06/30 10:47:17 loizides Exp $
 //
 // GenFakeableObjsMod
 //
@@ -46,8 +46,8 @@ namespace mithep
       const char   *GetCleanMuonsName()              const { return fCleanMuonsName;               }
       const char   *GetCleanPhotonsName()            const { return fCleanPhotonsName;             }
       const char   *GetCleanJetsName()               const { return fCleanJetsName;                }
-      const char   *GetElectronFakeableObjectsName() const { return fElectronFakeableObjectsName;  }
-      const char   *GetMuonFakeableObjectsName()     const { return fMuonFakeableObjectsName;      }
+      const char   *GetElFakeableObjsName()          const { return fElFakeableObjsName;           }
+      const char   *GetMuFakeableObjsName()          const { return fMuFakeableObjsName;           }
       const char   *GetMCLeptonsName()               const { return fMCLeptonsName;                }
       const char   *GetMCTausName()                  const { return fMCTausName;                   }
 
@@ -72,8 +72,8 @@ namespace mithep
       void SetCleanMuonsName(const char *name)               { fCleanMuonsName             = name; }
       void SetCleanPhotonsName(const char *name)             { fCleanPhotonsName           = name; }
       void SetCleanJetsName(const char *name)                { fCleanJetsName              = name; }
-      void SetElectronFakeableObjectsName(const char *name)  { fElectronFakeableObjectsName= name; }
-      void SetMuonFakeableObjectsName(const char *name)      { fMuonFakeableObjectsName    = name; }
+      void SetElFakeableObjsName(const char *name)           { fElFakeableObjsName         = name; }
+      void SetMuFakeableObjsName(const char *name)           { fMuFakeableObjsName         = name; }
       void SetMCLeptonsName(const char *name)                { fMCLeptonsName              = name; }
       void SetMCTausName(const char *name)                   { fMCTausName                 = name; }
 
@@ -117,8 +117,8 @@ namespace mithep
       TString          fCleanJetsName;                 //name of clean jets                  (input)
       TString          fMCLeptonsName;                 //name of MC leptons                  (input)
       TString          fMCTausName;                    //name of MC taus                     (input)
-      TString          fElectronFakeableObjectsName;   //name of fakeable objects           (output)
-      TString          fMuonFakeableObjectsName;       //name of fakeable objects           (output)
+      TString          fElFakeableObjsName;            //name of fakeable objects           (output)
+      TString          fMuFakeableObjsName;            //name of fakeable objects           (output)
       ElectronFOType   fElFOType;                      //!FO type
       MuonFOType       fMuFOType;                      //!FO type
 

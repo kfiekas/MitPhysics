@@ -1,4 +1,4 @@
-// $Id:  $
+// $Id: GenFakeableObjsMod.cc,v 1.1 2009/06/30 10:47:17 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -33,8 +33,8 @@ GenFakeableObjsMod::GenFakeableObjsMod(const char *name, const char *title) :
   fCleanMuonsName(ModNames::gkCleanMuonsName),
   fMCLeptonsName(ModNames::gkMCLeptonsName),
   fMCTausName(ModNames::gkMCTausName),
-  fElectronFakeableObjectsName(ModNames::gkElFakeableObjsName),
-  fMuonFakeableObjectsName(ModNames::gkMuFakeableObjsName),
+  fElFakeableObjsName(ModNames::gkElFakeableObjsName),
+  fMuFakeableObjsName(ModNames::gkMuFakeableObjsName),
   fElFOType(kElFOUndef),
   fMuFOType(kMuFOUndef),
   fBarrelSuperClusters(0),
@@ -154,8 +154,8 @@ void GenFakeableObjsMod::Process()
   std::vector<const Electron*> tmpDuplicateRemovedElectrons;
 
   // create final output collection
-  ElectronArr *ElectronFakeableObjects = new ElectronArr;
-  MuonArr *MuonFakeableObjects = new MuonArr;
+  ElectronArr *ElFakeableObjs = new ElectronArr;
+  MuonArr *MuFakeableObjs = new MuonArr;
 
 
   //***********************************************************************************************
@@ -370,7 +370,7 @@ void GenFakeableObjsMod::Process()
 
     //Save denominators permanently for export
     for (UInt_t d=0; d<GsfTrackSCDenominators.size() ; ++d) {
-      Electron *tmpElectron = ElectronFakeableObjects->AddNew();
+      Electron *tmpElectron = ElFakeableObjs->AddNew();
       tmpElectron->SetPtEtaPhi(GsfTrackSCDenominators[d]->Pt(), 
                                GsfTrackSCDenominators[d]->Eta(),GsfTrackSCDenominators[d]->Phi());
       tmpElectron->SetGsfTrk(GsfTrackSCDenominators[d]->GsfTrk());
@@ -484,7 +484,7 @@ void GenFakeableObjsMod::Process()
           && !(fVetoCleanLeptons && IsCleanLepton)
           && !(fVetoTriggerJet && IsTriggerJet)
         ) {
-        Electron *tmpElectron = ElectronFakeableObjects->AddNew();
+        Electron *tmpElectron = ElFakeableObjs->AddNew();
         tmpElectron->SetPtEtaPhi(denominator->Pt(), denominator->Eta(),denominator->Phi());
         tmpElectron->SetGsfTrk(denominator->GsfTrk());
         tmpElectron->SetSuperCluster(denominator->SCluster());        
@@ -593,7 +593,7 @@ void GenFakeableObjsMod::Process()
           && !(fVetoCleanLeptons && IsCleanLepton)
           && !(fVetoTriggerJet && IsTriggerJet)
         ) {
-        Electron *tmpElectron = ElectronFakeableObjects->AddNew();
+        Electron *tmpElectron = ElFakeableObjs->AddNew();
         tmpElectron->SetPtEtaPhi(denominator->Pt(), denominator->Eta(),denominator->Phi());
         tmpElectron->SetGsfTrk(denominator->GsfTrk());
         tmpElectron->SetSuperCluster(denominator->SCluster());
@@ -664,7 +664,7 @@ void GenFakeableObjsMod::Process()
           && !(fVetoTriggerJet && IsTriggerJet)
         ) {
         //add to fakeable objects
-        Muon* tmpMuon = MuonFakeableObjects->AddNew();
+        Muon* tmpMuon = MuFakeableObjs->AddNew();
         tmpMuon->SetTrackerTrk(track);
       }
     }
@@ -725,7 +725,7 @@ void GenFakeableObjsMod::Process()
           && !(fVetoCleanLeptons && IsCleanLepton)
           && !(fVetoTriggerJet && IsTriggerJet)
         ) {
-        Muon* tmpMuon = MuonFakeableObjects->AddNew();
+        Muon* tmpMuon = MuFakeableObjs->AddNew();
         tmpMuon->SetGlobalTrk(denominator->GlobalTrk());
         tmpMuon->SetTrackerTrk(denominator->TrackerTrk());
       }
@@ -786,7 +786,7 @@ void GenFakeableObjsMod::Process()
           && !(fVetoCleanLeptons && IsCleanLepton)
           && !(fVetoTriggerJet && IsTriggerJet)
         ) {
-        Muon* tmpMuon = MuonFakeableObjects->AddNew();
+        Muon* tmpMuon = MuFakeableObjs->AddNew();
         tmpMuon->SetTrackerTrk(denominator->TrackerTrk());
       }
     }
@@ -795,10 +795,10 @@ void GenFakeableObjsMod::Process()
   //***********************************************************************************************
   //Export the fakeable object collections for other modules to use
   //***********************************************************************************************
-  ElectronFakeableObjects->SetName(fElectronFakeableObjectsName);
-  AddObjThisEvt(ElectronFakeableObjects);
-  MuonFakeableObjects->SetName(fMuonFakeableObjectsName);
-  AddObjThisEvt(MuonFakeableObjects);
+  ElFakeableObjs->SetName(fElFakeableObjsName);
+  AddObjThisEvt(ElFakeableObjs);
+  MuFakeableObjs->SetName(fMuFakeableObjsName);
+  AddObjThisEvt(MuFakeableObjs);
 
   delete GenLeptonsAndTaus;
   delete SuperClusters;
