@@ -1,4 +1,4 @@
-// $Id: TracksValMod.cc,v 1.1 2009/03/23 09:09:15 loizides Exp $
+// $Id: TracksValMod.cc,v 1.2 2009/06/15 15:00:23 loizides Exp $
 
 #include "MitPhysics/Validation/interface/TracksValMod.h"
 #include "MitAna/DataTree/interface/Names.h"
@@ -72,4 +72,3 @@ void TracksValMod::SlaveTerminate()
   // Run finishing code on the computer (slave) that did the
   // analysis. For this module, we dont do anything here.
 }
-

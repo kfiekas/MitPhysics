@@ -1,4 +1,4 @@
-// $Id: JetValidationMod.cc,v 1.3 2009/04/07 15:37:10 loizides Exp $
+// $Id: JetValidationMod.cc,v 1.4 2009/06/15 15:00:23 loizides Exp $
 
 #include "MitPhysics/Validation/interface/JetValidationMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -119,18 +119,23 @@ void JetValidationMod::Process()
       
       fIC5GenJetRecoJetDeltaR->Fill(dR);
       fIC5GenJetRecoJetDeltaEta->Fill(fabs(GoodIC5GenJets->At(i)->Eta() - iter->second->Eta()));
-      fIC5GenJetRecoJetDeltaPhi->Fill(MathUtils::DeltaPhi(GoodIC5GenJets->At(i)->Phi(),iter->second->Phi()));
+      fIC5GenJetRecoJetDeltaPhi->Fill(MathUtils::DeltaPhi(GoodIC5GenJets->At(i)->Phi(),
+                                                          iter->second->Phi()));
       
       if (fabs(iter->second->Eta()) <= 1.4)
-        fIC5JetResponseVsGenJetPtInBarrel->Fill(iter->second->Et()/GoodIC5GenJets->At(i)->Et(),GoodIC5GenJets->At(i)->Pt());
+        fIC5JetResponseVsGenJetPtInBarrel->Fill(iter->second->Et()/GoodIC5GenJets->At(i)->Et(),
+                                                GoodIC5GenJets->At(i)->Pt());
       else if (fabs(iter->second->Eta()) <= 3.0)
-        fIC5JetResponseVsGenJetPtInEndcap->Fill(iter->second->Et()/GoodIC5GenJets->At(i)->Et(),GoodIC5GenJets->At(i)->Pt());
+        fIC5JetResponseVsGenJetPtInEndcap->Fill(iter->second->Et()/GoodIC5GenJets->At(i)->Et(),
+                                                GoodIC5GenJets->At(i)->Pt());
       else if (fabs(iter->second->Eta()) <= 5.0)
-        fIC5JetResponseVsGenJetPtForward->Fill(iter->second->Et()/GoodIC5GenJets->At(i)->Et(),GoodIC5GenJets->At(i)->Pt());                
+        fIC5JetResponseVsGenJetPtForward->Fill(iter->second->Et()/GoodIC5GenJets->At(i)->Et(),
+                                               GoodIC5GenJets->At(i)->Pt());                
       
       //avoid the low pt region
       if (iter->second->Pt() > 30)
-        fIC5JetResponseVsCaloJetEta->Fill(iter->second->Et()/GoodIC5GenJets->At(i)->Et(),iter->second->Eta());
+        fIC5JetResponseVsCaloJetEta->Fill(iter->second->Et()/GoodIC5GenJets->At(i)->Et(),
+                                          iter->second->Eta());
       
       if (fabs(iter->second->Eta()) <= 3.0) {
         fIC5CentralGenJetRecoJetDeltaR->Fill(dR);
@@ -148,7 +153,11 @@ void JetValidationMod::Process()
       if (GoodIC5GenJets->At(i)->Pt() > 60.0 && GoodIC5GenJets->At(i)->Pt() < 80.0)
         fIC5NMatchedCaloJetsVsGenJetEta_Pt60To80->Fill(GoodIC5GenJets->At(i)->Eta());
      
-      fIC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt->Fill(iter->second->Pt() * iter->second->L2RelativeCorrectionScale() * iter->second->L3AbsoluteCorrectionScale() / GoodIC5GenJets->At(i)->Pt(), GoodIC5GenJets->At(i)->Pt());
+      fIC5CorrPtCaloJetsOverGenJetsPtVsGenJetPt->Fill(iter->second->Pt() * 
+                                                      iter->second->L2RelativeCorrectionScale() * 
+                                                      iter->second->L3AbsoluteCorrectionScale() / 
+                                                      GoodIC5GenJets->At(i)->Pt(), 
+                                                      GoodIC5GenJets->At(i)->Pt());
     }             
   }
 
@@ -157,7 +166,9 @@ void JetValidationMod::Process()
       IC5JetToIC5GenJetMap.find(GoodIC5Jets->At(i));      
     //unmatched ones
     if (iter == IC5JetToIC5GenJetMap.end()) {          
-      fIC5NUnmatchedCaloJetsVsCorrectedCaloJetPt->Fill(GoodIC5Jets->At(i)->Pt() * GoodIC5Jets->At(i)->L2RelativeCorrectionScale() * GoodIC5Jets->At(i)->L3AbsoluteCorrectionScale());
+      fIC5NUnmatchedCaloJetsVsCorrectedCaloJetPt->Fill(
+        GoodIC5Jets->At(i)->Pt() * GoodIC5Jets->At(i)->L2RelativeCorrectionScale() * 
+        GoodIC5Jets->At(i)->L3AbsoluteCorrectionScale());
       fIC5NUnmatchedCalojetsVsCorrectedCaloJetEta->Fill(GoodIC5Jets->At(i)->Eta());
     }
   }

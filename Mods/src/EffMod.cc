@@ -1,4 +1,4 @@
-// $Id: EffMod.cc,v 1.1 2009/04/29 15:06:42 loizides Exp $
+// $Id: EffMod.cc,v 1.2 2009/06/29 08:41:50 loizides Exp $
 
 #include "MitPhysics/Mods/interface/EffMod.h"
 #include "MitAna/DataCont/interface/BaseCollection.h"
@@ -113,13 +113,13 @@ void EffMod::SlaveBegin()
 {
   // Create and add histograms to the output list.
 
-  AddTH1(fCol1Pt,"hCol1Pt",";p_{T} [GeV];#",100,0,300);
+  AddTH1(fCol1Pt,"hCol1Pt",";p_{t} [GeV];#",100,0,300);
   AddTH1(fCol1Eta,"hCol1Eta",";#eta;#",50,-5,5);
-  AddTH1(fCol2Pt,"hCol2Pt",";p_{T} [GeV];#",100,0,300);
+  AddTH1(fCol2Pt,"hCol2Pt",";p_{t} [GeV];#",100,0,300);
   AddTH1(fCol2Eta,"hCol2Eta",";#eta;#",50,-5,5);
-  AddTH1(fGoodPt,"hGoodPt",";p_{T} [GeV];#",100,0,300);
+  AddTH1(fGoodPt,"hGoodPt",";p_{t} [GeV];#",100,0,300);
   AddTH1(fGoodEta,"hGoodEta",";#eta;#",50,-5,5);
-  AddTH1(fFakePt,"hFakePt",";p_{T} [GeV];#",100,0,300);
+  AddTH1(fFakePt,"hFakePt",";p_{t} [GeV];#",100,0,300);
   AddTH1(fFakeEta,"hFakeEta",";#eta;#",50,-5,5);
 }
 

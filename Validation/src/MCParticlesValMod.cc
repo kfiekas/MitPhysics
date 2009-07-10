@@ -1,4 +1,4 @@
-// $Id: MCParticlesValMod.cc,v 1.1 2009/03/23 09:09:14 loizides Exp $
+// $Id: MCParticlesValMod.cc,v 1.2 2009/06/15 15:00:23 loizides Exp $
 
 #include "MitPhysics/Validation/interface/MCParticlesValMod.h"
 #include "MitAna/DataTree/interface/MCParticleCol.h"
@@ -64,11 +64,11 @@ void MCParticlesValMod::SlaveBegin()
 
   ReqBranch(GetPartName(), fParticles);
 
-  AddTH1(fHs[0],"hPtHist",";p_{t};#",100,0.,250.);
+  AddTH1(fHs[0],"hPtHist",";p_{t} [GeV]; #",100,0.,250.);
   AddTH1(fHs[1],"hEtaHist",";#eta;#",160,-8.,8.);
-  AddTH1(fHs[2],"hGenPtHist",";p_{t};#",100,0.,250.);
+  AddTH1(fHs[2],"hGenPtHist",";p_{t} [GeV];#",100,0.,250.);
   AddTH1(fHs[3],"hGenEtaHist",";#eta;#",160,-8.,8.);
-  AddTH1(fHs[4],"hSimPtHist",";p_{t};#",100,0.,250.);
+  AddTH1(fHs[4],"hSimPtHist",";p_{t} [GeV];#",100,0.,250.);
   AddTH1(fHs[5],"hSimEtaHist",";#eta;#",160,-8.,8.);
   AddTH1(fHs[6],"hMassDiff",";#eta;#",1000,-5.,5.);
   AddTH1(fHs[7],"hGenMassDiff",";#eta;#",1000,-5.,5.);
@@ -82,4 +82,3 @@ void MCParticlesValMod::SlaveTerminate()
   // Run finishing code on the computer (slave) that did the
   // analysis. For this module, we dont do anything here.
 }
-
