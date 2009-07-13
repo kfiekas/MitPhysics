@@ -1,8 +1,16 @@
-// $Id: GenFakeableObjsMod.cc,v 1.1 2009/06/30 10:47:17 loizides Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.2 2009/07/02 12:17:32 phedex Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
-#include "MitAna/DataUtil/interface/Debug.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataUtil/interface/Debug.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/SuperClusterCol.h"
+#include "MitAna/DataTree/interface/TrackCol.h"
+#include "MitAna/DataTree/interface/JetCol.h"
+#include "MitAna/DataTree/interface/VertexCol.h"
+#include "MitAna/DataTree/interface/DecayParticleCol.h"
+#include "MitAna/DataTree/interface/StableData.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 

@@ -1,9 +1,15 @@
- // $Id: FakeLeptonExampleAnaMod.cc,v 1.1 2009/06/30 10:47:17 loizides Exp $
+ // $Id: FakeLeptonExampleAnaMod.cc,v 1.2 2009/06/30 10:58:50 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeLeptonExampleAnaMod.h"
+#include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataUtil/interface/Debug.h"
 #include "MitAna/DataTree/interface/Names.h"
-#include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/GenJetCol.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
+#include "MitAna/DataTree/interface/MetCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/TrackCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/FakeMods/interface/FakeObject.h"
 #include "MitPhysics/FakeMods/interface/FakeEventHeader.h"
@@ -58,11 +64,11 @@ void FakeLeptonExampleAnaMod::Process()
   //***********************************************************************************************
 
   //Obtain all cleaned objects
-  ElectronOArr *CleanElectrons = dynamic_cast<ElectronOArr* >
-    (FindObjThisEvt(ModNames::gkCleanElectronsName));
+//  ElectronOArr *CleanElectrons = dynamic_cast<ElectronOArr* >
+//    (FindObjThisEvt(ModNames::gkCleanElectronsName));
   MuonOArr *CleanMuons = dynamic_cast<MuonOArr* >
     (FindObjThisEvt(ModNames::gkCleanMuonsName));
-  mithep::ParticleOArr *CleanLeptons = dynamic_cast<mithep::ParticleOArr*>
+  ParticleOArr *CleanLeptons = dynamic_cast<mithep::ParticleOArr*>
     (FindObjThisEvt(ModNames::gkMergedLeptonsName));
 
   //Get Met

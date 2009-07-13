@@ -1,6 +1,7 @@
-// $Id: $
+// $Id: FakeRate.cc,v 1.1 2009/06/30 10:47:17 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeRate.h"
+#include <TMath.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>

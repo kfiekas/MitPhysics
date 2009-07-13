@@ -1,9 +1,9 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: FakeRate.h,v 1.1 2009/06/30 10:47:17 loizides Exp $
 //
 // FakeRate
 //
-// Class for storing the Fake rates
+// Class for storing the fake rates.
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -38,8 +38,6 @@ namespace mithep
         fIsInit = Init();
       }
       
-      ~FakeRate() {}
-
       Bool_t       Init();
       Double_t     ElectronFakeRate(Double_t et, Double_t eta, Double_t phi);
       Double_t     MuonFakeRate(Double_t pt, Double_t eta, Double_t phi);

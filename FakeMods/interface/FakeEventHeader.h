@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: FakeEventHeader.h,v 1.1 2009/06/30 10:47:16 loizides Exp $
 //
 // FakeEventHeader
 //
@@ -13,12 +13,8 @@
 #define MITPHYSICS_FAKEMODS_FAKEEVENTHEADER_H
  
 #include "MitAna/DataTree/interface/DataObject.h"
-#include "MitAna/DataTree/interface/Jet.h"
-#include "MitAna/DataTree/interface/JetFwd.h"
-#include "MitAna/DataCont/interface/ObjArray.h"
-#include "MitAna/DataCont/interface/Array.h"
-#include "MitPhysics/FakeMods/interface/FakeObject.h"
-#include "MitPhysics/FakeMods/interface/FakeObjectFwd.h"
+#include "MitAna/DataTree/interface/JetCol.h"
+#include "MitPhysics/FakeMods/interface/FakeObjectCol.h"
 
 namespace mithep 
 {

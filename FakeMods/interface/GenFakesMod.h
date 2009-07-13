@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakesMod.h,v 1.1 2009/06/30 10:47:17 loizides Exp $
+// $Id: GenFakesMod.h,v 1.2 2009/07/02 12:17:32 phedex Exp $
 //
 // Genfakesmod
 //
@@ -14,17 +14,16 @@
 #define MITPHYSICS_FAKEMODS_GENFAKESMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
-#include "MitPhysics/FakeMods/interface/FakeRate.h"
 
 namespace mithep 
 {
+  class FakeRate;
+
   class GenFakesMod : public BaseMod
   {
     public:
       GenFakesMod(const char *name="GenFakesMod", 
                   const char *title="Fake Object Generation Module");
-      ~GenFakesMod() {}
 
       const char   *GetCleanElectronsName()          const { return fCleanElectronsName;          }
       const char   *GetCleanMuonsName()              const { return fCleanMuonsName;              }
@@ -80,8 +79,7 @@ namespace mithep
       TString            fMCTausName;                   //name of MC taus
       TString            fElFakeableObjsName;           //name of electron fakeable objects (input)
       TString            fMuFakeableObjsName;           //name of muon fakeable objects     (input)
-
-      TString            fFakeEventHeadersName; //name of collection of FakeEventHeaders    (output)
+      TString            fFakeEventHeadersName;         //name of collection of FakeEventHeaders    (output)
    
     ClassDef(GenFakesMod, 1) // Jet cleaning module
   };

@@ -1,10 +1,17 @@
-// $Id: GenFakesMod.cc,v 1.1 2009/06/30 10:47:17 loizides Exp $
+// $Id: GenFakesMod.cc,v 1.2 2009/07/02 12:17:32 phedex Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakesMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataUtil/interface/Debug.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/PhotonCol.h"
+#include "MitAna/DataTree/interface/JetCol.h"
+#include "MitAna/DataTree/interface/ParticleCol.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/FakeMods/interface/FakeEventHeader.h"
+#include "MitPhysics/FakeMods/interface/FakeRate.h"
 
 using namespace mithep;
 
@@ -25,10 +32,10 @@ GenFakesMod::GenFakesMod(const char *name, const char *title) :
   fCleanMuonsName(ModNames::gkCleanMuonsName),        
   fCleanPhotonsName(ModNames::gkCleanPhotonsName),        
   fCleanJetsName(ModNames::gkCleanJetsName),
-  fElFakeableObjsName(ModNames::gkElFakeableObjsName),
-  fMuFakeableObjsName(ModNames::gkMuFakeableObjsName),
   fMCLeptonsName(ModNames::gkMCLeptonsName),
   fMCTausName(ModNames::gkMCTausName),
+  fElFakeableObjsName(ModNames::gkElFakeableObjsName),
+  fMuFakeableObjsName(ModNames::gkMuFakeableObjsName),
   fFakeEventHeadersName(ModNames::gkFakeEventHeadersName)
 {
   // Constructor.
@@ -41,9 +48,7 @@ void GenFakesMod::LoadFakeRate()
   fFakeRate = new FakeRate(fElectronFRFilename,fMuonFRFilename,fElectronFRFunctionName,
                            fMuonFRFunctionName,fElectronFRHistName,
                            fMuonFRHistName,fUse2DFakeRate, fUseFitFunction );
-
 }
-
 
 //--------------------------------------------------------------------------------------------------
 void GenFakesMod::Process()
@@ -216,7 +221,7 @@ void GenFakesMod::Process()
 
         //add all previous jets except the one matching to the new fake
         for (UInt_t jj=0;jj<FakeEventHeaders->At(i)->NJets();jj++) {
-          if (jj != fakeToJetMatch)
+          if ((int)jj != fakeToJetMatch)
             fakeMuonEvent->AddJets(FakeEventHeaders->At(i)->UnfakedJet(jj));
         }
         
@@ -384,7 +389,7 @@ void GenFakesMod::Process()
                                            kElectron,isCleanLepton,isGenElectron);
           //add previous jets that do not match to the new fake
           for (UInt_t jj=0;jj<FakeEventHeaders->At(i)->NJets();jj++) {
-            if (jj != fakeToJetMatch)
+            if ((int)jj != fakeToJetMatch)
               fakeElectronEvent->AddJets(FakeEventHeaders->At(i)->UnfakedJet(jj));
           }
           

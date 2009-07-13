@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: FakeLeptonExampleAnaMod.h,v 1.1 2009/06/30 10:47:16 loizides Exp $
 //
 // FakeLeptonExampleAnaMod
 //
@@ -14,7 +14,7 @@
 #define MITHIGGS_HWWMODS_FAKELEPTONEXAMPLEANAMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/CollectionsFwd.h"
 
 class TH1D;
 class TH2D;
@@ -24,9 +24,8 @@ namespace mithep
   class FakeLeptonExampleAnaMod : public BaseMod
   {
     public:
-    FakeLeptonExampleAnaMod(const char *name="FakeLeptonExampleAnaMod", 
-		 const char *title="Example analysis module with all branches");
-      ~FakeLeptonExampleAnaMod() {}
+      FakeLeptonExampleAnaMod(const char *name="FakeLeptonExampleAnaMod", 
+                              const char *title="Example analysis module with all branches");
 
       Bool_t      GetUseMCFake()                         { return fUseMCFake;                    }
       Bool_t      GetPerformFakeMuonMetCorrection()      { return fPerformFakeMuonMetCorrection; }

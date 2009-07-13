@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.1 2009/06/30 10:47:17 loizides Exp $
+// $Id: GenFakeableObjsMod.h,v 1.2 2009/07/02 12:17:32 phedex Exp $
 //
 // GenFakeableObjsMod
 //
@@ -14,7 +14,7 @@
 #define MITPHYSICS_FAKEMODS_GENFAKEABLEOBJSMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "MitAna/DataTree/interface/Collections.h"
+#include "MitAna/DataTree/interface/CollectionsFwd.h"
 
 namespace mithep 
 {
@@ -22,8 +22,7 @@ namespace mithep
   {
     public:
       GenFakeableObjsMod(const char *name="GenFakeableObjsMod", 
-                     const char *title="Fake Object Generation Module");
-      ~GenFakeableObjsMod() {}
+                         const char *title="Fake Object Generation Module");
 
       Bool_t        GetVetoTriggerJet()              const { return fVetoTriggerJet;               }
       Bool_t        GetVetoGenLeptons()              const { return fVetoGenLeptons;               }
