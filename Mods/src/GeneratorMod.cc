@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.45 2009/06/17 20:27:44 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.46 2009/06/22 11:55:02 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -769,70 +769,72 @@ void GeneratorMod::Process()
 	}
       }
     } // end loop of particles
-    if(diBosonMass[0] > 70 && diBosonMass[0] < 110 && 
-       diBosonMass[1] > 70 && diBosonMass[1] < 110){
-      if(sumV[0] + 4*sumV[1] == 2){
-	if     (sumVVFlavor[0] == 2)    		    hDVVMass[18]->Fill(0.);
-	else if(sumVVFlavor[1] == 2)    		    hDVVMass[18]->Fill(1.);
-	else if(sumVVFlavor[2] == 2)                        hDVVMass[18]->Fill(2.);
-	else if(sumVVFlavor[0] == 1 && sumVVFlavor[1] == 1) hDVVMass[18]->Fill(3.);
-	else if(sumVVFlavor[0] == 1 && sumVVFlavor[2] == 1) hDVVMass[18]->Fill(4.);
-	else if(sumVVFlavor[1] == 1 && sumVVFlavor[2] == 1) hDVVMass[18]->Fill(5.);
-	else                                                hDVVMass[18]->Fill(6.);
-      }
-      if(sumV[0] + 4*sumV[1] == 5){
-	if     (sumVVFlavor[3] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(0.);
-	else if(sumVVFlavor[3] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(1.);
-	else if(sumVVFlavor[3] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(2.);
-	else if(sumVVFlavor[4] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(3.);
-	else if(sumVVFlavor[4] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(4.);
-	else if(sumVVFlavor[4] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(5.);
-	else if(sumVVFlavor[5] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(6.);
-	else if(sumVVFlavor[5] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(7.);
-	else if(sumVVFlavor[5] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(8.);
-	else                           			    hDVVMass[19]->Fill(9.);
-      }
-      if(sumV[0] + 4*sumV[1] == 8 &&
-         sumVVFlavor[3] + sumVVFlavor[4] +sumVVFlavor[5] == 2){
-	if     (sumVVFlavor[3] == 2)  			     hDVVMass[20]->Fill(0.);
-	else if(sumVVFlavor[4] == 2)  			     hDVVMass[20]->Fill(1.);
-	else if(sumVVFlavor[5] == 2)  			     hDVVMass[20]->Fill(2.);
-	else if(sumVVFlavor[3] == 1 && sumVVFlavor[4] == 1)  hDVVMass[20]->Fill(3.);
-	else if(sumVVFlavor[3] == 1 && sumVVFlavor[5] == 1)  hDVVMass[20]->Fill(4.);
-	else if(sumVVFlavor[4] == 1 && sumVVFlavor[5] == 1)  hDVVMass[20]->Fill(5.);
-	else                                                 hDVVMass[20]->Fill(6.);
-      }
-      else if(sumV[0] + 4*sumV[1] == 8){
-	if     (sumVVFlavor[6] == 2)  			     hDVVMass[21]->Fill(0.);
-	else if(sumVVFlavor[7] == 2)  			     hDVVMass[21]->Fill(1.);
-	else if(sumVVFlavor[8] == 2)  			     hDVVMass[21]->Fill(2.);
-	else if(sumVVFlavor[3] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(3.);
-	else if(sumVVFlavor[3] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(4.);
-	else if(sumVVFlavor[3] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(5.);
-	else if(sumVVFlavor[4] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(6.);
-	else if(sumVVFlavor[4] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(7.);
-	else if(sumVVFlavor[4] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(8.);
-	else if(sumVVFlavor[5] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(9.);
-	else if(sumVVFlavor[5] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(10.);
-	else if(sumVVFlavor[5] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(11.);
-	else if(sumVVFlavor[6] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(12.);
-	else if(sumVVFlavor[6] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(13.);
-	else if(sumVVFlavor[7] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(14.);
-	else                                                 hDVVMass[21]->Fill(15.);
-      }
-    } // 60<mV1/2<120
-    if(sumV[0] + 4*sumV[1] == 2) 
-      hDVVMass[22]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
-    if(sumV[0] + 4*sumV[1] == 2) 
-      hDVVMass[23]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
-    if(sumV[0] + 4*sumV[1] == 5) 
-      hDVVMass[24]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
-    if(sumV[0] + 4*sumV[1] == 5) 
-      hDVVMass[25]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
-    if(sumV[0] + 4*sumV[1] == 8) 
-      hDVVMass[26]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
-    if(sumV[0] + 4*sumV[1] == 8) 
-      hDVVMass[27]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
+    if (GetFillHist()) {
+      if(diBosonMass[0] > 70 && diBosonMass[0] < 110 && 
+         diBosonMass[1] > 70 && diBosonMass[1] < 110){
+        if(sumV[0] + 4*sumV[1] == 2){
+          if     (sumVVFlavor[0] == 2)    		    hDVVMass[18]->Fill(0.);
+          else if(sumVVFlavor[1] == 2)    		    hDVVMass[18]->Fill(1.);
+          else if(sumVVFlavor[2] == 2)                        hDVVMass[18]->Fill(2.);
+          else if(sumVVFlavor[0] == 1 && sumVVFlavor[1] == 1) hDVVMass[18]->Fill(3.);
+          else if(sumVVFlavor[0] == 1 && sumVVFlavor[2] == 1) hDVVMass[18]->Fill(4.);
+          else if(sumVVFlavor[1] == 1 && sumVVFlavor[2] == 1) hDVVMass[18]->Fill(5.);
+          else                                                hDVVMass[18]->Fill(6.);
+        }
+        if(sumV[0] + 4*sumV[1] == 5){
+          if     (sumVVFlavor[3] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(0.);
+          else if(sumVVFlavor[3] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(1.);
+          else if(sumVVFlavor[3] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(2.);
+          else if(sumVVFlavor[4] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(3.);
+          else if(sumVVFlavor[4] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(4.);
+          else if(sumVVFlavor[4] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(5.);
+          else if(sumVVFlavor[5] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(6.);
+          else if(sumVVFlavor[5] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(7.);
+          else if(sumVVFlavor[5] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(8.);
+          else                           			    hDVVMass[19]->Fill(9.);
+        }
+        if(sumV[0] + 4*sumV[1] == 8 &&
+           sumVVFlavor[3] + sumVVFlavor[4] +sumVVFlavor[5] == 2){
+          if     (sumVVFlavor[3] == 2)  			     hDVVMass[20]->Fill(0.);
+          else if(sumVVFlavor[4] == 2)  			     hDVVMass[20]->Fill(1.);
+          else if(sumVVFlavor[5] == 2)  			     hDVVMass[20]->Fill(2.);
+          else if(sumVVFlavor[3] == 1 && sumVVFlavor[4] == 1)  hDVVMass[20]->Fill(3.);
+          else if(sumVVFlavor[3] == 1 && sumVVFlavor[5] == 1)  hDVVMass[20]->Fill(4.);
+          else if(sumVVFlavor[4] == 1 && sumVVFlavor[5] == 1)  hDVVMass[20]->Fill(5.);
+          else                                                 hDVVMass[20]->Fill(6.);
+        }
+        else if(sumV[0] + 4*sumV[1] == 8){
+          if     (sumVVFlavor[6] == 2)  			     hDVVMass[21]->Fill(0.);
+          else if(sumVVFlavor[7] == 2)  			     hDVVMass[21]->Fill(1.);
+          else if(sumVVFlavor[8] == 2)  			     hDVVMass[21]->Fill(2.);
+          else if(sumVVFlavor[3] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(3.);
+          else if(sumVVFlavor[3] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(4.);
+          else if(sumVVFlavor[3] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(5.);
+          else if(sumVVFlavor[4] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(6.);
+          else if(sumVVFlavor[4] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(7.);
+          else if(sumVVFlavor[4] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(8.);
+          else if(sumVVFlavor[5] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(9.);
+          else if(sumVVFlavor[5] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(10.);
+          else if(sumVVFlavor[5] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(11.);
+          else if(sumVVFlavor[6] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(12.);
+          else if(sumVVFlavor[6] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(13.);
+          else if(sumVVFlavor[7] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(14.);
+          else                                                 hDVVMass[21]->Fill(15.);
+        }
+      } // 60<mV1/2<120
+      if(sumV[0] + 4*sumV[1] == 2) 
+        hDVVMass[22]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
+      if(sumV[0] + 4*sumV[1] == 2) 
+        hDVVMass[23]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
+      if(sumV[0] + 4*sumV[1] == 5) 
+        hDVVMass[24]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
+      if(sumV[0] + 4*sumV[1] == 5) 
+        hDVVMass[25]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
+      if(sumV[0] + 4*sumV[1] == 8) 
+        hDVVMass[26]->Fill(TMath::Min(TMath::Min(diBosonMass[0],diBosonMass[1]),199.999));
+      if(sumV[0] + 4*sumV[1] == 8) 
+        hDVVMass[27]->Fill(TMath::Min(TMath::Max(diBosonMass[0],diBosonMass[1]),199.999));
+    }
     delete GenTempMG1;
   } // WW, WZ or ZZ
   // --------------------------------
