@@ -1,8 +1,9 @@
-// $Id: runSkimmingExample.C,v 1.3 2009/03/23 22:01:29 loizides Exp $
+// $Id: runSkimmingExample.C,v 1.4 2009/03/24 18:00:41 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TRandom.h>
+#include <TParameter.h>
 #include "MitAna/DataUtil/interface/Debug.h"
 #include "MitAna/TreeMod/interface/Analysis.h"
 #include "MitAna/TreeMod/interface/OutputMod.h"
@@ -13,10 +14,17 @@ namespace mithep
   class Sel : public BaseMod
   {
     public:
-      Sel(Int_t r=10) : fRand(r) {}
+      Sel(Int_t r=10) : fRand(r), fP("RValue",0) {}
+
     protected:
-      void       Process() { if (gRandom->Rndm()>1./fRand) SkipEvent(); }
-      Int_t      fRand;
+      void               Process() { Double_t r = gRandom->Rndm(); 
+                                     fP.SetVal(r);
+                                     if (r>1./fRand) SkipEvent(); }
+      void               SlaveBegin() { PublishObj(&fP);          }
+
+      Int_t              fRand; //inverse fraction of to be skipped events
+      TParameter<double> fP;    //parameter holding the random number
+
     ClassDef(Sel, 1)
   };
 }
@@ -34,6 +42,8 @@ void runSkimmingExample(const char *files,
   Sel *smod = new Sel((Int_t)(1./fkeep));
   OutputMod *omod = new OutputMod;
   omod->SetFileName(prefix);
+  //omod->SetCheckBrDep(kFALSE);
+  omod->AddNewBranch("RValue");
   omod->Keep("*");
   if (0) { // more complex case
     omod->Drop("*");
