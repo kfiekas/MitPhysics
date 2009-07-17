@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.22 2009/06/01 17:31:38 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.23 2009/06/15 15:00:21 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -69,7 +69,17 @@ void MuonIDMod::Process()
         if (pass) 
           pt = mu->StandaloneTrk()->Pt();
         break;
-      case kTrackerOnly:
+      case kTrackerMuon:
+        pass = mu->HasTrackerTrk() && mu->IsTrackerMuon();
+        if (pass) 
+          pt = mu->TrackerTrk()->Pt();
+        break;
+      case kCaloMuon:
+        pass = mu->HasTrackerTrk() && mu->IsCaloMuon();
+        if (pass) 
+          pt = mu->TrackerTrk()->Pt();
+        break;
+      case kTrackerBased:
         pass = mu->HasTrackerTrk();
         if (pass) 
           pt = mu->TrackerTrk()->Pt();
@@ -231,8 +241,12 @@ void MuonIDMod::SlaveBegin()
     fMuClassType = kGlobal;
   else if (fMuonClassType.CompareTo("Standalone") == 0) 
     fMuClassType = kSta;
-  else if (fMuonClassType.CompareTo("TrackerOnly") == 0) 
-    fMuClassType = kTrackerOnly;
+  else if (fMuonClassType.CompareTo("TrackerMuon") == 0) 
+    fMuClassType = kTrackerMuon;
+  else if (fMuonClassType.CompareTo("CaloMuon") == 0) 
+    fMuClassType = kCaloMuon;
+  else if (fMuonClassType.CompareTo("TrackerBased") == 0) 
+    fMuClassType = kTrackerBased;
   else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified muon class %s is not defined.",
