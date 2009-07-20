@@ -1,11 +1,11 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakesMod.h,v 1.2 2009/07/02 12:17:32 phedex Exp $
+// $Id: GenFakesMod.h,v 1.3 2009/07/13 11:27:13 loizides Exp $
 //
-// Genfakesmod
+// GenFakesMod
 //
 // This Module generates a collection of FakeEventHeaders containing information
-// about possible fakes and their weight. The collection generated takes into account all possible
-// faking combinatorics from the given set of fakable objects.
+// about possible fakes and their weight. The collection generated takes into account 
+// all possible faking combinatorics from the given set of fakable objects.
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -79,9 +79,9 @@ namespace mithep
       TString            fMCTausName;                   //name of MC taus
       TString            fElFakeableObjsName;           //name of electron fakeable objects (input)
       TString            fMuFakeableObjsName;           //name of muon fakeable objects     (input)
-      TString            fFakeEventHeadersName;         //name of collection of FakeEventHeaders    (output)
+      TString            fFakeEventHeadersName;         //name of FakeEventHeaders          (output)
    
-    ClassDef(GenFakesMod, 1) // Jet cleaning module
+    ClassDef(GenFakesMod, 1) // FakeEventHeader generation module
   };
 }
 #endif

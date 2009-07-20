@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MergerMod.h,v 1.4 2009/06/15 15:00:21 loizides Exp $
+// $Id: MergerMod.h,v 1.5 2009/06/17 11:50:28 loizides Exp $
 //
 // MergerMod
 //
@@ -37,7 +37,7 @@ namespace mithep
       std::vector<std::string> fInList;        //list of to be merged objects (input)
       TString                  fMergedName;    //name of merged collection (output)
 
-    ClassDef(MergerMod, 1) // Merger module
+    ClassDef(MergerMod, 1) // Generic collection merging module
   };
 }
 #endif

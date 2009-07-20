@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: FakeRate.h,v 1.1 2009/06/30 10:47:17 loizides Exp $
+// $Id: FakeRate.h,v 1.2 2009/07/13 11:27:13 loizides Exp $
 //
 // FakeRate
 //
@@ -87,7 +87,7 @@ namespace mithep
       TH2F        *fMuonFakeRateHist_PtEta_sysError;     //!2D Fake Rate Error for muons
 
 
-    ClassDef(FakeRate, 1) // Charged particle class
+    ClassDef(FakeRate, 1) // Fake rate class
   };
 }
 #endif

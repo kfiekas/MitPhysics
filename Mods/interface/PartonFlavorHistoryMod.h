@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PartonFlavorHistoryMod.h,v 1.3 2009/04/30 08:09:32 loizides Exp $
+// $Id: PartonFlavorHistoryMod.h,v 1.4 2009/06/15 15:00:21 loizides Exp $
 //
 // PartonFlavorHistoryMod
 //
@@ -52,7 +52,7 @@ namespace mithep
       const MCParticleCol *fParticles;	              //!MCParticle branch
       TH1D                *fFlavorClassification;     //!histos for flavor history
 
-    ClassDef(PartonFlavorHistoryMod, 1) // Module to gather generator information
+    ClassDef(PartonFlavorHistoryMod, 1) // Module to gather flavor history information
   };
 }
 #endif

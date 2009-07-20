@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: FakeEventHeader.h,v 1.1 2009/06/30 10:47:16 loizides Exp $
+// $Id: FakeEventHeader.h,v 1.2 2009/07/13 11:27:13 loizides Exp $
 //
 // FakeEventHeader
 //
@@ -47,7 +47,7 @@ namespace mithep
       FakeObjectArr             fFakeObjects;     //!fake objects
       JetOArr                   fJets;            //!collection of jets after some have been 
 
-    ClassDef(FakeEventHeader, 1) // Event header class
+    ClassDef(FakeEventHeader, 1) // Fake event header class
   };
 }
 
@@ -73,5 +73,4 @@ inline void mithep::FakeEventHeader::AddFakeObject(const mithep::FakeObject *fo)
   newFake->SetFakeTag(fo->FakeTag());
   newFake->SetMCTag(fo->MCTag());  
 }
-
 #endif

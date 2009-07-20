@@ -68,7 +68,7 @@ namespace mithep
       const TrackCol          *fGsfTrackCol;          //!pointer to collection 
       TH1D                    *fNAccCounters;         //!acceptance histogram
 
-      ClassDef(PhotonPlusIsoTrackSelMod,1) // Generic selection module
+      ClassDef(PhotonPlusIsoTrackSelMod,1) // Photon plus isolated track selection module
   };
 }
 #endif

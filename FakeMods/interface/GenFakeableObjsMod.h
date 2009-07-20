@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.2 2009/07/02 12:17:32 phedex Exp $
+// $Id: GenFakeableObjsMod.h,v 1.3 2009/07/13 11:27:13 loizides Exp $
 //
 // GenFakeableObjsMod
 //
@@ -131,7 +131,7 @@ namespace mithep
       const VertexCol        *fVertices;              //!Vertex branch
       const DecayParticleCol *fConversions;           //!conversion collection       
 
-      ClassDef(GenFakeableObjsMod, 1) // Jet cleaning module
+      ClassDef(GenFakeableObjsMod, 1) // Fabeable objects generation module
   };
 }
 #endif

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: FakeObject.h,v 1.1 2009/06/30 10:47:16 loizides Exp $
 //
 // FakeObject
 //
@@ -41,7 +41,7 @@ namespace mithep
       EObjType        fFakeType;              //!the type of object it faked
       const Particle *fParticle;              //!pointer to the original particle
  
-    ClassDef(FakeObject, 1) // Charged particle class
+    ClassDef(FakeObject, 1) // Fake object class
   };
 }
 

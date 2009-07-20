@@ -1,13 +1,11 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: FakeLeptonExampleAnaMod.h,v 1.1 2009/06/30 10:47:16 loizides Exp $
+// $Id: FakeLeptonExampleAnaMod.h,v 1.2 2009/07/13 11:27:13 loizides Exp $
 //
 // FakeLeptonExampleAnaMod
 //
-// A Module for Selecting H->WW events
-// and produces some distributions.
+// TODO
 //
-//
-// Authors: Si Xie
+// Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
 
 #ifndef MITHIGGS_HWWMODS_FAKELEPTONEXAMPLEANAMOD_H
@@ -55,6 +53,12 @@ namespace mithep
       void   SetTriggerObjectsName(const char *name)       { fTriggerObjectsName         = name; }
 
     protected:
+      void         Begin();
+      void         Process();
+      void         SlaveBegin();
+      void         SlaveTerminate();
+      void         Terminate();      
+
       Bool_t                fUseMCFake;                    //whether to use MC simulation fakes
       Bool_t                fPerformFakeMuonMetCorrection; //whether to perform fake muon 
                                                            //met correction
@@ -103,14 +107,7 @@ namespace mithep
       TH1D                    *fMtLepton2_afterCuts;
       TH1D                    *fMtHiggs_afterCuts;
 
-
-      void         Begin();
-      void         Process();
-      void         SlaveBegin();
-      void         SlaveTerminate();
-      void         Terminate();      
-
-      ClassDef(FakeLeptonExampleAnaMod,1) // TAM example analysis module
+      ClassDef(FakeLeptonExampleAnaMod,1) // Fake lepton analysis example
   };
 }
 #endif
