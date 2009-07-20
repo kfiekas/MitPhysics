@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.8 2009/05/11 08:01:31 loizides Exp $
+// $Id: MuonTools.h,v 1.9 2009/06/15 15:00:23 loizides Exp $
 //
 // MuonTools
 //
@@ -27,7 +27,7 @@ namespace mithep {
     public:
       MuonTools(const char *mutemp="$CMSSW_BASE/src/MitPhysics/data/MuonCaloTemplate.root", 
                 const char *pitemp="$CMSSW_BASE/src/MitPhysics/data/PionCaloTemplate.root");
-      ~MuonTools();
+      virtual ~MuonTools();
 
       enum ESelType { 
         kAllArbitrated,          //All arbitration (DT/CSC/RPC Hits) put on at least one 
@@ -76,6 +76,8 @@ namespace mithep {
       TH2D       *fpion_had_etaEpl;     //!Plus Endcap Hadronic Calo Deposit Template for Pions
 
       TH2D       *LoadHisto(const char *fname, TFile *file)                      const;
+
+    ClassDef(MuonTools, 0) // Muon tools
   };
 }
 

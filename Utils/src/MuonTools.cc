@@ -1,7 +1,9 @@
-// $Id: MuonTools.cc,v 1.8 2009/03/23 14:48:08 loizides Exp $
+// $Id: MuonTools.cc,v 1.9 2009/04/07 15:37:10 loizides Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
+
+ClassImp(mithep::MuonTools)
 
 using namespace mithep;
 

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DiTauSystem.h,v 1.8 2009/03/23 22:17:04 loizides Exp $
+// $Id: DiTauSystem.h,v 1.9 2009/06/12 12:40:34 loizides Exp $
 //
 // DiTauSystem
 //
@@ -43,6 +43,8 @@ namespace mithep
       Double_t         fMT;       //transverse visible mass
       Double_t         fETll;     //transverse energy of tau products
       Double_t         fETnn;     //transverse missing energy
+
+    ClassDef(DiTauSystem, 0) // DiTauSystem ala CMS note 2006/082
   };
 }
 #endif

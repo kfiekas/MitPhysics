@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.3 2009/02/17 06:49:01 phedex Exp $
+// $Id: IsolationTools.h,v 1.4 2009/05/11 08:01:31 loizides Exp $
 //
 // IsolationTools
 //
@@ -33,6 +33,8 @@ namespace mithep
       static Double_t CaloTowerEmIsolation(const ThreeVector *p, Double_t extRadius, 
                                            Double_t intRadius, Double_t etLow, 
                                            const mithep::Collection<mithep::CaloTower> *caloTowers);
+
+    ClassDef(IsolationTools, 0) // Isolation tools
   };
 }
 #endif

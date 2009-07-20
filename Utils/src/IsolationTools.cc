@@ -1,7 +1,9 @@
-// $Id: IsolationTools.cc,v 1.2 2009/02/17 06:49:28 phedex Exp $
+// $Id: IsolationTools.cc,v 1.3 2009/03/03 18:11:19 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+
+ClassImp(mithep::IsolationTools)
 
 using namespace mithep;
 

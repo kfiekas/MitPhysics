@@ -1,9 +1,11 @@
-// $Id: DiTauSystem.cc,v 1.5 2008/12/11 20:29:36 ceballos Exp $
+// $Id: DiTauSystem.cc,v 1.6 2009/01/20 10:28:36 loizides Exp $
 
 #include "MitPhysics/Utils/interface/DiTauSystem.h"
 #include "MitAna/DataTree/interface/CompositeParticle.h"
 #include "MitAna/DataTree/interface/Met.h"
 #include "MitAna/DataTree/interface/Particle.h"
+
+ClassImp(mithep::DiTauSystem)
 
 using namespace mithep;
 
