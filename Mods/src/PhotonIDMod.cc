@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.6 2009/05/19 11:42:20 loizides Exp $
+// $Id: PhotonIDMod.cc,v 1.7 2009/06/15 15:00:21 loizides Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -75,7 +75,7 @@ void PhotonIDMod::Process()
         isocut = kTRUE;
         break;
       case kCombinedIso:
-        isocut = ph->HollowConeTrkIso() + 
+        isocut = ph->HollowConeTrkIsoDr04() + 
 	         ph->HcalRecHitIso() < 5.0;
         break;
       case kCustomIso:

@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.26 2009/06/15 15:00:21 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.27 2009/07/17 13:37:15 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -81,17 +81,17 @@ void ElectronIDMod::Process()
     Bool_t isocut = kFALSE;
     switch (fElIsoType) {
       case kTrackCalo:
-        isocut = (e->TrackIsolation() < fTrackIsolationCut) &&
+        isocut = (e->TrackIsolationDr03() < fTrackIsolationCut) &&
                  (e->CaloIsolation() < fCaloIsolationCut);
         break;
       case kTrackJura:
-        isocut = (e->TrackIsolation() < fTrackIsolationCut) &&
-                 (e->EcalJurassicIsolation() < fEcalJuraIsoCut) &&
+        isocut = (e->TrackIsolationDr03() < fTrackIsolationCut) &&
+                 (e->EcalRecHitIsoDr04() < fEcalJuraIsoCut) &&
                  (e->HcalIsolation() < fHcalIsolationCut);
         break;
       case kTrackJuraSliding:
         {
-          Double_t totalIso = e->TrackIsolation() + e->EcalJurassicIsolation() - 1.5;
+          Double_t totalIso = e->TrackIsolationDr03() + e->EcalRecHitIsoDr04() - 1.5;
           if ((totalIso < (e->Pt()-10.0)*5.0/15.0 && e->Pt() <= 25) ||
               (totalIso < 5.0 && e->Pt() > 25) ||
 	       totalIso <= 0)
