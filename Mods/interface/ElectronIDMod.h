@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.19 2009/06/02 05:30:44 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.20 2009/06/15 15:00:21 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -67,7 +67,8 @@ namespace mithep
         kLoose,             //"Loose"
         kLikelihood,        //"Likelihood"
         kNoId,              //"NoId"
-        kCustomId           //"Custom"
+        kCustomIdLoose,      //"CustomLoose"
+        kCustomIdTight      //"CustomTight"
       };
       enum EElIsoType {
         kIsoUndef = 0,      //not defined
@@ -77,10 +78,16 @@ namespace mithep
         kNoIso,             //"NoIso"
         kCustomIso          //"Custom"
       };
+      enum EElIdCustomType {
+        kTightCustom,             //"Tight"
+        kLooseCustom             //"Loose"
+      };
 
     protected:
       void                    Process();
       void                    SlaveBegin();
+      Bool_t                  PassCustomID(const Electron *ele, EElIdCustomType CustomIDName);
+      Int_t                   Categories(const Electron *ele);
 
       TString                 fElectronBranchName;     //name of electron collection (input)
       TString                 fConversionBranchName;   //name of electron collection (input)
