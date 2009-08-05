@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.20 2009/06/15 15:00:21 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.21 2009/08/04 08:23:18 peveraer Exp $
 //
 // ElectronIDMod
 //
@@ -40,15 +40,16 @@ namespace mithep
       const char         *GetIsoType()                const { return fElectronIsoType;        }
       const char         *GetOutputName()             const { return GetGoodElectronsName();  }
       Double_t            GetPtMin()                  const { return fElectronPtMin;          }
-      Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
-      Bool_t              GetReverseIsoCut()          const { return fReverseIsoCut;          }
       Bool_t              GetReverseD0Cut()           const { return fReverseD0Cut;           }
+      Bool_t              GetReverseIsoCut()          const { return fReverseIsoCut;          }
+      Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
+      void                SetD0Cut(Double_t cut)                { fD0Cut = cut;               }
       void                SetEcalJurIsoCut(Double_t cut)        { fEcalJuraIsoCut     = cut;  }
-      void                SetGoodName(const char *n)            { SetGoodElectronsName(n);    }   
       void                SetGoodElectronsName(const char *n)   { fGoodElectronsName  = n;    }   
+      void                SetGoodName(const char *n)            { SetGoodElectronsName(n);    }   
       void                SetHcalIsoCut(Double_t cut)           { fHcalIsolationCut   = cut;  }
       void                SetIDLikelihoodCut(Double_t cut)      { fIDLikelihoodCut    = cut;  }
       void                SetIDType(const char *type)           { fElectronIDType     = type; }
@@ -56,10 +57,9 @@ namespace mithep
       void                SetIsoType(const char *type)          { fElectronIsoType    = type; }
       void                SetOutputName(const char *n)          { SetGoodElectronsName(n);    }   
       void                SetPtMin(Double_t pt)                 { fElectronPtMin      = pt;   }
-      void                SetTrackIsoCut(Double_t cut)          { fTrackIsolationCut  = cut;  }
-      void                SetD0Cut(Double_t cut)                { fD0Cut = cut;               }
-      void                SetReverseIsoCut(Bool_t b)            { fReverseIsoCut = b;         }
       void                SetReverseD0Cut(Bool_t b)             { fReverseD0Cut = b;          }
+      void                SetReverseIsoCut(Bool_t b)            { fReverseIsoCut = b;         }
+      void                SetTrackIsoCut(Double_t cut)          { fTrackIsolationCut  = cut;  }
 
       enum EElIdType {
         kIdUndef = 0,       //not defined
@@ -67,9 +67,10 @@ namespace mithep
         kLoose,             //"Loose"
         kLikelihood,        //"Likelihood"
         kNoId,              //"NoId"
-        kCustomIdLoose,      //"CustomLoose"
+        kCustomIdLoose,     //"CustomLoose"
         kCustomIdTight      //"CustomTight"
       };
+
       enum EElIsoType {
         kIsoUndef = 0,      //not defined
         kTrackCalo,         //"TrackCalo"
@@ -78,16 +79,13 @@ namespace mithep
         kNoIso,             //"NoIso"
         kCustomIso          //"Custom"
       };
-      enum EElIdCustomType {
-        kTightCustom,             //"Tight"
-        kLooseCustom             //"Loose"
-      };
 
     protected:
+      Bool_t                  PassCustomID(const Electron *el) const;
       void                    Process();
+      void                    SetCustomIDCuts(EElIdType idt);
       void                    SlaveBegin();
-      Bool_t                  PassCustomID(const Electron *ele, EElIdCustomType CustomIDName);
-      Int_t                   Categories(const Electron *ele);
+
 
       TString                 fElectronBranchName;     //name of electron collection (input)
       TString                 fConversionBranchName;   //name of electron collection (input)
@@ -111,6 +109,7 @@ namespace mithep
       const ElectronCol      *fElectrons;              //!electron collection
       const DecayParticleCol *fConversions;            //!conversion collection
       const VertexCol        *fVertices;               //!vertices branches
+      Double_t                fCuts[6][8];             //!custom id cuts
 
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.28 2009/07/21 16:35:12 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.29 2009/08/04 08:23:01 peveraer Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -41,6 +41,59 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
 }
 
 //--------------------------------------------------------------------------------------------------
+Bool_t ElectronIDMod::PassCustomID(const Electron *ele) const
+{
+  // Check if given electron passes the custom id criteria. Based on XXX (Todo Pieter) from CMSSW.
+
+  Double_t eOverP = ele->ESuperClusterOverP();
+  Double_t fBrem  = ele->FBrem();
+
+  if ((eOverP < fCuts[5][0]) && (fBrem < fCuts[5][1]))
+    return kFALSE;
+
+  if (eOverP < fCuts[5][2]*(1-fBrem))
+    return kFALSE;
+
+  Int_t cat = 2;
+  if ((ele->IsEB() && fBrem<0.06) || (ele->IsEE() && fBrem<0.1)) 
+    cat=1;
+  else if (eOverP < 1.2 && eOverP > 0.8) 
+    cat=0;
+
+  Double_t eSeedOverPin = ele->ESeedClusterOverPIn(); 
+  Double_t hOverE       = ele->HadronicOverEm();
+  Double_t sigmaee      = ele->CoviEtaiEta();
+  Double_t deltaPhiIn   = TMath::Abs(ele->DeltaPhiSuperClusterTrackAtVtx());
+  Double_t deltaEtaIn   = TMath::Abs(ele->DeltaEtaSuperClusterTrackAtVtx());
+
+  Int_t eb = 1;
+  if (ele->IsEB()) 
+    eb = 0;
+ 
+  if (hOverE>fCuts[0][cat+4*eb])
+    return kFALSE;
+
+  if (sigmaee>fCuts[1][cat+4*eb])
+    return kFALSE;
+
+  if (eOverP<1.5) {  
+    if (deltaPhiIn>fCuts[2][cat+4*eb])
+      return kFALSE; 
+  } else {
+    if(deltaPhiIn>fCuts[2][3+4*eb])
+      return kFALSE;
+  }
+
+  if(deltaEtaIn>fCuts[3][cat+4*eb])
+    return kFALSE; 
+
+  if(eSeedOverPin<fCuts[4][cat+4*eb])
+    return kFALSE;
+
+  return kTRUE;
+}
+
+//--------------------------------------------------------------------------------------------------
 void ElectronIDMod::Process()
 {
   // Process entries of the tree. 
@@ -71,10 +124,12 @@ void ElectronIDMod::Process()
         idcut = kTRUE;
         break;
       case kCustomIdLoose:
-        idcut = ElectronIDMod::PassCustomID(e,kLooseCustom);
+        idcut = ElectronIDMod::PassCustomID(e);
         break;
       case kCustomIdTight:
-        idcut = ElectronIDMod::PassCustomID(e,kTightCustom);
+        idcut = ElectronIDMod::PassCustomID(e);
+        break;
+      default:
         break;
     }
 
@@ -173,9 +228,9 @@ void ElectronIDMod::Process()
       Bool_t d0cut = kFALSE;
       LoadBranch(fVertexName);
       // d0 cut
-      double d0_real = 99999;
-      for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-	double pD0 = e->GsfTrk()->D0Corrected(*fVertices->At(i0));
+      Double_t d0_real = 99999;
+      for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+	Double_t pD0 = e->GsfTrk()->D0Corrected(*fVertices->At(i0));
 	if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
       }
       if(d0_real < fD0Cut) d0cut = kTRUE;
@@ -201,99 +256,6 @@ void ElectronIDMod::Process()
   AddObjThisEvt(GoodElectrons);  
 }
 
-Bool_t ElectronIDMod::PassCustomID(const Electron *ele, EElIdCustomType CustomIDName){
-
-     double tightcuts[6][8]={
-         {0.056, 0.0221, 0.037, 0.0, 0.0268, 0.0102, 0.0104, 0.0}, //hovere
-	 {0.0095, 0.0094, 0.0094, 0.0, 0.029, 0.029, 0.029, 0.0}, //sigmaetaeta
-	 {0.0225, 0.0114, 0.0234, 0.039, 0.0215, 0.0095, 0.0148, 0.0167}, //deltaphiin
-	 {0.0043, 0.00282, 0.0036, 0.0, 0.0066, 0.0049, 0.0041, 0.0},  //deltaetain
-	 {0.32, 0.94, 0.221, 0.0, 0.74, 0.89, 0.66, 0.0},  //eoverp
-         {0.8,0.2,0.9,0,0,0,0,0}}; //extra cuts fbrem and E_Over_P 
-      double loosecuts[6][8]={
-	 {0.076, 0.033, 0.07, 0.0, 0.083,0.148, 0.033, 0.0}, //hovere
-	 {0.0101, 0.0095, 0.0097, 0.0, 0.03, 0.03, 0.03, 0.0}, //sigmaetaeta
-	 {0.053, 0.0189, 0.059, 0.099, 0.0278,0.0157, 0.042, 0.080}, //deltaphiin
-	 {0.0078, 0.00259, 0.0062, 0.0, 0.0078,0.0061, 0.0061, 0.0}, //deltaetain
-	 {0.3, 0.92, 0.211, 0.0, 0.42, 0.88, 0.68, 0.0}, //eoverp
-	 {0.8,0.2,0,0,0,0,0,0}}; //extra cuts fbrem and E_Over_P 
-
-  double cuts[6][8];
-
-    switch (CustomIDName) {
-      case kTightCustom:    
-        for (int i=0;i<6;i++){
-         for (int j=0;j<8;j++){
-           cuts[i][j]=tightcuts[i][j];
-          }
-        }
-         break;
-      case kLooseCustom:
-        for (int i=0;i<6;i++){
-         for (int j=0;j<8;j++){
-           cuts[i][j]=loosecuts[i][j];
-          }
-        }
-       break;
-    }
-
-   double eOverP = ele->ESuperClusterOverP();
-   double pin  = ele->PIn(); 
-   double pout = ele->POut();
-   double fBrem = (pin-pout)/pin;
-   if ((eOverP < cuts[5][0]) && (fBrem < cuts[5][1])) {
-       return false; }
-   if (eOverP < cuts[5][2]*(1-fBrem)){
-        return false; }
-   int cat = ElectronIDMod::Categories(ele);
-   double eSeedOverPin = ele->ESeedClusterOverPIn(); 
-   double hOverE = ele->HadronicOverEm();
-   double sigmaee = ele->CoviEtaiEta();
-   double deltaPhiIn = fabs(ele->DeltaPhiSuperClusterTrackAtVtx());
-   double deltaEtaIn = fabs(ele->DeltaEtaSuperClusterTrackAtVtx());
-
-  int eb;
-  if (ele->IsEB()) 
-     eb = 0;
-   else {
-     eb = 1; 
-   }
- 
-   if(hOverE>cuts[0][cat+4*eb]) {  return false;  }
-   if(sigmaee>cuts[1][cat+4*eb]){  return false; }
-   if(eOverP<1.5){  
-       if(deltaPhiIn>cuts[2][cat+4*eb]){ return false;} }
-   else{
-       if(deltaPhiIn>cuts[2][3+4*eb]){ return false;}  }
-   if(deltaEtaIn>cuts[3][cat+4*eb]){ return false;} 
-   if(eSeedOverPin<cuts[4][cat+4*eb]){ return false;} 
-   return true;
-}
-
-
-Int_t ElectronIDMod::Categories(const Electron *electron){   
-   double eOverP = electron->ESuperClusterOverP();
-   double pin  = electron->PIn(); 
-   double pout = electron->POut(); 
-   double fBrem = (pin-pout)/pin;
-   
-   int cat;
-   
-   if( (electron->IsEB() && fBrem<0.06) || (electron->IsEE() && fBrem<0.1)) 
-     cat=1;
-   else if (eOverP < 1.2 && eOverP > 0.8) 
-     cat=0;
-   else 
-     cat=2;
-   
-  return cat;
-}
-
-
-
-
-
-
 //--------------------------------------------------------------------------------------------------
 void ElectronIDMod::SlaveBegin()
 {
@@ -316,16 +278,19 @@ void ElectronIDMod::SlaveBegin()
     fElIdType = kLikelihood;
   else if (fElectronIDType.CompareTo("NoId") == 0) 
     fElIdType = kNoId;
-  else if (fElectronIDType.CompareTo("CustomLoose") == 0) 
+  else if (fElectronIDType.CompareTo("CustomLoose") == 0) {
     fElIdType = kCustomIdLoose;
-  else if (fElectronIDType.CompareTo("CustomTight") == 0) 
+  } else if (fElectronIDType.CompareTo("CustomTight") == 0) {
     fElIdType = kCustomIdTight;
+  }
    else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified electron identification %s is not defined.",
               fElectronIDType.Data());
     return;
   }
+
+  SetCustomIDCuts(fElIdType);
 
   if (fElectronIsoType.CompareTo("TrackCalo") == 0 )
     fElIsoType = kTrackCalo;
@@ -346,3 +311,38 @@ void ElectronIDMod::SlaveBegin()
     return;
   }
 }
+
+//--------------------------------------------------------------------------------------------------
+void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
+{
+  // Set cut values based on XXX from CMSSW (Todo Pieter).
+
+  Double_t tightcuts[6][8]={
+    {0.056, 0.0221, 0.037, 0.0, 0.0268, 0.0102, 0.0104, 0.0},        //hovere
+    {0.0095, 0.0094, 0.0094, 0.0, 0.029, 0.029, 0.029, 0.0},         //sigmaetaeta
+    {0.0225, 0.0114, 0.0234, 0.039, 0.0215, 0.0095, 0.0148, 0.0167}, //deltaphiin
+    {0.0043, 0.00282, 0.0036, 0.0, 0.0066, 0.0049, 0.0041, 0.0},     //deltaetain
+    {0.32, 0.94, 0.221, 0.0, 0.74, 0.89, 0.66, 0.0},                 //eoverp
+    {0.8,0.2,0.9,0,0,0,0,0}};                                        //extra cuts fbrem and E_Over_P 
+
+  Double_t loosecuts[6][8]={
+    {0.076, 0.033, 0.07, 0.0, 0.083,0.148, 0.033, 0.0},              //hovere
+    {0.0101, 0.0095, 0.0097, 0.0, 0.03, 0.03, 0.03, 0.0},            //sigmaetaeta
+    {0.053, 0.0189, 0.059, 0.099, 0.0278,0.0157, 0.042, 0.080},      //deltaphiin
+    {0.0078, 0.00259, 0.0062, 0.0, 0.0078,0.0061, 0.0061, 0.0},      //deltaetain
+    {0.3, 0.92, 0.211, 0.0, 0.42, 0.88, 0.68, 0.0},                  //eoverp
+    {0.8,0.2,0,0,0,0,0,0}};                                          //extra cuts fbrem and E_Over_P 
+
+  switch (idt) {
+    case kCustomIdTight:    
+      memcpy(fCuts,tightcuts,sizeof(fCuts));
+      break;
+    case kCustomIdLoose:
+      memcpy(fCuts,loosecuts,sizeof(fCuts));
+      break;
+    default:
+      memset(fCuts,0,sizeof(fCuts));
+      break;
+  }
+}
+
