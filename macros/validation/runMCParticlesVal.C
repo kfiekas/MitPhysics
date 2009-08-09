@@ -1,10 +1,10 @@
-// $Id: runMCParticlesVal.C,v 1.1 2009/03/17 15:48:07 loizides Exp $
+// $Id: runMCParticlesVal.C,v 1.1 2009/03/23 09:09:05 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
 #include "MitAna/DataUtil/interface/Debug.h"
 #include "MitAna/TreeMod/interface/Analysis.h"
-#include "MitAna/Validation/interface/MCParticlesValMod.h"
+#include "MitPhysics/Validation/interface/MCParticlesValMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
