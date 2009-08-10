@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: FakeEventHeader.h,v 1.2 2009/07/13 11:27:13 loizides Exp $
+// $Id: FakeEventHeader.h,v 1.3 2009/07/20 19:05:04 loizides Exp $
 //
 // FakeEventHeader
 //
@@ -41,11 +41,11 @@ namespace mithep
 
     protected:
 
-      Double_t                  fWeight;          //!fake event weight
-      Double_t                  fWeightLowError;  //!fake event weight low error
-      Double_t                  fWeightHighError; //!fake event weight high error
-      FakeObjectArr             fFakeObjects;     //!fake objects
-      JetOArr                   fJets;            //!collection of jets after some have been 
+      Double_t                  fWeight;          //fake event weight
+      Double_t                  fWeightLowError;  //fake event weight low error
+      Double_t                  fWeightHighError; //fake event weight high error
+      FakeObjectArr             fFakeObjects;     //fake objects
+      JetOArr                   fJets;            //collection of jets after some have been 
 
     ClassDef(FakeEventHeader, 1) // Fake event header class
   };
@@ -55,7 +55,7 @@ namespace mithep
 inline void mithep::FakeEventHeader::AddFakeObject(const Particle *p, EObjType faketype, 
                                                    Bool_t fakeTag, Bool_t mcTag)  
 {
-   // Add new fake object
+  // Add new fake object
   mithep::FakeObject *newFake = fFakeObjects.AddNew();
   newFake->SetParticle(p);
   newFake->SetFakeType(faketype);
@@ -66,7 +66,7 @@ inline void mithep::FakeEventHeader::AddFakeObject(const Particle *p, EObjType f
 //--------------------------------------------------------------------------------------------------
 inline void mithep::FakeEventHeader::AddFakeObject(const mithep::FakeObject *fo)  
 {
-   // Add new fake object
+  // Add new fake object with default parameters taken from the original object.
   mithep::FakeObject *newFake = fFakeObjects.AddNew();
   newFake->SetParticle(fo->FakeParticle());
   newFake->SetFakeType(fo->ObjType());

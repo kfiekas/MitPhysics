@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: FakeObject.h,v 1.1 2009/06/30 10:47:16 loizides Exp $
+// $Id: FakeObject.h,v 1.2 2009/07/20 19:05:04 loizides Exp $
 //
 // FakeObject
 //
@@ -36,10 +36,10 @@ namespace mithep
       Double_t        GetMass()                const { return fParticle->Mass(); }
       void            GetMom()                 const;
 
-      Bool_t          fFakeTag;               //!whether the fake object passed lepton ID criteria
-      Bool_t          fMCTag;                 //!whether the fake object was a true fake in Monte Carlo
-      EObjType        fFakeType;              //!the type of object it faked
-      const Particle *fParticle;              //!pointer to the original particle
+      Bool_t          fFakeTag;               //whether the fake object passed lepton ID criteria
+      Bool_t          fMCTag;                 //whether the fake object was a fake in Monte Carlo
+      EObjType        fFakeType;              //the type of object it faked
+      const Particle *fParticle;              //pointer to the original particle
  
     ClassDef(FakeObject, 1) // Fake object class
   };
@@ -48,7 +48,7 @@ namespace mithep
 //--------------------------------------------------------------------------------------------------
 inline Double_t mithep::FakeObject::GetCharge() const
 {
-  // Get charge from track.
+  // Get charge of the fake object. Charge is calculated from the original particle.
   
   if (fParticle) 
     return fParticle->Charge();

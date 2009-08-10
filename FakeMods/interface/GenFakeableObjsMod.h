@@ -1,11 +1,11 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.3 2009/07/13 11:27:13 loizides Exp $
+// $Id: GenFakeableObjsMod.h,v 1.4 2009/07/20 19:05:04 loizides Exp $
 //
 // GenFakeableObjsMod
 //
-// This Module generates a collection of FakeEventHeaders containing information
-// about possible fakes and their weight. The collection generated takes into account all possible
-// faking combinatorics from the given set of fakable objects.
+// This Module generates a collection of Electron and Muon Fakeable Objects. The exact definition
+// of the electron and muon fakeable objects can be specified according to the ElectronFOType 
+// and MuonFOType enum types.
 //
 // Authors: S.Xie
 //--------------------------------------------------------------------------------------------------
@@ -118,8 +118,8 @@ namespace mithep
       TString          fMCTausName;                    //name of MC taus                     (input)
       TString          fElFakeableObjsName;            //name of fakeable objects           (output)
       TString          fMuFakeableObjsName;            //name of fakeable objects           (output)
-      ElectronFOType   fElFOType;                      //!FO type
-      MuonFOType       fMuFOType;                      //!FO type
+      ElectronFOType   fElFOType;                      //Electron Fakeable Object type
+      MuonFOType       fMuFOType;                      //Muon Fakeable Object type
 
       const ElectronCol      *fElectrons;             //!Electron branch
       const MuonCol          *fMuons;                 //!Muon branch
@@ -131,7 +131,7 @@ namespace mithep
       const VertexCol        *fVertices;              //!Vertex branch
       const DecayParticleCol *fConversions;           //!conversion collection       
 
-      ClassDef(GenFakeableObjsMod, 1) // Fabeable objects generation module
+      ClassDef(GenFakeableObjsMod, 1) // Fakeable objects generation module
   };
 }
 #endif

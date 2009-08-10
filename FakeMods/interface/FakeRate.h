@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: FakeRate.h,v 1.2 2009/07/13 11:27:13 loizides Exp $
+// $Id: FakeRate.h,v 1.3 2009/07/20 19:05:04 loizides Exp $
 //
 // FakeRate
 //
@@ -12,6 +12,7 @@
 #define MITPHYSICS_FAKEMODS_FAKERATE_H
  
 #include "MitAna/DataTree/interface/DataObject.h"
+#include "MitCommon/DataFormats/interface/TH2DAsymErr.h"
 
 class TH1F;
 class TH2F;
@@ -40,9 +41,24 @@ namespace mithep
       
       Bool_t       Init();
       Double_t     ElectronFakeRate(Double_t et, Double_t eta, Double_t phi);
+      Double_t     ElectronFakeRateError(Double_t pt, Double_t eta, Double_t phi, 
+                                         mithep::TH2DAsymErr::ErrorType errorType);
+      Double_t     ElectronFakeRateStatErrorLow(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     ElectronFakeRateStatErrorHigh(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     ElectronFakeRateSysErrorLow(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     ElectronFakeRateSysErrorHigh(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     ElectronFakeRateErrorLow(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     ElectronFakeRateErrorHigh(Double_t pt, Double_t eta, Double_t phi);
       Double_t     MuonFakeRate(Double_t pt, Double_t eta, Double_t phi);
-      Double_t     ElectronFakeRateError(Double_t et, Double_t eta, Double_t phi);
-      Double_t     MuonFakeRateError(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     MuonFakeRateError(Double_t pt, Double_t eta, Double_t phi, 
+                                     mithep::TH2DAsymErr::ErrorType errorType);
+      Double_t     MuonFakeRateStatErrorLow(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     MuonFakeRateStatErrorHigh(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     MuonFakeRateSysErrorLow(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     MuonFakeRateSysErrorHigh(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     MuonFakeRateErrorLow(Double_t pt, Double_t eta, Double_t phi);
+      Double_t     MuonFakeRateErrorHigh(Double_t pt, Double_t eta, Double_t phi);
+
       const char  *GetElectronFRFilename()                     { return fElectronFRFilename;     }
       const char  *GetMuonFRFilename()                         { return fMuonFRFilename;         }
       const char  *GetElectronFRFunctionName()                 { return fElectronFRFunctionName; }
@@ -51,6 +67,8 @@ namespace mithep
       const char  *GetMuonFRHistName()                         { return fMuonFRHistName;         }
       Bool_t       GetUse2DFakeRate()                          { return fUse2DFakeRate;          }
       Bool_t       GetUseFitFunction()                         { return fUseFitFunction;         }
+      TH2DAsymErr *GetMuonFakeRate()                           { return fMuonFakeRateHist_PtEta; }
+      TH2DAsymErr *GetElectronFakeRate()                       { return fElectronFakeRateHist_PtEta; }
 
       void         SetElectronFRFilename(const char *name)     { fElectronFRFilename     = name; }
       void         SetMuonFRFilename(const char *name)         { fMuonFRFilename         = name; }
@@ -63,29 +81,25 @@ namespace mithep
 
     protected:
       void         DeleteHistos();
-      TString      fElectronFRFilename;       //!filename of file containing electron fake rate
-      TString      fMuonFRFilename;           //!filename of file containing muon fake rate
-      TString      fElectronFRFunctionName;   //!name of electron fake rate function
-      TString      fMuonFRFunctionName;       //!name of muon fake rate function
-      TString      fElectronFRHistName;       //!name of histogram containing electron fake rate
-      TString      fMuonFRHistName;           //!name of histogram containing muon fake rate
-      Bool_t       fUse2DFakeRate;            //!whether to use 2D pt-eta fake rate
-      Bool_t       fUseFitFunction;           //!whether to use fit function or not
+      TString      fElectronFRFilename;       //filename of file containing electron fake rate
+      TString      fMuonFRFilename;           //filename of file containing muon fake rate
+      TString      fElectronFRFunctionName;   //name of electron fake rate function
+      TString      fMuonFRFunctionName;       //name of muon fake rate function
+      TString      fElectronFRHistName;       //name of histogram containing electron fake rate
+      TString      fMuonFRHistName;           //name of histogram containing muon fake rate
+      Bool_t       fUse2DFakeRate;            //whether to use 2D pt-eta fake rate
+      Bool_t       fUseFitFunction;           //whether to use fit function or not
 
     private:
-      Bool_t       fIsInit;                       //!=true if histograms are loaded
-      TH2F        *fElectronFakeRateHist_PtEta;   //!2D Fake Rate for electrons
-      TH2F        *fMuonFakeRateHist_PtEta;       //!2D Fake Rate for muons
-      TH1F        *fElectronFakeRateHist_Pt;      //!2D Fake Rate for electrons
-      TH1F        *fMuonFakeRateHist_Pt;          //!2D Fake Rate for electrons
-      TF2         *fElectronFakeRateFit_PtEta;    //!2D Fake Rate Fit for electrons
-      TF2         *fMuonFakeRateFit_PtEta;        //!2D Fake Rate Fit for muons
-      TF1         *fElectronFakeRateFit_Pt;       //!2D Fake Rate Fit for electrons
-      TF1         *fMuonFakeRateFit_Pt;           //!2D Fake Rate Fit for electrons
-
-      TH2F        *fElectronFakeRateHist_PtEta_sysError; //!2D Fake Rate Error for electrons
-      TH2F        *fMuonFakeRateHist_PtEta_sysError;     //!2D Fake Rate Error for muons
-
+      Bool_t       fIsInit;                       //=true if histograms are loaded
+      TH2DAsymErr  *fElectronFakeRateHist_PtEta;   //2D Fake Rate for electrons
+      TH2DAsymErr  *fMuonFakeRateHist_PtEta;       //2D Fake Rate for muons
+      TH1F         *fElectronFakeRateHist_Pt;      //1D Fake Rate for electrons
+      TH1F         *fMuonFakeRateHist_Pt;          //1D Fake Rate for electrons
+      TF2          *fElectronFakeRateFit_PtEta;    //2D Fake Rate Fit for electrons
+      TF2          *fMuonFakeRateFit_PtEta;        //2D Fake Rate Fit for muons
+      TF1          *fElectronFakeRateFit_Pt;       //1D Fake Rate Fit for electrons
+      TF1          *fMuonFakeRateFit_Pt;           //1D Fake Rate Fit for electrons
 
     ClassDef(FakeRate, 1) // Fake rate class
   };

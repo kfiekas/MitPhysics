@@ -1,4 +1,4 @@
-// $Id: GenFakesMod.cc,v 1.2 2009/07/02 12:17:32 phedex Exp $
+// $Id: GenFakesMod.cc,v 1.3 2009/07/13 11:27:13 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakesMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -111,7 +111,7 @@ void GenFakesMod::Process()
   // Fake into Muons
   // Loop through all Muon Fakeable objects and consider the fake possibility.
   // *****************************************************************************************
-  for (UInt_t n = 0; n < MuFakeableObjs->GetEntries();n++) {
+  for (UInt_t n = 0; n < MuFakeableObjs->GetEntries(); ++n) {
 
     //make temporary fake event headers array
     ObjArray <FakeEventHeader> *tempFakeEventHeaders = new ObjArray <FakeEventHeader> ;
@@ -172,18 +172,33 @@ void GenFakesMod::Process()
       
       //Obtain the muon FakeRate 
       Double_t muonFakeProb = 0.0;
-      Double_t muonFakeProbLowError = 0.0;
-      Double_t muonFakeProbHighError = 0.0;
+      Double_t muonFakeProbStatErrorLow = 0.0;
+      Double_t muonFakeProbStatErrorHigh = 0.0;
+      Double_t muonFakeProbSysErrorLow = 0.0;
+      Double_t muonFakeProbSysErrorHigh = 0.0;
+      Double_t muonFakeProbErrorLow = 0.0;
+      Double_t muonFakeProbErrorHigh = 0.0;
       if(fFakeRate) {
         muonFakeProb = fFakeRate->MuonFakeRate(MuFakeableObjs->At(n)->Et(),
                                                MuFakeableObjs->At(n)->Eta(),
                                                MuFakeableObjs->At(n)->Phi());
-        muonFakeProbLowError = fFakeRate->MuonFakeRateError(MuFakeableObjs->At(n)->Et(),
+        muonFakeProbStatErrorLow = fFakeRate->MuonFakeRateStatErrorLow(MuFakeableObjs->At(n)->Et(),
                                                             MuFakeableObjs->At(n)->Eta(),
                                                             MuFakeableObjs->At(n)->Phi());
-        muonFakeProbHighError = fFakeRate->MuonFakeRateError(MuFakeableObjs->At(n)->Et(),
+        muonFakeProbStatErrorHigh = fFakeRate->MuonFakeRateStatErrorHigh(MuFakeableObjs->At(n)->Et(),
                                                              MuFakeableObjs->At(n)->Eta(),
-                                                             MuFakeableObjs->At(n)->Phi());                
+                                                             MuFakeableObjs->At(n)->Phi());        
+        muonFakeProbSysErrorLow = fFakeRate->MuonFakeRateSysErrorLow(MuFakeableObjs->At(n)->Et(),
+                                                            MuFakeableObjs->At(n)->Eta(),
+                                                            MuFakeableObjs->At(n)->Phi());
+        muonFakeProbSysErrorHigh = fFakeRate->MuonFakeRateSysErrorHigh(MuFakeableObjs->At(n)->Et(),
+                                                                      MuFakeableObjs->At(n)->Eta(),
+                                                                      MuFakeableObjs->At(n)->Phi());
+        muonFakeProbErrorLow = TMath::Sqrt(muonFakeProbStatErrorLow*muonFakeProbStatErrorLow +
+                                           muonFakeProbSysErrorLow*muonFakeProbSysErrorLow);
+        muonFakeProbErrorHigh = TMath::Sqrt(muonFakeProbStatErrorHigh*muonFakeProbStatErrorHigh +
+                                            muonFakeProbSysErrorHigh*muonFakeProbSysErrorHigh);
+
       } else {
         cerr << "Error: fFakeRate is a NULL pointer.\n";
         assert(false);
@@ -195,22 +210,26 @@ void GenFakesMod::Process()
         //create new fake event header
         FakeEventHeader *fakeMuonEvent = new FakeEventHeader();
         fakeMuonEvent->SetWeight(FakeEventHeaders->At(i)->Weight() * muonFakeProb);
-        fakeMuonEvent->SetWeightLowError(FakeEventHeaders->At(i)->Weight()*muonFakeProb*
-                                         TMath::Sqrt((FakeEventHeaders->At(i)->WeightLowError()/
-                                                      FakeEventHeaders->At(i)->Weight())*
-                                                     (FakeEventHeaders->At(i)->WeightLowError()/
-                                                      FakeEventHeaders->At(i)->Weight()) +
-                                                     (muonFakeProbLowError/muonFakeProb)*
-                                                     (muonFakeProbLowError/muonFakeProb)                                                      
-                                           ));
-        fakeMuonEvent->SetWeightHighError(FakeEventHeaders->At(i)->Weight()*muonFakeProb*
-                                         TMath::Sqrt((FakeEventHeaders->At(i)->WeightHighError()/
-                                                      FakeEventHeaders->At(i)->Weight())*
-                                                     (FakeEventHeaders->At(i)->WeightHighError()/
-                                                      FakeEventHeaders->At(i)->Weight()) +
-                                                     (muonFakeProbHighError/muonFakeProb)*
-                                                     (muonFakeProbHighError/muonFakeProb)                                                      
-                                           ));
+        Double_t weightLowError = 0;
+        Double_t weightHighError = 0;
+        if (muonFakeProb > 0) { 
+          weightLowError = FakeEventHeaders->At(i)->Weight()*muonFakeProb*
+            TMath::Sqrt((FakeEventHeaders->At(i)->WeightLowError()/
+                         FakeEventHeaders->At(i)->Weight())*
+                        (FakeEventHeaders->At(i)->WeightLowError()/
+                         FakeEventHeaders->At(i)->Weight()) +
+                        (muonFakeProbErrorLow/muonFakeProb)*
+                        (muonFakeProbErrorLow/muonFakeProb));
+          weightHighError = FakeEventHeaders->At(i)->Weight()*muonFakeProb*
+            TMath::Sqrt((FakeEventHeaders->At(i)->WeightHighError()/
+                         FakeEventHeaders->At(i)->Weight())*
+                        (FakeEventHeaders->At(i)->WeightHighError()/
+                         FakeEventHeaders->At(i)->Weight()) +
+                        (muonFakeProbErrorHigh/muonFakeProb)*
+                        (muonFakeProbErrorHigh/muonFakeProb));
+        }
+        fakeMuonEvent->SetWeightLowError(weightLowError);
+        fakeMuonEvent->SetWeightHighError(weightHighError);
 
         //add all previous fakes
         for (UInt_t f=0;f<FakeEventHeaders->At(i)->FakeObjsSize();f++) {
@@ -338,48 +357,69 @@ void GenFakesMod::Process()
 
         //Obtain the electron FakeRate 
         Double_t electronFakeProb = 0.0;
-        Double_t electronFakeProbLowError = 0.0;
-        Double_t electronFakeProbHighError = 0.0;
+        Double_t electronFakeProbStatErrorLow = 0.0;
+        Double_t electronFakeProbStatErrorHigh = 0.0;
+        Double_t electronFakeProbSysErrorLow = 0.0;
+        Double_t electronFakeProbSysErrorHigh = 0.0;
+        Double_t electronFakeProbErrorLow = 0.0;
+        Double_t electronFakeProbErrorHigh = 0.0;
         if(fFakeRate) {
           electronFakeProb = fFakeRate->ElectronFakeRate(ElFakeableObjs->At(n)->Et(),
                                                          ElFakeableObjs->At(n)->Eta(),
                                                          ElFakeableObjs->At(n)->Phi());
-          electronFakeProbLowError = fFakeRate->ElectronFakeRateError(
-            ElFakeableObjs->At(n)->Et(),
-            ElFakeableObjs->At(n)->Eta(),
-            ElFakeableObjs->At(n)->Phi());
-          electronFakeProbHighError = fFakeRate->ElectronFakeRateError(
-            ElFakeableObjs->At(n)->Et(),
-            ElFakeableObjs->At(n)->Eta(),
-            ElFakeableObjs->At(n)->Phi());                          
+          electronFakeProbStatErrorLow = 
+            fFakeRate->ElectronFakeRateStatErrorLow(ElFakeableObjs->At(n)->Et(),
+                                                    ElFakeableObjs->At(n)->Eta(),
+                                                    ElFakeableObjs->At(n)->Phi());
+          electronFakeProbStatErrorHigh = 
+            fFakeRate->ElectronFakeRateStatErrorHigh(ElFakeableObjs->At(n)->Et(),
+                                                     ElFakeableObjs->At(n)->Eta(),
+                                                     ElFakeableObjs->At(n)->Phi());                
+          electronFakeProbSysErrorLow = 
+            fFakeRate->ElectronFakeRateSysErrorLow(ElFakeableObjs->At(n)->Et(),
+                                                   ElFakeableObjs->At(n)->Eta(),
+                                                   ElFakeableObjs->At(n)->Phi());
+          electronFakeProbSysErrorHigh = 
+            fFakeRate->ElectronFakeRateSysErrorHigh(ElFakeableObjs->At(n)->Et(),
+                                                    ElFakeableObjs->At(n)->Eta(),
+                                                    ElFakeableObjs->At(n)->Phi());                
+          electronFakeProbErrorLow = 
+            TMath::Sqrt(electronFakeProbStatErrorLow*electronFakeProbStatErrorLow +
+                        electronFakeProbSysErrorLow*electronFakeProbSysErrorLow);
+          electronFakeProbErrorHigh = 
+            TMath::Sqrt(electronFakeProbStatErrorHigh*electronFakeProbStatErrorHigh +
+                        electronFakeProbSysErrorHigh*electronFakeProbSysErrorHigh);
         } else {
           cerr << "Error: fFakeRate is a NULL pointer.\n";
           assert(false);
         }
-
+        
         //only fake into a muon if the fakeable object did not match to a clean lepton
         if (!isCleanLepton) {
           //create new fake event header
           FakeEventHeader *fakeElectronEvent = new FakeEventHeader();
           fakeElectronEvent->SetWeight(FakeEventHeaders->At(i)->Weight() * electronFakeProb);
-          fakeElectronEvent->SetWeightLowError(FakeEventHeaders->At(i)->Weight()*electronFakeProb*
-                                         TMath::Sqrt((FakeEventHeaders->At(i)->WeightLowError()/
-                                                      FakeEventHeaders->At(i)->Weight())*
-                                                     (FakeEventHeaders->At(i)->WeightLowError()/
-                                                      FakeEventHeaders->At(i)->Weight()) +
-                                                     (electronFakeProbLowError/electronFakeProb)*
-                                                     (electronFakeProbLowError/electronFakeProb)                                                      
-                                           ));
-          fakeElectronEvent->SetWeightHighError(FakeEventHeaders->At(i)->Weight()*electronFakeProb*
-                                         TMath::Sqrt((FakeEventHeaders->At(i)->WeightHighError()/
-                                                      FakeEventHeaders->At(i)->Weight())*
-                                                     (FakeEventHeaders->At(i)->WeightHighError()/
-                                                      FakeEventHeaders->At(i)->Weight()) +
-                                                     (electronFakeProbHighError/electronFakeProb)*
-                                                     (electronFakeProbHighError/electronFakeProb)                                                      
-                                           ));
-
-
+          Double_t weightLowError = 0;
+          Double_t weightHighError = 0;
+          if (electronFakeProb) {
+            weightLowError = FakeEventHeaders->At(i)->Weight()*electronFakeProb*
+              TMath::Sqrt((FakeEventHeaders->At(i)->WeightLowError()/
+                           FakeEventHeaders->At(i)->Weight())*
+                          (FakeEventHeaders->At(i)->WeightLowError()/
+                           FakeEventHeaders->At(i)->Weight()) +
+                          (electronFakeProbErrorLow/electronFakeProb)*
+                          (electronFakeProbErrorLow/electronFakeProb));
+            weightHighError = FakeEventHeaders->At(i)->Weight()*electronFakeProb*
+              TMath::Sqrt((FakeEventHeaders->At(i)->WeightHighError()/
+                           FakeEventHeaders->At(i)->Weight())*
+                          (FakeEventHeaders->At(i)->WeightHighError()/
+                           FakeEventHeaders->At(i)->Weight()) +
+                          (electronFakeProbErrorHigh/electronFakeProb)*
+                          (electronFakeProbErrorHigh/electronFakeProb));
+          }
+          fakeElectronEvent->SetWeightLowError(weightLowError);
+          fakeElectronEvent->SetWeightHighError(weightHighError);
+          
           //add previous fakes
           for (UInt_t f=0;f<FakeEventHeaders->At(i)->FakeObjsSize();f++) {
             fakeElectronEvent->AddFakeObject(FakeEventHeaders->At(i)->FakeObj(f));

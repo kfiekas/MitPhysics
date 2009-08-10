@@ -1,4 +1,4 @@
- // $Id: FakeLeptonExampleAnaMod.cc,v 1.2 2009/06/30 10:58:50 loizides Exp $
+ // $Id: FakeLeptonExampleAnaMod.cc,v 1.3 2009/07/13 11:27:13 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeLeptonExampleAnaMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -64,8 +64,6 @@ void FakeLeptonExampleAnaMod::Process()
   //***********************************************************************************************
 
   //Obtain all cleaned objects
-//  ElectronOArr *CleanElectrons = dynamic_cast<ElectronOArr* >
-//    (FindObjThisEvt(ModNames::gkCleanElectronsName));
   MuonOArr *CleanMuons = dynamic_cast<MuonOArr* >
     (FindObjThisEvt(ModNames::gkCleanMuonsName));
   ParticleOArr *CleanLeptons = dynamic_cast<mithep::ParticleOArr*>

@@ -1,8 +1,10 @@
-// $Id: FakeRate.cc,v 1.1 2009/06/30 10:47:17 loizides Exp $
+// $Id: FakeRate.cc,v 1.2 2009/07/13 11:27:13 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeRate.h"
+#include "MitCommon/DataFormats/interface/TH2DAsymErr.h"
 #include <TMath.h>
 #include <TFile.h>
+#include <TMath.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <TH3.h>
@@ -17,7 +19,7 @@ ClassImp(mithep::FakeRate)
 //--------------------------------------------------------------------------------------------------
 Bool_t FakeRate::Init()
 {
-  //Load all histogram files.
+  //Load all fake rate histogram files.
 
   //Get the root file which is storing the fake rates
   TFile *ElectronFRFile = new TFile(fElectronFRFilename);  
@@ -36,8 +38,9 @@ Bool_t FakeRate::Init()
   // *****************************************************************************************
   if (fUse2DFakeRate) {
 
-    fElectronFakeRateHist_PtEta = (TH2F*)(ElectronFRFile->Get(fElectronFRHistName));
-    fMuonFakeRateHist_PtEta = (TH2F*)(MuonFRFile->Get(fMuonFRHistName));
+    fElectronFakeRateHist_PtEta = (TH2DAsymErr*)(ElectronFRFile->Get(fElectronFRHistName));
+    fMuonFakeRateHist_PtEta = (TH2DAsymErr*)(MuonFRFile->Get(fMuonFRHistName));
+
     if (!fElectronFakeRateHist_PtEta) {
       cout << "Error: Histogram " << fElectronFRHistName << " cannot be loaded from file "
            << fElectronFRFilename << endl;
@@ -69,7 +72,6 @@ Bool_t FakeRate::Init()
       fElectronFakeRateFit_PtEta = (TF2*)(ElectronFakeRateFit_PtEta_temp->Clone());
       fMuonFakeRateFit_PtEta = (TF2*)(MuonFakeRateFit_PtEta_temp->Clone());
     }
-
   } else {
 
     fElectronFakeRateHist_Pt = (TH1F*)(ElectronFRFile->Get(fElectronFRHistName)); 
@@ -101,21 +103,6 @@ Bool_t FakeRate::Init()
     }
   }
 
-
-  fElectronFakeRateHist_PtEta_sysError = (TH2F*)(ElectronFRFile->Get("RecoElectronFakeRate_PtEta_Madgraph_SysErrors"));
-  fMuonFakeRateHist_PtEta_sysError = (TH2F*)(MuonFRFile->Get("TrackerMuonFakeRate_PtEta_Madgraph_SysErrors"));
-  if (!fElectronFakeRateHist_PtEta_sysError) {
-    cout << "Error: Histogram RecoElectronFakeRate_PtEta_Madgraph_SysErrors cannot be loaded from file "
-         << endl;
-  }
-  if (!fMuonFakeRateHist_PtEta_sysError) {
-    cout << "Error: Histogram TrackerMuonFakeRate_PtEta_Madgraph_SysErrors cannot be loaded. from file"
-         << endl;
-  }
-  fElectronFakeRateHist_PtEta_sysError->SetDirectory(0);
-  fMuonFakeRateHist_PtEta_sysError->SetDirectory(0);
-
-
   ElectronFRFile->Close();
   MuonFRFile->Close();
   delete ElectronFRFile;
@@ -129,6 +116,7 @@ Bool_t FakeRate::Init()
 Double_t FakeRate::ElectronFakeRate(Double_t pt, Double_t eta, Double_t phi)
 {
   // Calculate the electron fake rate given pt, eta, and phi
+
   Double_t prob = 0.0;
 
   if (fIsInit) {
@@ -171,9 +159,11 @@ Double_t FakeRate::ElectronFakeRate(Double_t pt, Double_t eta, Double_t phi)
 }
 
 //--------------------------------------------------------------------------------------------------
-Double_t FakeRate::ElectronFakeRateError(Double_t pt, Double_t eta, Double_t phi)
+Double_t FakeRate::ElectronFakeRateError(Double_t pt, Double_t eta, Double_t phi, 
+                                         mithep::TH2DAsymErr::ErrorType errorType)
 {
-  // Calculate the electron fake rate given pt, eta, and phi
+  // Calculate the electron fake rate error given pt, eta, and phi
+
   Double_t error = 0.0;
 
   if (fIsInit) {
@@ -181,14 +171,19 @@ Double_t FakeRate::ElectronFakeRateError(Double_t pt, Double_t eta, Double_t phi
       if (fUseFitFunction) {
         cerr << "Error: Using 2D Fake Rates with Fit Function is not currently supported.\n";      
       } else {
-        if (fElectronFakeRateHist_PtEta_sysError) {
-          Int_t ptbin = fElectronFakeRateHist_PtEta_sysError->GetXaxis()->FindFixBin(pt);
-          Int_t etabin = fElectronFakeRateHist_PtEta_sysError->GetYaxis()->FindFixBin(eta);    
-          error = fElectronFakeRateHist_PtEta_sysError->GetBinContent(ptbin,etabin);
+        if (fElectronFakeRateHist_PtEta) {
 
-          if (isnan(error)) {
-            cerr << "Error: ElectronFakeRateError(" << ptbin << "," << etabin << ") = NAN.\n";
-            error = 0;              
+          if(errorType == mithep::TH2DAsymErr::kStatErrorLow) {
+            return fElectronFakeRateHist_PtEta->GetStatErrorLow(pt, eta);
+          } else if(errorType == mithep::TH2DAsymErr::kStatErrorHigh) {
+            return fElectronFakeRateHist_PtEta->GetStatErrorHigh(pt, eta);
+          } else if(errorType == mithep::TH2DAsymErr::kSysErrorLow) {
+            return fElectronFakeRateHist_PtEta->GetSysErrorLow(pt, eta);
+          } else if(errorType == mithep::TH2DAsymErr::kSysErrorHigh) {
+            return fElectronFakeRateHist_PtEta->GetSysErrorHigh(pt, eta);
+          } else {
+            cerr << "Error: Given ErrorType = " << errorType << " is not recognized.\n";
+            return 0.0;
           }
         } else {
           cerr << "Error: fElectronFakeRateHist_PtEta_sysError was not loaded properly.\n";
@@ -203,6 +198,57 @@ Double_t FakeRate::ElectronFakeRateError(Double_t pt, Double_t eta, Double_t phi
   return error;
 }
 
+
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::ElectronFakeRateStatErrorLow(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the electron fake rate lower statistical error given pt, eta, and phi
+  return ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorLow);
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::ElectronFakeRateStatErrorHigh(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the electron fake rate upper statistical error given pt, eta, and phi
+  return ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorHigh);
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::ElectronFakeRateSysErrorLow(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the electron fake rate  lower systematic error given pt, eta, and phi
+  return ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorLow);
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::ElectronFakeRateSysErrorHigh(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the electron fake rate upper systematic error given pt, eta, and phi
+  return ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorHigh);
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::ElectronFakeRateErrorLow(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the electron fake rate total lower error given pt, eta, and phi
+  return TMath::Sqrt( ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorLow)*
+                      ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorLow) +
+                      ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorLow)*
+                      ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorLow)
+    );
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::ElectronFakeRateErrorHigh(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the electron fake rate total upper error given pt, eta, and phi
+  return TMath::Sqrt( ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorHigh)*
+                      ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorHigh) +
+                      ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorHigh)*
+                      ElectronFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorHigh)
+    );
+}
 
 //--------------------------------------------------------------------------------------------------
 Double_t FakeRate::MuonFakeRate(Double_t pt, Double_t eta, Double_t phi)
@@ -250,9 +296,10 @@ Double_t FakeRate::MuonFakeRate(Double_t pt, Double_t eta, Double_t phi)
 }
 
 //--------------------------------------------------------------------------------------------------
-Double_t FakeRate::MuonFakeRateError(Double_t pt, Double_t eta, Double_t phi)
+Double_t FakeRate::MuonFakeRateError(Double_t pt, Double_t eta, Double_t phi, 
+                                     mithep::TH2DAsymErr::ErrorType errorType)
 {
-  // Calculate the muon fake rate given pt, eta, and phi
+  // Calculate the muon fake rate error given pt, eta, and phi
   Double_t error = 0.0;
 
   if (fIsInit) {
@@ -260,14 +307,19 @@ Double_t FakeRate::MuonFakeRateError(Double_t pt, Double_t eta, Double_t phi)
       if (fUseFitFunction) {
         cerr << "Error: Using 2D Fake Rates with Fit Function is not currently supported.\n";      
       } else {
-        if (fMuonFakeRateHist_PtEta_sysError) {
-          Int_t ptbin = fMuonFakeRateHist_PtEta_sysError->GetXaxis()->FindFixBin(pt);
-          Int_t etabin = fMuonFakeRateHist_PtEta_sysError->GetYaxis()->FindFixBin(eta);    
-          error = fMuonFakeRateHist_PtEta_sysError->GetBinContent(ptbin,etabin);
+        if (fMuonFakeRateHist_PtEta) {
 
-          if (isnan(error)) {
-            cerr << "Error: ElectronFakeRateError(" << ptbin << "," << etabin << ") = NAN.\n";
-            error = 0;              
+          if(errorType ==mithep::TH2DAsymErr::kStatErrorLow) {
+            return fMuonFakeRateHist_PtEta->GetStatErrorLow(pt, eta);
+          } else if(errorType == mithep::TH2DAsymErr::kStatErrorHigh) {
+            return fMuonFakeRateHist_PtEta->GetStatErrorHigh(pt, eta);
+          } else if(errorType == mithep::TH2DAsymErr::kSysErrorLow) {
+            return fMuonFakeRateHist_PtEta->GetSysErrorLow(pt, eta);
+          } else if(errorType == mithep::TH2DAsymErr::kSysErrorHigh) {
+            return fMuonFakeRateHist_PtEta->GetSysErrorHigh(pt, eta);
+          } else {
+            cerr << "Error: Given ErrorType = " << errorType << " is not recognized.\n";
+            return 0.0;
           }
         } else {
           cerr << "Error: fMuonFakeRateHist_PtEta_sysError was not loaded properly.\n";
@@ -280,4 +332,54 @@ Double_t FakeRate::MuonFakeRateError(Double_t pt, Double_t eta, Double_t phi)
     assert(false);
   }
   return error;
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::MuonFakeRateStatErrorLow(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the muon fake rate lower statistical error given pt, eta, and phi
+  return MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorLow);
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::MuonFakeRateStatErrorHigh(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the muon fake rate upper statistical error given pt, eta, and phi
+  return MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorHigh);
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::MuonFakeRateSysErrorLow(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the muon fake rate lower systematic error given pt, eta, and phi
+  return MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorLow);
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::MuonFakeRateSysErrorHigh(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the muon fake rate upper systematic error given pt, eta, and phi
+  return MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorHigh);
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::MuonFakeRateErrorLow(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the muon fake rate total lower error given pt, eta, and phi
+  return TMath::Sqrt( MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorLow)*
+                      MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorLow) +
+                      MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorLow)*
+                      MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorLow)
+    );
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t FakeRate::MuonFakeRateErrorHigh(Double_t pt, Double_t eta, Double_t phi)
+{
+  // Calculate the muon fake rate total upper error given pt, eta, and phi
+  return TMath::Sqrt( MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorHigh)*
+                      MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kSysErrorHigh) +
+                      MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorHigh)*
+                      MuonFakeRateError(pt, eta, phi, mithep::TH2DAsymErr::kStatErrorHigh)
+    );
 }
