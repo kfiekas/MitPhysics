@@ -1,10 +1,11 @@
 # -*- Makefile -*-
-# $Id: BuildFile,v 1.1 2008/10/15 06:04:59 loizides Exp $
+# $Id: BuildFile,v 1.2 2008/11/27 16:30:26 loizides Exp $
 
 <use name=MitCommon/MathTools>
 <use name=MitAna/TreeMod>
 <use name=MitPhysics/Init>
 <use name=MitPhysics/Utils>
+<use name=lhapdf>
 <use root>
 #<flags CXXFLAGS="-g">
 <export>

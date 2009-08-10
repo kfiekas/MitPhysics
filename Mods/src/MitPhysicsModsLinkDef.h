@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.14 2009/04/30 08:09:32 loizides Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.15 2009/06/17 08:42:29 loizides Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -16,6 +16,7 @@
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitPhysics/Mods/interface/TauIDMod.h"
+#include "MitPhysics/Mods/interface/PDFProducer.h"
 #endif
 
 #ifdef __CINT__
@@ -45,4 +46,5 @@
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::TauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;
+#pragma link C++ class mithep::PDFProducer+;
 #endif
