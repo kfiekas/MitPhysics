@@ -1,15 +1,15 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PDFProducer.h,v 1.1 2009/08/10 20:27:47 ceballos Exp $
+// $Id: PDFProducerMod.h,v 1.2 2009/08/11 10:50:37 loizides Exp $
 //
-// PDFProducer
+// PDFProducerMod
 //
 // Computes PDFs from LHAPDF based on input from MCEventInfo.
 //
 // Authors: G.Gomez-Ceballos
 //--------------------------------------------------------------------------------------------------
 
-#ifndef MITPHYSICS_MODS_PDFProducer_H
-#define MITPHYSICS_MODS_PDFProducer_H
+#ifndef MITPHYSICS_MODS_PDFPRODUCERMOD_H
+#define MITPHYSICS_MODS_PDFPRODUCERMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 
@@ -19,10 +19,10 @@ class TH2D;
 namespace mithep 
 {
   class MCEventInfo;
-  class PDFProducer : public BaseMod
+  class PDFProducerMod : public BaseMod
   {
     public:
-      PDFProducer(const char *name="PDFProducerMod", 
+      PDFProducerMod(const char *name="PDFProducerMod", 
                   const char *title="PDF producer module");
 
       void               SetMCEventInfoName(const char *s)   { fMCEvInfoName = s; }
@@ -39,7 +39,7 @@ namespace mithep
       const MCEventInfo *fMCEventInfo;      //!event info branch pointer
       TH1D              *hDPDFHisto[10];    //!output histograms
 
-    ClassDef(PDFProducer, 1) // Module to produce PDFs
+    ClassDef(PDFProducerMod, 1) // Module to produce PDFs
   };
 }
 #endif

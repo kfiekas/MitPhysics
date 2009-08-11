@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.15 2009/06/17 08:42:29 loizides Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.16 2009/08/10 20:27:59 ceballos Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -11,12 +11,12 @@
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
+#include "MitPhysics/Mods/interface/PDFProducerMod.h"
 #include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitPhysics/Mods/interface/TauIDMod.h"
-#include "MitPhysics/Mods/interface/PDFProducer.h"
 #endif
 
 #ifdef __CINT__
@@ -42,9 +42,9 @@
 #pragma link C++ enum mithep::MuonIDMod::EMuIdType;
 #pragma link C++ enum mithep::MuonIDMod::EMuIsoType;
 #pragma link C++ class mithep::PartonFlavorHistoryMod+;
+#pragma link C++ class mithep::PDFProducerMod+;
 #pragma link C++ class mithep::PhotonCleaningMod+;
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::TauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;
-#pragma link C++ class mithep::PDFProducer+;
 #endif

@@ -1,6 +1,6 @@
-// $Id: PDFProducer.cc,v 1.1 2009/08/10 20:27:47 ceballos Exp $
+// $Id: PDFProducerMod.cc,v 1.2 2009/08/11 10:50:38 loizides Exp $
 
-#include "MitPhysics/Mods/interface/PDFProducer.h"
+#include "MitPhysics/Mods/interface/PDFProducerMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/MCEventInfo.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -11,10 +11,10 @@
 
 using namespace mithep;
 
-ClassImp(mithep::PDFProducer)
+ClassImp(mithep::PDFProducerMod)
 
 //--------------------------------------------------------------------------------------------------
-PDFProducer::PDFProducer(const char *name, const char *title) : 
+PDFProducerMod::PDFProducerMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fPrintDebug(kFALSE),
   fMCEvInfoName(Names::gkMCEvtInfoBrn),
@@ -25,7 +25,7 @@ PDFProducer::PDFProducer(const char *name, const char *title) :
 }
 
 //--------------------------------------------------------------------------------------------------
-void PDFProducer::Process()
+void PDFProducerMod::Process()
 {
   // Process entries of the tree.
 
@@ -69,7 +69,7 @@ void PDFProducer::Process()
 }
 
 //--------------------------------------------------------------------------------------------------
-void PDFProducer::SlaveBegin()
+void PDFProducerMod::SlaveBegin()
 {
   // Setup LHAPDF and book branch and histograms if wanted.
 
