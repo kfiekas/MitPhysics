@@ -1,4 +1,4 @@
- // $Id: FakeLeptonExampleAnaMod.cc,v 1.3 2009/07/13 11:27:13 loizides Exp $
+ // $Id: FakeLeptonExampleAnaMod.cc,v 1.4 2009/08/10 16:07:26 phedex Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeLeptonExampleAnaMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -43,13 +43,6 @@ FakeLeptonExampleAnaMod::FakeLeptonExampleAnaMod(const char *name, const char *t
   fMet(0)
 {
   // Constructor.
-}
-
-//--------------------------------------------------------------------------------------------------
-void FakeLeptonExampleAnaMod::Begin()
-{
-  // Run startup code on the client machine. For this module, we dont do
-  // anything here.
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -103,13 +96,16 @@ void FakeLeptonExampleAnaMod::Process()
   Collection<FakeEventHeader> *FakeEventHeaders = 0;
   if (!fUseMCFake) {
     if (!fFakeEventHeaderName.IsNull()) {
-      FakeEventHeaders = dynamic_cast<Collection<FakeEventHeader>* >(FindObjThisEvt(fFakeEventHeaderName.Data()));
+      FakeEventHeaders = 
+        dynamic_cast<Collection<FakeEventHeader>* >(FindObjThisEvt(fFakeEventHeaderName.Data()));
       if (!FakeEventHeaders) {
-        cout << "Error: FakeEventHeader with name  " << fFakeEventHeaderName.Data() << " could not be loaded.\n";
+        cout << "Error: FakeEventHeader with name  " << fFakeEventHeaderName.Data() 
+             << " could not be loaded.\n";
         assert(false);
       }
     } else 
-      cout << "Error: FakeEventHeaders  " << fFakeEventHeaderName.Data() << " could not be loaded.\n";
+      cout << "Error: FakeEventHeaders  " << fFakeEventHeaderName.Data() 
+           << " could not be loaded.\n";
   }  
 
   //***********************************************************************************************
@@ -191,7 +187,7 @@ void FakeLeptonExampleAnaMod::Process()
     }
 
     //*********************************************************************************************
-    //another correction to account for events lost due to only the fake lepton firing the trigger    
+    //another correction to account for events lost due to only the fake lepton firing the trigger
     //The numbers need to be changed for your analysis. 
     //Given numbers are for the 2 lepton final state.
     //*********************************************************************************************
@@ -211,12 +207,12 @@ void FakeLeptonExampleAnaMod::Process()
       }
     }
 
-    //***********************************************************************************************
+    //*********************************************************************************************
     //For FR method (fUseMCFake == false)
     //Make analysis specific cuts. 
     //For example for 2 lepton final state we require that the event contains
     //one and only one clean lepton with pt > 10 GeV. 
-    //***********************************************************************************************
+    //*********************************************************************************************
     if (!fUseMCFake) {
       if (CleanLeptons->GetEntries() != 1 || CleanLeptons->At(0)->Pt() <= 10.0)
         continue;
@@ -224,7 +220,7 @@ void FakeLeptonExampleAnaMod::Process()
 
     //*********************************************************************************************
     //Fill some distributions before preselection
-    //*********************************************************************************************   
+    //*********************************************************************************************
     
     CompositeParticle *dilepton = NULL;
 
@@ -369,9 +365,11 @@ void FakeLeptonExampleAnaMod::Process()
     
     //Lepton Type
     int finalstateType = -1;
-    if (leptons->At(0)->ObjType() == kMuon && leptons->At(1)->ObjType() == kMuon ){ // mumu
+    if (leptons->At(0)->ObjType() == kMuon && 
+        leptons->At(1)->ObjType() == kMuon ){ // mumu
       finalstateType = 10;
-    } else if(leptons->At(0)->ObjType() == kElectron && leptons->At(1)->ObjType() == kElectron ){ // ee
+    } else if(leptons->At(0)->ObjType() == kElectron && 
+              leptons->At(1)->ObjType() == kElectron ){ // ee
       finalstateType = 11;
     } else if((leptons->At(0)->ObjType() == kElectron && leptons->At(1)->ObjType() == kMuon) || 
               (leptons->At(0)->ObjType() == kMuon && leptons->At(1)->ObjType() == kElectron)) {
@@ -638,18 +636,4 @@ void FakeLeptonExampleAnaMod::SlaveBegin()
   AddTH1(fMtHiggs_afterCuts                 ,"hMtHiggs_afterCuts",
                                              ";M_t (l1+l2+Met);Number of Events",150,0.,300.);
 
-}
-
-//--------------------------------------------------------------------------------------------------
-void FakeLeptonExampleAnaMod::SlaveTerminate()
-{
-  // Run finishing code on the computer (slave) that did the analysis. For this
-  // module, we dont do anything here.
-}
-
-//--------------------------------------------------------------------------------------------------
-void FakeLeptonExampleAnaMod::Terminate()
-{
-  // Run finishing code on the client computer. For this module, we dont do
-  // anything here.
 }

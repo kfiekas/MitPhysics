@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: FakeLeptonExampleAnaMod.h,v 1.3 2009/07/20 19:05:04 loizides Exp $
+// $Id: FakeLeptonExampleAnaMod.h,v 1.4 2009/08/10 16:07:26 phedex Exp $
 //
 // FakeLeptonExampleAnaMod
 //
@@ -40,26 +40,23 @@ namespace mithep
       const char *GetMetName()                     const { return fMetName;                      }
       const char *GetTriggerObjectsName()          const { return fTriggerObjectsName;           }
 
-      void   SetUseMCFake(Bool_t b)                        { fUseMCFake                    = b;  }
-      void   SetPerformFakeMuonMetCorrection(Bool_t b)     { fPerformFakeMuonMetCorrection = b;  }
-      void   SetSampleName(const char *s)                  { fSampleName                   = s;  }
-      void   SetFakeEventHeaderName (const char *s)        { fFakeEventHeaderName          = s;  }
-      void   SetElectronFakeableObjectsName(const char *s) { fElectronFakeableObjectsName  = s;  }
-      void   SetMuonFakeableObjectsName(const char *s)     { fMuonFakeableObjectsName      = s;  }
-      void   SetCleanJetsName (TString s)                  { fCleanJetsName                = s;  }
-      void   SetMCPartBranchName (TString s)               { fMCPartBranchName             = s;  }
-      void   SetGenJetBranchName (TString s)               { fGenJetBranchName             = s;  }
-      void   SetTrackBranchName (TString s)                { fTrackBranchName              = s;  }
-      void   SetMuonBranchName (TString s)                 { fMuonBranchName               = s;  }
-      void   SetMetName (TString s)                        { fMetName                      = s;  }
-      void   SetTriggerObjectsName(const char *name)       { fTriggerObjectsName         = name; }
+      void SetUseMCFake(Bool_t b)                        { fUseMCFake                      = b;  }
+      void SetPerformFakeMuonMetCorrection(Bool_t b)     { fPerformFakeMuonMetCorrection   = b;  }
+      void SetSampleName(const char *s)                  { fSampleName                     = s;  }
+      void SetFakeEventHeaderName (const char *s)        { fFakeEventHeaderName            = s;  }
+      void SetElectronFakeableObjectsName(const char *s) { fElectronFakeableObjectsName    = s;  }
+      void SetMuonFakeableObjectsName(const char *s)     { fMuonFakeableObjectsName        = s;  }
+      void SetCleanJetsName (TString s)                  { fCleanJetsName                  = s;  }
+      void SetMCPartBranchName (TString s)               { fMCPartBranchName               = s;  }
+      void SetGenJetBranchName (TString s)               { fGenJetBranchName               = s;  }
+      void SetTrackBranchName (TString s)                { fTrackBranchName                = s;  }
+      void SetMuonBranchName (TString s)                 { fMuonBranchName                 = s;  }
+      void SetMetName (TString s)                        { fMetName                        = s;  }
+      void SetTriggerObjectsName(const char *n)          { fTriggerObjectsName             = n;  }
 
     protected:
-      void         Begin();
-      void         Process();
-      void         SlaveBegin();
-      void         SlaveTerminate();
-      void         Terminate();      
+      void                  Process();
+      void                  SlaveBegin();
 
       Bool_t                fUseMCFake;                    //whether to use MC simulation fakes
       Bool_t                fPerformFakeMuonMetCorrection; //whether to do fake muon met correction
@@ -79,34 +76,30 @@ namespace mithep
       const TrackCol	   *fTracks;                       //!Track branch      
       const MuonCol	   *fMuons;	                   //!Muon branch
       const MetCol         *fMet;                          //!Missing Et
-  
-
-      TH1D                    *fDileptonCharge;                   //Dilepton Charge Histogram
-      TH1D                    *fLeptonPtMax;                      //Lepton1 Pt Histogram
-      TH1D                    *fLeptonPtMin;                      //Lepton2 Pt Histogram
-      TH1D                    *fMetPtHist;                        //Met Histogram
-      TH1D                    *fDeltaPhiLeptons;                  //DeltaPhi Histogram
-      TH1D                    *fDeltaEtaLeptons;                  //DeltaEta Histogram
-      TH1D                    *fDileptonMass;                     //Dilepton Mass Histogram
-
-      TH1D                    *fLeptonEta_NMinusOne;              //Lepton Eta Histogram
-      TH1D                    *fLeptonPtMax_NMinusOne;            //Lepton1 Pt Histogram
-      TH1D                    *fLeptonPtMin_NMinusOne;            //Lepton2 Pt Histogram
-      TH1D                    *fMetPtHist_NMinusOne;	          //Met Histogram
-      TH1D                    *fMetPhiHist_NMinusOne;             //Met Phi Histogram
-      TH1D                    *fMETdeltaPhilEtHist_NMinusOne;     //METdeltaPhilEtHist Histogram   
-      TH1D                    *fNCentralJets_NMinusOne;           //# of Central Jets Histogram
-      TH1D                    *fNDirtyMuonsHist_NMinusOne;        //# of Dirty Muons Histogram
-      TH1D                    *fNCleanExtraTracksHist_NMinusOne;  //# of Extra Tracks Histogram
-      TH1D                    *fDeltaPhiLeptons_NMinusOne;        //DeltaPhi Histogram
-      TH1D                    *fDeltaEtaLeptons_NMinusOne;        //DeltaEta Histogram
-      TH1D                    *fDileptonMass_NMinusOne;           //Dilepton Mass Histogram
-      TH1D                    *fMinDeltaPhiLeptonMet_NMinusOne;   //MinDeltaPhiLeptonMet Histogram
-
-      TH1D                    *fMinDeltaPhiLeptonMet_afterCuts;   //MinDeltaPhiLeptonMet Histogram
-      TH1D                    *fMtLepton1_afterCuts;              //M_t1 Histogram Histogram
-      TH1D                    *fMtLepton2_afterCuts;              //M_t2 Histogram Histogram
-      TH1D                    *fMtHiggs_afterCuts;                //M_t Higgs Histogram
+      TH1D                 *fDileptonCharge;                   //!Dilepton Charge Histogram
+      TH1D                 *fLeptonPtMax;                      //!Lepton1 Pt Histogram
+      TH1D                 *fLeptonPtMin;                      //!Lepton2 Pt Histogram
+      TH1D                 *fMetPtHist;                        //!Met Histogram
+      TH1D                 *fDeltaPhiLeptons;                  //!DeltaPhi Histogram
+      TH1D                 *fDeltaEtaLeptons;                  //!DeltaEta Histogram
+      TH1D                 *fDileptonMass;                     //!Dilepton Mass Histogram
+      TH1D                 *fLeptonEta_NMinusOne;              //!Lepton Eta Histogram
+      TH1D                 *fLeptonPtMax_NMinusOne;            //!Lepton1 Pt Histogram
+      TH1D                 *fLeptonPtMin_NMinusOne;            //!Lepton2 Pt Histogram
+      TH1D                 *fMetPtHist_NMinusOne;	       //!Met Histogram
+      TH1D                 *fMetPhiHist_NMinusOne;             //!Met Phi Histogram
+      TH1D                 *fMETdeltaPhilEtHist_NMinusOne;     //!METdeltaPhilEtHist Histogram   
+      TH1D                 *fNCentralJets_NMinusOne;           //!# of Central Jets Histogram
+      TH1D                 *fNDirtyMuonsHist_NMinusOne;        //!# of Dirty Muons Histogram
+      TH1D                 *fNCleanExtraTracksHist_NMinusOne;  //!# of Extra Tracks Histogram
+      TH1D                 *fDeltaPhiLeptons_NMinusOne;        //!DeltaPhi Histogram
+      TH1D                 *fDeltaEtaLeptons_NMinusOne;        //!DeltaEta Histogram
+      TH1D                 *fDileptonMass_NMinusOne;           //!Dilepton Mass Histogram
+      TH1D                 *fMinDeltaPhiLeptonMet_NMinusOne;   //!MinDeltaPhiLeptonMet Histogram
+      TH1D                 *fMinDeltaPhiLeptonMet_afterCuts;   //!MinDeltaPhiLeptonMet Histogram
+      TH1D                 *fMtLepton1_afterCuts;              //!M_t1 Histogram Histogram
+      TH1D                 *fMtLepton2_afterCuts;              //!M_t2 Histogram Histogram
+      TH1D                 *fMtHiggs_afterCuts;                //!M_t Higgs Histogram
 
       ClassDef(FakeLeptonExampleAnaMod,1) // Fake lepton analysis example
   };

@@ -1,4 +1,4 @@
-// $Id: GenFakesMod.cc,v 1.3 2009/07/13 11:27:13 loizides Exp $
+// $Id: GenFakesMod.cc,v 1.4 2009/08/10 16:07:26 phedex Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakesMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -185,9 +185,10 @@ void GenFakesMod::Process()
         muonFakeProbStatErrorLow = fFakeRate->MuonFakeRateStatErrorLow(MuFakeableObjs->At(n)->Et(),
                                                             MuFakeableObjs->At(n)->Eta(),
                                                             MuFakeableObjs->At(n)->Phi());
-        muonFakeProbStatErrorHigh = fFakeRate->MuonFakeRateStatErrorHigh(MuFakeableObjs->At(n)->Et(),
-                                                             MuFakeableObjs->At(n)->Eta(),
-                                                             MuFakeableObjs->At(n)->Phi());        
+        muonFakeProbStatErrorHigh = 
+          fFakeRate->MuonFakeRateStatErrorHigh(MuFakeableObjs->At(n)->Et(),
+                                               MuFakeableObjs->At(n)->Eta(),
+                                               MuFakeableObjs->At(n)->Phi());        
         muonFakeProbSysErrorLow = fFakeRate->MuonFakeRateSysErrorLow(MuFakeableObjs->At(n)->Et(),
                                                             MuFakeableObjs->At(n)->Eta(),
                                                             MuFakeableObjs->At(n)->Phi());

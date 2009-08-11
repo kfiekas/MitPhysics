@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: FakeObject.h,v 1.2 2009/07/20 19:05:04 loizides Exp $
+// $Id: FakeObject.h,v 1.3 2009/08/10 16:07:26 phedex Exp $
 //
 // FakeObject
 //
@@ -68,5 +68,4 @@ inline void mithep::FakeObject::GetMom() const
     fCachedMom.SetCoordinates(0,0,0,0);
   }
 }
-
 #endif

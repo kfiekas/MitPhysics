@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.3 2009/07/13 11:27:13 loizides Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.4 2009/07/21 16:35:12 bendavid Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -260,8 +260,10 @@ void GenFakeableObjsMod::Process()
         Bool_t IsTriggerJet = false;
         if (fVetoTriggerJet) {
           for (UInt_t l=0; l<triggerObjects->GetEntries(); l++) {      
-            Double_t deltaR = MathUtils::DeltaR(EOverPMatchedTrk->Phi(), EOverPMatchedTrk->Eta(),
-                                                triggerObjects->At(l)->Phi(), triggerObjects->At(l)->Eta());
+            Double_t deltaR = MathUtils::DeltaR(EOverPMatchedTrk->Phi(), 
+                                                EOverPMatchedTrk->Eta(),
+                                                triggerObjects->At(l)->Phi(), 
+                                                triggerObjects->At(l)->Eta());
             if (triggerObjects->At(l)->TrigName() == fTriggerName.Data() 
                 && triggerObjects->At(l)->Type() == TriggerObject::TriggerJet
                 && deltaR < 0.3
@@ -284,7 +286,7 @@ void GenFakeableObjsMod::Process()
      
         //****************************************************************************************
         // conversion filter
-        //****************************************************************************************        
+        //****************************************************************************************
         Bool_t isGoodConversion = kFALSE;
         for (UInt_t ifc=0; ifc<fConversions->GetEntries(); ifc++) {          
           Bool_t ConversionMatchFound = kFALSE;
@@ -329,7 +331,7 @@ void GenFakeableObjsMod::Process()
 
         //****************************************************************************************
         // D0 Cut        
-        //****************************************************************************************        
+        //****************************************************************************************
         double d0Min = 99999;
         for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
           double pD0 = EOverPMatchedTrk->D0Corrected(*fVertices->At(i0));
@@ -415,8 +417,10 @@ void GenFakeableObjsMod::Process()
       Bool_t IsTriggerJet = false;
       if (fVetoTriggerJet) {
         for (UInt_t l=0; l<triggerObjects->GetEntries(); l++) {      
-          Double_t deltaR = MathUtils::DeltaR(denominator->Phi(), denominator->Eta(),
-                                              triggerObjects->At(l)->Phi(), triggerObjects->At(l)->Eta());
+          Double_t deltaR = MathUtils::DeltaR(denominator->Phi(), 
+                                              denominator->Eta(),
+                                              triggerObjects->At(l)->Phi(), 
+                                              triggerObjects->At(l)->Eta());
           if (triggerObjects->At(l)->TrigName() == fTriggerName.Data() 
               && triggerObjects->At(l)->Type() == TriggerObject::TriggerJet
               && deltaR < 0.3
@@ -474,7 +478,7 @@ void GenFakeableObjsMod::Process()
       
       //****************************************************************************************
       // D0 Cut        
-      //****************************************************************************************        
+      //****************************************************************************************
       double d0Min = 99999;
       for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
         double pD0 = denominator->GsfTrk()->D0Corrected(*fVertices->At(i0));
@@ -483,7 +487,7 @@ void GenFakeableObjsMod::Process()
 
       //****************************************************************************************
       // Apply Denominator Cuts
-      //****************************************************************************************        
+      //****************************************************************************************
       if (denominator->Pt() > 10.0 && 
           denominatorIso < 10.0
           && !isGoodConversion
@@ -501,7 +505,9 @@ void GenFakeableObjsMod::Process()
   } else if (fElFOType == kElFOLoose) {
     for (UInt_t i=0; i<DuplicateRemovedElectrons->GetEntries(); i++) {  
       const Electron *denominator = DuplicateRemovedElectrons->At(i);
-      Double_t denominatorIso =  denominator->TrackIsolationDr03() + denominator->EcalRecHitIsoDr04() - 1.5;
+      Double_t denominatorIso =  
+        denominator->TrackIsolationDr03() + 
+        denominator->EcalRecHitIsoDr04() - 1.5;
 
       //Veto denominators matching to real electrons      
       Bool_t IsGenLepton = false;
@@ -527,8 +533,10 @@ void GenFakeableObjsMod::Process()
       Bool_t IsTriggerJet = false;
       if (fVetoTriggerJet) {
         for (UInt_t l=0; l<triggerObjects->GetEntries(); l++) {      
-          Double_t deltaR = MathUtils::DeltaR(denominator->Phi(), denominator->Eta(),
-                                              triggerObjects->At(l)->Phi(), triggerObjects->At(l)->Eta());
+          Double_t deltaR = MathUtils::DeltaR(denominator->Phi(), 
+                                              denominator->Eta(),
+                                              triggerObjects->At(l)->Phi(), 
+                                              triggerObjects->At(l)->Eta());
           if (triggerObjects->At(l)->TrigName() == fTriggerName.Data() 
               && triggerObjects->At(l)->Type() == TriggerObject::TriggerJet
               && deltaR < 0.3
@@ -541,7 +549,7 @@ void GenFakeableObjsMod::Process()
 
       //****************************************************************************************
       // conversion filter
-      //****************************************************************************************        
+      //****************************************************************************************
       Bool_t isGoodConversion = kFALSE;
       for (UInt_t ifc=0; ifc<fConversions->GetEntries(); ifc++) {          
         Bool_t ConversionMatchFound = kFALSE;
@@ -586,7 +594,7 @@ void GenFakeableObjsMod::Process()
       
       //****************************************************************************************
       // D0 Cut        
-      //****************************************************************************************        
+      //****************************************************************************************
       double d0Min = 99999;
       for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
         double pD0 = denominator->GsfTrk()->D0Corrected(*fVertices->At(i0));
@@ -706,8 +714,10 @@ void GenFakeableObjsMod::Process()
       Bool_t IsTriggerJet = false;
       if (fVetoTriggerJet) {
         for (UInt_t l=0; l<triggerObjects->GetEntries(); l++) {      
-          Double_t deltaR = MathUtils::DeltaR(denominator->Phi(), denominator->Eta(),
-                                              triggerObjects->At(l)->Phi(), triggerObjects->At(l)->Eta());
+          Double_t deltaR = MathUtils::DeltaR(denominator->Phi(), 
+                                              denominator->Eta(),
+                                              triggerObjects->At(l)->Phi(), 
+                                              triggerObjects->At(l)->Eta());
           if (triggerObjects->At(l)->TrigName() == fTriggerName.Data() 
               && triggerObjects->At(l)->Type() == TriggerObject::TriggerJet
               && deltaR < 0.3
@@ -720,7 +730,7 @@ void GenFakeableObjsMod::Process()
 
       //****************************************************************************************
       // D0 Cut        
-      //****************************************************************************************        
+      //****************************************************************************************
       double d0Min = 99999;
       for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
         double pD0 = denominator->Trk()->D0Corrected(*fVertices->At(i0));
@@ -741,7 +751,10 @@ void GenFakeableObjsMod::Process()
   } else if (fMuFOType == kMuFOTrackerMuon) {
     for (UInt_t i=0; i<fMuons->GetEntries(); i++) {
       const Muon *denominator = fMuons->At(i);
-      Double_t totalIsolation = denominator->IsoR03SumPt() + denominator->IsoR03EmEt() + denominator->IsoR03HadEt();
+      Double_t totalIsolation = 
+        denominator->IsoR03SumPt() + 
+        denominator->IsoR03EmEt() + 
+        denominator->IsoR03HadEt();
 
       //Determine if muon fakeable object matches a gen lepton
       Bool_t IsGenLepton = false;
@@ -767,8 +780,10 @@ void GenFakeableObjsMod::Process()
       Bool_t IsTriggerJet = false;
       if (fVetoTriggerJet) {
         for (UInt_t l=0; l<triggerObjects->GetEntries(); l++) {      
-          Double_t deltaR = MathUtils::DeltaR(denominator->Phi(), denominator->Eta(),
-                                              triggerObjects->At(l)->Phi(), triggerObjects->At(l)->Eta());
+          Double_t deltaR = MathUtils::DeltaR(denominator->Phi(), 
+                                              denominator->Eta(),
+                                              triggerObjects->At(l)->Phi(), 
+                                              triggerObjects->At(l)->Eta());
           if (triggerObjects->At(l)->TrigName() == fTriggerName.Data() 
               && triggerObjects->At(l)->Type() == TriggerObject::TriggerJet
               && deltaR < 0.3
@@ -781,7 +796,7 @@ void GenFakeableObjsMod::Process()
 
       //****************************************************************************************
       // D0 Cut        
-      //****************************************************************************************        
+      //****************************************************************************************
       double d0Min = 99999;
       for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
         double pD0 = denominator->Trk()->D0Corrected(*fVertices->At(i0));

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.4 2009/07/20 19:05:04 loizides Exp $
+// $Id: GenFakeableObjsMod.h,v 1.5 2009/08/10 16:07:26 phedex Exp $
 //
 // GenFakeableObjsMod
 //
@@ -120,7 +120,6 @@ namespace mithep
       TString          fMuFakeableObjsName;            //name of fakeable objects           (output)
       ElectronFOType   fElFOType;                      //Electron Fakeable Object type
       MuonFOType       fMuFOType;                      //Muon Fakeable Object type
-
       const ElectronCol      *fElectrons;             //!Electron branch
       const MuonCol          *fMuons;                 //!Muon branch
       const SuperClusterCol  *fBarrelSuperClusters;   //!Barrel Supercluster branch
