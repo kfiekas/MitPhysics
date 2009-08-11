@@ -1,4 +1,4 @@
-// $Id: runSkimmingExample.C,v 1.4 2009/03/24 18:00:41 loizides Exp $
+// $Id: runSkimmingExample.C,v 1.5 2009/07/17 20:48:23 loizides Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
@@ -40,10 +40,12 @@ void runSkimmingExample(const char *files,
   gDebugLevel = 1;
 
   Sel *smod = new Sel((Int_t)(1./fkeep));
+
   OutputMod *omod = new OutputMod;
   omod->SetFileName(prefix);
   //omod->SetCheckBrDep(kFALSE);
   omod->AddNewBranch("RValue");
+
   omod->Keep("*");
   if (0) { // more complex case
     omod->Drop("*");
@@ -58,6 +60,11 @@ void runSkimmingExample(const char *files,
 
   // set up analysis
   Analysis *ana = new Analysis;
+  if (0) {
+    ana->SetHLTTreeName("HLT_E29");
+    ana->SetHLTObjsName("HLTObjects_E29");
+  }
+
   ana->SetSuperModule(smod);
   if (nev)
     ana->SetProcessNEvents(nev);
