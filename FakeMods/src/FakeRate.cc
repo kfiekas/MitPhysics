@@ -1,4 +1,4 @@
-// $Id: FakeRate.cc,v 1.3 2009/08/10 16:07:26 phedex Exp $
+// $Id: FakeRate.cc,v 1.4 2009/08/11 09:16:01 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeRate.h"
 #include "MitCommon/DataFormats/interface/TH2DAsymErr.h"
@@ -128,8 +128,7 @@ Double_t FakeRate::ElectronFakeRate(Double_t pt, Double_t eta, Double_t phi)
           Int_t etabin = fElectronFakeRateHist_PtEta->GetYaxis()->FindFixBin(eta);    
           prob = fElectronFakeRateHist_PtEta->GetBinContent(ptbin,etabin);
         } else {
-          cerr << "Error: fElectronFakeRateHist_PtEta was not loaded properly.\n";
-          assert(kFALSE);
+          Fatal("ElectronFakeRate","Error: fElectronFakeRateHist_PtEta was not loaded properly.");
         }
       }
     } else {
@@ -137,22 +136,19 @@ Double_t FakeRate::ElectronFakeRate(Double_t pt, Double_t eta, Double_t phi)
         if (fElectronFakeRateFit_Pt) {
           prob = fElectronFakeRateFit_Pt->Eval(pt);
         } else {
-          cerr << "Error: fElectronFakeRateFit_Pt was not loaded properly.\n";
-          assert(kFALSE);
+          Fatal("ElectronFakeRate","Error: fElectronFakeRateFit_Pt was not loaded properly.");
         }
       } else {
         if (fElectronFakeRateHist_Pt) {
           Int_t ptbin = fElectronFakeRateHist_Pt->GetXaxis()->FindFixBin(pt);
           prob = fElectronFakeRateHist_Pt->GetBinContent(ptbin);
         } else {
-          cerr << "Error: fElectronFakeRateHist_Pt was not loaded properly.\n";
-          assert(kFALSE);
+          Fatal("ElectronFakeRate","Error: fElectronFakeRateHist_Pt was not loaded properly.");
         }
       }
     }
   } else {
-    cerr << "Error: FakeRate was not properly initialized. \n";
-    assert(kFALSE);
+    Fatal("ElectronFakeRate","Error: FakeRate was not properly initialized.");
   }
   return prob;
 }
@@ -170,29 +166,15 @@ Double_t FakeRate::ElectronFakeRateError(Double_t pt, Double_t eta, Double_t phi
       if (fUseFitFunction) {
         cerr << "Error: Using 2D Fake Rates with Fit Function is not currently supported.\n";      
       } else {
-        if (fElectronFakeRateHist_PtEta) {
-          
-          if(errorType == TH2DAsymErr::kStatErrLow) {
-            return fElectronFakeRateHist_PtEta->GetStatErrorLow(pt, eta);
-          } else if(errorType == TH2DAsymErr::kStatErrHigh) {
-            return fElectronFakeRateHist_PtEta->GetStatErrorHigh(pt, eta);
-          } else if(errorType == TH2DAsymErr::kSysErrLow) {
-            return fElectronFakeRateHist_PtEta->GetSysErrorLow(pt, eta);
-          } else if(errorType == TH2DAsymErr::kSysErrHigh) {
-            return fElectronFakeRateHist_PtEta->GetSysErrorHigh(pt, eta);
-          } else {
-            cerr << "Error: Given ErrorType = " << errorType << " is not recognized.\n";
-            return 0.0;
-          }
+        if (fElectronFakeRateHist_PtEta) {          
+          return fElectronFakeRateHist_PtEta->GetError(pt, eta, errorType);        
         } else {
-          cerr << "Error: fElectronFakeRateHist_PtEta_sysError was not loaded properly.\n";
-          assert(kFALSE);
+          Fatal("ElectronFakeRate","Error: fElectronFakeRateHist_PtEta_sysError was not loaded properly.");
         }
       }
     } 
   } else {
-    cerr << "Error: FakeRate was not properly initialized. \n";
-    assert(kFALSE);
+    Fatal("ElectronFakeRate","Error: FakeRate was not properly initialized.");
   }
   return error;
 }
@@ -263,8 +245,7 @@ Double_t FakeRate::MuonFakeRate(Double_t pt, Double_t eta, Double_t phi)
           Int_t etabin = fMuonFakeRateHist_PtEta->GetYaxis()->FindFixBin(eta);    
           prob = fMuonFakeRateHist_PtEta->GetBinContent(ptbin,etabin);
         } else {
-          cerr << "Error: fMuonFakeRateHist_PtEta was not loaded properly.\n";
-          assert(kFALSE);
+          Fatal("ElectronFakeRate","Error: fMuonFakeRateHist_PtEta was not loaded properly.");
         }
       }
     } else {
@@ -272,22 +253,19 @@ Double_t FakeRate::MuonFakeRate(Double_t pt, Double_t eta, Double_t phi)
         if (fMuonFakeRateFit_Pt) {
           prob = fMuonFakeRateFit_Pt->Eval(pt);
         } else {
-          cerr << "Error: fMuonFakeRateFit_Pt was not loaded properly.\n";
-          assert(kFALSE);
+          Fatal("ElectronFakeRate","Error: fMuonFakeRateFit_Pt was not loaded properly.");
         }
       } else {
         if (fMuonFakeRateHist_Pt) {
           Int_t ptbin = fMuonFakeRateHist_Pt->GetXaxis()->FindFixBin(pt);
           prob = fMuonFakeRateHist_Pt->GetBinContent(ptbin);
         } else {
-          cerr << "Error: fMuonFakeRateHist_Pt was not loaded properly.\n";
-          assert(kFALSE);
+          Fatal("ElectronFakeRate","Error: fMuonFakeRateHist_Pt was not loaded properly.");
         }
       }
     }
   } else {
-    cerr << "Error: FakeRate was not properly initialized. \n";
-    assert(kFALSE);
+    Fatal("ElectronFakeRate","Error: FakeRate was not properly initialized.");
   }
   return prob;
 }
@@ -306,28 +284,14 @@ Double_t FakeRate::MuonFakeRateError(Double_t pt, Double_t eta, Double_t phi,
         cerr << "Error: Using 2D Fake Rates with Fit Function is not currently supported.\n";      
       } else {
         if (fMuonFakeRateHist_PtEta) {
-
-          if(errorType == TH2DAsymErr::kStatErrLow) {
-            return fMuonFakeRateHist_PtEta->GetStatErrorLow(pt, eta);
-          } else if(errorType == TH2DAsymErr::kStatErrHigh) {
-            return fMuonFakeRateHist_PtEta->GetStatErrorHigh(pt, eta);
-          } else if(errorType == TH2DAsymErr::kSysErrLow) {
-            return fMuonFakeRateHist_PtEta->GetSysErrorLow(pt, eta);
-          } else if(errorType == TH2DAsymErr::kSysErrHigh) {
-            return fMuonFakeRateHist_PtEta->GetSysErrorHigh(pt, eta);
-          } else {
-            cerr << "Error: Given ErrorType = " << errorType << " is not recognized.\n";
-            return 0.0;
-          }
+          return fMuonFakeRateHist_PtEta->GetError(pt, eta, errorType);                 
         } else {
-          cerr << "Error: fMuonFakeRateHist_PtEta_sysError was not loaded properly.\n";
-          assert(kFALSE);
+          Fatal("ElectronFakeRate","Error: fMuonFakeRateHist_PtEta_sysError was not loaded properly.");
         }
       }
     } 
   } else {
-    cerr << "Error: FakeRate was not properly initialized. \n";
-    assert(kFALSE);
+    Fatal("ElectronFakeRate","Error: FakeRate was not properly initialized.");
   }
   return error;
 }

@@ -1,4 +1,4 @@
- // $Id: FakeLeptonExampleAnaMod.cc,v 1.4 2009/08/10 16:07:26 phedex Exp $
+ // $Id: FakeLeptonExampleAnaMod.cc,v 1.5 2009/08/11 09:16:01 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeLeptonExampleAnaMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -23,8 +23,8 @@ ClassImp(mithep::FakeLeptonExampleAnaMod)
 //--------------------------------------------------------------------------------------------------
 FakeLeptonExampleAnaMod::FakeLeptonExampleAnaMod(const char *name, const char *title) : 
   BaseMod(name,title),
-  fUseMCFake(false),
-  fPerformFakeMuonMetCorrection(true),
+  fUseMCFake(kFALSE),
+  fPerformFakeMuonMetCorrection(kTRUE),
   fSampleName("NotSet"),
   fFakeEventHeaderName(ModNames::gkFakeEventHeadersName),
   fElectronFakeableObjectsName(ModNames::gkElFakeableObjsName),
@@ -99,9 +99,9 @@ void FakeLeptonExampleAnaMod::Process()
       FakeEventHeaders = 
         dynamic_cast<Collection<FakeEventHeader>* >(FindObjThisEvt(fFakeEventHeaderName.Data()));
       if (!FakeEventHeaders) {
-        cout << "Error: FakeEventHeader with name  " << fFakeEventHeaderName.Data() 
-             << " could not be loaded.\n";
-        assert(false);
+        string errorMsg = "Error: FakeEventHeader with name  " + 
+          string(fFakeEventHeaderName.Data()) + "could not be loaded.\n";
+        Fatal("Process()",errorMsg.c_str());        
       }
     } else 
       cout << "Error: FakeEventHeaders  " << fFakeEventHeaderName.Data() 
@@ -208,7 +208,7 @@ void FakeLeptonExampleAnaMod::Process()
     }
 
     //*********************************************************************************************
-    //For FR method (fUseMCFake == false)
+    //For FR method (fUseMCFake == kFALSE)
     //Make analysis specific cuts. 
     //For example for 2 lepton final state we require that the event contains
     //one and only one clean lepton with pt > 10 GeV. 
@@ -266,7 +266,7 @@ void FakeLeptonExampleAnaMod::Process()
       if(mu->Pt() < 5.0)   continue;
 
       //remove the fake
-       bool isFakedMuon = false;
+       Bool_t isFakedMuon = kFALSE;
        for (UInt_t f=0;f<FakeEventHeaders->At(i)->FakeObjsSize() ; f++) {
          if (mu->HasTrackerTrk() && 
              (dynamic_cast<const mithep::ChargedParticle*>
@@ -275,13 +275,13 @@ void FakeLeptonExampleAnaMod::Process()
               (FakeEventHeaders->At(i)->FakeObj(f)->FakeParticle()))->TrackerTrk() ==
              mu->TrackerTrk()
            )
-           isFakedMuon = true;
+           isFakedMuon = kTRUE;
        }
       
       //remove clean muons
-      bool isCleanMuon = false;
+      Bool_t isCleanMuon = kFALSE;
       for (UInt_t j=0; j<CleanMuons->GetEntries(); j++) {
-        if(fMuons->At(m) == CleanMuons->At(j)) isCleanMuon = true;
+        if(fMuons->At(m) == CleanMuons->At(j)) isCleanMuon = kTRUE;
       }
 
       if(!isCleanMuon 
@@ -293,13 +293,13 @@ void FakeLeptonExampleAnaMod::Process()
     //Get Clean Tracks excluding the good leptons
     //*********************************************************************************************
     ObjArray<Track> *CleanExtraTracks = new ObjArray<Track>;
-    int nTracks = 0;
+    Int_t nTracks = 0;
 
-    double z0Average = ( (dynamic_cast<const mithep::ChargedParticle*>(leptons->At(0)))->Trk()->Z0()
+    Double_t z0Average = ( (dynamic_cast<const mithep::ChargedParticle*>(leptons->At(0)))->Trk()->Z0()
       + (dynamic_cast<const mithep::ChargedParticle*>(leptons->At(1)))->Trk()->Z0()) /2 ;
     
     for (UInt_t t=0; t<fTracks->GetEntries(); ++t) {
-      bool isLepton = false;
+      Bool_t isLepton = kFALSE;
       
       if (MathUtils::DeltaR(fTracks->At(t)->Phi(),fTracks->At(t)->Eta(),leptons->At(0)->Phi(),
                             leptons->At(0)->Eta()) > 0.01 &&
@@ -307,7 +307,7 @@ void FakeLeptonExampleAnaMod::Process()
                             leptons->At(1)->Eta()) > 0.01
         ) {
       } else {
-        isLepton = true;
+        isLepton = kTRUE;
       }
       
       MDB(kAnalysis, 8) {
@@ -332,39 +332,39 @@ void FakeLeptonExampleAnaMod::Process()
     //Define Event Variables
     //*********************************************************************************************
     //delta phi between the 2 leptons in degrees
-    double deltaPhiLeptons = MathUtils::DeltaPhi(leptons->At(0)->Phi(), 
+    Double_t deltaPhiLeptons = MathUtils::DeltaPhi(leptons->At(0)->Phi(), 
                                                  leptons->At(1)->Phi())* 360.0 / 2 / TMath::Pi();
     
-    double deltaEtaLeptons = leptons->At(0)->Eta() - leptons->At(1)->Eta();
+    Double_t deltaEtaLeptons = leptons->At(0)->Eta() - leptons->At(1)->Eta();
     
-    double deltaPhiDileptonMet = MathUtils::DeltaPhi(caloMet->Phi(), 
+    Double_t deltaPhiDileptonMet = MathUtils::DeltaPhi(caloMet->Phi(), 
                                                      dilepton->Phi())*360.0 / 2 / TMath::Pi();
     
-    double mtHiggs = TMath::Sqrt(2.0*dilepton->Pt() * caloMet->Pt()*
+    Double_t mtHiggs = TMath::Sqrt(2.0*dilepton->Pt() * caloMet->Pt()*
                                  (1.0 - cos(deltaPhiDileptonMet * 2 * TMath::Pi() / 360.0)));
     
     //angle between MET and closest lepton
-    double deltaPhiMetLepton[2] = {MathUtils::DeltaPhi(caloMet->Phi(), leptons->At(0)->Phi()),
+    Double_t deltaPhiMetLepton[2] = {MathUtils::DeltaPhi(caloMet->Phi(), leptons->At(0)->Phi()),
                                    MathUtils::DeltaPhi(caloMet->Phi(), leptons->At(1)->Phi())};
     
-    double mTW[2] = {TMath::Sqrt(2.0*leptons->At(0)->Pt()*caloMet->Pt()*
+    Double_t mTW[2] = {TMath::Sqrt(2.0*leptons->At(0)->Pt()*caloMet->Pt()*
                                  (1.0 - cos(deltaPhiMetLepton[0]))),
                      TMath::Sqrt(2.0*leptons->At(1)->Pt()*caloMet->Pt()*
                                  (1.0 - cos(deltaPhiMetLepton[1])))};
     
-    double minDeltaPhiMetLepton = (deltaPhiMetLepton[0] < deltaPhiMetLepton[1])?
+    Double_t minDeltaPhiMetLepton = (deltaPhiMetLepton[0] < deltaPhiMetLepton[1])?
       deltaPhiMetLepton[0]:deltaPhiMetLepton[1];
     minDeltaPhiMetLepton = minDeltaPhiMetLepton * 360.0 / 2 / TMath::Pi();
     
     //count the number of central Jets for vetoing
-    int nCentralJets = 0;
+    Int_t nCentralJets = 0;
     for (UInt_t j=0; j<CleanJets->GetEntries(); j++) {
       if (fabs(CleanJets->At(j)->Eta()) < 2.5)
         nCentralJets++;
     }
     
     //Lepton Type
-    int finalstateType = -1;
+    Int_t finalstateType = -1;
     if (leptons->At(0)->ObjType() == kMuon && 
         leptons->At(1)->ObjType() == kMuon ){ // mumu
       finalstateType = 10;
@@ -381,55 +381,55 @@ void FakeLeptonExampleAnaMod::Process()
     //*********************************************************************************************
     //Define Cuts
     //*********************************************************************************************
-    const int nCuts = 9;
-    bool passCut[nCuts] = {false, false, false, false,
-                           false, false, false, false, false};
+    const Int_t nCuts = 9;
+    Bool_t passCut[nCuts] = {kFALSE, kFALSE, kFALSE, kFALSE,
+                           kFALSE, kFALSE, kFALSE, kFALSE, kFALSE};
     
     if(leptons->At(0)->Pt() > 20.0 &&
        leptons->At(1)->Pt() > 10.0 &&
        caloMet->Pt()    > 30.0 &&
        dilepton->Mass() > 12.0
-      )                              passCut[0] = true;
+      )                              passCut[0] = kTRUE;
     //above cuts are for preselction to be fed into TMVA
     
-    if(nCentralJets < 1)     passCut[1] = true;
+    if(nCentralJets < 1)     passCut[1] = kTRUE;
     
     if (finalstateType == 10){ // mumu
       if(caloMet->Pt()	> 50.0 &&
-         caloMet->Pt()	< 200.0)         passCut[2] = true;
-      if(deltaPhiLeptons	< 45.0)          passCut[3] = true;
-      if(dilepton->Mass()	< 50.0)          passCut[4] = true;
+         caloMet->Pt()	< 200.0)                 passCut[2] = kTRUE;
+      if(deltaPhiLeptons	< 45.0)          passCut[3] = kTRUE;
+      if(dilepton->Mass()	< 50.0)          passCut[4] = kTRUE;
       if(leptons->At(0)->Pt()	> 35.0   &&
-         leptons->At(0)->Pt()	< 55.0)          passCut[5] = true;
-      if(leptons->At(1)->Pt()	> 25.0)          passCut[6] = true;
+         leptons->At(0)->Pt()	< 55.0)          passCut[5] = kTRUE;
+      if(leptons->At(1)->Pt()	> 25.0)          passCut[6] = kTRUE;
     }
     else if(finalstateType == 11 ){ // ee
       if(caloMet->Pt()	  > 51.0   &&
-         caloMet->Pt()	  < 200.0)       passCut[2] = true;
-      if(deltaPhiLeptons	  < 45.0)        passCut[3] = true;
-      if(dilepton->Mass()	  < 40.0)        passCut[4] = true;
+         caloMet->Pt()	  < 200.0)               passCut[2] = kTRUE;
+      if(deltaPhiLeptons	  < 45.0)        passCut[3] = kTRUE;
+      if(dilepton->Mass()	  < 40.0)        passCut[4] = kTRUE;
       if(leptons->At(0)->Pt() > 25.0   &&
-	 leptons->At(0)->Pt() < 49.0)        passCut[5] = true;
-      if(leptons->At(1)->Pt() > 25.0)        passCut[6] = true;
+	 leptons->At(0)->Pt() < 49.0)            passCut[5] = kTRUE;
+      if(leptons->At(1)->Pt() > 25.0)            passCut[6] = kTRUE;
     }      
     else if(finalstateType == 12) { //emu
       if(caloMet->Pt()			> 45.0 &&
-         caloMet->Pt()			< 105.0) passCut[2] = true;
-      if(deltaPhiLeptons		< 70.0)  passCut[3] = true;
-      if(dilepton->Mass()		< 45.0)  passCut[4] = true;
+         caloMet->Pt()			< 105.0) passCut[2] = kTRUE;
+      if(deltaPhiLeptons		< 70.0)  passCut[3] = kTRUE;
+      if(dilepton->Mass()		< 45.0)  passCut[4] = kTRUE;
       if(leptons->At(0)->Pt()	> 25.0   &&
-         leptons->At(0)->Pt()	< 50.0)  passCut[5] = true;
-      if(leptons->At(1)->Pt()	> 25.0)  passCut[6] = true;
+         leptons->At(0)->Pt()	< 50.0)          passCut[5] = kTRUE;
+      if(leptons->At(1)->Pt()	> 25.0)          passCut[6] = kTRUE;
     }
     
-    if (DirtyMuons->GetEntries() < 1)      passCut[7] = true;
-    if (CleanExtraTracks->GetEntries() < 4)     passCut[8] = true;
+    if (DirtyMuons->GetEntries() < 1)            passCut[7] = kTRUE;
+    if (CleanExtraTracks->GetEntries() < 4)      passCut[8] = kTRUE;
 
     //*********************************************************************************************
     //Final Decision
     //*********************************************************************************************
-    bool passAllCuts = true;
-    for(int c=0; c<nCuts; c++) passAllCuts = passAllCuts & passCut[c];
+    Bool_t passAllCuts = kTRUE;
+    for(Int_t c=0; c<nCuts; c++) passAllCuts = passAllCuts & passCut[c];
     
     //*****************************************************************************************
     //Histograms after no cuts
@@ -446,8 +446,8 @@ void FakeLeptonExampleAnaMod::Process()
     //*********************************************************************************************
 
     //N Jet Veto  
-    bool pass = true;
-    for (int k=0;k<nCuts;k++) {
+    Bool_t pass = kTRUE;
+    for (Int_t k=0;k<nCuts;k++) {
       if (k != 1) {
         pass = (pass && passCut[k]);      
       }
@@ -457,8 +457,8 @@ void FakeLeptonExampleAnaMod::Process()
     }     
 
     //Met Cut
-    pass = true;
-    for (int k=0;k<nCuts;k++) {
+    pass = kTRUE;
+    for (Int_t k=0;k<nCuts;k++) {
       if (k != 2) {
         pass = (pass && passCut[k]);      
       }
@@ -468,8 +468,8 @@ void FakeLeptonExampleAnaMod::Process()
     }
     
     //DeltaPhiLeptons
-    pass = true;
-    for (int k=0;k<nCuts;k++) {
+    pass = kTRUE;
+    for (Int_t k=0;k<nCuts;k++) {
       if (k != 3) {
         pass = (pass && passCut[k]);      
       }
@@ -479,8 +479,8 @@ void FakeLeptonExampleAnaMod::Process()
     }
     
     //dilepton mass
-    pass = true;
-    for (int k=0;k<nCuts;k++) {
+    pass = kTRUE;
+    for (Int_t k=0;k<nCuts;k++) {
       if (k != 4)
         pass = (pass && passCut[k]);    
     }
@@ -489,8 +489,8 @@ void FakeLeptonExampleAnaMod::Process()
     }
     
     //Lepton Pt Max
-    pass = true;
-    for (int k=0;k<nCuts;k++) {
+    pass = kTRUE;
+    for (Int_t k=0;k<nCuts;k++) {
       if (k != 5) {
         pass = (pass && passCut[k]);      
       }
@@ -500,8 +500,8 @@ void FakeLeptonExampleAnaMod::Process()
     }
     
     //Lepton Pt Min
-    pass = true;
-    for (int k=0;k<nCuts;k++) {
+    pass = kTRUE;
+    for (Int_t k=0;k<nCuts;k++) {
       if (k != 6) {
         pass = (pass && passCut[k]);      
       }
@@ -511,8 +511,8 @@ void FakeLeptonExampleAnaMod::Process()
     }
     
     //NDirtyMuons
-    pass = true;
-    for (int k=0;k<nCuts;k++) {
+    pass = kTRUE;
+    for (Int_t k=0;k<nCuts;k++) {
       if (k != 7)
         pass = (pass && passCut[k]);    
     }
@@ -521,8 +521,8 @@ void FakeLeptonExampleAnaMod::Process()
     }
     
     //NCleanExtraTracks
-    pass = true;
-    for (int k=0;k<nCuts;k++) {
+    pass = kTRUE;
+    for (Int_t k=0;k<nCuts;k++) {
       if (k != 8)
         pass = (pass && passCut[k]);    
     }

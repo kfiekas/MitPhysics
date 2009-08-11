@@ -1,4 +1,4 @@
-// $Id: GenFakesMod.cc,v 1.4 2009/08/10 16:07:26 phedex Exp $
+// $Id: GenFakesMod.cc,v 1.5 2009/08/11 09:16:01 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakesMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -201,8 +201,7 @@ void GenFakesMod::Process()
                                             muonFakeProbSysErrorHigh*muonFakeProbSysErrorHigh);
 
       } else {
-        cerr << "Error: fFakeRate is a NULL pointer.\n";
-        assert(false);
+        Fatal("Process()","Error: fFakeRate is a NULL pointer.");   
       }
 
       //only fake into a muon if the fakeable object did not match to a clean lepton
@@ -391,8 +390,7 @@ void GenFakesMod::Process()
             TMath::Sqrt(electronFakeProbStatErrorHigh*electronFakeProbStatErrorHigh +
                         electronFakeProbSysErrorHigh*electronFakeProbSysErrorHigh);
         } else {
-          cerr << "Error: fFakeRate is a NULL pointer.\n";
-          assert(false);
+          Fatal("Process()","Error: fFakeRate is a NULL pointer.");   
         }
         
         //only fake into a muon if the fakeable object did not match to a clean lepton
