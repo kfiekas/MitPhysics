@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.29 2009/08/04 08:23:01 peveraer Exp $
+// $Id: ElectronIDMod.cc,v 1.30 2009/08/05 20:09:45 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -18,7 +18,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
   fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
-  fElectronIDType("Tight"),
+  fElectronIDType("CustomTight"),
   fElectronIsoType("TrackJuraSliding"),
   fElectronPtMin(10),
   fIDLikelihoodCut(0.9),
@@ -43,7 +43,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
 //--------------------------------------------------------------------------------------------------
 Bool_t ElectronIDMod::PassCustomID(const Electron *ele) const
 {
-  // Check if given electron passes the custom id criteria. Based on XXX (Todo Pieter) from CMSSW.
+  // Based on RecoEgamma/ElectronIdentification/src/CutBasedElectronID.cc
 
   Double_t eOverP = ele->ESuperClusterOverP();
   Double_t fBrem  = ele->FBrem();
@@ -315,15 +315,15 @@ void ElectronIDMod::SlaveBegin()
 //--------------------------------------------------------------------------------------------------
 void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
 {
-  // Set cut values based on XXX from CMSSW (Todo Pieter).
+  // Set cut values based on RecoEgamma/ElectronIdentification/python/electronIdCutBasedExt_cfi.py
 
   Double_t tightcuts[6][8]={
-    {0.056, 0.0221, 0.037, 0.0, 0.0268, 0.0102, 0.0104, 0.0},        //hovere
-    {0.0095, 0.0094, 0.0094, 0.0, 0.029, 0.029, 0.029, 0.0},         //sigmaetaeta
-    {0.0225, 0.0114, 0.0234, 0.039, 0.0215, 0.0095, 0.0148, 0.0167}, //deltaphiin
-    {0.0043, 0.00282, 0.0036, 0.0, 0.0066, 0.0049, 0.0041, 0.0},     //deltaetain
-    {0.32, 0.94, 0.221, 0.0, 0.74, 0.89, 0.66, 0.0},                 //eoverp
-    {0.8,0.2,0.9,0,0,0,0,0}};                                        //extra cuts fbrem and E_Over_P 
+    {0.05, 0.042, 0.045, 0.0, 0.055, 0.037, 0.05, 0.0},        //hovere
+    {0.0125, 0.011, 0.01, 0.0, 0.0295, 0.0292, 0.0283, 0.0},   //sigmaetaeta
+    {0.032, 0.016, 0.0525, 0.09, 0.025, 0.035, 0.065, 0.092},  //deltaphiin
+    {0.0055, 0.003, 0.0075, 0.0, 0.0070, 0.0055, 0.0085, 0.0}, //deltaetain
+    {0.24, 0.94, 0.11, 0.0, 0.32, 0.83, 0.0, 0.0},             //eoverp
+    {0.8,0.2,0.9,0,0,0,0,0}};                                  //extra cuts fbrem and E_Over_P 
 
   Double_t loosecuts[6][8]={
     {0.076, 0.033, 0.07, 0.0, 0.083,0.148, 0.033, 0.0},              //hovere
