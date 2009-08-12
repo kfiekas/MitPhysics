@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.30 2009/08/05 20:09:45 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.31 2009/08/11 15:16:17 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -43,7 +43,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
 //--------------------------------------------------------------------------------------------------
 Bool_t ElectronIDMod::PassCustomID(const Electron *ele) const
 {
-  // Based on RecoEgamma/ElectronIdentification/src/CutBasedElectronID.cc
+  // Based on RecoEgamma/ElectronIdentification/src/CutBasedElectronID.cc.
 
   Double_t eOverP = ele->ESuperClusterOverP();
   Double_t fBrem  = ele->FBrem();
@@ -315,7 +315,8 @@ void ElectronIDMod::SlaveBegin()
 //--------------------------------------------------------------------------------------------------
 void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
 {
-  // Set cut values based on RecoEgamma/ElectronIdentification/python/electronIdCutBasedExt_cfi.py
+  // Set cut values based on RecoEgamma/ElectronIdentification/python/electronIdCutBasedExt_cfi.py.
+  // The following changes are in sigmaetaeta for endcups and deltaetain.
 
   Double_t tightcuts[6][8]={
     {0.05, 0.042, 0.045, 0.0, 0.055, 0.037, 0.05, 0.0},        //hovere
