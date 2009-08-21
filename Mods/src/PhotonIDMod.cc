@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.7 2009/06/15 15:00:21 loizides Exp $
+// $Id: PhotonIDMod.cc,v 1.8 2009/07/21 16:35:12 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -18,7 +18,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPhotonPtMin(15.0),
   fHadOverEmMax(0.03),
   fApplyPixelSeed(kTRUE),
-  fPhotonR9Min(0.8),
+  fPhotonR9Min(0.7),
   fPhIdType(kIdUndef),
   fPhIsoType(kIsoUndef),
   fPhotons(0)
@@ -75,8 +75,13 @@ void PhotonIDMod::Process()
         isocut = kTRUE;
         break;
       case kCombinedIso:
-        isocut = ph->HollowConeTrkIsoDr04() + 
-	         ph->HcalRecHitIso() < 5.0;
+        Double_t totalIso = ph->HollowConeTrkIsoDr04()+
+                            ph->EcalRecHitIsoDr04() +
+                            ph->HcalTowerSumEtDr04();
+        if ((totalIso < (ph->Pt()-0.0)*7.0/25.0 && ph->Pt() <= 25) ||
+            (totalIso < 7.0 && ph->Pt() > 25) ||
+	     totalIso <= 0)
+          isocut = kTRUE;
         break;
       case kCustomIso:
       default:
