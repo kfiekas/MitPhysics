@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.9 2009/04/30 08:09:32 loizides Exp $
+// $Id: PhotonIDMod.h,v 1.10 2009/06/15 15:00:21 loizides Exp $
 //
 // PhotonIDMod
 //
@@ -32,6 +32,9 @@ namespace mithep
       const char         *GetIsoType()                const { return fPhotonIsoType;       }
       const char         *GetOutputName()             const { return GetGoodPhotonsName(); }   
       Double_t            GetPtMin()                  const { return fPhotonPtMin;         }
+      Bool_t              GetApplyFiduciality()       const { return fFiduciality;         }
+      Double_t            GetEtaWidthEB()	      const { return fEtaWidthEB;	   }
+      Double_t            GetEtaWidthEE()	      const { return fEtaWidthEE;	   }
       void                SetApplyPixelSeed(Bool_t b)       { fApplyPixelSeed  = b;        }
       void                SetGoodName(const char *n)        { SetGoodPhotonsName(n);       }   
       void                SetGoodPhotonsName(const char *n) { fGoodPhotonsName = n;        }   
@@ -41,7 +44,9 @@ namespace mithep
       void                SetIsoType(const char *type)      { fPhotonIsoType   = type;     }
       void                SetOutputName(const char *n)      { SetGoodPhotonsName(n);       }    
       void                SetPtMin(Double_t pt)             { fPhotonPtMin     = pt;       }
-      void                SetR9Min(Double_t x)              { fPhotonR9Min     = x;         }
+      void                SetR9Min(Double_t x)              { fPhotonR9Min     = x;        }
+      void                SetEtaWidthEB(Double_t x)	    { fEtaWidthEB      = x;	   }
+      void                SetEtaWidthEE(Double_t x)         { fEtaWidthEE      = x;	   }
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -71,6 +76,9 @@ namespace mithep
       Double_t            fPhotonR9Min;          //min R9 value
       EPhIdType           fPhIdType;             //!identification scheme
       EPhIsoType          fPhIsoType;            //!isolation scheme
+      Bool_t              fFiduciality;          //=true then apply fiducual requirement
+      Double_t            fEtaWidthEB;  	 //max Eta Width in ECAL Barrel
+      Double_t            fEtaWidthEE;  	 //max Eta Width in ECAL End Cap
       const PhotonCol    *fPhotons;              //!photon branch
     
     ClassDef(PhotonIDMod, 1) // Photon identification module

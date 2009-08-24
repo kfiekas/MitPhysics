@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.8 2009/07/21 16:35:12 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.9 2009/08/21 15:51:53 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -16,11 +16,14 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPhotonIDType("Custom"),
   fPhotonIsoType("CombinedIso"),
   fPhotonPtMin(15.0),
-  fHadOverEmMax(0.03),
+  fHadOverEmMax(0.05),
   fApplyPixelSeed(kTRUE),
-  fPhotonR9Min(0.7),
+  fPhotonR9Min(0.5),
   fPhIdType(kIdUndef),
   fPhIsoType(kIsoUndef),
+  fFiduciality(kTRUE),
+  fEtaWidthEB(0.013),
+  fEtaWidthEE(0.031),
   fPhotons(0)
 {
   // Constructor.
@@ -78,9 +81,7 @@ void PhotonIDMod::Process()
         Double_t totalIso = ph->HollowConeTrkIsoDr04()+
                             ph->EcalRecHitIsoDr04() +
                             ph->HcalTowerSumEtDr04();
-        if ((totalIso < (ph->Pt()-0.0)*7.0/25.0 && ph->Pt() <= 25) ||
-            (totalIso < 7.0 && ph->Pt() > 25) ||
-	     totalIso <= 0)
+        if (totalIso/ph->Pt() < 0.25)
           isocut = kTRUE;
         break;
       case kCustomIso:
@@ -92,6 +93,14 @@ void PhotonIDMod::Process()
       continue;
 
     if (ph->R9() <= fPhotonR9Min) 
+      continue;
+
+    if (fFiduciality == kTRUE &&
+        ph->IsEB() == kFALSE && ph->IsEE() == kFALSE) 
+      continue;
+
+    if ((ph->IsEB() == kTRUE && ph->SCluster()->EtaWidth() >= fEtaWidthEB) ||
+        (ph->IsEE() == kTRUE && ph->SCluster()->EtaWidth() >= fEtaWidthEE))
       continue;
 
     // add good electron
