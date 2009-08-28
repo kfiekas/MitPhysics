@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.21 2009/08/04 08:23:18 peveraer Exp $
+// $Id: ElectronIDMod.h,v 1.22 2009/08/05 20:09:45 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -43,6 +43,7 @@ namespace mithep
       Bool_t              GetReverseD0Cut()           const { return fReverseD0Cut;           }
       Bool_t              GetReverseIsoCut()          const { return fReverseIsoCut;          }
       Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
+      Bool_t              GetChargeFilter()           const { return fChargeFilter;           }
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
@@ -60,6 +61,7 @@ namespace mithep
       void                SetReverseD0Cut(Bool_t b)             { fReverseD0Cut = b;          }
       void                SetReverseIsoCut(Bool_t b)            { fReverseIsoCut = b;         }
       void                SetTrackIsoCut(Double_t cut)          { fTrackIsolationCut  = cut;  }
+      void                SetChargeFilter(Bool_t b)             { fChargeFilter = b;          }
 
       enum EElIdType {
         kIdUndef = 0,       //not defined
@@ -106,6 +108,7 @@ namespace mithep
       Bool_t                  fReverseD0Cut;           //apply reversion d0 cut (default=0)
       EElIdType               fElIdType;               //!identification scheme
       EElIsoType              fElIsoType;              //!isolation scheme
+      Bool_t                  fChargeFilter;           //whether apply GSF and CFT equal requirement
       const ElectronCol      *fElectrons;              //!electron collection
       const DecayParticleCol *fConversions;            //!conversion collection
       const VertexCol        *fVertices;               //!vertices branches

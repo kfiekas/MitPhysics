@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.31 2009/08/11 15:16:17 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.32 2009/08/12 07:50:31 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -33,6 +33,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fReverseD0Cut(kFALSE),
   fElIdType(kIdUndef),
   fElIsoType(kIsoUndef),
+  fChargeFilter(kTRUE),
   fElectrons(0),
   fConversions(0),
   fVertices(0)
@@ -244,10 +245,14 @@ void ElectronIDMod::Process()
       if (d0cut == kFALSE)
         continue;
     }
+    if(fChargeFilter == kTRUE &&
+       e->TrackerTrk() &&
+       e->TrackerTrk()->Charge() != e->Charge()) continue;
 
     // add good electron
     GoodElectrons->Add(e);
   }
+
 
   // sort according to pt
   GoodElectrons->Sort();
