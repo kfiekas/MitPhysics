@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.23 2009/06/15 15:00:21 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.24 2009/07/17 12:11:36 loizides Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -15,7 +15,7 @@ ClassImp(mithep::MuonIDMod)
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
-  fVertexName("PrimaryVertexesBeamSpot"),
+  fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
   fMuonIDType("Loose"),
   fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
@@ -43,7 +43,9 @@ void MuonIDMod::Process()
   // Process entries of the tree. 
 
   LoadEventObject(fMuonBranchName, fMuons);
-  LoadEventObject(fVertexName,     fVertices);
+  if (fApplyD0Cut) {
+    LoadEventObject(fVertexName,     fVertices);
+  }
 
   MuonOArr *CleanMuons = new MuonOArr;
   CleanMuons->SetName(fCleanMuonsName);

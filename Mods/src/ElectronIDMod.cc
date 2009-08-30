@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.32 2009/08/12 07:50:31 loizides Exp $
+// $Id: ElectronIDMod.cc,v 1.33 2009/08/28 13:38:00 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -100,6 +100,9 @@ void ElectronIDMod::Process()
   // Process entries of the tree. 
 
   LoadEventObject(fElectronBranchName, fElectrons);
+  if (fApplyD0Cut) {
+    LoadEventObject(fVertexName,     fVertices);
+  }
 
   ElectronOArr *GoodElectrons = new ElectronOArr;
   GoodElectrons->SetName(fGoodElectronsName);
@@ -227,7 +230,6 @@ void ElectronIDMod::Process()
 
     if (fApplyD0Cut) {
       Bool_t d0cut = kFALSE;
-      LoadBranch(fVertexName);
       // d0 cut
       Double_t d0_real = 99999;
       for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
