@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.30 2009/06/17 16:46:17 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.31 2009/06/17 20:27:44 loizides Exp $
 //
 // GeneratorMod
 //
@@ -14,6 +14,7 @@
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/MCParticleFwd.h"
+#include "MitAna/DataTree/interface/MetFwd.h"
 
 class TH1D;
 class TH2D;
@@ -25,6 +26,7 @@ namespace mithep
     public:
       GeneratorMod(const char *name="GeneratorMod", 
                    const char *title="Generator information module");
+      ~GeneratorMod();
 
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
       const char          *GetMCBosonsName()     const { return fMCBosonsName;     }
@@ -105,6 +107,17 @@ namespace mithep
       TH1D                *hDGenISRPhotons[20]; //!histos for ISR photons
       TH1D                *hDVMass[20];         //!histos for auxiliar MG work
       TH1D                *hDVVMass[50];        //!histos for auxiliar VV work
+
+      MCParticleArr       *fGenLeptons;
+      MCParticleArr       *fGenAllLeptons;
+      MCParticleArr       *fGenTaus;      
+      MCParticleArr       *fGenNeutrinos; 
+      MCParticleArr       *fGenQuarks;    
+      MCParticleArr       *fGenqqHs;      
+      MCParticleArr       *fGenBosons;    
+      MCParticleArr       *fGenPhotons;   
+      MCParticleArr       *fGenRadPhotons;
+      MCParticleArr       *fGenISRPhotons;
 
     ClassDef(GeneratorMod, 1) // Module to gather generator information
   };
