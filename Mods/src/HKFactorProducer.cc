@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.3 2009/06/15 15:00:21 loizides Exp $
+// $Id: HKFactorProducer.cc,v 1.4 2009/09/03 07:08:33 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -79,7 +79,7 @@ void HKFactorProducer::Process()
     }
   }
   // process id distribution
-  if (GetFillHist()) hDHKFactor[4]->Fill(TMath::Min(fMCEventInfo->ProcessId(),999.499));
+  if (GetFillHist()) hDHKFactor[4]->Fill(TMath::Min((Double_t)fMCEventInfo->ProcessId(),999.499));
 
   TParameter<Double_t> *NNLOWeight = new TParameter<Double_t>("NNLOWeight", theWeight);
   AddObjThisEvt(NNLOWeight);
