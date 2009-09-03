@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.33 2009/08/28 13:38:00 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.34 2009/08/30 10:36:49 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -154,9 +154,8 @@ void ElectronIDMod::Process()
       case kTrackJuraSliding:
         {
           Double_t totalIso = e->TrackIsolationDr03() + e->EcalRecHitIsoDr04() - 1.5;
-          if ((totalIso < (e->Pt()-10.0)*5.0/15.0 && e->Pt() <= 25) ||
-              (totalIso < 5.0 && e->Pt() > 25) ||
-	       totalIso <= 0)
+          if (totalIso < (e->Pt()-10.0)*4.5/20.0 ||
+	      totalIso <= 0)
             isocut = kTRUE;
         
 	  if     (fReverseIsoCut == kTRUE &&
@@ -329,7 +328,7 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
     {0.05, 0.042, 0.045, 0.0, 0.055, 0.037, 0.05, 0.0},        //hovere
     {0.0125, 0.011, 0.01, 0.0, 0.0295, 0.0292, 0.0283, 0.0},   //sigmaetaeta
     {0.032, 0.016, 0.0525, 0.09, 0.025, 0.035, 0.065, 0.092},  //deltaphiin
-    {0.0055, 0.003, 0.0075, 0.0, 0.0070, 0.0055, 0.0085, 0.0}, //deltaetain
+    {0.0055, 0.0024, 0.0065, 0.0, 0.0070, 0.0055, 0.0085, 0.0}, //deltaetain
     {0.24, 0.94, 0.11, 0.0, 0.32, 0.83, 0.0, 0.0},             //eoverp
     {0.8,0.2,0.9,0,0,0,0,0}};                                  //extra cuts fbrem and E_Over_P 
 

@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.47 2009/07/15 06:42:01 phedex Exp $
+// $Id: GeneratorMod.cc,v 1.48 2009/08/31 06:40:15 sixie Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -134,16 +134,19 @@ void GeneratorMod::Process()
     if(fPrintDebug) 
       p->Print("l");
 
-    // rad photons
-    if(p->Is(MCParticle::kGamma) && p->HasMother() && p->Mother()->Status() == 3 &&
-       (p->Mother()->Is(MCParticle::kEl) || p->Mother()->Is(MCParticle::kMu) ||
-        p->Mother()->Is(MCParticle::kTau)) &&
-       p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax) {
+    // rad photons, includes gamma from WWGamma vertex.
+    if( p->Is(MCParticle::kGamma) && p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax && 
+        p->DistinctMother() &&
+       (p->DistinctMother()->Is(MCParticle::kEl)  || p->DistinctMother()->Is(MCParticle::kMu) ||
+        p->DistinctMother()->Is(MCParticle::kTau) || p->DistinctMother()->Is(MCParticle::kW))
+      ) {
       GenRadPhotons->Add(p);
     }
 
     // ISR photons
-    if(p->Is(MCParticle::kGamma) && p->HasMother() && p->Mother()->IsQuark()) {
+    if( p->Is(MCParticle::kGamma) && p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax &&
+        p->DistinctMother() && p->DistinctMother()->IsParton()
+      ) {
       GenISRPhotons->Add(p);
     }
 
@@ -227,10 +230,12 @@ void GeneratorMod::Process()
     }
 
     // information about bosons: W, Z, h, Z', W', H0, A0, H+
-    else if (p->Status() == 3 &&
-             (p->Is(MCParticle::kZ)  || p->Is(MCParticle::kW)   || p->Is(MCParticle::kH) ||
-              p->Is(MCParticle::kZp) || p->Is(MCParticle::kZpp) ||
-              p->Is(MCParticle::kH0) || p->Is(MCParticle::kA0)  || p->Is(MCParticle::kHp))) {
+    else if ((p->Status() == 3 &&
+             (p->Is(MCParticle::kZ)    || p->Is(MCParticle::kW)   || p->Is(MCParticle::kH) ||
+              p->Is(MCParticle::kZp)   || p->Is(MCParticle::kZpp) ||
+              p->Is(MCParticle::kH0)   || p->Is(MCParticle::kA0)  || p->Is(MCParticle::kHp))) ||
+	     (p->Status() == 2 &&
+	     (p->Is(MCParticle::kJPsi) || p->Is(MCParticle::kUpsilon)))) {
       GenBosons->Add(p);
       if     (p->Is(MCParticle::kW)) sumV[0]++;
       else if(p->Is(MCParticle::kZ)) sumV[1]++;
@@ -1167,15 +1172,16 @@ void GeneratorMod::Process()
     hDGenAllLeptons[0]->Fill(GenAllLeptons->GetEntries());
     for(UInt_t i=0; i<GenAllLeptons->GetEntries(); i++) {
       hDGenAllLeptons[1]->Fill(GenAllLeptons->At(i)->Pt());
-      hDGenAllLeptons[2]->Fill(GenAllLeptons->At(i)->Eta());
+      hDGenAllLeptons[2]->Fill(GenAllLeptons->At(i)->AbsEta());
       hDGenAllLeptons[3]->Fill(GenAllLeptons->At(i)->PhiDeg());
     }
+    if(GenAllLeptons->GetEntries() >= 2) hDGenAllLeptons[4]->Fill(GenAllLeptons->At(1)->Pt());
 
     // taus
     hDGenTaus[0]->Fill(GenTaus->GetEntries());
     for(UInt_t i=0; i<GenTaus->GetEntries(); i++) {
       hDGenTaus[1]->Fill(GenTaus->At(i)->Pt());
-      hDGenTaus[2]->Fill(GenTaus->At(i)->Eta());
+      hDGenTaus[2]->Fill(GenTaus->At(i)->AbsEta());
       hDGenTaus[3]->Fill(GenTaus->At(i)->PhiDeg());
     }
 
@@ -1188,7 +1194,7 @@ void GeneratorMod::Process()
     }
     if (GenNeutrinos->GetEntries() > 0) {
       hDGenNeutrinos[1]->Fill(neutrinoTotal->Pt());
-      hDGenNeutrinos[2]->Fill(neutrinoTotal->Eta());
+      hDGenNeutrinos[2]->Fill(neutrinoTotal->AbsEta());
       hDGenNeutrinos[3]->Fill(neutrinoTotal->PhiDeg());    
     }
     delete neutrinoTotal;
@@ -1285,12 +1291,15 @@ void GeneratorMod::Process()
                                           19.499));
       hDGenRadPhotons[4]->Fill(GenRadPhotons->At(i)->IsGenerated() + 
                                2*GenRadPhotons->At(i)->IsSimulated());
-      hDGenRadPhotons[5]->Fill(TMath::Min(
+      if(GenRadPhotons->At(i)->DistinctMother()){
+        hDGenRadPhotons[5]->Fill(TMath::Min(
                                  MathUtils::DeltaR(*GenRadPhotons->At(i),
-                                                   *GenRadPhotons->At(i)->Mother()),
+                                                   *GenRadPhotons->At(i)->DistinctMother()),
                                  4.999));
+      }
       Int_t Mother = 0;
-      if(GenRadPhotons->At(i)->Mother()->Is(MCParticle::kMu)) Mother = 1;
+      if(GenRadPhotons->At(i)->DistinctMother() &&
+         GenRadPhotons->At(i)->DistinctMother()->Is(MCParticle::kMu)) Mother = 1;
       hDGenRadPhotons[6]->Fill(Mother);
     }
 
@@ -1309,9 +1318,9 @@ void GeneratorMod::Process()
     }
   }
 
-  // Apply ISR filter (but filling all histograms)
-  if(fApplyISRFilter == kTRUE && GenISRPhotons->GetEntries() > 0 &&
-     GenISRPhotons->At(0)->Pt() > 15.0){
+  // Apply ISR+Rad filter (but filling all histograms)
+  if(fApplyISRFilter == kTRUE &&
+    (GenISRPhotons->GetEntries() > 0 || GenRadPhotons->GetEntries() > 0)){
     SkipEvent();
   }
 }
@@ -1394,9 +1403,10 @@ void GeneratorMod::SlaveBegin()
     // all leptons
     AddTH1(hDGenAllLeptons[0], "hDGenAllLeptons_0",
            "Number of all leptons;N_{leptons};#",10,-0.5,9.5); 
-    AddTH1(hDGenAllLeptons[1], "hDGenAllLeptons_1","Pt all leptons;p_{t} [GeV];#",100,0.0,200.0); 
+    AddTH1(hDGenAllLeptons[1], "hDGenAllLeptons_1","Pt all leptons;p_{t} [GeV];#",400,0.0,200.0); 
     AddTH1(hDGenAllLeptons[2], "hDGenAllLeptons_2","Eta all leptons;#eta;#",50,0.0,5.0); 
     AddTH1(hDGenAllLeptons[3], "hDGenAllLeptons_3","Phi all leptons;#phi;#",90,0.0,180.0); 
+    AddTH1(hDGenAllLeptons[4], "hDGenAllLeptons_4","Pt second lepton;p_{t} [GeV];#",400,0.0,200.0); 
 
     // taus
     AddTH1(hDGenTaus[0], "hDGenTaus_0","Number of taus;N_{tau};#",10,-0.5,9.5); 
@@ -1407,7 +1417,7 @@ void GeneratorMod::SlaveBegin()
     // neutrinos
     AddTH1(hDGenNeutrinos[0], "hDGenNeutrinos_0","Number of neutrinos;N_{#nu};#",10,-0.5,9.5); 
     AddTH1(hDGenNeutrinos[1], "hDGenNeutrinos_1","Pt neutrinos;p_{t} [GeV];#",100,0.0,200.0);
-    AddTH1(hDGenNeutrinos[2], "hDGenNeutrinos_2","Eta neutrinos;#eta;#",100,-5.0,5.0); 
+    AddTH1(hDGenNeutrinos[2], "hDGenNeutrinos_2","Eta neutrinos;#eta;#",50,0.0,5.0); 
     AddTH1(hDGenNeutrinos[3], "hDGenNeutrinos_3","Phi neutrinos;#phi;#",90,0.0,180.0); 
 
     // quarks
@@ -1453,7 +1463,7 @@ void GeneratorMod::SlaveBegin()
     AddTH1(hDGenBosons[0], "hDGenBosons_0", "Number of bosons;N_{bosons};#",10,-0.5,9.5); 
     AddTH1(hDGenBosons[1], "hDGenBosons_1", "Pt of bosons;p_{t} [GeV];#",200,0.0,400.0); 
     AddTH1(hDGenBosons[2], "hDGenBosons_2", "Eta of bosons;#eta;#",100,-5.0,5.0); 
-    AddTH1(hDGenBosons[3], "hDGenBosons_3", "Phi of bosons;#phi;#",2000,0.0,2000.0);
+    AddTH1(hDGenBosons[3], "hDGenBosons_3", "Mass of bosons;Mass;#",2000,0.0,2000.0);
     AddTH1(hDGenBosons[4], "hDGenBosons_4", "Mass of bosons;m_{V};#",200,0.0,200.0);
     AddTH1(hDGenBosons[5], "hDGenBosons_5", "Mass of W bosons;m_{W};#",200,0.0,200.0);
     AddTH1(hDGenBosons[6], "hDGenBosons_6", "Mass of Z bosons;m_{Z};#",200,0.0,200.0);
@@ -1473,7 +1483,7 @@ void GeneratorMod::SlaveBegin()
     AddTH1(hDGenRadPhotons[2], "hDGenRadPhotons_2", 
            "Eta of radiative photons;#eta;#",100,0.0,5.0); 
     AddTH1(hDGenRadPhotons[3], "hDGenRadPhotons_3", 
-           "Status of mother of radiative photons;#eta;#",20,-0.5,19.5); 
+           "Status of mother of radiative photons;Status;#",20,-0.5,19.5); 
     AddTH1(hDGenRadPhotons[4], "hDGenRadPhotons_4", 
            "IsGenerated+2*IsSimulated of radiative photons;IsGenerated+2*IsSimulated;#",
            4,-0.5,3.5); 
