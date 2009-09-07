@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.48 2009/08/31 06:40:15 sixie Exp $
+// $Id: GeneratorMod.cc,v 1.49 2009/09/03 07:05:52 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -135,7 +135,8 @@ void GeneratorMod::Process()
       p->Print("l");
 
     // rad photons, includes gamma from WWGamma vertex.
-    if( p->Is(MCParticle::kGamma) && p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax && 
+    if( p->Is(MCParticle::kGamma) && p->Status() == 1 && 
+        p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax && 
         p->DistinctMother() &&
        (p->DistinctMother()->Is(MCParticle::kEl)  || p->DistinctMother()->Is(MCParticle::kMu) ||
         p->DistinctMother()->Is(MCParticle::kTau) || p->DistinctMother()->Is(MCParticle::kW))
@@ -144,7 +145,8 @@ void GeneratorMod::Process()
     }
 
     // ISR photons
-    if( p->Is(MCParticle::kGamma) && p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax &&
+    if( p->Is(MCParticle::kGamma) && p->Status() == 1 && 
+        p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax &&
         p->DistinctMother() && p->DistinctMother()->IsParton()
       ) {
       GenISRPhotons->Add(p);
