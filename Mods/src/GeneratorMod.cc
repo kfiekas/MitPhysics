@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.49 2009/09/03 07:05:52 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.50 2009/09/07 13:23:04 phedex Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -135,13 +135,16 @@ void GeneratorMod::Process()
       p->Print("l");
 
     // rad photons, includes gamma from WWGamma vertex.
-    if( p->Is(MCParticle::kGamma) && p->Status() == 1 && 
-        p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax && 
-        p->DistinctMother() &&
+    if( p->Is(MCParticle::kGamma) && p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax && 
+        p->DistinctMother() && p->DistinctMother()->Status() == 3 &&
        (p->DistinctMother()->Is(MCParticle::kEl)  || p->DistinctMother()->Is(MCParticle::kMu) ||
         p->DistinctMother()->Is(MCParticle::kTau) || p->DistinctMother()->Is(MCParticle::kW))
       ) {
-      GenRadPhotons->Add(p);
+      CompositeParticle *object = new CompositeParticle();
+      object->AddDaughter(p);
+      object->AddDaughter(p->DistinctMother());
+      if(object->Mass() > 1.0) GenRadPhotons->Add(p);
+      delete object;
     }
 
     // ISR photons
@@ -1273,8 +1276,8 @@ void GeneratorMod::Process()
       if(GenBosons->At(i)->Is(MCParticle::kZ))
         hDGenBosons[6]->Fill(TMath::Min(GenBosons->At(i)->Mass(),199.999));
     }
-    if(sumV[0] >= 4) printf("More than 3 W bosons (%d)\n",sumV[0]);
-    if(sumV[1] >= 4) printf("More than 3 Z bosons (%d)\n",sumV[1]);
+    //if(sumV[0] >= 4) printf("More than 3 W bosons (%d)\n",sumV[0]);
+    //if(sumV[1] >= 4) printf("More than 3 Z bosons (%d)\n",sumV[1]);
     hDGenBosons[7]->Fill(TMath::Min((double)(sumV[0] + 4*sumV[1]),12.4999));
 
     // photons
@@ -1289,7 +1292,7 @@ void GeneratorMod::Process()
     for(UInt_t i=0; i<GenRadPhotons->GetEntries(); i++) {
       hDGenRadPhotons[1]->Fill(TMath::Min(GenRadPhotons->At(i)->Pt(),199.999));
       hDGenRadPhotons[2]->Fill(TMath::Min(GenRadPhotons->At(i)->AbsEta(),4.999));
-      hDGenRadPhotons[3]->Fill(TMath::Min((double)GenRadPhotons->At(i)->Mother()->Status(),
+      hDGenRadPhotons[3]->Fill(TMath::Min((double)GenRadPhotons->At(i)->DistinctMother()->Status(),
                                           19.499));
       hDGenRadPhotons[4]->Fill(GenRadPhotons->At(i)->IsGenerated() + 
                                2*GenRadPhotons->At(i)->IsSimulated());
@@ -1298,11 +1301,16 @@ void GeneratorMod::Process()
                                  MathUtils::DeltaR(*GenRadPhotons->At(i),
                                                    *GenRadPhotons->At(i)->DistinctMother()),
                                  4.999));
+        CompositeParticle *object = new CompositeParticle();
+        object->AddDaughter(GenRadPhotons->At(i));
+        object->AddDaughter(GenRadPhotons->At(i)->DistinctMother());
+        hDGenRadPhotons[6]->Fill(TMath::Min(object->Mass(),99.999));
+        delete object;
       }
       Int_t Mother = 0;
       if(GenRadPhotons->At(i)->DistinctMother() &&
          GenRadPhotons->At(i)->DistinctMother()->Is(MCParticle::kMu)) Mother = 1;
-      hDGenRadPhotons[6]->Fill(Mother);
+      hDGenRadPhotons[7]->Fill(Mother);
     }
 
     // ISR photons
@@ -1310,13 +1318,20 @@ void GeneratorMod::Process()
     for(UInt_t i=0; i<GenISRPhotons->GetEntries(); i++) {
       hDGenISRPhotons[1]->Fill(TMath::Min(GenISRPhotons->At(i)->Pt(),199.999));
       hDGenISRPhotons[2]->Fill(TMath::Min(GenISRPhotons->At(i)->AbsEta(),4.999));
-      hDGenISRPhotons[3]->Fill(TMath::Min((Double_t)GenISRPhotons->At(i)->Mother()->Status(),
+      hDGenISRPhotons[3]->Fill(TMath::Min((Double_t)GenISRPhotons->At(i)->DistinctMother()->Status(),
                                           19.499));
       hDGenISRPhotons[4]->Fill(GenISRPhotons->At(i)->IsGenerated() + 
                                2*GenISRPhotons->At(i)->IsSimulated());
-      hDGenISRPhotons[5]->Fill(TMath::Min(
-                               MathUtils::DeltaR(*GenISRPhotons->At(i),
-                                                 *GenISRPhotons->At(i)->Mother()),4.999));
+      if(GenISRPhotons->At(i)->DistinctMother()){
+      	hDGenISRPhotons[5]->Fill(TMath::Min(
+      				 MathUtils::DeltaR(*GenISRPhotons->At(i),
+      						   *GenISRPhotons->At(i)->DistinctMother()),4.999));
+      	CompositeParticle *object = new CompositeParticle();
+      	object->AddDaughter(GenISRPhotons->At(i));
+      	object->AddDaughter(GenISRPhotons->At(i)->DistinctMother());
+      	hDGenISRPhotons[6]->Fill(TMath::Min(object->Mass(),99.999));
+      	delete object;
+      }
     }
   }
 
@@ -1492,6 +1507,8 @@ void GeneratorMod::SlaveBegin()
     AddTH1(hDGenRadPhotons[5], "hDGenRadPhotons_5", 
            "Delta R between photon and mother of radiative photons;#Delta R;#",500,0.0,5.0); 
     AddTH1(hDGenRadPhotons[6], "hDGenRadPhotons_6", 
+           "Mass photon-photon mother;Mass;#",500,0.0,100.0); 
+    AddTH1(hDGenRadPhotons[7], "hDGenRadPhotons_7", 
            "Number of radiative photon with muon as a mother;Status;#",2,-0.5,1.5); 
 
     //  ISR photons
@@ -1508,6 +1525,8 @@ void GeneratorMod::SlaveBegin()
            4,-0.5,3.5); 
     AddTH1(hDGenISRPhotons[5], "hDGenISRPhotons_5", 
            "Delta R between photon and mother of ISR photons;#Delta R;#",500,0.0,5.0); 
+    AddTH1(hDGenISRPhotons[6], "hDGenISRPhotons_6", 
+           "Mass photon-photon mother;Mass;#",500,0.0,100.0); 
 
     // auxiliar for MG studies
     AddTH1(hDVMass[0], "hDVMass_0", "Mass of munu candidates  ;Mass [GeV];#",200,0.,200.);
