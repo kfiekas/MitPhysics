@@ -87,7 +87,7 @@ void CaloMetCorrectionMod::Process()
     met->SetMey(inMet->Mey()+deltaPy);
     met->SetSumEt(inMet->SumEt()+deltaSumEt);
 
-    if (1) {
+    if (0) {
       UInt_t corSize = inMet->Dmex().GetEntries();
       if (corSize>0) {
         printf("inMet Dmex = %5f, outMet Dmex= %5f\n",inMet->Dmex().At(corSize-1),deltaPx);
