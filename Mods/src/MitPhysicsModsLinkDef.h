@@ -2,6 +2,7 @@
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
+#include "MitPhysics/Mods/interface/CaloMetCorrectionMod.h"
 #include "MitPhysics/Mods/interface/EffMod.h"
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
@@ -28,6 +29,7 @@
 #pragma link C++ nestedtypedef;
 #pragma link C++ namespace mithep;
 
+#pragma link C++ class mithep::CaloMetCorrectionMod+;
 #pragma link C++ class mithep::EffMod+;
 #pragma link C++ class mithep::ElectronCleaningMod+;
 #pragma link C++ class mithep::ElectronIDMod+;
