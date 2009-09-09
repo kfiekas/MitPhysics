@@ -59,8 +59,8 @@ void JetCorrectionMod::Process()
   for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
     const Jet *inJet = inJets->At(i);
 
-    //copy input jet
-    Jet *jet = new Jet(*inJet);
+    //copy input jet, using special function to copy full derived class
+    Jet *jet = inJet->MakeCopy();
 
     //cache uncorrected momentum
     const FourVectorM rawMom = jet->RawMom();
