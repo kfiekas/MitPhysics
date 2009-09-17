@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.50 2009/09/07 13:23:04 phedex Exp $
+// $Id: GeneratorMod.cc,v 1.51 2009/09/08 08:30:21 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -135,7 +135,8 @@ void GeneratorMod::Process()
       p->Print("l");
 
     // rad photons, includes gamma from WWGamma vertex.
-    if( p->Is(MCParticle::kGamma) && p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax && 
+    if( p->Is(MCParticle::kGamma) && p->Status() == 1 && 
+        p->Pt() > fPtRadPhotonMin && p->AbsEta() < fEtaRadPhotonMax && 
         p->DistinctMother() && p->DistinctMother()->Status() == 3 &&
        (p->DistinctMother()->Is(MCParticle::kEl)  || p->DistinctMother()->Is(MCParticle::kMu) ||
         p->DistinctMother()->Is(MCParticle::kTau) || p->DistinctMother()->Is(MCParticle::kW))
