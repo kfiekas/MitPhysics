@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.34 2009/08/30 10:36:49 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.35 2009/09/03 07:05:51 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -194,7 +194,7 @@ void ElectronIDMod::Process()
 
         // if match between the e-track and one of the conversion legs
         if (ConversionMatchFound == kTRUE){
-          isGoodConversion =  (fConversions->At(ifc)->Prob() > 0.0005) &&
+          isGoodConversion =  (fConversions->At(ifc)->Prob() > 1e-6) &&
                               (fConversions->At(ifc)->Lxy() > 0) &&
                               (fConversions->At(ifc)->Lz() > 0);
 
@@ -205,7 +205,7 @@ void ElectronIDMod::Process()
             	      
               if (trk) {
                 // These requirements are not used for the GSF track
-            	if (!(trk->NHits() > 8 && trk->Prob() > 0.005) && trk!=e->GsfTrk())
+            	if (!(trk->NHits() >= 3 && trk->Prob() > 1e-6) && trk!=e->GsfTrk())
             	  isGoodConversion = kFALSE;
               
             	const StableData *sd = dynamic_cast<const StableData*>
