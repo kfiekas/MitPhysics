@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.35 2009/09/03 07:05:51 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.36 2009/09/21 15:43:46 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -196,7 +196,8 @@ void ElectronIDMod::Process()
         if (ConversionMatchFound == kTRUE){
           isGoodConversion =  (fConversions->At(ifc)->Prob() > 1e-6) &&
                               (fConversions->At(ifc)->Lxy() > 0) &&
-                              (fConversions->At(ifc)->Lz() > 0);
+                              (fConversions->At(ifc)->Lz() > 0) &&
+                              (fConversions->At(ifc)->Position().Rho() > 2.0);
 
           if (isGoodConversion == kTRUE) {
 	    for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
