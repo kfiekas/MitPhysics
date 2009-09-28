@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.36 2009/09/21 15:43:46 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.37 2009/09/22 17:28:38 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -27,6 +27,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fEcalJuraIsoCut(5.0),
   fHcalIsolationCut(5.0),
   fApplyConvFilter(kTRUE),
+  fWrongHitsRequirement(kTRUE),
   fApplyD0Cut(kTRUE),
   fD0Cut(0.025),
   fReverseIsoCut(kFALSE),
@@ -211,7 +212,7 @@ void ElectronIDMod::Process()
               
             	const StableData *sd = dynamic_cast<const StableData*>
 		                  (fConversions->At(ifc)->DaughterDat(d));
-            	if (sd->NWrongHits() != 0)
+            	if (fWrongHitsRequirement && sd->NWrongHits() != 0)
             	  isGoodConversion = kFALSE;
               
               } else {

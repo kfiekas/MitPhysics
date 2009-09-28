@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.22 2009/08/05 20:09:45 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.23 2009/08/28 13:38:00 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -62,6 +62,7 @@ namespace mithep
       void                SetReverseIsoCut(Bool_t b)            { fReverseIsoCut = b;         }
       void                SetTrackIsoCut(Double_t cut)          { fTrackIsolationCut  = cut;  }
       void                SetChargeFilter(Bool_t b)             { fChargeFilter = b;          }
+      void                SetWrongHitsRequirement(Bool_t b)     { fWrongHitsRequirement = b;  }
 
       enum EElIdType {
         kIdUndef = 0,       //not defined
@@ -102,6 +103,7 @@ namespace mithep
       Double_t                fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
       Double_t                fHcalIsolationCut;       //cut value for hcal isolation
       Bool_t                  fApplyConvFilter;        //whether remove conversions
+      Bool_t                  fWrongHitsRequirement;   //whether to use wrong hits req for conversion removal
       Bool_t                  fApplyD0Cut;             //whether apply d0 cut
       Double_t                fD0Cut;                  //max d0
       Bool_t                  fReverseIsoCut;          //apply reversion iso cut (default=0)
