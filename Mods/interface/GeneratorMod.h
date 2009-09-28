@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.31 2009/06/17 20:27:44 loizides Exp $
+// $Id: GeneratorMod.h,v 1.32 2009/08/31 06:39:22 sixie Exp $
 //
 // GeneratorMod
 //
@@ -28,6 +28,8 @@ namespace mithep
                    const char *title="Generator information module");
       ~GeneratorMod();
 
+      Bool_t               GetApplyISRFilter()   const { return fApplyISRFilter;   }
+      const Bool_t         GetCopyArrays()	 const { return fCopyArrays;       }	
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
       const char          *GetMCBosonsName()     const { return fMCBosonsName;     }
       const char          *GetMCISRPhotonsName() const { return fMCISRPhotonsName; }	
@@ -41,8 +43,8 @@ namespace mithep
       const char          *GetMCTausName()	 const { return fMCTausName;       }	
       const char          *GetMCqqHsName()	 const { return fMCqqHsName;       }	
       const Bool_t         GetPrintDebug()	 const { return fPrintDebug;       }	
-      Bool_t               GetApplyISRFilter()   const { return fApplyISRFilter;   }
       void                 SetApplyISRFilter(Bool_t b)	       { fApplyISRFilter   = b; }	 
+      void                 SetCopyArrays(Bool_t b)	       { fCopyArrays       = b; }	 
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
       void                 SetEtaRadPhotonMax(Double_t x)      { fEtaRadPhotonMax  = x; }	  
@@ -70,7 +72,8 @@ namespace mithep
       void                 Process();
       void                 SlaveBegin();
 
-      Bool_t               fPrintDebug;         //=true then print debug info
+      Bool_t               fPrintDebug;         //=true then print debug info (def=0)
+      Bool_t               fCopyArrays;         //=true then copy array content for skimming  (def=0)
       TString              fMCPartName;         //name of MCParticle branch
       TString              fMCMETName;          //name of met coll
       TString              fMCLeptonsName;      //name of lepton coll (from W/Z/H)
@@ -107,17 +110,16 @@ namespace mithep
       TH1D                *hDGenISRPhotons[20]; //!histos for ISR photons
       TH1D                *hDVMass[20];         //!histos for auxiliar MG work
       TH1D                *hDVVMass[50];        //!histos for auxiliar VV work
-
-      MCParticleArr       *fGenLeptons;
-      MCParticleArr       *fGenAllLeptons;
-      MCParticleArr       *fGenTaus;      
-      MCParticleArr       *fGenNeutrinos; 
-      MCParticleArr       *fGenQuarks;    
-      MCParticleArr       *fGenqqHs;      
-      MCParticleArr       *fGenBosons;    
-      MCParticleArr       *fGenPhotons;   
-      MCParticleArr       *fGenRadPhotons;
-      MCParticleArr       *fGenISRPhotons;
+      MCParticleArr       *fGenLeptons;         //!copied owning array for skimming
+      MCParticleArr       *fGenAllLeptons;      //!copied owning array for skimming
+      MCParticleArr       *fGenTaus;            //!copied owning array for skimming
+      MCParticleArr       *fGenNeutrinos;       //!copied owning array for skimming
+      MCParticleArr       *fGenQuarks;          //!copied owning array for skimming
+      MCParticleArr       *fGenqqHs;            //!copied owning array for skimming
+      MCParticleArr       *fGenBosons;          //!copied owning array for skimming
+      MCParticleArr       *fGenPhotons;         //!copied owning array for skimming
+      MCParticleArr       *fGenRadPhotons;      //!copied owning array for skimming
+      MCParticleArr       *fGenISRPhotons;      //!copied owning array for skimming
 
     ClassDef(GeneratorMod, 1) // Module to gather generator information
   };
