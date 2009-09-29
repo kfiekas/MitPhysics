@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.23 2009/08/28 13:38:00 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.24 2009/09/28 18:05:05 bendavid Exp $
 //
 // ElectronIDMod
 //
@@ -105,12 +105,12 @@ namespace mithep
       Bool_t                  fApplyConvFilter;        //whether remove conversions
       Bool_t                  fWrongHitsRequirement;   //whether to use wrong hits req for conversion removal
       Bool_t                  fApplyD0Cut;             //whether apply d0 cut
+      Bool_t                  fChargeFilter;           //whether apply GSF and CFT equal requirement
       Double_t                fD0Cut;                  //max d0
       Bool_t                  fReverseIsoCut;          //apply reversion iso cut (default=0)
       Bool_t                  fReverseD0Cut;           //apply reversion d0 cut (default=0)
       EElIdType               fElIdType;               //!identification scheme
       EElIsoType              fElIsoType;              //!isolation scheme
-      Bool_t                  fChargeFilter;           //whether apply GSF and CFT equal requirement
       const ElectronCol      *fElectrons;              //!electron collection
       const DecayParticleCol *fConversions;            //!conversion collection
       const VertexCol        *fVertices;               //!vertices branches

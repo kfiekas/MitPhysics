@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.37 2009/09/22 17:28:38 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.38 2009/09/28 18:05:05 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -29,12 +29,12 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyConvFilter(kTRUE),
   fWrongHitsRequirement(kTRUE),
   fApplyD0Cut(kTRUE),
+  fChargeFilter(kTRUE),
   fD0Cut(0.025),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
   fElIdType(kIdUndef),
   fElIsoType(kIsoUndef),
-  fChargeFilter(kTRUE),
   fElectrons(0),
   fConversions(0),
   fVertices(0)
@@ -327,20 +327,20 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
   // The following changes are in sigmaetaeta for endcups and deltaetain.
 
   Double_t tightcuts[6][8]={
-    {0.05, 0.042, 0.045, 0.0, 0.055, 0.037, 0.05, 0.0},        //hovere
-    {0.0125, 0.011, 0.01, 0.0, 0.0295, 0.0292, 0.0283, 0.0},   //sigmaetaeta
-    {0.032, 0.016, 0.0525, 0.09, 0.025, 0.035, 0.065, 0.092},  //deltaphiin
+    {0.05, 0.042, 0.045, 0.0, 0.055, 0.037, 0.05, 0.0},         //hovere
+    {0.0125, 0.011, 0.01, 0.0, 0.0295, 0.0292, 0.0283, 0.0},    //sigmaetaeta
+    {0.032, 0.016, 0.0525, 0.09, 0.025, 0.035, 0.065, 0.092},   //deltaphiin
     {0.0055, 0.0024, 0.0065, 0.0, 0.0070, 0.0055, 0.0085, 0.0}, //deltaetain
-    {0.24, 0.94, 0.11, 0.0, 0.32, 0.83, 0.0, 0.0},             //eoverp
-    {0.8,0.2,0.9,0,0,0,0,0}};                                  //extra cuts fbrem and E_Over_P 
+    {0.24, 0.94, 0.11, 0.0, 0.32, 0.83, 0.0, 0.0},              //eoverp
+    {0.8,0.2,0.9,0,0,0,0,0}};                                   //extra cuts fbrem and E_Over_P 
 
   Double_t loosecuts[6][8]={
-    {0.076, 0.033, 0.07, 0.0, 0.083,0.148, 0.033, 0.0},              //hovere
-    {0.0101, 0.0095, 0.0097, 0.0, 0.03, 0.03, 0.03, 0.0},            //sigmaetaeta
-    {0.053, 0.0189, 0.059, 0.099, 0.0278,0.0157, 0.042, 0.080},      //deltaphiin
-    {0.0078, 0.00259, 0.0062, 0.0, 0.0078,0.0061, 0.0061, 0.0},      //deltaetain
-    {0.3, 0.92, 0.211, 0.0, 0.42, 0.88, 0.68, 0.0},                  //eoverp
-    {0.8,0.2,0,0,0,0,0,0}};                                          //extra cuts fbrem and E_Over_P 
+    {0.076, 0.033, 0.07, 0.0, 0.083,0.148, 0.033, 0.0},         //hovere
+    {0.0101, 0.0095, 0.0097, 0.0, 0.03, 0.03, 0.03, 0.0},       //sigmaetaeta
+    {0.053, 0.0189, 0.059, 0.099, 0.0278,0.0157, 0.042, 0.080}, //deltaphiin
+    {0.0078, 0.00259, 0.0062, 0.0, 0.0078,0.0061, 0.0061, 0.0}, //deltaetain
+    {0.3, 0.92, 0.211, 0.0, 0.42, 0.88, 0.68, 0.0},             //eoverp
+    {0.8,0.2,0,0,0,0,0,0}};                                     //extra cuts fbrem and E_Over_P 
 
   switch (idt) {
     case kCustomIdTight:    
@@ -354,4 +354,3 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
       break;
   }
 }
-
