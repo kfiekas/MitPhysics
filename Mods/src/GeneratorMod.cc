@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.52 2009/09/17 14:58:11 sixie Exp $
+// $Id: GeneratorMod.cc,v 1.53 2009/09/28 14:32:28 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -81,8 +81,6 @@ GeneratorMod::~GeneratorMod()
   delete fGenRadPhotons;
   delete fGenISRPhotons;
 }
-
-
 
 //--------------------------------------------------------------------------------------------------
 void GeneratorMod::Process()
@@ -922,6 +920,56 @@ void GeneratorMod::Process()
   AddObjThisEvt(GenRadPhotons);
   AddObjThisEvt(GenISRPhotons);
 
+  // --------------------------------
+  // Copy these Collections into the Arrays for Publication for Output Module
+  // --------------------------------
+  fGenLeptons->Delete();
+  fGenAllLeptons->Delete();
+  fGenTaus->Delete();
+  fGenNeutrinos->Delete();
+  fGenQuarks->Delete();
+  fGenqqHs->Delete();
+  fGenBosons->Delete();
+  fGenPhotons->Delete();
+  fGenRadPhotons->Delete();
+  fGenISRPhotons->Delete();
+
+  for (UInt_t i=0; i < GenLeptons->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenLeptons->Allocate();
+    new (genParticle) mithep::MCParticle(GenLeptons->At(i)->Px(),GenLeptons->At(i)->Py(),
+                                         GenLeptons->At(i)->Pz(),GenLeptons->At(i)->E(),
+                                         GenLeptons->At(i)->PdgId(),GenLeptons->At(i)->Status());
+  }
+  for (UInt_t i=0; i < GenAllLeptons->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenAllLeptons->Allocate();
+    new (genParticle) mithep::MCParticle(GenAllLeptons->At(i)->Px(),GenAllLeptons->At(i)->Py(),
+                                         GenAllLeptons->At(i)->Pz(),GenAllLeptons->At(i)->E(),
+                                         GenAllLeptons->At(i)->PdgId(),GenAllLeptons->At(i)->Status());
+  }
+  for (UInt_t i=0; i < GenTaus->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenTaus->Allocate();
+    new (genParticle) mithep::MCParticle(GenTaus->At(i)->Px(),GenTaus->At(i)->Py(),
+                                         GenTaus->At(i)->Pz(),GenTaus->At(i)->E(),
+                                         GenTaus->At(i)->PdgId(),GenTaus->At(i)->Status());
+  }
+  for (UInt_t i=0; i < GenNeutrinos->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenNeutrinos->Allocate();
+    new (genParticle) mithep::MCParticle(GenNeutrinos->At(i)->Px(),GenNeutrinos->At(i)->Py(),
+                                         GenNeutrinos->At(i)->Pz(),GenNeutrinos->At(i)->E(),
+                                         GenNeutrinos->At(i)->PdgId(),GenNeutrinos->At(i)->Status());
+  }
+  for (UInt_t i=0; i < GenQuarks->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenQuarks->Allocate();
+    new (genParticle) mithep::MCParticle(GenQuarks->At(i)->Px(),GenQuarks->At(i)->Py(),
+                                         GenQuarks->At(i)->Pz(),GenQuarks->At(i)->E(),
+                                         GenQuarks->At(i)->PdgId(),GenQuarks->At(i)->Status());
+  }
+  for (UInt_t i=0; i < GenqqHs->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenqqHs->Allocate();
+    new (genParticle) mithep::MCParticle(GenqqHs->At(i)->Px(),GenqqHs->At(i)->Py(),
+                                         GenqqHs->At(i)->Pz(),GenqqHs->At(i)->E(),
+                                         GenqqHs->At(i)->PdgId(),GenqqHs->At(i)->Status());
+
   if (fCopyArrays) {
     // --------------------------------
     // Copy these Collections into the Arrays for Publication for Output Module
@@ -1006,6 +1054,31 @@ void GeneratorMod::Process()
                                            GenISRPhotons->At(i)->PdgId(),
                                            GenISRPhotons->At(i)->Status());
     }
+  }
+
+  for (UInt_t i=0; i < GenBosons->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenBosons->Allocate();
+    new (genParticle) mithep::MCParticle(GenBosons->At(i)->Px(),GenBosons->At(i)->Py(),
+                                         GenBosons->At(i)->Pz(),GenBosons->At(i)->E(),
+                                         GenBosons->At(i)->PdgId(),GenBosons->At(i)->Status());
+  }
+  for (UInt_t i=0; i < GenPhotons->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenPhotons->Allocate();
+    new (genParticle) mithep::MCParticle(GenPhotons->At(i)->Px(),GenPhotons->At(i)->Py(),
+                                         GenPhotons->At(i)->Pz(),GenPhotons->At(i)->E(),
+                                         GenPhotons->At(i)->PdgId(),GenPhotons->At(i)->Status());
+  }
+  for (UInt_t i=0; i < GenRadPhotons->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenRadPhotons->Allocate();
+    new (genParticle) mithep::MCParticle(GenRadPhotons->At(i)->Px(),GenRadPhotons->At(i)->Py(),
+                                         GenRadPhotons->At(i)->Pz(),GenRadPhotons->At(i)->E(),
+                                         GenRadPhotons->At(i)->PdgId(),GenRadPhotons->At(i)->Status());
+  }
+  for (UInt_t i=0; i < GenISRPhotons->GetEntries(); ++i) {
+    mithep::MCParticle *genParticle = fGenISRPhotons->Allocate();
+    new (genParticle) mithep::MCParticle(GenISRPhotons->At(i)->Px(),GenISRPhotons->At(i)->Py(),
+                                         GenISRPhotons->At(i)->Pz(),GenISRPhotons->At(i)->E(),
+                                         GenISRPhotons->At(i)->PdgId(),GenISRPhotons->At(i)->Status());
   }
 
   // fill histograms if requested
