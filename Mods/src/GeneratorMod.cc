@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.53 2009/09/28 14:32:28 loizides Exp $
+// $Id: GeneratorMod.cc,v 1.54 2009/10/20 08:17:39 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -969,6 +969,7 @@ void GeneratorMod::Process()
     new (genParticle) mithep::MCParticle(GenqqHs->At(i)->Px(),GenqqHs->At(i)->Py(),
                                          GenqqHs->At(i)->Pz(),GenqqHs->At(i)->E(),
                                          GenqqHs->At(i)->PdgId(),GenqqHs->At(i)->Status());
+  }
 
   if (fCopyArrays) {
     // --------------------------------
@@ -1083,7 +1084,6 @@ void GeneratorMod::Process()
 
   // fill histograms if requested
   if (GetFillHist()) {
-
     // MET
     hDGenMet[0]->Fill(GenMet->At(0)->Pt());
     hDGenMet[1]->Fill(GenMet->At(0)->Px());
@@ -1417,8 +1417,8 @@ void GeneratorMod::Process()
   }
 
   // Apply ISR+Rad filter (but filling all histograms)
-  if(fApplyISRFilter == kTRUE &&
-    (GenISRPhotons->GetEntries() > 0 || GenRadPhotons->GetEntries() > 0)){
+  if (fApplyISRFilter == kTRUE &&
+     (GenISRPhotons->GetEntries() > 0 || GenRadPhotons->GetEntries() > 0)) {
     SkipEvent();
   }
 }

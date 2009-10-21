@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.32 2009/08/31 06:39:22 sixie Exp $
+// $Id: GeneratorMod.h,v 1.33 2009/09/28 14:32:28 loizides Exp $
 //
 // GeneratorMod
 //
@@ -29,7 +29,7 @@ namespace mithep
       ~GeneratorMod();
 
       Bool_t               GetApplyISRFilter()   const { return fApplyISRFilter;   }
-      const Bool_t         GetCopyArrays()	 const { return fCopyArrays;       }	
+      Bool_t               GetCopyArrays()	 const { return fCopyArrays;       }	
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
       const char          *GetMCBosonsName()     const { return fMCBosonsName;     }
       const char          *GetMCISRPhotonsName() const { return fMCISRPhotonsName; }	
@@ -42,7 +42,7 @@ namespace mithep
       const char          *GetMCRadPhotonsName() const { return fMCRadPhotonsName; }	
       const char          *GetMCTausName()	 const { return fMCTausName;       }	
       const char          *GetMCqqHsName()	 const { return fMCqqHsName;       }	
-      const Bool_t         GetPrintDebug()	 const { return fPrintDebug;       }	
+      Bool_t               GetPrintDebug()	 const { return fPrintDebug;       }	
       void                 SetApplyISRFilter(Bool_t b)	       { fApplyISRFilter   = b; }	 
       void                 SetCopyArrays(Bool_t b)	       { fCopyArrays       = b; }	 
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
