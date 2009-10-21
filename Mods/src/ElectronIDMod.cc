@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.38 2009/09/28 18:05:05 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.39 2009/09/29 19:41:13 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -31,6 +31,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyD0Cut(kTRUE),
   fChargeFilter(kTRUE),
   fD0Cut(0.025),
+  fChargeFilter(kTRUE),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
   fElIdType(kIdUndef),
@@ -78,13 +79,17 @@ Bool_t ElectronIDMod::PassCustomID(const Electron *ele) const
   if (sigmaee>fCuts[1][cat+4*eb])
     return kFALSE;
 
-  if (eOverP<1.5) {  
-    if (deltaPhiIn>fCuts[2][cat+4*eb])
-      return kFALSE; 
-  } else {
-    if(deltaPhiIn>fCuts[2][3+4*eb])
-      return kFALSE;
-  }
+  //Don't use this further complication for now
+//   if (eOverP<1.5) {  
+//     if (deltaPhiIn>fCuts[2][cat+4*eb])
+//       return kFALSE; 
+//   } else {
+//     if(deltaPhiIn>fCuts[2][3+4*eb])
+//       return kFALSE;
+//   }
+
+  if (deltaPhiIn>fCuts[2][cat+4*eb])
+    return kFALSE; 
 
   if(deltaEtaIn>fCuts[3][cat+4*eb])
     return kFALSE; 
@@ -327,12 +332,12 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
   // The following changes are in sigmaetaeta for endcups and deltaetain.
 
   Double_t tightcuts[6][8]={
-    {0.05, 0.042, 0.045, 0.0, 0.055, 0.037, 0.05, 0.0},         //hovere
-    {0.0125, 0.011, 0.01, 0.0, 0.0295, 0.0292, 0.0283, 0.0},    //sigmaetaeta
-    {0.032, 0.016, 0.0525, 0.09, 0.025, 0.035, 0.065, 0.092},   //deltaphiin
-    {0.0055, 0.0024, 0.0065, 0.0, 0.0070, 0.0055, 0.0085, 0.0}, //deltaetain
-    {0.24, 0.94, 0.11, 0.0, 0.32, 0.83, 0.0, 0.0},              //eoverp
-    {0.8,0.2,0.9,0,0,0,0,0}};                                   //extra cuts fbrem and E_Over_P 
+    {0.086, 0.1, 0.052, 0.0, 0.050, 0.059, 0.061, 0.0},   //hovere
+    {0.01, 0.01, 0.01, 0.0, 0.033, 0.029, 0.028, 0.0},     //sigmaetaeta
+    {0.038, 0.024, 0.038, 0.0, 0.034, 0.011, 0.023, 0.0},   //deltaphiin
+    {0.0081, 0.0029, 0.0051, 0.0, 0.0056, 0.0062, 0.0088, 0.0}, //deltaetain
+    {0.0, 0.9, 0.0, 0.0, 0.0, 0.78, 0.0, 0.0},             //eoverp
+    {0.8,0.2,0.9,0,0,0,0,0}};                              //extra cuts fbrem and E_Over_P 
 
   Double_t loosecuts[6][8]={
     {0.076, 0.033, 0.07, 0.0, 0.083,0.148, 0.033, 0.0},         //hovere
