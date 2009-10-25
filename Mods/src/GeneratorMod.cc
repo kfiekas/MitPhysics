@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.54 2009/10/20 08:17:39 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.55 2009/10/21 13:19:44 loizides Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -142,7 +142,7 @@ void GeneratorMod::Process()
       CompositeParticle *object = new CompositeParticle();
       object->AddDaughter(p);
       object->AddDaughter(p->DistinctMother());
-      if(object->Mass() > 1.0) GenRadPhotons->Add(p);
+      if(object->Mass() > 1.0 || p->DistinctMother()->Is(MCParticle::kW)) GenRadPhotons->Add(p);
       delete object;
     }
 
