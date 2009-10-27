@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.24 2009/09/28 18:05:05 bendavid Exp $
+// $Id: ElectronIDMod.h,v 1.25 2009/09/29 19:41:13 loizides Exp $
 //
 // ElectronIDMod
 //
@@ -27,6 +27,27 @@ namespace mithep
       ElectronIDMod(const char *name="ElectronIDMod", 
                     const char *title="Electron identification module");
 
+     enum EElIdType {
+        kIdUndef = 0,       //not defined
+        kTight,             //"Tight"
+        kLoose,             //"Loose"
+        kLikelihood,        //"Likelihood"
+        kNoId,              //"NoId"
+        kZeeId,             //"ZeeId"
+        kCustomIdLoose,     //"CustomLoose"
+        kCustomIdTight      //"CustomTight"
+      };
+
+      enum EElIsoType {
+        kIsoUndef = 0,      //not defined
+        kTrackCalo,         //"TrackCalo"
+        kTrackJura,         //"TrackJura"
+        kTrackJuraSliding,  //"TrackJuraSliding"
+        kNoIso,             //"NoIso"
+        kZeeIso,            //"ZeeIso"
+        kCustomIso          //"Custom"
+      };
+
       Bool_t              GetApplyConversionFilter()  const { return fApplyConvFilter;        }
       Bool_t              GetApplyD0Cut()             const { return fApplyD0Cut;             }
       Double_t            GetCaloIsoCut()             const { return fCaloIsolationCut;       }
@@ -44,6 +65,12 @@ namespace mithep
       Bool_t              GetReverseIsoCut()          const { return fReverseIsoCut;          }
       Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
       Bool_t              GetChargeFilter()           const { return fChargeFilter;           }
+      Bool_t              PassChargeFilter(const Electron *el) const;
+      Bool_t              PassConversionFilter(const Electron *el, const DecayParticleCol *conversions) const;
+      Bool_t              PassD0Cut(const Electron *el, const VertexCol *vertices) const;
+      Bool_t              PassIDCut(const Electron *el, EElIdType idType) const;
+      Bool_t              PassIsolationCut(const Electron *el, EElIsoType isoType) const;
+      void                Setup();
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
@@ -64,30 +91,13 @@ namespace mithep
       void                SetChargeFilter(Bool_t b)             { fChargeFilter = b;          }
       void                SetWrongHitsRequirement(Bool_t b)     { fWrongHitsRequirement = b;  }
 
-      enum EElIdType {
-        kIdUndef = 0,       //not defined
-        kTight,             //"Tight"
-        kLoose,             //"Loose"
-        kLikelihood,        //"Likelihood"
-        kNoId,              //"NoId"
-        kCustomIdLoose,     //"CustomLoose"
-        kCustomIdTight      //"CustomTight"
-      };
 
-      enum EElIsoType {
-        kIsoUndef = 0,      //not defined
-        kTrackCalo,         //"TrackCalo"
-        kTrackJura,         //"TrackJura"
-        kTrackJuraSliding,  //"TrackJuraSliding"
-        kNoIso,             //"NoIso"
-        kCustomIso          //"Custom"
-      };
 
     protected:
-      Bool_t                  PassCustomID(const Electron *el) const;
-      void                    Process();
-      void                    SetCustomIDCuts(EElIdType idt);
-      void                    SlaveBegin();
+      Bool_t              PassCustomID(const Electron *el) const;
+      void                Process();
+      void                SetCustomIDCuts(EElIdType idt);
+      void                SlaveBegin();
 
 
       TString                 fElectronBranchName;     //name of electron collection (input)
