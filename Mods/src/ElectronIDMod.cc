@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.41 2009/10/21 13:45:44 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.42 2009/10/26 14:33:20 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -300,7 +300,7 @@ void ElectronIDMod::Process()
     // apply d0 cut
     if (fApplyD0Cut) {
       LoadEventObject(fVertexName, fVertices);
-      Bool_t passD0cut = PassD0Cut(e, *&fVertices);
+      Bool_t passD0cut = PassD0Cut(e, fVertices);
       if (!passD0cut)
         continue;
     }
