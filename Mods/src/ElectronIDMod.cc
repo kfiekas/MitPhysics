@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.42 2009/10/26 14:33:20 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.43 2009/10/27 07:13:21 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -227,7 +227,7 @@ Bool_t ElectronIDMod::PassConversionFilter(const Electron *ele, const DecayParti
     
   } // loop over all conversions 
   
-  return isGoodConversion;
+  return !isGoodConversion;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -293,7 +293,7 @@ void ElectronIDMod::Process()
     Bool_t isGoodConversion = kFALSE;
     if (fApplyConvFilter) {
       LoadEventObject(fConversionBranchName, fConversions);
-      isGoodConversion = PassConversionFilter(e, fConversions);      
+      isGoodConversion = !PassConversionFilter(e, fConversions);      
     }
     if (isGoodConversion) continue;
     
@@ -398,9 +398,9 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
 
   Double_t tightcuts[6][8]={
     {0.086, 0.1, 0.052, 0.0, 0.050, 0.059, 0.061, 0.0},   //hovere
-    {0.01, 0.01, 0.01, 0.0, 0.033, 0.029, 0.028, 0.0},     //sigmaetaeta
-    {0.038, 0.024, 0.038, 0.0, 0.034, 0.011, 0.023, 0.0},   //deltaphiin
-    {0.0081, 0.0029, 0.0051, 0.0, 0.0056, 0.0062, 0.0088, 0.0}, //deltaetain
+    {0.011, 0.011, 0.011, 0.0, 0.033, 0.029, 0.030, 0.0},     //sigmaetaeta
+    {0.038, 0.024, 0.045, 0.0, 0.034, 0.017, 0.026, 0.0},   //deltaphiin
+    {0.0081, 0.0029, 0.0051, 0.0, 0.0070, 0.0062, 0.0088, 0.0}, //deltaetain
     {0.0, 0.9, 0.0, 0.0, 0.0, 0.78, 0.0, 0.0},             //eoverp
     {0.8,0.2,0.9,0,0,0,0,0}};                              //extra cuts fbrem and E_Over_P 
 
