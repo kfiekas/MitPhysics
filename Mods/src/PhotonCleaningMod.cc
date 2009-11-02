@@ -1,4 +1,4 @@
-// $Id: PhotonCleaningMod.cc,v 1.5 2009/06/15 15:00:21 loizides Exp $
+// $Id: PhotonCleaningMod.cc,v 1.6 2009/11/02 12:28:25 sixie Exp $
 
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -47,7 +47,7 @@ void PhotonCleaningMod::Process()
       for (UInt_t j=0; j<n2; j++) {
         Double_t deltaR = MathUtils::DeltaR(CleanElectrons->At(j)->SCluster()->Eta(), 
                                             CleanElectrons->At(j)->SCluster()->Phi(),
-                                            ph->Eta(), ph->Phi());  
+                                            ph->SCluster()->Eta(), ph->SCluster()->Phi());  
         if (deltaR < fMinDeltaRToElectron) {
           isElectronOverlap = kTRUE;
           break;	 	 
