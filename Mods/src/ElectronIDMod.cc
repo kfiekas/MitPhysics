@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.43 2009/10/27 07:13:21 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.44 2009/10/29 18:25:42 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -29,8 +29,8 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyConvFilter(kTRUE),
   fWrongHitsRequirement(kTRUE),
   fApplyD0Cut(kTRUE),
-  fD0Cut(0.025),
   fChargeFilter(kTRUE),
+  fD0Cut(0.025),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
   fElIdType(kIdUndef),
@@ -227,7 +227,7 @@ Bool_t ElectronIDMod::PassConversionFilter(const Electron *ele, const DecayParti
     
   } // loop over all conversions 
   
-  return !isGoodConversion;
+  return isGoodConversion;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -258,10 +258,8 @@ Bool_t ElectronIDMod::PassChargeFilter(const Electron *ele) const
   if(ele->TrackerTrk() &&
      ele->TrackerTrk()->Charge() != ele->Charge()) passChargeFilter = kFALSE;
 
-
   return passChargeFilter;
 }
-
 
 //--------------------------------------------------------------------------------------------------
 void ElectronIDMod::Process()
@@ -293,14 +291,14 @@ void ElectronIDMod::Process()
     Bool_t isGoodConversion = kFALSE;
     if (fApplyConvFilter) {
       LoadEventObject(fConversionBranchName, fConversions);
-      isGoodConversion = !PassConversionFilter(e, fConversions);      
+      isGoodConversion = PassConversionFilter(e, fConversions);      
     }
     if (isGoodConversion) continue;
     
     // apply d0 cut
     if (fApplyD0Cut) {
       LoadEventObject(fVertexName, fVertices);
-      Bool_t passD0cut = PassD0Cut(e, fVertices);
+      Bool_t passD0cut = PassD0Cut(e, *&fVertices);
       if (!passD0cut)
         continue;
     }
@@ -309,7 +307,8 @@ void ElectronIDMod::Process()
     if(fChargeFilter == kTRUE) {
       Bool_t passChargeFilter = PassChargeFilter(e);
       if (!passChargeFilter) continue;
-    } 
+    }
+
     // add good electron
     GoodElectrons->Add(e);
   }
