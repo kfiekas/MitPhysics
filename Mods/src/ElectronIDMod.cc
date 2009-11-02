@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.45 2009/11/02 13:29:21 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.46 2009/11/02 13:48:23 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -288,12 +288,12 @@ void ElectronIDMod::Process()
       continue;
 
     // apply conversion filter
-    Bool_t isGoodConversion = kFALSE;
+    Bool_t passConvVeto = kFALSE;
     if (fApplyConvFilter) {
       LoadEventObject(fConversionBranchName, fConversions);
-      isGoodConversion = !PassConversionFilter(e, fConversions);      
+      passConvVeto = PassConversionFilter(e, fConversions);      
     }
-    if (isGoodConversion) continue;
+    if (passConvVeto == kFALSE) continue;
     
     // apply d0 cut
     if (fApplyD0Cut) {
