@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.44 2009/10/29 18:25:42 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.45 2009/11/02 13:29:21 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -227,7 +227,7 @@ Bool_t ElectronIDMod::PassConversionFilter(const Electron *ele, const DecayParti
     
   } // loop over all conversions 
   
-  return isGoodConversion;
+  return !isGoodConversion;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -291,14 +291,14 @@ void ElectronIDMod::Process()
     Bool_t isGoodConversion = kFALSE;
     if (fApplyConvFilter) {
       LoadEventObject(fConversionBranchName, fConversions);
-      isGoodConversion = PassConversionFilter(e, fConversions);      
+      isGoodConversion = !PassConversionFilter(e, fConversions);      
     }
     if (isGoodConversion) continue;
     
     // apply d0 cut
     if (fApplyD0Cut) {
       LoadEventObject(fVertexName, fVertices);
-      Bool_t passD0cut = PassD0Cut(e, *&fVertices);
+      Bool_t passD0cut = PassD0Cut(e, fVertices);
       if (!passD0cut)
         continue;
     }
