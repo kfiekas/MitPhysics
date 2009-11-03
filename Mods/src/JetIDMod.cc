@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.17 2009/06/15 15:00:21 loizides Exp $
+// $Id: JetIDMod.cc,v 1.18 2009/11/03 08:39:19 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -59,7 +59,8 @@ void JetIDMod::Process()
     if(fJetEEMFractionMinCut > 0){
       const CaloJet *caloJet = dynamic_cast<const CaloJet*>(jet->MakeCopy());
       // The 2.6 value is hardcoded, no reason to change that value in CMS
-      if (caloJet->AbsEta() < 2.6 && caloJet->EnergyFractionEm() < fJetEEMFractionMinCut)
+      if (caloJet && caloJet->AbsEta() < 2.6 &&
+          caloJet->EnergyFractionEm() < fJetEEMFractionMinCut)
         passEEMFractionMinCut = kFALSE;
       delete caloJet;
     }
