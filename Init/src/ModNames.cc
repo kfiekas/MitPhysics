@@ -1,4 +1,4 @@
-// $Id: ModNames.cc,v 1.11 2009/06/30 10:58:51 loizides Exp $
+// $Id: ModNames.cc,v 1.12 2009/09/08 00:00:30 bendavid Exp $
 
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -8,17 +8,17 @@ using namespace mithep;
 
 const char *ModNames::gkCleanCaloMetName       = "CleanCaloMet";
 const char *ModNames::gkCleanElectronsName     = "CleanElectrons";
-const char *ModNames::gkCleanFwdJetsName       = "CleanFwdSC5Jets";
-const char *ModNames::gkCleanJetsName          = "CleanSC5Jets";
+const char *ModNames::gkCleanFwdJetsName       = "CleanFwdAKt5Jets";
+const char *ModNames::gkCleanJetsName          = "CleanAKt5Jets";
 const char *ModNames::gkCleanMuonsName         = "CleanMuons";
-const char *ModNames::gkCleanNoFwdJetsName     = "CleanNoFwdSC5Jets";
+const char *ModNames::gkCleanNoFwdJetsName     = "CleanNoFwdAKt5Jets";
 const char *ModNames::gkCleanPhotonsName       = "CleanPhotons";
 const char *ModNames::gkCleanTausName          = "CleanTaus";
 const char *ModNames::gkCorrectedJetsName      = "CorrectedJets";
 const char *ModNames::gkElFakeableObjsName     = "ElectronFakeableObjects";
 const char *ModNames::gkFakeEventHeadersName   = "FakeEventHeaders";
 const char *ModNames::gkGoodElectronsName      = "GoodElectrons";
-const char *ModNames::gkGoodJetsName           = "GoodSC5Jets";
+const char *ModNames::gkGoodJetsName           = "GoodAKt5Jets";
 const char *ModNames::gkGoodMuonsName          = "GoodMuons";
 const char *ModNames::gkGoodPhotonsName        = "GoodPhotons";
 const char *ModNames::gkGoodTausName           = "GoodTaus";
