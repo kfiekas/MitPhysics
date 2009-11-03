@@ -1,4 +1,4 @@
-// $Id: FakeRate.cc,v 1.5 2009/08/11 11:19:40 phedex Exp $
+// $Id: FakeRate.cc,v 1.6 2009/11/03 08:40:37 ceballos Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeRate.h"
 #include "MitCommon/DataFormats/interface/TH2DAsymErr.h"
@@ -50,6 +50,16 @@ Bool_t FakeRate::Init()
 
     fElectronFakeRateHist_PtEta->SetDirectory(0);
     fMuonFakeRateHist_PtEta->SetDirectory(0);
+
+    cout << " check fake rate histogram : " << fElectronFRHistName << " from " << fElectronFRFilename << endl;
+    for (int b=0;b<=fElectronFakeRateHist_PtEta->GetXaxis()->GetNbins();b++) {
+      for (int c=0;c<=fElectronFakeRateHist_PtEta->GetYaxis()->GetNbins();c++) {
+        Double_t x = fElectronFakeRateHist_PtEta->GetXaxis()->GetBinCenter(b);
+        Double_t y = fElectronFakeRateHist_PtEta->GetYaxis()->GetBinCenter(c);
+        cout << "bin : " << x << " " << y << " " << fElectronFakeRateHist_PtEta->GetBinContent(b,c) << "  |  " <<  fElectronFakeRateHist_PtEta->GetStatErrorLow(x,y) << " " << fElectronFakeRateHist_PtEta->GetStatErrorHigh(x,y) << " " << fElectronFakeRateHist_PtEta->GetSysErrorLow(x,y) << " " << fElectronFakeRateHist_PtEta->GetSysErrorHigh(x,y) << endl;
+      }
+    }
+
 
     if (fUseFitFunction) {
       //Currently unsupported
