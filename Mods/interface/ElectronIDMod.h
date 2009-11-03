@@ -70,7 +70,6 @@ namespace mithep
       Bool_t              PassD0Cut(const Electron *el, const VertexCol *vertices) const;
       Bool_t              PassIDCut(const Electron *el, EElIdType idType) const;
       Bool_t              PassIsolationCut(const Electron *el, EElIsoType isoType) const;
-      void                Setup();
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
@@ -90,6 +89,7 @@ namespace mithep
       void                SetTrackIsoCut(Double_t cut)          { fTrackIsolationCut  = cut;  }
       void                SetChargeFilter(Bool_t b)             { fChargeFilter = b;          }
       void                SetWrongHitsRequirement(Bool_t b)     { fWrongHitsRequirement = b;  }
+      void                Setup();
 
 
 

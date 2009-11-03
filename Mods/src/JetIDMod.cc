@@ -1,9 +1,10 @@
-// $Id: JetIDMod.cc,v 1.16 2009/05/09 18:35:57 ceballos Exp $
+// $Id: JetIDMod.cc,v 1.17 2009/06/15 15:00:21 loizides Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitAna/DataTree/interface/CaloJetCol.h"
 
 using namespace mithep;
 
@@ -16,12 +17,13 @@ JetIDMod::JetIDMod(const char *name, const char *title) :
   fGoodJetsName(ModNames::gkGoodJetsName),  
   fUseJetCorrection(kTRUE),
   fJetPtCut(35.0),
-  fJetEtaMaxCut(5.0)
+  fJetEtaMaxCut(5.0),
+  fJetEEMFractionMinCut(0.01)
 {
   // Constructor.
 }
 
-//--------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void JetIDMod::Process()
 {
   // Process entries of the tree. 
@@ -53,6 +55,17 @@ void JetIDMod::Process()
     if (jetpt < fJetPtCut)
       continue;
     
+    Bool_t passEEMFractionMinCut = kTRUE;
+    if(fJetEEMFractionMinCut > 0){
+      const CaloJet *caloJet = dynamic_cast<const CaloJet*>(jet->MakeCopy());
+      // The 2.6 value is hardcoded, no reason to change that value in CMS
+      if (caloJet->AbsEta() < 2.6 && caloJet->EnergyFractionEm() < fJetEEMFractionMinCut)
+        passEEMFractionMinCut = kFALSE;
+      delete caloJet;
+    }
+    if(passEEMFractionMinCut == kFALSE)
+      continue;
+
     // add good jet to collection
     GoodJets->Add(jet);             
   }
