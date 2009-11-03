@@ -45,7 +45,7 @@ void JetIDMod::Process()
 
     if (jet->AbsEta() > fJetEtaMaxCut) 
       continue;
-    
+
     Double_t jetpt;
     if (fUseJetCorrection)
       jetpt = jet->Pt();
