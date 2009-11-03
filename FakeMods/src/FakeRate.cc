@@ -1,4 +1,4 @@
-// $Id: FakeRate.cc,v 1.4 2009/08/11 09:16:01 loizides Exp $
+// $Id: FakeRate.cc,v 1.5 2009/08/11 11:19:40 phedex Exp $
 
 #include "MitPhysics/FakeMods/interface/FakeRate.h"
 #include "MitCommon/DataFormats/interface/TH2DAsymErr.h"
@@ -150,6 +150,9 @@ Double_t FakeRate::ElectronFakeRate(Double_t pt, Double_t eta, Double_t phi)
   } else {
     Fatal("ElectronFakeRate","Error: FakeRate was not properly initialized.");
   }
+  if (prob > 1) {
+    cerr << "Fake Rate = " << prob << " is larger than 1.0" << endl;
+  }
   return prob;
 }
 
@@ -164,9 +167,8 @@ Double_t FakeRate::ElectronFakeRateError(Double_t pt, Double_t eta, Double_t phi
   if (fIsInit) {
     if (fUse2DFakeRate) {
       if (fUseFitFunction) {
-        cerr << "Error: Using 2D Fake Rates with Fit Function is not currently supported.\n";      
       } else {
-        if (fElectronFakeRateHist_PtEta) {          
+        if (fElectronFakeRateHist_PtEta) { 
           return fElectronFakeRateHist_PtEta->GetError(pt, eta, errorType);        
         } else {
           Fatal("ElectronFakeRate","Error: fElectronFakeRateHist_PtEta_sysError was not loaded properly.");
@@ -266,6 +268,9 @@ Double_t FakeRate::MuonFakeRate(Double_t pt, Double_t eta, Double_t phi)
     }
   } else {
     Fatal("ElectronFakeRate","Error: FakeRate was not properly initialized.");
+  }
+  if (prob > 1) {
+    cerr << "Fake Rate is larger than 1.0" << endl;
   }
   return prob;
 }

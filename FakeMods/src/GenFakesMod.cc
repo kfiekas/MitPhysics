@@ -1,4 +1,4 @@
-// $Id: GenFakesMod.cc,v 1.5 2009/08/11 09:16:01 loizides Exp $
+// $Id: GenFakesMod.cc,v 1.6 2009/08/11 11:19:40 phedex Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakesMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -393,7 +393,7 @@ void GenFakesMod::Process()
           Fatal("Process()","Error: fFakeRate is a NULL pointer.");   
         }
         
-        //only fake into a muon if the fakeable object did not match to a clean lepton
+        //only fake into an electron if the fakeable object did not match to a clean lepton
         if (!isCleanLepton) {
           //create new fake event header
           FakeEventHeader *fakeElectronEvent = new FakeEventHeader();

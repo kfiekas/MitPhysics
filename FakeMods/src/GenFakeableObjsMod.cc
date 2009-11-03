@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.4 2009/07/21 16:35:12 bendavid Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.5 2009/08/11 09:16:01 loizides Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -13,6 +13,7 @@
 #include "MitAna/DataTree/interface/StableData.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitPhysics/Mods/interface/ElectronIDMod.h"
 
 using namespace mithep;
 
@@ -21,9 +22,19 @@ ClassImp(mithep::GenFakeableObjsMod)
 //--------------------------------------------------------------------------------------------------
 GenFakeableObjsMod::GenFakeableObjsMod(const char *name, const char *title) : 
   BaseMod(name,title),
-  fVetoTriggerJet(false),
-  fVetoGenLeptons(true),
-  fVetoCleanLeptons(false),
+
+  fApplyConvFilter(kTRUE),
+  fWrongHitsRequirement(kTRUE),
+  fApplyD0Cut(kTRUE),
+  fChargeFilter(kTRUE),
+  fD0Cut(0.025),
+  fCombIsolationCut(10.0),
+  fTrackIsolationCut(-1.0),
+  fEcalIsolationCut(-1.0),
+  fHcalIsolationCut(-1.0),
+  fVetoTriggerJet(kFALSE),
+  fVetoGenLeptons(kTRUE),
+  fVetoCleanLeptons(kFALSE),
   fElectronFOType("GsfPlusSC"),
   fMuonFOType("IsoTrack"),
   fTriggerName("NotSpecified"),
@@ -100,6 +111,13 @@ void GenFakeableObjsMod::SlaveBegin()
     return;
   }
 
+  electronID = new ElectronIDMod();
+  electronID->SetApplyConversionFilter(fApplyConvFilter);    
+  electronID->SetWrongHitsRequirement(fWrongHitsRequirement);    
+  electronID->SetApplyD0Cut(fApplyD0Cut);    
+  electronID->SetChargeFilter(fChargeFilter);    
+  electronID->SetD0Cut(fD0Cut);
+
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -170,6 +188,8 @@ void GenFakeableObjsMod::Process()
   //First do duplicate electron removal
   //***********************************************************************************************
   for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {  
+
+
     const Electron *e = fElectrons->At(i);   
     Bool_t isElectronOverlap = kFALSE;
 
@@ -284,66 +304,29 @@ void GenFakeableObjsMod::Process()
         denominator->SetGsfTrk(EOverPMatchedTrk);
         denominator->SetSuperCluster(cluster);
      
+        const Electron *tmpEle = denominator;
+        //****************************************************************************************
+        // Isolation Cut
+        //****************************************************************************************
+        Bool_t passIsolationCut = (matchiso <= fTrackIsolationCut);
+
         //****************************************************************************************
         // conversion filter
         //****************************************************************************************
-        Bool_t isGoodConversion = kFALSE;
-        for (UInt_t ifc=0; ifc<fConversions->GetEntries(); ifc++) {          
-          Bool_t ConversionMatchFound = kFALSE;
-          for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
-            const Track *trk = dynamic_cast<const ChargedParticle*>
-              (fConversions->At(ifc)->Daughter(d))->Trk();
-            if (EOverPMatchedTrk == trk) {
-              ConversionMatchFound = kTRUE;
-              break;
-            }
-          }
-          
-          // if match between the gsftrack and one of the conversion legs
-          if (ConversionMatchFound == kTRUE){
-            isGoodConversion =  (fConversions->At(ifc)->Prob() > 0.0005) &&
-              (fConversions->At(ifc)->Lxy() > 0) &&
-              (fConversions->At(ifc)->Lz() > 0);
-            
-            if (isGoodConversion == kTRUE) {
-              for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
-                const Track *trk = dynamic_cast<const ChargedParticle*>
-                  (fConversions->At(ifc)->Daughter(d))->Trk();
-                
-                if (trk) {
-                  // These requirements are not used for the GSF track (d == 1)
-                  if (!(trk->NHits() > 8 && trk->Prob() > 0.005) && d == 0)
-                    isGoodConversion = kFALSE;
-                  
-                  const StableData *sd = dynamic_cast<const StableData*>
-                    (fConversions->At(ifc)->DaughterDat(d));
-                  if (sd->NWrongHits() != 0)
-                    isGoodConversion = kFALSE;
-                  
-                } else {
-                  isGoodConversion = kFALSE;
-                }
-              }
-            }
-          }          
-          if (isGoodConversion == kTRUE) break;          
-        } // loop over all conversions 
+        Bool_t passConversionFilter = electronID->PassConversionFilter(tmpEle, fConversions);
 
         //****************************************************************************************
         // D0 Cut        
         //****************************************************************************************
-        double d0Min = 99999;
-        for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-          double pD0 = EOverPMatchedTrk->D0Corrected(*fVertices->At(i0));
-          if(TMath::Abs(pD0) < TMath::Abs(d0Min)) d0Min = TMath::Abs(pD0);
-        }
+        Bool_t passD0Cut = electronID->PassD0Cut(tmpEle,fVertices);
 
         //****************************************************************************************
         // Make denominator object cuts
         //****************************************************************************************
-        if( matchiso <= 10.0 && denominator->Pt() > 10.0
-            && !isGoodConversion
-            && d0Min < 0.025
+        if( denominator->Pt() > 10.0  
+            && passIsolationCut
+            && (passConversionFilter || !fApplyConvFilter)
+            && (passD0Cut || !fApplyD0Cut)
             && !(fVetoCleanLeptons && IsCleanLepton)
             && !(fVetoGenLeptons && IsGenLepton)
             && !(fVetoTriggerJet && IsTriggerJet)
@@ -388,10 +371,9 @@ void GenFakeableObjsMod::Process()
       delete GsfTrackSCDenominators[d];
     }
   } else if (fElFOType == kElFOReco) {
+
     for (UInt_t i=0; i<DuplicateRemovedElectrons->GetEntries(); i++) {  
       const Electron *denominator = DuplicateRemovedElectrons->At(i);
-      Double_t denominatorIso =  
-        denominator->TrackIsolationDr03() + denominator->EcalRecHitIsoDr04() - 1.5;
 
       //Veto denominators matching to real electrons      
       Bool_t IsGenLepton = false;
@@ -431,71 +413,39 @@ void GenFakeableObjsMod::Process()
         }
       }
 
-      //*************************************************************
+      const Electron *tmpEle = denominator;
+      //****************************************************************************************
+      // Isolation Cut
+      //****************************************************************************************
+      Double_t combIso = 
+        denominator->TrackIsolationDr03() + denominator->EcalRecHitIsoDr04() - 1.5;
+
+      Bool_t passIsolationCut = (combIso <= fCombIsolationCut || fCombIsolationCut < 0) &&
+        (denominator->TrackIsolationDr04() <= fTrackIsolationCut || fTrackIsolationCut < 0) &&
+        (denominator->EcalRecHitIsoDr04() <= fEcalIsolationCut || fEcalIsolationCut < 0) &&
+        (denominator->HcalTowerSumEtDr04() <= fHcalIsolationCut || fHcalIsolationCut < 0) ;
+      
+      //****************************************************************************************
       // conversion filter
-      //*************************************************************        
-      Bool_t isGoodConversion = kFALSE;
-      for (UInt_t ifc=0; ifc<fConversions->GetEntries(); ifc++) {          
-        Bool_t ConversionMatchFound = kFALSE;
-        for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
-          const Track *trk = dynamic_cast<const ChargedParticle*>
-            (fConversions->At(ifc)->Daughter(d))->Trk();
-          if (denominator->GsfTrk() == trk) {
-            ConversionMatchFound = kTRUE;
-            break;
-          }
-        }
-        
-        // if match between the gsftrack and one of the conversion legs
-        if (ConversionMatchFound == kTRUE){
-          isGoodConversion =  (fConversions->At(ifc)->Prob() > 0.0005) &&
-            (fConversions->At(ifc)->Lxy() > 0) &&
-            (fConversions->At(ifc)->Lz() > 0);
-          
-          if (isGoodConversion == kTRUE) {
-            for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
-              const Track *trk = dynamic_cast<const ChargedParticle*>
-                (fConversions->At(ifc)->Daughter(d))->Trk();
-              
-              if (trk) {
-                // These requirements are not used for the GSF track (d == 1)
-                if (!(trk->NHits() > 8 && trk->Prob() > 0.005) && d == 0)
-                  isGoodConversion = kFALSE;
-                
-                const StableData *sd = dynamic_cast<const StableData*>
-                  (fConversions->At(ifc)->DaughterDat(d));
-                if (sd->NWrongHits() != 0)
-                  isGoodConversion = kFALSE;
-                
-              } else {
-                isGoodConversion = kFALSE;
-              }
-            }
-          }
-        }          
-        if (isGoodConversion == kTRUE) break;          
-      } // loop over all conversions 
+      //****************************************************************************************
+      Bool_t passConversionFilter = electronID->PassConversionFilter(tmpEle, fConversions);
       
       //****************************************************************************************
       // D0 Cut        
       //****************************************************************************************
-      double d0Min = 99999;
-      for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-        double pD0 = denominator->GsfTrk()->D0Corrected(*fVertices->At(i0));
-        if(TMath::Abs(pD0) < TMath::Abs(d0Min)) d0Min = TMath::Abs(pD0);
-      }
-
+      Bool_t passD0Cut = electronID->PassD0Cut(tmpEle,fVertices);
+      
       //****************************************************************************************
-      // Apply Denominator Cuts
+      // Make denominator object cuts
       //****************************************************************************************
-      if (denominator->Pt() > 10.0 && 
-          denominatorIso < 10.0
-          && !isGoodConversion
-          && d0Min < 0.025
-          && !(fVetoGenLeptons && IsGenLepton)
+      if( denominator->Pt() > 10.0  
+          && passIsolationCut
+          && (passConversionFilter || !fApplyConvFilter)
+          && (passD0Cut || !fApplyD0Cut)
           && !(fVetoCleanLeptons && IsCleanLepton)
+          && !(fVetoGenLeptons && IsGenLepton)
           && !(fVetoTriggerJet && IsTriggerJet)
-        ) {
+        ) {        
         Electron *tmpElectron = ElFakeableObjs->AddNew();
         tmpElectron->SetPtEtaPhi(denominator->Pt(), denominator->Eta(),denominator->Phi());
         tmpElectron->SetGsfTrk(denominator->GsfTrk());
@@ -508,7 +458,7 @@ void GenFakeableObjsMod::Process()
       Double_t denominatorIso =  
         denominator->TrackIsolationDr03() + 
         denominator->EcalRecHitIsoDr04() - 1.5;
-
+      
       //Veto denominators matching to real electrons      
       Bool_t IsGenLepton = false;
       for (UInt_t l=0; l<GenLeptonsAndTaus->GetEntries(); l++) {
@@ -547,68 +497,40 @@ void GenFakeableObjsMod::Process()
         }
       }
 
+      const Electron *tmpEle = denominator;
+      //****************************************************************************************
+      // Isolation Cut
+      //****************************************************************************************
+      Double_t combIso = 
+        denominator->TrackIsolationDr03() + denominator->EcalRecHitIsoDr04() - 1.5;
+      
+      Bool_t passIsolationCut = (combIso <= fCombIsolationCut || fCombIsolationCut < 0) &&
+        (denominator->TrackIsolationDr04() <= fTrackIsolationCut || fTrackIsolationCut < 0) &&
+        (denominator->EcalRecHitIsoDr04() <= fEcalIsolationCut || fEcalIsolationCut < 0) &&
+        (denominator->HcalTowerSumEtDr04() <= fHcalIsolationCut || fHcalIsolationCut < 0) ;
+      
       //****************************************************************************************
       // conversion filter
       //****************************************************************************************
-      Bool_t isGoodConversion = kFALSE;
-      for (UInt_t ifc=0; ifc<fConversions->GetEntries(); ifc++) {          
-        Bool_t ConversionMatchFound = kFALSE;
-        for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
-          const Track *trk = dynamic_cast<const ChargedParticle*>
-            (fConversions->At(ifc)->Daughter(d))->Trk();
-          if (denominator->GsfTrk() == trk) {
-            ConversionMatchFound = kTRUE;
-            break;
-          }
-        }
-        
-        // if match between the gsftrack and one of the conversion legs
-        if (ConversionMatchFound == kTRUE){
-          isGoodConversion =  (fConversions->At(ifc)->Prob() > 0.0005) &&
-            (fConversions->At(ifc)->Lxy() > 0) &&
-            (fConversions->At(ifc)->Lz() > 0);
-          
-          if (isGoodConversion == kTRUE) {
-            for (UInt_t d=0; d<fConversions->At(ifc)->NDaughters(); d++) {
-              const Track *trk = dynamic_cast<const ChargedParticle*>
-                (fConversions->At(ifc)->Daughter(d))->Trk();
-              
-              if (trk) {
-                // These requirements are not used for the GSF track (d == 1)
-                if (!(trk->NHits() > 8 && trk->Prob() > 0.005) && d == 0)
-                  isGoodConversion = kFALSE;
-                
-                const StableData *sd = dynamic_cast<const StableData*>
-                  (fConversions->At(ifc)->DaughterDat(d));
-                if (sd->NWrongHits() != 0)
-                  isGoodConversion = kFALSE;
-                
-              } else {
-                isGoodConversion = kFALSE;
-              }
-            }
-          }
-        }          
-        if (isGoodConversion == kTRUE) break;          
-      } // loop over all conversions 
+      Bool_t passConversionFilter = electronID->PassConversionFilter(tmpEle, fConversions);
       
       //****************************************************************************************
       // D0 Cut        
       //****************************************************************************************
-      double d0Min = 99999;
-      for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-        double pD0 = denominator->GsfTrk()->D0Corrected(*fVertices->At(i0));
-        if(TMath::Abs(pD0) < TMath::Abs(d0Min)) d0Min = TMath::Abs(pD0);
-      }
-
-      if (denominator->Pt() > 10.0 && denominatorIso < 10.0
-          && !isGoodConversion
-          && d0Min < 0.025
+      Bool_t passD0Cut = electronID->PassD0Cut(tmpEle,fVertices);
+      
+      //****************************************************************************************
+      // Make denominator object cuts
+      //****************************************************************************************
+      if( denominator->Pt() > 10.0  
+          && passIsolationCut
+          && (passConversionFilter || !fApplyConvFilter)
+          && (passD0Cut || !fApplyD0Cut)
           && denominator->PassLooseID()
-          && !(fVetoGenLeptons && IsGenLepton)
           && !(fVetoCleanLeptons && IsCleanLepton)
+          && !(fVetoGenLeptons && IsGenLepton)
           && !(fVetoTriggerJet && IsTriggerJet)
-        ) {
+        ) {        
         Electron *tmpElectron = ElFakeableObjs->AddNew();
         tmpElectron->SetPtEtaPhi(denominator->Pt(), denominator->Eta(),denominator->Phi());
         tmpElectron->SetGsfTrk(denominator->GsfTrk());

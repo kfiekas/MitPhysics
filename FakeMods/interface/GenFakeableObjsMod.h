@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.5 2009/08/10 16:07:26 phedex Exp $
+// $Id: GenFakeableObjsMod.h,v 1.6 2009/08/11 09:15:59 loizides Exp $
 //
 // GenFakeableObjsMod
 //
@@ -15,6 +15,7 @@
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/CollectionsFwd.h"
+#include "MitPhysics/Mods/interface/ElectronIDMod.h"
 
 namespace mithep 
 {
@@ -24,6 +25,15 @@ namespace mithep
       GenFakeableObjsMod(const char *name="GenFakeableObjsMod", 
                          const char *title="Fake Object Generation Module");
 
+      Bool_t        GetApplyConversionFilter()       const { return fApplyConvFilter;              }
+      Bool_t        GetApplyD0Cut()                  const { return fApplyD0Cut;                   }
+      Bool_t        GetChargeFilter()                const { return fChargeFilter;                 }
+      Bool_t        GetWrongHitsRequirement()        const { return fWrongHitsRequirement;         }
+      Double_t      GetD0Cut()                       const { return fD0Cut;                        }
+      Double_t      GetCombIsolationCut()            const { return fCombIsolationCut;             }
+      Double_t      GetTrackIsolationCut()           const { return fTrackIsolationCut;            }
+      Double_t      GetEcalIsolationCut()            const { return fEcalIsolationCut;             }
+      Double_t      GetHcalIsolationCut()            const { return fHcalIsolationCut;             }
       Bool_t        GetVetoTriggerJet()              const { return fVetoTriggerJet;               }
       Bool_t        GetVetoGenLeptons()              const { return fVetoGenLeptons;               }
       Bool_t        GetVetoCleanLeptons()            const { return fVetoCleanLeptons;             }
@@ -50,6 +60,15 @@ namespace mithep
       const char   *GetMCLeptonsName()               const { return fMCLeptonsName;                }
       const char   *GetMCTausName()                  const { return fMCTausName;                   }
 
+      void SetApplyConversionFilter(Bool_t b)                { fApplyConvFilter            = b;    }
+      void SetApplyD0Cut(Bool_t b)                           { fApplyD0Cut                 = b;    }
+      void SetD0Cut(Double_t cut)                            { fD0Cut                      = cut;  }
+      void SetCombIsolationCut(Double_t cut)                 { fCombIsolationCut           = cut;  }
+      void SetTrackIsolationCut(Double_t cut)                { fTrackIsolationCut          = cut;  }
+      void SetEcalIsolationCut(Double_t cut)                 { fEcalIsolationCut           = cut;  }
+      void SetHcalIsolationCut(Double_t cut)                 { fHcalIsolationCut           = cut;  }
+      void SetChargeFilter(Bool_t b)                         { fChargeFilter               = b;    }
+      void SetWrongHitsRequirement(Bool_t b)                 { fWrongHitsRequirement       = b;    }
       void SetVetoTriggerJet(Bool_t b)                       { fVetoTriggerJet             = b;    }
       void SetVetoGenLeptons(Bool_t b)                       { fVetoGenLeptons             = b;    }
       void SetVetoCleanLeptons(Bool_t b)                     { fVetoCleanLeptons           = b;    }
@@ -93,6 +112,15 @@ namespace mithep
       void             Process();
       void             SlaveBegin();
 
+      Bool_t           fApplyConvFilter;               //whether remove conversions
+      Bool_t           fWrongHitsRequirement;          //whether to use wrong hits req for conversion removal
+      Bool_t           fApplyD0Cut;                    //whether apply d0 cut
+      Bool_t           fChargeFilter;                  //whether apply GSF and CFT equal requirement
+      Double_t         fD0Cut;                         //max d0
+      Double_t         fCombIsolationCut;                  //max isolation
+      Double_t         fTrackIsolationCut;             //max isolation
+      Double_t         fEcalIsolationCut;              //max isolation
+      Double_t         fHcalIsolationCut;              //max isolation
       Bool_t           fVetoTriggerJet;                //whether to veto on the leading jet
       Bool_t           fVetoGenLeptons;                //whether we exclude gen leptons
       Bool_t           fVetoCleanLeptons;              //whether we exclude clean leptons
@@ -129,6 +157,7 @@ namespace mithep
       const JetCol           *fJets;                  //!Jet branch
       const VertexCol        *fVertices;              //!Vertex branch
       const DecayParticleCol *fConversions;           //!conversion collection       
+      ElectronIDMod          *electronID;             //!electron ID object
 
       ClassDef(GenFakeableObjsMod, 1) // Fakeable objects generation module
   };
