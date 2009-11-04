@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.5 2009/08/11 09:16:01 loizides Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.6 2009/11/03 08:40:37 ceballos Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -450,14 +450,11 @@ void GenFakeableObjsMod::Process()
         tmpElectron->SetPtEtaPhi(denominator->Pt(), denominator->Eta(),denominator->Phi());
         tmpElectron->SetGsfTrk(denominator->GsfTrk());
         tmpElectron->SetSuperCluster(denominator->SCluster());        
-      }
+      } 
     }
   } else if (fElFOType == kElFOLoose) {
     for (UInt_t i=0; i<DuplicateRemovedElectrons->GetEntries(); i++) {  
       const Electron *denominator = DuplicateRemovedElectrons->At(i);
-      Double_t denominatorIso =  
-        denominator->TrackIsolationDr03() + 
-        denominator->EcalRecHitIsoDr04() - 1.5;
       
       //Veto denominators matching to real electrons      
       Bool_t IsGenLepton = false;
