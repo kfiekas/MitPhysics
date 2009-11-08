@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.46 2009/11/02 13:48:23 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.47 2009/11/02 13:52:55 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -292,6 +292,8 @@ void ElectronIDMod::Process()
     if (fApplyConvFilter) {
       LoadEventObject(fConversionBranchName, fConversions);
       passConvVeto = PassConversionFilter(e, fConversions);      
+    } else {
+      passConvVeto = kTRUE;
     }
     if (passConvVeto == kFALSE) continue;
     
