@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.33 2009/09/28 14:32:28 loizides Exp $
+// $Id: GeneratorMod.h,v 1.34 2009/10/21 13:19:44 loizides Exp $
 //
 // GeneratorMod
 //
@@ -28,6 +28,7 @@ namespace mithep
                    const char *title="Generator information module");
       ~GeneratorMod();
 
+      Bool_t               GetIsData()           const { return fIsData;           }
       Bool_t               GetApplyISRFilter()   const { return fApplyISRFilter;   }
       Bool_t               GetCopyArrays()	 const { return fCopyArrays;       }	
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
@@ -43,6 +44,7 @@ namespace mithep
       const char          *GetMCTausName()	 const { return fMCTausName;       }	
       const char          *GetMCqqHsName()	 const { return fMCqqHsName;       }	
       Bool_t               GetPrintDebug()	 const { return fPrintDebug;       }	
+      void                 SetIsData(Bool_t b)	               { fIsData           = b; }	 
       void                 SetApplyISRFilter(Bool_t b)	       { fApplyISRFilter   = b; }	 
       void                 SetCopyArrays(Bool_t b)	       { fCopyArrays       = b; }	 
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
@@ -72,6 +74,7 @@ namespace mithep
       void                 Process();
       void                 SlaveBegin();
 
+      Bool_t               fIsData;             //=true then it does nothing (def=0)
       Bool_t               fPrintDebug;         //=true then print debug info (def=0)
       Bool_t               fCopyArrays;         //=true then copy array content for skimming  (def=0)
       TString              fMCPartName;         //name of MCParticle branch

@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.4 2009/09/03 07:08:33 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.5 2009/09/03 07:21:52 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -19,6 +19,7 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
   fInputFileName("setme"),
   fMCBosonsName(ModNames::gkMCBosonsName),
   fMCEvInfoName(Names::gkMCEvtInfoBrn),
+  fIsData(kFALSE),
   fPt_histo(0),
   fMCEventInfo(0)
 {
@@ -38,48 +39,50 @@ void HKFactorProducer::Process()
 {
   // Process entries of the tree.
 
-  // get the bosons
-  MCParticleCol *GenBosons = GetObjThisEvt<MCParticleCol>(fMCBosonsName);
-
-  LoadBranch(fMCEvInfoName);
-
   Double_t theWeight = 1.0;
 
-  // only accept the exact process id
-  if (fProcessID == fMCEventInfo->ProcessId()) { 
+  if(fIsData == kFALSE){
+    // get the bosons
+    MCParticleCol *GenBosons = GetObjThisEvt<MCParticleCol>(fMCBosonsName);
 
-    Double_t ptH = -1.0;
-    for (UInt_t i=0; i<GenBosons->GetEntries(); ++i) {
-      if(GenBosons->At(i)->PdgId() == MCParticle::kH) {
-    	ptH = GenBosons->At(i)->Pt();
-    	break;
+    LoadBranch(fMCEvInfoName);
+
+    // only accept the exact process id
+    if (fProcessID == fMCEventInfo->ProcessId()) { 
+
+      Double_t ptH = -1.0;
+      for (UInt_t i=0; i<GenBosons->GetEntries(); ++i) {
+	if(GenBosons->At(i)->PdgId() == MCParticle::kH) {
+    	  ptH = GenBosons->At(i)->Pt();
+    	  break;
+	}
+      }
+
+      if(ptH >= 0) {
+	// calculate bin size
+	Double_t binsize = fPt_histo->GetXaxis()->GetXmax()/fPt_histo->GetNbinsX();
+	// get bin
+	Int_t bin = Int_t((ptH/binsize)) + 1;
+	// overflow protection: use last entry
+	if(bin > fPt_histo->GetNbinsX()) bin=fPt_histo->GetNbinsX();
+	theWeight = fPt_histo->GetBinContent(bin);
+
+	if (0) {
+          cout << "Bin Size: " << binsize << ", Higgs Pt: " << ptH
+               << ", Bin: "<< bin  << ", KFactor: "<< fPt_histo->GetBinContent(bin) << endl;
+	}
+
+	if (GetFillHist()) {
+          hDHKFactor[0]->Fill(0.5);
+          hDHKFactor[1]->Fill(TMath::Min(ptH,499.999));
+          hDHKFactor[2]->Fill(TMath::Min(ptH,499.999),theWeight);
+          hDHKFactor[3]->Fill(TMath::Min(theWeight,9.999));
+	}
       }
     }
-  
-    if(ptH >= 0) {
-      // calculate bin size
-      Double_t binsize = fPt_histo->GetXaxis()->GetXmax()/fPt_histo->GetNbinsX();
-      // get bin
-      Int_t bin = Int_t((ptH/binsize)) + 1;
-      // overflow protection: use last entry
-      if(bin > fPt_histo->GetNbinsX()) bin=fPt_histo->GetNbinsX();
-      theWeight = fPt_histo->GetBinContent(bin);
-
-      if (0) {
-        cout << "Bin Size: " << binsize << ", Higgs Pt: " << ptH
-             << ", Bin: "<< bin  << ", KFactor: "<< fPt_histo->GetBinContent(bin) << endl;
-      }
-
-      if (GetFillHist()) {
-        hDHKFactor[0]->Fill(0.5);
-        hDHKFactor[1]->Fill(TMath::Min(ptH,499.999));
-        hDHKFactor[2]->Fill(TMath::Min(ptH,499.999),theWeight);
-        hDHKFactor[3]->Fill(TMath::Min(theWeight,9.999));
-      }
-    }
+    // process id distribution
+    if (GetFillHist()) hDHKFactor[4]->Fill(TMath::Min((Double_t)fMCEventInfo->ProcessId(),999.499));
   }
-  // process id distribution
-  if (GetFillHist()) hDHKFactor[4]->Fill(TMath::Min((Double_t)fMCEventInfo->ProcessId(),999.499));
 
   TParameter<Double_t> *NNLOWeight = new TParameter<Double_t>("NNLOWeight", theWeight);
   AddObjThisEvt(NNLOWeight);
@@ -90,7 +93,9 @@ void HKFactorProducer::SlaveBegin()
 {
   // Book branch and histograms if wanted.
 
-  ReqBranch(fMCEvInfoName, fMCEventInfo);
+  if(fIsData == kFALSE){
+    ReqBranch(fMCEvInfoName, fMCEventInfo);
+  }
 
   if (!fPt_histo) {
     Info("SlaveBegin", "Using %s as input data file", fInputFileName.Data());

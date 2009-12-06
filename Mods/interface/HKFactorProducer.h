@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: HKFactorProducer.h,v 1.1 2009/04/06 10:43:58 ceballos Exp $
+// $Id: HKFactorProducer.h,v 1.2 2009/04/07 15:37:09 loizides Exp $
 //
 // HKFactorProducer
 //
@@ -31,6 +31,7 @@ namespace mithep
       void               SetInputFilename(const char *s)   { fInputFileName = s; }
       void               SetMCBosonsName(const char *s)    { fMCBosonsName  = s; }
       void               SetMCEventInfoName(const char *s) { fMCEvInfoName  = s; }
+      void               SetIsData(Bool_t b)               { fIsData        = b; }	 
 
     protected:
       void               Process();
@@ -42,6 +43,7 @@ namespace mithep
       TString            fMCEvInfoName;     //event info branch name
       HWWKfactorList    *fPt_histo;         //!histogram with weights read from input file
       const MCEventInfo *fMCEventInfo;      //!event info branch pointer
+      Bool_t             fIsData;           //=true then it does nothing (def=0)
       TH1D              *hDHKFactor[10];    //!output histograms
 
     ClassDef(HKFactorProducer, 1) // Module to produce k factors

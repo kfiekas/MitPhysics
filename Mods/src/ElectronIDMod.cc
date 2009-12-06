@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.47 2009/11/02 13:52:55 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.48 2009/11/08 13:52:29 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -26,6 +26,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fCaloIsolationCut(5.0),
   fEcalJuraIsoCut(5.0),
   fHcalIsolationCut(5.0),
+  fCombIsolationCut(5.0),
   fApplyConvFilter(kTRUE),
   fWrongHitsRequirement(kTRUE),
   fApplyD0Cut(kTRUE),
@@ -143,6 +144,10 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, EElIsoType isoType) 
       isocut = (ele->TrackIsolationDr03() < fTrackIsolationCut) &&
         (ele->EcalRecHitIsoDr04() < fEcalJuraIsoCut) &&
         (ele->HcalIsolation() < fHcalIsolationCut);
+      break;
+    case kTrackJuraCombined:
+      isocut = (ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr04() 
+                - 1.5 < fCombIsolationCut);
       break;
     case kTrackJuraSliding:
     {
@@ -372,6 +377,8 @@ void ElectronIDMod::Setup()
     fElIsoType = kTrackCalo;
   else if (fElectronIsoType.CompareTo("TrackJura") == 0) 
     fElIsoType = kTrackJura;
+  else if(fElectronIsoType.CompareTo("TrackJuraCombined") == 0)
+    fElIsoType = kTrackJuraCombined;
   else if(fElectronIsoType.CompareTo("TrackJuraSliding") == 0)
     fElIsoType = kTrackJuraSliding;
   else if (fElectronIsoType.CompareTo("NoIso") == 0 )

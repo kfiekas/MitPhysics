@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.25 2009/09/29 19:41:13 loizides Exp $
+// $Id: ElectronIDMod.h,v 1.27 2009/11/03 08:38:37 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -42,6 +42,7 @@ namespace mithep
         kIsoUndef = 0,      //not defined
         kTrackCalo,         //"TrackCalo"
         kTrackJura,         //"TrackJura"
+        kTrackJuraCombined, //"TrackJuraCombined"
         kTrackJuraSliding,  //"TrackJuraSliding"
         kNoIso,             //"NoIso"
         kZeeIso,            //"ZeeIso"
@@ -52,6 +53,7 @@ namespace mithep
       Bool_t              GetApplyD0Cut()             const { return fApplyD0Cut;             }
       Double_t            GetCaloIsoCut()             const { return fCaloIsolationCut;       }
       Double_t            GetEcalJurIsoCut()          const { return fEcalJuraIsoCut;         }
+      Double_t            GetCombIsoCut()             const { return fCombIsolationCut;       }
       const char         *GetGoodName()               const { return GetGoodElectronsName();  }   
       const char         *GetGoodElectronsName()      const { return fGoodElectronsName;      }   
       Double_t            GetHcalIsoCut()             const { return fHcalIsolationCut;       }
@@ -73,6 +75,7 @@ namespace mithep
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
+      void                SetCombIsoCut(Double_t cut)           { fCombIsolationCut  = cut;   }
       void                SetD0Cut(Double_t cut)                { fD0Cut = cut;               }
       void                SetEcalJurIsoCut(Double_t cut)        { fEcalJuraIsoCut     = cut;  }
       void                SetGoodElectronsName(const char *n)   { fGoodElectronsName  = n;    }   
@@ -112,6 +115,7 @@ namespace mithep
       Double_t                fCaloIsolationCut;       //cut value for calo isolation
       Double_t                fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
       Double_t                fHcalIsolationCut;       //cut value for hcal isolation
+      Double_t                fCombIsolationCut;       //cut value for combined isolation
       Bool_t                  fApplyConvFilter;        //whether remove conversions
       Bool_t                  fWrongHitsRequirement;   //whether to use wrong hits req for conversion removal
       Bool_t                  fApplyD0Cut;             //whether apply d0 cut

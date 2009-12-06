@@ -1,8 +1,9 @@
-// $Id: PDFProducerMod.cc,v 1.2 2009/08/11 10:50:38 loizides Exp $
+// $Id: PDFProducerMod.cc,v 1.1 2009/08/11 10:56:48 loizides Exp $
 
 #include "MitPhysics/Mods/interface/PDFProducerMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/MCEventInfo.h"
+#include "MitAna/DataTree/interface/ParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>
@@ -38,31 +39,46 @@ void PDFProducerMod::Process()
   Int_t    id2  = fMCEventInfo->Id2();
   Double_t x2   = fMCEventInfo->X2();
   Double_t pdf2 = fMCEventInfo->Pdf2();
+
+  if (GetFillHist()) {
+    hDPDFHisto[0]->Fill(TMath::Min(Q,999.999));
+    hDPDFHisto[1]->Fill(TMath::Min(pdf1,999.999));
+    hDPDFHisto[2]->Fill(TMath::Min(pdf2,999.999));
+    hDPDFHisto[3]->Fill(TMath::Min(x1,0.999));
+    hDPDFHisto[4]->Fill(TMath::Min(x2,0.999));
+  }
   
   UInt_t nmembers = LHAPDF::numberPDF() + 1;
 
   // Array to be filled
   FArrDouble *PDFArr = new FArrDouble(nmembers);
 
-  if (fPrintDebug) 
-    cout << "Start loop over PDF members:" << endl;
+  ParticleOArr *leptons = GetObjThisEvt<ParticleOArr>(ModNames::gkMergedLeptonsName);
+  if(leptons->GetEntries() >= 2){ // Nlep >= 2 to fill it
+    if (fPrintDebug) 
+      cout << "Start loop over PDF members:" << endl;
 
-  for (UInt_t i=0; i<nmembers; ++i) {
-    LHAPDF::usePDFMember(i);
-    Double_t newpdf1 = LHAPDF::xfx(x1, Q, id1)/x1;
-    Double_t newpdf2 = LHAPDF::xfx(x2, Q, id2)/x2;
-    Double_t TheWeight = newpdf1/pdf1*newpdf2/pdf2;
-    
-    if (fPrintDebug) {
-      cout << i << " --> " << pdf1 << " "   << pdf2 << " | "
-                           << x1   << " "   << x2   << " | "
-			   << id1  << " "   << id2  << " | "
-			   << Q    << " : " <<  TheWeight << endl;
+    for (UInt_t i=0; i<nmembers; ++i) {
+      LHAPDF::usePDFMember(i);
+      Double_t newpdf1 = LHAPDF::xfx(x1, Q, id1)/x1;
+      Double_t newpdf2 = LHAPDF::xfx(x2, Q, id2)/x2;
+      Double_t TheWeight = newpdf1/pdf1*newpdf2/pdf2;
+
+      if (fPrintDebug) {
+	cout << i << " --> " << pdf1 << " "   << pdf2 << " | "
+                             << x1   << " "   << x2   << " | "
+			     << id1  << " "   << id2  << " | "
+			     << Q    << " : " <<  TheWeight << endl;
+      }
+      if (GetFillHist()) {
+        hDPDFHisto[5]->Fill(TMath::Min(TheWeight,99.999));
+	hDPDFHisto[6]->Fill(TheWeight);
+      }
+      PDFArr->Add(TheWeight);
     }
-    if (GetFillHist()) {
-      hDPDFHisto[0]->Fill(TheWeight);
-    }
-    PDFArr->Add(TheWeight);
+  } // Nlep >= 2 to fill it
+  else {
+    for (UInt_t i=0; i<nmembers; ++i) PDFArr->Add(1.0);
   }
 
   AddObjThisEvt(PDFArr, "PDFWeights");
@@ -82,8 +98,15 @@ void PDFProducerMod::SlaveBegin()
 
   if (GetFillHist()) {
     char sb[1024];
-    sprintf(sb,"hDPDFHisto_%d", 0);  
-    hDPDFHisto[0] = new TH1D(sb,sb,1,0,1); 
-    AddOutput(hDPDFHisto[0]);
+    sprintf(sb,"hDPDFHisto_%d", 0); hDPDFHisto[0] = new TH1D(sb,sb,500,0,1000); 
+    sprintf(sb,"hDPDFHisto_%d", 1); hDPDFHisto[1] = new TH1D(sb,sb,500,0,1000); 
+    sprintf(sb,"hDPDFHisto_%d", 2); hDPDFHisto[2] = new TH1D(sb,sb,500,0,1000); 
+    sprintf(sb,"hDPDFHisto_%d", 3); hDPDFHisto[3] = new TH1D(sb,sb,100,0,1); 
+    sprintf(sb,"hDPDFHisto_%d", 4); hDPDFHisto[4] = new TH1D(sb,sb,100,0,1); 
+    sprintf(sb,"hDPDFHisto_%d", 5); hDPDFHisto[5] = new TH1D(sb,sb,500,0,100); 
+    sprintf(sb,"hDPDFHisto_%d", 6); hDPDFHisto[6] = new TH1D(sb,sb,1,0,1); 
+    for(int i=0; i<7; i++){
+      AddOutput(hDPDFHisto[i]);
+    }
   }
 }

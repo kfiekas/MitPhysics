@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.10 2009/06/15 15:00:21 loizides Exp $
+// $Id: PhotonIDMod.h,v 1.11 2009/08/24 14:46:26 ceballos Exp $
 //
 // PhotonIDMod
 //
@@ -35,6 +35,7 @@ namespace mithep
       Bool_t              GetApplyFiduciality()       const { return fFiduciality;         }
       Double_t            GetEtaWidthEB()	      const { return fEtaWidthEB;	   }
       Double_t            GetEtaWidthEE()	      const { return fEtaWidthEE;	   }
+      Double_t            GetAbsEtaMax()	      const { return fAbsEtaMax;	   }
       void                SetApplyPixelSeed(Bool_t b)       { fApplyPixelSeed  = b;        }
       void                SetGoodName(const char *n)        { SetGoodPhotonsName(n);       }   
       void                SetGoodPhotonsName(const char *n) { fGoodPhotonsName = n;        }   
@@ -47,6 +48,7 @@ namespace mithep
       void                SetR9Min(Double_t x)              { fPhotonR9Min     = x;        }
       void                SetEtaWidthEB(Double_t x)	    { fEtaWidthEB      = x;	   }
       void                SetEtaWidthEE(Double_t x)         { fEtaWidthEE      = x;	   }
+      void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax       = x;	   }
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -79,6 +81,7 @@ namespace mithep
       Bool_t              fFiduciality;          //=true then apply fiducual requirement
       Double_t            fEtaWidthEB;  	 //max Eta Width in ECAL Barrel
       Double_t            fEtaWidthEE;  	 //max Eta Width in ECAL End Cap
+      Double_t            fAbsEtaMax;  	         //max Abs Eta
       const PhotonCol    *fPhotons;              //!photon branch
     
     ClassDef(PhotonIDMod, 1) // Photon identification module

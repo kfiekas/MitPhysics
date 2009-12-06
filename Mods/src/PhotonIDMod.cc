@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.9 2009/08/21 15:51:53 ceballos Exp $
+// $Id: PhotonIDMod.cc,v 1.10 2009/08/24 14:46:26 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -24,6 +24,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fFiduciality(kTRUE),
   fEtaWidthEB(0.013),
   fEtaWidthEE(0.031),
+  fAbsEtaMax(2.5),
   fPhotons(0)
 {
   // Constructor.
@@ -103,6 +104,9 @@ void PhotonIDMod::Process()
         (ph->IsEE() == kTRUE && ph->SCluster()->EtaWidth() >= fEtaWidthEE))
       continue;
 
+    if (ph->AbsEta() >= fAbsEtaMax) 
+      continue;
+    
     // add good electron
     GoodPhotons->Add(fPhotons->At(i));
   }
