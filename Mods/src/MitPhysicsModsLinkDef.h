@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.17 2009/08/11 10:56:48 loizides Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.19 2009/09/09 03:43:09 bendavid Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -7,6 +7,7 @@
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
+#include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitPhysics/Mods/interface/JetIDMod.h"
@@ -19,6 +20,7 @@
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitPhysics/Mods/interface/TauIDMod.h"
+#include "MitPhysics/Mods/interface/TrackingPurityFilterMod.h"
 #endif
 
 #ifdef __CINT__
@@ -36,6 +38,7 @@
 #pragma link C++ enum mithep::ElectronIDMod::EElIdType;
 #pragma link C++ enum mithep::ElectronIDMod::EElIsoType;
 #pragma link C++ class mithep::GeneratorMod+;
+#pragma link C++ class mithep::GoodPVFilterMod+;
 #pragma link C++ class mithep::HKFactorProducer+;
 #pragma link C++ class mithep::JetCleaningMod+;
 #pragma link C++ class mithep::JetIDMod+;
@@ -51,4 +54,5 @@
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::TauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;
+#pragma link C++ class mithep::TrackingPurityFilterMod+;
 #endif
