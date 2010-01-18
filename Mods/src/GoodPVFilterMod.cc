@@ -1,4 +1,4 @@
-// $Id: GoodPVFilterMod.cc,v 1.4 2009/12/02 20:27:42 loizides Exp $
+// $Id: GoodPVFilterMod.cc,v 1.1 2010/01/18 14:43:02 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
@@ -63,6 +63,9 @@ const BitMask8 GoodPVFilterMod::FailedCuts(const Vertex *v) const
 //--------------------------------------------------------------------------------------------------
 void GoodPVFilterMod::Process()
 {
+  
+  LoadBranch(fVertexesName);
+  
   // Increment counters and stop further processing of an event if current run is excluded
 
   ++fNEvents; 

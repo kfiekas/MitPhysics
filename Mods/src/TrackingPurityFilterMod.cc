@@ -1,4 +1,4 @@
-// $Id: TrackingPurityFilterMod.cc,v 1.4 2009/12/02 20:27:42 loizides Exp $
+// $Id: TrackingPurityFilterMod.cc,v 1.1 2010/01/18 14:43:03 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/TrackingPurityFilterMod.h"
 #include <TFile.h>
@@ -46,6 +46,8 @@ void TrackingPurityFilterMod::BeginRun()
 void TrackingPurityFilterMod::Process()
 {
   // Increment counters and stop further processing of an event if current run is excluded
+
+  LoadBranch(fTracksName);
 
   ++fNEvents; 
   
