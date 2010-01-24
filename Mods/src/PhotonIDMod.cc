@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.10 2009/08/24 14:46:26 ceballos Exp $
+// $Id: PhotonIDMod.cc,v 1.11 2009/12/06 14:59:28 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -79,11 +79,13 @@ void PhotonIDMod::Process()
         isocut = kTRUE;
         break;
       case kCombinedIso:
-        Double_t totalIso = ph->HollowConeTrkIsoDr04()+
-                            ph->EcalRecHitIsoDr04() +
-                            ph->HcalTowerSumEtDr04();
-        if (totalIso/ph->Pt() < 0.25)
-          isocut = kTRUE;
+        {
+          Double_t totalIso = ph->HollowConeTrkIsoDr04()+
+                              ph->EcalRecHitIsoDr04() +
+                              ph->HcalTowerSumEtDr04();
+          if (totalIso/ph->Pt() < 0.25)
+            isocut = kTRUE;
+        }
         break;
       case kCustomIso:
       default:
