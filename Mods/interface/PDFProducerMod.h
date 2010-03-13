@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PDFProducerMod.h,v 1.2 2009/08/11 10:50:37 loizides Exp $
+// $Id: PDFProducerMod.h,v 1.1 2009/08/11 10:56:48 loizides Exp $
 //
 // PDFProducerMod
 //
@@ -28,6 +28,7 @@ namespace mithep
       void               SetMCEventInfoName(const char *s)   { fMCEvInfoName = s; }
       void               SetPDFName(const char *s)           { fPDFName      = s; }
       void               SetPrintDebug(Bool_t b)             { fPrintDebug   = b; }
+      void               SetRunPDF(Bool_t b)                 { fRunPDF       = b; }
 
     protected:
       void               Process();
@@ -36,6 +37,7 @@ namespace mithep
       Bool_t             fPrintDebug;       //=true then print debug info
       TString            fMCEvInfoName;     //event info branch name
       TString            fPDFName;          //PDF name
+      Bool_t             fRunPDF;           //=true run PDFs
       const MCEventInfo *fMCEventInfo;      //!event info branch pointer
       TH1D              *hDPDFHisto[10];    //!output histograms
 
