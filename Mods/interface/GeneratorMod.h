@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.34 2009/10/21 13:19:44 loizides Exp $
+// $Id: GeneratorMod.h,v 1.35 2009/12/06 14:59:43 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -100,6 +100,7 @@ namespace mithep
       Double_t             fMassMaxCut;	        //mass max for given PdgId particle
       Bool_t               fApplyISRFilter;     //=true then apply ISR filter (def=0)
       const MCParticleCol *fParticles;	        //!MCParticle branch
+      TH1D                *hDGenPtMin;          //!histo for Pt min for leptons from W/Z
       TH1D                *hDGenMet[10];        //!histos for gen MET
       TH1D                *hDGenLeptons[40];    //!histos for W/Z/H leptons
       TH1D                *hDGenAllLeptons[20]; //!histos for all leptons

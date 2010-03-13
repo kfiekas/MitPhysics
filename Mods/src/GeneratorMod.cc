@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.56 2009/10/25 10:50:14 sixie Exp $
+// $Id: GeneratorMod.cc,v 1.57 2009/12/06 14:59:28 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -121,6 +121,7 @@ void GeneratorMod::Process()
   Int_t sumVVFlavor[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   Double_t totalMET[3] = {0.0, 0.0, 0.0};
   Bool_t isqqH = kFALSE;
+  Double_t ptMin = 999999.;
   if(fIsData == kFALSE){
     if (fPrintDebug) 
       printf("\n************ Next Event ************\n\n");
@@ -165,6 +166,13 @@ void GeneratorMod::Process()
 
       if (!p->IsGenerated()) continue;
 
+      if ((((p->Is(MCParticle::kEl) || p->Is(MCParticle::kMu)) && 
+            !p->HasMother(MCParticle::kTau, kFALSE)) || p->Is(MCParticle::kTau)) && 
+           p->Status() == 3 &&
+	  (p->HasMother(MCParticle::kW, kFALSE) || p->HasMother(MCParticle::kZ, kFALSE))) {
+        if(p->Pt() < ptMin) ptMin = p->Pt();
+      }
+
       // all muons/electrons
       if ((p->Is(MCParticle::kEl) || p->Is(MCParticle::kMu)) && p->Status() == 1) {
 	if (p->Pt() > fPtLeptonMin && p->AbsEta() < fEtaLeptonMax) {
@@ -199,7 +207,7 @@ void GeneratorMod::Process()
                 	 p->Pz()-tv->Pz(), p->E()-tv->E());
             GenTaus->AddOwned(pm_f);
           } else {
-            SendError(kWarning, "Process", "Could not find a tau neutrino!");
+            //SendError(kWarning, "Process", "Could not find a tau neutrino!");
           }
 	}
       }
@@ -825,8 +833,8 @@ void GeneratorMod::Process()
 	if(diBosonMass[0] > 70 && diBosonMass[0] < 110 && 
            diBosonMass[1] > 70 && diBosonMass[1] < 110){
           if(sumV[0] + 4*sumV[1] == 2){
-            if     (sumVVFlavor[0] == 2)    		    hDVVMass[18]->Fill(0.);
-            else if(sumVVFlavor[1] == 2)    		    hDVVMass[18]->Fill(1.);
+            if     (sumVVFlavor[0] == 2)    		        hDVVMass[18]->Fill(0.);
+            else if(sumVVFlavor[1] == 2)    		        hDVVMass[18]->Fill(1.);
             else if(sumVVFlavor[2] == 2)                        hDVVMass[18]->Fill(2.);
             else if(sumVVFlavor[0] == 1 && sumVVFlavor[1] == 1) hDVVMass[18]->Fill(3.);
             else if(sumVVFlavor[0] == 1 && sumVVFlavor[2] == 1) hDVVMass[18]->Fill(4.);
@@ -843,22 +851,23 @@ void GeneratorMod::Process()
             else if(sumVVFlavor[5] == 1 && sumVVFlavor[0] == 1)  hDVVMass[19]->Fill(6.);
             else if(sumVVFlavor[5] == 1 && sumVVFlavor[1] == 1)  hDVVMass[19]->Fill(7.);
             else if(sumVVFlavor[5] == 1 && sumVVFlavor[2] == 1)  hDVVMass[19]->Fill(8.);
-            else                           			    hDVVMass[19]->Fill(9.);
+            else  {                         			 hDVVMass[19]->Fill(9.);
+	    /*for(int i=0; i<9; i++) cout << sumVVFlavor[i] << " " ;cout << endl;*/}
           }
           if(sumV[0] + 4*sumV[1] == 8 &&
-             sumVVFlavor[3] + sumVVFlavor[4] +sumVVFlavor[5] == 2){
-            if     (sumVVFlavor[3] == 2)  			     hDVVMass[20]->Fill(0.);
-            else if(sumVVFlavor[4] == 2)  			     hDVVMass[20]->Fill(1.);
-            else if(sumVVFlavor[5] == 2)  			     hDVVMass[20]->Fill(2.);
+             sumVVFlavor[3] + sumVVFlavor[4] + sumVVFlavor[5] == 2){
+            if     (sumVVFlavor[3] == 2)  			 hDVVMass[20]->Fill(0.);
+            else if(sumVVFlavor[4] == 2)  			 hDVVMass[20]->Fill(1.);
+            else if(sumVVFlavor[5] == 2)  			 hDVVMass[20]->Fill(2.);
             else if(sumVVFlavor[3] == 1 && sumVVFlavor[4] == 1)  hDVVMass[20]->Fill(3.);
             else if(sumVVFlavor[3] == 1 && sumVVFlavor[5] == 1)  hDVVMass[20]->Fill(4.);
             else if(sumVVFlavor[4] == 1 && sumVVFlavor[5] == 1)  hDVVMass[20]->Fill(5.);
             else                                                 hDVVMass[20]->Fill(6.);
           }
           else if(sumV[0] + 4*sumV[1] == 8){
-            if     (sumVVFlavor[6] == 2)  			     hDVVMass[21]->Fill(0.);
-            else if(sumVVFlavor[7] == 2)  			     hDVVMass[21]->Fill(1.);
-            else if(sumVVFlavor[8] == 2)  			     hDVVMass[21]->Fill(2.);
+            if     (sumVVFlavor[6] == 2)  			 hDVVMass[21]->Fill(0.);
+            else if(sumVVFlavor[7] == 2)  			 hDVVMass[21]->Fill(1.);
+            else if(sumVVFlavor[8] == 2)  			 hDVVMass[21]->Fill(2.);
             else if(sumVVFlavor[3] == 1 && sumVVFlavor[6] == 1)  hDVVMass[21]->Fill(3.);
             else if(sumVVFlavor[3] == 1 && sumVVFlavor[7] == 1)  hDVVMass[21]->Fill(4.);
             else if(sumVVFlavor[3] == 1 && sumVVFlavor[8] == 1)  hDVVMass[21]->Fill(5.);
@@ -1085,6 +1094,12 @@ void GeneratorMod::Process()
                                          GenISRPhotons->At(i)->PdgId(),GenISRPhotons->At(i)->Status());
   }
 
+  //bool theZCut = (GenLeptons->GetEntries() > 0 || GenTaus->GetEntries() > 0) && GenQuarks->GetEntries() == 0;
+  //if(!theZCut){
+  //  SkipEvent();
+  //  return;
+  //}
+
   // fill histograms if requested
   if (GetFillHist()) {
     // MET
@@ -1093,6 +1108,13 @@ void GeneratorMod::Process()
     hDGenMet[2]->Fill(GenMet->At(0)->Py());
     hDGenMet[3]->Fill(GenMet->At(0)->Elongitudinal());
 
+    // pt min for leptons from W/Z
+    hDGenPtMin->Fill(TMath::Min(ptMin, 199.999));
+    //if(ptMin < 10){
+    //  SkipEvent();
+    //  return;
+    //}
+  
     // leptons
     hDGenLeptons[0]->Fill(GenLeptons->GetEntries());
     for(UInt_t i=0; i<GenLeptons->GetEntries(); i++) {
@@ -1454,6 +1476,9 @@ void GeneratorMod::SlaveBegin()
     AddTH1(hDGenMet[1],"hDGenMet_1","Gen MET Px;p_{x} [GeV];#",400,-200,200); 
     AddTH1(hDGenMet[2],"hDGenMet_2","Gen MET Py;p_{y} [GeV];#",400,-200,200); 
     AddTH1(hDGenMet[3],"hDGenMet_3","Gen MET Pz;p_{z} [GeV];#",400,-1000,1000);
+
+    // pt min for leptons from W/Z
+    AddTH1(hDGenPtMin, "hDGenPtMin","Pt min leptons from W/Z;p_{t} [GeV];#",200,0.0,200.0); 
 
     // leptons from W
     AddTH1(hDGenLeptons[0], "hDGenLeptons_0",
