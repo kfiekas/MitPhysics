@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.5 2009/09/03 07:21:52 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.6 2009/12/06 14:59:28 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -76,9 +76,14 @@ void HKFactorProducer::Process()
           hDHKFactor[0]->Fill(0.5);
           hDHKFactor[1]->Fill(TMath::Min(ptH,499.999));
           hDHKFactor[2]->Fill(TMath::Min(ptH,499.999),theWeight);
-          hDHKFactor[3]->Fill(TMath::Min(theWeight,9.999));
+          hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
 	}
       }
+    } else {
+      theWeight = fMCEventInfo->Weight();
+      hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
+      theWeight = theWeight/fabs(theWeight);
+      hDHKFactor[0]->Fill(0.5,theWeight);
     }
     // process id distribution
     if (GetFillHist()) hDHKFactor[4]->Fill(TMath::Min((Double_t)fMCEventInfo->ProcessId(),999.499));
@@ -107,7 +112,7 @@ void HKFactorProducer::SlaveBegin()
     sprintf(sb,"hDHKFactor_%d", 0);  hDHKFactor[0]  = new TH1D(sb,sb,1,0,1); 
     sprintf(sb,"hDHKFactor_%d", 1);  hDHKFactor[1]  = new TH1D(sb,sb,500,0.,500.); 
     sprintf(sb,"hDHKFactor_%d", 2);  hDHKFactor[2]  = new TH1D(sb,sb,500,0.,500.); 
-    sprintf(sb,"hDHKFactor_%d", 3);  hDHKFactor[3]  = new TH1D(sb,sb,400,0.,4.); 
+    sprintf(sb,"hDHKFactor_%d", 3);  hDHKFactor[3]  = new TH1D(sb,sb,400,-4.0,4.0); 
     sprintf(sb,"hDHKFactor_%d", 4);  hDHKFactor[4]  = new TH1D(sb,sb,1000,-0.5,999.5); 
     for(Int_t i=0; i<5; i++) AddOutput(hDHKFactor[i]);
   }
