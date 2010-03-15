@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: $
+// $Id: runPhysicsExample.C,v 1.1 2010/03/12 13:52:01 bendavid Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -186,8 +186,8 @@ void executePhysicsExample(const char *fileset  = "",
     d = c->FindDataset(book,dataset,fileset);
   else 
     d = c->FindDataset(book,skimdataset.Data(),fileset);
-  //ana->AddDataset(d);
-  ana->AddFile("rfio:/castor/cern.ch/user/p/paus/filler/011/s09-ttbar-mc3/s09-ttbar-mc3_000_10.root");
+  ana->AddDataset(d);
+  //ana->AddFile("rfio:/castor/cern.ch/user/p/paus/filler/011/s09-ttbar-mc3/s09-ttbar-mc3_000_10.root");
 
   //------------------------------------------------------------------------------------------------
   // organize output
