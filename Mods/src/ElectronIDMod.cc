@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.48 2009/11/08 13:52:29 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.49 2009/12/06 14:59:28 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -203,7 +203,6 @@ Bool_t ElectronIDMod::PassConversionFilter(const Electron *ele, const DecayParti
     if (ConversionMatchFound == kTRUE){
       isGoodConversion =  (conversions->At(ifc)->Prob() > 1e-6) &&
         (conversions->At(ifc)->Lxy() > 0) &&
-        (conversions->At(ifc)->Lz() > 0) &&
         (conversions->At(ifc)->Position().Rho() > 2.0);
       
       if (isGoodConversion == kTRUE) {
