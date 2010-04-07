@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.50 2010/03/28 15:58:53 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.51 2010/04/07 06:57:10 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -211,7 +211,6 @@ Bool_t ElectronIDMod::PassConversionFilter(const Electron *ele, const DecayParti
   Bool_t isGoodConversion = kFALSE;
 
   for (UInt_t ifc=0; ifc<conversions->GetEntries(); ifc++) {
-    
     Bool_t ConversionMatchFound = kFALSE;
     for (UInt_t d=0; d<conversions->At(ifc)->NDaughters(); d++) {
       const Track *trk = dynamic_cast<const ChargedParticle*>
@@ -221,39 +220,35 @@ Bool_t ElectronIDMod::PassConversionFilter(const Electron *ele, const DecayParti
         break;
       }
     }
-    
+
     // if match between the e-track and one of the conversion legs
     if (ConversionMatchFound == kTRUE){
       isGoodConversion =  (conversions->At(ifc)->Prob() > 1e-6) &&
         (conversions->At(ifc)->Lxy() > 0) &&
         (conversions->At(ifc)->Position().Rho() > 2.0);
-      
+
       if (isGoodConversion == kTRUE) {
         for (UInt_t d=0; d<conversions->At(ifc)->NDaughters(); d++) {
           const Track *trk = dynamic_cast<const ChargedParticle*>
             (conversions->At(ifc)->Daughter(d))->Trk();
-          
           if (trk) {
             // These requirements are not used for the GSF track
             if (!(trk->NHits() >= 3 && trk->Prob() > 1e-6) && trk!=ele->GsfTrk())
               isGoodConversion = kFALSE;
-            
             const StableData *sd = dynamic_cast<const StableData*>
               (conversions->At(ifc)->DaughterDat(d));
             if (fWrongHitsRequirement && sd->NWrongHits() != 0)
               isGoodConversion = kFALSE;
-            
           } else {
             isGoodConversion = kFALSE;
           }
         }
       }
     }
-    
     if (isGoodConversion == kTRUE) break;
     
   } // loop over all conversions 
-  
+
   return !isGoodConversion;
 }
 
@@ -566,16 +561,16 @@ void ElectronIDMod::SetCustomIsoCuts(EElIsoType idt)
 
   switch (idt) {
     case kVBTFWorkingPoint90Iso:
-      memcpy(fIsoCuts,VBTFWorkingPoint90,sizeof(fCuts));
+      memcpy(fIsoCuts,VBTFWorkingPoint90,sizeof(fIsoCuts));
       break;
     case kVBTFWorkingPoint80Iso:
-      memcpy(fIsoCuts,VBTFWorkingPoint80,sizeof(fCuts));
+      memcpy(fIsoCuts,VBTFWorkingPoint80,sizeof(fIsoCuts));
       break;
     case kVBTFWorkingPoint70Iso:
-      memcpy(fIsoCuts,VBTFWorkingPoint70,sizeof(fCuts));
+      memcpy(fIsoCuts,VBTFWorkingPoint70,sizeof(fIsoCuts));
       break;
     default:
-      memset(fIsoCuts,0,sizeof(fCuts));
+      memset(fIsoCuts,0,sizeof(fIsoCuts));
       break;
   }
 }
