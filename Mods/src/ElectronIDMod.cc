@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.49 2009/12/06 14:59:28 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.50 2010/03/28 15:58:53 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -47,7 +47,6 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
 Bool_t ElectronIDMod::PassCustomID(const Electron *ele) const
 {
   // Based on RecoEgamma/ElectronIdentification/src/CutBasedElectronID.cc.
-
   Double_t eOverP = ele->ESuperClusterOverP();
   Double_t fBrem  = ele->FBrem();
 
@@ -88,8 +87,37 @@ Bool_t ElectronIDMod::PassCustomID(const Electron *ele) const
   if(eSeedOverPin<fCuts[4][cat+4*eb])
     return kFALSE;
 
+
   return kTRUE;
 }
+
+//--------------------------------------------------------------------------------------------------
+Bool_t ElectronIDMod::PassCustomIso(const Electron *ele) const
+{
+  Bool_t pass = kTRUE;
+  
+  Double_t trkIso  = ele->TrackIsolationDr03();
+  Double_t ecalIso = ele->EcalRecHitIsoDr04();
+  Double_t hcalIso = ele->HcalIsolation();
+  Double_t combinedIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr04() - 1.5;
+
+  Int_t eb = 1;
+  if (ele->IsEB()) 
+    eb = 0;
+ 
+  if (trkIso>fCuts[0][eb])
+    pass = kFALSE;
+  if (ecalIso>fCuts[1][eb])
+    pass = kFALSE;
+  if (hcalIso>fCuts[2][eb])
+    pass = kFALSE;
+  if (combinedIso>fCuts[3][eb])
+    pass = kFALSE;
+
+
+  return pass;
+}
+
 
 //--------------------------------------------------------------------------------------------------
 Bool_t ElectronIDMod::PassIDCut(const Electron *ele, EElIdType idType) const
@@ -114,13 +142,6 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, EElIdType idType) const
       break;
     case kCustomIdTight:
       idcut = ElectronIDMod::PassCustomID(ele);
-      break;
-    case kZeeId:
-      if (ele->IsEB()) {
-        idcut = (ele->CoviEtaiEta() < 0.01 && ele->DeltaEtaSuperClusterTrackAtVtx() < 0.0071);
-      } else {
-        idcut = (ele->CoviEtaiEta() < 0.028 && ele->DeltaEtaSuperClusterTrackAtVtx() < 0.0066);
-      }
       break;
     default:
       break;
@@ -163,15 +184,17 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, EElIsoType isoType) 
         isocut = kFALSE;
     }
     break;
+    case kVBTFWorkingPoint90Iso:
+      isocut = ElectronIDMod::PassCustomIso(ele);
+      break;
+    case kVBTFWorkingPoint80Iso:
+      isocut = ElectronIDMod::PassCustomIso(ele);
+      break;
+    case kVBTFWorkingPoint70Iso:
+      isocut = ElectronIDMod::PassCustomIso(ele);
+      break;
     case kNoIso:
       isocut = kTRUE;
-      break;
-    case kZeeIso:
-      if (ele->IsEB()) {
-        isocut = (ele->TrackIsolationDr04() < 7.2 && ele->EcalRecHitIsoDr04() < 5.7 && ele->HcalTowerSumEtDr04() < 8.1);
-      } else {
-        isocut = (ele->TrackIsolationDr04() < 5.1 && ele->EcalRecHitIsoDr04() < 5.0 && ele->HcalTowerSumEtDr04() < 3.4);
-      }      
       break;
     case kCustomIso:
     default:
@@ -266,6 +289,29 @@ Bool_t ElectronIDMod::PassChargeFilter(const Electron *ele) const
 }
 
 //--------------------------------------------------------------------------------------------------
+Bool_t ElectronIDMod::PassSpikeRemovalFilter(const Electron *ele) const
+{
+  Bool_t passSpikeRemovalFilter = kTRUE;
+  if(ele->SCluster()->Seed()->Energy() > 5.0 && 
+     ele->SCluster()->Seed()->EMax() / ele->SCluster()->Seed()->E3x3() > 0.95
+    ) {
+    passSpikeRemovalFilter = kFALSE;
+  }
+
+  // For Now Only use the EMax/E3x3 prescription.
+  //   if(ele->SCluster()->Seed()->Energy() > 5.0 && 
+  //      (1 - (ele->SCluster()->Seed()->E1x3() + ele->SCluster()->Seed()->E3x1() - 2*ele->SCluster()->Seed()->EMax())) > 0.95
+  //     ) {
+  //     passSpikeRemovalFilter = kFALSE;
+  //   }
+    
+  return passSpikeRemovalFilter;
+}
+
+
+
+
+//--------------------------------------------------------------------------------------------------
 void ElectronIDMod::Process()
 {
   // Process entries of the tree. 
@@ -358,19 +404,26 @@ void ElectronIDMod::Setup()
     fElIdType = kNoId;
   else if (fElectronIDType.CompareTo("ZeeId") == 0) 
     fElIdType = kZeeId;
-  else if (fElectronIDType.CompareTo("CustomLoose") == 0) {
+  else if (fElectronIDType.CompareTo("CustomLoose") == 0) 
     fElIdType = kCustomIdLoose;
-  } else if (fElectronIDType.CompareTo("CustomTight") == 0) {
+  else if (fElectronIDType.CompareTo("CustomTight") == 0) 
     fElIdType = kCustomIdTight;
-  }
+  else if (fElectronIDType.CompareTo("VBTFWorkingPoint90Id") == 0) 
+    fElIdType = kVBTFWorkingPoint90Id;
+  else if (fElectronIDType.CompareTo("VBTFWorkingPoint80Id") == 0) 
+    fElIdType = kVBTFWorkingPoint80Id;
+  else if (fElectronIDType.CompareTo("VBTFWorkingPoint70Id") == 0) 
+    fElIdType = kVBTFWorkingPoint70Id;
+  
    else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified electron identification %s is not defined.",
               fElectronIDType.Data());
     return;
   }
-
   SetCustomIDCuts(fElIdType);
+
+
 
   if (fElectronIsoType.CompareTo("TrackCalo") == 0 )
     fElIsoType = kTrackCalo;
@@ -384,6 +437,12 @@ void ElectronIDMod::Setup()
     fElIsoType = kNoIso;
   else if (fElectronIsoType.CompareTo("ZeeIso") == 0 )
     fElIsoType = kZeeIso;
+  else if (fElectronIsoType.CompareTo("VBTFWorkingPoint90Iso") == 0 )
+    fElIsoType = kVBTFWorkingPoint90Iso;
+  else if (fElectronIsoType.CompareTo("VBTFWorkingPoint80Iso") == 0 )
+    fElIsoType = kVBTFWorkingPoint80Iso;
+  else if (fElectronIsoType.CompareTo("VBTFWorkingPoint70Iso") == 0 )
+    fElIsoType = kVBTFWorkingPoint70Iso;
   else if (fElectronIsoType.CompareTo("Custom") == 0 ) {
     fElIsoType = kCustomIso;
     SendError(kWarning, "SlaveBegin",
@@ -394,6 +453,8 @@ void ElectronIDMod::Setup()
               fElectronIsoType.Data());
     return;
   }
+  SetCustomIsoCuts(fElIsoType);
+
 
 }
 
@@ -408,7 +469,7 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
     {0.011, 0.011, 0.011, 0.0, 0.033, 0.029, 0.030, 0.0},     //sigmaetaeta
     {0.038, 0.024, 0.045, 0.0, 0.034, 0.017, 0.026, 0.0},   //deltaphiin
     {0.0081, 0.0029, 0.0051, 0.0, 0.0070, 0.0062, 0.0088, 0.0}, //deltaetain
-    {0.0, 0.9, 0.0, 0.0, 0.0, 0.78, 0.0, 0.0},             //eoverp
+    {0.0,    0.9,    0.0,    0.0, 0.0,    0.78,   0.0,    0.0},             //eoverp
     {0.8,0.2,0.9,0,0,0,0,0}};                              //extra cuts fbrem and E_Over_P 
 
   Double_t loosecuts[6][8]={
@@ -419,6 +480,33 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
     {0.3, 0.92, 0.211, 0.0, 0.42, 0.88, 0.68, 0.0},             //eoverp
     {0.8,0.2,0,0,0,0,0,0}};                                     //extra cuts fbrem and E_Over_P 
 
+  Double_t VBTFWorkingPoint90[6][8] = {
+    {0.05,  0.05,  0.05,  0.05,  0.05,  0.05,  0.05,  0.05},   //hovere
+    {0.012, 0.012, 0.012, 0.012, 0.03,  0.03,  0.03,  0.0 },  //sigmaetaeta
+    {0.04,  0.04,  0.04,  0.04,  0.04,  0.04,  0.04,  0.04},  //deltaphiin
+    {0.007, 0.007, 0.007, 0.007, 0.007, 0.007, 0.007, 0.007}, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0},   //eoverp
+    {0.0,   0.0,   0,     0,     0,     0,     0,     0}      //extra cuts fbrem and E_Over_P 
+  };            
+
+  Double_t VBTFWorkingPoint80[6][8] = {
+    {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025},   //hovere
+    {0.01, 0.01, 0.01, 0.01, 0.03,  0.03,  0.03,  0.0 },  //sigmaetaeta
+    {0.02,  0.02,  0.02,  0.02,  0.02,  0.02,  0.02,  0.02},  //deltaphiin
+    {0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006}, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0},   //eoverp
+    {0.0,   0.0,   0,     0,     0,     0,     0,     0}      //extra cuts fbrem and E_Over_P 
+  };            
+
+  Double_t VBTFWorkingPoint70[6][8] = {
+    {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025},   //hovere
+    {0.01, 0.01, 0.01, 0.01, 0.03,  0.03,  0.03,  0.0 },  //sigmaetaeta
+    {0.02,  0.02,  0.02,  0.02,  0.02,  0.02,  0.02,  0.02},  //deltaphiin
+    {0.006, 0.006, 0.006, 0.006, 0.003, 0.003, 0.003, 0.003}, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0},   //eoverp
+    {0.0,   0.0,   0,     0,     0,     0,     0,     0}      //extra cuts fbrem and E_Over_P 
+  };            
+  
 
   switch (idt) {
     case kCustomIdTight:    
@@ -427,8 +515,70 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
     case kCustomIdLoose:
       memcpy(fCuts,loosecuts,sizeof(fCuts));
       break;
+    case kVBTFWorkingPoint90Id:
+      memcpy(fCuts,VBTFWorkingPoint90,sizeof(fCuts));
+      break;
+    case kVBTFWorkingPoint80Id:
+      memcpy(fCuts,VBTFWorkingPoint80,sizeof(fCuts));
+      break;
+    case kVBTFWorkingPoint70Id:
+      memcpy(fCuts,VBTFWorkingPoint70,sizeof(fCuts));
+      break;
     default:
       memset(fCuts,0,sizeof(fCuts));
       break;
   }
 }
+
+//--------------------------------------------------------------------------------------------------
+void ElectronIDMod::SetCustomIsoCuts(EElIsoType idt)
+{
+
+  //From Georgios Daskalakis email:
+  // WP90 (90%) ======= EB -- track_iso 5.0 GeV ecal_iso 5.0 GeV hcal_iso 5.0 GeV sihih 0.012 Dphi@vtx 0.04 Deta@vtx 0.007 H/E 0.05 
+  // EE -- track_iso 5.0 GeV ecal_iso 5.0 GeV hcal_iso 5.0 GeV sihih 0.03 Dphi@vtx 0.04 Deta@vtx 0.007 H/E 0.05 
+  // WP80 (80%) ======= EB -- track_iso 3.0 GeV ecal_iso 4.0 GeV hcal_iso 5.0 GeV sihih 0.01 Dphi@vtx 0.02 Deta@vtx 0.006 H/E 0.05 
+  // EE -- track_iso 1.5 GeV ecal_iso 2.5 GeV hcal_iso 0.7 GeV sihih 0.03 Dphi@vtx 0.02 Deta@vtx 0.006 H/E 0.025 
+  // WP70 (70%) ======= EB -- track_iso 2.5 GeV ecal_iso 3.0 GeV hcal_iso 5.0 GeV sihih 0.01 Dphi@vtx 0.02 Deta@vtx 0.006 H/E 0.02 
+  // EE -- track_iso 0.8 GeV ecal_iso 2.5 GeV hcal_iso 0.25 GeV sihih 0.03 Dphi@vtx 0.02 Deta@vtx 0.003 H/E 0.0025 
+
+  Double_t VBTFWorkingPoint90[6][2] = {
+    {5.0 ,  5.0   },   //TrkIso
+    {5.0 ,  5.0   },   //ECALIso
+    {5.0 ,  5.0   },   //HCALIso
+    {9999,  9999  }   //Combined    
+  };            
+
+  Double_t VBTFWorkingPoint80[6][8] = {
+    {3.0 ,  1.5   },   //TrkIso
+    {4.0 ,  2.5   },   //ECALIso
+    {5.0 ,  0.7   },   //HCALIso
+    {9999,  9999  }   //Combined    
+  };            
+
+  Double_t VBTFWorkingPoint70[6][8] = {
+    {2.5 ,  0.8   },   //TrkIso
+    {3.0 ,  2.5   },   //ECALIso
+    {5.0 ,  0.25  },   //HCALIso
+    {9999,  9999  }   //Combined    
+  };            
+  
+
+  switch (idt) {
+    case kVBTFWorkingPoint90Iso:
+      memcpy(fIsoCuts,VBTFWorkingPoint90,sizeof(fCuts));
+      break;
+    case kVBTFWorkingPoint80Iso:
+      memcpy(fIsoCuts,VBTFWorkingPoint80,sizeof(fCuts));
+      break;
+    case kVBTFWorkingPoint70Iso:
+      memcpy(fIsoCuts,VBTFWorkingPoint70,sizeof(fCuts));
+      break;
+    default:
+      memset(fIsoCuts,0,sizeof(fCuts));
+      break;
+  }
+}
+
+
+

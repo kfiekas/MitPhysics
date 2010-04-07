@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.27 2009/11/03 08:38:37 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.28 2009/12/06 14:59:43 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -35,7 +35,10 @@ namespace mithep
         kNoId,              //"NoId"
         kZeeId,             //"ZeeId"
         kCustomIdLoose,     //"CustomLoose"
-        kCustomIdTight      //"CustomTight"
+        kCustomIdTight,     //"CustomTight"
+        kVBTFWorkingPoint90Id,
+        kVBTFWorkingPoint80Id,
+        kVBTFWorkingPoint70Id
       };
 
       enum EElIsoType {
@@ -46,7 +49,10 @@ namespace mithep
         kTrackJuraSliding,  //"TrackJuraSliding"
         kNoIso,             //"NoIso"
         kZeeIso,            //"ZeeIso"
-        kCustomIso          //"Custom"
+        kCustomIso,          //"Custom"
+        kVBTFWorkingPoint90Iso,
+        kVBTFWorkingPoint80Iso,
+        kVBTFWorkingPoint70Iso
       };
 
       Bool_t              GetApplyConversionFilter()  const { return fApplyConvFilter;        }
@@ -72,6 +78,7 @@ namespace mithep
       Bool_t              PassD0Cut(const Electron *el, const VertexCol *vertices) const;
       Bool_t              PassIDCut(const Electron *el, EElIdType idType) const;
       Bool_t              PassIsolationCut(const Electron *el, EElIsoType isoType) const;
+      Bool_t              PassSpikeRemovalFilter(const Electron *ele) const;
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
@@ -94,12 +101,12 @@ namespace mithep
       void                SetWrongHitsRequirement(Bool_t b)     { fWrongHitsRequirement = b;  }
       void                Setup();
 
-
-
     protected:
       Bool_t              PassCustomID(const Electron *el) const;
+      Bool_t              PassCustomIso(const Electron *el) const;
       void                Process();
       void                SetCustomIDCuts(EElIdType idt);
+      void                SetCustomIsoCuts(EElIsoType idt);
       void                SlaveBegin();
 
 
@@ -129,6 +136,7 @@ namespace mithep
       const DecayParticleCol *fConversions;            //!conversion collection
       const VertexCol        *fVertices;               //!vertices branches
       Double_t                fCuts[6][8];             //!custom id cuts
+      Double_t                fIsoCuts[4][2];          //!custom isolation cuts
 
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };
