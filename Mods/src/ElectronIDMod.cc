@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.51 2010/04/07 06:57:10 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.52 2010/04/07 12:24:58 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -476,30 +476,30 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
     {0.8,0.2,0,0,0,0,0,0}};                                     //extra cuts fbrem and E_Over_P 
 
   Double_t VBTFWorkingPoint90[6][8] = {
-    {0.05,  0.05,  0.05,  0.05,  0.05,  0.05,  0.05,  0.05},   //hovere
-    {0.012, 0.012, 0.012, 0.012, 0.03,  0.03,  0.03,  0.0 },  //sigmaetaeta
-    {0.04,  0.04,  0.04,  0.04,  0.04,  0.04,  0.04,  0.04},  //deltaphiin
-    {0.007, 0.007, 0.007, 0.007, 0.007, 0.007, 0.007, 0.007}, //deltaetain
-    {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0},   //eoverp
-    {0.0,   0.0,   0,     0,     0,     0,     0,     0}      //extra cuts fbrem and E_Over_P 
+    {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025 }, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03  }, //sigmaetaeta
+    {0.04,  0.04,  0.04,  0.04,  0.025,  0.025,  0.025,  0.025 }, //deltaphiin
+    {0.006, 0.006, 0.006, 0.006, 0.008,  0.008,  0.008,  0.008 }, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0   }, //eoverp
+    {0.0,   0.0,   0,     0,     0,      0,      0,      0     }  //extra cuts fbrem and E_Over_P 
   };            
 
   Double_t VBTFWorkingPoint80[6][8] = {
-    {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025},   //hovere
-    {0.01, 0.01, 0.01, 0.01, 0.03,  0.03,  0.03,  0.0 },  //sigmaetaeta
-    {0.02,  0.02,  0.02,  0.02,  0.02,  0.02,  0.02,  0.02},  //deltaphiin
-    {0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006}, //deltaetain
-    {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0},   //eoverp
-    {0.0,   0.0,   0,     0,     0,     0,     0,     0}      //extra cuts fbrem and E_Over_P 
+    {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025}, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
+    {0.02,  0.02,  0.02,  0.02,  0.02,   0.02,   0.02,   0.02 }, //deltaphiin
+    {0.006, 0.006, 0.006, 0.006, 0.006,  0.006,  0.006,  0.006}, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0  }, //eoverp
+    {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
   };            
 
   Double_t VBTFWorkingPoint70[6][8] = {
-    {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025},   //hovere
-    {0.01, 0.01, 0.01, 0.01, 0.03,  0.03,  0.03,  0.0 },  //sigmaetaeta
-    {0.02,  0.02,  0.02,  0.02,  0.02,  0.02,  0.02,  0.02},  //deltaphiin
-    {0.006, 0.006, 0.006, 0.006, 0.003, 0.003, 0.003, 0.003}, //deltaetain
-    {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0},   //eoverp
-    {0.0,   0.0,   0,     0,     0,     0,     0,     0}      //extra cuts fbrem and E_Over_P 
+    {0.02,  0.02,  0.02,  0.02,  0.025,  0.025,  0.025,  0.025}, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
+    {0.02,  0.02,  0.02,  0.02,  0.02,   0.02,   0.02,   0.02 }, //deltaphiin
+    {0.006, 0.006, 0.006, 0.006, 0.003,  0.003,  0.003,  0.003}, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0  }, //eoverp
+    {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
   };            
   
 
@@ -538,9 +538,9 @@ void ElectronIDMod::SetCustomIsoCuts(EElIsoType idt)
   // EE -- track_iso 0.8 GeV ecal_iso 2.5 GeV hcal_iso 0.25 GeV sihih 0.03 Dphi@vtx 0.02 Deta@vtx 0.003 H/E 0.0025 
 
   Double_t VBTFWorkingPoint90[6][2] = {
-    {5.0 ,  5.0   },   //TrkIso
-    {5.0 ,  5.0   },   //ECALIso
-    {5.0 ,  5.0   },   //HCALIso
+    {6.0 ,  6.0   },   //TrkIso
+    {5.0 ,  2.5   },   //ECALIso
+    {5.0 ,  1.5   },   //HCALIso
     {9999,  9999  }   //Combined    
   };            
 
