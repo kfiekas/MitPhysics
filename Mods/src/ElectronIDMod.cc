@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.52 2010/04/07 12:24:58 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.53 2010/04/07 12:53:32 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -17,7 +17,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronBranchName(Names::gkElectronBrn),
   fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
-  fVertexName(string("PrimaryVertexesBeamSpot").c_str()),
+  fVertexName(string("PrimaryVertexes").c_str()),
   fElectronIDType("CustomTight"),
   fElectronIsoType("TrackJuraSliding"),
   fElectronPtMin(10),
@@ -31,7 +31,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fWrongHitsRequirement(kTRUE),
   fApplyD0Cut(kTRUE),
   fChargeFilter(kTRUE),
-  fD0Cut(0.025),
+  fD0Cut(0.25),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
   fElIdType(kIdUndef),
@@ -87,7 +87,6 @@ Bool_t ElectronIDMod::PassCustomID(const Electron *ele) const
   if(eSeedOverPin<fCuts[4][cat+4*eb])
     return kFALSE;
 
-
   return kTRUE;
 }
 
@@ -105,13 +104,13 @@ Bool_t ElectronIDMod::PassCustomIso(const Electron *ele) const
   if (ele->IsEB()) 
     eb = 0;
  
-  if (trkIso>fCuts[0][eb])
+  if (trkIso>fIsoCuts[0][eb])
     pass = kFALSE;
-  if (ecalIso>fCuts[1][eb])
+  if (ecalIso>fIsoCuts[1][eb])
     pass = kFALSE;
-  if (hcalIso>fCuts[2][eb])
+  if (hcalIso>fIsoCuts[2][eb])
     pass = kFALSE;
-  if (combinedIso>fCuts[3][eb])
+  if (combinedIso>fIsoCuts[3][eb])
     pass = kFALSE;
 
 
@@ -141,6 +140,15 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, EElIdType idType) const
       idcut = ElectronIDMod::PassCustomID(ele);
       break;
     case kCustomIdTight:
+      idcut = ElectronIDMod::PassCustomID(ele);
+      break;
+    case kVBTFWorkingPoint90Id:
+      idcut = ElectronIDMod::PassCustomID(ele);
+      break;
+    case kVBTFWorkingPoint80Id:
+      idcut = ElectronIDMod::PassCustomID(ele);
+      break;
+    case kVBTFWorkingPoint70Id:
       idcut = ElectronIDMod::PassCustomID(ele);
       break;
     default:
@@ -303,9 +311,6 @@ Bool_t ElectronIDMod::PassSpikeRemovalFilter(const Electron *ele) const
   return passSpikeRemovalFilter;
 }
 
-
-
-
 //--------------------------------------------------------------------------------------------------
 void ElectronIDMod::Process()
 {
@@ -418,8 +423,6 @@ void ElectronIDMod::Setup()
   }
   SetCustomIDCuts(fElIdType);
 
-
-
   if (fElectronIsoType.CompareTo("TrackCalo") == 0 )
     fElIsoType = kTrackCalo;
   else if (fElectronIsoType.CompareTo("TrackJura") == 0) 
@@ -501,7 +504,6 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
     {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0  }, //eoverp
     {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
   };            
-  
 
   switch (idt) {
     case kCustomIdTight:    
@@ -544,20 +546,19 @@ void ElectronIDMod::SetCustomIsoCuts(EElIsoType idt)
     {9999,  9999  }   //Combined    
   };            
 
-  Double_t VBTFWorkingPoint80[6][8] = {
+  Double_t VBTFWorkingPoint80[6][2] = {
     {3.0 ,  1.5   },   //TrkIso
     {4.0 ,  2.5   },   //ECALIso
     {5.0 ,  0.7   },   //HCALIso
     {9999,  9999  }   //Combined    
   };            
 
-  Double_t VBTFWorkingPoint70[6][8] = {
+  Double_t VBTFWorkingPoint70[6][2] = {
     {2.5 ,  0.8   },   //TrkIso
     {3.0 ,  2.5   },   //ECALIso
     {5.0 ,  0.25  },   //HCALIso
     {9999,  9999  }   //Combined    
   };            
-  
 
   switch (idt) {
     case kVBTFWorkingPoint90Iso:
@@ -574,6 +575,3 @@ void ElectronIDMod::SetCustomIsoCuts(EElIsoType idt)
       break;
   }
 }
-
-
-
