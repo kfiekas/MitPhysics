@@ -14,6 +14,7 @@
 #include "MitAna/DataTree/interface/Electron.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
+#include "MitAna/DataTree/interface/BeamSpotCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 namespace mithep {
@@ -57,6 +58,8 @@ namespace mithep {
       static Bool_t       PassCustomID(const Electron *el, EElIdType idType);
       static Bool_t       PassCustomIso(const Electron *el, EElIsoType isoType);
       static Bool_t       PassD0Cut(const Electron *el, const VertexCol *vertices, 
+                                    Double_t fD0Cut, Bool_t fReverseD0Cut);
+      static Bool_t       PassD0Cut(const Electron *el, const BeamSpotCol *beamspots, 
                                     Double_t fD0Cut, Bool_t fReverseD0Cut);
       static Bool_t       PassSpikeRemovalFilter(const Electron *ele);
    

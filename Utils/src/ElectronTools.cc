@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.10 2009/07/20 04:55:33 loizides Exp $
+// $Id: ElectronTools.cc,v 1.1 2010/04/10 18:06:51 sixie Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -274,6 +274,28 @@ Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, 
   Double_t d0_real = 99999;
   for(UInt_t i0 = 0; i0 < vertices->GetEntries(); i0++) {
     Double_t pD0 = ele->GsfTrk()->D0Corrected(*vertices->At(i0));
+    if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
+  }
+  if(d0_real < fD0Cut) d0cut = kTRUE;
+  
+  if     (fReverseD0Cut == kTRUE &&
+          d0cut == kFALSE && d0_real < 0.05)
+    d0cut = kTRUE;
+  else if(fReverseD0Cut == kTRUE)
+    d0cut = kFALSE;
+  
+  return d0cut;
+}
+
+//--------------------------------------------------------------------------------------------------
+Bool_t ElectronTools::PassD0Cut(const Electron *ele, const BeamSpotCol *beamspots, Double_t fD0Cut, 
+                                Bool_t fReverseD0Cut) 
+{
+  Bool_t d0cut = kFALSE;
+  // d0 cut
+  Double_t d0_real = 99999;
+  for(UInt_t i0 = 0; i0 < beamspots->GetEntries(); i0++) {
+    Double_t pD0 = ele->GsfTrk()->D0Corrected(*beamspots->At(i0));
     if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
   }
   if(d0_real < fD0Cut) d0cut = kTRUE;
