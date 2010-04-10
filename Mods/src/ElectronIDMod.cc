@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.53 2010/04/07 12:53:32 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.54 2010/04/09 22:51:57 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -327,6 +327,11 @@ void ElectronIDMod::Process()
     if (e->Pt() <= fElectronPtMin) 
       continue;
     
+    //apply ECAL spike removal    
+    Bool_t spikecut = PassSpikeRemovalFilter(e);
+    if (!spikecut)
+      continue;
+
     //apply id cut
     Bool_t idcut = PassIDCut(e, fElIdType);
     if (!idcut) 
@@ -408,6 +413,8 @@ void ElectronIDMod::Setup()
     fElIdType = kCustomIdLoose;
   else if (fElectronIDType.CompareTo("CustomTight") == 0) 
     fElIdType = kCustomIdTight;
+  else if (fElectronIDType.CompareTo("VBTFWorkingPoint95Id") == 0) 
+    fElIdType = kVBTFWorkingPoint95Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint90Id") == 0) 
     fElIdType = kVBTFWorkingPoint90Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint80Id") == 0) 
@@ -435,6 +442,8 @@ void ElectronIDMod::Setup()
     fElIsoType = kNoIso;
   else if (fElectronIsoType.CompareTo("ZeeIso") == 0 )
     fElIsoType = kZeeIso;
+  else if (fElectronIsoType.CompareTo("VBTFWorkingPoint95Iso") == 0 )
+    fElIsoType = kVBTFWorkingPoint95Iso;
   else if (fElectronIsoType.CompareTo("VBTFWorkingPoint90Iso") == 0 )
     fElIsoType = kVBTFWorkingPoint90Iso;
   else if (fElectronIsoType.CompareTo("VBTFWorkingPoint80Iso") == 0 )
@@ -478,6 +487,16 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
     {0.3, 0.92, 0.211, 0.0, 0.42, 0.88, 0.68, 0.0},             //eoverp
     {0.8,0.2,0,0,0,0,0,0}};                                     //extra cuts fbrem and E_Over_P 
 
+  Double_t VBTFWorkingPoint95[6][8] = {
+    {0.05,  0.05,  0.05,  0.05,  0.04,   0.04,   0.04,   0.04 }, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03  }, //sigmaetaeta
+    {0.08,  0.08,  0.08,  0.08,  0.07,   0.07,   0.07,   0.07 }, //deltaphiin
+    {0.006, 0.006, 0.006, 0.006, 0.008,  0.008,  0.008,  0.008 }, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0   }, //eoverp
+    {0.0,   0.0,   0,     0,     0,      0,      0,      0     }  //extra cuts fbrem and E_Over_P 
+  };            
+
+
   Double_t VBTFWorkingPoint90[6][8] = {
     {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025 }, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03  }, //sigmaetaeta
@@ -512,6 +531,9 @@ void ElectronIDMod::SetCustomIDCuts(EElIdType idt)
     case kCustomIdLoose:
       memcpy(fCuts,loosecuts,sizeof(fCuts));
       break;
+    case kVBTFWorkingPoint95Id:
+      memcpy(fCuts,VBTFWorkingPoint95,sizeof(fCuts));
+      break;
     case kVBTFWorkingPoint90Id:
       memcpy(fCuts,VBTFWorkingPoint90,sizeof(fCuts));
       break;
@@ -539,21 +561,28 @@ void ElectronIDMod::SetCustomIsoCuts(EElIsoType idt)
   // WP70 (70%) ======= EB -- track_iso 2.5 GeV ecal_iso 3.0 GeV hcal_iso 5.0 GeV sihih 0.01 Dphi@vtx 0.02 Deta@vtx 0.006 H/E 0.02 
   // EE -- track_iso 0.8 GeV ecal_iso 2.5 GeV hcal_iso 0.25 GeV sihih 0.03 Dphi@vtx 0.02 Deta@vtx 0.003 H/E 0.0025 
 
-  Double_t VBTFWorkingPoint90[6][2] = {
+  Double_t VBTFWorkingPoint95[4][2] = {
+    {7.0 ,  8.0   },   //TrkIso
+    {5.0 ,  3.0   },   //ECALIso
+    {5.0 ,  2.0   },   //HCALIso
+    {9999,  9999  }   //Combined    
+  };            
+
+  Double_t VBTFWorkingPoint90[4][2] = {
     {6.0 ,  6.0   },   //TrkIso
     {5.0 ,  2.5   },   //ECALIso
     {5.0 ,  1.5   },   //HCALIso
     {9999,  9999  }   //Combined    
   };            
 
-  Double_t VBTFWorkingPoint80[6][2] = {
+  Double_t VBTFWorkingPoint80[4][2] = {
     {3.0 ,  1.5   },   //TrkIso
     {4.0 ,  2.5   },   //ECALIso
     {5.0 ,  0.7   },   //HCALIso
     {9999,  9999  }   //Combined    
   };            
 
-  Double_t VBTFWorkingPoint70[6][2] = {
+  Double_t VBTFWorkingPoint70[4][2] = {
     {2.5 ,  0.8   },   //TrkIso
     {3.0 ,  2.5   },   //ECALIso
     {5.0 ,  0.25  },   //HCALIso
@@ -561,6 +590,9 @@ void ElectronIDMod::SetCustomIsoCuts(EElIsoType idt)
   };            
 
   switch (idt) {
+    case kVBTFWorkingPoint95Iso:
+      memcpy(fIsoCuts,VBTFWorkingPoint95,sizeof(fIsoCuts));
+      break;
     case kVBTFWorkingPoint90Iso:
       memcpy(fIsoCuts,VBTFWorkingPoint90,sizeof(fIsoCuts));
       break;

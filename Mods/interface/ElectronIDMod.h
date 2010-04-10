@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.28 2009/12/06 14:59:43 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.29 2010/04/07 06:57:47 sixie Exp $
 //
 // ElectronIDMod
 //
@@ -36,6 +36,7 @@ namespace mithep
         kZeeId,             //"ZeeId"
         kCustomIdLoose,     //"CustomLoose"
         kCustomIdTight,     //"CustomTight"
+        kVBTFWorkingPoint95Id,
         kVBTFWorkingPoint90Id,
         kVBTFWorkingPoint80Id,
         kVBTFWorkingPoint70Id
@@ -50,6 +51,7 @@ namespace mithep
         kNoIso,             //"NoIso"
         kZeeIso,            //"ZeeIso"
         kCustomIso,          //"Custom"
+        kVBTFWorkingPoint95Iso,
         kVBTFWorkingPoint90Iso,
         kVBTFWorkingPoint80Iso,
         kVBTFWorkingPoint70Iso
