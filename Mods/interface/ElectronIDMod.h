@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.29 2010/04/07 06:57:47 sixie Exp $
+// $Id: ElectronIDMod.h,v 1.30 2010/04/10 16:29:51 sixie Exp $
 //
 // ElectronIDMod
 //
@@ -18,6 +18,7 @@
 #include "MitAna/DataTree/interface/ElectronFwd.h"
 #include "MitAna/DataTree/interface/VertexFwd.h"
 #include "MitAna/DataTree/interface/DecayParticleFwd.h"
+#include "MitPhysics/Utils/interface/ElectronTools.h"
 
 namespace mithep 
 {
@@ -26,36 +27,6 @@ namespace mithep
     public:
       ElectronIDMod(const char *name="ElectronIDMod", 
                     const char *title="Electron identification module");
-
-     enum EElIdType {
-        kIdUndef = 0,       //not defined
-        kTight,             //"Tight"
-        kLoose,             //"Loose"
-        kLikelihood,        //"Likelihood"
-        kNoId,              //"NoId"
-        kZeeId,             //"ZeeId"
-        kCustomIdLoose,     //"CustomLoose"
-        kCustomIdTight,     //"CustomTight"
-        kVBTFWorkingPoint95Id,
-        kVBTFWorkingPoint90Id,
-        kVBTFWorkingPoint80Id,
-        kVBTFWorkingPoint70Id
-      };
-
-      enum EElIsoType {
-        kIsoUndef = 0,      //not defined
-        kTrackCalo,         //"TrackCalo"
-        kTrackJura,         //"TrackJura"
-        kTrackJuraCombined, //"TrackJuraCombined"
-        kTrackJuraSliding,  //"TrackJuraSliding"
-        kNoIso,             //"NoIso"
-        kZeeIso,            //"ZeeIso"
-        kCustomIso,          //"Custom"
-        kVBTFWorkingPoint95Iso,
-        kVBTFWorkingPoint90Iso,
-        kVBTFWorkingPoint80Iso,
-        kVBTFWorkingPoint70Iso
-      };
 
       Bool_t              GetApplyConversionFilter()  const { return fApplyConvFilter;        }
       Bool_t              GetApplyD0Cut()             const { return fApplyD0Cut;             }
@@ -75,12 +46,9 @@ namespace mithep
       Bool_t              GetReverseIsoCut()          const { return fReverseIsoCut;          }
       Double_t            GetTrackIsoCut()            const { return fTrackIsolationCut;      }
       Bool_t              GetChargeFilter()           const { return fChargeFilter;           }
-      Bool_t              PassChargeFilter(const Electron *el) const;
-      Bool_t              PassConversionFilter(const Electron *el, const DecayParticleCol *conversions) const;
-      Bool_t              PassD0Cut(const Electron *el, const VertexCol *vertices) const;
-      Bool_t              PassIDCut(const Electron *el, EElIdType idType) const;
-      Bool_t              PassIsolationCut(const Electron *el, EElIsoType isoType) const;
-      Bool_t              PassSpikeRemovalFilter(const Electron *ele) const;
+      Bool_t              PassIDCut(const Electron *el, ElectronTools::EElIdType idType) const;
+      Bool_t              PassIsolationCut(const Electron *el, 
+                                           ElectronTools::EElIsoType isoType) const;
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
@@ -104,42 +72,37 @@ namespace mithep
       void                Setup();
 
     protected:
-      Bool_t              PassCustomID(const Electron *el) const;
-      Bool_t              PassCustomIso(const Electron *el) const;
       void                Process();
-      void                SetCustomIDCuts(EElIdType idt);
-      void                SetCustomIsoCuts(EElIsoType idt);
       void                SlaveBegin();
 
 
-      TString                 fElectronBranchName;     //name of electron collection (input)
-      TString                 fConversionBranchName;   //name of electron collection (input)
-      TString                 fGoodElectronsName;      //name of exported "good electrons" col
-      TString                 fVertexName;	       //name of vertex collection
-      TString                 fElectronIDType;         //type of electron ID we impose
-      TString                 fElectronIsoType;        //type of electron Isolation we impose
-      Double_t                fElectronPtMin;	       //min pt cut
-      Double_t                fIDLikelihoodCut;        //cut value for ID likelihood
-      Double_t                fTrackIsolationCut;      //cut value for track isolation
-      Double_t                fCaloIsolationCut;       //cut value for calo isolation
-      Double_t                fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
-      Double_t                fHcalIsolationCut;       //cut value for hcal isolation
-      Double_t                fCombIsolationCut;       //cut value for combined isolation
-      Bool_t                  fApplyConvFilter;        //whether remove conversions
-      Bool_t                  fWrongHitsRequirement;   //whether to use wrong hits req for conversion removal
-      Bool_t                  fApplyD0Cut;             //whether apply d0 cut
-      Bool_t                  fChargeFilter;           //whether apply GSF and CFT equal requirement
-      Double_t                fD0Cut;                  //max d0
-      Bool_t                  fReverseIsoCut;          //apply reversion iso cut (default=0)
-      Bool_t                  fReverseD0Cut;           //apply reversion d0 cut (default=0)
-      EElIdType               fElIdType;               //!identification scheme
-      EElIsoType              fElIsoType;              //!isolation scheme
-      const ElectronCol      *fElectrons;              //!electron collection
-      const DecayParticleCol *fConversions;            //!conversion collection
-      const VertexCol        *fVertices;               //!vertices branches
-      Double_t                fCuts[6][8];             //!custom id cuts
-      Double_t                fIsoCuts[4][2];          //!custom isolation cuts
-
+      TString                   fElectronBranchName;     //name of electron collection (input)
+      TString                   fConversionBranchName;   //name of electron collection (input)
+      TString                   fGoodElectronsName;      //name of exported "good electrons" col
+      TString                   fVertexName;	         //name of vertex collection
+      TString                   fElectronIDType;         //type of electron ID we impose
+      TString                   fElectronIsoType;        //type of electron Isolation we impose
+      Double_t                  fElectronPtMin;	         //min pt cut
+      Double_t                  fIDLikelihoodCut;        //cut value for ID likelihood
+      Double_t                  fTrackIsolationCut;      //cut value for track isolation
+      Double_t                  fCaloIsolationCut;       //cut value for calo isolation
+      Double_t                  fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
+      Double_t                  fHcalIsolationCut;       //cut value for hcal isolation
+      Double_t                  fCombIsolationCut;       //cut value for combined isolation
+      Bool_t                    fApplyConvFilter;        //whether remove conversions
+      Bool_t                    fWrongHitsRequirement;   //whether to use wrong hits req 
+                                                         //for conversion removal
+      Bool_t                    fApplyD0Cut;             //whether apply d0 cut
+      Bool_t                    fChargeFilter;           //whether apply GSF and CFT equal requirement
+      Double_t                  fD0Cut;                  //max d0
+      Bool_t                    fReverseIsoCut;          //apply reversion iso cut (default=0)
+      Bool_t                    fReverseD0Cut;           //apply reversion d0 cut (default=0)
+      ElectronTools::EElIdType  fElIdType;              //!identification scheme
+      ElectronTools::EElIsoType fElIsoType;              //!isolation scheme
+      const ElectronCol        *fElectrons;              //!electron collection
+      const DecayParticleCol   *fConversions;            //!conversion collection
+      const VertexCol          *fVertices;               //!vertices branches
+ 
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };
 }

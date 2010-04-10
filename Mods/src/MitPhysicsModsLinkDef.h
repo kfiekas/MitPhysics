@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.20 2010/01/18 14:43:02 bendavid Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.21 2010/04/08 09:30:04 sixie Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -36,8 +36,6 @@
 #pragma link C++ class mithep::EffMod+;
 #pragma link C++ class mithep::ElectronCleaningMod+;
 #pragma link C++ class mithep::ElectronIDMod+;
-#pragma link C++ enum mithep::ElectronIDMod::EElIdType;
-#pragma link C++ enum mithep::ElectronIDMod::EElIsoType;
 #pragma link C++ class mithep::GeneratorMod+;
 #pragma link C++ class mithep::GoodPVFilterMod+;
 #pragma link C++ class mithep::HFCoincidenceFilterMod+;
