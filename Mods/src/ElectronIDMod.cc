@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.56 2010/04/10 18:07:53 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.57 2010/04/10 19:38:45 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -29,6 +29,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fCombIsolationCut(5.0),
   fApplyConvFilter(kTRUE),
   fWrongHitsRequirement(kTRUE),
+  fApplySpikeRemoval(kTRUE),
   fApplyD0Cut(kTRUE),
   fChargeFilter(kTRUE),
   fD0Cut(0.25),
