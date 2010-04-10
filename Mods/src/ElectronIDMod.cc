@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.55 2010/04/10 16:29:52 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.56 2010/04/10 18:07:53 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -162,7 +162,7 @@ void ElectronIDMod::Process()
     
     //apply ECAL spike removal    
     Bool_t spikecut = ElectronTools::PassSpikeRemovalFilter(e);
-    if (!spikecut)
+    if (fApplySpikeRemoval && !spikecut)
       continue;
 
     //apply id cut

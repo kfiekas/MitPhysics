@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.30 2010/04/10 16:29:51 sixie Exp $
+// $Id: ElectronIDMod.h,v 1.31 2010/04/10 18:07:53 sixie Exp $
 //
 // ElectronIDMod
 //
@@ -29,6 +29,7 @@ namespace mithep
                     const char *title="Electron identification module");
 
       Bool_t              GetApplyConversionFilter()  const { return fApplyConvFilter;        }
+      Bool_t              GetApplySpikeRemoval()      const { return fApplySpikeRemoval;      }
       Bool_t              GetApplyD0Cut()             const { return fApplyD0Cut;             }
       Double_t            GetCaloIsoCut()             const { return fCaloIsolationCut;       }
       Double_t            GetEcalJurIsoCut()          const { return fEcalJuraIsoCut;         }
@@ -50,6 +51,7 @@ namespace mithep
       Bool_t              PassIsolationCut(const Electron *el, 
                                            ElectronTools::EElIsoType isoType) const;
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
+      void                SetApplySpikeRemoval(Bool_t b)        { fApplySpikeRemoval  = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
       void                SetCaloIsoCut(Double_t cut)           { fCaloIsolationCut   = cut;  }
       void                SetCombIsoCut(Double_t cut)           { fCombIsolationCut  = cut;   }
@@ -92,6 +94,7 @@ namespace mithep
       Bool_t                    fApplyConvFilter;        //whether remove conversions
       Bool_t                    fWrongHitsRequirement;   //whether to use wrong hits req 
                                                          //for conversion removal
+      Bool_t                    fApplySpikeRemoval;      //whether apply d0 cut
       Bool_t                    fApplyD0Cut;             //whether apply d0 cut
       Bool_t                    fChargeFilter;           //whether apply GSF and CFT equal requirement
       Double_t                  fD0Cut;                  //max d0
