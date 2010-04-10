@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.6 2009/08/11 09:15:59 loizides Exp $
+// $Id: GenFakeableObjsMod.h,v 1.7 2009/11/03 08:40:48 ceballos Exp $
 //
 // GenFakeableObjsMod
 //
@@ -157,7 +157,6 @@ namespace mithep
       const JetCol           *fJets;                  //!Jet branch
       const VertexCol        *fVertices;              //!Vertex branch
       const DecayParticleCol *fConversions;           //!conversion collection       
-      ElectronIDMod          *electronID;             //!electron ID object
 
       ClassDef(GenFakeableObjsMod, 1) // Fakeable objects generation module
   };

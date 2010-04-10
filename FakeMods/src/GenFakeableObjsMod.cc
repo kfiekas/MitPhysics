@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.6 2009/11/03 08:40:37 ceballos Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.7 2009/11/04 14:16:50 sixie Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -14,6 +14,7 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
+#include "MitPhysics/Utils/interface/ElectronTools.h"
 
 using namespace mithep;
 
@@ -110,13 +111,6 @@ void GenFakeableObjsMod::SlaveBegin()
               fMuonFOType.Data());
     return;
   }
-
-  electronID = new ElectronIDMod();
-  electronID->SetApplyConversionFilter(fApplyConvFilter);    
-  electronID->SetWrongHitsRequirement(fWrongHitsRequirement);    
-  electronID->SetApplyD0Cut(fApplyD0Cut);    
-  electronID->SetChargeFilter(fChargeFilter);    
-  electronID->SetD0Cut(fD0Cut);
 
 }
 
@@ -313,12 +307,13 @@ void GenFakeableObjsMod::Process()
         //****************************************************************************************
         // conversion filter
         //****************************************************************************************
-        Bool_t passConversionFilter = electronID->PassConversionFilter(tmpEle, fConversions);
+        Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions,
+                                                                          fWrongHitsRequirement );
 
         //****************************************************************************************
         // D0 Cut        
         //****************************************************************************************
-        Bool_t passD0Cut = electronID->PassD0Cut(tmpEle,fVertices);
+        Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle, fVertices, fD0Cut, kFALSE);
 
         //****************************************************************************************
         // Make denominator object cuts
@@ -428,12 +423,13 @@ void GenFakeableObjsMod::Process()
       //****************************************************************************************
       // conversion filter
       //****************************************************************************************
-      Bool_t passConversionFilter = electronID->PassConversionFilter(tmpEle, fConversions);
+      Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions, 
+                                                                     fWrongHitsRequirement);
       
       //****************************************************************************************
       // D0 Cut        
       //****************************************************************************************
-      Bool_t passD0Cut = electronID->PassD0Cut(tmpEle,fVertices);
+      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices,fD0Cut , kFALSE);
       
       //****************************************************************************************
       // Make denominator object cuts
@@ -509,12 +505,13 @@ void GenFakeableObjsMod::Process()
       //****************************************************************************************
       // conversion filter
       //****************************************************************************************
-      Bool_t passConversionFilter = electronID->PassConversionFilter(tmpEle, fConversions);
+      Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle,fConversions,
+                                                                        fWrongHitsRequirement);
       
       //****************************************************************************************
       // D0 Cut        
       //****************************************************************************************
-      Bool_t passD0Cut = electronID->PassD0Cut(tmpEle,fVertices);
+      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, fD0Cut, kFALSE);
       
       //****************************************************************************************
       // Make denominator object cuts
