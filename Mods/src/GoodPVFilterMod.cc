@@ -1,4 +1,4 @@
-// $Id: GoodPVFilterMod.cc,v 1.1 2010/01/18 14:43:02 bendavid Exp $
+// $Id: GoodPVFilterMod.cc,v 1.2 2010/01/18 17:24:53 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
@@ -14,7 +14,8 @@ ClassImp(mithep::GoodPVFilterMod)
 GoodPVFilterMod::GoodPVFilterMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fAbort(kTRUE),
-  fMinVertexNTracks(4),
+  fMinVertexNTracks(0),
+  fMinNDof(5),
   fMaxAbsZ(15.0),
   fMaxRho(2.0),
   fVertexesName(Names::gkPVBrn),
@@ -50,6 +51,9 @@ const BitMask8 GoodPVFilterMod::FailedCuts(const Vertex *v) const
   if (v->NTracksFit() < fMinVertexNTracks)
     failedCuts.SetBit(eNTracks);
   
+  if (v->Ndof() < fMinNDof)
+    failedCuts.SetBit(eNDof);
+  
   if (TMath::Abs(v->Position().Z()) > fMaxAbsZ)
     failedCuts.SetBit(eZ);
   
@@ -82,6 +86,11 @@ void GoodPVFilterMod::Process()
     failedNTracks.ClearBit(eNTracks);
     if (!failedNTracks.NBitsSet())
       hVertexNTracks->Fill(v->NTracksFit());
+    
+    BitMask8 failedNDof = failed;
+    failedNTracks.ClearBit(eNDof);
+    if (!failedNDof.NBitsSet())
+      hVertexNDof->Fill(v->Ndof());
     
     BitMask8 failedZ = failed;
     failedZ.ClearBit(eZ);
@@ -122,6 +131,9 @@ void GoodPVFilterMod::SlaveBegin()
   
   hVertexNTracks = new TH1F("hVertexNTracks", "hVertexNTracks", 401, -0.5,400.5);
   AddOutput(hVertexNTracks);
+  
+  hVertexNDof = new TH1F("hVertexNDof", "hVertexNDof", 401, -0.5,400.5);
+  AddOutput(hVertexNDof);
   
   hVertexZ = new TH1F("hVertexZ", "hVertexZ", 100, -100.0, 100.0);
   AddOutput(hVertexZ);

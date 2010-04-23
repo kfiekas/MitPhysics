@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GoodPVFilterMod.h,v 1.3 2009/12/02 20:27:42 loizides Exp $
+// $Id: GoodPVFilterMod.h,v 1.1 2010/01/18 14:43:02 bendavid Exp $
 //
 // GoodPVFilterMod
 //
@@ -25,6 +25,7 @@ namespace mithep
       
       enum ECuts {
         eNTracks,
+        eNDof,
         eZ,
         eRho
       };
@@ -37,6 +38,7 @@ namespace mithep
       Int_t                       GetNFailed()      const { return fNFailed;       }
       void                        SetAbortIfNotAccepted(Bool_t b)   { fAbort         = b; }
       void                        SetMinVertexNTracks(UInt_t n)     { fMinVertexNTracks = n; }
+      void                        SetMinNDof(UInt_t n)              { fMinNDof = n; }
       void                        SetMaxAbsZ(Double_t x)  { fMaxAbsZ = x; }
       void                        SetMaxRho(Double_t x)   { fMaxRho = x; }
 
@@ -51,6 +53,7 @@ namespace mithep
 
       Bool_t                      fAbort;         //=true then abort (sub-)modules if not accepted
       UInt_t                      fMinVertexNTracks; //minimum number of tracks for the vertex
+      UInt_t                      fMinNDof;       //minimum number of degrees of freedom
       Double_t                    fMaxAbsZ;       //maximum abs(z) of the vertex
       Double_t                    fMaxRho;        //maximum rho of the vertex
       TString                     fVertexesName;  //Name of PV collection
@@ -59,6 +62,7 @@ namespace mithep
       Int_t                       fNFailed;       //!number of failed events
       const VertexCol            *fVertexes;      //!PV collection
       TH1F                       *hVertexNTracks;
+      TH1F                       *hVertexNDof;
       TH1F                       *hVertexRho;
       TH1F                       *hVertexZ;
 
