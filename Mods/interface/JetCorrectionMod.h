@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.13 2009/06/15 15:00:21 loizides Exp $
+// $Id: JetCorrectionMod.h,v 1.1 2009/09/08 00:00:30 bendavid Exp $
 //
 // JetCorrectionMod
 //
@@ -15,7 +15,7 @@
 #define MITPHYSICS_MODS_JETCORRECTIONMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
-#include "CondFormats/JetMETObjects/interface/CombinedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 
 namespace mithep 
 {
@@ -44,7 +44,7 @@ namespace mithep
       TString           fJetsName;              //name of jet collection (input)
       TString           fCorrectedJetsName;     //name of good jets collection (output)
       TString           fCorrectionTag;         //tag to select which corrections to apply
-      CombinedJetCorrector *fJetCorrector;      //CMSSW/FWLite jet corrections module
+      FactorizedJetCorrector *fJetCorrector;      //CMSSW/FWLite jet corrections module
 
       ClassDef(JetCorrectionMod, 1) // Jet identification module
   };

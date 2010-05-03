@@ -1,4 +1,4 @@
-// $Id: HFCoincidenceFilterMod.cc,v 1.2 2010/01/18 17:24:53 bendavid Exp $
+// $Id: HFCoincidenceFilterMod.cc,v 1.1 2010/04/08 09:30:04 sixie Exp $
 
 #include "MitPhysics/Mods/interface/HFCoincidenceFilterMod.h"
 #include <TFile.h>
@@ -49,8 +49,8 @@ void HFCoincidenceFilterMod::Process()
 
   ++fNEvents; 
   Bool_t PassHFCoincidence = kFALSE;
-  Int_t NPositiveEtaHFCaloTowers = 0;
-  Int_t NNegativeEtaHFCaloTowers = 0;
+  UInt_t NPositiveEtaHFCaloTowers = 0;
+  UInt_t NNegativeEtaHFCaloTowers = 0;
 
   for (UInt_t i=0; i<fCaloTowers->GetEntries(); ++i) {
     

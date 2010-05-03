@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.17 2009/06/15 15:00:21 loizides Exp $
+// $Id: JetCorrectionMod.cc,v 1.2 2009/09/09 03:40:54 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -33,7 +33,7 @@ void JetCorrectionMod::SlaveBegin()
 {
   //initialize jet corrector for L2 and L3 corrections with the configured tag
   std::string levels = "L2:L3";
-  fJetCorrector = new CombinedJetCorrector(levels,std::string(fCorrectionTag));
+  fJetCorrector = new FactorizedJetCorrector(levels,std::string(fCorrectionTag));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ void JetCorrectionMod::Process()
   CorrectedJets->SetOwner(kTRUE);
   CorrectedJets->SetName(fCorrectedJetsName);
 
-  std::vector<double> corrections;
+  std::vector<float> corrections;
 
   // loop over jets
   for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
@@ -66,7 +66,11 @@ void JetCorrectionMod::Process()
     const FourVectorM rawMom = jet->RawMom();
     
     //compute correction factors
-    corrections = fJetCorrector->getSubCorrections(rawMom.Pt(),rawMom.Eta(),rawMom.E());
+    fJetCorrector->setJetEta(rawMom.Eta());
+    fJetCorrector->setJetPt(rawMom.Pt());
+    fJetCorrector->setJetPhi(rawMom.Phi());
+    fJetCorrector->setJetE(rawMom.E());
+    corrections = fJetCorrector->getSubCorrections();
     Double_t l2Factor = corrections.at(0);
     Double_t l3Factor = corrections.at(1)/l2Factor;
 
