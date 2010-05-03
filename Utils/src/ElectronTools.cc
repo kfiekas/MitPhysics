@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.1 2010/04/10 18:06:51 sixie Exp $
+// $Id: ElectronTools.cc,v 1.2 2010/04/10 19:51:58 sixie Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -238,6 +238,7 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
     if (ConversionMatchFound == kTRUE){
       isGoodConversion =  (conversions->At(ifc)->Prob() > 1e-6) &&
         (conversions->At(ifc)->Lxy() > 0) &&
+        (conversions->At(ifc)->Lz() > 0) &&
         (conversions->At(ifc)->Position().Rho() > 2.0);
 
       if (isGoodConversion == kTRUE) {
