@@ -58,6 +58,7 @@ void doubleLepton(const char *fileset    = "0000",
   GenericSelMod<Particle> *selMod = new GenericSelMod<Particle>;
   selMod->SetMinMaxPt(ptMinMax);
   selMod->SetPtMin(ptMin);
+  selMod->SetMinCounts(2);
   selMod->SetColName(merger->GetOutputName());
   merger->Add(selMod);
 
