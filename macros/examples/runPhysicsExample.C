@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.1 2010/03/12 13:52:01 bendavid Exp $
+// $Id: runPhysicsExample.C,v 1.2 2010/03/15 14:20:56 bendavid Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -10,6 +10,7 @@
 #include "MitAna/TreeMod/interface/Analysis.h"
 #include "MitAna/TreeMod/interface/HLTMod.h"
 #include "MitAna/PhysicsMod/interface/PublisherMod.h"
+#include "MitAna/PhysicsMod/interface/RunLumiSelectionMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitPhysics/Mods/interface/PDFProducerMod.h"
@@ -58,6 +59,10 @@ void executePhysicsExample(const char *fileset  = "",
 
   bool useHLTE29 = true;
 
+//   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
+//   runLumiSelectionMod->SetAcceptMC(kTRUE);
+//   runLumiSelectionMod->AddJSONFile("Cert_132440-133511_StreamExpress_Commissioning10-Express_DQM_JSON.txt");
+
   //------------------------------------------------------------------------------------------------
   // generator information
   //------------------------------------------------------------------------------------------------
@@ -97,8 +102,9 @@ void executePhysicsExample(const char *fileset  = "",
   //------------------------------------------------------------------------------------------------
   // Apply Jet/Met Corrections
   //------------------------------------------------------------------------------------------------
-  JetCorrectionMod *jetCorr = new JetCorrectionMod;  
-  jetCorr->SetCorrectionTag("Summer09_L2Relative_AK5Calo:Summer09_L3Absolute_AK5Calo");
+  JetCorrectionMod *jetCorr = new JetCorrectionMod;
+  jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Summer09_7TeV_ReReco332_L2Relative_AK5Calo.txt"); 
+  jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Summer09_7TeV_ReReco332_L3Absolute_AK5Calo.txt");  
   jetCorr->SetInputName(pubJet->GetOutputName());
 
   CaloMetCorrectionMod *metCorr = new CaloMetCorrectionMod;
@@ -116,7 +122,7 @@ void executePhysicsExample(const char *fileset  = "",
   photonID->SetIDType(TString("Custom"));
   TauIDMod *tauID = new TauIDMod;
   JetIDMod            *jetID            = new JetIDMod;
-  jetID->SetInputName(jetCorr->GetOutputName());
+  jetID->SetInputName(pubJet->GetOutputName());
   jetID->SetUseCorrection(kTRUE); 
   jetID->SetPtCut(30.0);
   jetID->SetEtaMaxCut(5.0);
@@ -148,15 +154,17 @@ void executePhysicsExample(const char *fileset  = "",
   //------------------------------------------------------------------------------------------------
   // making analysis chain
   //------------------------------------------------------------------------------------------------
+  //generatorMod->Add(muonID);
   generatorMod->Add(muonID);
   muonID->Add(electronID);
   electronID->Add(photonID);
   photonID->Add(tauID);
   tauID->Add(pubJet);
-  pubJet->Add(pubMet);
+  pubJet->Add(pubMet); 
   pubMet->Add(jetCorr);
   jetCorr->Add(metCorr);
   metCorr->Add(jetID);
+  //pubJet->Add(jetID);
   jetID->Add(electronCleaning);
   electronCleaning->Add(photonCleaning);
   photonCleaning->Add(tauCleaning);
@@ -187,7 +195,8 @@ void executePhysicsExample(const char *fileset  = "",
   else 
     d = c->FindDataset(book,skimdataset.Data(),fileset);
   ana->AddDataset(d);
-  //ana->AddFile("rfio:/castor/cern.ch/user/p/paus/filler/011/s09-ttbar-mc3/s09-ttbar-mc3_000_10.root");
+  //ana->AddFile("root://castorcms//castor/cern.ch/user/p/paus/filler/011/s09-ttbar-7-mc3/*.root");
+  //ana->AddFile("/build/bendavid/XX-MITDATASET-XX_000-valskim-Run132605.root");
 
   //------------------------------------------------------------------------------------------------
   // organize output
@@ -211,7 +220,7 @@ void executePhysicsExample(const char *fileset  = "",
 //--------------------------------------------------------------------------------------------------
 void runPhysicsExample(const char *fileset      = "",
                          const char *skim         = "noskim",
-                         const char *dataset      = "s09-ttbar-mc3",
+                         const char *dataset      = "s09-ttbar-7-mc3",
                          const char *book         = "cern/filler/011",
                          const char *catalogDir   = "/home/mitprod/catalog",
                          const char *outputName   = "PhysicsExample",
