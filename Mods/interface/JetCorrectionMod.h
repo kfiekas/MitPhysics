@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.1 2009/09/08 00:00:30 bendavid Exp $
+// $Id: JetCorrectionMod.h,v 1.2 2010/05/03 11:37:49 bendavid Exp $
 //
 // JetCorrectionMod
 //
@@ -15,6 +15,9 @@
 #define MITPHYSICS_MODS_JETCORRECTIONMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
+#include "MitAna/DataTree/interface/Jet.h"
+#include "MitAna/DataCont/interface/Types.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 
 namespace mithep 
@@ -29,11 +32,11 @@ namespace mithep
       const char       *GetInputName()                 const      { return fJetsName;               }   
       const char       *GetCorrectedName()             const      { return GetCorrectedJetsName();  }     
       const char       *GetCorrectedJetsName()         const      { return fCorrectedJetsName;      }     
-      const char       *GetCorrectionTag()             const      { return fCorrectionTag;          }
-      const char       *GetOutputName()                const      { return GetCorrectedJetsName();  }    
+      const char       *GetOutputName()                const      { return GetCorrectedJetsName();  }
+      void              AddCorrectionFromRelease(const std::string &path);
+      void              AddCorrectionFromFile(const std::string &file);    
       void              SetCorrectedJetsName(const char *name)    { fCorrectedJetsName = name;      }     
       void              SetCorrectedName(const char *name)        { SetCorrectedJetsName(name);     }    
-      void              SetCorrectionTag(const char *tag)         { fCorrectionTag = tag;           }
       void              SetInputName(const char *name)            { fJetsName = name;               }  
       void              SetOutputName(const char *name)           { SetCorrectedJetsName(name);     }          
 
@@ -43,8 +46,10 @@ namespace mithep
 
       TString           fJetsName;              //name of jet collection (input)
       TString           fCorrectedJetsName;     //name of good jets collection (output)
-      TString           fCorrectionTag;         //tag to select which corrections to apply
+      std::vector<JetCorrectorParameters> fCorrectionParameters; //list of corrections files (full paths)
       FactorizedJetCorrector *fJetCorrector;      //CMSSW/FWLite jet corrections module
+      BitMask8          fEnabledCorrectionMask; //bitmask of enabled corrections
+      std::vector<Jet::ECorr> fEnabledCorrections; //vector of enabled corrections
 
       ClassDef(JetCorrectionMod, 1) // Jet identification module
   };

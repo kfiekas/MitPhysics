@@ -1,4 +1,4 @@
-// $Id: CaloMetCorrectionMod.cc,v 1.17 2009/06/15 15:00:21 loizides Exp $
+// $Id: CaloMetCorrectionMod.cc,v 1.2 2009/09/09 05:41:51 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/CaloMetCorrectionMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -105,4 +105,5 @@ void CaloMetCorrectionMod::Process()
   // add to event for other modules to use
   AddObjThisEvt(CorrectedMet);
 }
+
 

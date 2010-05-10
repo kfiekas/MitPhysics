@@ -1,8 +1,10 @@
-// $Id: JetCorrectionMod.cc,v 1.2 2009/09/09 03:40:54 bendavid Exp $
+// $Id: JetCorrectionMod.cc,v 1.3 2010/05/03 11:37:49 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
+#include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/JetCol.h"
+#include "MitAna/DataTree/interface/CaloJetCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
 using namespace mithep;
@@ -31,9 +33,34 @@ JetCorrectionMod::~JetCorrectionMod()
 //--------------------------------------------------------------------------------------------------
 void JetCorrectionMod::SlaveBegin()
 {
-  //initialize jet corrector for L2 and L3 corrections with the configured tag
-  std::string levels = "L2:L3";
-  fJetCorrector = new FactorizedJetCorrector(levels,std::string(fCorrectionTag));
+   //initialize jet corrector class
+   fJetCorrector = new FactorizedJetCorrector(fCorrectionParameters);
+
+   //keep track of which corrections are enabled
+   for (std::vector<JetCorrectorParameters>::const_iterator it = fCorrectionParameters.begin(); it != fCorrectionParameters.end(); ++it) {
+     std::string ss = it->definitions().level();
+     if (ss == "L1Offset") 
+       fEnabledCorrectionMask.SetBit(Jet::L1);
+     else if (ss == "L2Relative")
+       fEnabledCorrectionMask.SetBit(Jet::L2);
+     else if (ss == "L3Absolute")
+       fEnabledCorrectionMask.SetBit(Jet::L3);
+     else if (ss == "L4EMF")
+       fEnabledCorrectionMask.SetBit(Jet::L4);
+     else if (ss == "L5Flavor")
+       fEnabledCorrectionMask.SetBit(Jet::L5);
+     else if (ss == "L6SLB")
+       fEnabledCorrectionMask.SetBit(Jet::L6);
+     else if (ss == "L7Parton")
+       fEnabledCorrectionMask.SetBit(Jet::L7);
+   }
+   
+   for (UInt_t l=0; l<8; l=l+1) {
+     if (fEnabledCorrectionMask.TestBit(l)) {
+       fEnabledCorrections.push_back(Jet::ECorr(l));
+     }
+   }
+
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -70,21 +97,47 @@ void JetCorrectionMod::Process()
     fJetCorrector->setJetPt(rawMom.Pt());
     fJetCorrector->setJetPhi(rawMom.Phi());
     fJetCorrector->setJetE(rawMom.E());
+    
+    //emf only valid for CaloJets
+    const CaloJet *caloJet = dynamic_cast<const CaloJet*>(jet);
+    if (caloJet) {
+      fJetCorrector->setJetEMF(caloJet->EnergyFractionEm());
+    }
+    else {
+      fJetCorrector->setJetEMF(-99.0);
+    }
+    
     corrections = fJetCorrector->getSubCorrections();
-    Double_t l2Factor = corrections.at(0);
-    Double_t l3Factor = corrections.at(1)/l2Factor;
-
+    
     //set and enable correction factors in the output jet
-    jet->SetL2RelativeCorrectionScale(l2Factor);
-    jet->SetL3AbsoluteCorrectionScale(l3Factor);     
-    jet->EnableCorrection(mithep::Jet::L2);
-    jet->EnableCorrection(mithep::Jet::L3);  
-
+    Double_t cumulativeCorrection = 1.0;
+    for (UInt_t j=0; j<corrections.size(); ++j) {
+      Double_t currentCorrection = corrections.at(j)/cumulativeCorrection;
+      cumulativeCorrection = corrections.at(j);
+      Jet::ECorr currentLevel = fEnabledCorrections.at(j);
+      jet->EnableCorrection(currentLevel);
+      if (currentLevel==Jet::L1)
+        jet->SetL1OffsetCorrectionScale(currentCorrection);
+      else if (currentLevel==Jet::L2)
+        jet->SetL2RelativeCorrectionScale(currentCorrection);
+      else if (currentLevel==Jet::L3)
+        jet->SetL3AbsoluteCorrectionScale(currentCorrection);
+      else if (currentLevel==Jet::L4)
+        jet->SetL4EMFCorrectionScale(currentCorrection);
+      else if (currentLevel==Jet::L5)
+        jet->SetL5FlavorCorrectionScale(currentCorrection);
+      else if (currentLevel==Jet::L6)
+        jet->SetL6LSBCorrectionScale(currentCorrection);
+      else if (currentLevel==Jet::L7)
+        jet->SetL7PartonCorrectionScale(currentCorrection);
+    }
+    
     if (0) {
       printf("In L2 = %5f, Out L2 = %5f\n",inJet->L2RelativeCorrectionScale(),jet->L2RelativeCorrectionScale());
       printf("In L3 = %5f, Out L3 = %5f\n",inJet->L3AbsoluteCorrectionScale(),jet->L3AbsoluteCorrectionScale());
       printf("In RawPt = %5f, Out RawPt = %5f\n",inJet->RawMom().Pt(),jet->RawMom().Pt());
       printf("In Pt = %5f, Out Pt = %5f\n",inJet->Pt(),jet->Pt());
+      printf("Pt Ratio          = %5f\n", jet->Pt()/inJet->Pt());
     }
 
     // add corrected jet to collection
@@ -98,3 +151,16 @@ void JetCorrectionMod::Process()
   AddObjThisEvt(CorrectedJets);
 }
 
+//--------------------------------------------------------------------------------------------------
+void JetCorrectionMod::AddCorrectionFromRelease(const std::string &path)
+{
+  edm::FileInPath file(path);
+  AddCorrectionFromFile(file.fullPath());
+}
+
+//--------------------------------------------------------------------------------------------------
+void JetCorrectionMod::AddCorrectionFromFile(const std::string &file)
+{
+  JetCorrectorParameters correctionPar(file);
+  fCorrectionParameters.push_back(correctionPar);
+}
