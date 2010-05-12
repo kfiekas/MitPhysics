@@ -157,6 +157,7 @@ namespace mithep
       const JetCol           *fJets;                  //!Jet branch
       const VertexCol        *fVertices;              //!Vertex branch
       const DecayParticleCol *fConversions;           //!conversion collection       
+      ElectronIDMod          *electronID;             //!electron ID object
 
       ClassDef(GenFakeableObjsMod, 1) // Fakeable objects generation module
   };

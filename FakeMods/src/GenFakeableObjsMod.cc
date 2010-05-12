@@ -14,7 +14,6 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
-#include "MitPhysics/Utils/interface/ElectronTools.h"
 
 using namespace mithep;
 
@@ -111,6 +110,13 @@ void GenFakeableObjsMod::SlaveBegin()
               fMuonFOType.Data());
     return;
   }
+
+  electronID = new ElectronIDMod();
+  electronID->SetApplyConversionFilter(fApplyConvFilter);    
+  electronID->SetWrongHitsRequirement(fWrongHitsRequirement);    
+  electronID->SetApplyD0Cut(fApplyD0Cut);    
+  electronID->SetChargeFilter(fChargeFilter);    
+  electronID->SetD0Cut(fD0Cut);
 
 }
 
@@ -307,13 +313,12 @@ void GenFakeableObjsMod::Process()
         //****************************************************************************************
         // conversion filter
         //****************************************************************************************
-        Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions,
-                                                                          fWrongHitsRequirement );
+        Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions, kTRUE);
 
         //****************************************************************************************
         // D0 Cut        
         //****************************************************************************************
-        Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle, fVertices, fD0Cut, kFALSE);
+        Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE, kFALSE);
 
         //****************************************************************************************
         // Make denominator object cuts
@@ -423,13 +428,12 @@ void GenFakeableObjsMod::Process()
       //****************************************************************************************
       // conversion filter
       //****************************************************************************************
-      Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions, 
-                                                                     fWrongHitsRequirement);
+      Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions, kTRUE);
       
       //****************************************************************************************
       // D0 Cut        
       //****************************************************************************************
-      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices,fD0Cut , kFALSE);
+      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE, kFALSE);
       
       //****************************************************************************************
       // Make denominator object cuts
@@ -505,13 +509,12 @@ void GenFakeableObjsMod::Process()
       //****************************************************************************************
       // conversion filter
       //****************************************************************************************
-      Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle,fConversions,
-                                                                        fWrongHitsRequirement);
+      Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions, kTRUE);
       
       //****************************************************************************************
       // D0 Cut        
       //****************************************************************************************
-      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, fD0Cut, kFALSE);
+      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE, kFALSE);
       
       //****************************************************************************************
       // Make denominator object cuts
