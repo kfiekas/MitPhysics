@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.9 2009/06/15 15:00:23 loizides Exp $
+// $Id: MuonTools.h,v 1.10 2009/07/20 04:55:33 loizides Exp $
 //
 // MuonTools
 //
@@ -107,8 +107,8 @@ inline Bool_t mithep::MuonTools::Overflow(const TH2D *iHist, Double_t lVal0, Dou
 
   if (iHist ->GetXaxis()->FindBin(lVal0) == 0                  || 
       iHist ->GetXaxis()->FindBin(lVal0) >  iHist->GetNbinsX() || 
-      iHist ->GetYaxis()->FindBin(lVal0) == 0                  || 
-      iHist ->GetYaxis()->FindBin(lVal0) >  iHist->GetNbinsY()) {
+      iHist ->GetYaxis()->FindBin(lVal1) == 0                  || 
+      iHist ->GetYaxis()->FindBin(lVal1) >  iHist->GetNbinsY()) {
     return kTRUE;
   }
   return kFALSE;
