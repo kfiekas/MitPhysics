@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.31 2010/04/10 18:07:53 sixie Exp $
+// $Id: ElectronIDMod.h,v 1.32 2010/04/10 19:38:46 sixie Exp $
 //
 // ElectronIDMod
 //
@@ -50,6 +50,7 @@ namespace mithep
       Bool_t              PassIDCut(const Electron *el, ElectronTools::EElIdType idType) const;
       Bool_t              PassIsolationCut(const Electron *el, 
                                            ElectronTools::EElIsoType isoType) const;
+      Bool_t              GetCombinedIdCut()          const { return fCombinedIdCut;          }
       void                SetApplyConversionFilter(Bool_t b)    { fApplyConvFilter    = b;    }
       void                SetApplySpikeRemoval(Bool_t b)        { fApplySpikeRemoval  = b;    }
       void                SetApplyD0Cut(Bool_t b)               { fApplyD0Cut         = b;    }
@@ -71,6 +72,7 @@ namespace mithep
       void                SetTrackIsoCut(Double_t cut)          { fTrackIsolationCut  = cut;  }
       void                SetChargeFilter(Bool_t b)             { fChargeFilter = b;          }
       void                SetWrongHitsRequirement(Bool_t b)     { fWrongHitsRequirement = b;  }
+      void                SetCombinedIdCut(Bool_t b)            { fCombinedIdCut  = b;        }
       void                Setup();
 
     protected:
@@ -94,6 +96,7 @@ namespace mithep
       Bool_t                    fApplyConvFilter;        //whether remove conversions
       Bool_t                    fWrongHitsRequirement;   //whether to use wrong hits req 
                                                          //for conversion removal
+      Bool_t                    fCombinedIdCut;          //whether to use full combined id
       Bool_t                    fApplySpikeRemoval;      //whether apply d0 cut
       Bool_t                    fApplyD0Cut;             //whether apply d0 cut
       Bool_t                    fChargeFilter;           //whether apply GSF and CFT equal requirement

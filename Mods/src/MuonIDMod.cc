@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.26 2009/08/31 07:39:28 loizides Exp $
+// $Id: MuonIDMod.cc,v 1.27 2009/09/03 13:31:35 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -15,7 +15,7 @@ ClassImp(mithep::MuonIDMod)
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
-  fVertexName("PrimaryVertexesBeamSpot"),
+  fVertexName("PrimaryVertexes"),
   fMuonIDType("Loose"),
   fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
@@ -62,7 +62,8 @@ void MuonIDMod::Process()
           pt = mu->Pt();
         break;
       case kGlobal:
-        pass = mu->HasGlobalTrk();
+        pass = mu->HasGlobalTrk() && mu->IsTrackerMuon() &&
+	       mu->Quality().Quality(MuonQuality::TrackerMuonArbitrated);
         if (pass) 
           pt = mu->GlobalTrk()->Pt();
         break;
@@ -72,7 +73,8 @@ void MuonIDMod::Process()
           pt = mu->StandaloneTrk()->Pt();
         break;
       case kTrackerMuon:
-        pass = mu->HasTrackerTrk() && mu->IsTrackerMuon();
+        pass = mu->HasTrackerTrk() && mu->IsTrackerMuon() &&
+	       mu->Quality().Quality(MuonQuality::TrackerMuonArbitrated);
         if (pass) 
           pt = mu->TrackerTrk()->Pt();
         break;
@@ -99,12 +101,23 @@ void MuonIDMod::Process()
     Bool_t idpass = kFALSE;
     switch (fMuIDType) {
       case kLoose:
-        idpass = fMuonTools->IsGood(mu, MuonTools::kTMOneStationLoose) &&
-                 fMuonTools->IsGood(mu, MuonTools::kTM2DCompatibilityLoose);
+        idpass = mu->Quality().Quality(MuonQuality::TMOneStationLoose) &&
+                 mu->Quality().Quality(MuonQuality::TM2DCompatibilityLoose) &&
+		 mu->BestTrk()->NHits() >= 10 &&
+		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
+		 mu->NSegments() > 0;
         break;
       case kTight:
-        idpass = fMuonTools->IsGood(mu, MuonTools::kTMOneStationTight) &&
-                 fMuonTools->IsGood(mu, MuonTools::kTM2DCompatibilityTight);
+        idpass = mu->Quality().Quality(MuonQuality::TMOneStationTight) &&
+                 mu->Quality().Quality(MuonQuality::TM2DCompatibilityTight) &&
+		 mu->BestTrk()->NHits() >= 10 &&
+		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
+		 mu->NSegments() > 0;
+        break;
+      case kMinimal:
+        idpass = mu->BestTrk()->NHits() >= 10 &&
+		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
+		 mu->NSegments() > 0;
         break;
       case kNoId:
         idpass = kTRUE;
@@ -124,15 +137,14 @@ void MuonIDMod::Process()
         break;
       case kTrackCaloCombined:
         isocut = (1.0 * mu->IsoR03SumPt() + 1.0 * mu->IsoR03EmEt() + 
-                   1.0 * mu->IsoR03HadEt() < fCombIsolationCut);
+                  1.0 * mu->IsoR03HadEt() < fCombIsolationCut);
         break;
       case kTrackCaloSliding:
         { 
           Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
                               1.0 * mu->IsoR03EmEt() + 
                               1.0 * mu->IsoR03HadEt();
-          if (totalIso < (mu->Pt()-10.0)*5.0/20.0 ||
-	      totalIso <= 0)
+          if (totalIso < (mu->Pt()*0.10) )
             isocut = kTRUE;
 
 	  if     (fReverseIsoCut == kTRUE &&
@@ -204,6 +216,8 @@ void MuonIDMod::SlaveBegin()
     fMuIDType = kTight;
   else if (fMuonIDType.CompareTo("Loose") == 0) 
     fMuIDType = kLoose;
+  else if (fMuonIDType.CompareTo("Minimal") == 0) 
+    fMuIDType = kMinimal;
   else if (fMuonIDType.CompareTo("NoId") == 0) 
     fMuIDType = kNoId;
   else if (fMuonIDType.CompareTo("Custom") == 0) {

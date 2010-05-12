@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.57 2010/04/10 19:38:45 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.58 2010/04/10 19:41:41 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -29,10 +29,11 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fCombIsolationCut(5.0),
   fApplyConvFilter(kTRUE),
   fWrongHitsRequirement(kTRUE),
+  fCombinedIdCut(kFALSE),
   fApplySpikeRemoval(kTRUE),
   fApplyD0Cut(kTRUE),
   fChargeFilter(kTRUE),
-  fD0Cut(0.25),
+  fD0Cut(0.025),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
   fElIdType(ElectronTools::kIdUndef),
@@ -110,8 +111,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kTrackJuraSliding:
     {
       Double_t totalIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr04() - 1.5;
-      if (totalIso < (ele->Pt()-10.0)*4.5/20.0 ||
-          totalIso <= 0)
+      if (totalIso < (ele->Pt()*0.15) )
         isocut = kTRUE;
       
       if     (fReverseIsoCut == kTRUE &&
@@ -195,10 +195,18 @@ void ElectronIDMod::Process()
         continue;
     }
 
-    //apply charge filter
+    // apply charge filter
     if(fChargeFilter == kTRUE) {
       Bool_t passChargeFilter = ElectronTools::PassChargeFilter(e);
       if (!passChargeFilter) continue;
+    }
+
+    // apply full combined id, using Medium cuts
+    if(fCombinedIdCut == kTRUE) {
+      LoadEventObject(fVertexName, fVertices);
+      LoadEventObject(fConversionBranchName, fConversions);
+      Int_t result = ElectronTools::PassTightId(e, *&fVertices, fConversions, 1);
+      if(result != 15) continue;
     }
 
     // add good electron
@@ -220,10 +228,18 @@ void ElectronIDMod::SlaveBegin()
 
   ReqEventObject(fElectronBranchName, fElectrons, kTRUE);
 
-  if (fApplyConvFilter)
+  if(fCombinedIdCut == kTRUE) {
+    fElectronIDType  = "NoId";
+    fElectronIsoType = "NoIso";
+    fApplyConvFilter = kFALSE;
+    fApplyD0Cut      = kFALSE;
+    fChargeFilter    = kFALSE;
+  }
+
+  if (fApplyConvFilter || fCombinedIdCut == kTRUE)
     ReqEventObject(fConversionBranchName, fConversions, kTRUE);
 
-  if (fApplyD0Cut)
+  if (fApplyD0Cut || fCombinedIdCut == kTRUE)
     ReqEventObject(fVertexName, fVertices, kTRUE);
 
   Setup();

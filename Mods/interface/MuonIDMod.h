@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.22 2009/06/15 15:00:21 loizides Exp $
+// $Id: MuonIDMod.h,v 1.23 2009/07/17 12:11:36 loizides Exp $
 //
 // MuonIDMod
 //
@@ -37,7 +37,7 @@ namespace mithep
       const char        *GetInputName()                 const { return fMuonBranchName;     }   
       const char        *GetIsoType()                   const { return fMuonIsoType;        }
       const char        *GetOutputName()                const { return GetCleanMuonsName(); }   
-      Double_t           GetPtMin(Double_t pt)          const { return fMuonPtMin;          }
+      Double_t           GetPtMin()                     const { return fMuonPtMin;          }
       Bool_t             GetReverseIsoCut()             const { return fReverseIsoCut;      }
       Bool_t             GetReverseD0Cut()              const { return fReverseD0Cut;       }
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
@@ -61,6 +61,7 @@ namespace mithep
         kIdUndef = 0,       //not defined
         kTight,             //"Tight"
         kLoose,             //"Loose"
+        kMinimal,           //"Minimal"
         kNoId,              //"NoId"
         kCustomId           //"Custom"
       };
