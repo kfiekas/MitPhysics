@@ -62,7 +62,9 @@ namespace mithep {
       static Bool_t       PassD0Cut(const Electron *el, const BeamSpotCol *beamspots, 
                                     Double_t fD0Cut, Bool_t fReverseD0Cut);
       static Bool_t       PassSpikeRemovalFilter(const Electron *ele);
-   
+      static Int_t        Classify(const Electron *ele);
+      static Int_t        PassTightId(const Electron *ele, const VertexCol *vertices, 
+                                      const DecayParticleCol *conversions, const Int_t typeCuts);
 
     ClassDef(ElectronTools, 0) // Muon tools
   };
