@@ -15,11 +15,11 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void doubleLepton(const char *fileset    = "0000",
-		  const char *dataset    = "p10-wjets-mg-v26",
-		  const char *book       = "cern/filler/013",
-		  const char *catalogDir = "/home/mitprod/catalog",
-		  Int_t       nEvents    = -1)
+void doubleLepton(const char *catalogDir   = "/home/mitprod/catalog",
+                  const char *book	   = "mit/filler/011",
+                  const char *dataset	   = "p10-wjets-mg-v26",
+                  const char *fileset	   = "0000",
+                  int nsel = 0, int NEvents = 999999999)
 {
   TString skimName("doubleLepton");
   using namespace mithep;
@@ -31,7 +31,6 @@ void doubleLepton(const char *fileset    = "0000",
   //------------------------------------------------------------------------------------------------
   const char     *muInput  = Names::gkMuonBrn;
   const char     *elInput  = Names::gkElectronBrn;
-  const Double_t  ptMinMax  = 10;
   const Double_t  ptMin     = 10;
 
   MuonIDMod *muId = new MuonIDMod;  
@@ -56,7 +55,6 @@ void doubleLepton(const char *fileset    = "0000",
   merger->SetElectronsName(elId->GetOutputName());
 
   GenericSelMod<Particle> *selMod = new GenericSelMod<Particle>;
-  selMod->SetMinMaxPt(ptMinMax);
   selMod->SetPtMin(ptMin);
   selMod->SetMinCounts(2);
   selMod->SetColName(merger->GetOutputName());
@@ -68,7 +66,9 @@ void doubleLepton(const char *fileset    = "0000",
   OutputMod *outMod = new OutputMod;
   outMod->Keep("*");
   selMod->Add(outMod);
-  TString rootFile = skimName;
+  TString rootFile = "";
+  rootFile += TString("skims/") + dataset + TString("/");
+  rootFile += skimName;
   if (TString(fileset) != TString(""))
     rootFile += TString("_") + TString(fileset);
   printf("\nRoot output: %s\n\n",rootFile.Data());  
@@ -82,8 +82,8 @@ void doubleLepton(const char *fileset    = "0000",
   ana->AddSuperModule(muId);
   muId->Add(elId);
   elId->Add(merger);
-  if (nEvents>0)
-    ana->SetProcessNEvents(nEvents);
+  if (NEvents>0)
+    ana->SetProcessNEvents(NEvents);
 
   //------------------------------------------------------------------------------------------------
   // organize input
