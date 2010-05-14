@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.11 2009/08/24 14:46:26 ceballos Exp $
+// $Id: PhotonIDMod.h,v 1.12 2009/12/06 14:59:43 ceballos Exp $
 //
 // PhotonIDMod
 //
@@ -23,6 +23,7 @@ namespace mithep
       PhotonIDMod(const char *name="PhotonIDMod", 
                   const char *title="Photon identification module");
 
+      Bool_t              GetApplySpikeRemoval()      const { return fApplySpikeRemoval;   }
       Bool_t              GetApplyPixelSeed()         const { return fApplyPixelSeed;      }
       const char         *GetGoodName()               const { return GetGoodPhotonsName(); }   
       const char         *GetGoodPhotonsName()        const { return fGoodPhotonsName;     }   
@@ -36,6 +37,7 @@ namespace mithep
       Double_t            GetEtaWidthEB()	      const { return fEtaWidthEB;	   }
       Double_t            GetEtaWidthEE()	      const { return fEtaWidthEE;	   }
       Double_t            GetAbsEtaMax()	      const { return fAbsEtaMax;	   }
+      void                SetApplySpikeRemoval(Bool_t b)    { fApplySpikeRemoval  = b;     }
       void                SetApplyPixelSeed(Bool_t b)       { fApplyPixelSeed  = b;        }
       void                SetGoodName(const char *n)        { SetGoodPhotonsName(n);       }   
       void                SetGoodPhotonsName(const char *n) { fGoodPhotonsName = n;        }   
@@ -74,6 +76,7 @@ namespace mithep
       TString             fPhotonIsoType;        //type of photon isolation we impose
       Double_t            fPhotonPtMin;          //min pt cut
       Double_t            fHadOverEmMax;         //maximum of hadronic/em energy
+      Bool_t              fApplySpikeRemoval;    //whether apply spike removal      
       Bool_t              fApplyPixelSeed;       //=true then apply pixel seed constraint
       Double_t            fPhotonR9Min;          //min R9 value
       EPhIdType           fPhIdType;             //!identification scheme

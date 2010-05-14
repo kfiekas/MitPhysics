@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.11 2009/12/06 14:59:28 ceballos Exp $
+// $Id: PhotonIDMod.cc,v 1.12 2010/01/24 21:00:19 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -17,6 +17,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPhotonIsoType("CombinedIso"),
   fPhotonPtMin(15.0),
   fHadOverEmMax(0.05),
+  fApplySpikeRemoval(kTRUE),
   fApplyPixelSeed(kTRUE),
   fPhotonR9Min(0.5),
   fPhIdType(kIdUndef),
@@ -45,7 +46,26 @@ void PhotonIDMod::Process()
 
     if (ph->Pt() <= fPhotonPtMin) 
       continue;
+
+
     
+    Bool_t passSpikeRemovalFilter = kTRUE;
+    if(ph->SCluster()->Seed()->Energy() > 5.0 && 
+       ph->SCluster()->Seed()->EMax() / ph->SCluster()->Seed()->E3x3() > 0.95
+      ) {
+      passSpikeRemovalFilter = kFALSE;
+    }
+
+    // For Now Only use the EMax/E3x3 prescription.
+    //if(ph->SCluster()->Seed()->Energy() > 5.0 && 
+    //   (1 - (ph->SCluster()->Seed()->E1x3() + ph->SCluster()->Seed()->E3x1() - 2*ph->SCluster()->Seed()->EMax())) > 0.95
+    //  ) {
+    //  passSpikeRemovalFilter = kFALSE;
+    //}
+    if (fApplySpikeRemoval && !passSpikeRemovalFilter) continue;
+    
+
+
     if (ph->HadOverEm() >= fHadOverEmMax) 
       continue;
     
