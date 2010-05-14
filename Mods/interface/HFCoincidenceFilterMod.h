@@ -17,7 +17,9 @@
 #include <TH1F.h>
 #include "MitAna/DataTree/interface/VertexFwd.h" 
 #include "MitAna/DataTree/interface/CaloTowerFwd.h" 
+#include "MitAna/DataTree/interface/EvtSelData.h" 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
+
 
 namespace mithep 
 {
@@ -36,7 +38,8 @@ namespace mithep
       Int_t                       GetNEvents()      const { return fNEvents;       }
       Int_t                       GetNAccepted()    const { return fNAcceped;      }
       Int_t                       GetNFailed()      const { return fNFailed;       }
-      void                        SetAbortIfNotAccepted(Bool_t b)   { fAbort         = b; }
+      void                        SetUseEvtSelData(Bool_t b)                { fUseEvtSelData            = b; }
+      void                        SetAbortIfNotAccepted(Bool_t b)           { fAbort                    = b; }
       void                        SetMinNCoincidentCaloTowers(UInt_t n)     { fMinNCoincidentCaloTowers = n; }
       void                        SetCaloTowerEnergyThreshold(Double_t x)   { fCaloTowerEnergyThreshold = x; }
 
@@ -48,7 +51,8 @@ namespace mithep
       void                        SlaveBegin();
       void                        SlaveTerminate();
 
-      Bool_t                      fAbort;         //=true then abort (sub-)modules if not accepted
+      Bool_t                      fUseEvtSelData;   //=true then use info from EvtSelData
+      Bool_t                      fAbort;           //=true then abort (sub-)modules if not accepted
       UInt_t                      fMinNCoincidentCaloTowers; //minimum number of tracks for the vertex
       Double_t                    fCaloTowerEnergyThreshold; //maximum abs(z) of the vertex
       TString                     fCaloTowersName;  //Name of CaloTower collection
@@ -56,6 +60,7 @@ namespace mithep
       Int_t                       fNAcceped;        //!number of accepted events
       Int_t                       fNFailed;         //!number of failed events
       const CaloTowerCol         *fCaloTowers;      //!CaloTower collection
+      const EvtSelData           *fEvtSelData;      //!CaloTower collection
 
     ClassDef(HFCoincidenceFilterMod, 1) // L1 TAM module
   };

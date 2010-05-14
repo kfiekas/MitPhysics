@@ -1,4 +1,4 @@
-// $Id: HFCoincidenceFilterMod.cc,v 1.1 2010/04/08 09:30:04 sixie Exp $
+// $Id: HFCoincidenceFilterMod.cc,v 1.2 2010/05/03 11:37:49 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/HFCoincidenceFilterMod.h"
 #include <TFile.h>
@@ -14,6 +14,7 @@ ClassImp(mithep::HFCoincidenceFilterMod)
 //--------------------------------------------------------------------------------------------------
 HFCoincidenceFilterMod::HFCoincidenceFilterMod(const char *name, const char *title) : 
   BaseMod(name,title),
+  fUseEvtSelData(kTRUE),
   fAbort(kTRUE),
   fMinNCoincidentCaloTowers(1),
   fCaloTowerEnergyThreshold(4.0),
@@ -21,7 +22,8 @@ HFCoincidenceFilterMod::HFCoincidenceFilterMod(const char *name, const char *tit
   fNEvents(0),
   fNAcceped(0),
   fNFailed(0),
-  fCaloTowers(0)
+  fCaloTowers(0),
+  fEvtSelData(0)
 {
   // Constructor. 
 }
@@ -44,33 +46,44 @@ void HFCoincidenceFilterMod::Process()
 {
   
   LoadBranch(fCaloTowersName);
-  
+  LoadBranch("EvtSelData");
+
   // Increment counters and stop further processing of an event if current run is excluded
 
   ++fNEvents; 
   Bool_t PassHFCoincidence = kFALSE;
-  UInt_t NPositiveEtaHFCaloTowers = 0;
-  UInt_t NNegativeEtaHFCaloTowers = 0;
 
-  for (UInt_t i=0; i<fCaloTowers->GetEntries(); ++i) {
-    
-    const CaloTower *tower = fCaloTowers->At(i);
-    
-    if (tower->Eta() > 3.0 && tower->Eta() < 5.0 && tower->E() > fCaloTowerEnergyThreshold) {
-      NPositiveEtaHFCaloTowers++;
-    }
-
-    if (tower->Eta() < -3.0 && tower->Eta() > -5.0 && tower->E() > fCaloTowerEnergyThreshold) {
-      NNegativeEtaHFCaloTowers++;
-    }
-
-    if (NPositiveEtaHFCaloTowers >= fMinNCoincidentCaloTowers && 
-        NNegativeEtaHFCaloTowers >= fMinNCoincidentCaloTowers) {
+  if (fUseEvtSelData) {
+    if (fEvtSelData->NHfTowersN() > int(fMinNCoincidentCaloTowers) &&
+        fEvtSelData->NHfTowersP() > int(fMinNCoincidentCaloTowers) ) {
       PassHFCoincidence = kTRUE;
-      break;
-    }    
+    }
+  } else {
+
+    
+    UInt_t NPositiveEtaHFCaloTowers = 0;
+    UInt_t NNegativeEtaHFCaloTowers = 0;
+    
+    for (UInt_t i=0; i<fCaloTowers->GetEntries(); ++i) {
+      
+      const CaloTower *tower = fCaloTowers->At(i);
+      
+      if (tower->Eta() > 3.0 && tower->Eta() < 5.0 && tower->E() > fCaloTowerEnergyThreshold) {
+        NPositiveEtaHFCaloTowers++;
+      }
+      
+      if (tower->Eta() < -3.0 && tower->Eta() > -5.0 && tower->E() > fCaloTowerEnergyThreshold) {
+        NNegativeEtaHFCaloTowers++;
+      }
+      
+      if (NPositiveEtaHFCaloTowers >= fMinNCoincidentCaloTowers && 
+          NNegativeEtaHFCaloTowers >= fMinNCoincidentCaloTowers) {
+        PassHFCoincidence = kTRUE;
+        break;
+      }    
+    }
   }
-  
+
   // take action if failed
   if (!PassHFCoincidence) {
     ++fNFailed;
@@ -92,7 +105,8 @@ void HFCoincidenceFilterMod::SlaveBegin()
 {
 
   ReqBranch(fCaloTowersName, fCaloTowers);
-    
+  ReqBranch("EvtSelData", fEvtSelData);
+
 }
 
 //--------------------------------------------------------------------------------------------------
