@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.2 2010/03/15 14:20:56 bendavid Exp $
+// $Id: runPhysicsExample.C,v 1.3 2010/05/10 16:17:02 bendavid Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -35,14 +35,14 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void executePhysicsExample(const char *fileset  = "",
-                             const char *skim         = "",
-                             const char *dataset    = "",
-                             const char *book       = "",
-                             const char *catalogDir = "",
-                             const char *outputName = "",
-                             int   sampleID         = -1,
-                             int   nEvents          = -1)
+void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
+		       const char *book       = "cern/filler/013",
+                       const char *dataset    = "p10-ggwwll-v26",
+                       const char *fileset    = "0000",
+                       const char *skim       = "noskim",
+                       const char *outputName = "histo",
+                       int   sampleID	      = -1,
+                       int   nEvents	      = 1000)
 {
   //------------------------------------------------------------------------------------------------
   // some global setups
@@ -54,19 +54,35 @@ void executePhysicsExample(const char *fileset  = "",
   //------------------------------------------------------------------------------------------------
   // set up information
   //------------------------------------------------------------------------------------------------
-  Bool_t isFastSim = kFALSE;
-  if(sampleID >= 100) isFastSim = kTRUE;
-
-  bool useHLTE29 = true;
+  Bool_t useHLTE29      = kFALSE;
+  Bool_t applyISRFilter = kFALSE;
+  Bool_t applyMllGenCut = kFALSE;
+  Bool_t isData         = kFALSE;
 
 //   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
 //   runLumiSelectionMod->SetAcceptMC(kTRUE);
 //   runLumiSelectionMod->AddJSONFile("Cert_132440-133511_StreamExpress_Commissioning10-Express_DQM_JSON.txt");
 
+  if(sampleID > 1000) isData = kTRUE;
+
   //------------------------------------------------------------------------------------------------
   // generator information
   //------------------------------------------------------------------------------------------------
   GeneratorMod *generatorMod = new GeneratorMod;
+  generatorMod->SetPrintDebug(kFALSE);
+  generatorMod->SetPtLeptonMin(0.0);
+  generatorMod->SetEtaLeptonMax(2.7);
+  generatorMod->SetPtPhotonMin(15.0);
+  generatorMod->SetEtaPhotonMax(2.7);
+  generatorMod->SetPtRadPhotonMin(10.0);
+  generatorMod->SetEtaRadPhotonMax(2.7);
+  generatorMod->SetIsData(isData);
+  generatorMod->SetFillHist(!isData);
+  if(applyMllGenCut == kTRUE){
+    generatorMod->SetPdgIdCut(23);
+    generatorMod->SetMassMaxCut(50.);
+  }
+  generatorMod->SetApplyISRFilter(applyISRFilter);
 
   //------------------------------------------------------------------------------------------------
   // HLT information
@@ -80,13 +96,16 @@ void executePhysicsExample(const char *fileset  = "",
     hltmod->AddTrigger("HLT_Ele15_SC10_LW_L1R");
     hltmod->AddTrigger("HLT_Ele20_SW_L1R");
     hltmod->AddTrigger("HLT_IsoMu9");
-  } else {
-    hltmod->AddTrigger("HLT_Ele10_LW_EleId_L1R");
     hltmod->AddTrigger("HLT_Mu9");
+    hltmod->AddTrigger("HLT_Ele10_LW_EleId_L1R");
+    hltmod->AddTrigger("HLT_Ele15_SW_EleId_L1R");
+  } else {
+    hltmod->AddTrigger("HLT_Mu9");
+    hltmod->AddTrigger("HLT_Ele10_LW_EleId_L1R");
+    hltmod->AddTrigger("HLT_Ele15_SW_EleId_L1R");
     hltmod->SetBitsName("HLTBits_E29");
   }
   hltmod->SetTrigObjsName("myhltobjs");
-
 
   //------------------------------------------------------------------------------------------------
   // publisher Mod
@@ -99,40 +118,48 @@ void executePhysicsExample(const char *fileset  = "",
   pubMet->SetInputName("TCMet");
   pubMet->SetOutputName("PubTCMet");
 
+  PublisherMod<CaloMet> *pubCaloMet = new PublisherMod<CaloMet>;
+  pubCaloMet->SetName("CaloMetPub");
+  pubCaloMet->SetInputName("CorMuonMet");
+  pubCaloMet->SetOutputName("pubCaloMet");
+
   //------------------------------------------------------------------------------------------------
-  // Apply Jet/Met Corrections
+  // Apply Jet Corrections
   //------------------------------------------------------------------------------------------------
   JetCorrectionMod *jetCorr = new JetCorrectionMod;
   jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Summer09_7TeV_ReReco332_L2Relative_AK5Calo.txt"); 
   jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Summer09_7TeV_ReReco332_L3Absolute_AK5Calo.txt");  
   jetCorr->SetInputName(pubJet->GetOutputName());
+  jetCorr->SetCorrectedName("CorrectedJets");
 
-  CaloMetCorrectionMod *metCorr = new CaloMetCorrectionMod;
-  metCorr->SetInputName(pubMet->GetOutputName());
-  metCorr->SetCorrectedJetsName(jetCorr->GetOutputName());
-
+  //------------------------------------------------------------------------------------------------
+  // Apply Met Corrections
+  //------------------------------------------------------------------------------------------------
+  CaloMetCorrectionMod *metCaloCorr = new CaloMetCorrectionMod;
+  metCaloCorr->SetInputName(pubCaloMet->GetOutputName());
+  metCaloCorr->SetCorrectedJetsName(jetCorr->GetOutputName());
+  metCaloCorr->SetOutputName("pubCaloCorrectedMet");
 
   //------------------------------------------------------------------------------------------------
   // object id and cleaning sequence
   //------------------------------------------------------------------------------------------------
-  MuonIDMod           *muonID           = new MuonIDMod;  
-  ElectronIDMod       *electronID       = new ElectronIDMod;
-  electronID->SetIDType(TString("CustomTight"));
-  PhotonIDMod         *photonID       = new PhotonIDMod;
-  photonID->SetIDType(TString("Custom"));
-  TauIDMod *tauID = new TauIDMod;
-  JetIDMod            *jetID            = new JetIDMod;
-  jetID->SetInputName(pubJet->GetOutputName());
-  jetID->SetUseCorrection(kTRUE); 
-  jetID->SetPtCut(30.0);
+  MuonIDMod           *muonID        = new MuonIDMod;  
+  ElectronIDMod       *electronID    = new ElectronIDMod;
+  PhotonIDMod         *photonID      = new PhotonIDMod;
+  TauIDMod            *tauID         = new TauIDMod;
+  JetIDMod            *jetID         = new JetIDMod;
+  jetID->SetInputName(jetCorr->GetOutputName());
+  jetID->SetPtCut(20.0);
   jetID->SetEtaMaxCut(5.0);
-  jetID->SetOutputName(ModNames::gkGoodJetsName);
+  jetID->SetJetEEMFractionMinCut(0.01);
+  jetID->SetOutputName("GoodJets");
+
   ElectronCleaningMod *electronCleaning = new ElectronCleaningMod;
   PhotonCleaningMod   *photonCleaning   = new PhotonCleaningMod;
   TauCleaningMod      *tauCleaning      = new TauCleaningMod;
   JetCleaningMod      *jetCleaning      = new JetCleaningMod;
-  jetCleaning->SetGoodJetsName(ModNames::gkGoodJetsName);
-  jetCleaning->SetCleanJetsName(ModNames::gkCleanJetsName);
+  jetCleaning->SetGoodJetsName("GoodJets");
+  jetCleaning->SetCleanJetsName("CleanJets");
 
   //------------------------------------------------------------------------------------------------
   // merge modules
@@ -150,21 +177,20 @@ void executePhysicsExample(const char *fileset  = "",
   analysisMod->SetElectronName(electronID->GetOutputName());
   analysisMod->SetElectronsFromBranch(kFALSE);
 
-
   //------------------------------------------------------------------------------------------------
   // making analysis chain
   //------------------------------------------------------------------------------------------------
-  //generatorMod->Add(muonID);
-  generatorMod->Add(muonID);
+  generatorMod->Add(hltmod);
+  hltmod->Add(muonID);
   muonID->Add(electronID);
   electronID->Add(photonID);
   photonID->Add(tauID);
   tauID->Add(pubJet);
   pubJet->Add(pubMet); 
-  pubMet->Add(jetCorr);
-  jetCorr->Add(metCorr);
-  metCorr->Add(jetID);
-  //pubJet->Add(jetID);
+  pubMet->Add(pubCaloMet); 
+  pubCaloMet->Add(jetCorr);
+  jetCorr->Add(metCaloCorr);
+  metCaloCorr->Add(jetID);
   jetID->Add(electronCleaning);
   electronCleaning->Add(photonCleaning);
   photonCleaning->Add(tauCleaning);
@@ -176,11 +202,16 @@ void executePhysicsExample(const char *fileset  = "",
   // setup analysis
   //------------------------------------------------------------------------------------------------
   Analysis *ana = new Analysis;
-  ana->SetUseHLT(kFALSE);
-  ana->SetKeepHierarchy(kTRUE);
+  ana->SetUseHLT(kTRUE);
+  ana->SetKeepHierarchy(kFALSE);
   if (nEvents >= 0)
     ana->SetProcessNEvents(nEvents);
   ana->SetSuperModule(generatorMod);
+  ana->SetPrintScale(100);
+  if(useHLTE29 == true){
+    ana->SetHLTTreeName("HLT_E29");
+    ana->SetHLTObjsName("HLTObjects_E29");
+  }
 
   //------------------------------------------------------------------------------------------------
   // organize input
@@ -209,24 +240,11 @@ void executePhysicsExample(const char *fileset  = "",
   printf("\nRoot output: %s\n\n",rootFile.Data());  
   ana->SetOutputName(rootFile.Data());
 
+  ana->SetCacheSize(64*1024*1024);
   //------------------------------------------------------------------------------------------------
   // run the analysis after successful initialisation
   //------------------------------------------------------------------------------------------------
   ana->Run(!gROOT->IsBatch());  
 
   return;
-}
-
-//--------------------------------------------------------------------------------------------------
-void runPhysicsExample(const char *fileset      = "",
-                         const char *skim         = "noskim",
-                         const char *dataset      = "s09-ttbar-7-mc3",
-                         const char *book         = "cern/filler/011",
-                         const char *catalogDir   = "/home/mitprod/catalog",
-                         const char *outputName   = "PhysicsExample",
-                         int         nEvents      = 10000, 
-                         int         runTypeIndex = -1)
-{
-  TString outfileName = TString(outputName);
-  executePhysicsExample(fileset,skim,dataset,book,catalogDir,outfileName,runTypeIndex,nEvents);
 }
