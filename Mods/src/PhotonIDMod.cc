@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.12 2010/01/24 21:00:19 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.13 2010/05/14 12:11:17 sixie Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -68,11 +68,11 @@ void PhotonIDMod::Process()
 
     if (ph->HadOverEm() >= fHadOverEmMax) 
       continue;
-    
+
     if (fApplyPixelSeed == kTRUE &&
         ph->HasPixelSeed() == kTRUE) 
       continue;
-    
+
     Bool_t idcut = kFALSE;
     switch (fPhIdType) {
       case kTight:
@@ -128,7 +128,7 @@ void PhotonIDMod::Process()
 
     if (ph->AbsEta() >= fAbsEtaMax) 
       continue;
-    
+
     // add good electron
     GoodPhotons->Add(fPhotons->At(i));
   }

@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.27 2009/09/03 13:31:35 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.28 2010/05/12 19:06:53 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -103,19 +103,19 @@ void MuonIDMod::Process()
       case kLoose:
         idpass = mu->Quality().Quality(MuonQuality::TMOneStationLoose) &&
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityLoose) &&
-		 mu->BestTrk()->NHits() >= 10 &&
+		 mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
 		 mu->NSegments() > 0;
         break;
       case kTight:
         idpass = mu->Quality().Quality(MuonQuality::TMOneStationTight) &&
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityTight) &&
-		 mu->BestTrk()->NHits() >= 10 &&
+		 mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
 		 mu->NSegments() > 0;
         break;
       case kMinimal:
-        idpass = mu->BestTrk()->NHits() >= 10 &&
+        idpass = mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
 		 mu->NSegments() > 0;
         break;
@@ -144,7 +144,7 @@ void MuonIDMod::Process()
           Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
                               1.0 * mu->IsoR03EmEt() + 
                               1.0 * mu->IsoR03HadEt();
-          if (totalIso < (mu->Pt()*0.10) )
+          if (totalIso < (mu->Pt()*0.15) )
             isocut = kTRUE;
 
 	  if     (fReverseIsoCut == kTRUE &&
