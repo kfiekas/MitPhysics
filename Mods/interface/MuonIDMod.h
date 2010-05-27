@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.23 2009/07/17 12:11:36 loizides Exp $
+// $Id: MuonIDMod.h,v 1.24 2010/05/12 19:06:52 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -48,6 +48,7 @@ namespace mithep
       void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
       void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
       void               SetD0Cut(Double_t cut)               { fD0Cut             = cut;   }
+      void               SetEtaCut(Double_t cut)              { fEtaCut            = cut;   }
       void               SetIDType(const char *type)          { fMuonIDType        = type;  }
       void               SetInputName(const char *name)       { fMuonBranchName    = name;  }   
       void               SetIsoType(const char *type)         { fMuonIsoType       = type;  }
@@ -99,6 +100,7 @@ namespace mithep
       Double_t           fMuonPtMin;           //min muon pt
       Bool_t             fApplyD0Cut;          //=true then apply d0 cut (def=1)
       Double_t           fD0Cut;               //max d0
+      Double_t           fEtaCut;              //max eta, absolute value
       Bool_t             fReverseIsoCut;       //apply reversion iso cut (default=0)
       Bool_t             fReverseD0Cut;        //apply reversion d0 cut (default=0)
       EMuIdType          fMuIDType;            //!muon id type (imposed)

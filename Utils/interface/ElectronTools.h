@@ -33,6 +33,7 @@ namespace mithep {
         kCustomIdTight,     //"CustomTight"
         kVBTFWorkingPoint95Id,
         kVBTFWorkingPoint90Id,
+        kVBTFWorkingPoint85Id,
         kVBTFWorkingPoint80Id,
         kVBTFWorkingPoint70Id
       };
@@ -48,6 +49,7 @@ namespace mithep {
         kCustomIso,          //"Custom"
         kVBTFWorkingPoint95Iso,
         kVBTFWorkingPoint90Iso,
+        kVBTFWorkingPoint85Iso,
         kVBTFWorkingPoint80Iso,
         kVBTFWorkingPoint70Iso
       };
@@ -56,7 +58,8 @@ namespace mithep {
       static Bool_t       PassConversionFilter(const Electron *el, const DecayParticleCol *conversions, 
                                                Bool_t WrongHitsRequirement );
       static Bool_t       PassCustomID(const Electron *el, EElIdType idType);
-      static Bool_t       PassCustomIso(const Electron *el, EElIsoType isoType);
+      static Bool_t       PassCustomIso(const Electron *el, EElIsoType isoType,
+                                        Bool_t useCombineIso = kTRUE);
       static Bool_t       PassD0Cut(const Electron *el, const VertexCol *vertices, 
                                     Double_t fD0Cut, Bool_t fReverseD0Cut);
       static Bool_t       PassD0Cut(const Electron *el, const BeamSpotCol *beamspots, 

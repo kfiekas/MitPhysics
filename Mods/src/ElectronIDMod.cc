@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.58 2010/04/10 19:41:41 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.59 2010/05/12 19:06:53 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -27,13 +27,15 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fEcalJuraIsoCut(5.0),
   fHcalIsolationCut(5.0),
   fCombIsolationCut(5.0),
-  fApplyConvFilter(kTRUE),
+  fApplyConvFilterType1(kTRUE),
+  fApplyConvFilterType2(kFALSE),
   fWrongHitsRequirement(kTRUE),
+  fNExpectedHitsInnerCut(999),
   fCombinedIdCut(kFALSE),
   fApplySpikeRemoval(kTRUE),
   fApplyD0Cut(kTRUE),
   fChargeFilter(kTRUE),
-  fD0Cut(0.025),
+  fD0Cut(0.020),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
   fElIdType(ElectronTools::kIdUndef),
@@ -75,6 +77,9 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
     case ElectronTools::kVBTFWorkingPoint90Id:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint90Id);
       break;
+    case ElectronTools::kVBTFWorkingPoint85Id:
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint85Id);
+      break;
     case ElectronTools::kVBTFWorkingPoint80Id:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint80Id);
       break;
@@ -101,17 +106,19 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       break;
     case ElectronTools::kTrackJura:
       isocut = (ele->TrackIsolationDr03() < fTrackIsolationCut) &&
-        (ele->EcalRecHitIsoDr04() < fEcalJuraIsoCut) &&
-        (ele->HcalIsolation() < fHcalIsolationCut);
+        (ele->EcalRecHitIsoDr03() < fEcalJuraIsoCut) &&
+        (ele->HcalTowerSumEtDr03() < fHcalIsolationCut);
       break;
     case ElectronTools::kTrackJuraCombined:
-      isocut = (ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr04() 
+      isocut = (ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() 
                 - 1.5 < fCombIsolationCut);
       break;
     case ElectronTools::kTrackJuraSliding:
     {
-      Double_t totalIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr04() - 1.5;
-      if (totalIso < (ele->Pt()*0.15) )
+      Double_t totalIso = ele->TrackIsolationDr03() + 
+                          ele->EcalRecHitIsoDr03()  +
+			  ele->HcalTowerSumEtDr03() - 1.0;
+      if (totalIso < (ele->Pt()*0.10) )
         isocut = kTRUE;
       
       if     (fReverseIsoCut == kTRUE &&
@@ -126,6 +133,9 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       break;
     case ElectronTools::kVBTFWorkingPoint90Iso:
       isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint90Iso);
+      break;
+    case ElectronTools::kVBTFWorkingPoint85Iso:
+      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint85Iso);
       break;
     case ElectronTools::kVBTFWorkingPoint80Iso:
       isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint80Iso);
@@ -176,17 +186,34 @@ void ElectronIDMod::Process()
     if (!isocut)
       continue;
 
-    // apply conversion filter
-    Bool_t passConvVeto = kFALSE;
-    if (fApplyConvFilter) {
+    // apply conversion filters
+    Bool_t passConvVetoType1 = kFALSE;
+    if (fApplyConvFilterType1) {
       LoadEventObject(fConversionBranchName, fConversions);
-      passConvVeto = ElectronTools::PassConversionFilter(e, fConversions, 
+      passConvVetoType1 = ElectronTools::PassConversionFilter(e, fConversions, 
                                                          fWrongHitsRequirement);      
-    } else {
-      passConvVeto = kTRUE;
     }
-    if (passConvVeto == kFALSE) continue;
+    else {
+      passConvVetoType1 = kTRUE;
+    }
+
+    if (passConvVetoType1 == kFALSE) continue;
+
+    Bool_t passConvVetoType2 = kFALSE;
+    if (fApplyConvFilterType2) {
+      passConvVetoType2 = TMath::Abs(e->ConvPartnerDCotTheta()) >= 0.02 || 
+                          TMath::Abs(e->ConvPartnerDist())      >= 0.02;
+    }
+    else {
+      passConvVetoType2 = kTRUE;
+    }
     
+    if (passConvVetoType2 == kFALSE) continue;
+    
+    // apply NExpectedHitsInner Cut
+    if(fNExpectedHitsInnerCut < 999 && 
+       e->BestTrk()->NExpectedHitsInner() > fNExpectedHitsInnerCut) continue;
+
     // apply d0 cut
     if (fApplyD0Cut) {
       LoadEventObject(fVertexName, fVertices);
@@ -229,14 +256,15 @@ void ElectronIDMod::SlaveBegin()
   ReqEventObject(fElectronBranchName, fElectrons, kTRUE);
 
   if(fCombinedIdCut == kTRUE) {
-    fElectronIDType  = "NoId";
-    fElectronIsoType = "NoIso";
-    fApplyConvFilter = kFALSE;
-    fApplyD0Cut      = kFALSE;
-    fChargeFilter    = kFALSE;
+    fElectronIDType  	  = "NoId";
+    fElectronIsoType 	  = "NoIso";
+    fApplyConvFilterType1 = kFALSE;
+    fApplyConvFilterType2 = kFALSE;
+    fApplyD0Cut           = kFALSE;
+    fChargeFilter         = kFALSE;
   }
 
-  if (fApplyConvFilter || fCombinedIdCut == kTRUE)
+  if (fApplyConvFilterType1 || fCombinedIdCut == kTRUE)
     ReqEventObject(fConversionBranchName, fConversions, kTRUE);
 
   if (fApplyD0Cut || fCombinedIdCut == kTRUE)
@@ -270,6 +298,8 @@ void ElectronIDMod::Setup()
     fElIdType = ElectronTools::kVBTFWorkingPoint90Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint80Id") == 0) 
     fElIdType = ElectronTools::kVBTFWorkingPoint80Id;
+  else if (fElectronIDType.CompareTo("VBTFWorkingPoint85Id") == 0) 
+    fElIdType = ElectronTools::kVBTFWorkingPoint85Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint70Id") == 0) 
     fElIdType = ElectronTools::kVBTFWorkingPoint70Id;
   
@@ -296,6 +326,8 @@ void ElectronIDMod::Setup()
     fElIsoType = ElectronTools::kVBTFWorkingPoint95Iso;
   else if (fElectronIsoType.CompareTo("VBTFWorkingPoint90Iso") == 0 )
     fElIsoType = ElectronTools::kVBTFWorkingPoint90Iso;
+  else if (fElectronIsoType.CompareTo("VBTFWorkingPoint85Iso") == 0 )
+    fElIsoType = ElectronTools::kVBTFWorkingPoint85Iso;
   else if (fElectronIsoType.CompareTo("VBTFWorkingPoint80Iso") == 0 )
     fElIsoType = ElectronTools::kVBTFWorkingPoint80Iso;
   else if (fElectronIsoType.CompareTo("VBTFWorkingPoint70Iso") == 0 )

@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.28 2010/05/12 19:06:53 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.29 2010/05/21 05:59:55 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -16,7 +16,7 @@ ClassImp(mithep::MuonIDMod)
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
   fVertexName("PrimaryVertexes"),
-  fMuonIDType("Loose"),
+  fMuonIDType("Minimal"),
   fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
@@ -24,7 +24,8 @@ ClassImp(mithep::MuonIDMod)
   fCombIsolationCut(5.0),
   fMuonPtMin(10),
   fApplyD0Cut(kTRUE),
-  fD0Cut(0.025),
+  fD0Cut(0.020),
+  fEtaCut(2.4),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
   fMuIDType(kIdUndef),
@@ -54,39 +55,52 @@ void MuonIDMod::Process()
     const Muon *mu = fMuons->At(i);
 
     Bool_t pass = kFALSE;
-    Double_t pt = 0; // make sure pt is taken from the correct track!
+    Double_t pt = 0;  // make sure pt is taken from the correct track!
+    Double_t eta = 0; // make sure eta is taken from the correct track!
     switch (fMuClassType) {
       case kAll:
         pass = kTRUE;
-        if (mu->HasTrk())
-          pt = mu->Pt();
+        if (mu->HasTrk()) {
+          pt  = mu->Pt();
+	  eta = TMath::Abs(mu->Eta());
+	}
         break;
       case kGlobal:
         pass = mu->HasGlobalTrk() && mu->IsTrackerMuon() &&
 	       mu->Quality().Quality(MuonQuality::TrackerMuonArbitrated);
-        if (pass) 
-          pt = mu->GlobalTrk()->Pt();
-        break;
+        if (pass) {
+          pt  = mu->TrackerTrk()->Pt();
+	  eta = TMath::Abs(mu->TrackerTrk()->Eta());
+        }
+	break;
       case kSta:
         pass = mu->HasStandaloneTrk();
-        if (pass) 
-          pt = mu->StandaloneTrk()->Pt();
+        if (pass) {
+          pt  = mu->StandaloneTrk()->Pt();
+          eta = TMath::Abs(mu->StandaloneTrk()->Eta());
+	}
         break;
       case kTrackerMuon:
         pass = mu->HasTrackerTrk() && mu->IsTrackerMuon() &&
 	       mu->Quality().Quality(MuonQuality::TrackerMuonArbitrated);
-        if (pass) 
-          pt = mu->TrackerTrk()->Pt();
+        if (pass) {
+          pt  = mu->TrackerTrk()->Pt();
+          eta = TMath::Abs(mu->TrackerTrk()->Eta());
+	}
         break;
       case kCaloMuon:
         pass = mu->HasTrackerTrk() && mu->IsCaloMuon();
-        if (pass) 
-          pt = mu->TrackerTrk()->Pt();
+        if (pass) {
+          pt  = mu->TrackerTrk()->Pt();
+          eta = TMath::Abs(mu->TrackerTrk()->Eta());
+	}
         break;
       case kTrackerBased:
         pass = mu->HasTrackerTrk();
-        if (pass) 
-          pt = mu->TrackerTrk()->Pt();
+        if (pass) {
+          pt  = mu->TrackerTrk()->Pt();
+          eta = TMath::Abs(mu->TrackerTrk()->Eta());
+	}
         break;
       default:
         break;
@@ -98,6 +112,9 @@ void MuonIDMod::Process()
     if (pt <= fMuonPtMin) 
       continue;
 
+    if (eta >= fEtaCut) 
+      continue;
+
     Bool_t idpass = kFALSE;
     switch (fMuIDType) {
       case kLoose:
@@ -105,19 +122,22 @@ void MuonIDMod::Process()
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityLoose) &&
 		 mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 mu->NSegments() > 0;
+		 mu->NSegments() > 0 &&
+		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kTight:
         idpass = mu->Quality().Quality(MuonQuality::TMOneStationTight) &&
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityTight) &&
 		 mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 mu->NSegments() > 0;
+		 mu->NSegments() > 0 &&
+		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kMinimal:
         idpass = mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 mu->NSegments() > 0;
+		 mu->NSegments() > 0 &&
+		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kNoId:
         idpass = kTRUE;

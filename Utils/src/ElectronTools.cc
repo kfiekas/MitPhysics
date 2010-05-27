@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.3 2010/05/03 11:35:17 bendavid Exp $
+// $Id: ElectronTools.cc,v 1.4 2010/05/12 19:06:22 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -36,38 +36,46 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     {0.8,0.2,0,0,0,0,0,0}};                                     //extra cuts fbrem and E_Over_P 
 
   Double_t VBTFWorkingPoint95[6][8] = {
-    {0.05,  0.05,  0.05,  0.05,  0.04,   0.04,   0.04,   0.04  }, //hovere
+    {0.5,   0.5,   0.5,   0.5,   0.07,   0.07,   0.07,   0.07  }, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03  }, //sigmaetaeta
     {0.8,   0.8,   0.8,   0.8,   0.7,    0.7,    0.7,    0.7   }, //deltaphiin
-    {0.006, 0.006, 0.006, 0.006, 0.008,  0.008,  0.008,  0.008 }, //deltaetain
+    {0.007, 0.007, 0.007, 0.007, 0.010,  0.010,  0.010,  0.010 }, //deltaetain
     {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0   }, //eoverp
     {0.0,   0.0,   0,     0,     0,      0,      0,      0     }  //extra cuts fbrem and E_Over_P 
   };            
 
-
   Double_t VBTFWorkingPoint90[6][8] = {
-    {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025 }, //hovere
+    {0.12,  0.12,  0.12,  0.12,  0.05,   0.05,   0.05,   0.05  }, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03  }, //sigmaetaeta
-    {0.04,  0.04,  0.04,  0.04,  0.025,  0.025,  0.025,  0.025 }, //deltaphiin
-    {0.006, 0.006, 0.006, 0.006, 0.008,  0.008,  0.008,  0.008 }, //deltaetain
+    {0.8,   0.8,   0.8,   0.8,   0.7,    0.7,    0.7,    0.7   }, //deltaphiin
+    {0.007, 0.007, 0.007, 0.007, 0.009,  0.009,  0.009,  0.009 }, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0   }, //eoverp
+    {0.0,   0.0,   0,     0,     0,      0,      0,      0     }  //extra cuts fbrem and E_Over_P 
+  };            
+
+  Double_t VBTFWorkingPoint85[6][8] = {
+    {0.04,  0.04,  0.04,  0.04,  0.025,  0.025,  0.025,  0.025 }, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03  }, //sigmaetaeta
+    {0.06,  0.06,  0.06,  0.06,  0.04,   0.04,   0.04,   0.04  }, //deltaphiin
+    {0.006, 0.006, 0.006, 0.006, 0.007,  0.007,  0.007,  0.007 }, //deltaetain
     {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0   }, //eoverp
     {0.0,   0.0,   0,     0,     0,      0,      0,      0     }  //extra cuts fbrem and E_Over_P 
   };            
 
   Double_t VBTFWorkingPoint80[6][8] = {
-    {0.05,  0.05,  0.05,  0.05,  0.025,  0.025,  0.025,  0.025}, //hovere
+    {0.04,  0.04,  0.04,  0.04,  0.025,  0.025,  0.025,  0.025}, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
-    {0.02,  0.02,  0.02,  0.02,  0.02,   0.02,   0.02,   0.02 }, //deltaphiin
-    {0.006, 0.006, 0.006, 0.006, 0.006,  0.006,  0.006,  0.006}, //deltaetain
+    {0.06,  0.06,  0.06,  0.06,  0.03,   0.03,   0.03,   0.03 }, //deltaphiin
+    {0.004, 0.004, 0.004, 0.004, 0.007,  0.007,  0.007,  0.007}, //deltaetain
     {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0  }, //eoverp
     {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
   };            
 
   Double_t VBTFWorkingPoint70[6][8] = {
-    {0.02,  0.02,  0.02,  0.02,  0.025,  0.025,  0.025,  0.025}, //hovere
+    {0.025, 0.025, 0.025, 0.025, 0.012,  0.012,  0.012,  0.012}, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
-    {0.02,  0.02,  0.02,  0.02,  0.02,   0.02,   0.02,   0.02 }, //deltaphiin
-    {0.006, 0.006, 0.006, 0.006, 0.003,  0.003,  0.003,  0.003}, //deltaetain
+    {0.03,  0.03,  0.03,  0.03,  0.02,   0.02,   0.02,   0.02 }, //deltaphiin
+    {0.003, 0.003, 0.003, 0.003, 0.005,  0.005,  0.005,  0.005}, //deltaetain
     {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0  }, //eoverp
     {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
   };            
@@ -84,6 +92,9 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
       break;
     case kVBTFWorkingPoint90Id:
       memcpy(fCuts,VBTFWorkingPoint90,sizeof(fCuts));
+      break;
+    case kVBTFWorkingPoint85Id:
+      memcpy(fCuts,VBTFWorkingPoint85,sizeof(fCuts));
       break;
     case kVBTFWorkingPoint80Id:
       memcpy(fCuts,VBTFWorkingPoint80,sizeof(fCuts));
@@ -142,37 +153,44 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType) 
+Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType,
+                                    Bool_t useCombineIso) 
 {
   Bool_t pass = kTRUE;
   Double_t fIsoCuts[4][2];          //!custom isolation cuts
-
   Double_t VBTFWorkingPoint95[4][2] = {
-    {7.0 ,  8.0   },   //TrkIso
-    {5.0 ,  3.0   },   //ECALIso
-    {5.0 ,  2.0   },   //HCALIso
-    {9999,  9999  }   //Combined    
+    {0.15 , 0.08   },   //TrkIso
+    {2.00 , 0.06   },   //ECALIso
+    {0.12 , 0.05   },   //HCALIso
+    {0.15,  0.10   }   //Combined    
   };            
 
   Double_t VBTFWorkingPoint90[4][2] = {
-    {6.0 ,  6.0   },   //TrkIso
-    {5.0 ,  2.5   },   //ECALIso
-    {5.0 ,  1.5   },   //HCALIso
-    {9999,  9999  }   //Combined    
+    {0.12 , 0.05   },   //TrkIso
+    {0.09 , 0.06   },   //ECALIso
+    {0.10 , 0.03   },   //HCALIso
+    {0.10,  0.07   }   //Combined    
+  };            
+
+  Double_t VBTFWorkingPoint85[4][2] = {
+    {0.09 , 0.05   },   //TrkIso
+    {0.08 , 0.05   },   //ECALIso
+    {0.10 , 0.025  },   //HCALIso
+    {0.09,  0.06   }   //Combined    
   };            
 
   Double_t VBTFWorkingPoint80[4][2] = {
-    {3.0 ,  1.5   },   //TrkIso
-    {4.0 ,  2.5   },   //ECALIso
-    {5.0 ,  0.7   },   //HCALIso
-    {9999,  9999  }   //Combined    
+    {0.09 , 0.04   },   //TrkIso
+    {0.07 , 0.05   },   //ECALIso
+    {0.10 , 0.025  },   //HCALIso
+    {0.07,  0.06   }   //Combined    
   };            
 
   Double_t VBTFWorkingPoint70[4][2] = {
-    {2.5 ,  0.8   },   //TrkIso
-    {3.0 ,  2.5   },   //ECALIso
-    {5.0 ,  0.25  },   //HCALIso
-    {9999,  9999  }   //Combined    
+    {0.06 , 0.03   },   //TrkIso
+    {0.06 , 0.03   },   //ECALIso
+    {0.05 , 0.015  },   //HCALIso
+    {0.05,  0.04   }   //Combined    
   };            
 
   switch (isoType) {
@@ -181,6 +199,9 @@ Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType)
       break;
     case kVBTFWorkingPoint90Iso:
       memcpy(fIsoCuts,VBTFWorkingPoint90,sizeof(fIsoCuts));
+      break;
+    case kVBTFWorkingPoint85Iso:
+      memcpy(fIsoCuts,VBTFWorkingPoint85,sizeof(fIsoCuts));
       break;
     case kVBTFWorkingPoint80Iso:
       memcpy(fIsoCuts,VBTFWorkingPoint80,sizeof(fIsoCuts));
@@ -194,23 +215,28 @@ Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType)
   }
 
   Double_t trkIso  = ele->TrackIsolationDr03();
-  Double_t ecalIso = ele->EcalRecHitIsoDr04();
-  Double_t hcalIso = ele->HcalIsolation();
-  Double_t combinedIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr04() - 1.5;
+  Double_t ecalIso = ele->EcalRecHitIsoDr03();
+  Double_t hcalIso = ele->HcalTowerSumEtDr03();
+  Double_t combinedIso = trkIso + ecalIso + hcalIso;
+  if(ele->IsEB()) combinedIso = combinedIso - 1.0;
+  combinedIso = combinedIso / ele->Pt();
 
   Int_t eb = 1;
   if (ele->IsEB()) 
     eb = 0;
  
-  if (trkIso>fIsoCuts[0][eb])
-    pass = kFALSE;
-  if (ecalIso>fIsoCuts[1][eb])
-    pass = kFALSE;
-  if (hcalIso>fIsoCuts[2][eb])
-    pass = kFALSE;
-  if (combinedIso>fIsoCuts[3][eb])
-    pass = kFALSE;
-
+  if(useCombineIso == kFALSE){
+    if (trkIso>fIsoCuts[0][eb])
+      pass = kFALSE;
+    if (ecalIso>fIsoCuts[1][eb])
+      pass = kFALSE;
+    if (hcalIso>fIsoCuts[2][eb])
+      pass = kFALSE;
+  }
+  else {
+    if (combinedIso>fIsoCuts[3][eb])
+      pass = kFALSE;
+  }
 
   return pass;
 }
@@ -343,34 +369,34 @@ Bool_t ElectronTools::PassSpikeRemovalFilter(const Electron *ele)
 //--------------------------------------------------------------------------------------------------
 Int_t ElectronTools::Classify(const Electron *ele) {
   
-  double eta = ele->AbsEta();
+  double eta    = ele->AbsEta();
   double eOverP = ele->ESuperClusterOverP();
   double fBrem  = ele->FBrem();
 
   int cat = -1;
   if (ele->IsEB()) {
-    if ((fBrem >= 0.12) && (eOverP > 0.9) && (eOverP < 1.2))
+    if ((fBrem >= 0.12) and (eOverP > 0.9) and (eOverP < 1.2))
       cat = 0;
-    else if ((ele->IsTrackerDriven()) && (!ele->IsEcalDriven()))
+    else if (((eta >  .445   and eta <  .45  ) or
+  	      (eta >  .79    and eta <  .81  ) or
+  	      (eta > 1.137   and eta < 1.157 ) or
+  	      (eta > 1.47285 and eta < 1.4744)))
+      cat = 6;
+    else if (ele->IsTrackerDriven() and !ele->IsEcalDriven())
       cat = 8;
     else if (fBrem < 0.12)
       cat = 1;
-    else if ((eta >  .445   && eta <  .45  ) ||
-  	     (eta >  .79    && eta <  .81  ) ||
-  	     (eta > 1.137   && eta < 1.157 ) ||
-  	     (eta > 1.47285 && eta < 1.4744))
-      cat = 6;
     else
       cat = 2;
   } else {
-    if ((fBrem >= 0.2) && (eOverP > 0.82) && (eOverP < 1.22))
+    if ((fBrem >= 0.2) and (eOverP > 0.82) and (eOverP < 1.22))
       cat = 3;
-    else if ((ele->IsTrackerDriven()) && (!ele->IsEcalDriven()))
+    else if (eta > 1.5 and eta <  1.58)
+      cat = 7;
+    else if (ele->IsTrackerDriven() and !ele->IsEcalDriven())
       cat = 8;
     else if (fBrem < 0.2)
       cat = 4;
-    else if (eta > 1.5 && eta <  1.58)
-      cat = 7;
     else
       cat = 5;
   }
@@ -416,12 +442,16 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
   Int_t result = 0.;
   
   Int_t bin = 0;
-  if (scEt < 20.)
-    bin = 2;
-  else if (scEt > 30.)
-    bin = 0;
-  else
-    bin = 1;
+  
+  Double_t WantBin = kFALSE;
+  if(WantBin) {
+    if (scEt < 20.)
+      bin = 2;
+    else if (scEt > 30.)
+      bin = 0;
+    else
+      bin = 1;
+  }
 
   if (fBrem > 0)
     eSeedOverPin = eSeedOverPin + fBrem;
@@ -495,187 +525,88 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
   }
   else if(typeCuts == 0 || typeCuts == 1 || typeCuts == 2){
     // Loose cuts
-  Double_t cutdcotdistLoose[27] = {
-  3.98e-02, 3.97e-02, 4.01e-02, 3.99e-02, 3.97e-02, 3.94e-02, 3.82e-02, 3.93e-02, 3.88e-02,
-  3.89e-02, 1.58e-02, 4.18e-03, 3.94e-02, 3.85e-02, 3.86e-02, 2.14e-02, 2.65e-02, 1.33e-02,
-  2.86e-02, 3.19e-02, 1.04e-02, 3.86e-02, 3.25e-02, 3.00e-02, 4.77e-04, 3.55e-02, 2.32e-02
+  Double_t cutdcotdistLoose[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
   };
-  Double_t cutdetainLoose[27] = {
-  9.57e-03, 4.87e-03, 1.49e-02, 1.47e-02, 9.13e-03, 1.68e-02, 1.32e-02, 5.18e-02, 3.00e-02,
-  9.38e-03, 3.72e-03, 9.06e-03, 1.31e-02, 6.65e-03, 1.23e-02, 1.30e-02, 2.32e-02, 1.18e-02,
-  1.07e-02, 3.82e-03, 8.96e-03, 1.40e-02, 6.64e-03, 1.22e-02, 1.20e-02, 2.09e-02, 2.18e-03
+  Double_t cutdetainLoose[9] = {1.30e-02, 5.95e-03, 3.10e-02, 1.68e-02, 8.44e-03, 1.70e-02, 1.55e-02, 5.13e-02, 1.61e-02
   };
-  Double_t cutdphiinLoose[27] = {
-  4.10e-02, 2.72e-01, 3.69e-01, 4.70e-02, 2.74e-01, 2.91e-01, 3.30e-01, 4.98e-01, 6.38e-01,
-  5.95e-02, 9.63e-02, 3.24e-01, 6.87e-02, 6.17e-02, 2.82e-01, 9.06e-02, 2.93e-01, 2.29e-01,
-  8.14e-02, 5.19e-02, 2.99e-01, 1.14e-01, 6.05e-02, 3.03e-01, 1.16e-01, 2.56e-01, 4.63e-02
+  Double_t cutdphiinLoose[9] = {7.51e-02, 3.30e-01, 4.20e-01, 9.86e-02, 2.84e-01, 3.28e-01, 3.77e-01, 4.32e-01, 3.74e-01
   };
-  Double_t cuteseedopcorLoose[27] = {
-  7.81e-01, 2.96e-01, 4.81e-01, 9.03e-01, 1.68e-01, 6.44e-01, 1.06e-01, 2.83e-01, 4.65e-01,
-  5.99e-01, 3.33e-01, 5.45e-01, 8.17e-01, 7.82e-01, 6.75e-01, 4.17e-01, 8.24e-01, 8.79e-01,
-  5.16e-01, 9.38e-01, 8.10e-01, 8.17e-01, 8.50e-01, 5.06e-01, 4.30e-01, 8.33e-01, 7.36e-01
+  Double_t cuteseedopcorLoose[9] = {6.31e-01, 3.02e-01, 3.04e-01, 8.10e-01, 2.23e-01, 5.03e-01, 2.78e-01, 3.10e-01, 4.69e-01
   };
-  Double_t cutetLoose[27] = {
-  -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05,
-  -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05,
-   1.20e+01,  1.20e+01,  1.20e+01,  1.20e+01,  1.20e+01,  1.20e+01,  1.20e+01,  1.20e+01,  1.42e+01
+  Double_t cutetLoose[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.
   };
-  Double_t cutfmishitsLoose[27] = {
-  4.50e+00, 1.50e+00, 1.50e+00, 2.50e+00, 2.50e+00, 1.50e+00, 2.50e+00, 2.50e+00, 1.50e+00,
-  2.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 2.50e+00, 2.50e+00, 5.00e-01,
-  2.50e+00, 1.50e+00, 5.00e-01, 1.50e+00, 1.50e+00, 5.00e-01, 2.50e+00, 5.00e-01, 1.50e+00
+  Double_t cutfmishitsLoose[9] = {4.50e+00, 1.50e+00, 1.50e+00, 2.50e+00, 2.50e+00, 1.50e+00, 2.50e+00, 4.50e+00, 5.00e-01
   };
-  Double_t cuthoeLoose[27] = {
-  1.65e-01, 7.55e-02, 1.43e-01, 3.70e-01, 5.01e-02, 1.25e-01, 4.06e-01, 2.69e+00, 5.58e-01,
-  2.37e-01, 5.43e-02, 1.47e-01, 3.68e-01, 3.12e-02, 1.20e-01, 6.06e-01, 2.81e+00, 1.07e+00,
-  1.04e-01, 6.22e-02, 5.73e-02, 2.97e-01, 2.10e-02, 3.08e-02, 5.46e-01, 4.71e+00, 8.00e-01
+  Double_t cuthoeLoose[9] = {2.47e-01, 7.78e-02, 1.49e-01, 3.82e-01, 4.70e-02, 1.12e-01, 1.16e+00, 5.04e+00, 1.35e+00
   };
-  Double_t cutip_gsfLoose[27] = {
-  4.31e-02, 7.19e-02, 1.40e-01, 8.68e-02, 1.45e-01, 1.57e-01, 9.21e-01, 1.62e-01, 1.86e-01,
-  2.09e-02, 4.59e-02, 9.03e-02, 3.65e-02, 1.49e-01, 9.89e-02, 6.24e-02, 1.88e-01, 1.31e-01,
-  1.22e-02, 1.23e-02, 7.07e-02, 1.65e-02, 1.23e-01, 6.70e-02, 4.77e-02, 5.92e-02, 1.84e-02
+  Double_t cutip_gsfLoose[9] = {0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02
   };
-  Double_t cutiso_sumLoose[27] = {
-  3.17e+01, 9.85e+00, 8.88e+00, 1.13e+01, 6.05e+00, 7.19e+00, 7.65e+00, 9.84e+00, 3.45e+00,
-  1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05,
-  1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05
+  Double_t cutiso_sumLoose[9] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
   };
-  Double_t cutiso_sumoetLoose[27] = {
-  2.58e+01, 1.48e+01, 1.14e+01, 1.93e+01, 7.10e+00, 9.51e+00, 1.09e+01, 9.71e+00, 3.86e+00,
-  2.31e+01, 1.58e+01, 1.24e+01, 1.72e+01, 7.37e+00, 8.98e+00, 1.51e+01, 1.31e+01, 6.20e+00,
-  2.12e+01, 2.14e+01, 1.75e+01, 1.56e+01, 9.62e+00, 1.06e+01, 2.00e+01, 2.23e+01, 1.37e+01
+  Double_t cutiso_sumoetLoose[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
   };
-  Double_t cutseeLoose[27] = {
-  1.82e-02, 1.29e-02, 1.68e-02, 3.73e-02, 3.14e-02, 3.30e-02, 1.53e-02, 3.97e-02, 8.41e+00,
-  1.62e-02, 1.07e-02, 1.40e-02, 3.62e-02, 3.21e-02, 3.53e-02, 1.19e-02, 3.72e-02, 5.04e+01,
-  1.59e-02, 1.12e-02, 1.38e-02, 3.98e-02, 3.27e-02, 4.07e-02, 1.04e-02, 4.42e-02, 1.19e-02
+  Double_t cutseeLoose[9] = {1.92e-02, 1.31e-02, 2.53e-02, 5.27e-02, 3.29e-02, 4.19e-02, 2.65e-02, 6.58e-02, 1.38e-01
   };
 
     // Medium cuts
-  Double_t cutdcotdistMedium[27] = {
-  3.93e-02, 3.01e-02, 3.32e-02, 3.94e-02, 3.91e-02, 3.90e-02, 3.70e-02, 3.88e-02, 3.90e-02,
-  3.21e-02, 7.36e-04, 1.95e-04, 3.76e-02, 2.35e-02, 1.13e-02, 1.96e-02, 1.62e-02, 1.04e-03,
-  1.34e-03, 2.56e-02, 1.31e-03, 3.26e-02, 8.21e-03, 1.60e-02, 5.17e-03, 2.63e-02, 1.80e-03
+  Double_t cutdcotdistMedium[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
   };
-  Double_t cutdetainMedium[27] = {
-  7.95e-03, 3.91e-03, 9.04e-03, 1.46e-02, 7.02e-03, 1.09e-02, 1.10e-02, 3.87e-02, 1.81e-02,
-  9.29e-03, 3.31e-03, 6.94e-03, 1.31e-02, 5.39e-03, 9.18e-03, 1.22e-02, 1.63e-02, 2.82e-03,
-  1.11e-02, 4.09e-03, 6.89e-03, 1.08e-02, 5.78e-03, 9.06e-03, 1.19e-02, 1.50e-02, 1.31e-03
+  Double_t cutdetainMedium[9] = {1.19e-02, 4.20e-03, 1.07e-02, 1.49e-02, 6.56e-03, 1.19e-02, 1.16e-02, 5.13e-02, 6.37e-03
   };
-  Double_t cutdphiinMedium[27] = {
-  4.03e-02, 9.76e-02, 3.24e-01, 4.70e-02, 2.36e-01, 2.73e-01, 3.10e-01, 3.98e-01, 6.38e-01,
-  5.53e-02, 5.50e-02, 3.21e-01, 6.57e-02, 2.58e-02, 1.14e-01, 5.92e-02, 2.68e-01, 2.61e-02,
-  7.99e-02, 2.47e-02, 1.72e-01, 5.64e-02, 2.45e-02, 8.58e-02, 6.44e-02, 7.18e-02, 3.48e-02
+  Double_t cutdphiinMedium[9] = {7.51e-02, 2.93e-01, 3.58e-01, 9.53e-02, 1.62e-01, 2.99e-01, 2.76e-01, 4.32e-01, 2.57e-01
   };
-  Double_t cuteseedopcorMedium[27] = {
-  7.85e-01, 3.53e-01, 5.77e-01, 9.03e-01, 1.66e-01, 6.43e-01, 1.78e-01, 3.24e-01, 9.02e-01,
-  8.15e-01, 9.11e-01, 8.94e-01, 8.48e-01, 8.70e-01, 9.50e-01, 5.34e-01, 9.19e-01, 9.61e-01,
-  4.57e-01, 9.51e-01, 9.53e-01, 8.22e-01, 8.74e-01, 9.18e-01, 8.08e-01, 9.19e-01, 1.02e+00
+  Double_t cuteseedopcorMedium[9] = {6.31e-01, 8.14e-01, 7.60e-01, 8.18e-01, 7.56e-01, 5.35e-01, 6.20e-01, 7.88e-01, 8.85e-01
   };
-  Double_t cutetMedium[27] = {
-  -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05,
-  -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05,
-   1.20e+01,  1.20e+01,  1.20e+01,  1.22e+01,  1.22e+01,  1.22e+01,  1.20e+01,  1.23e+01,  1.84e+01
+  Double_t cutetMedium[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.
   };
-  Double_t cutfmishitsMedium[27] = {
-  2.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 2.50e+00, 2.50e+00, 1.50e+00,
-  2.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 2.50e+00, 5.00e-01, 5.00e-01,
-  2.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 2.50e+00
+  Double_t cutfmishitsMedium[9] = {1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 2.50e+00, 1.50e+00, 5.00e-01
   };
-  Double_t cuthoeMedium[27] = {
-  9.79e-02, 5.42e-02, 1.13e-01, 3.61e-01, 3.73e-02, 7.61e-02, 3.45e-01, 2.69e+00, 4.05e-01,
-  1.11e-01, 4.66e-02, 1.39e-01, 3.59e-01, 2.34e-02, 5.75e-02, 6.10e-01, 1.35e+00, 6.35e-01,
-  6.07e-02, 5.34e-02, 2.97e-02, 1.16e-01, 1.45e-02, 1.92e-02, 1.30e-01, 5.37e+00, 5.06e-01
+  Double_t cuthoeMedium[9] = {2.46e-01, 6.80e-02, 1.35e-01, 3.73e-01, 2.33e-02, 5.58e-02, 8.80e-01, 5.04e+00, 3.78e-02
   };
-  Double_t cutip_gsfMedium[27] = {
-  3.95e-02, 5.29e-02, 1.15e-01, 4.56e-02, 1.31e-01, 1.27e-01, 3.13e-01, 9.50e-02, 1.58e-01,
-  1.41e-02, 2.00e-02, 5.52e-02, 2.97e-02, 7.65e-02, 4.84e-02, 4.15e-02, 1.73e-01, 1.31e-02,
-  1.01e-02, 9.93e-03, 3.60e-02, 1.17e-02, 1.89e-02, 3.43e-02, 1.83e-02, 2.27e-02, 3.30e-03
+  Double_t cutip_gsfMedium[9] = {0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02
   };
-  Double_t cutiso_sumMedium[27] = {
-  1.48e+01, 8.45e+00, 6.96e+00, 8.73e+00, 4.11e+00, 4.97e+00, 5.36e+00, 5.83e+00, 1.89e+00,
-  1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05,
-  1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05
+  Double_t cutiso_sumMedium[9] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
   };
-  Double_t cutiso_sumoetMedium[27] = {
-  1.74e+01, 1.13e+01, 8.29e+00, 1.42e+01, 4.72e+00, 6.09e+00, 7.07e+00, 8.32e+00, 2.32e+00,
-  1.49e+01, 1.28e+01, 1.01e+01, 1.13e+01, 6.51e+00, 6.93e+00, 1.16e+01, 1.01e+01, 6.16e+00,
-  1.40e+01, 1.49e+01, 1.24e+01, 1.02e+01, 6.59e+00, 7.29e+00, 1.51e+01, 1.61e+01, 1.38e+01
+  Double_t cutiso_sumoetMedium[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
   };
-  Double_t cutseeMedium[27] = {
-  1.53e-02, 1.11e-02, 1.39e-02, 3.31e-02, 3.08e-02, 3.15e-02, 1.26e-02, 3.18e-02, 4.42e-01,
-  1.45e-02, 1.04e-02, 1.28e-02, 3.50e-02, 3.02e-02, 3.18e-02, 1.14e-02, 3.36e-02, 3.94e+00,
-  1.56e-02, 1.06e-02, 1.28e-02, 3.75e-02, 3.16e-02, 3.65e-02, 9.67e-03, 3.61e-02, 9.56e-03
+  Double_t cutseeMedium[9] = {1.92e-02, 1.13e-02, 1.47e-02, 3.84e-02, 3.05e-02, 3.36e-02, 1.35e-02, 5.05e-02, 2.79e-02
   };
 
     // Tight cuts
-  Double_t cutdcotdistTight[27] = {
-  3.93e-02, 2.56e-02, 8.20e-03, 3.94e-02, 3.85e-02, 3.92e-02, 3.27e-02, 3.71e-02, 3.82e-02,
-  2.40e-02, 3.57e-03, 9.45e-03, 3.35e-02, 2.38e-02, 5.29e-04, 1.75e-02, 2.63e-03, 8.06e-05,
-  4.87e-04, 2.91e-02, 3.85e-03, 1.94e-02, 6.72e-03, 8.84e-03, 2.41e-04, 2.04e-03, 1.80e-03
+  Double_t cutdcotdistTight[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
   };
-  Double_t cutdetainTight[27] = {
-  8.57e-03, 3.40e-03, 6.56e-03, 1.05e-02, 6.56e-03, 9.98e-03, 1.04e-02, 1.48e-02, 1.44e-02,
-  7.71e-03, 2.59e-03, 5.21e-03, 9.40e-03, 4.25e-03, 8.49e-03, 1.18e-02, 2.29e-02, 1.90e-03,
-  8.70e-03, 3.62e-03, 4.92e-03, 9.33e-03, 4.80e-03, 7.72e-03, 1.19e-02, 4.61e-03, 1.34e-03
+  Double_t cutdetainTight[9] = {9.28e-03, 3.56e-03, 7.16e-03, 1.31e-02, 5.81e-03, 9.79e-03, 1.15e-02, 1.66e-02, 3.19e-03
   };
-  Double_t cutdphiinTight[27] = {
-  4.05e-02, 5.29e-02, 2.45e-01, 4.05e-02, 4.87e-02, 2.44e-01, 2.85e-01, 2.27e-01, 1.36e-01,
-  5.49e-02, 3.41e-02, 1.54e-01, 6.24e-02, 1.87e-02, 3.97e-02, 5.33e-02, 9.76e-02, 7.28e-03,
-  4.25e-02, 2.14e-02, 9.01e-02, 5.30e-02, 1.76e-02, 2.48e-02, 6.61e-02, 2.61e-02, 3.48e-02
+  Double_t cutdphiinTight[9] = {4.66e-02, 7.80e-02, 2.64e-01, 4.42e-02, 3.20e-02, 2.37e-01, 8.25e-02, 2.07e-01, 5.39e-02
   };
-  Double_t cuteseedopcorTight[27] = {
-  7.82e-01, 3.83e-01, 6.00e-01, 9.11e-01, 1.63e-01, 6.39e-01, 5.58e-01, 5.55e-01, 9.62e-01,
-  8.35e-01, 9.66e-01, 9.67e-01, 9.23e-01, 8.97e-01, 9.79e-01, 6.25e-01, 9.60e-01, 1.00e+00,
-  5.51e-01, 9.67e-01, 9.87e-01, 8.21e-01, 8.56e-01, 1.01e+00, 9.40e-01, 1.01e+00, 1.03e+00
+  Double_t cuteseedopcorTight[9] = {6.48e-01, 8.97e-01, 8.91e-01, 8.39e-01, 8.35e-01, 6.49e-01, 6.76e-01, 8.70e-01, 9.91e-01
   };
-  Double_t cutetTight[27] = {
-  -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05,
-  -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05, -1.00e+05,
-   1.37e+01,  1.32e+01,  1.36e+01,  1.42e+01,  1.43e+01,  1.41e+01,  1.30e+01,  1.75e+01,  1.83e+01
+  Double_t cutetTight[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.
   };
-  Double_t cutfmishitsTight[27] = {
-  2.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 5.00e-01, 2.50e+00, 5.00e-01, 5.00e-01,
-  2.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, -5.00e-01,
-  2.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 2.50e+00
+  Double_t cutfmishitsTight[9] = {1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 5.00e-01, 2.50e+00, 5.00e-01, 5.00e-01
   };
-  Double_t cuthoeTight[27] = {
-  7.61e-02, 3.97e-02, 1.07e-01, 1.22e-01, 2.28e-02, 6.10e-02, 1.19e-01, 2.69e+00, 3.14e-01,
-  9.01e-02, 4.94e-02, 1.01e-01, 7.59e-02, 1.53e-02, 3.38e-02, 5.41e-01, 1.10e+00, 6.97e-01,
-  4.83e-02, 4.88e-02, 2.45e-02, 3.91e-02, 9.84e-03, 1.38e-02, 1.89e-01, 7.10e-01, 4.39e-01
+  Double_t cuthoeTight[9] = {9.94e-02, 5.61e-02, 1.05e-01, 9.73e-02, 1.81e-02, 3.06e-02, 5.57e-01, 5.04e+00, 1.06e-03
   };
-  Double_t cutip_gsfTight[27] = {
-  2.45e-02, 4.31e-02, 6.38e-02, 3.33e-02, 7.65e-02, 1.36e-01, 6.79e-01, 9.98e-02, 4.62e-02,
-  1.31e-02, 1.45e-02, 4.60e-02, 1.53e-02, 3.43e-02, 2.58e-02, 2.82e-02, 1.29e-01, 3.21e-03,
-  8.51e-03, 7.46e-03, 1.77e-02, 1.06e-02, 1.18e-02, 1.13e-02, 1.22e-02, 2.26e-02, 5.29e-03
+  Double_t cutip_gsfTight[9] = {0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02
   };
-  Double_t cutiso_sumTight[27] = {
-  1.14e+01, 8.08e+00, 6.16e+00, 6.73e+00, 3.18e+00, 4.36e+00, 4.40e+00, 5.30e+00, 1.34e+00,
-  1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05,
-  1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05, 1.00e+05
+  Double_t cutiso_sumTight[9] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
   };
-  Double_t cutiso_sumoetTight[27] = {
-  1.36e+01, 1.02e+01, 7.07e+00, 9.77e+00, 3.57e+00, 4.85e+00, 6.13e+00, 7.89e+00, 2.14e+00,
-  1.12e+01, 1.18e+01, 7.73e+00, 8.18e+00, 4.85e+00, 5.05e+00, 1.13e+01, 7.16e+00, 5.76e+00,
-  1.04e+01, 1.12e+01, 1.05e+01, 7.53e+00, 5.51e+00, 6.08e+00, 1.21e+01, 1.31e+01, 1.41e+01
+  Double_t cutiso_sumoetTight[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
   };
-  Double_t cutseeTight[27] = {
-  1.42e-02, 1.05e-02, 1.25e-02, 3.24e-02, 3.08e-02, 3.01e-02, 1.10e-02, 2.71e-02, 4.69e-02,
-  1.33e-02, 1.04e-02, 1.15e-02, 3.31e-02, 2.96e-02, 3.08e-02, 9.90e-03, 2.74e-02, 3.16e-01,
-  1.45e-02, 1.05e-02, 1.10e-02, 3.37e-02, 2.97e-02, 3.01e-02, 9.40e-03, 2.77e-02, 9.39e-03
+  Double_t cutseeTight[9] = {1.56e-02, 1.07e-02, 1.23e-02, 3.35e-02, 2.98e-02, 3.06e-02, 1.07e-02, 3.79e-02, 1.01e-02
   };
 
-    Double_t cutdcotdist[27];
-    Double_t cutdetain[27];
-    Double_t cutdphiin[27];
-    Double_t cuteseedopcor[27];
-    Double_t cutet[27];
-    Double_t cutfmishits[27];
-    Double_t cuthoe[27];
-    Double_t cutip_gsf[27];
-    Double_t cutiso_sum[27];
-    Double_t cutiso_sumoet[27];
-    Double_t cutsee[27];
+    Double_t cutdcotdist[9];
+    Double_t cutdetain[9];
+    Double_t cutdphiin[9];
+    Double_t cuteseedopcor[9];
+    Double_t cutet[9];
+    Double_t cutfmishits[9];
+    Double_t cuthoe[9];
+    Double_t cutip_gsf[9];
+    Double_t cutiso_sum[9];
+    Double_t cutiso_sumoet[9];
+    Double_t cutsee[9];
     if     (typeCuts == 0) {
       memcpy(cutdcotdist  ,cutdcotdistLoose  ,sizeof(cutdcotdistLoose));
       memcpy(cutdetain    ,cutdetainLoose	,sizeof(cutdetainLoose));
@@ -716,7 +647,10 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
       memcpy(cutsee       ,cutseeTight	,sizeof(cutseeTight));
     }
 
-    Double_t iso_sum = tkIso + ecalIso + hcalIso;
+    // CAREFUL, I HAVE COMMENT IT OUT WHAT SANI IS DOING
+    //Double_t iso_sum = tkIso + ecalIso + hcalIso;
+    Double_t iso_sum = (ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + 
+                        ele->HcalTowerSumEtDr03() - 1.0) / ele->Pt();
     Double_t iso_sum_corrected = iso_sum*pow(40./scEt, 2);
     if ((iso_sum < cutiso_sum[cat+bin*9]) &&
 	(iso_sum_corrected < cutiso_sumoet[cat+bin*9]))
