@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.5 2010/05/27 07:59:10 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.6 2010/05/27 09:24:50 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -649,8 +649,8 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
 
     // CAREFUL, I HAVE COMMENTED OUT WHAT SANI IS DOING
     //Double_t iso_sum = tkIso + ecalIso + hcalIso;
-    Double_t iso_sum = (ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + 
-                        ele->HcalTowerSumEtDr03() - 1.0) / ele->Pt();
+    Double_t iso_sum = (ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + 
+                        ele->HcalTowerSumEtDr03()) / ele->Pt();
     Double_t iso_sum_corrected = iso_sum*pow(40./scEt, 2);
     if ((iso_sum < cutiso_sum[cat+bin*9]) &&
 	(iso_sum_corrected < cutiso_sumoet[cat+bin*9]))

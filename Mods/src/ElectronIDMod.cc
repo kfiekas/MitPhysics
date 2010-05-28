@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.59 2010/05/12 19:06:53 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.60 2010/05/27 07:59:03 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -116,8 +116,8 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kTrackJuraSliding:
     {
       Double_t totalIso = ele->TrackIsolationDr03() + 
-                          ele->EcalRecHitIsoDr03()  +
-			  ele->HcalTowerSumEtDr03() - 1.0;
+                          TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0)  +
+			  ele->HcalTowerSumEtDr03();
       if (totalIso < (ele->Pt()*0.10) )
         isocut = kTRUE;
       
@@ -261,7 +261,6 @@ void ElectronIDMod::SlaveBegin()
     fApplyConvFilterType1 = kFALSE;
     fApplyConvFilterType2 = kFALSE;
     fApplyD0Cut           = kFALSE;
-    fChargeFilter         = kFALSE;
   }
 
   if (fApplyConvFilterType1 || fCombinedIdCut == kTRUE)
