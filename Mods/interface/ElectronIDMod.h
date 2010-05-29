@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.34 2010/05/27 07:58:59 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.35 2010/05/29 11:56:17 bendavid Exp $
 //
 // ElectronIDMod
 //
@@ -69,6 +69,7 @@ namespace mithep
       void                SetIDType(const char *type)            { fElectronIDType     = type; }
       void                SetInputName(const char *n)            { fElectronBranchName = n;    }  
       void                SetIsoType(const char *type)           { fElectronIsoType    = type; }
+      void                SetTriggerObjectsName(const char *n)   { fTrigObjectsName = n;       }
       void                SetOutputName(const char *n)           { SetGoodElectronsName(n);    }  
       void                SetPtMin(Double_t pt)                  { fElectronPtMin      = pt;   }
       void                SetReverseD0Cut(Bool_t b)              { fReverseD0Cut = b;	       }
