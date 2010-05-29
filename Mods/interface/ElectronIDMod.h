@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.33 2010/05/12 19:06:52 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.34 2010/05/27 07:58:59 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -46,6 +46,7 @@ namespace mithep
       Double_t            GetPtMin()                  	  const { return fElectronPtMin;	  }
       Bool_t              GetReverseD0Cut()           	  const { return fReverseD0Cut; 	  }
       Bool_t              GetReverseIsoCut()          	  const { return fReverseIsoCut;	  }
+      Bool_t              GetApplyTriggerMatching()       const { return fApplyTriggerMatching;   }
       Double_t            GetTrackIsoCut()            	  const { return fTrackIsolationCut;	  }
       Bool_t              GetChargeFilter()           	  const { return fChargeFilter; 	  }
       Bool_t              PassIDCut(const Electron *el, ElectronTools::EElIdType idType) const;
@@ -72,6 +73,7 @@ namespace mithep
       void                SetPtMin(Double_t pt)                  { fElectronPtMin      = pt;   }
       void                SetReverseD0Cut(Bool_t b)              { fReverseD0Cut = b;	       }
       void                SetReverseIsoCut(Bool_t b)             { fReverseIsoCut = b;         }
+      void                SetApplyTriggerMatching(Bool_t b)     { fApplyTriggerMatching = b;  }
       void                SetTrackIsoCut(Double_t cut)           { fTrackIsolationCut  = cut;  }
       void                SetChargeFilter(Bool_t b)              { fChargeFilter = b;	       }
       void                SetWrongHitsRequirement(Bool_t b)      { fWrongHitsRequirement = b;  }
@@ -89,6 +91,7 @@ namespace mithep
       TString                   fVertexName;	         //name of vertex collection
       TString                   fElectronIDType;         //type of electron ID we impose
       TString                   fElectronIsoType;        //type of electron Isolation we impose
+      TString                   fTrigObjectsName;        //name of trigger object collection
       Double_t                  fElectronPtMin;	         //min pt cut
       Double_t                  fIDLikelihoodCut;        //cut value for ID likelihood
       Double_t                  fTrackIsolationCut;      //cut value for track isolation
@@ -108,6 +111,7 @@ namespace mithep
       Double_t                  fD0Cut;                  //max d0
       Bool_t                    fReverseIsoCut;          //apply reversion iso cut (default=0)
       Bool_t                    fReverseD0Cut;           //apply reversion d0 cut (default=0)
+      Bool_t                    fApplyTriggerMatching;   //match to hlt electron (default=0)
       ElectronTools::EElIdType  fElIdType;              //!identification scheme
       ElectronTools::EElIsoType fElIsoType;              //!isolation scheme
       const ElectronCol        *fElectrons;              //!electron collection

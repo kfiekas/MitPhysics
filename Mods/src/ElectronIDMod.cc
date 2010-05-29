@@ -1,9 +1,10 @@
-// $Id: ElectronIDMod.cc,v 1.60 2010/05/27 07:59:03 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.61 2010/05/28 15:45:40 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
+#include "MitAna/DataTree/interface/TriggerObjectCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -20,6 +21,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fVertexName(string("PrimaryVertexes").c_str()),
   fElectronIDType("CustomTight"),
   fElectronIsoType("TrackJuraSliding"),
+  fTrigObjectsName("HLTModTrigObjs"),
   fElectronPtMin(10),
   fIDLikelihoodCut(0.9),
   fTrackIsolationCut(5.0),
@@ -38,6 +40,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fD0Cut(0.020),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
+  fApplyTriggerMatching(kFALSE),
   fElIdType(ElectronTools::kIdUndef),
   fElIsoType(ElectronTools::kIsoUndef),
   fElectrons(0),
@@ -162,6 +165,12 @@ void ElectronIDMod::Process()
 
   LoadEventObject(fElectronBranchName, fElectrons);
 
+  //get trigger object collection if trigger matching is enabled
+  const TriggerObjectCol *trigObjs = 0;
+  if (fApplyTriggerMatching) {
+    trigObjs = GetHLTObjects(fTrigObjectsName);
+  }
+  
   ElectronOArr *GoodElectrons = new ElectronOArr;
   GoodElectrons->SetName(fGoodElectronsName);
 
@@ -169,6 +178,11 @@ void ElectronIDMod::Process()
     const Electron *e = fElectrons->At(i);        
 
     if (e->Pt() <= fElectronPtMin) 
+      continue;
+    
+    //apply trigger matching
+    Bool_t matchTrigger = fApplyTriggerMatching && ElectronTools::PassTriggerMatching(e,trigObjs);
+    if (fApplyTriggerMatching && !matchTrigger)
       continue;
     
     //apply ECAL spike removal    

@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.7 2010/05/28 15:45:45 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.8 2010/05/28 16:31:43 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -364,6 +364,23 @@ Bool_t ElectronTools::PassSpikeRemovalFilter(const Electron *ele)
   //   }
     
   return passSpikeRemovalFilter;
+}
+
+Bool_t ElectronTools::PassTriggerMatching(const Electron *ele, const TriggerObjectCol *trigobjs)
+{
+  
+  for (UInt_t i=0; i<trigobjs->GetEntries(); ++i) {
+    const TriggerObject *trigobj = trigobjs->At(i);
+    if (trigobj->TriggerType()==TriggerObject::TriggerCluster || trigobj->TriggerType()==TriggerObject::TriggerElectron) {
+      if (MathUtils::DeltaR(ele,trigobj)<0.3) {
+        return kTRUE;
+      }
+    }
+  }
+  
+  return kFALSE;
+  
+  
 }
 
 //--------------------------------------------------------------------------------------------------

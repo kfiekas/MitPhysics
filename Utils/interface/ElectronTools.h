@@ -15,6 +15,7 @@
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitAna/DataTree/interface/BeamSpotCol.h"
+#include "MitAna/DataTree/interface/TriggerObjectCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 namespace mithep {
@@ -65,6 +66,7 @@ namespace mithep {
       static Bool_t       PassD0Cut(const Electron *el, const BeamSpotCol *beamspots, 
                                     Double_t fD0Cut, Bool_t fReverseD0Cut);
       static Bool_t       PassSpikeRemovalFilter(const Electron *ele);
+      static Bool_t       PassTriggerMatching(const Electron *ele, const TriggerObjectCol *trigobjs);
       static Int_t        Classify(const Electron *ele);
       static Int_t        PassTightId(const Electron *ele, const VertexCol *vertices, 
                                       const DecayParticleCol *conversions, const Int_t typeCuts);
