@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.61 2010/05/28 15:45:40 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.62 2010/05/29 11:56:17 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -242,11 +242,11 @@ void ElectronIDMod::Process()
       if (!passChargeFilter) continue;
     }
 
-    // apply full combined id, using Medium cuts
+    // apply full combined id, using Tight cuts
     if(fCombinedIdCut == kTRUE) {
       LoadEventObject(fVertexName, fVertices);
       LoadEventObject(fConversionBranchName, fConversions);
-      Int_t result = ElectronTools::PassTightId(e, *&fVertices, fConversions, 1);
+      Int_t result = ElectronTools::PassTightId(e, *&fVertices, fConversions, 2);
       if(result != 15) continue;
     }
 
