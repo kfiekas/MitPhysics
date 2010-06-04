@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.8 2010/05/28 16:31:43 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.9 2010/05/29 11:56:17 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -214,12 +214,11 @@ Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType,
       break;
   }
 
-  Double_t trkIso  = ele->TrackIsolationDr03();
-  Double_t ecalIso = ele->EcalRecHitIsoDr03();
-  Double_t hcalIso = ele->HcalTowerSumEtDr03();
-  Double_t combinedIso = trkIso + ecalIso + hcalIso;
-  if(ele->IsEB()) combinedIso = trkIso + TMath::Max(ecalIso - 1.0, 0.0) + hcalIso;
-  combinedIso = combinedIso / ele->Pt();
+  Double_t trkIso  = ele->TrackIsolationDr03() / ele->Pt();
+  Double_t ecalIso = ele->EcalRecHitIsoDr03() / ele->Pt();
+  Double_t hcalIso = ele->HcalTowerSumEtDr03() / ele->Pt();
+  Double_t combinedIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03();
+  if(ele->IsEB()) combinedIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03();
 
   Int_t eb = 1;
   if (ele->IsEB()) 
