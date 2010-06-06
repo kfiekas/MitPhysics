@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.9 2010/05/29 11:56:17 bendavid Exp $
+// $Id: ElectronTools.cc,v 1.10 2010/06/04 20:07:29 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -75,7 +75,7 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     {0.025, 0.025, 0.025, 0.025, 0.012,  0.012,  0.012,  0.012}, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
     {0.03,  0.03,  0.03,  0.03,  0.02,   0.02,   0.02,   0.02 }, //deltaphiin
-    {0.003, 0.003, 0.003, 0.003, 0.005,  0.005,  0.005,  0.005}, //deltaetain
+    {0.004, 0.004, 0.004, 0.004, 0.005,  0.005,  0.005,  0.005}, //deltaetain
     {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0  }, //eoverp
     {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
   };            
@@ -187,10 +187,10 @@ Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType,
   };            
 
   Double_t VBTFWorkingPoint70[4][2] = {
-    {0.06 , 0.03   },   //TrkIso
-    {0.06 , 0.03   },   //ECALIso
-    {0.05 , 0.015  },   //HCALIso
-    {0.05,  0.04   }   //Combined    
+    {0.05 , 0.025  },   //TrkIso
+    {0.06 , 0.025  },   //ECALIso
+    {0.03 , 0.020  },   //HCALIso
+    {0.04,  0.030  }   //Combined
   };            
 
   switch (isoType) {
@@ -219,6 +219,7 @@ Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType,
   Double_t hcalIso = ele->HcalTowerSumEtDr03() / ele->Pt();
   Double_t combinedIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03();
   if(ele->IsEB()) combinedIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03();
+  combinedIso = combinedIso / ele->Pt();
 
   Int_t eb = 1;
   if (ele->IsEB()) 
