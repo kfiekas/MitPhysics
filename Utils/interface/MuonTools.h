@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.10 2009/07/20 04:55:33 loizides Exp $
+// $Id: MuonTools.h,v 1.11 2010/05/12 19:07:32 ceballos Exp $
 //
 // MuonTools
 //
@@ -19,6 +19,8 @@
 #define MITPHYSICS_UTILS_MUONTOOLS_H
 
 #include "MitAna/DataTree/interface/Muon.h"
+#include "MitAna/DataTree/interface/VertexCol.h"
+#include "MitAna/DataTree/interface/BeamSpotCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "TH2D.h"
 
@@ -43,11 +45,15 @@ namespace mithep {
                                  //  ===> 1.2 Segment compatability + 0.8 calo compatability > 1.2
       };
 
-      Bool_t      Init(const char *mutemp, const char *pitemp);
-      Bool_t      IsGood(const mithep::Muon *iMuon, ESelType iSel) const;
-      Double_t    GetCaloCompatability(const mithep::Muon *iMuon,
-                                       Bool_t iEMSpecial, Bool_t iCorrectedHCAL) const; 
-      Double_t    GetSegmentCompatability(const mithep::Muon *iMuon)             const;
+      Bool_t        Init(const char *mutemp, const char *pitemp);
+      Bool_t        IsGood(const mithep::Muon *iMuon, ESelType iSel) const;
+      Double_t      GetCaloCompatability(const mithep::Muon *iMuon,
+                                         Bool_t iEMSpecial, Bool_t iCorrectedHCAL) const; 
+      Double_t      GetSegmentCompatability(const mithep::Muon *iMuon)             const;
+      static Bool_t PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut, 
+                              Bool_t fReverseD0Cut); 
+      static Bool_t PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double_t fD0Cut, 
+                              Bool_t fReverseD0Cut);
 
     protected:
       void        DeleteHistos();

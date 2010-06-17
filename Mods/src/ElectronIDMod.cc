@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.62 2010/05/29 11:56:17 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.63 2010/05/30 17:58:47 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -23,6 +23,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronIsoType("TrackJuraSliding"),
   fTrigObjectsName("HLTModTrigObjs"),
   fElectronPtMin(10),
+  fElectronEtaMax(2.5),
   fIDLikelihoodCut(0.9),
   fTrackIsolationCut(5.0),
   fCaloIsolationCut(5.0),
@@ -178,6 +179,9 @@ void ElectronIDMod::Process()
     const Electron *e = fElectrons->At(i);        
 
     if (e->Pt() <= fElectronPtMin) 
+      continue;
+    
+    if (e->AbsEta() >= fElectronEtaMax) 
       continue;
     
     //apply trigger matching

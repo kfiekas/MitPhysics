@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.35 2010/05/29 11:56:17 bendavid Exp $
+// $Id: ElectronIDMod.h,v 1.36 2010/05/29 18:08:34 bendavid Exp $
 //
 // ElectronIDMod
 //
@@ -44,6 +44,7 @@ namespace mithep
       const char         *GetIsoType()                	  const { return fElectronIsoType;	  }
       const char         *GetOutputName()             	  const { return GetGoodElectronsName();  }
       Double_t            GetPtMin()                  	  const { return fElectronPtMin;	  }
+      Double_t            GetEtaMax()                  	  const { return fElectronEtaMax;	  }
       Bool_t              GetReverseD0Cut()           	  const { return fReverseD0Cut; 	  }
       Bool_t              GetReverseIsoCut()          	  const { return fReverseIsoCut;	  }
       Bool_t              GetApplyTriggerMatching()       const { return fApplyTriggerMatching;   }
@@ -72,9 +73,10 @@ namespace mithep
       void                SetTriggerObjectsName(const char *n)   { fTrigObjectsName = n;       }
       void                SetOutputName(const char *n)           { SetGoodElectronsName(n);    }  
       void                SetPtMin(Double_t pt)                  { fElectronPtMin      = pt;   }
+      void                SetEtaMin(Double_t eta)                { fElectronEtaMax     = eta;  }
       void                SetReverseD0Cut(Bool_t b)              { fReverseD0Cut = b;	       }
       void                SetReverseIsoCut(Bool_t b)             { fReverseIsoCut = b;         }
-      void                SetApplyTriggerMatching(Bool_t b)     { fApplyTriggerMatching = b;  }
+      void                SetApplyTriggerMatching(Bool_t b)      { fApplyTriggerMatching = b;  }
       void                SetTrackIsoCut(Double_t cut)           { fTrackIsolationCut  = cut;  }
       void                SetChargeFilter(Bool_t b)              { fChargeFilter = b;	       }
       void                SetWrongHitsRequirement(Bool_t b)      { fWrongHitsRequirement = b;  }
@@ -94,6 +96,7 @@ namespace mithep
       TString                   fElectronIsoType;        //type of electron Isolation we impose
       TString                   fTrigObjectsName;        //name of trigger object collection
       Double_t                  fElectronPtMin;	         //min pt cut
+      Double_t                  fElectronEtaMax;         //max eta cut
       Double_t                  fIDLikelihoodCut;        //cut value for ID likelihood
       Double_t                  fTrackIsolationCut;      //cut value for track isolation
       Double_t                  fCaloIsolationCut;       //cut value for calo isolation

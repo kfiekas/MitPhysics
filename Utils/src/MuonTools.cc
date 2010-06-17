@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.9 2009/04/07 15:37:10 loizides Exp $
+// $Id: MuonTools.cc,v 1.10 2009/07/20 04:55:33 loizides Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -427,5 +427,56 @@ TH2D *MuonTools::LoadHisto(const char *name, TFile *file) const
   }
   ret->SetDirectory(0);
   return ret;
+}
+//--------------------------------------------------------------------------------------------------
+Bool_t MuonTools::PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut, 
+                            Bool_t fReverseD0Cut) 
+{
+  Bool_t d0cut = kFALSE;
+  const Track *mt = mu->BestTrk();
+  if (!mt) return kFALSE;
+
+  Double_t d0_real = 1e30;
+  for(UInt_t i0 = 0; i0 < vertices->GetEntries(); i0++) {
+    if(vertices->At(i0)->NTracks() > 0){
+      Double_t pD0 = mt->D0Corrected(*vertices->At(i0));
+      d0_real = TMath::Abs(pD0);
+      break;
+    }
+  }
+  if(d0_real < fD0Cut) d0cut = kTRUE;
+
+  if	 (fReverseD0Cut == kTRUE &&
+  	  d0cut == kFALSE && d0_real < 0.05)
+    d0cut = kTRUE;
+  else if(fReverseD0Cut == kTRUE)
+    d0cut = kFALSE;
+  
+  return d0cut;
+}
+
+//--------------------------------------------------------------------------------------------------
+Bool_t MuonTools::PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double_t fD0Cut, 
+                                Bool_t fReverseD0Cut) 
+{
+  Bool_t d0cut = kFALSE;
+  const Track *mt = mu->BestTrk();
+  if (!mt) return kFALSE;
+
+  // d0 cut
+  Double_t d0_real = 99999;
+  for(UInt_t i0 = 0; i0 < beamspots->GetEntries(); i0++) {
+    Double_t pD0 = mt->D0Corrected(*beamspots->At(i0));
+    if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
+  }
+  if(d0_real < fD0Cut) d0cut = kTRUE;
+  
+  if     (fReverseD0Cut == kTRUE &&
+          d0cut == kFALSE && d0_real < 0.05)
+    d0cut = kTRUE;
+  else if(fReverseD0Cut == kTRUE)
+    d0cut = kFALSE;
+  
+  return d0cut;
 }
 

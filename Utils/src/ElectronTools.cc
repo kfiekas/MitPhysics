@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.10 2010/06/04 20:07:29 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.11 2010/06/06 17:27:21 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -300,8 +300,11 @@ Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, 
   // d0 cut
   Double_t d0_real = 99999;
   for(UInt_t i0 = 0; i0 < vertices->GetEntries(); i0++) {
-    Double_t pD0 = ele->GsfTrk()->D0Corrected(*vertices->At(i0));
-    if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
+    if(vertices->At(i0)->NTracks() > 0){
+      Double_t pD0 = ele->GsfTrk()->D0Corrected(*vertices->At(i0));
+      d0_real = TMath::Abs(pD0);
+      break;
+    }
   }
   if(d0_real < fD0Cut) d0cut = kTRUE;
   
@@ -523,12 +526,8 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
     
     result = result + 1;
 
-    Double_t d0_real = 99999;
-    for(UInt_t i0 = 0; i0 < vertices->GetEntries(); i0++) {
-      Double_t pD0 = ele->GsfTrk()->D0Corrected(*vertices->At(i0));
-      if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
-    }
-    if (d0_real > cut[26*eb+21])
+    Bool_t passD0cut = PassD0Cut(ele, vertices, cut[26*eb+21], kFALSE);
+    if (!passD0cut)
       return result;
 
     if (mishits > cut[26*eb+22]) // expected missing hits
@@ -683,12 +682,8 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
 	result += 1.;
     }
 
-    Double_t d0_real = 99999;
-    for(UInt_t i0 = 0; i0 < vertices->GetEntries(); i0++) {
-      Double_t pD0 = ele->GsfTrk()->D0Corrected(*vertices->At(i0));
-      if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
-    }
-    if (d0_real < cutip_gsf[cat+bin*9])
+    Bool_t passD0cut = PassD0Cut(ele, vertices, cutip_gsf[cat+bin*9], kFALSE);
+    if (passD0cut)
       result += 4;
 
     Bool_t passConvVeto = PassConversionFilter(ele, conversions, kTRUE);

@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.29 2010/05/21 05:59:55 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.30 2010/05/27 07:59:03 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -66,8 +66,9 @@ void MuonIDMod::Process()
 	}
         break;
       case kGlobal:
-        pass = mu->HasGlobalTrk() && mu->IsTrackerMuon() &&
-	       mu->Quality().Quality(MuonQuality::TrackerMuonArbitrated);
+        pass = mu->HasGlobalTrk() && mu->IsTrackerMuon();
+        //pass = mu->HasGlobalTrk() && mu->IsTrackerMuon() &&
+	//       mu->Quality().Quality(MuonQuality::TrackerMuonArbitrated);
         if (pass) {
           pt  = mu->TrackerTrk()->Pt();
 	  eta = TMath::Abs(mu->TrackerTrk()->Eta());
@@ -122,7 +123,7 @@ void MuonIDMod::Process()
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityLoose) &&
 		 mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 mu->NSegments() > 0 &&
+		 //mu->NSegments() > 0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kTight:
@@ -130,13 +131,13 @@ void MuonIDMod::Process()
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityTight) &&
 		 mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 mu->NSegments() > 0 &&
+		 //mu->NSegments() > 0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kMinimal:
         idpass = mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 mu->NSegments() > 0 &&
+		 //mu->NSegments() > 0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kNoId:
@@ -186,25 +187,8 @@ void MuonIDMod::Process()
       continue;
 
     if (fApplyD0Cut) {
-      Bool_t d0cut = kFALSE;
-      const Track *mt = mu->BestTrk();
-      if (!mt)
-        continue;
-      Double_t d0_real = 1e30;
-      for(UInt_t i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-        Double_t pD0 = mt->D0Corrected(*fVertices->At(i0));
-        if(TMath::Abs(pD0) < TMath::Abs(d0_real)) 
-          d0_real = TMath::Abs(pD0);
-      }
-      if(d0_real < fD0Cut) d0cut = kTRUE;
-
-      if     (fReverseD0Cut == kTRUE &&
-              d0cut == kFALSE && d0_real < 0.05)
-	d0cut = kTRUE;
-      else if(fReverseD0Cut == kTRUE)
-	d0cut = kFALSE;
-
-      if (d0cut == kFALSE)
+      Bool_t passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut, fReverseD0Cut);
+      if (!passD0cut)
         continue;
     }
 
