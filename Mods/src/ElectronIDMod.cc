@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.63 2010/05/30 17:58:47 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.64 2010/06/17 13:25:04 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -178,10 +178,10 @@ void ElectronIDMod::Process()
   for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
     const Electron *e = fElectrons->At(i);        
 
-    if (e->Pt() <= fElectronPtMin) 
+    if (e->Pt() < fElectronPtMin) 
       continue;
     
-    if (e->AbsEta() >= fElectronEtaMax) 
+    if (e->AbsEta() > fElectronEtaMax) 
       continue;
     
     //apply trigger matching
