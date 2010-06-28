@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCleaningMod.h,v 1.11 2009/04/08 10:12:21 ceballos Exp $
+// $Id: JetCleaningMod.h,v 1.12 2009/06/15 15:00:21 loizides Exp $
 //
 // JetCleaningMod
 //
@@ -32,6 +32,7 @@ namespace mithep
       Double_t           GetMinDeltaRToElectron() const { return fMinDeltaRToElectron; }
       Double_t           GetMinDeltaRToMuon()     const { return fMinDeltaRToMuon;     }
       Double_t           GetMinDeltaRToPhoton()   const { return fMinDeltaRToPhoton;   }
+      Bool_t             GetApplyPhotonRemoval()  const { return fApplyPhotonRemoval;  }
       Bool_t             GetApplyTauRemoval()     const { return fApplyTauRemoval;     }
       const char        *GetOutputName()          const { return GetCleanJetsName();   }
       void               SetCleanElectronsName(const char *name) { fCleanElectronsName  = name; }
@@ -44,6 +45,7 @@ namespace mithep
       void               SetMinDeltaRToElectron(Double_t dr)     { fMinDeltaRToElectron = dr;   }
       void               SetMinDeltaRToMuon(Double_t dr)         { fMinDeltaRToMuon     = dr;   }
       void               SetMinDeltaRToPhoton(Double_t dr)       { fMinDeltaRToPhoton   = dr;   }
+      void               SetApplyPhotonRemoval(Bool_t b)         { fApplyPhotonRemoval  = b;    }
       void               SetApplyTauRemoval(Bool_t b)            { fApplyTauRemoval     = b;    }
       void               SetOutputName(const char *name)         { SetCleanJetsName(name);      }
 
@@ -60,6 +62,7 @@ namespace mithep
       Double_t           fMinDeltaRToMuon;      //delta R for separating muons from jets
       Double_t           fMinDeltaRToPhoton;    //delta R for separating photons from jets
       Double_t           fMinDeltaRToTau;       //delta R for separating taus from jets
+      Bool_t             fApplyPhotonRemoval;   //apply photon removal?
       Bool_t             fApplyTauRemoval;      //apply tau removal?
    
     ClassDef(JetCleaningMod, 1) // Jet cleaning module
