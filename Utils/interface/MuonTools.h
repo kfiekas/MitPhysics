@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.11 2010/05/12 19:07:32 ceballos Exp $
+// $Id: MuonTools.h,v 1.12 2010/06/17 13:24:56 ceballos Exp $
 //
 // MuonTools
 //
@@ -54,6 +54,7 @@ namespace mithep {
                               Bool_t fReverseD0Cut); 
       static Bool_t PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double_t fD0Cut, 
                               Bool_t fReverseD0Cut);
+      static Bool_t PassSoftMuonCut(const Muon *mu, const VertexCol *vertices); 
 
     protected:
       void        DeleteHistos();

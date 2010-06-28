@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.10 2009/07/20 04:55:33 loizides Exp $
+// $Id: MuonTools.cc,v 1.11 2010/06/17 13:25:54 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -480,3 +480,18 @@ Bool_t MuonTools::PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double
   return d0cut;
 }
 
+//--------------------------------------------------------------------------------------------------
+Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices) 
+{
+  if(mu->Pt() <= 3.0) return kFALSE;
+  
+  if(!mu->IsTrackerMuon()) return kFALSE;
+  
+  if(!mu->Quality().Quality(MuonQuality::TMLastStationAngTight)) return kFALSE;
+  
+  if(mu->BestTrk()->NHits() <= 10) return kFALSE;
+
+  if(!PassD0Cut(mu, vertices, 0.2, kFALSE)) return kFALSE;
+  
+  return kTRUE;
+}
