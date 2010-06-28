@@ -1,4 +1,4 @@
-// $Id: ElectronCleaningMod.cc,v 1.8 2009/02/18 15:52:33 loizides Exp $
+// $Id: ElectronCleaningMod.cc,v 1.9 2009/06/15 15:00:21 loizides Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -43,18 +43,10 @@ void ElectronCleaningMod::Process()
     Bool_t isMuonOverlap = kFALSE;
     UInt_t n = CleanMuons->GetEntries();
     for (UInt_t j=0; j<n; ++j) {
-      
-      if (trtrack && CleanMuons->At(j)->TrackerTrk()) {
-        if (CleanMuons->At(j)->TrackerTrk() == trtrack) {
-          isMuonOverlap = kTRUE;
-          break;	 
-        }
-      } else {      
-        Double_t deltaR = MathUtils::DeltaR(CleanMuons->At(j)->Mom(), mom);     
-        if (deltaR < 0.1) {
-          isMuonOverlap = kTRUE;
-          break;	 
-        }
+      Double_t deltaR = MathUtils::DeltaR(CleanMuons->At(j)->Mom(), mom);     
+      if (deltaR < 0.1) {
+        isMuonOverlap = kTRUE;
+        break;         
       }
     }
     
