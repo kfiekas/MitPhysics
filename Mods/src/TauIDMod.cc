@@ -1,4 +1,4 @@
-// $Id: TauIDMod.cc,v 1.7 2009/04/09 11:24:58 loizides Exp $
+// $Id: TauIDMod.cc,v 1.8 2009/06/15 15:00:21 loizides Exp $
 
 #include "MitPhysics/Mods/interface/TauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -43,7 +43,7 @@ void TauIDMod::Process()
     if (tau->Pt() <= fPtMin)
       continue;
     
-    if (tau->SourceCaloJet()->Pt() <= fJetPtMin)
+    if (!tau->SourceCaloJet() || tau->SourceCaloJet()->Pt() <= fJetPtMin)
       continue;
     
     if (tau->NSignalTracks() == 0 || tau->NSignalTracks() > fNSignalTracksMax)

@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.13 2010/05/14 12:11:17 sixie Exp $
+// $Id: PhotonIDMod.cc,v 1.14 2010/05/21 05:59:55 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -50,10 +50,13 @@ void PhotonIDMod::Process()
 
     
     Bool_t passSpikeRemovalFilter = kTRUE;
-    if(ph->SCluster()->Seed()->Energy() > 5.0 && 
-       ph->SCluster()->Seed()->EMax() / ph->SCluster()->Seed()->E3x3() > 0.95
-      ) {
-      passSpikeRemovalFilter = kFALSE;
+
+    if (ph->SCluster() && ph->SCluster()->Seed()) {
+      if(ph->SCluster()->Seed()->Energy() > 5.0 && 
+         ph->SCluster()->Seed()->EMax() / ph->SCluster()->Seed()->E3x3() > 0.95
+        ) {
+        passSpikeRemovalFilter = kFALSE;
+      }
     }
 
     // For Now Only use the EMax/E3x3 prescription.
@@ -122,8 +125,8 @@ void PhotonIDMod::Process()
         ph->IsEB() == kFALSE && ph->IsEE() == kFALSE) 
       continue;
 
-    if ((ph->IsEB() == kTRUE && ph->SCluster()->EtaWidth() >= fEtaWidthEB) ||
-        (ph->IsEE() == kTRUE && ph->SCluster()->EtaWidth() >= fEtaWidthEE))
+    if ((ph->IsEB() == kTRUE && ph->SCluster() && ph->SCluster()->EtaWidth() >= fEtaWidthEB) ||
+        (ph->IsEE() == kTRUE && ph->SCluster() && ph->SCluster()->EtaWidth() >= fEtaWidthEE))
       continue;
 
     if (ph->AbsEta() >= fAbsEtaMax) 
