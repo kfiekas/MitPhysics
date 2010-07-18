@@ -1,4 +1,4 @@
-// $Id: doubleLepton.C,v 1.3 2009/04/30 12:13:37 ceballos Exp $
+// $Id: doubleLepton.C,v 1.3 2010/05/12 19:05:51 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -12,14 +12,15 @@
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
 #include "MitPhysics/SelMods/interface/GenericSelMod.h"
+#include "MitAna/TreeMod/interface/HLTMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void doubleLepton(const char *catalogDir   = "/home/mitprod/catalog",
-                  const char *book	   = "mit/filler/011",
-                  const char *dataset	   = "p10-wjets-mg-v26",
-                  const char *fileset	   = "0000",
-                  int nsel = 0, int NEvents = 999999999)
+void doubleLepton(const char *catalogDir   = "/home/sixie/catalog",
+                  const char *book	   = "cern/filler/014",
+                  const char *dataset	   = "run2010a-eg-rrjun14",
+                  const char *fileset	   = "0003",
+                  int nsel = 0, int NEvents = 10000)
 {
   TString skimName("doubleLepton");
   using namespace mithep;
@@ -29,34 +30,55 @@ void doubleLepton(const char *catalogDir   = "/home/mitprod/catalog",
   //------------------------------------------------------------------------------------------------
   // organize selection
   //------------------------------------------------------------------------------------------------
+  HLTMod *hltmod = new HLTMod;
+  hltmod->SetPrintTable(kFALSE);
+  hltmod->AddTrigger("HLT_Mu3");
+  hltmod->AddTrigger("HLT_Mu5");
+  hltmod->AddTrigger("HLT_Mu9");
+  hltmod->AddTrigger("HLT_Mu0_Track0_Jpsi");
+  hltmod->AddTrigger("HLT_Mu3_Track0_Jpsi");
+  hltmod->AddTrigger("HLT_Mu5_Track0_Jpsi");
+  hltmod->AddTrigger("HLT_Ele10_LW_L1R");
+  hltmod->AddTrigger("HLT_Ele10_LW_EleId_L1R");
+  hltmod->AddTrigger("HLT_Ele15_LW_L1R");
+  hltmod->AddTrigger("HLT_Ele20_LW_L1R");
+  hltmod->AddTrigger("HLT_Photon10_L1R");
+  hltmod->AddTrigger("HLT_Photon15_L1R");
+  hltmod->AddTrigger("HLT_Photon20_L1R");
+  hltmod->SetTrigObjsName("myhltobjs");
+
   const char     *muInput  = Names::gkMuonBrn;
   const char     *elInput  = Names::gkElectronBrn;
-  const Double_t  ptMin     = 10;
 
   MuonIDMod *muId = new MuonIDMod;  
   muId->SetInputName (muInput);
-  muId->SetPtMin     (ptMin);
-  muId->SetApplyD0Cut(kFALSE);
-  muId->SetClassType ("Global");
+  muId->SetPtMin     (3.0);
+  muId->SetApplyD0Cut(kTRUE);
+  muId->SetD0Cut     (0.2);
+  muId->SetClassType ("All");
   muId->SetIDType    ("NoId");
   muId->SetIsoType   ("NoIso");
 
   ElectronIDMod *elId = new ElectronIDMod;
-  elId->SetInputName            (elInput);
-  elId->SetPtMin                (ptMin);
-  elId->SetApplyConversionFilter(kFALSE);
-  elId->SetApplySpikeRemoval    (kFALSE);
-  elId->SetApplyD0Cut           (kFALSE);
-  elId->SetIDType               ("NoId");
-  elId->SetIsoType              ("NoIso");
+  elId->SetInputName                 (elInput);
+  elId->SetPtMin                     (10.0);
+  elId->SetApplyConversionFilterType1(kFALSE);
+  elId->SetApplyConversionFilterType2(kFALSE);
+  elId->SetChargeFilter              (kFALSE);
+  elId->SetApplySpikeRemoval         (kFALSE);
+  elId->SetApplyD0Cut                (kTRUE);
+  elId->SetD0Cut                     (0.2);
+  elId->SetNExpectedHitsInnerCut     (999);
+  elId->SetIDType                    ("NoId");
+  elId->SetIsoType                   ("NoIso");
 
   MergeLeptonsMod *merger = new MergeLeptonsMod;
   merger->SetMuonsName    (muId->GetOutputName());
   merger->SetElectronsName(elId->GetOutputName());
 
   GenericSelMod<Particle> *selMod = new GenericSelMod<Particle>;
-  selMod->SetPtMin(ptMin);
-  selMod->SetMinCounts(2);
+  selMod->SetPtMin(3.0);
+  selMod->SetMinCounts(1);
   selMod->SetColName(merger->GetOutputName());
   merger->Add(selMod);
 
@@ -79,7 +101,8 @@ void doubleLepton(const char *catalogDir   = "/home/mitprod/catalog",
   // set up analysis
   //------------------------------------------------------------------------------------------------
   Analysis *ana = new Analysis;
-  ana->AddSuperModule(muId);
+  ana->AddSuperModule(hltmod);
+  hltmod->Add(muId);
   muId->Add(elId);
   elId->Add(merger);
   if (NEvents>0)
