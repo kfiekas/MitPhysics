@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.57 2009/12/06 14:59:28 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.58 2010/03/13 20:51:27 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -185,7 +185,8 @@ void GeneratorMod::Process()
             break;
           if (pm->Mother()->Is(MCParticle::kZ)  || pm->Mother()->Is(MCParticle::kW)  ||
               pm->Mother()->Is(MCParticle::kZp) || pm->Mother()->Is(MCParticle::kWp) ||
-              pm->Mother()->Is(MCParticle::kH)) {
+              pm->Mother()->Is(MCParticle::kH)  || pm->Mother()->Is(MCParticle::kH0) ||
+	      pm->Mother()->Is(MCParticle::kA0) || pm->Mother()->Is(MCParticle::kHp)) {
             GenLeptons->Add(p);
             isGoodLepton = kTRUE;
             break;
