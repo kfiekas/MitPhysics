@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.21 2010/04/08 09:30:04 sixie Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.22 2010/04/10 18:07:53 sixie Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -20,7 +20,9 @@
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
+#include "MitPhysics/Mods/interface/PFTauCleaningMod.h"
 #include "MitPhysics/Mods/interface/TauIDMod.h"
+#include "MitPhysics/Mods/interface/PFTauIDMod.h"
 #include "MitPhysics/Mods/interface/TrackingPurityFilterMod.h"
 #endif
 
@@ -53,6 +55,8 @@
 #pragma link C++ class mithep::PhotonCleaningMod+;
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::TauCleaningMod+;
+#pragma link C++ class mithep::PFTauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;
+#pragma link C++ class mithep::PFTauIDMod+;
 #pragma link C++ class mithep::TrackingPurityFilterMod+;
 #endif

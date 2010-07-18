@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ModNames.h,v 1.10 2009/06/30 10:58:51 loizides Exp $
+// $Id: ModNames.h,v 1.11 2009/09/08 00:00:29 bendavid Exp $
 //
 // Names
 //
@@ -27,6 +27,7 @@ namespace mithep
       static const char *gkCleanNoFwdJetsName;
       static const char *gkCleanPhotonsName;
       static const char *gkCleanTausName;
+      static const char *gkCleanPFTausName;
       static const char *gkCorrectedJetsName;
       static const char *gkElFakeableObjsName;
       static const char *gkFakeEventHeadersName;
@@ -35,6 +36,7 @@ namespace mithep
       static const char *gkGoodMuonsName;
       static const char *gkGoodPhotonsName;
       static const char *gkGoodTausName;
+      static const char *gkGoodPFTausName;
       static const char *gkMCAllLeptonsName;
       static const char *gkMCBosonsName;
       static const char *gkMCISRPhotonsName;
