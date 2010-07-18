@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.2 2010/03/27 13:38:44 sixie Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.3 2010/04/10 18:06:51 sixie Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -9,6 +9,7 @@
 #include "MitPhysics/Utils/interface/MatchingTools.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
+#include "MitPhysics/Utils/interface/JetTools.h"
 #endif
 
 #ifdef __CINT__
@@ -25,6 +26,7 @@
 #pragma link C++ class mithep::MatchingTools;
 #pragma link C++ class mithep::MuonTools;
 #pragma link C++ class mithep::ElectronTools;
+#pragma link C++ class mithep::JetTools;
 #pragma link C++ enum mithep::ElectronTools::EElIdType;
 #pragma link C++ enum mithep::ElectronTools::EElIsoType;
 
