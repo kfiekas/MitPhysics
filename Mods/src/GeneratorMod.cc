@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.58 2010/03/13 20:51:27 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.59 2010/07/18 21:09:21 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -903,8 +903,8 @@ void GeneratorMod::Process()
     // End special study about VVjets
     // --------------------------------
 
-    Met *theMET = new Met(totalMET[0], totalMET[1]);
-    theMET->SetElongitudinal(totalMET[2]);
+    Met *theMET = new Met(-totalMET[0], -totalMET[1]);
+    theMET->SetElongitudinal(-totalMET[2]);
     GenMet->AddOwned(theMET);
 
     // sort according to pt
