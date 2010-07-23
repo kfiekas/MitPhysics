@@ -18,6 +18,7 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitAna/DataTree/interface/TrackCol.h"
+#include "MitAna/DataTree/interface/CaloTowerCol.h"
 #include "MitAna/DataTree/interface/MetCol.h"
 #include <TVector3.h>
 #include <TLorentzVector.h>
@@ -28,9 +29,10 @@ namespace mithep {
       JetTools();
       virtual ~JetTools();
 
-      static Double_t NJettiness(const ParticleOArr *particles, const JetOArr *jets, double Y = 0.0);
-      static Double_t NJettiness(const TrackOArr *tracks, const JetOArr *jets, double Y = 0.0);
-      static Double_t NJettiness(const JetOArr *jetsS, const JetOArr *jets, double Y = 0.0);
+      static Double_t NJettiness(const ParticleOArr *particles, const JetOArr *jets, bool UseQ = kFALSE, double Y = 0.0);
+      static Double_t NJettiness(const TrackOArr *tracks, const JetOArr *jets, bool UseQ = kFALSE, double Y = 0.0);
+      static Double_t NJettiness(const JetOArr *jetsS, const JetOArr *jets, bool UseQ = kFALSE, double Y = 0.0);
+      static Double_t NJettiness(const CaloTowerOArr *calos, const JetOArr *jets, bool UseQ = kFALSE, double Y = 0.0);
       static Double_t M_r(const ParticleOArr *particles);
       static Double_t Beta_r(const ParticleOArr *particles);
       static Double_t M_r_t(const ParticleOArr *particles, const Met *met);

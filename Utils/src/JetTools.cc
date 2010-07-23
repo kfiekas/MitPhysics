@@ -15,7 +15,9 @@ JetTools::~JetTools()
 }
 
 //Remember to remove the signal from particles before inputting into the function
-Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets, Double_t Y){
+Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets, bool UseQ, Double_t Y){
+  if(particles->GetEntries() <= 0) return 0.0;
+
   Double_t fval = 0.0;
   Double_t fvalpart;
 
@@ -29,10 +31,15 @@ Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets
     }
     fval = fval + fvalpart;
   }
+
+  if(UseQ == kTRUE) fval = fval / particles->At(0)->Pt();
+
   return fval;
 }
 
-Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, Double_t Y){
+Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, bool UseQ, Double_t Y){
+  if(tracks->GetEntries() <= 0) return 0.0;
+
   Double_t fval = 0.0;
   Double_t fvalpart;
 
@@ -46,10 +53,15 @@ Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, Doub
     }
     fval = fval + fvalpart;
   }
+
+  if(UseQ == kTRUE) fval = fval / tracks->At(0)->Pt();
+  
   return fval;
 }
 
-Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, Double_t Y){
+Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, bool UseQ, Double_t Y){
+  if(jetsS->GetEntries() <= 0) return 0.0;
+
   Double_t fval = 0.0;
   Double_t fvalpart;
 
@@ -63,6 +75,31 @@ Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, Double_
     }
     fval = fval + fvalpart;
   }
+
+  if(UseQ == kTRUE) fval = fval / jetsS->At(0)->Pt();
+  
+  return fval;
+}
+
+Double_t JetTools::NJettiness(const CaloTowerOArr *calos, const JetOArr *jets, bool UseQ, Double_t Y){
+  if(calos->GetEntries() <= 0) return 0.0;
+
+  Double_t fval = 0.0;
+  Double_t fvalpart;
+
+  for(int i=0;i<int(calos->GetEntries());i++){
+    fvalpart = (calos->At(i)->Pt()) * TMath::Exp(-TMath::Abs(calos->At(i)->Eta()-Y));     
+
+    for(int j=0;j<int(jets->GetEntries());j++){
+      fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
+                 (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-calos->At(i)->Eta()))
+		- 2 * TMath::Cos(MathUtils::DeltaPhi(jets->At(j)->Phi(),calos->At(i)->Phi()))));
+    }
+    fval = fval + fvalpart;
+  }
+
+  if(UseQ == kTRUE) fval = fval / calos->At(0)->Pt();
+  
   return fval;
 }
 
