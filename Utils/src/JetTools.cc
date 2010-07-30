@@ -164,11 +164,10 @@ Double_t JetTools::Razor(const ParticleOArr *particles, const Met *met){
 }
 
 //Cosine Omega
-Double_t JetTools::CosineOmega(const ParticleOArr *particles){
-  if(particles->GetEntries() < 2) return -999.;
+Double_t JetTools::CosineOmega(const Particle *particles0, const Particle *particles1){
 
-  TLorentzVector v_L1(particles->At(0)->Px(),particles->At(0)->Py(),particles->At(0)->Pz(),particles->At(0)->E());
-  TLorentzVector v_L2(particles->At(1)->Px(),particles->At(1)->Py(),particles->At(1)->Pz(),particles->At(1)->E());
+  TLorentzVector v_L1(particles0->Px(),particles0->Py(),particles0->Pz(),particles0->E());
+  TLorentzVector v_L2(particles1->Px(),particles1->Py(),particles1->Pz(),particles1->E());
 
   Double_t beta = (v_L1.P()-v_L2.P())/(v_L1.Pz()-v_L2.Pz());
 
@@ -184,9 +183,20 @@ Double_t JetTools::CosineOmega(const ParticleOArr *particles){
 }
 
 //Transverse Higgs mass
-Double_t JetTools::MtHiggs(const CompositeParticle *dilepton, const Met *met, int nsel){
+Double_t JetTools::MtHiggs(const ParticleOArr * leptons,
+                           const Met *met, int nsel){
+  if(leptons->Entries() < 2) return -999.0;
+
   double mtHiggs = -999.0;
-  double enell,enenn,enex,eney,mll,mnu;
+  double enell = 0.0;
+  double enenn = 0.0;
+  double enex  = 0.0;
+  double eney  = 0.0;
+  double mll   = 0.0;
+  double mnu   = 0.0;
+  CompositeParticle *dilepton = new CompositeParticle();
+  dilepton->AddDaughter(leptons->At(0));
+  dilepton->AddDaughter(leptons->At(1));
   
   if     (nsel == 0){ // Use of Mt mass and mnu == mll
     enell = TMath::Sqrt(dilepton->Pt()*dilepton->Pt() + dilepton->Mt()*dilepton->Mt());
@@ -220,13 +230,20 @@ Double_t JetTools::MtHiggs(const CompositeParticle *dilepton, const Met *met, in
     mll   = dilepton->Mass();
     mnu   = 0.0;
   }
-  else {
-    return -999.;
+  else if(nsel == 4){ // Use the formula from hep-ph:1006.4998
+    mtHiggs = 2*leptons->At(0)->Pt()*leptons->At(0)->Pt() + 2*leptons->At(1)->Pt()*leptons->At(1)->Pt() + 3 * (
+      leptons->At(0)->Pt()*leptons->At(1)->Pt() + met->Pt()*(leptons->At(0)->Pt()+leptons->At(1)->Pt())
+      - met->Px()*dilepton->Px() - met->Py()*dilepton->Py()
+      - leptons->At(0)->Px()*leptons->At(1)->Px() - leptons->At(0)->Py()*leptons->At(1)->Py());
   }
 
-  mtHiggs = mll*mll + mnu*mnu + 2.0*(enell*enenn - enex*enex - eney*eney);
+  if(nsel >= 0 && nsel <= 3){
+    mtHiggs = mll*mll + mnu*mnu + 2.0*(enell*enenn - enex*enex - eney*eney);
+  }
   if(mtHiggs <= 0) mtHiggs = 0.0;
   else             mtHiggs = TMath::Sqrt(mtHiggs);
+
+  delete dilepton;
 
   return mtHiggs;
 }

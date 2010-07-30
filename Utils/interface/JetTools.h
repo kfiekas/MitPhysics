@@ -37,8 +37,8 @@ namespace mithep {
       static Double_t Beta_r(const ParticleOArr *particles);
       static Double_t M_r_t(const ParticleOArr *particles, const Met *met);
       static Double_t Razor(const ParticleOArr *particles, const Met *met);
-      static Double_t CosineOmega(const ParticleOArr *particles);
-      static Double_t MtHiggs(const CompositeParticle *dilepton, const Met *met, int nsel);
+      static Double_t CosineOmega(const Particle *particles0, const Particle *particles1);
+      static Double_t MtHiggs(const ParticleOArr *leptons, const Met *met, int nsel);
 
       ClassDef(JetTools, 0)
   };
