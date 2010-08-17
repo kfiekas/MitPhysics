@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.2 2010/05/03 11:37:49 bendavid Exp $
+// $Id: JetCorrectionMod.h,v 1.3 2010/05/10 15:15:43 bendavid Exp $
 //
 // JetCorrectionMod
 //
@@ -17,9 +17,8 @@
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Jet.h"
 #include "MitAna/DataCont/interface/Types.h"
-#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
-#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
-
+ 
+class FactorizedJetCorrector;
 namespace mithep 
 {
   class JetCorrectionMod : public BaseMod
@@ -46,8 +45,9 @@ namespace mithep
 
       TString           fJetsName;              //name of jet collection (input)
       TString           fCorrectedJetsName;     //name of good jets collection (output)
-      std::vector<JetCorrectorParameters> fCorrectionParameters; //list of corrections files (full paths)
-      FactorizedJetCorrector *fJetCorrector;      //CMSSW/FWLite jet corrections module
+      //std::vector<JetCorrectorParameters> fCorrectionParameters; //list of corrections files (full paths)
+      std::vector<std::string> fCorrectionFiles; //list of jet correction files
+      FactorizedJetCorrector *fJetCorrector;      //!CMSSW/FWLite jet corrections module
       BitMask8          fEnabledCorrectionMask; //bitmask of enabled corrections
       std::vector<Jet::ECorr> fEnabledCorrections; //vector of enabled corrections
 

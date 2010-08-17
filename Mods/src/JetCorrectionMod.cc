@@ -1,7 +1,9 @@
-// $Id: JetCorrectionMod.cc,v 1.3 2010/05/03 11:37:49 bendavid Exp $
+// $Id: JetCorrectionMod.cc,v 1.4 2010/05/10 15:15:44 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/CaloJetCol.h"
@@ -33,11 +35,17 @@ JetCorrectionMod::~JetCorrectionMod()
 //--------------------------------------------------------------------------------------------------
 void JetCorrectionMod::SlaveBegin()
 {
+   //fill JetCorrectorParameters from files
+   std::vector<JetCorrectorParameters> correctionParameters;
+   for (std::vector<std::string>::const_iterator it = fCorrectionFiles.begin(); it!=fCorrectionFiles.end(); ++it) {
+     correctionParameters.push_back(JetCorrectorParameters(*it));
+   }
+  
    //initialize jet corrector class
-   fJetCorrector = new FactorizedJetCorrector(fCorrectionParameters);
+   fJetCorrector = new FactorizedJetCorrector(correctionParameters);
 
    //keep track of which corrections are enabled
-   for (std::vector<JetCorrectorParameters>::const_iterator it = fCorrectionParameters.begin(); it != fCorrectionParameters.end(); ++it) {
+   for (std::vector<JetCorrectorParameters>::const_iterator it = correctionParameters.begin(); it != correctionParameters.end(); ++it) {
      std::string ss = it->definitions().level();
      if (ss == "L1Offset") 
        fEnabledCorrectionMask.SetBit(Jet::L1);
@@ -144,7 +152,7 @@ void JetCorrectionMod::Process()
     CorrectedJets->AddOwned(jet);             
   }
 
-  // sort according to pt
+  // sort according to ptrootcint forward declaration data members
   CorrectedJets->Sort();
   
   // add to event for other modules to use
@@ -161,6 +169,5 @@ void JetCorrectionMod::AddCorrectionFromRelease(const std::string &path)
 //--------------------------------------------------------------------------------------------------
 void JetCorrectionMod::AddCorrectionFromFile(const std::string &file)
 {
-  JetCorrectorParameters correctionPar(file);
-  fCorrectionParameters.push_back(correctionPar);
+  fCorrectionFiles.push_back(file);
 }
