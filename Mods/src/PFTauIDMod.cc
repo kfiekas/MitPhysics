@@ -1,4 +1,4 @@
-// $Id: PFTauIDMod.cc,v 1.9 2010/07/06 08:33:16 sixie Exp $
+// $Id: PFTauIDMod.cc,v 1.1 2010/07/18 21:15:19 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/PFTauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -45,7 +45,8 @@ void PFTauIDMod::Process()
     UInt_t nTrk = 0;
     for (UInt_t j=0; j<tau->NSignalPFCands(); ++j) {
       tauSystem.AddDaughter(tau->SignalPFCand(j));
-      if(tau->SignalPFCand(j)->Charge() != 0){
+      if(tau->SignalPFCand(j) != 0 &&
+         tau->SignalPFCand(j)->Charge() != 0){
         nTrk++;
         tauChargedSystem.AddDaughter(tau->SignalPFCand(j));
       }

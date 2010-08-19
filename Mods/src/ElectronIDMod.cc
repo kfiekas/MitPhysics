@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.64 2010/06/17 13:25:04 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.65 2010/06/18 06:08:46 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -178,6 +178,9 @@ void ElectronIDMod::Process()
   for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
     const Electron *e = fElectrons->At(i);        
 
+    if (e->SCluster() == 0) 
+      continue;
+    
     if (e->Pt() < fElectronPtMin) 
       continue;
     

@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.11 2010/06/06 17:27:21 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.12 2010/06/17 13:26:21 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -123,7 +123,9 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     cat=1;
   else if (eOverP < 1.2 && eOverP > 0.8) 
     cat=0;
-
+  
+  if(ele->SCluster() == 0)
+    return kFALSE;
   Double_t eSeedOverPin = ele->ESeedClusterOverPIn(); 
   Double_t hOverE       = ele->HadronicOverEm();
   Double_t sigmaee      = ele->CoviEtaiEta();
@@ -285,6 +287,7 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
         }
       }
     }
+
     if (isGoodConversion == kTRUE) break;
     
   } // loop over all conversions 
@@ -353,7 +356,8 @@ Bool_t ElectronTools::PassChargeFilter(const Electron *ele)
 Bool_t ElectronTools::PassSpikeRemovalFilter(const Electron *ele) 
 {
   Bool_t passSpikeRemovalFilter = kTRUE;
-  if(ele->SCluster()->Seed()->Energy() > 5.0 && 
+  if(ele->SCluster() &&
+     ele->SCluster()->Seed()->Energy() > 5.0 && 
      ele->SCluster()->Seed()->EMax() / ele->SCluster()->Seed()->E3x3() > 0.95
     ) {
     passSpikeRemovalFilter = kFALSE;

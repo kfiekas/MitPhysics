@@ -184,7 +184,7 @@ Double_t JetTools::CosineOmega(const Particle *particles0, const Particle *parti
 
 //Transverse Higgs mass
 Double_t JetTools::MtHiggs(const ParticleOArr * leptons,
-                           const Met *met, int nsel){
+                           const Met *met, double metFraction[2], int nsel){
   if(leptons->Entries() < 2) return -999.0;
 
   double mtHiggs = -999.0;
@@ -230,14 +230,44 @@ Double_t JetTools::MtHiggs(const ParticleOArr * leptons,
     mll   = dilepton->Mass();
     mnu   = 0.0;
   }
-  else if(nsel == 4){ // Use the formula from hep-ph:1006.4998
+  else if(nsel == 4){ // Use of Mt mass and replacing mnu using the met optimal
+    enell = TMath::Sqrt(dilepton->Pt()*dilepton->Pt() + dilepton->Mt()*dilepton->Mt());
+    enenn = TMath::Sqrt(met->Pt() *met->Pt()  + 0.0*0.0);
+    enex  = dilepton->Px() + met->Px();
+    eney  = dilepton->Py() + met->Py();
+    mll   = dilepton->Mass();
+    double metAuxPx[2] = {met->Px() * metFraction[0],
+	    		  met->Px() * (1.0 - metFraction[0])};
+    double metAuxPy[2] = {met->Py() * metFraction[1],
+	 		  met->Py() * (1.0 - metFraction[1])};
+    double ene = TMath::Sqrt(metAuxPx[0]*metAuxPx[0]+metAuxPy[0]*metAuxPy[0]) +
+		 TMath::Sqrt(metAuxPx[1]*metAuxPx[1]+metAuxPy[1]*metAuxPy[1]);
+    double px = metAuxPx[0] + metAuxPx[1];
+    double py = metAuxPy[0] + metAuxPy[1];
+    mnu = TMath::Sqrt(ene*ene - px*px - py*py);
+  }
+  else if(nsel == 5){ // Using the optimal met value
+    double metAuxPx[2] = {met->Px() * metFraction[0],
+	    		  met->Px() * (1.0 - metFraction[0])};
+    double metAuxPy[2] = {met->Py() * metFraction[1],
+	 		  met->Py() * (1.0 - metFraction[1])};
+    double ene = leptons->At(0)->Pt() + leptons->At(1)->Pt() +
+                 TMath::Sqrt(metAuxPx[0]*metAuxPx[0]+metAuxPy[0]*metAuxPy[0]) +
+		 TMath::Sqrt(metAuxPx[1]*metAuxPx[1]+metAuxPy[1]*metAuxPy[1]);
+    double px = leptons->At(0)->Px() + leptons->At(1)->Px() +
+                metAuxPx[0] + metAuxPx[1];
+    double py = leptons->At(0)->Py() + leptons->At(1)->Py() +
+                metAuxPy[0] + metAuxPy[1];
+    mtHiggs = ene*ene - px*px - py*py;
+  }
+  else if(nsel == 6){ // Use the formula from hep-ph:1006.4998
     mtHiggs = 2*leptons->At(0)->Pt()*leptons->At(0)->Pt() + 2*leptons->At(1)->Pt()*leptons->At(1)->Pt() + 3 * (
       leptons->At(0)->Pt()*leptons->At(1)->Pt() + met->Pt()*(leptons->At(0)->Pt()+leptons->At(1)->Pt())
       - met->Px()*dilepton->Px() - met->Py()*dilepton->Py()
       - leptons->At(0)->Px()*leptons->At(1)->Px() - leptons->At(0)->Py()*leptons->At(1)->Py());
   }
 
-  if(nsel >= 0 && nsel <= 3){
+  if(nsel >= 0 && nsel <= 4){
     mtHiggs = mll*mll + mnu*mnu + 2.0*(enell*enenn - enex*enex - eney*eney);
   }
   if(mtHiggs <= 0) mtHiggs = 0.0;

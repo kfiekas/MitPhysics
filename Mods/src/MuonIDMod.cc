@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.30 2010/05/27 07:59:03 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.31 2010/06/17 13:25:17 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -69,10 +69,14 @@ void MuonIDMod::Process()
         pass = mu->HasGlobalTrk() && mu->IsTrackerMuon();
         //pass = mu->HasGlobalTrk() && mu->IsTrackerMuon() &&
 	//       mu->Quality().Quality(MuonQuality::TrackerMuonArbitrated);
-        if (pass) {
+        if (pass && mu->TrackerTrk()) {
           pt  = mu->TrackerTrk()->Pt();
 	  eta = TMath::Abs(mu->TrackerTrk()->Eta());
         }
+	else {
+          pt  = mu->Pt();
+	  eta = TMath::Abs(mu->Eta());
+	}
 	break;
       case kSta:
         pass = mu->HasStandaloneTrk();
@@ -119,7 +123,8 @@ void MuonIDMod::Process()
     Bool_t idpass = kFALSE;
     switch (fMuIDType) {
       case kLoose:
-        idpass = mu->Quality().Quality(MuonQuality::TMOneStationLoose) &&
+        idpass = mu->BestTrk() != 0 &&
+	         mu->Quality().Quality(MuonQuality::TMOneStationLoose) &&
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityLoose) &&
 		 mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
@@ -127,7 +132,8 @@ void MuonIDMod::Process()
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kTight:
-        idpass = mu->Quality().Quality(MuonQuality::TMOneStationTight) &&
+        idpass = mu->BestTrk() !=  0 &&
+	         mu->Quality().Quality(MuonQuality::TMOneStationTight) &&
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityTight) &&
 		 mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
@@ -135,7 +141,8 @@ void MuonIDMod::Process()
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kMinimal:
-        idpass = mu->BestTrk()->NHits() > 10 &&
+        idpass = mu->BestTrk() != 0 &&
+	         mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
 		 //mu->NSegments() > 0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
