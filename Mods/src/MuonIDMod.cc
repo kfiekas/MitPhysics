@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.31 2010/06/17 13:25:17 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.32 2010/08/19 14:37:17 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -67,8 +67,6 @@ void MuonIDMod::Process()
         break;
       case kGlobal:
         pass = mu->HasGlobalTrk() && mu->IsTrackerMuon();
-        //pass = mu->HasGlobalTrk() && mu->IsTrackerMuon() &&
-	//       mu->Quality().Quality(MuonQuality::TrackerMuonArbitrated);
         if (pass && mu->TrackerTrk()) {
           pt  = mu->TrackerTrk()->Pt();
 	  eta = TMath::Abs(mu->TrackerTrk()->Eta());
