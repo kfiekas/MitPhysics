@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.59 2010/07/18 21:09:21 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.60 2010/07/22 08:03:04 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -1382,10 +1382,9 @@ void GeneratorMod::Process()
         hDGenBosons[5]->Fill(TMath::Min(GenBosons->At(i)->Mass(),199.999));
       if(GenBosons->At(i)->Is(MCParticle::kZ))
         hDGenBosons[6]->Fill(TMath::Min(GenBosons->At(i)->Mass(),199.999));
+      hDGenBosons[7]->Fill(GenBosons->At(i)->Rapidity());
     }
-    //if(sumV[0] >= 4) printf("More than 3 W bosons (%d)\n",sumV[0]);
-    //if(sumV[1] >= 4) printf("More than 3 Z bosons (%d)\n",sumV[1]);
-    hDGenBosons[7]->Fill(TMath::Min((double)(sumV[0] + 4*sumV[1]),12.4999));
+    hDGenBosons[8]->Fill(TMath::Min((double)(sumV[0] + 4*sumV[1]),12.4999));
 
     // photons
     hDGenPhotons[0]->Fill(GenPhotons->GetEntries());
@@ -1593,7 +1592,8 @@ void GeneratorMod::SlaveBegin()
     AddTH1(hDGenBosons[4], "hDGenBosons_4", "Mass of bosons;m_{V};#",200,0.0,200.0);
     AddTH1(hDGenBosons[5], "hDGenBosons_5", "Mass of W bosons;m_{W};#",200,0.0,200.0);
     AddTH1(hDGenBosons[6], "hDGenBosons_6", "Mass of Z bosons;m_{Z};#",200,0.0,200.0);
-    AddTH1(hDGenBosons[7], "hDGenBosons_7", 
+    AddTH1(hDGenBosons[7], "hDGenBosons_8", "Rapidity of bosons;rapidity;#",100,-5.0,5.0); 
+    AddTH1(hDGenBosons[8], "hDGenBosons_7", 
            "Number of W bosons + 4 * Z bosons;Number;#",13,-0.5,12.5); 
 
     // photons
