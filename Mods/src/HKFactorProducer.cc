@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.6 2009/12/06 14:59:28 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.7 2010/03/13 20:50:32 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -79,11 +79,14 @@ void HKFactorProducer::Process()
           hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
 	}
       }
-    } else {
+    } else if (fProcessID == 999){
       theWeight = fMCEventInfo->Weight();
-      hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
+      if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
       theWeight = theWeight/fabs(theWeight);
-      hDHKFactor[0]->Fill(0.5,theWeight);
+      if (GetFillHist()) hDHKFactor[0]->Fill(0.5,theWeight);
+    }
+    else {
+      if (GetFillHist()) hDHKFactor[0]->Fill(0.5,1.0);
     }
     // process id distribution
     if (GetFillHist()) hDHKFactor[4]->Fill(TMath::Min((Double_t)fMCEventInfo->ProcessId(),999.499));

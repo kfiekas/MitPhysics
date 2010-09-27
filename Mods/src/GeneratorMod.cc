@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.60 2010/07/22 08:03:04 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.61 2010/09/27 12:42:20 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -7,6 +7,7 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TParameter.h>
 
 using namespace mithep;
 
@@ -1383,8 +1384,13 @@ void GeneratorMod::Process()
       if(GenBosons->At(i)->Is(MCParticle::kZ))
         hDGenBosons[6]->Fill(TMath::Min(GenBosons->At(i)->Mass(),199.999));
       hDGenBosons[7]->Fill(GenBosons->At(i)->Rapidity());
+      if(GenBosons->At(i)->Mass() > 60 && GenBosons->At(i)->Mass() < 120){
+        hDGenBosons[8] ->Fill(GenBosons->At(i)->Pt());
+        hDGenBosons[9] ->Fill(GenBosons->At(i)->Eta());
+        hDGenBosons[10]->Fill(GenBosons->At(i)->Rapidity());        
+      }
     }
-    hDGenBosons[8]->Fill(TMath::Min((double)(sumV[0] + 4*sumV[1]),12.4999));
+    hDGenBosons[11]->Fill(TMath::Min((double)(sumV[0] + 4*sumV[1]),12.4999));
 
     // photons
     hDGenPhotons[0]->Fill(GenPhotons->GetEntries());
@@ -1587,14 +1593,16 @@ void GeneratorMod::SlaveBegin()
     // bosons
     AddTH1(hDGenBosons[0], "hDGenBosons_0", "Number of bosons;N_{bosons};#",10,-0.5,9.5); 
     AddTH1(hDGenBosons[1], "hDGenBosons_1", "Pt of bosons;p_{t} [GeV];#",200,0.0,400.0); 
-    AddTH1(hDGenBosons[2], "hDGenBosons_2", "Eta of bosons;#eta;#",100,-5.0,5.0); 
+    AddTH1(hDGenBosons[2], "hDGenBosons_2", "Eta of bosons;#eta;#",100,-10.0,10.0); 
     AddTH1(hDGenBosons[3], "hDGenBosons_3", "Mass of bosons;Mass;#",2000,0.0,2000.0);
     AddTH1(hDGenBosons[4], "hDGenBosons_4", "Mass of bosons;m_{V};#",200,0.0,200.0);
     AddTH1(hDGenBosons[5], "hDGenBosons_5", "Mass of W bosons;m_{W};#",200,0.0,200.0);
     AddTH1(hDGenBosons[6], "hDGenBosons_6", "Mass of Z bosons;m_{Z};#",200,0.0,200.0);
-    AddTH1(hDGenBosons[7], "hDGenBosons_8", "Rapidity of bosons;rapidity;#",100,-5.0,5.0); 
-    AddTH1(hDGenBosons[8], "hDGenBosons_7", 
-           "Number of W bosons + 4 * Z bosons;Number;#",13,-0.5,12.5); 
+    AddTH1(hDGenBosons[7], "hDGenBosons_7", "Rapidity of bosons;rapidity;#",100,-10.0,10.0); 
+    AddTH1(hDGenBosons[8], "hDGenBosons_8", "Pt of bosons;p_{t} [GeV];#",200,0.0,400.0); 
+    AddTH1(hDGenBosons[9], "hDGenBosons_9", "Eta of bosons;#eta;#",100,-10.0,10.0); 
+    AddTH1(hDGenBosons[10],"hDGenBosons_10","Rapidity of bosons;rapidity;#",100,-10.0,10.0); 
+    AddTH1(hDGenBosons[11],"hDGenBosons_11","Number of W bosons + 4 * Z bosons;Number;#",13,-0.5,12.5); 
 
     // photons
     AddTH1(hDGenPhotons[0], "hDGenPhotons_0", "Number of photons;N_{photons};#",10,-0.5,9.5); 

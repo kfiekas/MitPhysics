@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.36 2010/03/13 20:51:27 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.37 2010/09/27 12:42:19 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -108,7 +108,7 @@ namespace mithep
       TH1D                *hDGenNeutrinos[20];  //!histos for neutrinos
       TH1D                *hDGenQuarks[20];     //!histos for quarks
       TH1D                *hDGenWBF[20];        //!histos for WBF
-      TH1D                *hDGenBosons[10];     //!histos for bosons
+      TH1D                *hDGenBosons[15];     //!histos for bosons
       TH1D                *hDGenPhotons[20];    //!histos for photons
       TH1D                *hDGenRadPhotons[20]; //!histos for rad photons
       TH1D                *hDGenISRPhotons[20]; //!histos for ISR photons
