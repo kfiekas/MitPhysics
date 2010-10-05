@@ -113,9 +113,6 @@ void HwwExampleAnalysisMod::SlaveBegin()
   AddTH1(fLeptonPtPlusMet_afterCuts         ,"hLeptonPtPlusMet_afterCuts",
                                              ";LeptonPtPlusMet;Number of Events",150,0., 300.);
 
-  //*********************
-  //Added Test Histograms
-  //********************
 }
 
 //--------------------------------------------------------------------------------------------------
