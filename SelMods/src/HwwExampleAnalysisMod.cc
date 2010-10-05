@@ -131,6 +131,7 @@ void HwwExampleAnalysisMod::Process()
     (FindObjThisEvt(ModNames::gkMergedLeptonsName));
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
+  TParameter<Double_t> *NNLOWeight = GetObjThisEvt<TParameter<Double_t> >("NNLOWeight");
 
   MetCol *met = dynamic_cast<ObjArray<Met>* >(FindObjThisEvt(fMetName));
   const Met *caloMet = 0;
@@ -258,13 +259,13 @@ void HwwExampleAnalysisMod::Process()
   for(int c=0; c<nCuts; c++) passAllCuts = passAllCuts & passCut[c];
     
   //Cut Selection Histograms
-  fHWWSelection->Fill(-1,1.0);
+  fHWWSelection->Fill(-1,NNLOWeight->GetVal());
   if (finalstateType == 10 )
-    fHWWToMuMuSelection->Fill(-1,1.0);
+    fHWWToMuMuSelection->Fill(-1,NNLOWeight->GetVal());
   else if(finalstateType == 11 )
-    fHWWToEESelection->Fill(-1,1.0);
+    fHWWToEESelection->Fill(-1,NNLOWeight->GetVal());
   else if(finalstateType == 12 )
-    fHWWToEMuSelection->Fill(-1,1.0);
+    fHWWToEMuSelection->Fill(-1,NNLOWeight->GetVal());
 
   for (int k=0;k<nCuts;k++) {
     bool pass = true;
@@ -276,28 +277,28 @@ void HwwExampleAnalysisMod::Process()
     }
     
     if (pass) {
-      fHWWSelection->Fill(k,1.0);
+      fHWWSelection->Fill(k,NNLOWeight->GetVal());
       if (finalstateType == 10 )
-        fHWWToMuMuSelection->Fill(k,1.0);
+        fHWWToMuMuSelection->Fill(k,NNLOWeight->GetVal());
       else if(finalstateType == 11)
-        fHWWToEESelection->Fill(k,1.0);
+        fHWWToEESelection->Fill(k,NNLOWeight->GetVal());
       else if(finalstateType == 12)
-        fHWWToEMuSelection->Fill(k,1.0);
+        fHWWToEMuSelection->Fill(k,NNLOWeight->GetVal());
     }
   }
   
   //*****************************************************************************************
   //Make Preselection Histograms  
   //*****************************************************************************************
-  fLeptonEta->Fill(CleanLeptons->At(0)->Eta(),1.0); 
-  fLeptonEta->Fill(CleanLeptons->At(1)->Eta(),1.0);
-  fLeptonPtMax->Fill(CleanLeptons->At(0)->Pt(),1.0);
-  fLeptonPtMin->Fill(CleanLeptons->At(1)->Pt(),1.0);
-  fMetPtHist->Fill(caloMet->Pt(),1.0);                             
-  fMetPhiHist->Fill(caloMet->Phi(),1.0);                            
-  fDeltaPhiLeptons->Fill(deltaPhiLeptons,1.0);
-  fDeltaEtaLeptons->Fill(deltaEtaLeptons,1.0);
-  fDileptonMass->Fill(dilepton->Mass(),1.0);    
+  fLeptonEta->Fill(CleanLeptons->At(0)->Eta(),NNLOWeight->GetVal()); 
+  fLeptonEta->Fill(CleanLeptons->At(1)->Eta(),NNLOWeight->GetVal());
+  fLeptonPtMax->Fill(CleanLeptons->At(0)->Pt(),NNLOWeight->GetVal());
+  fLeptonPtMin->Fill(CleanLeptons->At(1)->Pt(),NNLOWeight->GetVal());
+  fMetPtHist->Fill(caloMet->Pt(),NNLOWeight->GetVal());                             
+  fMetPhiHist->Fill(caloMet->Phi(),NNLOWeight->GetVal());                            
+  fDeltaPhiLeptons->Fill(deltaPhiLeptons,NNLOWeight->GetVal());
+  fDeltaEtaLeptons->Fill(deltaEtaLeptons,NNLOWeight->GetVal());
+  fDileptonMass->Fill(dilepton->Mass(),NNLOWeight->GetVal());    
 
   //*********************************************************************************************
   // N-1 Histograms
@@ -312,7 +313,7 @@ void HwwExampleAnalysisMod::Process()
     }
   }
   if (pass) {
-    fNCentralJets_NMinusOne->Fill(nCentralJets,1.0);
+    fNCentralJets_NMinusOne->Fill(nCentralJets,NNLOWeight->GetVal());
   }     
   
   // Final Met Cut
@@ -323,7 +324,7 @@ void HwwExampleAnalysisMod::Process()
     }
   }
   if (pass) {
-    fMetPtHist_NMinusOne->Fill(caloMet->Pt(),1.0);  
+    fMetPtHist_NMinusOne->Fill(caloMet->Pt(),NNLOWeight->GetVal());  
   }
 
   // dilepton mass
@@ -333,7 +334,7 @@ void HwwExampleAnalysisMod::Process()
       pass = (pass && passCut[k]);    
   }
   if (pass) {
-    fDileptonMass_NMinusOne->Fill(dilepton->Mass(),1.0);
+    fDileptonMass_NMinusOne->Fill(dilepton->Mass(),NNLOWeight->GetVal());
   }
   
   // Lepton Pt Max, Lepton Pt Min, DeltaPhiLeptons
@@ -342,9 +343,9 @@ void HwwExampleAnalysisMod::Process()
     pass = (pass && passCut[k]);      
   }
   if (pass) {
-    fLeptonPtMax_NMinusOne->Fill(CleanLeptons->At(0)->Pt(),1.0);
-    fLeptonPtMin_NMinusOne->Fill(CleanLeptons->At(1)->Pt(),1.0);
-    fDeltaPhiLeptons_NMinusOne->Fill(deltaPhiLeptons,1.0); 
+    fLeptonPtMax_NMinusOne->Fill(CleanLeptons->At(0)->Pt(),NNLOWeight->GetVal());
+    fLeptonPtMin_NMinusOne->Fill(CleanLeptons->At(1)->Pt(),NNLOWeight->GetVal());
+    fDeltaPhiLeptons_NMinusOne->Fill(deltaPhiLeptons,NNLOWeight->GetVal()); 
   }
   
   // NSoftMuons
@@ -354,18 +355,18 @@ void HwwExampleAnalysisMod::Process()
       pass = (pass && passCut[k]);    
   }
   if (pass) {
-    fNSoftMuonsHist_NMinusOne->Fill(SoftMuons->GetEntries(),1.0);
+    fNSoftMuonsHist_NMinusOne->Fill(SoftMuons->GetEntries(),NNLOWeight->GetVal());
   }
 
   //*********************************************************************************************
   //Plots after all Cuts
   //*********************************************************************************************
   if (passAllCuts) {
-    fMinDeltaPhiLeptonMet_afterCuts->Fill(minDeltaPhiMetLepton,1.0);
-    fMtLepton1_afterCuts->Fill(mTW[0],1.0);
-    fMtLepton2_afterCuts->Fill(mTW[1],1.0);
-    fMtHiggs_afterCuts->Fill(mtHiggs,1.0);
-    fLeptonPtPlusMet_afterCuts->Fill(CleanLeptons->At(0)->Pt()+CleanLeptons->At(1)->Pt()+caloMet->Pt(),1.0);
+    fMinDeltaPhiLeptonMet_afterCuts->Fill(minDeltaPhiMetLepton,NNLOWeight->GetVal());
+    fMtLepton1_afterCuts->Fill(mTW[0],NNLOWeight->GetVal());
+    fMtLepton2_afterCuts->Fill(mTW[1],NNLOWeight->GetVal());
+    fMtHiggs_afterCuts->Fill(mtHiggs,NNLOWeight->GetVal());
+    fLeptonPtPlusMet_afterCuts->Fill(CleanLeptons->At(0)->Pt()+CleanLeptons->At(1)->Pt()+caloMet->Pt(),NNLOWeight->GetVal());
   }
   
   delete dilepton;

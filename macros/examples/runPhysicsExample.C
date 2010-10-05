@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.3 2010/05/10 16:17:02 bendavid Exp $
+// $Id: runPhysicsExample.C,v 1.4 2010/05/20 08:58:06 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -12,8 +12,8 @@
 #include "MitAna/PhysicsMod/interface/PublisherMod.h"
 #include "MitAna/PhysicsMod/interface/RunLumiSelectionMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
-#include "MitPhysics/Mods/interface/PDFProducerMod.h"
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "MitPhysics/Mods/interface/CaloMetCorrectionMod.h"
@@ -28,42 +28,41 @@
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
 #include "MitAna/DataTree/interface/JetCol.h"
-#include "MitAna/DataTree/interface/CaloJetCol.h"
+#include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/MetCol.h" 
 #include "MitAna/DataTree/interface/CaloMetCol.h"
-#include "MitAna/PhysicsMod/interface/FullExampleMod.h"
+#include "MitPhysics/SelMods/interface/HwwExampleAnalysisMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
-		       const char *book       = "cern/filler/013",
-                       const char *dataset    = "p10-ggwwll-v26",
+void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
+		       const char *book       = "cern/filler/014a",
+                       const char *dataset    = "p10-ww2l-v26",
                        const char *fileset    = "0000",
                        const char *skim       = "noskim",
                        const char *outputName = "histo",
                        int   sampleID	      = -1,
-                       int   nEvents	      = 1000)
+                       int   nEvents	      = 10000)
 {
   //------------------------------------------------------------------------------------------------
   // some global setups
   //------------------------------------------------------------------------------------------------
   using namespace mithep;
   gDebugMask  = Debug::kAnalysis;
-  gDebugLevel = 1;
+  gDebugLevel = 3;
 
   //------------------------------------------------------------------------------------------------
   // set up information
   //------------------------------------------------------------------------------------------------
-  Bool_t useHLTE29      = kFALSE;
   Bool_t applyISRFilter = kFALSE;
   Bool_t applyMllGenCut = kFALSE;
   Bool_t isData         = kFALSE;
+  Bool_t isElData       = kFALSE;
+  int processId         = -999999999; // use 999 for MCatNLO MC sample, 102 for H->WW
+  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_3_8_4/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
 
-//   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
-//   runLumiSelectionMod->SetAcceptMC(kTRUE);
-//   runLumiSelectionMod->AddJSONFile("Cert_132440-133511_StreamExpress_Commissioning10-Express_DQM_JSON.txt");
-
-  if(sampleID > 1000) isData = kTRUE;
+  if(sampleID > 1000) isData   = kTRUE;
+  if(sampleID > 2000) isElData = kTRUE;
 
   //------------------------------------------------------------------------------------------------
   // generator information
@@ -80,39 +79,66 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   generatorMod->SetFillHist(!isData);
   if(applyMllGenCut == kTRUE){
     generatorMod->SetPdgIdCut(23);
+    generatorMod->SetMassMinCut( 0.);
     generatorMod->SetMassMaxCut(50.);
   }
   generatorMod->SetApplyISRFilter(applyISRFilter);
+
+  HKFactorProducer *hKFactorProducer = new HKFactorProducer;
+  hKFactorProducer->SetProcessID(processId);
+  hKFactorProducer->SetInputFilename(fInputFilenameKF);
+  hKFactorProducer->SetIsData(isData);
+  hKFactorProducer->SetFillHist(!isData);
+
+  //------------------------------------------------------------------------------------------------
+  // Run RunLumiSelectionMod
+  //------------------------------------------------------------------------------------------------
+  RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
+  runLumiSelectionMod->SetAcceptMC(!isData);    
+  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_8_4/src/json/Cert_132440-144114_7TeV_StreamExpress_Collisions10_JSON.txt");
+
+  //------------------------------------------------------------------------------------------------
+  // PV filter selection
+  //------------------------------------------------------------------------------------------------
+  GoodPVFilterMod *goodPVFilterMod = new GoodPVFilterMod;
+  goodPVFilterMod->SetMinVertexNTracks(0);
+  goodPVFilterMod->SetMinNDof(5);
+  goodPVFilterMod->SetMaxAbsZ(24.0);
+  goodPVFilterMod->SetMaxRho(2.0);
 
   //------------------------------------------------------------------------------------------------
   // HLT information
   //------------------------------------------------------------------------------------------------
   HLTMod *hltmod = new HLTMod;
-  if(useHLTE29 == false) {
-    hltmod->AddTrigger("HLT_Ele10_SW_L1R");
-    hltmod->AddTrigger("HLT_Ele15_SW_LooseTrackIso_L1R");
-    hltmod->AddTrigger("HLT_Ele15_SW_EleId_L1R");
-    hltmod->AddTrigger("HLT_Ele15_LW_L1R");
-    hltmod->AddTrigger("HLT_Ele15_SC10_LW_L1R");
-    hltmod->AddTrigger("HLT_Ele20_SW_L1R");
-    hltmod->AddTrigger("HLT_IsoMu9");
+  if     (isData == kFALSE){
     hltmod->AddTrigger("HLT_Mu9");
-    hltmod->AddTrigger("HLT_Ele10_LW_EleId_L1R");
-    hltmod->AddTrigger("HLT_Ele15_SW_EleId_L1R");
-  } else {
-    hltmod->AddTrigger("HLT_Mu9");
-    hltmod->AddTrigger("HLT_Ele10_LW_EleId_L1R");
-    hltmod->AddTrigger("HLT_Ele15_SW_EleId_L1R");
-    hltmod->SetBitsName("HLTBits_E29");
+    hltmod->AddTrigger("HLT_Photon10_L1R",132440,137028);
+    hltmod->AddTrigger("HLT_Photon15_Cleaned_L1R",138564,140401);
+    hltmod->AddTrigger("HLT_Ele15_SW_CaloEleId_L1R",141956,999999);
+    hltmod->AddTrigger("HLT_Ele15_LW_L1R",1,1);
   }
+  else if(isElData == kFALSE){
+    hltmod->AddTrigger("HLT_Mu9");
+    hltmod->AddTrigger("HLT_Mu9&HLT_Photon10_L1R",132440,137028);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Photon15_Cleaned_L1R",138564,140401);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,999999);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_LW_L1R",1,1);
+  }
+  else {
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Photon10_L1R",132440,137028);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Photon15_Cleaned_L1R",138564,140401);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,999999);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_LW_L1R",1,1);
+  }
+
   hltmod->SetTrigObjsName("myhltobjs");
 
   //------------------------------------------------------------------------------------------------
   // publisher Mod
   //------------------------------------------------------------------------------------------------
-  PublisherMod<CaloJet,Jet> *pubJet = new PublisherMod<CaloJet,Jet>("JetPub");
-  pubJet->SetInputName("AKt5Jets");
-  pubJet->SetOutputName("PubAKt5Jets");
+  PublisherMod<PFJet,Jet> *pubJet = new PublisherMod<PFJet,Jet>("JetPub");
+  pubJet->SetInputName("AKt5PFJets");
+  pubJet->SetOutputName("PubAKt5PFJets");
 
   PublisherMod<Met,Met> *pubMet = new PublisherMod<Met,Met>("MetPub");
   pubMet->SetInputName("TCMet");
@@ -127,8 +153,8 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   // Apply Jet Corrections
   //------------------------------------------------------------------------------------------------
   JetCorrectionMod *jetCorr = new JetCorrectionMod;
-  jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Summer09_7TeV_ReReco332_L2Relative_AK5Calo.txt"); 
-  jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Summer09_7TeV_ReReco332_L3Absolute_AK5Calo.txt");  
+  jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Spring10_L2Relative_AK5PF.txt"); 
+  jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Spring10_L3Absolute_AK5PF.txt");  
   jetCorr->SetInputName(pubJet->GetOutputName());
   jetCorr->SetCorrectedName("CorrectedJets");
 
@@ -144,14 +170,27 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   // object id and cleaning sequence
   //------------------------------------------------------------------------------------------------
   MuonIDMod           *muonID        = new MuonIDMod;  
+  muonID->SetClassType("Global");
+  muonID->SetIDType("Minimal");
+  muonID->SetIsoType("TrackCaloSliding");
+  muonID->SetApplyD0Cut(kTRUE);
+
   ElectronIDMod       *electronID    = new ElectronIDMod;
+  electronID->SetIDType("VBTFWorkingPoint80Id");
+  electronID->SetIsoType("TrackJuraSliding");
+  electronID->SetApplyConversionFilterType1(kFALSE);
+  electronID->SetApplyConversionFilterType2(kTRUE);
+  electronID->SetChargeFilter(kFALSE);
+  electronID->SetApplyD0Cut(kTRUE);
+  electronID->SetNExpectedHitsInnerCut(0);
+
   PhotonIDMod         *photonID      = new PhotonIDMod;
   TauIDMod            *tauID         = new TauIDMod;
   JetIDMod            *jetID         = new JetIDMod;
   jetID->SetInputName(jetCorr->GetOutputName());
-  jetID->SetPtCut(20.0);
+  jetID->SetPtCut(25.0);
   jetID->SetEtaMaxCut(5.0);
-  jetID->SetJetEEMFractionMinCut(0.01);
+  jetID->SetJetEEMFractionMinCut(0.0);
   jetID->SetOutputName("GoodJets");
 
   ElectronCleaningMod *electronCleaning = new ElectronCleaningMod;
@@ -171,16 +210,17 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   //------------------------------------------------------------------------------------------------
   // analyses modules
   //------------------------------------------------------------------------------------------------
-  FullExampleMod *analysisMod = new FullExampleMod;
-  analysisMod->SetMuonName(muonID->GetOutputName());
-  analysisMod->SetMuonsFromBranch(kFALSE);
-  analysisMod->SetElectronName(electronID->GetOutputName());
-  analysisMod->SetElectronsFromBranch(kFALSE);
+  HwwExampleAnalysisMod *analysisMod = new HwwExampleAnalysisMod;
+  analysisMod->SetMetName(pubMet->GetOutputName());
+  analysisMod->SetCleanJetsName(jetCleaning->GetOutputName());
 
   //------------------------------------------------------------------------------------------------
   // making analysis chain
   //------------------------------------------------------------------------------------------------
-  generatorMod->Add(hltmod);
+  generatorMod->Add(hKFactorProducer);
+  hKFactorProducer->Add(runLumiSelectionMod);
+  runLumiSelectionMod->Add(goodPVFilterMod);
+  goodPVFilterMod->Add(hltmod);
   hltmod->Add(muonID);
   muonID->Add(electronID);
   electronID->Add(photonID);
@@ -208,10 +248,6 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
     ana->SetProcessNEvents(nEvents);
   ana->SetSuperModule(generatorMod);
   ana->SetPrintScale(100);
-  if(useHLTE29 == true){
-    ana->SetHLTTreeName("HLT_E29");
-    ana->SetHLTObjsName("HLTObjects_E29");
-  }
 
   //------------------------------------------------------------------------------------------------
   // organize input
@@ -226,8 +262,6 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   else 
     d = c->FindDataset(book,skimdataset.Data(),fileset);
   ana->AddDataset(d);
-  //ana->AddFile("root://castorcms//castor/cern.ch/user/p/paus/filler/011/s09-ttbar-7-mc3/*.root");
-  //ana->AddFile("/build/bendavid/XX-MITDATASET-XX_000-valskim-Run132605.root");
 
   //------------------------------------------------------------------------------------------------
   // organize output
@@ -239,8 +273,8 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   rootFile += TString(".root");
   printf("\nRoot output: %s\n\n",rootFile.Data());  
   ana->SetOutputName(rootFile.Data());
-
   ana->SetCacheSize(64*1024*1024);
+
   //------------------------------------------------------------------------------------------------
   // run the analysis after successful initialisation
   //------------------------------------------------------------------------------------------------
