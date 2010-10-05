@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.4 2010/05/20 08:58:06 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.5 2010/10/05 06:37:16 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -130,7 +130,6 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
     hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,999999);
     hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_LW_L1R",1,1);
   }
-
   hltmod->SetTrigObjsName("myhltobjs");
 
   //------------------------------------------------------------------------------------------------
