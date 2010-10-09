@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.32 2010/08/19 14:37:17 ceballos Exp $
+	// $Id: MuonIDMod.cc,v 1.33 2010/08/22 11:17:42 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -118,15 +118,36 @@ void MuonIDMod::Process()
     if (eta >= fEtaCut) 
       continue;
 
+    Double_t RChi2 = 0.0;
+    if     (mu->HasGlobalTrk()) {
+      RChi2 = mu->GlobalTrk()->Chi2()/mu->GlobalTrk()->Ndof();
+    }
+    else if(mu->BestTrk() != 0){
+      RChi2 = mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof();
+    }
     Bool_t idpass = kFALSE;
     switch (fMuIDType) {
+      case kWMuId:
+        idpass = mu->BestTrk() != 0 &&
+	         mu->BestTrk()->NHits() > 10 &&
+		 RChi2 < 10.0 &&
+		 mu->NSegments() > 1 &&
+		 mu->BestTrk()->NPixelHits() > 0 &&
+		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
+        break;
+      case kZMuId:
+        idpass = mu->BestTrk() != 0 &&
+	         mu->BestTrk()->NHits() > 10 &&
+		 mu->NSegments() > 1 &&
+		 mu->BestTrk()->NPixelHits() > 0 &&
+		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
+        break;
       case kLoose:
         idpass = mu->BestTrk() != 0 &&
 	         mu->Quality().Quality(MuonQuality::TMOneStationLoose) &&
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityLoose) &&
 		 mu->BestTrk()->NHits() > 10 &&
-		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 //mu->NSegments() > 0 &&
+		 RChi2 < 10.0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kTight:
@@ -134,15 +155,13 @@ void MuonIDMod::Process()
 	         mu->Quality().Quality(MuonQuality::TMOneStationTight) &&
                  mu->Quality().Quality(MuonQuality::TM2DCompatibilityTight) &&
 		 mu->BestTrk()->NHits() > 10 &&
-		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 //mu->NSegments() > 0 &&
+		 RChi2 < 10.0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kMinimal:
         idpass = mu->BestTrk() != 0 &&
 	         mu->BestTrk()->NHits() > 10 &&
-		 mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof() < 10 &&
-		 //mu->NSegments() > 0 &&
+		 RChi2 < 10.0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kNoId:
@@ -221,7 +240,11 @@ void MuonIDMod::SlaveBegin()
 
   fMuonTools = new MuonTools;
 
-  if (fMuonIDType.CompareTo("Tight") == 0) 
+  if (fMuonIDType.CompareTo("WMuId") == 0) 
+    fMuIDType = kWMuId;
+  else if (fMuonIDType.CompareTo("ZMuId") == 0) 
+    fMuIDType = kZMuId;
+  else if (fMuonIDType.CompareTo("Tight") == 0) 
     fMuIDType = kTight;
   else if (fMuonIDType.CompareTo("Loose") == 0) 
     fMuIDType = kLoose;
