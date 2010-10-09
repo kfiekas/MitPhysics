@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.12 2010/06/17 13:26:21 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.13 2010/08/19 14:37:08 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -36,7 +36,7 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     {0.8,0.2,0,0,0,0,0,0}};                                     //extra cuts fbrem and E_Over_P 
 
   Double_t VBTFWorkingPoint95[6][8] = {
-    {0.5,   0.5,   0.5,   0.5,   0.07,   0.07,   0.07,   0.07  }, //hovere
+    {0.15,  0.15,  0.15,  0.15,  0.07,   0.07,   0.07,   0.07  }, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03  }, //sigmaetaeta
     {0.8,   0.8,   0.8,   0.8,   0.7,    0.7,    0.7,    0.7   }, //deltaphiin
     {0.007, 0.007, 0.007, 0.007, 0.010,  0.010,  0.010,  0.010 }, //deltaetain
