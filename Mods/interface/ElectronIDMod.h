@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.36 2010/05/29 18:08:34 bendavid Exp $
+// $Id: ElectronIDMod.h,v 1.37 2010/06/17 13:26:26 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -73,7 +73,8 @@ namespace mithep
       void                SetTriggerObjectsName(const char *n)   { fTrigObjectsName = n;       }
       void                SetOutputName(const char *n)           { SetGoodElectronsName(n);    }  
       void                SetPtMin(Double_t pt)                  { fElectronPtMin      = pt;   }
-      void                SetEtaMin(Double_t eta)                { fElectronEtaMax     = eta;  }
+      void                SetEtMin(Double_t et)                  { fElectronEtMin      = et;   }      
+      void                SetEtaMax(Double_t eta)                { fElectronEtaMax     = eta;  }
       void                SetReverseD0Cut(Bool_t b)              { fReverseD0Cut = b;	       }
       void                SetReverseIsoCut(Bool_t b)             { fReverseIsoCut = b;         }
       void                SetApplyTriggerMatching(Bool_t b)      { fApplyTriggerMatching = b;  }
@@ -81,6 +82,9 @@ namespace mithep
       void                SetChargeFilter(Bool_t b)              { fChargeFilter = b;	       }
       void                SetWrongHitsRequirement(Bool_t b)      { fWrongHitsRequirement = b;  }
       void                SetCombinedIdCut(Bool_t b)             { fCombinedIdCut  = b;        }
+      void                SetApplyEcalFiducial(Bool_t b)         { fApplyEcalFiducial = b;     }
+      void                SetApplyEcalSeeded(Bool_t b)           { fApplyEcalSeeded = b;       }      
+      void                SetApplyCombinedIso(Bool_t b)          { fApplyCombinedIso = b;      }      
       void                Setup();
 
     protected:
@@ -96,6 +100,7 @@ namespace mithep
       TString                   fElectronIsoType;        //type of electron Isolation we impose
       TString                   fTrigObjectsName;        //name of trigger object collection
       Double_t                  fElectronPtMin;	         //min pt cut
+      Double_t                  fElectronEtMin;          //min pt cut            
       Double_t                  fElectronEtaMax;         //max eta cut
       Double_t                  fIDLikelihoodCut;        //cut value for ID likelihood
       Double_t                  fTrackIsolationCut;      //cut value for track isolation
@@ -116,6 +121,9 @@ namespace mithep
       Bool_t                    fReverseIsoCut;          //apply reversion iso cut (default=0)
       Bool_t                    fReverseD0Cut;           //apply reversion d0 cut (default=0)
       Bool_t                    fApplyTriggerMatching;   //match to hlt electron (default=0)
+      Bool_t                    fApplyEcalSeeded;        //require ecal seeded flag
+      Bool_t                    fApplyCombinedIso;       //apply combined isolation
+      Bool_t                    fApplyEcalFiducial;      //apply ecal fiducial cuts on supercluster eta
       ElectronTools::EElIdType  fElIdType;              //!identification scheme
       ElectronTools::EElIsoType fElIsoType;              //!isolation scheme
       const ElectronCol        *fElectrons;              //!electron collection

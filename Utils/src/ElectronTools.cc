@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.13 2010/08/19 14:37:08 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.14 2010/10/09 18:41:50 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -378,8 +378,8 @@ Bool_t ElectronTools::PassTriggerMatching(const Electron *ele, const TriggerObje
   
   for (UInt_t i=0; i<trigobjs->GetEntries(); ++i) {
     const TriggerObject *trigobj = trigobjs->At(i);
-    if (trigobj->TriggerType()==TriggerObject::TriggerCluster || trigobj->TriggerType()==TriggerObject::TriggerElectron) {
-      if (MathUtils::DeltaR(ele,trigobj)<0.3) {
+    if (trigobj->TriggerType()==TriggerObject::TriggerCluster || trigobj->TriggerType()==TriggerObject::TriggerElectron || trigobj->TriggerType()==TriggerObject::TriggerPhoton) {
+      if (MathUtils::DeltaR(ele->SCluster(),trigobj)<0.3) {
         return kTRUE;
       }
     }

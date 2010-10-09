@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.65 2010/06/18 06:08:46 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.66 2010/08/19 14:37:17 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -23,6 +23,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronIsoType("TrackJuraSliding"),
   fTrigObjectsName("HLTModTrigObjs"),
   fElectronPtMin(10),
+  fElectronEtMin(0.0),  
   fElectronEtaMax(2.5),
   fIDLikelihoodCut(0.9),
   fTrackIsolationCut(5.0),
@@ -42,6 +43,9 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
   fApplyTriggerMatching(kFALSE),
+  fApplyEcalSeeded(kFALSE),
+  fApplyCombinedIso(kTRUE),
+  fApplyEcalFiducial(kFALSE),
   fElIdType(ElectronTools::kIdUndef),
   fElIsoType(ElectronTools::kIsoUndef),
   fElectrons(0),
@@ -133,19 +137,19 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     }
     break;
     case ElectronTools::kVBTFWorkingPoint95Iso:
-      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint95Iso);
+      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint95Iso, fApplyCombinedIso);
       break;
     case ElectronTools::kVBTFWorkingPoint90Iso:
-      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint90Iso);
+      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint90Iso, fApplyCombinedIso);
       break;
     case ElectronTools::kVBTFWorkingPoint85Iso:
-      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint85Iso);
+      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint85Iso, fApplyCombinedIso);
       break;
     case ElectronTools::kVBTFWorkingPoint80Iso:
-      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint80Iso);
+      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint80Iso, fApplyCombinedIso);
       break;
     case ElectronTools::kVBTFWorkingPoint70Iso:
-      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint70Iso);
+      isocut = ElectronTools::PassCustomIso(ele, ElectronTools::kVBTFWorkingPoint70Iso, fApplyCombinedIso);
       break;
     case ElectronTools::kNoIso:
       isocut = kTRUE;
@@ -184,8 +188,19 @@ void ElectronIDMod::Process()
     if (e->Pt() < fElectronPtMin) 
       continue;
     
+    if (e->SCluster()->Et() < fElectronEtMin)
+      continue;    
+    
     if (e->AbsEta() > fElectronEtaMax) 
       continue;
+    
+    if (fApplyEcalFiducial && ( (e->SCluster()->AbsEta()>1.4442 && e->SCluster()->AbsEta()<1.5666) || e->SCluster()->AbsEta()>2.5 )) {
+      continue;
+    }
+    
+    if (fApplyEcalSeeded && !e->IsEcalDriven()) {
+      continue;
+    }    
     
     //apply trigger matching
     Bool_t matchTrigger = fApplyTriggerMatching && ElectronTools::PassTriggerMatching(e,trigObjs);
