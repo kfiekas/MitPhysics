@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.14 2010/10/09 18:41:50 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.15 2010/10/09 20:15:33 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -112,10 +112,10 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   Double_t eOverP = ele->ESuperClusterOverP();
   Double_t fBrem  = ele->FBrem();
 
-  if ((eOverP < fCuts[5][0]) && (fBrem < fCuts[5][1]))
+  if ( (fCuts[5][0]>0.0) && (eOverP < fCuts[5][0]) && (fCuts[5][1]>0.0) && (fBrem < fCuts[5][1]))
     return kFALSE;
 
-  if (eOverP < fCuts[5][2]*(1-fBrem))
+  if ( (fCuts[5][2]>0.0) && (eOverP < fCuts[5][2]*(1-fBrem)))
     return kFALSE;
 
   Int_t cat = 2;
