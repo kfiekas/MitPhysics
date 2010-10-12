@@ -145,7 +145,7 @@ void HwwExampleAnalysisMod::Process()
   // At least two leptons in the event
   if (CleanLeptons->GetEntries() < 2) return;
   // Pt1 > 20 && Pt2 > 10
-  if(CleanLeptons->At(0)->Pt() <= 20 || CleanLeptons->At(1)->Pt() <= 20) return;
+  if(CleanLeptons->At(0)->Pt() <= 20 || CleanLeptons->At(1)->Pt() <= 10) return;
   // opposite charge leptons
   if(CleanLeptons->At(0)->Charge() * CleanLeptons->At(1)->Charge() > 0) return;
     
