@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: DilepSelMod.h,v 1.2 2009/06/12 12:40:52 loizides Exp $
+// $Id: DilepSelMod.h,v 1.3 2009/06/15 15:00:22 loizides Exp $
 //
 // DilepSelMod
 // 
@@ -25,7 +25,7 @@ namespace mithep
                   const char *title="Dilepton selection module");
 
       void         SetCleanLeptonsName(const char *n)  { fCleanLeptonsName = n; }
-      void         SetIgnoreElCharge(Bool_t b)         { fIgnoreElCharge = b;   }
+      void         SetIgnoreCharge(Bool_t b)           { fIgnoreCharge = b;     }
       void         SetMaxZMass(Double_t m)             { fMaxZMass = m;         }
       void         SetMinDilMass(Double_t m)           { fDilMinMass = m;       }
       void         SetMinPt(Double_t pt)               { fMinPt      = pt;      }
@@ -40,7 +40,7 @@ namespace mithep
       Double_t     fDilMinMass;           //minimum dilepton mass
       Double_t     fMinZMass;             //minimum Z mass
       Double_t     fMaxZMass;             //maximum Z mass
-      Bool_t       fIgnoreElCharge;       //=true then ignore electron charge for z mass cut
+      Bool_t       fIgnoreCharge;         //=true then ignore lepton charge for dilepton mass cut
       TH1D        *fNAccCounters;         //!history of cuts
       TH1D        *fAllDiLepMass;         //!dilepton mass for all dilepton pairs
       TH1D        *fDiElMass;             //!dielectron mass 

@@ -1,4 +1,4 @@
-// $Id: DilepSelMod.cc,v 1.2 2009/06/15 15:00:22 loizides Exp $
+// $Id: DilepSelMod.cc,v 1.3 2009/06/17 14:52:59 loizides Exp $
 
 #include "MitPhysics/SelMods/interface/DilepSelMod.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
@@ -17,10 +17,10 @@ DilepSelMod::DilepSelMod(const char *name, const char *title) :
   BaseMod(name,title),
   fCleanLeptonsName(ModNames::gkMergedLeptonsName),
   fMinPt(10),
-  fDilMinMass(12),
-  fMinZMass(70),
-  fMaxZMass(110),
-  fIgnoreElCharge(kTRUE),
+  fDilMinMass(2),
+  fMinZMass(60),
+  fMaxZMass(120),
+  fIgnoreCharge(kTRUE),
   fNAccCounters(0),
   fAllDiLepMass(0),
   fDiElMass(0),
@@ -84,32 +84,32 @@ void DilepSelMod::Process()
       fAllDiLepMass->Fill(mass);
 
       if (li->ObjType()!=lj->ObjType()) {
-        fElMuMass->Fill(mass);
-        ++nGoodPairs;
+        if (fIgnoreCharge || (li->Charge()!=lj->Charge())) {
+           fElMuMass->Fill(mass);
+           ++nGoodPairs;
+        }
         continue;
       }
 
       if (li->Is(kMuon)) {
-        if (li->Charge()!=lj->Charge()) {
+        if (fIgnoreCharge || (li->Charge()!=lj->Charge())) {
           fDiMuMass->Fill(mass);
+          ++nGoodPairs;
           if ((mass>fMinZMass) && (mass<fMaxZMass)) {
             ++nZPairs;
-            continue;
           }
         }
-        ++nGoodPairs;
         continue;
       }
 
       if (li->Is(kElectron)) {
-        if (fIgnoreElCharge || (li->Charge()!=lj->Charge())) {
+        if (fIgnoreCharge || (li->Charge()!=lj->Charge())) {
           fDiElMass->Fill(mass);
+          ++nGoodPairs;
           if ((mass>fMinZMass) && (mass<fMaxZMass)) {
             ++nZPairs;
-            continue;
           }
         }
-        ++nGoodPairs;
         continue;
       }
     }
@@ -120,21 +120,13 @@ void DilepSelMod::Process()
   fNZPairs->Fill(nZPairs);
   fNAccCounters->Fill(2);
 
-  // cut on number of Z pairs
-  if (nZPairs>=1) {
-    SkipEvent();
-    return;
-  }
-
-  fNAccCounters->Fill(3);
-
   // cut on number of good pairs
   if (nGoodPairs<1) {
     SkipEvent();
     return;
   }
 
-  fNAccCounters->Fill(4);
+  fNAccCounters->Fill(3);
   for (UInt_t i=0; i<nLeps; ++i) {
     const Particle *li = leptons->At(i);
 
@@ -157,19 +149,21 @@ void DilepSelMod::Process()
       fAllDiLepMassAcc->Fill(mass);
 
       if (li->ObjType()!=lj->ObjType()) {
-        fElMuMassAcc->Fill(mass);
+        if (li->Charge()!=lj->Charge()) {
+          fElMuMassAcc->Fill(mass);
+        }
         continue;
       }
 
       if (li->Is(kMuon)) {
         if (li->Charge()!=lj->Charge()) {
           fDiMuMassAcc->Fill(mass);
-        continue;
         }
+        continue;
       }
 
       if (li->Is(kElectron)) {
-        if (fIgnoreElCharge || (li->Charge()!=lj->Charge())) {
+        if (li->Charge()!=lj->Charge()) {
           fDiElMassAcc->Fill(mass);
         }
         continue;
@@ -183,7 +177,7 @@ void DilepSelMod::SlaveBegin()
 {
   // Create and add histograms to the output list.
 
-  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",6,-0.5,5.5);
+  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",4,-0.5,3.5);
   if (1) {
     TAxis *xa = fNAccCounters->GetXaxis();
     for(Int_t i=1;i<=fNAccCounters->GetNbinsX();++i)
@@ -191,9 +185,8 @@ void DilepSelMod::SlaveBegin()
     xa->SetBinLabel(1,"Enter");
     xa->SetBinLabel(2,"Objs");
     xa->SetBinLabel(3,"2Lep");
-    xa->SetBinLabel(4,"ZPair");
-    xa->SetBinLabel(5,"GPair");
-    xa->SetRangeUser(0,4);
+    xa->SetBinLabel(4,"GPair");
+    xa->SetRangeUser(0,3);
   }
   AddTH1(fAllDiLepMass,"hAllDiLepMass",";m_{ll} [GeV];#",150,0,300);
   AddTH1(fDiElMass,"hDiElMass",";m_{ll} [GeV];#",150,0,300);
