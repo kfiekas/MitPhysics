@@ -1,4 +1,4 @@
-// $Id: doubleLepton.C,v 1.4 2010/07/18 21:16:18 ceballos Exp $
+// $Id: doubleLepton.C,v 1.5 2010/10/12 07:07:14 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -74,7 +74,7 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
   outMod->Keep("*");
   selMod->Add(outMod);
   TString rootFile = "";
-  rootFile += TString("skims/") + dataset + TString("/");
+  //rootFile += TString("skims/") + dataset + TString("/");
   rootFile += skimName;
   if (TString(fileset) != TString(""))
     rootFile += TString("_") + TString(fileset);
