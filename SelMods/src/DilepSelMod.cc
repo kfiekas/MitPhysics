@@ -1,4 +1,4 @@
-// $Id: DilepSelMod.cc,v 1.3 2009/06/17 14:52:59 loizides Exp $
+// $Id: DilepSelMod.cc,v 1.4 2010/10/12 01:59:36 ceballos Exp $
 
 #include "MitPhysics/SelMods/interface/DilepSelMod.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
@@ -42,7 +42,7 @@ void DilepSelMod::Process()
 {
   // Process entries of the tree.
 
-  fNAccCounters->Fill(0);
+  if (GetFillHist()) fNAccCounters->Fill(0);
 
   const ParticleCol *leptons = GetObjThisEvt<ParticleCol>(fCleanLeptonsName);
   if (!leptons) {
@@ -50,7 +50,7 @@ void DilepSelMod::Process()
     return;
   }
 
-  fNAccCounters->Fill(1);
+  if (GetFillHist()) fNAccCounters->Fill(1);
 
   // make sure have found at least 2 leptons
   if (leptons->GetEntries()<2) {
@@ -81,11 +81,11 @@ void DilepSelMod::Process()
       if (mass<fDilMinMass)
         continue;
 
-      fAllDiLepMass->Fill(mass);
+      if (GetFillHist()) fAllDiLepMass->Fill(mass);
 
       if (li->ObjType()!=lj->ObjType()) {
         if (fIgnoreCharge || (li->Charge()!=lj->Charge())) {
-           fElMuMass->Fill(mass);
+           if (GetFillHist()) fElMuMass->Fill(mass);
            ++nGoodPairs;
         }
         continue;
@@ -93,7 +93,7 @@ void DilepSelMod::Process()
 
       if (li->Is(kMuon)) {
         if (fIgnoreCharge || (li->Charge()!=lj->Charge())) {
-          fDiMuMass->Fill(mass);
+          if (GetFillHist()) fDiMuMass->Fill(mass);
           ++nGoodPairs;
           if ((mass>fMinZMass) && (mass<fMaxZMass)) {
             ++nZPairs;
@@ -104,7 +104,7 @@ void DilepSelMod::Process()
 
       if (li->Is(kElectron)) {
         if (fIgnoreCharge || (li->Charge()!=lj->Charge())) {
-          fDiElMass->Fill(mass);
+          if (GetFillHist()) fDiElMass->Fill(mass);
           ++nGoodPairs;
           if ((mass>fMinZMass) && (mass<fMaxZMass)) {
             ++nZPairs;
@@ -115,10 +115,12 @@ void DilepSelMod::Process()
     }
   }
 
-  fNLeptons->Fill(nLeps);
-  fNGPairs->Fill(nGoodPairs);
-  fNZPairs->Fill(nZPairs);
-  fNAccCounters->Fill(2);
+  if (GetFillHist()) {
+    fNLeptons->Fill(nLeps);
+    fNGPairs->Fill(nGoodPairs);
+    fNZPairs->Fill(nZPairs);
+    fNAccCounters->Fill(2);
+  }
 
   // cut on number of good pairs
   if (nGoodPairs<1) {
@@ -126,47 +128,51 @@ void DilepSelMod::Process()
     return;
   }
 
-  fNAccCounters->Fill(3);
-  for (UInt_t i=0; i<nLeps; ++i) {
-    const Particle *li = leptons->At(i);
+  if (GetFillHist()) {
+  
+    fNAccCounters->Fill(3);
 
-    if (li->Pt()<fMinPt)
-      continue;
+    for (UInt_t i=0; i<nLeps; ++i) {
+      const Particle *li = leptons->At(i);
 
-    for (UInt_t j=0; j<i; ++j) {
-      const Particle *lj = leptons->At(j);
+      if (li->Pt()<fMinPt)
+	continue;
 
-      if (lj->Pt()<fMinPt)
-        continue;
+      for (UInt_t j=0; j<i; ++j) {
+	const Particle *lj = leptons->At(j);
 
-      CompositeParticle dil;
-      dil.AddDaughter(li);
-      dil.AddDaughter(lj);
-      Double_t mass = dil.Mass();
-      if (mass<fDilMinMass)
-        continue;
+	if (lj->Pt()<fMinPt)
+          continue;
 
-      fAllDiLepMassAcc->Fill(mass);
+	CompositeParticle dil;
+	dil.AddDaughter(li);
+	dil.AddDaughter(lj);
+	Double_t mass = dil.Mass();
+	if (mass<fDilMinMass)
+          continue;
 
-      if (li->ObjType()!=lj->ObjType()) {
-        if (li->Charge()!=lj->Charge()) {
-          fElMuMassAcc->Fill(mass);
-        }
-        continue;
-      }
+	fAllDiLepMassAcc->Fill(mass);
 
-      if (li->Is(kMuon)) {
-        if (li->Charge()!=lj->Charge()) {
-          fDiMuMassAcc->Fill(mass);
-        }
-        continue;
-      }
+	if (li->ObjType()!=lj->ObjType()) {
+          if (li->Charge()!=lj->Charge()) {
+            fElMuMassAcc->Fill(mass);
+          }
+          continue;
+	}
 
-      if (li->Is(kElectron)) {
-        if (li->Charge()!=lj->Charge()) {
-          fDiElMassAcc->Fill(mass);
-        }
-        continue;
+	if (li->Is(kMuon)) {
+          if (li->Charge()!=lj->Charge()) {
+            fDiMuMassAcc->Fill(mass);
+          }
+          continue;
+	}
+
+	if (li->Is(kElectron)) {
+          if (li->Charge()!=lj->Charge()) {
+            fDiElMassAcc->Fill(mass);
+          }
+          continue;
+	}
       }
     }
   }
@@ -177,26 +183,28 @@ void DilepSelMod::SlaveBegin()
 {
   // Create and add histograms to the output list.
 
-  AddTH1(fNAccCounters,"hNAccCounters",";cut;#",4,-0.5,3.5);
-  if (1) {
-    TAxis *xa = fNAccCounters->GetXaxis();
-    for(Int_t i=1;i<=fNAccCounters->GetNbinsX();++i)
-      xa->SetBinLabel(i,"unused");
-    xa->SetBinLabel(1,"Enter");
-    xa->SetBinLabel(2,"Objs");
-    xa->SetBinLabel(3,"2Lep");
-    xa->SetBinLabel(4,"GPair");
-    xa->SetRangeUser(0,3);
+  if (GetFillHist()) {
+    AddTH1(fNAccCounters,"hNAccCounters",";cut;#",4,-0.5,3.5);
+    if (1) {
+      TAxis *xa = fNAccCounters->GetXaxis();
+      for(Int_t i=1;i<=fNAccCounters->GetNbinsX();++i)
+    	xa->SetBinLabel(i,"unused");
+      xa->SetBinLabel(1,"Enter");
+      xa->SetBinLabel(2,"Objs");
+      xa->SetBinLabel(3,"2Lep");
+      xa->SetBinLabel(4,"GPair");
+      xa->SetRangeUser(0,3);
+    }
+    AddTH1(fAllDiLepMass,"hAllDiLepMass",";m_{ll} [GeV];#",150,0,300);
+    AddTH1(fDiElMass,"hDiElMass",";m_{ll} [GeV];#",150,0,300);
+    AddTH1(fDiMuMass,"hDiMuMass",";m_{ll} [GeV];#",150,0,300);
+    AddTH1(fElMuMass,"hElMuMass",";m_{ll} [GeV];#",150,0,300);
+    AddTH1(fAllDiLepMassAcc,"hAllDiLepMassAcc",";m_{ll} [GeV];#",150,0,300);
+    AddTH1(fDiElMassAcc,"hDiElMassAcc",";m_{ll} [GeV];#",150,0,300);
+    AddTH1(fDiMuMassAcc,"hDiMuMassAcc",";m_{ll} [GeV];#",150,0,300);
+    AddTH1(fElMuMassAcc,"hElMuMassAcc",";m_{ll} [GeV];#",150,0,300);
+    AddTH1(fNLeptons,"hNLeptons",";leptons;#",10,-0.5,9.5);
+    AddTH1(fNGPairs,"hNGoodPairs",";leptons;#",10,-0.5,9.5);
+    AddTH1(fNZPairs,"hNZPairs",";leptons;#",10,-0.5,9.5);
   }
-  AddTH1(fAllDiLepMass,"hAllDiLepMass",";m_{ll} [GeV];#",150,0,300);
-  AddTH1(fDiElMass,"hDiElMass",";m_{ll} [GeV];#",150,0,300);
-  AddTH1(fDiMuMass,"hDiMuMass",";m_{ll} [GeV];#",150,0,300);
-  AddTH1(fElMuMass,"hElMuMass",";m_{ll} [GeV];#",150,0,300);
-  AddTH1(fAllDiLepMassAcc,"hAllDiLepMassAcc",";m_{ll} [GeV];#",150,0,300);
-  AddTH1(fDiElMassAcc,"hDiElMassAcc",";m_{ll} [GeV];#",150,0,300);
-  AddTH1(fDiMuMassAcc,"hDiMuMassAcc",";m_{ll} [GeV];#",150,0,300);
-  AddTH1(fElMuMassAcc,"hElMuMassAcc",";m_{ll} [GeV];#",150,0,300);
-  AddTH1(fNLeptons,"hNLeptons",";leptons;#",10,-0.5,9.5);
-  AddTH1(fNGPairs,"hNGoodPairs",";leptons;#",10,-0.5,9.5);
-  AddTH1(fNZPairs,"hNZPairs",";leptons;#",10,-0.5,9.5);
 }
