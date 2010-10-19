@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: HKFactorProducer.h,v 1.3 2009/12/06 14:59:43 ceballos Exp $
+// $Id: HKFactorProducer.h,v 1.4 2009/12/07 11:39:50 ceballos Exp $
 //
 // HKFactorProducer
 //
@@ -32,6 +32,7 @@ namespace mithep
       void               SetMCBosonsName(const char *s)    { fMCBosonsName  = s; }
       void               SetMCEventInfoName(const char *s) { fMCEvInfoName  = s; }
       void               SetIsData(Bool_t b)               { fIsData        = b; }	 
+      void               SetMakePDFNtuple(Bool_t b)        { fMakePDFNtuple = b; }	 
 
     protected:
       void               Process();
@@ -42,9 +43,13 @@ namespace mithep
       TString            fMCBosonsName;     //boson collection input name
       TString            fMCEvInfoName;     //event info branch name
       Bool_t             fIsData;           //=true then it does nothing (def=0)
+      Bool_t             fMakePDFNtuple;    //=true then it does nothing (def=0)
       HWWKfactorList    *fPt_histo;         //!histogram with weights read from input file
       const MCEventInfo *fMCEventInfo;      //!event info branch pointer
       TH1D              *hDHKFactor[10];    //!output histograms
+
+      float             fTreeVariables[8];            //Ntuple variables
+      TTree            *fTree;                        //ntuple tree
 
     ClassDef(HKFactorProducer, 1) // Module to produce k factors
   };

@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.7 2010/03/13 20:50:32 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.8 2010/09/27 15:49:24 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -7,6 +7,7 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TParameter.h>
+#include <TTree.h>
 
 using namespace mithep;
 
@@ -20,6 +21,7 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
   fMCBosonsName(ModNames::gkMCBosonsName),
   fMCEvInfoName(Names::gkMCEvtInfoBrn),
   fIsData(kFALSE),
+  fMakePDFNtuple(kFALSE),
   fPt_histo(0),
   fMCEventInfo(0)
 {
@@ -90,6 +92,18 @@ void HKFactorProducer::Process()
     }
     // process id distribution
     if (GetFillHist()) hDHKFactor[4]->Fill(TMath::Min((Double_t)fMCEventInfo->ProcessId(),999.499));
+
+    if (fMakePDFNtuple == kTRUE){
+      fTreeVariables[0] = fMCEventInfo->Weight();
+      fTreeVariables[1] = fMCEventInfo->Scale();
+      fTreeVariables[2] = fMCEventInfo->Id1();
+      fTreeVariables[3] = fMCEventInfo->X1();
+      fTreeVariables[4] = fMCEventInfo->Pdf1();
+      fTreeVariables[5] = fMCEventInfo->Id2();
+      fTreeVariables[6] = fMCEventInfo->X2();
+      fTreeVariables[7] = fMCEventInfo->Pdf2();
+      fTree->Fill();
+    }
   }
 
   TParameter<Double_t> *NNLOWeight = new TParameter<Double_t>("NNLOWeight", theWeight);
@@ -118,5 +132,17 @@ void HKFactorProducer::SlaveBegin()
     sprintf(sb,"hDHKFactor_%d", 3);  hDHKFactor[3]  = new TH1D(sb,sb,400,-4.0,4.0); 
     sprintf(sb,"hDHKFactor_%d", 4);  hDHKFactor[4]  = new TH1D(sb,sb,1000,-0.5,999.5); 
     for(Int_t i=0; i<5; i++) AddOutput(hDHKFactor[i]);
+  }
+
+  //***********************************************************************************************
+  //Create Ntuple Tree  
+  //***********************************************************************************************
+  if (fMakePDFNtuple == kTRUE){
+    printf("... init PDF ntuple ...\n");
+    fTree = new TTree("PDFTree", "PDFTree");
+    const char* TreeFormat;
+    TreeFormat = "weight/F:lq:lid1:lx1:lpdf1:lid2:lx2:lpdf2";
+    fTree->Branch("H", &fTreeVariables,TreeFormat);    
+    AddOutput(fTree);
   }
 }
