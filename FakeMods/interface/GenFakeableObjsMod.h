@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.7 2009/11/03 08:40:48 ceballos Exp $
+// $Id: GenFakeableObjsMod.h,v 1.9 2010/05/12 19:05:26 ceballos Exp $
 //
 // GenFakeableObjsMod
 //
@@ -48,7 +48,7 @@ namespace mithep
       const char   *GetBarrelSuperClustersName()     const { return fBarrelSuperClusterBranchName; }
       const char   *GetEndcapSuperClustersName()     const { return fEndcapSuperClusterBranchName; }
       const char   *GetJetBranchName()               const { return fJetBranchName;                }
-      const char   *GetVertexBranchName()            const { return fVertexBranchName;             }
+      const char   *GetVertexName()                  const { return fVertexName;                   }
       const char   *GetConversionBranchName()        const { return fConversionBranchName;         }
       const char   *GetGoodJetsName()                const { return fGoodJetsName;                 }
       const char   *GetCleanElectronsName()          const { return fCleanElectronsName;           }
@@ -83,7 +83,7 @@ namespace mithep
       void SetBarrelSuperClusterBranchName(const char *name) { fBarrelSuperClusterBranchName=name; }
       void SetEndcapSuperClusterBranchName(const char *name) { fEndcapSuperClusterBranchName=name; }
       void SetJetBranchName(const char *name)                { fJetBranchName              = name; }
-      void SetVertexBranchName(const char *name)             { fVertexBranchName           = name; }
+      void SetVertexName(const char *name)                   { fVertexName                 = name; }
       void SetConversionBranchName(const char *name)         { fConversionBranchName       = name; }
       void SetGoodJetsName(const char *name)                 { fGoodJetsName               = name; }
       void SetCleanElectronsName(const char *name)           { fCleanElectronsName         = name; }
@@ -135,7 +135,7 @@ namespace mithep
       TString          fBarrelSuperClusterBranchName;  //name of barrel supercluster branch  (input)
       TString          fEndcapSuperClusterBranchName;  //name of endcap supercluster branch  (input)
       TString          fJetBranchName;                 //name of jet branch                  (input)
-      TString          fVertexBranchName;              //name of vertex branch               (input)
+      TString          fVertexName;                    //name of vertex branch               (input)
       TString          fConversionBranchName;          //name of conversion collection       (input)
       TString          fGoodJetsName;                  //name of Good jets collection        (input)
       TString          fCleanElectronsName;            //name of clean electrons             (input)

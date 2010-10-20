@@ -1,9 +1,10 @@
-// $Id: GoodPVFilterMod.cc,v 1.2 2010/01/18 17:24:53 bendavid Exp $
+// $Id: GoodPVFilterMod.cc,v 1.3 2010/04/23 12:30:20 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
 #include <TTree.h>
 #include "MitAna/DataTree/interface/Names.h"
+#include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataTree/interface/Vertex.h"
 
 using namespace mithep;
@@ -19,10 +20,12 @@ GoodPVFilterMod::GoodPVFilterMod(const char *name, const char *title) :
   fMaxAbsZ(15.0),
   fMaxRho(2.0),
   fVertexesName(Names::gkPVBrn),
+  fGoodVertexesName(ModNames::gkGoodVertexesName),
   fNEvents(0),
   fNAcceped(0),
   fNFailed(0),
   fVertexes(0),
+  fGoodVertexes(0),
   hVertexNTracks(0),
   hVertexRho(0),
   hVertexZ(0)
@@ -69,6 +72,9 @@ void GoodPVFilterMod::Process()
 {
   
   LoadBranch(fVertexesName);
+
+  VertexOArr *GoodVertexes = new VertexOArr;
+  GoodVertexes->SetName(fGoodVertexesName);
   
   // Increment counters and stop further processing of an event if current run is excluded
 
@@ -102,11 +108,18 @@ void GoodPVFilterMod::Process()
     if (!failedRho.NBitsSet())
       hVertexRho->Fill(v->Position().Rho());
     
-    if (!failed.NBitsSet())
+    if (!failed.NBitsSet()) {
       goodVertex = kTRUE;
-    
+      GoodVertexes->Add(v);
+    }
   }
   
+  // sort according to pt
+  GoodVertexes->Sort();
+
+  // add objects for other modules to use
+  AddObjThisEvt(GoodVertexes);  
+
   // take action if failed
   if (!goodVertex) {
     ++fNFailed;

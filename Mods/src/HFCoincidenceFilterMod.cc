@@ -1,10 +1,9 @@
-// $Id: HFCoincidenceFilterMod.cc,v 1.2 2010/05/03 11:37:49 bendavid Exp $
+// $Id: HFCoincidenceFilterMod.cc,v 1.3 2010/05/14 12:11:44 sixie Exp $
 
 #include "MitPhysics/Mods/interface/HFCoincidenceFilterMod.h"
 #include <TFile.h>
 #include <TTree.h>
 #include "MitAna/DataTree/interface/Names.h"
-#include "MitAna/DataTree/interface/Vertex.h"
 #include "MitAna/DataTree/interface/CaloTower.h"
 
 using namespace mithep;

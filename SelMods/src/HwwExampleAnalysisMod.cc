@@ -22,7 +22,7 @@ HwwExampleAnalysisMod::HwwExampleAnalysisMod(const char *name, const char *title
   fMuonBranchName(Names::gkMuonBrn),
   fMetName("NoDefaultNameSet"),
   fCleanJetsName("NoDefaultNameSet"),
-  fVertexName(string("PrimaryVertexes").c_str()),
+  fVertexName(ModNames::gkGoodVertexesName),
   fMuons(0),
   fMet(0),
   fVertices(0)
@@ -46,7 +46,6 @@ void HwwExampleAnalysisMod::SlaveBegin()
 
   // Load Branches
   ReqBranch(fMuonBranchName,   fMuons);
-  ReqBranch(fVertexName,    fVertices);
 
   //Create your histograms here
 
@@ -120,9 +119,9 @@ void HwwExampleAnalysisMod::Process()
 {
   // Process entries of the tree. For this module, we just load the branches and  
   LoadBranch(fMuonBranchName);
-  LoadBranch(fVertexName);
   
   //Obtain all the good objects from the event cleaning module
+  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
   ObjArray<Muon> *CleanMuons = dynamic_cast<ObjArray<Muon>* >(FindObjThisEvt(ModNames::gkCleanMuonsName));
   ParticleOArr *CleanLeptons = dynamic_cast<mithep::ParticleOArr*>
     (FindObjThisEvt(ModNames::gkMergedLeptonsName));

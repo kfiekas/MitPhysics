@@ -1,4 +1,4 @@
-	// $Id: MuonIDMod.cc,v 1.33 2010/08/22 11:17:42 ceballos Exp $
+	// $Id: MuonIDMod.cc,v 1.34 2010/10/09 18:42:16 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -15,7 +15,7 @@ ClassImp(mithep::MuonIDMod)
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
-  fVertexName("PrimaryVertexes"),
+  fVertexName(ModNames::gkGoodVertexesName),
   fMuonIDType("Minimal"),
   fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
@@ -44,9 +44,6 @@ void MuonIDMod::Process()
   // Process entries of the tree. 
 
   LoadEventObject(fMuonBranchName, fMuons);
-  if (fApplyD0Cut) {
-    LoadEventObject(fVertexName,     fVertices);
-  }
 
   MuonOArr *CleanMuons = new MuonOArr;
   CleanMuons->SetName(fCleanMuonsName);
@@ -211,6 +208,7 @@ void MuonIDMod::Process()
       continue;
 
     if (fApplyD0Cut) {
+      fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
       Bool_t passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut, fReverseD0Cut);
       if (!passD0cut)
         continue;
@@ -234,9 +232,6 @@ void MuonIDMod::SlaveBegin()
   // we just request the muon collection branch.
 
   ReqEventObject(fMuonBranchName, fMuons, kTRUE);
-
-  if (fApplyD0Cut)
-    ReqEventObject(fVertexName, fVertices, kTRUE);
 
   fMuonTools = new MuonTools;
 

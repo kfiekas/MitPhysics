@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.66 2010/08/19 14:37:17 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.67 2010/10/09 20:15:33 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -18,7 +18,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronBranchName(Names::gkElectronBrn),
   fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
-  fVertexName(string("PrimaryVertexes").c_str()),
+  fVertexName(ModNames::gkGoodVertexesName),
   fElectronIDType("CustomTight"),
   fElectronIsoType("TrackJuraSliding"),
   fTrigObjectsName("HLTModTrigObjs"),
@@ -252,7 +252,7 @@ void ElectronIDMod::Process()
 
     // apply d0 cut
     if (fApplyD0Cut) {
-      LoadEventObject(fVertexName, fVertices);
+      fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
       Bool_t passD0cut = ElectronTools::PassD0Cut(e, fVertices, fD0Cut, fReverseD0Cut);
       if (!passD0cut)
         continue;
@@ -266,7 +266,7 @@ void ElectronIDMod::Process()
 
     // apply full combined id, using Tight cuts
     if(fCombinedIdCut == kTRUE) {
-      LoadEventObject(fVertexName, fVertices);
+      fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
       LoadEventObject(fConversionBranchName, fConversions);
       Int_t result = ElectronTools::PassTightId(e, *&fVertices, fConversions, 2);
       if(result != 15) continue;
@@ -301,9 +301,6 @@ void ElectronIDMod::SlaveBegin()
 
   if (fApplyConvFilterType1 || fCombinedIdCut == kTRUE)
     ReqEventObject(fConversionBranchName, fConversions, kTRUE);
-
-  if (fApplyD0Cut || fCombinedIdCut == kTRUE)
-    ReqEventObject(fVertexName, fVertices, kTRUE);
 
   Setup();
 }

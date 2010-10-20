@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GoodPVFilterMod.h,v 1.1 2010/01/18 14:43:02 bendavid Exp $
+// $Id: GoodPVFilterMod.h,v 1.2 2010/04/23 12:30:20 bendavid Exp $
 //
 // GoodPVFilterMod
 //
@@ -57,10 +57,12 @@ namespace mithep
       Double_t                    fMaxAbsZ;       //maximum abs(z) of the vertex
       Double_t                    fMaxRho;        //maximum rho of the vertex
       TString                     fVertexesName;  //Name of PV collection
+      TString                     fGoodVertexesName; //Name of newPV collection
       Int_t                       fNEvents;       //!number of processed events
       Int_t                       fNAcceped;      //!number of accepted events
       Int_t                       fNFailed;       //!number of failed events
       const VertexCol            *fVertexes;      //!PV collection
+      const VertexCol            *fGoodVertexes;  //!Good PV collection
       TH1F                       *hVertexNTracks;
       TH1F                       *hVertexNDof;
       TH1F                       *hVertexRho;

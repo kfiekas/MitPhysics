@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.9 2010/05/12 19:05:26 ceballos Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.10 2010/05/27 07:59:10 ceballos Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -45,7 +45,7 @@ GenFakeableObjsMod::GenFakeableObjsMod(const char *name, const char *title) :
   fGsfTrackBranchName(Names::gkGsfTrackBrn),
   fBarrelSuperClusterBranchName(Names::gkBarrelSuperClusterBrn),
   fEndcapSuperClusterBranchName(Names::gkEndcapSuperClusterBrn),
-  fVertexBranchName(Names::gkPVBeamSpotBrn),
+  fVertexName(ModNames::gkGoodVertexesName),
   fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodJetsName(ModNames::gkGoodJetsName),
   fCleanElectronsName(ModNames::gkCleanElectronsName),
@@ -83,7 +83,6 @@ void GenFakeableObjsMod::SlaveBegin()
   ReqBranch(fBarrelSuperClusterBranchName,    fBarrelSuperClusters);
   ReqBranch(fEndcapSuperClusterBranchName,    fEndcapSuperClusters);
   ReqBranch(fConversionBranchName,            fConversions);
-  ReqBranch(fVertexBranchName, fVertices);
 
   if (fElectronFOType.CompareTo("GsfPlusSC") == 0) 
     fElFOType = kElFOGsfPlusSC;
@@ -130,8 +129,9 @@ void GenFakeableObjsMod::Process()
   LoadBranch(fGsfTrackBranchName);
   LoadBranch(fBarrelSuperClusterBranchName);
   LoadBranch(fEndcapSuperClusterBranchName);
-  LoadBranch(fVertexBranchName);
   LoadBranch(fConversionBranchName);
+
+  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
   //Load Trigger Objects
   const TriggerObjectCol *triggerObjects = GetHLTObjects(fTriggerObjectsName);
