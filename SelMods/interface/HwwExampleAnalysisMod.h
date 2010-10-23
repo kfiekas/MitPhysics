@@ -18,6 +18,7 @@
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/JetCol.h"
+#include "MitAna/DataTree/interface/CaloJetCol.h"
 #include "MitAna/DataTree/interface/SuperClusterCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
@@ -38,19 +39,24 @@ namespace mithep
       const char *GetMuonBranchName()                const { return fMuonBranchName;               }
       const char *GetMetName()                       const { return fMetName;                      }
       const char *GetCleanJetsName()                 const { return fCleanJetsName;                }
+      const char *GetCleanJetsNoPtCutName()          const { return fCleanJetsNoPtCutName;         }
 
       void  SetMuonBranchName(const char *name)            { fMuonBranchName               = name; }
       void  SetMetName(const char *name)                   { fMetName                      = name; }
       void  SetCleanJetsName(const char *name)             { fCleanJetsName                = name; }
+      void  SetCleanJetsNoPtCutName(const char *name)      { fCleanJetsNoPtCutName         = name; }
 
     protected:
       TString                  fMuonBranchName;	         //name of muon branch
       TString                  fMetName;                 //name of met collection
       TString                  fCleanJetsName;           //name of clean central jets collection
+      TString                  fCleanJetsNoPtCutName;    //name of clean all jets collection
+      TString                  fCaloJetName0;            //name of jet collection used in b-tagging
       TString                  fVertexName;              //name of vertex collection
       const MuonCol	      *fMuons;	                 //!Muon branch
       const MetCol            *fMet;                     //!Missing Et branch
       const VertexCol         *fVertices;                //!Vertex branch
+      const CaloJetCol        *fCaloJet0;                //!Jet branch
 
       TH1D                    *fHWWSelection;
       TH1D                    *fHWWToEESelection;

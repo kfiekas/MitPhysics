@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.5 2010/10/05 06:37:16 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.6 2010/10/05 06:50:20 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -59,7 +59,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   Bool_t isData         = kFALSE;
   Bool_t isElData       = kFALSE;
   int processId         = -999999999; // use 999 for MCatNLO MC sample, 102 for H->WW
-  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_3_8_4/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
+  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_3_8_5/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
 
   if(sampleID > 1000) isData   = kTRUE;
   if(sampleID > 2000) isElData = kTRUE;
@@ -95,7 +95,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
   runLumiSelectionMod->SetAcceptMC(!isData);    
-  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_8_4/src/json/Cert_132440-144114_7TeV_StreamExpress_Collisions10_JSON.txt");
+  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_8_5/src/json/Cert_TopOct22_Merged_135821-148058_allPVT.txt");
 
   //------------------------------------------------------------------------------------------------
   // PV filter selection
@@ -112,23 +112,27 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   HLTMod *hltmod = new HLTMod;
   if     (isData == kFALSE){
     hltmod->AddTrigger("HLT_Mu9");
-    hltmod->AddTrigger("HLT_Photon10_L1R",132440,137028);
-    hltmod->AddTrigger("HLT_Photon15_Cleaned_L1R",138564,140401);
-    hltmod->AddTrigger("HLT_Ele15_SW_CaloEleId_L1R",141956,999999);
-    hltmod->AddTrigger("HLT_Ele15_LW_L1R",1,1);
+    hltmod->AddTrigger("!HLT_Mu9");
   }
   else if(isElData == kFALSE){
-    hltmod->AddTrigger("HLT_Mu9");
-    hltmod->AddTrigger("HLT_Mu9&HLT_Photon10_L1R",132440,137028);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Photon15_Cleaned_L1R",138564,140401);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,999999);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_LW_L1R",1,1);
+    hltmod->AddTrigger("HLT_Mu9",132440,147119);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Photon10_L1R",132440,135058);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele10_LW_L1R",135059,140041);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_L1R",140042,141900);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141901,146427);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147119);
+
+    hltmod->AddTrigger("HLT_Mu15_v1",147120,999999);
+    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1",147120,999999);
   }
   else {
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Photon10_L1R",132440,137028);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Photon15_Cleaned_L1R",138564,140401);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,999999);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_LW_L1R",1,1);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Photon10_L1R",132440,135058);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele10_LW_L1R",135059,140041);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_L1R",140042,141900);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141901,146427);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147119);
+
+    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1",147120,999999);
   }
   hltmod->SetTrigObjsName("myhltobjs");
 
@@ -199,6 +203,17 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   jetCleaning->SetGoodJetsName("GoodJets");
   jetCleaning->SetCleanJetsName("CleanJets");
 
+  JetIDMod            *jetIDNoPtCut     = new JetIDMod;
+  jetIDNoPtCut->SetInputName(jetCorr->GetOutputName());
+  jetIDNoPtCut->SetPtCut(0.0);
+  jetIDNoPtCut->SetEtaMaxCut(5.0);
+  jetIDNoPtCut->SetJetEEMFractionMinCut(0.0);
+  jetIDNoPtCut->SetOutputName("GoodJetsNoPtCut");
+
+  JetCleaningMod      *jetCleaningNoPtCut = new JetCleaningMod;
+  jetCleaningNoPtCut->SetGoodJetsName("GoodJetsNoPtCut");
+  jetCleaningNoPtCut->SetCleanJetsName("CleanJetsNoPtCut");
+
   //------------------------------------------------------------------------------------------------
   // merge modules
   //------------------------------------------------------------------------------------------------
@@ -212,6 +227,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   HwwExampleAnalysisMod *analysisMod = new HwwExampleAnalysisMod;
   analysisMod->SetMetName(pubMet->GetOutputName());
   analysisMod->SetCleanJetsName(jetCleaning->GetOutputName());
+  analysisMod->SetCleanJetsNoPtCutName(jetCleaningNoPtCut->GetOutputName());
 
   //------------------------------------------------------------------------------------------------
   // making analysis chain
@@ -234,7 +250,9 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   electronCleaning->Add(photonCleaning);
   photonCleaning->Add(tauCleaning);
   tauCleaning->Add(jetCleaning);
-  jetCleaning->Add(mergeLeptonsMod);
+  jetCleaning->Add(jetIDNoPtCut);
+  jetIDNoPtCut->Add(jetCleaningNoPtCut);
+  jetCleaningNoPtCut->Add(mergeLeptonsMod);
   mergeLeptonsMod->Add(analysisMod);
 
   //------------------------------------------------------------------------------------------------

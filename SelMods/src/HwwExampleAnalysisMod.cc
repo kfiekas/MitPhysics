@@ -22,10 +22,13 @@ HwwExampleAnalysisMod::HwwExampleAnalysisMod(const char *name, const char *title
   fMuonBranchName(Names::gkMuonBrn),
   fMetName("NoDefaultNameSet"),
   fCleanJetsName("NoDefaultNameSet"),
+  fCleanJetsNoPtCutName("NoDefaultNameSet"),
+  fCaloJetName0("AKt5Jets"),
   fVertexName(ModNames::gkGoodVertexesName),
   fMuons(0),
   fMet(0),
-  fVertices(0)
+  fVertices(0),
+  fCaloJet0(0)
 {
   // Constructor.
 }
@@ -45,17 +48,18 @@ void HwwExampleAnalysisMod::SlaveBegin()
   // branches. For this module, we request a branch of the MitTree.
 
   // Load Branches
-  ReqBranch(fMuonBranchName,   fMuons);
+  ReqBranch(fMuonBranchName,  fMuons);
+  ReqBranch(fCaloJetName0,    fCaloJet0);
 
   //Create your histograms here
 
   //*************************************************************************************************
   // Selection Histograms
   //*************************************************************************************************
-  AddTH1(fHWWSelection,"hHWWSelection", ";Cut Number;Number of Events", 8, -1.5, 6.5);
-  AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events", 8, -1.5, 6.5);
-  AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 8, -1.5, 6.5);
-  AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events", 8, -1.5, 6.5);
+  AddTH1(fHWWSelection,"hHWWSelection", ";Cut Number;Number of Events", 9, -1.5, 7.5);
+  AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events", 9, -1.5, 7.5);
+  AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 9, -1.5, 7.5);
+  AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events", 9, -1.5, 7.5);
 
   //***********************************************************************************************
   // Histograms after preselection
@@ -119,14 +123,18 @@ void HwwExampleAnalysisMod::Process()
 {
   // Process entries of the tree. For this module, we just load the branches and  
   LoadBranch(fMuonBranchName);
-  
+  LoadBranch(fCaloJetName0);
+ 
   //Obtain all the good objects from the event cleaning module
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
   ObjArray<Muon> *CleanMuons = dynamic_cast<ObjArray<Muon>* >(FindObjThisEvt(ModNames::gkCleanMuonsName));
+  ObjArray<Electron> *CleanElectrons = dynamic_cast<ObjArray<Electron>* >(FindObjThisEvt(ModNames::gkCleanElectronsName));
   ParticleOArr *CleanLeptons = dynamic_cast<mithep::ParticleOArr*>
     (FindObjThisEvt(ModNames::gkMergedLeptonsName));
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
+  ObjArray<Jet> *CleanJetsNoPtCut = dynamic_cast<ObjArray<Jet>* >
+    (FindObjThisEvt(fCleanJetsNoPtCutName.Data()));
   TParameter<Double_t> *NNLOWeight = GetObjThisEvt<TParameter<Double_t> >("NNLOWeight");
 
   MetCol *met = dynamic_cast<ObjArray<Met>* >(FindObjThisEvt(fMetName));
@@ -169,6 +177,21 @@ void HwwExampleAnalysisMod::Process()
   }
 
   //***********************************************************************************************
+  //|Z_vert-Z_l| maximum
+  //***********************************************************************************************
+  double zDiffMax = 0.0;
+  if(fVertices->GetEntries() > 0) {
+    for (UInt_t j=0; j<CleanMuons->GetEntries(); j++) {
+      if(TMath::Abs(CleanMuons->At(j)->BestTrk()->Z0() - fVertices->At(0)->Z()) > zDiffMax) 
+        zDiffMax = TMath::Abs(CleanMuons->At(j)->BestTrk()->Z0() - fVertices->At(0)->Z());
+    }
+    for (UInt_t j=0; j<CleanElectrons->GetEntries(); j++) {   
+      if(TMath::Abs(CleanElectrons->At(j)->BestTrk()->Z0() - fVertices->At(0)->Z()) > zDiffMax) 
+        zDiffMax = TMath::Abs(CleanElectrons->At(j)->BestTrk()->Z0() - fVertices->At(0)->Z());
+    }
+  }
+
+  //***********************************************************************************************
   //Define Event Variables
   //***********************************************************************************************
   //delta phi between the 2 leptons in degrees
@@ -199,12 +222,96 @@ void HwwExampleAnalysisMod::Process()
   if(minDeltaPhiMetLepton < TMath::Pi()/2.)
       METdeltaPhilEt = METdeltaPhilEt * sin(minDeltaPhiMetLepton);
 
-  //count the number of central Jets for vetoing
-  int nCentralJets = 0;
+  //count the number of central Jets for vetoing and b-tagging
+  vector<Jet*> sortedJetsAll;
+  vector<Jet*> sortedJets;
+  vector<Jet*> sortedJetsLowPt;
+  for(UInt_t i=0; i<CleanJetsNoPtCut->GetEntries(); i++){
+    Jet* jet_a = new Jet(CleanJetsNoPtCut->At(i)->Px(),
+   			 CleanJetsNoPtCut->At(i)->Py(),
+   			 CleanJetsNoPtCut->At(i)->Pz(),
+   			 CleanJetsNoPtCut->At(i)->E() );
+
+    int nCloseStdJet = -1;
+    double deltaRMin = 999.;
+    for(UInt_t nj=0; nj<fCaloJet0->GetEntries(); nj++){
+      const CaloJet *jet = fCaloJet0->At(nj);
+      Double_t deltaR = MathUtils::DeltaR(jet_a->Mom(),jet->Mom());
+      if(deltaR < deltaRMin) {
+   	nCloseStdJet = nj;
+   	deltaRMin = deltaR;
+      }
+    }
+    if(nCloseStdJet >= 0 && deltaRMin < 0.5){
+      jet_a->SetMatchedMCFlavor(fCaloJet0->At(nCloseStdJet)->MatchedMCFlavor());
+      jet_a->SetCombinedSecondaryVertexBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->CombinedSecondaryVertexBJetTagsDisc());
+      jet_a->SetCombinedSecondaryVertexMVABJetTagsDisc(fCaloJet0->At(nCloseStdJet)->CombinedSecondaryVertexMVABJetTagsDisc());
+      jet_a->SetJetProbabilityBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->JetProbabilityBJetTagsDisc());
+      jet_a->SetJetBProbabilityBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->JetBProbabilityBJetTagsDisc());
+      jet_a->SetTrackCountingHighEffBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->TrackCountingHighEffBJetTagsDisc());
+      jet_a->SetTrackCountingHighPurBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->TrackCountingHighPurBJetTagsDisc());
+      jet_a->SetSimpleSecondaryVertexBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->SimpleSecondaryVertexBJetTagsDisc());
+      jet_a->SetSimpleSecondaryVertexHighEffBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->SimpleSecondaryVertexHighEffBJetTagsDisc());
+      jet_a->SetSimpleSecondaryVertexHighPurBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->SimpleSecondaryVertexHighPurBJetTagsDisc());
+    }
+    else {
+      jet_a->SetMatchedMCFlavor(CleanJetsNoPtCut->At(i)->MatchedMCFlavor());
+      jet_a->SetCombinedSecondaryVertexBJetTagsDisc(CleanJetsNoPtCut->At(i)->CombinedSecondaryVertexBJetTagsDisc());
+      jet_a->SetCombinedSecondaryVertexMVABJetTagsDisc(CleanJetsNoPtCut->At(i)->CombinedSecondaryVertexMVABJetTagsDisc());
+      jet_a->SetJetProbabilityBJetTagsDisc(CleanJetsNoPtCut->At(i)->JetProbabilityBJetTagsDisc());
+      jet_a->SetJetBProbabilityBJetTagsDisc(CleanJetsNoPtCut->At(i)->JetBProbabilityBJetTagsDisc());
+      jet_a->SetTrackCountingHighEffBJetTagsDisc(CleanJetsNoPtCut->At(i)->TrackCountingHighEffBJetTagsDisc());
+      jet_a->SetTrackCountingHighPurBJetTagsDisc(CleanJetsNoPtCut->At(i)->TrackCountingHighPurBJetTagsDisc());
+      jet_a->SetSimpleSecondaryVertexBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexBJetTagsDisc());
+      jet_a->SetSimpleSecondaryVertexHighEffBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexHighEffBJetTagsDisc());
+      jet_a->SetSimpleSecondaryVertexHighPurBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexHighPurBJetTagsDisc());
+    }
+    sortedJetsAll.push_back(jet_a);
+  }
+
   for(UInt_t i=0; i<CleanJets->GetEntries(); i++){
-    if(TMath::Abs(CleanJets->At(i)->Eta()) < 5.0 &&
-       CleanJets->At(i)->Pt() > 25.0){
-      nCentralJets++;
+    if(TMath::Abs(CleanJets->At(i)->RawMom().Eta()) < 5.0 &&
+       CleanJets->At(i)->RawMom().Pt() > 25.0){
+      Jet* jet_b = new Jet(CleanJets->At(i)->Px(),
+     			   CleanJets->At(i)->Py(),
+   			   CleanJets->At(i)->Pz(),
+   			   CleanJets->At(i)->E() );
+      sortedJets.push_back(jet_b);
+    }
+  }
+
+  for(UInt_t i=0; i<sortedJetsAll.size(); i++){
+    bool overlap = kFALSE;
+    for(UInt_t j=0; j<sortedJets.size(); j++){
+      if(sortedJetsAll[i]->Pt() == sortedJets[j]->Pt() ||
+        (sortedJetsAll[i]->CombinedSecondaryVertexBJetTagsDisc() == sortedJets[j]->CombinedSecondaryVertexBJetTagsDisc() &&
+	 sortedJetsAll[i]->JetBProbabilityBJetTagsDisc()	 == sortedJets[j]->JetBProbabilityBJetTagsDisc() &&
+	 sortedJetsAll[i]->TrackCountingHighPurBJetTagsDisc()	 == sortedJets[j]->TrackCountingHighPurBJetTagsDisc())
+        ) {
+        sortedJets[j]->SetMatchedMCFlavor(sortedJetsAll[i]->MatchedMCFlavor());
+        sortedJets[j]->SetCombinedSecondaryVertexBJetTagsDisc(sortedJetsAll[i]->CombinedSecondaryVertexBJetTagsDisc());
+        sortedJets[j]->SetCombinedSecondaryVertexMVABJetTagsDisc(sortedJetsAll[i]->CombinedSecondaryVertexMVABJetTagsDisc());
+        sortedJets[j]->SetJetProbabilityBJetTagsDisc(sortedJetsAll[i]->JetProbabilityBJetTagsDisc());
+        sortedJets[j]->SetJetBProbabilityBJetTagsDisc(sortedJetsAll[i]->JetBProbabilityBJetTagsDisc());
+        sortedJets[j]->SetTrackCountingHighEffBJetTagsDisc(sortedJetsAll[i]->TrackCountingHighEffBJetTagsDisc());
+        sortedJets[j]->SetTrackCountingHighPurBJetTagsDisc(sortedJetsAll[i]->TrackCountingHighPurBJetTagsDisc());
+        sortedJets[j]->SetSimpleSecondaryVertexBJetTagsDisc(sortedJetsAll[i]->SimpleSecondaryVertexBJetTagsDisc());
+        sortedJets[j]->SetSimpleSecondaryVertexHighEffBJetTagsDisc(sortedJetsAll[i]->SimpleSecondaryVertexHighEffBJetTagsDisc());
+        sortedJets[j]->SetSimpleSecondaryVertexHighPurBJetTagsDisc(sortedJetsAll[i]->SimpleSecondaryVertexHighPurBJetTagsDisc());        
+  	overlap = kTRUE;
+        break;
+      }
+    }
+    if(overlap == kFALSE){
+      sortedJetsLowPt.push_back(sortedJetsAll[i]);
+    }
+  }
+  double maxBtag = -99999.;
+  double imaxBtag = -1;
+  for(UInt_t i=0; i<sortedJetsLowPt.size(); i++){
+    if(sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc() > maxBtag){
+      maxBtag  = sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc();
+      imaxBtag = i;
     }
   }
 
@@ -224,20 +331,21 @@ void HwwExampleAnalysisMod::Process()
   //*********************************************************************************************
   //Define Cuts
   //*********************************************************************************************
-  const int nCuts = 7;
-  bool passCut[nCuts] = {false, false, false, false, false, false, false};
+  const int nCuts = 8;
+  bool passCut[nCuts] = {false, false, false, false, false, false, false, false};
   
   if(CleanLeptons->At(0)->Pt() >  20.0 &&
-     CleanLeptons->At(1)->Pt() >= 20.0) passCut[0] = true;
+     CleanLeptons->At(1)->Pt() >= 20.0)             passCut[0] = true;
   
-  if(caloMet->Pt()    > 20.0)           passCut[1] = true;
+  if(caloMet->Pt()    > 20.0)                       passCut[1] = true;
   
-  if(dilepton->Mass() > 12.0)           passCut[2] = true;
+  if(dilepton->Mass() > 12.0 && zDiffMax < 1.0)     passCut[2] = true;
   
-  if(nCentralJets     < 1)              passCut[5] = true;
+  if(sortedJets.size() < 1)                         passCut[5] = true;
 
-  if(CleanLeptons->GetEntries() == 2 &&
-     SoftMuons->GetEntries() == 0)      passCut[6] = true;
+  if(SoftMuons->GetEntries() == 0 && maxBtag < 2.1) passCut[6] = true;
+
+  if(CleanLeptons->GetEntries() == 2)               passCut[7] = true;
 
   if (finalstateType == 10 || finalstateType == 11){ // mumu/ee
     if(fabs(dilepton->Mass()-91.1876)   > 15.0)   passCut[3] = true;
@@ -309,7 +417,7 @@ void HwwExampleAnalysisMod::Process()
     }
   }
   if (pass) {
-    fNCentralJets_NMinusOne->Fill(nCentralJets,NNLOWeight->GetVal());
+    fNCentralJets_NMinusOne->Fill(sortedJets.size(),NNLOWeight->GetVal());
   }     
   
   // Final Met Cut
@@ -367,6 +475,8 @@ void HwwExampleAnalysisMod::Process()
   
   delete dilepton;
   delete SoftMuons;
+  for(UInt_t i=0; i<sortedJets.size();      i++) delete sortedJets[i];
+  for(UInt_t i=0; i<sortedJetsAll.size();   i++) delete sortedJetsAll[i];
   return;
 }
 
