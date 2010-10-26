@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.10 2010/05/27 07:59:10 ceballos Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.11 2010/10/20 02:44:47 ceballos Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -27,8 +27,8 @@ GenFakeableObjsMod::GenFakeableObjsMod(const char *name, const char *title) :
   fWrongHitsRequirement(kTRUE),
   fApplyD0Cut(kTRUE),
   fChargeFilter(kTRUE),
-  fD0Cut(0.025),
-  fCombIsolationCut(10.0),
+  fD0Cut(0.02),
+  fCombIsolationCut(0.5),
   fTrackIsolationCut(-1.0),
   fEcalIsolationCut(-1.0),
   fHcalIsolationCut(-1.0),
@@ -196,8 +196,7 @@ void GenFakeableObjsMod::Process()
     for (UInt_t j=0; j<tmpDuplicateRemovedElectrons.size(); ++j) {
       Double_t deltaR = MathUtils::DeltaR(tmpDuplicateRemovedElectrons[j]->Mom(), e->Mom());
       if (e->SCluster() == tmpDuplicateRemovedElectrons[j]->SCluster() ||
-          e->GsfTrk() == tmpDuplicateRemovedElectrons[j]->GsfTrk() ||
-          deltaR < 0.1) {
+          e->GsfTrk() == tmpDuplicateRemovedElectrons[j]->GsfTrk()) {
         isElectronOverlap = kTRUE;
       }
     
@@ -418,17 +417,20 @@ void GenFakeableObjsMod::Process()
       // Isolation Cut
       //****************************************************************************************
       Double_t combIso = 
-        denominator->TrackIsolationDr03() + denominator->EcalRecHitIsoDr04() - 1.5;
+        denominator->TrackIsolationDr03() + TMath::Max(denominator->EcalRecHitIsoDr03() - 1.0, 0.0) + denominator->HcalTowerSumEtDr03();
+      if (fabs(denominator->Eta()) > 1.5) {
+        combIso = denominator->TrackIsolationDr03() + denominator->EcalRecHitIsoDr03() + denominator->HcalTowerSumEtDr03();
+      }
 
-      Bool_t passIsolationCut = (combIso <= fCombIsolationCut || fCombIsolationCut < 0) &&
-        (denominator->TrackIsolationDr04() <= fTrackIsolationCut || fTrackIsolationCut < 0) &&
-        (denominator->EcalRecHitIsoDr04() <= fEcalIsolationCut || fEcalIsolationCut < 0) &&
-        (denominator->HcalTowerSumEtDr04() <= fHcalIsolationCut || fHcalIsolationCut < 0) ;
+      Bool_t passIsolationCut = (combIso / denominator->Pt() <= fCombIsolationCut || fCombIsolationCut < 0) &&
+        (denominator->TrackIsolationDr04()/ denominator->Pt() <= fTrackIsolationCut || fTrackIsolationCut < 0) &&
+        (denominator->EcalRecHitIsoDr04()/ denominator->Pt() <= fEcalIsolationCut || fEcalIsolationCut < 0) &&
+        (denominator->HcalTowerSumEtDr04()/ denominator->Pt() <= fHcalIsolationCut || fHcalIsolationCut < 0) ;
       
       //****************************************************************************************
       // conversion filter
       //****************************************************************************************
-      Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions, kTRUE);
+       Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions, kTRUE);
       
       //****************************************************************************************
       // D0 Cut        
