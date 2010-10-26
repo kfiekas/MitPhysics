@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.6 2010/10/05 06:50:20 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.7 2010/10/23 04:47:46 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -35,14 +35,14 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
-		       const char *book       = "cern/filler/014a",
-                       const char *dataset    = "p10-ww2l-v26",
+void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
+		       const char *book	      = "cern/filefi/015",
+                       const char *dataset    = "f10-ww2l-z2-v12",
                        const char *fileset    = "0000",
                        const char *skim       = "noskim",
                        const char *outputName = "histo",
                        int   sampleID	      = -1,
-                       int   nEvents	      = 10000)
+                       int   nEvents	      = 1000000)
 {
   //------------------------------------------------------------------------------------------------
   // some global setups

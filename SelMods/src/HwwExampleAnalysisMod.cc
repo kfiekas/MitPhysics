@@ -56,10 +56,10 @@ void HwwExampleAnalysisMod::SlaveBegin()
   //*************************************************************************************************
   // Selection Histograms
   //*************************************************************************************************
-  AddTH1(fHWWSelection,"hHWWSelection", ";Cut Number;Number of Events", 9, -1.5, 7.5);
-  AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events", 9, -1.5, 7.5);
-  AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 9, -1.5, 7.5);
-  AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events", 9, -1.5, 7.5);
+  AddTH1(fHWWSelection,"hHWWSelection", ";Cut Number;Number of Events", 11, -1.5, 9.5);
+  AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events", 11, -1.5, 9.5);
+  AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 11, -1.5, 9.5);
+  AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events", 11, -1.5, 9.5);
 
   //***********************************************************************************************
   // Histograms after preselection
@@ -182,12 +182,24 @@ void HwwExampleAnalysisMod::Process()
   double zDiffMax = 0.0;
   if(fVertices->GetEntries() > 0) {
     for (UInt_t j=0; j<CleanMuons->GetEntries(); j++) {
-      if(TMath::Abs(CleanMuons->At(j)->BestTrk()->Z0() - fVertices->At(0)->Z()) > zDiffMax) 
-        zDiffMax = TMath::Abs(CleanMuons->At(j)->BestTrk()->Z0() - fVertices->At(0)->Z());
+      double pDz = 0.0;
+      for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+        if(fVertices->At(i0)->NTracks() > 0){
+	  pDz = TMath::Abs(CleanMuons->At(j)->BestTrk()->DzCorrected(*fVertices->At(i0)));
+          break;
+        }
+      }
+      if(pDz > zDiffMax) pDz = zDiffMax;
     }
     for (UInt_t j=0; j<CleanElectrons->GetEntries(); j++) {   
-      if(TMath::Abs(CleanElectrons->At(j)->BestTrk()->Z0() - fVertices->At(0)->Z()) > zDiffMax) 
-        zDiffMax = TMath::Abs(CleanElectrons->At(j)->BestTrk()->Z0() - fVertices->At(0)->Z());
+      double pDz = 0.0;
+      for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
+        if(fVertices->At(i0)->NTracks() > 0){
+	  pDz = TMath::Abs(CleanElectrons->At(j)->GsfTrk()->DzCorrected(*fVertices->At(i0)));
+          break;
+        }
+      }
+      if(pDz > zDiffMax) pDz = zDiffMax;
     }
   }
 
@@ -331,29 +343,34 @@ void HwwExampleAnalysisMod::Process()
   //*********************************************************************************************
   //Define Cuts
   //*********************************************************************************************
-  const int nCuts = 8;
-  bool passCut[nCuts] = {false, false, false, false, false, false, false, false};
+  const int nCuts = 10;
+  bool passCut[nCuts] = {false, false, false, false, false,
+                         false, false, false, false, false};
   
   if(CleanLeptons->At(0)->Pt() >  20.0 &&
-     CleanLeptons->At(1)->Pt() >= 20.0)             passCut[0] = true;
+     CleanLeptons->At(1)->Pt() >= 20.0) passCut[0] = true;
   
-  if(caloMet->Pt()    > 20.0)                       passCut[1] = true;
+  if(zDiffMax < 1.0)                    passCut[1] = true;
   
-  if(dilepton->Mass() > 12.0 && zDiffMax < 1.0)     passCut[2] = true;
+  if(caloMet->Pt()    > 20.0)           passCut[2] = true;
   
-  if(sortedJets.size() < 1)                         passCut[5] = true;
+  if(dilepton->Mass() > 12.0)           passCut[3] = true;
+  
+  if(sortedJets.size() < 1)             passCut[6] = true;
 
-  if(SoftMuons->GetEntries() == 0 && maxBtag < 2.1) passCut[6] = true;
+  if(SoftMuons->GetEntries() == 0)      passCut[7] = true;
 
-  if(CleanLeptons->GetEntries() == 2)               passCut[7] = true;
+  if(CleanLeptons->GetEntries() == 2)   passCut[8] = true;
+
+  if(maxBtag < 2.1)                     passCut[9] = true;
 
   if (finalstateType == 10 || finalstateType == 11){ // mumu/ee
-    if(fabs(dilepton->Mass()-91.1876)   > 15.0)   passCut[3] = true;
-    if(METdeltaPhilEt > 35) passCut[4] = true;
+    if(fabs(dilepton->Mass()-91.1876)   > 15.0)   passCut[4] = true;
+    if(METdeltaPhilEt > 35) passCut[5] = true;
   }
   else if(finalstateType == 12) { // emu
-    passCut[3] = true;
-    if(METdeltaPhilEt > 20) passCut[4] = true;
+    passCut[4] = true;
+    if(METdeltaPhilEt > 20) passCut[5] = true;
   }
   
   //*********************************************************************************************
