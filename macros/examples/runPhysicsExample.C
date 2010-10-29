@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.7 2010/10/23 04:47:46 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.8 2010/10/26 09:58:32 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -102,7 +102,7 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   //------------------------------------------------------------------------------------------------
   GoodPVFilterMod *goodPVFilterMod = new GoodPVFilterMod;
   goodPVFilterMod->SetMinVertexNTracks(0);
-  goodPVFilterMod->SetMinNDof(5);
+  goodPVFilterMod->SetMinNDof(4);
   goodPVFilterMod->SetMaxAbsZ(24.0);
   goodPVFilterMod->SetMaxRho(2.0);
 
@@ -123,7 +123,8 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
     hltmod->AddTrigger("HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147119);
 
     hltmod->AddTrigger("HLT_Mu15_v1",147120,999999);
-    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1",147120,999999);
+    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1",147120,148100);
+    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1",148101,999999);
   }
   else {
     hltmod->AddTrigger("!HLT_Mu9&HLT_Photon10_L1R",132440,135058);
@@ -132,7 +133,8 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
     hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141901,146427);
     hltmod->AddTrigger("!HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147119);
 
-    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1",147120,999999);
+    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1",147120,148100);
+    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1",148101,999999);
   }
   hltmod->SetTrigObjsName("myhltobjs");
 

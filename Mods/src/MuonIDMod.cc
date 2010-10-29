@@ -1,4 +1,4 @@
-	// $Id: MuonIDMod.cc,v 1.34 2010/10/09 18:42:16 ceballos Exp $
+	// $Id: MuonIDMod.cc,v 1.35 2010/10/20 02:44:16 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -16,7 +16,7 @@ ClassImp(mithep::MuonIDMod)
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
   fVertexName(ModNames::gkGoodVertexesName),
-  fMuonIDType("Minimal"),
+  fMuonIDType("WWMuId"),
   fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
@@ -128,14 +128,14 @@ void MuonIDMod::Process()
         idpass = mu->BestTrk() != 0 &&
 	         mu->BestTrk()->NHits() > 10 &&
 		 RChi2 < 10.0 &&
-		 mu->NSegments() > 1 &&
+		(mu->NSegments() > 1 || mu->NMatches() > 1) &&
 		 mu->BestTrk()->NPixelHits() > 0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kZMuId:
         idpass = mu->BestTrk() != 0 &&
 	         mu->BestTrk()->NHits() > 10 &&
-		 mu->NSegments() > 1 &&
+		(mu->NSegments() > 1 || mu->NMatches() > 1) &&
 		 mu->BestTrk()->NPixelHits() > 0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
@@ -155,11 +155,14 @@ void MuonIDMod::Process()
 		 RChi2 < 10.0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
-      case kMinimal:
+      case kWWMuId:
         idpass = mu->BestTrk() != 0 &&
 	         mu->BestTrk()->NHits() > 10 &&
 		 RChi2 < 10.0 &&
-		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
+		(mu->NSegments() > 1 || mu->NMatches() > 1) &&
+		 mu->BestTrk()->NPixelHits() > 0 &&
+		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight) &&
+		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1;
         break;
       case kNoId:
         idpass = kTRUE;
@@ -243,8 +246,8 @@ void MuonIDMod::SlaveBegin()
     fMuIDType = kTight;
   else if (fMuonIDType.CompareTo("Loose") == 0) 
     fMuIDType = kLoose;
-  else if (fMuonIDType.CompareTo("Minimal") == 0) 
-    fMuIDType = kMinimal;
+  else if (fMuonIDType.CompareTo("WWMuId") == 0) 
+    fMuIDType = kWWMuId;
   else if (fMuonIDType.CompareTo("NoId") == 0) 
     fMuIDType = kNoId;
   else if (fMuonIDType.CompareTo("Custom") == 0) {

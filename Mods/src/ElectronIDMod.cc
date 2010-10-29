@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.68 2010/10/20 02:44:48 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.69 2010/10/23 04:47:34 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -25,7 +25,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronPtMin(10),
   fElectronEtMin(0.0),  
   fElectronEtaMax(2.5),
-  fIDLikelihoodCut(0.9),
+  fIDLikelihoodCut(0.75),
   fTrackIsolationCut(5.0),
   fCaloIsolationCut(5.0),
   fEcalJuraIsoCut(5.0),
@@ -68,7 +68,8 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       idcut = ele->PassLooseID();
       break;
     case ElectronTools::kLikelihood:
-      idcut = (ele->IDLikelihood() > fIDLikelihoodCut);
+      idcut = (ele->Pt() >  15 && ele->IDLikelihood() > fIDLikelihoodCut) ||
+              (ele->Pt() <= 15 && ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint80Id));
       break;
     case ElectronTools::kNoId:
       idcut = kTRUE;
@@ -124,7 +125,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kTrackJuraSliding:
     {
       Double_t totalIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03();
-      if(ele->IsEB()) totalIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03();
+      if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03();
       if (totalIso < (ele->Pt()*0.10) )
         isocut = kTRUE;
       
