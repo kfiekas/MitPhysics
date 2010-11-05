@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.8 2010/10/26 09:58:32 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.9 2010/10/29 16:19:23 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -95,7 +95,7 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
   runLumiSelectionMod->SetAcceptMC(!isData);    
-  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_8_5/src/json/Cert_TopOct22_Merged_135821-148058_allPVT.txt");
+  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_8_5/src/json/Cert_TopNov5_Merged_135821-149442_allPVT.txt");
 
   //------------------------------------------------------------------------------------------------
   // PV filter selection
@@ -110,31 +110,32 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   // HLT information
   //------------------------------------------------------------------------------------------------
   HLTMod *hltmod = new HLTMod;
+
   if     (isData == kFALSE){
     hltmod->AddTrigger("HLT_Mu9");
     hltmod->AddTrigger("!HLT_Mu9");
   }
   else if(isElData == kFALSE){
-    hltmod->AddTrigger("HLT_Mu9",132440,147119);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Photon10_L1R",132440,135058);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele10_LW_L1R",135059,140041);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_L1R",140042,141900);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141901,146427);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147119);
+    hltmod->AddTrigger("HLT_Mu9",136033,147116);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele10_LW_L1R",136033,139980);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_L1R",140058,141882);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,144114);
+    hltmod->AddTrigger("HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147116);
 
-    hltmod->AddTrigger("HLT_Mu15_v1",147120,999999);
-    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1",147120,148100);
-    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1",148101,999999);
+    hltmod->AddTrigger("HLT_Mu15_v1",147196,999999);
+    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TightEleId_L1R",147196,148058);
+    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TighterEleIdIsol_L1R_v2",148819,149064);
+    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TighterEleIdIsol_L1R_v3",149181,999999);
   }
   else {
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Photon10_L1R",132440,135058);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele10_LW_L1R",135059,140041);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_L1R",140042,141900);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141901,146427);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147119);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele10_LW_L1R",136033,139980);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_L1R",140058,141882);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,144114);
+    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147116);
 
-    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1",147120,148100);
-    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1",148101,999999);
+    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TightEleId_L1R",147196,148058);
+    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TighterEleIdIsol_L1R_v2",148819,149064);
+    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TighterEleIdIsol_L1R_v3",149181,999999);
   }
   hltmod->SetTrigObjsName("myhltobjs");
 
