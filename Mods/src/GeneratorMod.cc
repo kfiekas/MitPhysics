@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.61 2010/09/27 12:42:20 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.62 2010/09/27 15:49:24 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -41,6 +41,7 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fMassMinCut(-FLT_MAX),
   fMassMaxCut(FLT_MAX),
   fApplyISRFilter(kFALSE),
+  fApplyWWFilter(kFALSE),
   fParticles(0)
 {
   // Constructor
@@ -1096,11 +1097,11 @@ void GeneratorMod::Process()
                                          GenISRPhotons->At(i)->PdgId(),GenISRPhotons->At(i)->Status());
   }
 
-  //bool theZCut = (GenLeptons->GetEntries() > 0 || GenTaus->GetEntries() > 0) && GenQuarks->GetEntries() == 0;
-  //if(!theZCut){
-  //  SkipEvent();
-  //  return;
-  //}
+  // Apply WW filter (without filling all histograms)
+  if (fApplyWWFilter == kTRUE && sumV[0] + 4*sumV[1] != 2) {
+    SkipEvent();
+    return;
+  }
 
   // fill histograms if requested
   if (GetFillHist()) {
@@ -1452,6 +1453,7 @@ void GeneratorMod::Process()
      (GenISRPhotons->GetEntries() > 0 || GenRadPhotons->GetEntries() > 0)) {
     SkipEvent();
   }
+
 }
 
 //--------------------------------------------------------------------------------------------------
