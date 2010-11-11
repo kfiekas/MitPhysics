@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.9 2010/10/29 16:19:23 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.10 2010/11/05 18:35:38 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -35,14 +35,14 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
-		       const char *book	      = "cern/filefi/015",
+void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
+		       const char *book	      = "cern/filler/015",
                        const char *dataset    = "f10-ww2l-z2-v12",
                        const char *fileset    = "0000",
                        const char *skim       = "noskim",
                        const char *outputName = "histo",
                        int   sampleID	      = -1,
-                       int   nEvents	      = 1000000)
+                       int   nEvents	      = 1000)
 {
   //------------------------------------------------------------------------------------------------
   // some global setups
@@ -177,7 +177,7 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   //------------------------------------------------------------------------------------------------
   MuonIDMod           *muonID        = new MuonIDMod;  
   muonID->SetClassType("Global");
-  muonID->SetIDType("Minimal");
+  muonID->SetIDType("WWMuId");
   muonID->SetIsoType("TrackCaloSliding");
   muonID->SetApplyD0Cut(kTRUE);
 
@@ -190,6 +190,7 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   electronID->SetApplyD0Cut(kTRUE);
   electronID->SetNExpectedHitsInnerCut(0);
 
+  // Object ID and Cleaning Sequence
   PhotonIDMod         *photonID      = new PhotonIDMod;
   TauIDMod            *tauID         = new TauIDMod;
   JetIDMod            *jetID         = new JetIDMod;
