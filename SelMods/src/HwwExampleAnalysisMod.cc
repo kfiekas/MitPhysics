@@ -72,7 +72,7 @@ void HwwExampleAnalysisMod::SlaveBegin()
   AddTH1(fUncorrMetPtHist    ,"hUncorrMetPtHist",";Met;Number of Events",150,0.,300.);  
   AddTH1(fUncorrMetPhiHist   ,"hUncorrMetPhiHist",";#phi;Number of Events",28,-3.5,3.5);
   AddTH1(fDeltaPhiLeptons    ,"hDeltaPhiLeptons",";#Delta#phi_{ll};Number of Events",90,0,180);
-  AddTH1(fDeltaEtaLeptons    ,"hDeltaEtaLeptons",";#Delta#eta_{ll};Number of Events",100,-50.,5.0);
+  AddTH1(fDeltaEtaLeptons    ,"hDeltaEtaLeptons",";#Delta#eta_{ll};Number of Events",100,-5.,5.0);
   AddTH1(fDileptonMass       ,"hDileptonMass",";Mass_{ll};Number of Events",150,0.,300.);
  
   //***********************************************************************************************
@@ -210,7 +210,7 @@ void HwwExampleAnalysisMod::Process()
   double deltaPhiLeptons = MathUtils::DeltaPhi(CleanLeptons->At(0)->Phi(), 
                                                CleanLeptons->At(1)->Phi())* 180.0 / TMath::Pi();
 
-  double deltaEtaLeptons = abs(CleanLeptons->At(0)->Eta() - CleanLeptons->At(1)->Eta()) * 180.0 / TMath::Pi();
+  double deltaEtaLeptons = CleanLeptons->At(0)->Eta() - CleanLeptons->At(1)->Eta();
 
   double deltaPhiDileptonMet = MathUtils::DeltaPhi(caloMet->Phi(), 
                                                    dilepton->Phi())*180.0 / TMath::Pi();
