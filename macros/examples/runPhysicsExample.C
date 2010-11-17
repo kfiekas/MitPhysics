@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.10 2010/11/05 18:35:38 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.11 2010/11/11 21:27:00 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -95,7 +95,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
   runLumiSelectionMod->SetAcceptMC(!isData);    
-  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_8_5/src/json/Cert_TopNov5_Merged_135821-149442_allPVT.txt");
+  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_8_5/src/json/merged_JsonReRecoSep17_JsonStreamExpressV2.txt");
 
   //------------------------------------------------------------------------------------------------
   // PV filter selection
@@ -159,8 +159,11 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   // Apply Jet Corrections
   //------------------------------------------------------------------------------------------------
   JetCorrectionMod *jetCorr = new JetCorrectionMod;
-  jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Spring10_L2Relative_AK5PF.txt"); 
-  jetCorr->AddCorrectionFromRelease("CondFormats/JetMETObjects/data/Spring10_L3Absolute_AK5PF.txt");  
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_8_5/src/MitPhysics/data/START38_V13_AK5PF_L2Relative.txt"); 
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_8_5/src/MitPhysics/data/START38_V13_AK5PF_L3Absolute.txt");
+  if(isData == true){ 
+    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_8_5/src/MitPhysics/data/START38_V13_AK5PF_L2L3Residual.txt");
+  }
   jetCorr->SetInputName(pubJet->GetOutputName());
   jetCorr->SetCorrectedName("CorrectedJets");
 
