@@ -282,8 +282,8 @@ void HwwExampleAnalysisMod::Process()
   }
 
   for(UInt_t i=0; i<CleanJets->GetEntries(); i++){
-    if(TMath::Abs(CleanJets->At(i)->RawMom().Eta()) < 5.0 &&
-       CleanJets->At(i)->RawMom().Pt() > 25.0){
+    if(TMath::Abs(CleanJets->At(i)->Eta()) < 5.0 &&
+       CleanJets->At(i)->Pt() > 25.0){
       Jet* jet_b = new Jet(CleanJets->At(i)->Px(),
      			   CleanJets->At(i)->Py(),
    			   CleanJets->At(i)->Pz(),
