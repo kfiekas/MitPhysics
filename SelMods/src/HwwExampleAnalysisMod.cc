@@ -189,7 +189,7 @@ void HwwExampleAnalysisMod::Process()
           break;
         }
       }
-      if(pDz > zDiffMax) pDz = zDiffMax;
+      if(pDz > zDiffMax) zDiffMax = pDz;
     }
     for (UInt_t j=0; j<CleanElectrons->GetEntries(); j++) {   
       double pDz = 0.0;
@@ -199,7 +199,7 @@ void HwwExampleAnalysisMod::Process()
           break;
         }
       }
-      if(pDz > zDiffMax) pDz = zDiffMax;
+      if(pDz > zDiffMax) zDiffMax = pDz;
     }
   }
 
