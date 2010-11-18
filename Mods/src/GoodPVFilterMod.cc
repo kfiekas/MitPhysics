@@ -1,4 +1,4 @@
-// $Id: GoodPVFilterMod.cc,v 1.4 2010/10/20 02:44:48 ceballos Exp $
+// $Id: GoodPVFilterMod.cc,v 1.5 2010/10/23 04:48:34 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
@@ -113,9 +113,6 @@ void GoodPVFilterMod::Process()
       GoodVertexes->Add(v);
     }
   }
-
-  // sort according to pt
-  GoodVertexes->Sort();
 
   // add objects for other modules to use
   AddObjThisEvt(GoodVertexes);  
