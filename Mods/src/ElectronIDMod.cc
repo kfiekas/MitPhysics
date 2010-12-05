@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.69 2010/10/23 04:47:34 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.70 2010/10/29 16:20:07 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -188,7 +188,7 @@ void ElectronIDMod::Process()
     if (e->Pt() < fElectronPtMin) 
       continue;
     
-    if (e->SCluster()->Et() < fElectronEtMin)
+    if ( (e->SCluster()->Energy()*e->Pt()/e->P()) < fElectronEtMin)
       continue;    
     
     if (e->AbsEta() > fElectronEtaMax) 
