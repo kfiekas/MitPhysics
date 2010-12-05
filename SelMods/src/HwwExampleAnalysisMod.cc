@@ -429,7 +429,7 @@ void HwwExampleAnalysisMod::Process()
   //N Jet Veto  
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    if (k != 5) {
+    if (k != 6) {
       pass = (pass && passCut[k]);      
     }
   }
@@ -440,7 +440,7 @@ void HwwExampleAnalysisMod::Process()
   // Final Met Cut
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    if (k != 4) {
+    if (k != 5) {
       pass = (pass && passCut[k]);      
     }
   }
@@ -451,7 +451,7 @@ void HwwExampleAnalysisMod::Process()
   // dilepton mass
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    if (k != 2 && k !=  3)
+    if (k != 3 && k !=  4)
       pass = (pass && passCut[k]);    
   }
   if (pass) {
@@ -472,7 +472,7 @@ void HwwExampleAnalysisMod::Process()
   // NSoftMuons
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    if (k != 6)
+    if (k != 7)
       pass = (pass && passCut[k]);    
   }
   if (pass) {
