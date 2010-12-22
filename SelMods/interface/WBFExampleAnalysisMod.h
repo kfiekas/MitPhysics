@@ -17,7 +17,6 @@
 #include "MitAna/DataTree/interface/MetCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
-#include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/SuperClusterCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
@@ -61,14 +60,15 @@ namespace mithep
 
       TH1D                    *fWBFPtJetMax_NMinusOne;
       TH1D                    *fWBFPtJetMin_NMinusOne;
+      TH1D                    *fWBFEta12_NMinusOne;
       TH1D                    *fWBFdeltaEta_NMinusOne;
       TH1D                    *fWBFdijetMass_NMinusOne;
+      TH1D                    *fWBFZVar_NMinusOne;
 
       TH1D                    *fWBFSSMass_afterCuts;   
       TH1D                    *fWBFSSDeltaPhi_afterCuts;    
       TH1D                    *fWBFOSMass_afterCuts;   
       TH1D                    *fWBFOSDeltaPhi_afterCuts;    
-      TH1D                    *fWBFDiPhotonMass_afterCuts;	      
 
       void         Begin();
       void         Process();

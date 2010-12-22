@@ -51,25 +51,26 @@ void WBFExampleAnalysisMod::SlaveBegin()
   //*************************************************************************************************
   // Selection Histograms
   //*************************************************************************************************
-  AddTH1(fWBFSelection,"fWBFSelection", ";Cut Number;Number of Events", 6, -1.5, 4.5);
+  AddTH1(fWBFSelection,"fWBFSelection", ";Cut Number;Number of Events", 7, -1.5, 5.5);
  
   //***********************************************************************************************
   // N-1 Histograms
   //***********************************************************************************************
   //All events
-  AddTH1(fWBFPtJetMax_NMinusOne, "fWBFPtJetMax_NMinusOne", ";Pt Jet Max;Number of Events",400,0.,400.);
-  AddTH1(fWBFPtJetMin_NMinusOne, "fWBFPtJetMin_NMinusOne", ";Pt Jet Min;Number of Events",400,0.,400.);
-  AddTH1(fWBFdeltaEta_NMinusOne, "fWBFdeltaEta_NMinusOne", ";Delta Eta;Number of Events",100,0.,10.);
-  AddTH1(fWBFdijetMass_NMinusOne,"fWBFdijetMass_NMinusOne",";DiJet Mass;Number of Events",400,0.,4000.);
+  AddTH1(fWBFPtJetMax_NMinusOne, "fWBFPtJetMax_NMinusOne", ";Pt Jet Max;Number of Events",300,0.,300. );
+  AddTH1(fWBFPtJetMin_NMinusOne, "fWBFPtJetMin_NMinusOne", ";Pt Jet Min;Number of Events",300,0.,300. );
+  AddTH1(fWBFEta12_NMinusOne,    "fWBFEta12_NMinusOne",    ";eta1*eta2;Number of Events", 2,-1.5,1.5  );
+  AddTH1(fWBFdeltaEta_NMinusOne, "fWBFdeltaEta_NMinusOne", ";Delta Eta;Number of Events", 100,0.,10.  );
+  AddTH1(fWBFdijetMass_NMinusOne,"fWBFdijetMass_NMinusOne",";DiJet Mass;Number of Events",300,0.,3000.);
+  AddTH1(fWBFZVar_NMinusOne,     "fWBFZVar_NMinusOne",     ";Z variable;Number of Events",50,0.,5.    );
 
   //***********************************************************************************************
   // After all cuts Histograms
   //***********************************************************************************************
   AddTH1(fWBFSSMass_afterCuts,"fWBFSSMass_afterCuts",";SS dilepton Mass;Number of Events",200,0.,400);
-  AddTH1(fWBFSSDeltaPhi_afterCuts,"fWBFOSDeltaPhi_afterCuts",";SS DeltaPhi 2l;Number of Events",90,0.,180);
-  AddTH1(fWBFOSMass_afterCuts,"fWBFSSMass_afterCuts",";OS dilepton Mass;Number of Events",200,0.,400);
-  AddTH1(fWBFSSDeltaPhi_afterCuts,"fWBFOSDeltaPhi_afterCuts",";OS DeltaPhi 2l;Number of Events",90,0.,180);
-  AddTH1(fWBFDiPhotonMass_afterCuts,"fWBFDiPhotonMass_afterCuts",";DiPhoton Mass;Number of Events",400,0.,400);
+  AddTH1(fWBFSSDeltaPhi_afterCuts,"fWBFSSDeltaPhi_afterCuts",";SS DeltaPhi 2l;Number of Events",90,0.,180);
+  AddTH1(fWBFOSMass_afterCuts,"fWBFOSMass_afterCuts",";OS dilepton Mass;Number of Events",200,0.,400);
+  AddTH1(fWBFOSDeltaPhi_afterCuts,"fWBFOSDeltaPhi_afterCuts",";OS DeltaPhi 2l;Number of Events",90,0.,180);
 
 }
 
@@ -80,7 +81,6 @@ void WBFExampleAnalysisMod::Process()
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
   ParticleOArr *CleanLeptons = dynamic_cast<mithep::ParticleOArr*>
      (FindObjThisEvt(ModNames::gkMergedLeptonsName));
-  PhotonOArr *CleanPhotons     = GetObjThisEvt<PhotonOArr>(ModNames::gkMCPhotonsName);
   ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsName.Data()));
   TParameter<Double_t> *NNLOWeight = GetObjThisEvt<TParameter<Double_t> >("NNLOWeight");
@@ -99,8 +99,8 @@ void WBFExampleAnalysisMod::Process()
   //*********************************************************************************************
   //Define Cuts
   //*********************************************************************************************
-  const int nCuts = 7;
-  bool passCut[nCuts] = {false, false, false, false, false};
+  const int nCuts = 6;
+  bool passCut[nCuts] = {false, false, false, false, false, false};
   
   // ptjet max cut
   if(CleanJets->At(0)->Pt() >  fJetPtMax) 		   passCut[0] = true;
@@ -120,7 +120,19 @@ void WBFExampleAnalysisMod::Process()
   dijet.AddDaughter(CleanJets->At(0));
   dijet.AddDaughter(CleanJets->At(1));
   if(dijet.Mass() > fDiJetMassMin)                         passCut[4] = true;
-
+  
+  // jet veto cut, use of zeffendeld variable
+  passCut[5] = true;
+  double zVarMin = 30.;
+  if(CleanJets->GetEntries() >=2 ){
+    for(UInt_t i=2; i<CleanJets->GetEntries(); i++){
+      if(CleanJets->At(i)->Pt() <= 30.0) return;
+      double zVar = TMath::Abs(CleanJets->At(i)->Eta()-(CleanJets->At(0)->Eta()+CleanJets->At(1)->Eta())/2)/
+                    TMath::Abs(CleanJets->At(0)->Eta()-CleanJets->At(1)->Eta());
+      if(zVar < zVarMin) zVarMin = zVar;
+    }
+    if(zVarMin < 1) passCut[5] = false;
+  }
   //*********************************************************************************************
   //Make Selection Histograms. Number of events passing each level of cut
   //*********************************************************************************************  
@@ -154,7 +166,7 @@ void WBFExampleAnalysisMod::Process()
     }
   }
   if (pass) {
-    fWBFPtJetMax_NMinusOne->Fill(TMath::Min(CleanJets->At(0)->Pt(),399.999),NNLOWeight->GetVal());
+    fWBFPtJetMax_NMinusOne->Fill(TMath::Min(CleanJets->At(0)->Pt(),299.999),NNLOWeight->GetVal());
   }     
   
   // N-1 ptjet min
@@ -165,7 +177,19 @@ void WBFExampleAnalysisMod::Process()
     }
   }
   if (pass) {
-    fWBFPtJetMin_NMinusOne->Fill(TMath::Min(CleanJets->At(1)->Pt(),399.999),NNLOWeight->GetVal());
+    fWBFPtJetMin_NMinusOne->Fill(TMath::Min(CleanJets->At(1)->Pt(),299.999),NNLOWeight->GetVal());
+  }     
+  
+  // N-1 eta1*eta2
+  pass = true;
+  for (int k=0;k<nCuts;k++) {
+    if (k != 2) {
+      pass = (pass && passCut[k]);      
+    }
+  }
+  if (pass) {
+    fWBFEta12_NMinusOne->Fill(CleanJets->At(0)->Eta()*CleanJets->At(1)->Eta()/
+                   TMath::Abs(CleanJets->At(0)->Eta()*CleanJets->At(1)->Eta()),NNLOWeight->GetVal());
   }     
   
   // N-1 deltaEta
@@ -187,7 +211,18 @@ void WBFExampleAnalysisMod::Process()
     }
   }
   if (pass) {
-    fWBFdijetMass_NMinusOne->Fill(TMath::Min(dijet.Mass(),3999.999),NNLOWeight->GetVal());
+    fWBFdijetMass_NMinusOne->Fill(TMath::Min(dijet.Mass(),2999.999),NNLOWeight->GetVal());
+  }
+  
+  // N-1 dijet mass
+  pass = true;
+  for (int k=0;k<nCuts;k++) {
+    if (k != 5) {
+      pass = (pass && passCut[k]);      
+    }
+  }
+  if (pass) {
+    fWBFZVar_NMinusOne->Fill(TMath::Min(zVarMin,4.999),NNLOWeight->GetVal());
   }
 
   //*********************************************************************************************
@@ -204,23 +239,14 @@ void WBFExampleAnalysisMod::Process()
       double deltaPhiLeptons = MathUtils::DeltaPhi(CleanLeptons->At(0)->Phi(), 
                                                    CleanLeptons->At(1)->Phi())* 180.0 / TMath::Pi();
       
-      if(CleanLeptons->At(0)->Charge() * CleanLeptons->At(1)->Charge() > 0){
+      if(CleanLeptons->At(0)->Charge() * CleanLeptons->At(1)->Charge() > 0){  // same-sign
         fWBFSSMass_afterCuts->Fill(TMath::Min(dilepton.Mass(),399.999),NNLOWeight->GetVal());
         fWBFSSDeltaPhi_afterCuts->Fill(deltaPhiLeptons,NNLOWeight->GetVal());
       }
-      else {
+      else { // opposite-sign
         fWBFOSMass_afterCuts->Fill(TMath::Min(dilepton.Mass(),399.999),NNLOWeight->GetVal());
         fWBFOSDeltaPhi_afterCuts->Fill(deltaPhiLeptons,NNLOWeight->GetVal());
       }
-    }
-
-    // Distributions for diphotons events
-    if(CleanPhotons->GetEntries() >= 2 && 
-       CleanPhotons->At(0)->Pt()  > 30 && CleanPhotons->At(1)->Pt() > 30){
-      CompositeParticle diphoton;
-      diphoton.AddDaughter(CleanPhotons->At(0));
-      diphoton.AddDaughter(CleanPhotons->At(1));
-      fWBFDiPhotonMass_afterCuts->Fill(TMath::Min(diphoton.Mass(),399.999),NNLOWeight->GetVal());  
     }
   }
   
