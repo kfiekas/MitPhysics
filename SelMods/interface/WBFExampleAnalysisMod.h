@@ -57,6 +57,7 @@ namespace mithep
       double       	       fDiJetMassMin;
 
       TH1D                    *fWBFSelection;
+      TH1D                    *fWBFDeltaPhi;
 
       TH1D                    *fWBFPtJetMax_NMinusOne;
       TH1D                    *fWBFPtJetMin_NMinusOne;

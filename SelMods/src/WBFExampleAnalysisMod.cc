@@ -52,6 +52,7 @@ void WBFExampleAnalysisMod::SlaveBegin()
   // Selection Histograms
   //*************************************************************************************************
   AddTH1(fWBFSelection,"fWBFSelection", ";Cut Number;Number of Events", 7, -1.5, 5.5);
+  AddTH1(fWBFDeltaPhi, "fWBFDeltaPhi",  ";Delta Phi;Number of Events",   90,0.,180  );
  
   //***********************************************************************************************
   // N-1 Histograms
@@ -133,12 +134,19 @@ void WBFExampleAnalysisMod::Process()
     }
     if(zVarMin < 1) passCut[5] = false;
   }
+
   //*********************************************************************************************
   //Make Selection Histograms. Number of events passing each level of cut
   //*********************************************************************************************  
   bool passAllCuts = true;
   for(int c=0; c<nCuts; c++) passAllCuts = passAllCuts & passCut[c];
-    
+  
+  if(passAllCuts){
+    double deltaPhiJJ = MathUtils::DeltaPhi(CleanJets->At(0)->Phi(), 
+                                            CleanJets->At(1)->Phi())* 180.0 / TMath::Pi();
+    fWBFDeltaPhi->Fill(deltaPhiJJ,NNLOWeight->GetVal()); 
+  }
+  
   //Cut Selection Histograms
   fWBFSelection->Fill(-1,NNLOWeight->GetVal());
   for (int k=0;k<nCuts;k++) {
