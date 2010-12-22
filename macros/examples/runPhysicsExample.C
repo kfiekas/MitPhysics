@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.11 2010/11/11 21:27:00 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.12 2010/11/17 19:38:29 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -32,17 +32,18 @@
 #include "MitAna/DataTree/interface/MetCol.h" 
 #include "MitAna/DataTree/interface/CaloMetCol.h"
 #include "MitPhysics/SelMods/interface/HwwExampleAnalysisMod.h"
+#include "MitPhysics/SelMods/interface/WBFExampleAnalysisMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
 void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
 		       const char *book	      = "cern/filler/015",
-                       const char *dataset    = "f10-ww2l-z2-v12",
+                       const char *dataset    = "f10-h150ww2l-wbf-z2-v12",
                        const char *fileset    = "0000",
                        const char *skim       = "noskim",
                        const char *outputName = "histo",
                        int   sampleID	      = -1,
-                       int   nEvents	      = 1000)
+                       int   nEvents	      = 10000)
 {
   //------------------------------------------------------------------------------------------------
   // some global setups
@@ -59,7 +60,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   Bool_t isData         = kFALSE;
   Bool_t isElData       = kFALSE;
   int processId         = -999999999; // use 999 for MCatNLO MC sample, 102 for H->WW
-  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_3_8_5/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
+  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_3_9_7/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
 
   if(sampleID > 1000) isData   = kTRUE;
   if(sampleID > 2000) isElData = kTRUE;
@@ -95,7 +96,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
   runLumiSelectionMod->SetAcceptMC(!isData);    
-  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_8_5/src/json/merged_JsonReRecoSep17_JsonStreamExpressV2.txt");
+  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_9_7/src/json/merged_JsonReRecoSep17_JsonStreamExpressV2.txt");
 
   //------------------------------------------------------------------------------------------------
   // PV filter selection
@@ -159,10 +160,10 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   // Apply Jet Corrections
   //------------------------------------------------------------------------------------------------
   JetCorrectionMod *jetCorr = new JetCorrectionMod;
-  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_8_5/src/MitPhysics/data/START38_V13_AK5PF_L2Relative.txt"); 
-  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_8_5/src/MitPhysics/data/START38_V13_AK5PF_L3Absolute.txt");
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_9_7/src/MitPhysics/data/START38_V13_AK5PF_L2Relative.txt"); 
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_9_7/src/MitPhysics/data/START38_V13_AK5PF_L3Absolute.txt");
   if(isData == true){ 
-    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_8_5/src/MitPhysics/data/START38_V13_AK5PF_L2L3Residual.txt");
+    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_9_7/src/MitPhysics/data/START38_V13_AK5PF_L2L3Residual.txt");
   }
   jetCorr->SetInputName(pubJet->GetOutputName());
   jetCorr->SetCorrectedName("CorrectedJets");
@@ -231,10 +232,14 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   //------------------------------------------------------------------------------------------------
   // analyses modules
   //------------------------------------------------------------------------------------------------
-  HwwExampleAnalysisMod *analysisMod = new HwwExampleAnalysisMod;
-  analysisMod->SetMetName(pubMet->GetOutputName());
-  analysisMod->SetCleanJetsName(jetCleaning->GetOutputName());
-  analysisMod->SetCleanJetsNoPtCutName(jetCleaningNoPtCut->GetOutputName());
+  HwwExampleAnalysisMod *WWanalysisMod = new HwwExampleAnalysisMod;
+  WWanalysisMod->SetMetName(pubMet->GetOutputName());
+  WWanalysisMod->SetCleanJetsName(jetCleaning->GetOutputName());
+  WWanalysisMod->SetCleanJetsNoPtCutName(jetCleaningNoPtCut->GetOutputName());
+
+  WBFExampleAnalysisMod *WBFanalysisMod = new WBFExampleAnalysisMod;
+  WBFanalysisMod->SetMetName(pubMet->GetOutputName());
+  WBFanalysisMod->SetCleanJetsName(jetCleaning->GetOutputName());
 
   //------------------------------------------------------------------------------------------------
   // making analysis chain
@@ -260,7 +265,8 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   jetCleaning->Add(jetIDNoPtCut);
   jetIDNoPtCut->Add(jetCleaningNoPtCut);
   jetCleaningNoPtCut->Add(mergeLeptonsMod);
-  mergeLeptonsMod->Add(analysisMod);
+  mergeLeptonsMod->Add(WWanalysisMod);
+  WWanalysisMod->Add(WBFanalysisMod);
 
   //------------------------------------------------------------------------------------------------
   // setup analysis

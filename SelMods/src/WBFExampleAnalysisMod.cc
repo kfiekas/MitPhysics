@@ -121,7 +121,7 @@ void WBFExampleAnalysisMod::Process()
   dijet.AddDaughter(CleanJets->At(1));
   if(dijet.Mass() > fDiJetMassMin)                         passCut[4] = true;
   
-  // jet veto cut, use of zeffendeld variable
+  // jet veto cut, use of Zeppenfeld variable
   passCut[5] = true;
   double zVarMin = 30.;
   if(CleanJets->GetEntries() >=2 ){
