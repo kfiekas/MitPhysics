@@ -27,7 +27,7 @@ WBFExampleAnalysisMod::WBFExampleAnalysisMod(const char *name, const char *title
   fJetPtMax(30),
   fJetPtMin(30),
   fDeltaEtaMin(4),
-  fDiJetMassMin(600)
+  fDiJetMassMin(500)
 {
   // Constructor.
 }
