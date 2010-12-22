@@ -1,4 +1,4 @@
-// $Id: MitPhysicsSelModsLinkDef.h,v 1.6 2009/06/15 15:00:22 loizides Exp $
+// $Id: MitPhysicsSelModsLinkDef.h,v 1.7 2010/10/04 18:06:10 ceballos Exp $
 
 #ifndef MITPHYSICS_SELMODS_LINKDEF_H
 #define MITPHYSICS_SELMODS_LINKDEF_H
@@ -21,6 +21,7 @@
 #include "MitPhysics/SelMods/interface/LeptonPlusIsoTrackSelMod.h"
 #include "MitPhysics/SelMods/interface/PhotonPlusIsoTrackSelMod.h"
 #include "MitPhysics/SelMods/interface/HwwExampleAnalysisMod.h"
+#include "MitPhysics/SelMods/interface/WBFExampleAnalysisMod.h"
 #endif
  
 #ifdef __CINT__
@@ -48,4 +49,5 @@
 #pragma link C++ class mithep::LeptonPlusIsoTrackSelMod+;
 #pragma link C++ class mithep::PhotonPlusIsoTrackSelMod+;
 #pragma link C++ class mithep::HwwExampleAnalysisMod+;
+#pragma link C++ class mithep::WBFExampleAnalysisMod+;
 #endif
