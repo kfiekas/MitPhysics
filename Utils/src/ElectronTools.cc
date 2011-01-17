@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.15 2010/10/09 20:15:33 bendavid Exp $
+// $Id: ElectronTools.cc,v 1.16 2010/10/11 23:11:39 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -432,8 +432,11 @@ Int_t ElectronTools::Classify(const Electron *ele) {
 Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices, 
                                  const DecayParticleCol *conversions, const Int_t typeCuts){
 
-  Double_t scEt   = ele->SCluster()->Et(); 
-  Double_t eOverP = ele->ESuperClusterOverP();
+// original code on
+// http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoEgamma/ElectronIdentification/src/CutBasedElectronID.cc
+
+  Double_t scEt   = ele->SCluster()->Et();
+  Double_t scEta  = ele->SCluster()->Eta();
 
   Double_t fBrem = ele->FBrem();
   Double_t hOverE = ele->HadronicOverEm();
@@ -445,15 +448,7 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
   Int_t mishits = ele->BestTrk()->NExpectedHitsInner();
   Double_t tkIso   = ele->TrackIsolationDr03();
   Double_t ecalIso = ele->EcalRecHitIsoDr04();
-  Double_t ecalIsoPed = (ele->IsEB())?std::max(0.,ecalIso-1.):ecalIso;
   Double_t hcalIso  = ele->HcalTowerSumEtDr04();
-  Double_t hcalIso1 = ele->HcalDepth1TowerSumEtDr04();
-  Double_t hcalIso2 = ele->HcalDepth2TowerSumEtDr04();
-  Double_t e25Max = ele->E25Max();
-  Double_t e15 = ele->E15();
-  Double_t e55 = ele->E55();
-  Double_t e25Maxoe55 = e25Max/e55;
-  Double_t e15oe55 = e15/e55;
 
   int cat = Classify(ele);
   int eb;
@@ -463,238 +458,284 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
   else 
     eb = 1; 
 
-  Int_t result = 0.;
+  // Medium cuts
+  Double_t cutdcotdistMedium[9] = {
+  3.32e-02, 2.92e-02, 2.49e-02, 3.92e-02, 3.41e-02, 3.96e-02, 2.91e-02, 3.95e-02, 7.71e-03};
+  Double_t cutdetainMedium[9] = {
+  1.33e-02, 4.48e-03, 9.22e-03, 1.54e-02, 7.26e-03, 1.24e-02, 1.29e-02, 3.84e-02, 1.88e-02};
+  Double_t cutdetainlMedium[9] = {
+  1.21e-02, 4.22e-03, 9.18e-03, 1.61e-02, 6.45e-03, 1.16e-02, 1.23e-02, 6.20e-02, 2.43e-02};
+  Double_t cutdphiinMedium[9] = {
+  7.09e-02, 2.43e-01, 2.96e-01, 7.98e-02, 2.35e-01, 2.76e-01, 3.42e-01, 4.04e-01, 2.99e-01};
+  Double_t cutdphiinlMedium[9] = {
+  7.42e-02, 2.43e-01, 2.97e-01, 9.12e-02, 2.26e-01, 2.76e-01, 3.34e-01, 5.58e-01, 2.91e-01};
+  Double_t cuteseedopcorMedium[9] = {
+  6.42e-01, 9.44e-01, 4.53e-01, 7.62e-01, 3.67e-01, 5.57e-01, 1.98e-01, 9.15e-01, 6.28e-02};
+  Double_t cutfmishitsMedium[9] = {
+  4.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 5.00e-01, 1.50e+00, 5.00e-01, 5.00e-01};
+  Double_t cuthoeMedium[9] = {
+  1.96e-01, 6.30e-02, 1.48e-01, 3.66e-01, 5.66e-02, 1.45e-01, 4.29e-01, 4.28e-01, 3.99e-01};
+  Double_t cuthoelMedium[9] = {
+  2.19e-01, 6.19e-02, 1.47e-01, 3.58e-01, 4.61e-02, 1.46e-01, 3.26e-01, 3.81e-01, 3.89e-01};
+  Double_t cutip_gsfMedium[9] = {
+  2.45e-02, 9.74e-02, 1.48e-01, 5.49e-02, 5.65e-01, 3.33e-01, 2.04e-01, 5.41e-01, 1.21e-01};
+  Double_t cutip_gsflMedium[9] = {
+  1.92e-02, 9.81e-02, 1.33e-01, 4.34e-02, 5.65e-01, 3.24e-01, 2.33e-01, 4.30e-01, 6.44e-02};
+  Double_t cutiso_sumMedium[9] = {
+  1.44e+01, 1.12e+01, 1.09e+01, 1.08e+01, 6.35e+00, 9.78e+00, 1.30e+01, 1.62e+01, 1.96e+00};
+  Double_t cutiso_sumoetMedium[9] = {
+  1.01e+01, 6.41e+00, 6.00e+00, 8.14e+00, 3.90e+00, 4.76e+00, 6.86e+00, 6.48e+00, 1.74e+01};
+  Double_t cutiso_sumoetlMedium[9] = {
+  9.44e+00, 7.67e+00, 7.15e+00, 7.34e+00, 3.35e+00, 4.70e+00, 8.32e+00, 7.55e+00, 6.25e+00};
+  Double_t cutseeMedium[9] = {
+  1.30e-02, 1.09e-02, 1.18e-02, 3.94e-02, 3.04e-02, 3.28e-02, 1.00e-02, 3.73e-02, 6.69e-02};
+  Double_t cutseelMedium[9] = {
+  1.42e-02, 1.11e-02, 1.29e-02, 4.32e-02, 2.96e-02, 3.82e-02, 1.01e-02, 4.45e-02, 1.19e-01};
+
+  // Tight cuts
+  Double_t cutdcotdistTight[9] = {
+  2.68e-02, 2.36e-02, 2.21e-02, 3.72e-02, 3.17e-02, 3.61e-02, 2.55e-02, 3.75e-02, 2.16e-04};
+  Double_t cutdetainTight[9] = {
+  8.92e-03, 3.96e-03, 8.50e-03, 1.34e-02, 6.27e-03, 1.05e-02, 1.12e-02, 3.09e-02, 1.88e-02};
+  Double_t cutdetainlTight[9] = {
+  9.23e-03, 3.77e-03, 8.70e-03, 1.39e-02, 5.60e-03, 9.40e-03, 1.07e-02, 6.20e-02, 4.10e-03};
+  Double_t cutdphiinTight[9] = {
+  6.37e-02, 1.53e-01, 2.90e-01, 7.69e-02, 1.81e-01, 2.34e-01, 3.42e-01, 3.93e-01, 2.84e-01};
+  Double_t cutdphiinlTight[9] = {
+  6.92e-02, 2.33e-01, 2.96e-01, 8.65e-02, 1.85e-01, 2.76e-01, 3.34e-01, 3.53e-01, 2.90e-01};
+  Double_t cuteseedopcorTight[9] = {
+  6.52e-01, 9.69e-01, 9.12e-01, 7.79e-01, 3.67e-01, 6.99e-01, 3.28e-01, 9.67e-01, 5.89e-01};
+  Double_t cutfmishitsTight[9] = {
+  4.50e+00, 1.50e+00, 5.00e-01, 1.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01};
+  Double_t cuthoeTight[9] = {
+  1.74e-01, 4.88e-02, 1.46e-01, 3.64e-01, 4.93e-02, 1.45e-01, 4.29e-01, 4.20e-01, 3.99e-01};
+  Double_t cuthoelTight[9] = {
+  2.19e-01, 5.25e-02, 1.47e-01, 3.57e-01, 4.25e-02, 1.45e-01, 3.26e-01, 3.80e-01, 1.32e-01};
+  Double_t cutip_gsfTight[9] = {
+  1.58e-02, 8.25e-02, 1.15e-01, 4.05e-02, 5.40e-01, 1.51e-01, 7.74e-02, 4.17e-01, 7.80e-02};
+  Double_t cutip_gsflTight[9] = {
+  1.27e-02, 6.26e-02, 9.68e-02, 3.02e-02, 5.65e-01, 1.46e-01, 7.90e-02, 4.10e-01, 4.79e-02};
+  Double_t cutiso_sumTight[9] = {
+  1.23e+01, 9.77e+00, 1.01e+01, 9.77e+00, 6.13e+00, 7.55e+00, 1.30e+01, 1.62e+01, 1.78e+00};
+  Double_t cutiso_sumoetTight[9] = {
+  7.75e+00, 5.45e+00, 5.67e+00, 5.97e+00, 3.17e+00, 3.86e+00, 6.06e+00, 5.31e+00, 1.05e+01};
+  Double_t cutiso_sumoetlTight[9] = {
+  7.56e+00, 5.08e+00, 5.77e+00, 5.74e+00, 2.37e+00, 3.32e+00, 4.97e+00, 5.46e+00, 3.82e+00};
+  Double_t cutseeTight[9] = {
+  1.16e-02, 1.07e-02, 1.08e-02, 3.49e-02, 2.89e-02, 3.08e-02, 9.87e-03, 3.37e-02, 4.40e-02};
+  Double_t cutseelTight[9] = {
+  1.27e-02, 1.08e-02, 1.13e-02, 4.19e-02, 2.81e-02, 3.02e-02, 9.76e-03, 4.28e-02, 2.98e-02};
   
-  Int_t bin = 0;
-  
-  Double_t WantBin = kFALSE;
-  if(WantBin) {
-    if (scEt < 20.)
-      bin = 2;
-    else if (scEt > 30.)
-      bin = 0;
-    else
-      bin = 1;
+  Double_t cutdcotdistSuperTight[9] = {
+  2.11e-02, 1.86e-02, 1.55e-02, 3.40e-02, 2.85e-02, 3.32e-02, 1.64e-02, 3.75e-02, 1.30e-04};
+  Double_t cutdetainSuperTight[9] = {
+  7.84e-03, 3.67e-03, 7.00e-03, 1.28e-02, 5.65e-03, 9.53e-03, 1.08e-02, 2.97e-02, 7.24e-03};
+  Double_t cutdetainlSuperTight[9] = {
+  7.61e-03, 3.28e-03, 6.57e-03, 1.03e-02, 5.05e-03, 8.55e-03, 1.07e-02, 2.94e-02, 4.10e-03};
+  Double_t cutdphiinSuperTight[9] = {
+  4.83e-02, 7.39e-02, 2.38e-01, 5.74e-02, 1.29e-01, 2.13e-01, 3.31e-01, 3.93e-01, 2.84e-01};
+  Double_t cutdphiinlSuperTight[9] = {
+  5.79e-02, 7.21e-02, 2.18e-01, 7.70e-02, 1.41e-01, 2.11e-01, 2.43e-01, 3.53e-01, 2.89e-01};
+  Double_t cuteseedopcorSuperTight[9] = {
+  7.32e-01, 9.77e-01, 9.83e-01, 8.55e-01, 4.31e-01, 7.35e-01, 4.18e-01, 9.99e-01, 5.89e-01};
+  Double_t cutfmishitsSuperTight[9] = {
+  3.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01};
+  Double_t cuthoeSuperTight[9] = {
+  9.19e-02, 4.11e-02, 1.42e-01, 3.35e-01, 3.82e-02, 1.41e-01, 4.29e-01, 4.01e-01, 3.99e-01};
+  Double_t cuthoelSuperTight[9] = {
+  7.51e-02, 3.81e-02, 1.41e-01, 3.32e-01, 3.10e-02, 1.43e-01, 2.35e-01, 3.80e-01, 1.32e-01};
+  Double_t cutip_gsfSuperTight[9] = {
+  1.42e-02, 2.66e-02, 1.06e-01, 3.38e-02, 3.23e-01, 1.07e-01, 7.74e-02, 2.32e-01, 7.80e-02};
+  Double_t cutip_gsflSuperTight[9] = {
+  1.15e-02, 2.72e-02, 8.41e-02, 2.49e-02, 4.17e-01, 1.02e-01, 7.90e-02, 1.69e-01, 4.79e-02};
+  Double_t cutiso_sumSuperTight[9] = {
+  8.95e+00, 8.18e+00, 8.75e+00, 7.47e+00, 5.43e+00, 5.87e+00, 8.16e+00, 1.02e+01, 1.78e+00};
+  Double_t cutiso_sumoetSuperTight[9] = {
+  6.45e+00, 5.14e+00, 4.99e+00, 5.21e+00, 2.65e+00, 3.12e+00, 4.52e+00, 4.72e+00, 3.68e+00};
+  Double_t cutiso_sumoetlSuperTight[9] = {
+  6.02e+00, 3.96e+00, 4.23e+00, 4.73e+00, 1.99e+00, 2.64e+00, 3.72e+00, 3.81e+00, 1.44e+00};
+  Double_t cutseeSuperTight[9] = {
+  1.09e-02, 1.05e-02, 1.05e-02, 3.24e-02, 2.81e-02, 2.95e-02, 9.77e-03, 2.75e-02, 2.95e-02};
+  Double_t cutseelSuperTight[9] = {
+  1.12e-02, 1.05e-02, 1.07e-02, 3.51e-02, 2.75e-02, 2.87e-02, 9.59e-03, 2.67e-02, 2.98e-02};
+
+  Double_t cutdcotdist[9];
+  Double_t cutdetain[9];
+  Double_t cutdetainl[9];
+  Double_t cutdphiin[9];
+  Double_t cutdphiinl[9];
+  Double_t cuteseedopcor[9];
+  Double_t cutfmishits[9];
+  Double_t cuthoe[9];
+  Double_t cuthoel[9];
+  Double_t cutip_gsf[9];
+  Double_t cutip_gsfl[9];
+  Double_t cutiso_sum[9];
+  Double_t cutiso_sumoet[9];
+  Double_t cutiso_sumoetl[9];
+  Double_t cutsee[9];
+  Double_t cutseel[9];
+  if	 (typeCuts == 0) {
+    memcpy(cutdcotdist   ,cutdcotdistMedium   ,sizeof(cutdcotdistMedium));
+    memcpy(cutdetain     ,cutdetainMedium     ,sizeof(cutdetainMedium));
+    memcpy(cutdetainl    ,cutdetainlMedium    ,sizeof(cutdetainlMedium));
+    memcpy(cutdphiin     ,cutdphiinMedium     ,sizeof(cutdphiinMedium));
+    memcpy(cutdphiinl    ,cutdphiinlMedium    ,sizeof(cutdphiinlMedium));
+    memcpy(cuteseedopcor ,cuteseedopcorMedium ,sizeof(cuteseedopcorMedium));
+    memcpy(cutfmishits   ,cutfmishitsMedium   ,sizeof(cutfmishitsMedium));
+    memcpy(cuthoe        ,cuthoeMedium	      ,sizeof(cuthoeMedium));
+    memcpy(cuthoel       ,cuthoelMedium	      ,sizeof(cuthoelMedium));
+    memcpy(cutip_gsf     ,cutip_gsfMedium     ,sizeof(cutip_gsfMedium));
+    memcpy(cutip_gsfl    ,cutip_gsflMedium    ,sizeof(cutip_gsflMedium));
+    memcpy(cutiso_sum    ,cutiso_sumMedium    ,sizeof(cutiso_sumMedium));
+    memcpy(cutiso_sumoet ,cutiso_sumoetMedium ,sizeof(cutiso_sumoetMedium));
+    memcpy(cutiso_sumoetl,cutiso_sumoetlMedium,sizeof(cutiso_sumoetlMedium));
+    memcpy(cutsee        ,cutseeMedium	      ,sizeof(cutseeMedium));
+    memcpy(cutseel       ,cutseelMedium	      ,sizeof(cutseelMedium));
+  }
+  else if(typeCuts == 1) {
+    memcpy(cutdcotdist   ,cutdcotdistTight   ,sizeof(cutdcotdistTight));
+    memcpy(cutdetain     ,cutdetainTight     ,sizeof(cutdetainTight));
+    memcpy(cutdetainl    ,cutdetainlTight    ,sizeof(cutdetainlTight));
+    memcpy(cutdphiin     ,cutdphiinTight     ,sizeof(cutdphiinTight));
+    memcpy(cutdphiinl    ,cutdphiinlTight    ,sizeof(cutdphiinlTight));
+    memcpy(cuteseedopcor ,cuteseedopcorTight ,sizeof(cuteseedopcorTight));
+    memcpy(cutfmishits   ,cutfmishitsTight   ,sizeof(cutfmishitsTight));
+    memcpy(cuthoe        ,cuthoeTight	     ,sizeof(cuthoeTight));
+    memcpy(cuthoel       ,cuthoelTight	     ,sizeof(cuthoelTight));
+    memcpy(cutip_gsf     ,cutip_gsfTight     ,sizeof(cutip_gsfTight));
+    memcpy(cutip_gsfl    ,cutip_gsflTight    ,sizeof(cutip_gsflTight));
+    memcpy(cutiso_sum    ,cutiso_sumTight    ,sizeof(cutiso_sumTight));
+    memcpy(cutiso_sumoet ,cutiso_sumoetTight ,sizeof(cutiso_sumoetTight));
+    memcpy(cutiso_sumoetl,cutiso_sumoetlTight,sizeof(cutiso_sumoetlTight));
+    memcpy(cutsee        ,cutseeTight	     ,sizeof(cutseeTight));
+    memcpy(cutseel       ,cutseelTight	     ,sizeof(cutseelTight));
+  }
+  else {
+    memcpy(cutdcotdist   ,cutdcotdistSuperTight   ,sizeof(cutdcotdistSuperTight));
+    memcpy(cutdetain     ,cutdetainSuperTight     ,sizeof(cutdetainSuperTight));
+    memcpy(cutdetainl    ,cutdetainlSuperTight    ,sizeof(cutdetainlSuperTight));
+    memcpy(cutdphiin     ,cutdphiinSuperTight     ,sizeof(cutdphiinSuperTight));
+    memcpy(cutdphiinl    ,cutdphiinlSuperTight    ,sizeof(cutdphiinlSuperTight));
+    memcpy(cuteseedopcor ,cuteseedopcorSuperTight ,sizeof(cuteseedopcorSuperTight));
+    memcpy(cutfmishits   ,cutfmishitsSuperTight   ,sizeof(cutfmishitsSuperTight));
+    memcpy(cuthoe        ,cuthoeSuperTight	  ,sizeof(cuthoeSuperTight));
+    memcpy(cuthoel       ,cuthoelSuperTight	  ,sizeof(cuthoelSuperTight));
+    memcpy(cutip_gsf     ,cutip_gsfSuperTight     ,sizeof(cutip_gsfSuperTight));
+    memcpy(cutip_gsfl    ,cutip_gsflSuperTight    ,sizeof(cutip_gsflSuperTight));
+    memcpy(cutiso_sum    ,cutiso_sumSuperTight    ,sizeof(cutiso_sumSuperTight));
+    memcpy(cutiso_sumoet ,cutiso_sumoetSuperTight ,sizeof(cutiso_sumoetSuperTight));
+    memcpy(cutiso_sumoetl,cutiso_sumoetlSuperTight,sizeof(cutiso_sumoetlSuperTight));
+    memcpy(cutsee        ,cutseeSuperTight	  ,sizeof(cutseeSuperTight));
+    memcpy(cutseel       ,cutseelSuperTight	  ,sizeof(cutseelSuperTight));
   }
 
-  if (fBrem > 0)
-    eSeedOverPin = eSeedOverPin + fBrem;
+  int result = 0;
+  
+  const int ncuts = 10;
+  std::vector<bool> cut_results(ncuts, false);
+  
+  float iso_sum = tkIso + ecalIso + hcalIso;
+  if(fabs(scEta)>1.5) 
+    iso_sum += (fabs(scEta)-1.5)*1.09;
+  
+  float iso_sumoet = iso_sum*(40./scEt);
+  
+  float eseedopincor = eSeedOverPin + fBrem;
+  if(fBrem < 0)
+    eseedopincor = eSeedOverPin;
 
-  if(typeCuts == 3 || typeCuts == 4){
-  // Loose robust cuts
-    Double_t robustlooseEleIDCuts[52] = {
-       0.05,  0.0103,  0.8, 0.00688, -1, -1, 7.33, 4.68, 9999., 9999., 9999.,9999., 9999.,9999., 9999., 9999.,9999., 9999., 0.000, -9999., 9999., 9999., 9999, -1, 0, 0,
-       0.0389, 0.0307, 0.7, 0.00944, -1, -1, 7.76, 3.09,  2.23, 9999., 9999.,9999., 9999.,9999., 9999., 9999.,9999., 9999., 0.000, -9999., 9999., 9999., 9999, -1, 0, 0
-    };
-  // Tight robust cuts
-    Double_t robusttightEleIDCuts[52] = {
-        0.0201, 0.0102, 0.0211, 0.00606, -1, -1, 2.34, 3.24, 4.51, 9999., 9999.,9999., 9999.,9999., 9999., 9999.,9999., 9999., 0.000, -9999., 9999., 9999., 9999, -1, 0, 0,
-        0.00253, 0.0291, 0.022, 0.0032, -1, -1, 0.826, 2.7, 0.255, 9999., 9999.,9999., 9999.,9999., 9999., 9999.,9999., 9999., 0.000, -9999., 9999., 9999., 9999, -1, 0, 0
-    };                            
-    Double_t cut[52];
-    if     (typeCuts == 3) {
-      memcpy(cut  ,robustlooseEleIDCuts  ,sizeof(cut));
+  float dist = (TMath::Abs(ele->ConvPartnerDist())      == -9999.? 9999:TMath::Abs(ele->ConvPartnerDist()));
+  float dcot = (TMath::Abs(ele->ConvPartnerDCotTheta()) == -9999.? 9999:TMath::Abs(ele->ConvPartnerDCotTheta()));
+
+  float dcotdistcomb = ((0.04 - std::max(dist, dcot)) > 0?(0.04 - std::max(dist, dcot)):0);
+
+  Double_t ip = 99999;
+  for(UInt_t i0 = 0; i0 < vertices->GetEntries(); i0++) {
+    if(vertices->At(i0)->NTracks() > 0){
+      Double_t pD0 = ele->GsfTrk()->D0Corrected(*vertices->At(i0));
+      ip = TMath::Abs(pD0);
+      break;
     }
-    else {
-      memcpy(cut  ,robusttightEleIDCuts  ,sizeof(cut));
+  }
+
+  for (int cut=0; cut<ncuts; cut++) {
+    switch (cut) {
+    case 0:
+      cut_results[cut] = compute_cut(fabs(deltaEtaIn), scEt, cutdetainl[cat], cutdetain[cat]);
+      break;
+    case 1:
+      cut_results[cut] = compute_cut(fabs(deltaPhiIn), scEt, cutdphiinl[cat], cutdphiin[cat]);
+      break;
+    case 2:
+      cut_results[cut] = (eseedopincor > cuteseedopcor[cat]);
+      break;
+    case 3:
+      cut_results[cut] = compute_cut(hOverE, scEt, cuthoel[cat], cuthoe[cat]);
+      break;
+    case 4:
+      cut_results[cut] = compute_cut(sigmaee, scEt, cutseel[cat], cutsee[cat]);
+      break;
+    case 5:
+      cut_results[cut] = compute_cut(iso_sumoet, scEt, cutiso_sumoetl[cat], cutiso_sumoet[cat]);
+      break;
+    case 6:
+      cut_results[cut] = (iso_sum < cutiso_sum[cat]);
+      break;
+    case 7:
+      cut_results[cut] = compute_cut(fabs(ip), scEt, cutip_gsfl[cat], cutip_gsf[cat]);
+      break;
+    case 8:
+      cut_results[cut] = (mishits < cutfmishits[cat]);
+      break;
+    case 9:
+      cut_results[cut] = (dcotdistcomb < cutdcotdist[cat]);
+      break;
     }
-
-    if ((tkIso > cut[26*eb+6]) || (ecalIso > cut[26*eb+7]) || (hcalIso > cut[26*eb+8]) || (hcalIso1 > cut[26*eb+9]) || (hcalIso2 > cut[26*eb+10]) || 
-        (tkIso/ele->Pt() > cut[26*eb+11]) || (ecalIso/ele->Pt() > cut[26*eb+12]) || (hcalIso/ele->Pt() > cut[26*eb+13]) ||
-        ((tkIso+ecalIso+hcalIso)>cut[26*eb+14]) || (((tkIso+ecalIso+hcalIso)/ ele->Pt()) > cut[26*eb+15]) || 
-        ((tkIso+ecalIsoPed+hcalIso)>cut[26*eb+16]) || (((tkIso+ecalIsoPed+hcalIso)/ ele->Pt()) > cut[26*eb+17])  )
-      result = 0.;
-    else
-      result = 2.;
-
-    if (hOverE > cut[26*eb+0]) 
-      return result;    
-
-    if (sigmaee > cut[26*eb+1]) 
-      return result;    
-
-    if (fabs(deltaPhiIn) > cut[26*eb+2]) 
-      return result;    
-
-    if (fabs(deltaEtaIn) > cut[26*eb+3]) 
-      return result;    
-    
-    if (e25Maxoe55 < cut[26*eb+4] && e15oe55 < cut[26*eb+5])
-      return result;
-    // some extra electron id cuts
-    if (sigmaee < cut[26*eb+18]) // inverted sigmaee cut - spike removal related
-      return result;
-
-    if (  eOverP < cut[26*eb+19] ||  eOverP > cut[26*eb+20]) // lower and upper cut in E/P
-      return result;
-    
+  }
+  
+  // ID part
+  if (cut_results[0] & cut_results[1] & cut_results[2] & cut_results[3] & cut_results[4])
     result = result + 1;
-
-    Bool_t passD0cut = PassD0Cut(ele, vertices, cut[26*eb+21], kFALSE);
-    if (!passD0cut)
-      return result;
-
-    if (mishits > cut[26*eb+22]) // expected missing hits
-      return result;
-
-    Bool_t passConvVeto = PassConversionFilter(ele, conversions, kTRUE);
-    if (passConvVeto == kFALSE)
-      return result;
-      
-    result += 4;
-  }
-  else if(typeCuts == 0 || typeCuts == 1 || typeCuts == 2){
-    // Loose cuts
-  Double_t cutdcotdistLoose[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
-  };
-  Double_t cutdetainLoose[9] = {1.30e-02, 5.95e-03, 3.10e-02, 1.68e-02, 8.44e-03, 1.70e-02, 1.55e-02, 5.13e-02, 1.61e-02
-  };
-  Double_t cutdphiinLoose[9] = {7.51e-02, 3.30e-01, 4.20e-01, 9.86e-02, 2.84e-01, 3.28e-01, 3.77e-01, 4.32e-01, 3.74e-01
-  };
-  Double_t cuteseedopcorLoose[9] = {6.31e-01, 3.02e-01, 3.04e-01, 8.10e-01, 2.23e-01, 5.03e-01, 2.78e-01, 3.10e-01, 4.69e-01
-  };
-  Double_t cutetLoose[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.
-  };
-  Double_t cutfmishitsLoose[9] = {4.50e+00, 1.50e+00, 1.50e+00, 2.50e+00, 2.50e+00, 1.50e+00, 2.50e+00, 4.50e+00, 5.00e-01
-  };
-  Double_t cuthoeLoose[9] = {2.47e-01, 7.78e-02, 1.49e-01, 3.82e-01, 4.70e-02, 1.12e-01, 1.16e+00, 5.04e+00, 1.35e+00
-  };
-  Double_t cutip_gsfLoose[9] = {0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02
-  };
-  Double_t cutiso_sumLoose[9] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
-  };
-  Double_t cutiso_sumoetLoose[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
-  };
-  Double_t cutseeLoose[9] = {1.92e-02, 1.31e-02, 2.53e-02, 5.27e-02, 3.29e-02, 4.19e-02, 2.65e-02, 6.58e-02, 1.38e-01
-  };
-
-    // Medium cuts
-  Double_t cutdcotdistMedium[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
-  };
-  Double_t cutdetainMedium[9] = {1.19e-02, 4.20e-03, 1.07e-02, 1.49e-02, 6.56e-03, 1.19e-02, 1.16e-02, 5.13e-02, 6.37e-03
-  };
-  Double_t cutdphiinMedium[9] = {7.51e-02, 2.93e-01, 3.58e-01, 9.53e-02, 1.62e-01, 2.99e-01, 2.76e-01, 4.32e-01, 2.57e-01
-  };
-  Double_t cuteseedopcorMedium[9] = {6.31e-01, 8.14e-01, 7.60e-01, 8.18e-01, 7.56e-01, 5.35e-01, 6.20e-01, 7.88e-01, 8.85e-01
-  };
-  Double_t cutetMedium[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.
-  };
-  Double_t cutfmishitsMedium[9] = {1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 2.50e+00, 1.50e+00, 5.00e-01
-  };
-  Double_t cuthoeMedium[9] = {2.46e-01, 6.80e-02, 1.35e-01, 3.73e-01, 2.33e-02, 5.58e-02, 8.80e-01, 5.04e+00, 3.78e-02
-  };
-  Double_t cutip_gsfMedium[9] = {0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02
-  };
-  Double_t cutiso_sumMedium[9] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
-  };
-  Double_t cutiso_sumoetMedium[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
-  };
-  Double_t cutseeMedium[9] = {1.92e-02, 1.13e-02, 1.47e-02, 3.84e-02, 3.05e-02, 3.36e-02, 1.35e-02, 5.05e-02, 2.79e-02
-  };
-
-    // Tight cuts
-  Double_t cutdcotdistTight[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
-  };
-  Double_t cutdetainTight[9] = {9.28e-03, 3.56e-03, 7.16e-03, 1.31e-02, 5.81e-03, 9.79e-03, 1.15e-02, 1.66e-02, 3.19e-03
-  };
-  Double_t cutdphiinTight[9] = {4.66e-02, 7.80e-02, 2.64e-01, 4.42e-02, 3.20e-02, 2.37e-01, 8.25e-02, 2.07e-01, 5.39e-02
-  };
-  Double_t cuteseedopcorTight[9] = {6.48e-01, 8.97e-01, 8.91e-01, 8.39e-01, 8.35e-01, 6.49e-01, 6.76e-01, 8.70e-01, 9.91e-01
-  };
-  Double_t cutetTight[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.
-  };
-  Double_t cutfmishitsTight[9] = {1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 1.50e+00, 5.00e-01, 2.50e+00, 5.00e-01, 5.00e-01
-  };
-  Double_t cuthoeTight[9] = {9.94e-02, 5.61e-02, 1.05e-01, 9.73e-02, 1.81e-02, 3.06e-02, 5.57e-01, 5.04e+00, 1.06e-03
-  };
-  Double_t cutip_gsfTight[9] = {0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02
-  };
-  Double_t cutiso_sumTight[9] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
-  };
-  Double_t cutiso_sumoetTight[9] = {9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999., 9999.
-  };
-  Double_t cutseeTight[9] = {1.56e-02, 1.07e-02, 1.23e-02, 3.35e-02, 2.98e-02, 3.06e-02, 1.07e-02, 3.79e-02, 1.01e-02
-  };
-
-    Double_t cutdcotdist[9];
-    Double_t cutdetain[9];
-    Double_t cutdphiin[9];
-    Double_t cuteseedopcor[9];
-    Double_t cutet[9];
-    Double_t cutfmishits[9];
-    Double_t cuthoe[9];
-    Double_t cutip_gsf[9];
-    Double_t cutiso_sum[9];
-    Double_t cutiso_sumoet[9];
-    Double_t cutsee[9];
-    if     (typeCuts == 0) {
-      memcpy(cutdcotdist  ,cutdcotdistLoose  ,sizeof(cutdcotdistLoose));
-      memcpy(cutdetain    ,cutdetainLoose	,sizeof(cutdetainLoose));
-      memcpy(cutdphiin    ,cutdphiinLoose	,sizeof(cutdphiinLoose));
-      memcpy(cuteseedopcor,cuteseedopcorLoose,sizeof(cuteseedopcorLoose));
-      memcpy(cutet        ,cutetLoose	,sizeof(cutetLoose));
-      memcpy(cutfmishits  ,cutfmishitsLoose  ,sizeof(cutfmishitsLoose));
-      memcpy(cuthoe       ,cuthoeLoose	,sizeof(cuthoeLoose));
-      memcpy(cutip_gsf    ,cutip_gsfLoose	,sizeof(cutip_gsfLoose));
-      memcpy(cutiso_sum   ,cutiso_sumLoose	,sizeof(cutiso_sumLoose));
-      memcpy(cutiso_sumoet,cutiso_sumoetLoose,sizeof(cutiso_sumoetLoose));
-      memcpy(cutsee       ,cutseeLoose	,sizeof(cutseeLoose));
-    }
-    else if(typeCuts == 1) {
-      memcpy(cutdcotdist  ,cutdcotdistMedium  ,sizeof(cutdcotdistMedium));
-      memcpy(cutdetain    ,cutdetainMedium	,sizeof(cutdetainMedium));
-      memcpy(cutdphiin    ,cutdphiinMedium	,sizeof(cutdphiinMedium));
-      memcpy(cuteseedopcor,cuteseedopcorMedium,sizeof(cuteseedopcorMedium));
-      memcpy(cutet        ,cutetMedium	,sizeof(cutetMedium));
-      memcpy(cutfmishits  ,cutfmishitsMedium  ,sizeof(cutfmishitsMedium));
-      memcpy(cuthoe       ,cuthoeMedium	,sizeof(cuthoeMedium));
-      memcpy(cutip_gsf    ,cutip_gsfMedium	,sizeof(cutip_gsfMedium));
-      memcpy(cutiso_sum   ,cutiso_sumMedium	,sizeof(cutiso_sumMedium));
-      memcpy(cutiso_sumoet,cutiso_sumoetMedium,sizeof(cutiso_sumoetMedium));
-      memcpy(cutsee       ,cutseeMedium	,sizeof(cutseeMedium));
-    }
-    else {
-      memcpy(cutdcotdist  ,cutdcotdistTight  ,sizeof(cutdcotdistTight));
-      memcpy(cutdetain    ,cutdetainTight	,sizeof(cutdetainTight));
-      memcpy(cutdphiin    ,cutdphiinTight	,sizeof(cutdphiinTight));
-      memcpy(cuteseedopcor,cuteseedopcorTight,sizeof(cuteseedopcorTight));
-      memcpy(cutet        ,cutetTight	,sizeof(cutetTight));
-      memcpy(cutfmishits  ,cutfmishitsTight  ,sizeof(cutfmishitsTight));
-      memcpy(cuthoe       ,cuthoeTight	,sizeof(cuthoeTight));
-      memcpy(cutip_gsf    ,cutip_gsfTight	,sizeof(cutip_gsfTight));
-      memcpy(cutiso_sum   ,cutiso_sumTight	,sizeof(cutiso_sumTight));
-      memcpy(cutiso_sumoet,cutiso_sumoetTight,sizeof(cutiso_sumoetTight));
-      memcpy(cutsee       ,cutseeTight	,sizeof(cutseeTight));
-    }
-
-    // CAREFUL, I HAVE COMMENTED OUT WHAT SANI IS DOING
-    //Double_t iso_sum = tkIso + ecalIso + hcalIso;
-    Double_t iso_sum = (ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + 
-                        ele->HcalTowerSumEtDr03()) / ele->Pt();
-    Double_t iso_sum_corrected = iso_sum*pow(40./scEt, 2);
-    if ((iso_sum < cutiso_sum[cat+bin*9]) &&
-	(iso_sum_corrected < cutiso_sumoet[cat+bin*9]))
-      result += 2;
-
-    if (fBrem > -2) {
-      if ((hOverE < cuthoe[cat+bin*9]) and
-    	  (sigmaee < cutsee[cat+bin*9]) and
-    	  (fabs(deltaPhiIn) < cutdphiin[cat+bin*9]) and
-    	  (fabs(deltaEtaIn) < cutdetain[cat+bin*9]) and
-    	  (eSeedOverPin > cuteseedopcor[cat+bin*9]) and
-    	  (scEt > cutet[cat+bin*9]))
-	result += 1.;
-    }
-
-    Bool_t passD0cut = PassD0Cut(ele, vertices, cutip_gsf[cat+bin*9], kFALSE);
-    if (passD0cut)
-      result += 4;
-
-    Bool_t passConvVeto = PassConversionFilter(ele, conversions, kTRUE);
-    if (mishits < cutfmishits[cat+bin*9] &&
-	passConvVeto)
-      result += 8;
-  } // classbased
-
+  
+  // ISO part
+  if (cut_results[5] & cut_results[6])
+    result = result + 2;
+  
+  // IP part
+  if (cut_results[7])
+    result = result + 8;
+  
+  // Conversion part
+  if (cut_results[8] and cut_results[9])
+    result = result + 4;
+  
   return result;
+}
+
+//--------------------------------------------------------------------------------------------------
+bool ElectronTools::compute_cut(double x, double et, double cut_min, double cut_max, bool gtn) {
+
+  float et_min = 10;
+  float et_max = 40;
+
+  bool accept = false;
+  float cut = cut_max; //  the cut at et=40 GeV
+
+  if(et < et_max) {
+    cut = cut_min + (1/et_min - 1/et)*(cut_max - cut_min)/(1/et_min - 1/et_max);
+  } 
+  
+  if(et < et_min) {
+    cut = cut_min;
+  } 
+
+  if(gtn) {   // useful for e/p cut which is gt
+    accept = (x >= cut);
+  } 
+  else {
+    accept = (x <= cut);
+  }
+
+  return accept;
 }

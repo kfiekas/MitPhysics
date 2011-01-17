@@ -70,6 +70,7 @@ namespace mithep {
       static Int_t        Classify(const Electron *ele);
       static Int_t        PassTightId(const Electron *ele, const VertexCol *vertices, 
                                       const DecayParticleCol *conversions, const Int_t typeCuts);
+      static bool         compute_cut(double x, double et, double cut_min, double cut_max, bool gtn=false);
 
     ClassDef(ElectronTools, 0) // Muon tools
   };

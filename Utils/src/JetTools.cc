@@ -277,3 +277,32 @@ Double_t JetTools::MtHiggs(const ParticleOArr * leptons,
 
   return mtHiggs;
 }
+
+void JetTools::Alpha(Double_t AlphaVar[2], const TrackCol *tracks, Jet *jet, const VertexCol *vertices, Double_t  delta_z, Double_t delta_cone){  
+  AlphaVar[0] = -1.0;
+  AlphaVar[1] = -1.0;
+  if(tracks->GetEntries() <= 0) return;
+
+  double Pt_jets_X = 0. ;
+  double Pt_jets_Y = 0. ;
+  double Pt_jets_X_tot = 0. ;
+  double Pt_jets_Y_tot = 0. ;
+
+  for(int i=0;i<int(tracks->GetEntries());i++){
+    if(MathUtils::DeltaR(tracks->At(i)->Mom(),jet->Mom()) < delta_cone){
+      Pt_jets_X_tot += tracks->At(i)->Px();
+      Pt_jets_Y_tot += tracks->At(i)->Py();  
+      double pDz = TMath::Abs(tracks->At(i)->DzCorrected(*vertices->At(0)));
+      if(pDz < delta_z){
+        Pt_jets_X += tracks->At(i)->Px();
+        Pt_jets_Y += tracks->At(i)->Py();   
+      }
+    }
+  }
+
+  if(jet->Pt() > 0)
+    AlphaVar[0] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / jet->Pt();
+  if(Pt_jets_X_tot > 0 || Pt_jets_Y_tot > 0)
+    AlphaVar[1] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+}
+
