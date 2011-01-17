@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.70 2010/10/29 16:20:07 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.71 2010/12/05 16:31:34 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -245,7 +245,7 @@ void ElectronIDMod::Process()
     }
     
     if (passConvVetoType2 == kFALSE) continue;
-    
+
     // apply NExpectedHitsInner Cut
     if(fNExpectedHitsInnerCut < 999 && 
        e->CorrectedNExpectedHitsInner() > fNExpectedHitsInnerCut) continue;
