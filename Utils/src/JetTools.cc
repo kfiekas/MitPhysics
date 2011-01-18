@@ -15,7 +15,7 @@ JetTools::~JetTools()
 }
 
 //Remember to remove the signal from particles before inputting into the function
-Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets, bool UseQ, Double_t Y){
+Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets, double Q, double Y){
   if(particles->GetEntries() <= 0) return 0.0;
 
   Double_t fval = 0.0;
@@ -32,12 +32,34 @@ Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets
     fval = fval + fvalpart;
   }
 
-  if(UseQ == kTRUE) fval = fval / particles->At(0)->Pt();
+  fval = fval / Q;
 
   return fval;
 }
 
-Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, bool UseQ, Double_t Y){
+Double_t JetTools::NJettiness(const PFCandidateOArr *pfCandidates, const JetOArr *jets, double Q, double Y){
+  if(pfCandidates->GetEntries() <= 0) return 0.0;
+
+  Double_t fval = 0.0;
+  Double_t fvalpart;
+
+  for(int i=0;i<int(pfCandidates->GetEntries());i++){
+    fvalpart = (pfCandidates->At(i)->Pt()) * TMath::Exp(-TMath::Abs(pfCandidates->At(i)->Eta()-Y)); 
+
+    for(int j=0;j<int(jets->GetEntries());j++){
+      fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
+                 (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-pfCandidates->At(i)->Eta()))
+		- 2 * TMath::Cos(MathUtils::DeltaPhi(jets->At(j)->Phi(),pfCandidates->At(i)->Phi()))));
+    }
+    fval = fval + fvalpart;
+  }
+
+  fval = fval / Q;
+
+  return fval;
+}
+
+Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, double Q, double Y){
   if(tracks->GetEntries() <= 0) return 0.0;
 
   Double_t fval = 0.0;
@@ -54,12 +76,12 @@ Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, bool
     fval = fval + fvalpart;
   }
 
-  if(UseQ == kTRUE) fval = fval / tracks->At(0)->Pt();
+  fval = fval / Q;
   
   return fval;
 }
 
-Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, bool UseQ, Double_t Y){
+Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, double Q, double Y){
   if(jetsS->GetEntries() <= 0) return 0.0;
 
   Double_t fval = 0.0;
@@ -76,12 +98,12 @@ Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, bool Us
     fval = fval + fvalpart;
   }
 
-  if(UseQ == kTRUE) fval = fval / jetsS->At(0)->Pt();
+  fval = fval / Q;
   
   return fval;
 }
 
-Double_t JetTools::NJettiness(const CaloTowerOArr *calos, const JetOArr *jets, bool UseQ, Double_t Y){
+Double_t JetTools::NJettiness(const CaloTowerOArr *calos, const JetOArr *jets, double Q, double Y){
   if(calos->GetEntries() <= 0) return 0.0;
 
   Double_t fval = 0.0;
@@ -98,7 +120,7 @@ Double_t JetTools::NJettiness(const CaloTowerOArr *calos, const JetOArr *jets, b
     fval = fval + fvalpart;
   }
 
-  if(UseQ == kTRUE) fval = fval / calos->At(0)->Pt();
+  fval = fval / Q;
   
   return fval;
 }
