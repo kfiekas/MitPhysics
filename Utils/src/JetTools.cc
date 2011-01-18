@@ -328,3 +328,31 @@ void JetTools::Alpha(Double_t AlphaVar[2], const TrackCol *tracks, Jet *jet, con
     AlphaVar[1] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
 }
 
+
+void JetTools::Alpha(Double_t AlphaVar[2], const PFJet *jet, const VertexCol *vertices, Double_t  delta_z){  
+  AlphaVar[0] = -1.0;
+  AlphaVar[1] = -1.0;
+
+  double Pt_jets_X = 0. ;
+  double Pt_jets_Y = 0. ;
+  double Pt_jets_X_tot = 0. ;
+  double Pt_jets_Y_tot = 0. ;
+
+  for(UInt_t i=0;i<jet->NPFCands();i++){
+    if(jet->PFCand(i)->BestTrk()){
+      Pt_jets_X_tot += jet->PFCand(i)->BestTrk()->Px();
+      Pt_jets_Y_tot += jet->PFCand(i)->BestTrk()->Py();  
+      double pDz = TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertices->At(0)));
+      if(pDz < delta_z){
+        Pt_jets_X += jet->PFCand(i)->BestTrk()->Px();
+        Pt_jets_Y += jet->PFCand(i)->BestTrk()->Py();   
+      }
+    }
+  }
+
+  if(jet->Pt() > 0)
+    AlphaVar[0] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / jet->Pt();
+  if(Pt_jets_X_tot > 0 || Pt_jets_Y_tot > 0)
+    AlphaVar[1] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+}
+

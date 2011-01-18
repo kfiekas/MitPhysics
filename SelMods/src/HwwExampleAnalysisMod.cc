@@ -461,7 +461,8 @@ void HwwExampleAnalysisMod::Process()
   // Lepton Pt Max, Lepton Pt Min, DeltaPhiLeptons
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    pass = (pass && passCut[k]);      
+    if (k != 0)
+      pass = (pass && passCut[k]);
   }
   if (pass) {
     fLeptonPtMax_NMinusOne->Fill(CleanLeptons->At(0)->Pt(),NNLOWeight->GetVal());
