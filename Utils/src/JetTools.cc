@@ -324,7 +324,7 @@ void JetTools::Alpha(Double_t AlphaVar[2], const TrackCol *tracks, Jet *jet, con
 
   if(jet->Pt() > 0)
     AlphaVar[0] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / jet->Pt();
-  if(Pt_jets_X_tot > 0 || Pt_jets_Y_tot > 0)
+  if(sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot) > 0)
     AlphaVar[1] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
 }
 
@@ -352,7 +352,6 @@ void JetTools::Alpha(Double_t AlphaVar[2], const PFJet *jet, const VertexCol *ve
 
   if(jet->Pt() > 0)
     AlphaVar[0] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / jet->Pt();
-  if(Pt_jets_X_tot > 0 || Pt_jets_Y_tot > 0)
+  if(sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot) > 0)
     AlphaVar[1] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
 }
-
