@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ModNames.h,v 1.12 2010/07/18 21:12:52 ceballos Exp $
+// $Id: ModNames.h,v 1.13 2010/10/20 02:44:52 ceballos Exp $
 //
 // Names
 //
@@ -52,6 +52,7 @@ namespace mithep
       static const char *gkMergedLeptonsName;
       static const char *gkMuFakeableObjsName;
       static const char *gkPubJetsName;
+      static const char *gkCorrectedElectronsName;
   };
 }
 #endif
