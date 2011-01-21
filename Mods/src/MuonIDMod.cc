@@ -1,4 +1,4 @@
-	// $Id: MuonIDMod.cc,v 1.35 2010/10/20 02:44:16 ceballos Exp $
+	// $Id: MuonIDMod.cc,v 1.36 2010/10/29 16:20:07 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -21,7 +21,7 @@ ClassImp(mithep::MuonIDMod)
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
-  fCombIsolationCut(5.0),
+  fCombIsolationCut(0.15),
   fMuonPtMin(10),
   fApplyD0Cut(kTRUE),
   fD0Cut(0.020),
@@ -189,7 +189,7 @@ void MuonIDMod::Process()
           Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
                               1.0 * mu->IsoR03EmEt() + 
                               1.0 * mu->IsoR03HadEt();
-          if (totalIso < (mu->Pt()*0.15) )
+          if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 
 	  if     (fReverseIsoCut == kTRUE &&
@@ -212,7 +212,7 @@ void MuonIDMod::Process()
 
     if (fApplyD0Cut) {
       fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
-      Bool_t passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut, fReverseD0Cut);
+      Bool_t passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut);
       if (!passD0cut)
         continue;
     }

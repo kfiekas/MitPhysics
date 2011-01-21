@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.72 2011/01/17 17:28:39 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.73 2011/01/21 09:26:06 dkralph Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -30,7 +30,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fCaloIsolationCut(5.0),
   fEcalJuraIsoCut(5.0),
   fHcalIsolationCut(5.0),
-  fCombIsolationCut(5.0),
+  fCombIsolationCut(0.10),
   fApplyConvFilterType1(kTRUE),
   fApplyConvFilterType2(kFALSE),
   fWrongHitsRequirement(kTRUE),
@@ -41,8 +41,6 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyD0Cut(kTRUE),
   fChargeFilter(kTRUE),
   fD0Cut(0.020),
-  fReverseIsoCut(kFALSE),
-  fReverseD0Cut(kFALSE),
   fApplyTriggerMatching(kFALSE),
   fApplyEcalSeeded(kFALSE),
   fApplyCombinedIso(kTRUE),
@@ -127,14 +125,8 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     {
       Double_t totalIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03();
       if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03();
-      if (totalIso < (ele->Pt()*0.10) )
+      if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
-      
-      if     (fReverseIsoCut == kTRUE &&
-              isocut == kFALSE && totalIso < 10)
-        isocut = kTRUE;
-      else if(fReverseIsoCut == kTRUE)
-        isocut = kFALSE;
     }
     break;
     case ElectronTools::kVBTFWorkingPoint95Iso:
@@ -254,7 +246,7 @@ void ElectronIDMod::Process()
     // apply d0 cut
     if (fApplyD0Cut) {
       fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
-      Bool_t passD0cut = ElectronTools::PassD0Cut(e, fVertices, fD0Cut, fReverseD0Cut);
+      Bool_t passD0cut = ElectronTools::PassD0Cut(e, fVertices, fD0Cut);
       if (!passD0cut)
         continue;
     }

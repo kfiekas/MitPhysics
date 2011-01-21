@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.16 2010/10/11 23:11:39 bendavid Exp $
+// $Id: ElectronTools.cc,v 1.17 2011/01/17 17:32:49 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -296,8 +296,7 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, Double_t fD0Cut, 
-                                Bool_t fReverseD0Cut) 
+Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, Double_t fD0Cut) 
 {
   Bool_t d0cut = kFALSE;
   // d0 cut
@@ -311,18 +310,11 @@ Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, 
   }
   if(d0_real < fD0Cut) d0cut = kTRUE;
   
-  if     (fReverseD0Cut == kTRUE &&
-          d0cut == kFALSE && d0_real < 0.05)
-    d0cut = kTRUE;
-  else if(fReverseD0Cut == kTRUE)
-    d0cut = kFALSE;
-  
   return d0cut;
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t ElectronTools::PassD0Cut(const Electron *ele, const BeamSpotCol *beamspots, Double_t fD0Cut, 
-                                Bool_t fReverseD0Cut) 
+Bool_t ElectronTools::PassD0Cut(const Electron *ele, const BeamSpotCol *beamspots, Double_t fD0Cut) 
 {
   Bool_t d0cut = kFALSE;
   // d0 cut
@@ -332,12 +324,6 @@ Bool_t ElectronTools::PassD0Cut(const Electron *ele, const BeamSpotCol *beamspot
     if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
   }
   if(d0_real < fD0Cut) d0cut = kTRUE;
-  
-  if     (fReverseD0Cut == kTRUE &&
-          d0cut == kFALSE && d0_real < 0.05)
-    d0cut = kTRUE;
-  else if(fReverseD0Cut == kTRUE)
-    d0cut = kFALSE;
   
   return d0cut;
 }

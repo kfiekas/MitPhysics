@@ -61,10 +61,8 @@ namespace mithep {
       static Bool_t       PassCustomID(const Electron *el, EElIdType idType);
       static Bool_t       PassCustomIso(const Electron *el, EElIsoType isoType,
                                         Bool_t useCombineIso = kTRUE);
-      static Bool_t       PassD0Cut(const Electron *el, const VertexCol *vertices, 
-                                    Double_t fD0Cut, Bool_t fReverseD0Cut);
-      static Bool_t       PassD0Cut(const Electron *el, const BeamSpotCol *beamspots, 
-                                    Double_t fD0Cut, Bool_t fReverseD0Cut);
+      static Bool_t       PassD0Cut(const Electron *el, const VertexCol *vertices, Double_t fD0Cut);
+      static Bool_t       PassD0Cut(const Electron *el, const BeamSpotCol *beamspots, Double_t fD0Cut);
       static Bool_t       PassSpikeRemovalFilter(const Electron *ele);
       static Bool_t       PassTriggerMatching(const Electron *ele, const TriggerObjectCol *trigobjs);
       static Int_t        Classify(const Electron *ele);

@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.11 2010/10/20 02:44:47 ceballos Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.12 2010/10/26 10:26:28 sixie Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -111,7 +111,8 @@ void GenFakeableObjsMod::SlaveBegin()
   }
 
   electronID = new ElectronIDMod();
-  electronID->SetApplyConversionFilterType1(fApplyConvFilter);    
+  electronID->SetApplyConversionFilterType1(kFALSE);    
+  electronID->SetApplyConversionFilterType2(fApplyConvFilter);    
   electronID->SetWrongHitsRequirement(fWrongHitsRequirement);    
   electronID->SetApplyD0Cut(fApplyD0Cut);    
   electronID->SetChargeFilter(fChargeFilter);    
@@ -189,12 +190,10 @@ void GenFakeableObjsMod::Process()
   //***********************************************************************************************
   for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {  
 
-
     const Electron *e = fElectrons->At(i);   
     Bool_t isElectronOverlap = kFALSE;
 
     for (UInt_t j=0; j<tmpDuplicateRemovedElectrons.size(); ++j) {
-      Double_t deltaR = MathUtils::DeltaR(tmpDuplicateRemovedElectrons[j]->Mom(), e->Mom());
       if (e->SCluster() == tmpDuplicateRemovedElectrons[j]->SCluster() ||
           e->GsfTrk() == tmpDuplicateRemovedElectrons[j]->GsfTrk()) {
         isElectronOverlap = kTRUE;
@@ -317,7 +316,7 @@ void GenFakeableObjsMod::Process()
         //****************************************************************************************
         // D0 Cut        
         //****************************************************************************************
-        Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE, kFALSE);
+        Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE);
 
         //****************************************************************************************
         // Make denominator object cuts
@@ -435,7 +434,7 @@ void GenFakeableObjsMod::Process()
       //****************************************************************************************
       // D0 Cut        
       //****************************************************************************************
-      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE, kFALSE);
+      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE);
       
       //****************************************************************************************
       // Make denominator object cuts
@@ -511,12 +510,13 @@ void GenFakeableObjsMod::Process()
       //****************************************************************************************
       // conversion filter
       //****************************************************************************************
-      Bool_t passConversionFilter = ElectronTools::PassConversionFilter(tmpEle, fConversions, kTRUE);
+      Bool_t  passConversionFilter = TMath::Abs(denominator->ConvPartnerDCotTheta()) >= 0.02 || 
+                                     TMath::Abs(denominator->ConvPartnerDist())	     >= 0.02;
       
       //****************************************************************************************
       // D0 Cut        
       //****************************************************************************************
-      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE, kFALSE);
+      Bool_t passD0Cut = ElectronTools::PassD0Cut(tmpEle,fVertices, kTRUE);
       
       //****************************************************************************************
       // Make denominator object cuts

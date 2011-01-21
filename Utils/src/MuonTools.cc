@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.12 2010/06/28 21:06:39 ceballos Exp $
+// $Id: MuonTools.cc,v 1.13 2010/10/29 16:18:05 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -429,8 +429,7 @@ TH2D *MuonTools::LoadHisto(const char *name, TFile *file) const
   return ret;
 }
 //--------------------------------------------------------------------------------------------------
-Bool_t MuonTools::PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut, 
-                            Bool_t fReverseD0Cut) 
+Bool_t MuonTools::PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut) 
 {
   Bool_t d0cut = kFALSE;
   const Track *mt = mu->BestTrk();
@@ -445,19 +444,12 @@ Bool_t MuonTools::PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t 
     }
   }
   if(d0_real < fD0Cut) d0cut = kTRUE;
-
-  if	 (fReverseD0Cut == kTRUE &&
-  	  d0cut == kFALSE && d0_real < 0.05)
-    d0cut = kTRUE;
-  else if(fReverseD0Cut == kTRUE)
-    d0cut = kFALSE;
   
   return d0cut;
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t MuonTools::PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double_t fD0Cut, 
-                                Bool_t fReverseD0Cut) 
+Bool_t MuonTools::PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double_t fD0Cut) 
 {
   Bool_t d0cut = kFALSE;
   const Track *mt = mu->BestTrk();
@@ -470,12 +462,6 @@ Bool_t MuonTools::PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double
     if(TMath::Abs(pD0) < TMath::Abs(d0_real)) d0_real = TMath::Abs(pD0);
   }
   if(d0_real < fD0Cut) d0cut = kTRUE;
-  
-  if     (fReverseD0Cut == kTRUE &&
-          d0cut == kFALSE && d0_real < 0.05)
-    d0cut = kTRUE;
-  else if(fReverseD0Cut == kTRUE)
-    d0cut = kFALSE;
   
   return d0cut;
 }
@@ -491,7 +477,7 @@ Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices)
   
   if(mu->BestTrk()->NHits() <= 10) return kFALSE;
 
-  if(!PassD0Cut(mu, vertices, 0.2, kFALSE)) return kFALSE;
+  if(!PassD0Cut(mu, vertices, 0.2)) return kFALSE;
   
   Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
                       1.0 * mu->IsoR03EmEt() + 
