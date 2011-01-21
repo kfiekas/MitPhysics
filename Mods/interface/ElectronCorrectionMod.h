@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronCorrectionMod.h,v 1.7 2010/03/12 13:51:26 bendavid Exp $
+// $Id: ElectronCorrectionMod.h,v 1.2 2011/01/21 09:20:25 dkralph Exp $
 //
 // ElectronCorrectionMod
 //
@@ -9,8 +9,18 @@
 // The corrections come from a text file with four columns: etaMin, etaMax, scale, resolution, where
 // the correction "scale" and "resolution" apply between etaMin and etaMax. There can be as many eta
 // bins as desired. There *must* be a newline at the end of *every* line in the file.
+// 
+// File that I used:
 //
+// #etamin etamax scale   resolution
+// 0.0    0.4    1.00015 0.44
+// 0.4    0.8    1.00247 0.64
+// 0.8    1.2    1.00961 0.33
+// 1.2    1.5    1.01524 0.975
+// 1.5    2.0    1.03187 1.539
+// 2.0    2.5    1.02821 2.31517
 //
+// 
 //--------------------------------------------------------------------------------------------------
 
 
