@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.71 2010/12/05 16:31:34 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.72 2011/01/17 17:28:39 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -34,6 +34,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyConvFilterType1(kTRUE),
   fApplyConvFilterType2(kFALSE),
   fWrongHitsRequirement(kTRUE),
+  fElectronsFromBranch(kTRUE),
   fNExpectedHitsInnerCut(999),
   fCombinedIdCut(kFALSE),
   fApplySpikeRemoval(kTRUE),
@@ -188,7 +189,7 @@ void ElectronIDMod::Process()
     if (e->Pt() < fElectronPtMin) 
       continue;
     
-    if ( (e->SCluster()->Energy()*e->Pt()/e->P()) < fElectronEtMin)
+    if (e->SCluster()->Et() < fElectronEtMin)
       continue;    
     
     if (e->AbsEta() > fElectronEtaMax) 
@@ -289,7 +290,7 @@ void ElectronIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the electron collection branch.
 
-  ReqEventObject(fElectronBranchName, fElectrons, kTRUE);
+  ReqEventObject(fElectronBranchName, fElectrons,fElectronsFromBranch);
 
   if(fCombinedIdCut == kTRUE) {
     fElectronIDType  	  = "NoId";

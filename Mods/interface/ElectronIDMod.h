@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.37 2010/06/17 13:26:26 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.38 2010/10/09 20:15:30 bendavid Exp $
 //
 // ElectronIDMod
 //
@@ -85,6 +85,7 @@ namespace mithep
       void                SetApplyEcalFiducial(Bool_t b)         { fApplyEcalFiducial = b;     }
       void                SetApplyEcalSeeded(Bool_t b)           { fApplyEcalSeeded = b;       }      
       void                SetApplyCombinedIso(Bool_t b)          { fApplyCombinedIso = b;      }      
+      void                SetElectronsFromBranch(Bool_t b)       { fElectronsFromBranch = b;   }      
       void                Setup();
 
     protected:
@@ -124,6 +125,7 @@ namespace mithep
       Bool_t                    fApplyEcalSeeded;        //require ecal seeded flag
       Bool_t                    fApplyCombinedIso;       //apply combined isolation
       Bool_t                    fApplyEcalFiducial;      //apply ecal fiducial cuts on supercluster eta
+      Bool_t                    fElectronsFromBranch;    //where to get input electrons
       ElectronTools::EElIdType  fElIdType;              //!identification scheme
       ElectronTools::EElIsoType fElIsoType;              //!isolation scheme
       const ElectronCol        *fElectrons;              //!electron collection
