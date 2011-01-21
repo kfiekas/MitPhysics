@@ -1,4 +1,4 @@
-// $Id: ModNames.cc,v 1.15 2010/07/18 21:12:52 ceballos Exp $
+// $Id: ModNames.cc,v 1.16 2010/10/20 02:44:47 ceballos Exp $
 
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -39,3 +39,4 @@ const char *ModNames::gkMCqqHsName             = "MCqqHs";
 const char *ModNames::gkMergedLeptonsName      = "MergedLeptons";
 const char *ModNames::gkMuFakeableObjsName     = "MuonFakeableObjects";
 const char *ModNames::gkPubJetsName            = "PubJets";
+const char *ModNames::gkCorrectedElectronsName = "CorrectedElectrons";
