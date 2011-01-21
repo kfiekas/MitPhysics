@@ -1,4 +1,4 @@
-// $Id: ElectronCorrectionMod.cc,v 1.6 2010/03/12 13:51:26 bendavid Exp $
+// $Id: ElectronCorrectionMod.cc,v 1.2 2011/01/21 09:19:55 dkralph Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCorrectionMod.h"
 #include <TH1D.h>
@@ -85,6 +85,7 @@ void ElectronCorrectionMod::Process()
 
   AddObjThisEvt(CorrectedElectrons);
 
+  delete fRand;
 }
 
 //--------------------------------------------------------------------------------------------------
