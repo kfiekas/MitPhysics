@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronCorrectionMod.h,v 1.2 2011/01/21 09:20:25 dkralph Exp $
+// $Id: ElectronCorrectionMod.h,v 1.3 2011/01/21 20:30:03 dkralph Exp $
 //
 // ElectronCorrectionMod
 //
@@ -40,13 +40,7 @@ namespace mithep
     public:
       ElectronCorrectionMod(const char *name="ElectronCorrectionMod", 
                      const char *title="Correcting the Electrons");
-
-    protected:
-      void                     Begin();
-      void                     Process();
-      void                     SlaveBegin();
-      void                     SlaveTerminate();
-      void                     Terminate();
+      ~ElectronCorrectionMod();
 
       void                     SetElectronsFromBranch(Bool_t b) { fElectronsFromBranch = b; }
       void                     SetInputName(TString name)   { fInElectronName = name; }
@@ -58,6 +52,13 @@ namespace mithep
       void                     SetSmearMC(Bool_t b) { fSmearMC=b; }
       void                     SetCorrectionFile(const char *file) { fCorrectionFileName=file;}
       void                     SetCorrectionValues(Electron *el);
+
+    protected:
+      void                     Begin();
+      void                     Process();
+      void                     SlaveBegin();
+      void                     SlaveTerminate();
+      void                     Terminate();
 
       Bool_t                   fElectronsFromBranch;    //where to get input electrons
       Bool_t                   fDoNotCorrect;           //false: don't do anything, true: do the corrections

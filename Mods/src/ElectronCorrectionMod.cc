@@ -1,4 +1,4 @@
-// $Id: ElectronCorrectionMod.cc,v 1.3 2011/01/21 11:56:41 dkralph Exp $
+// $Id: ElectronCorrectionMod.cc,v 1.4 2011/01/22 09:17:59 dkralph Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCorrectionMod.h"
 #include <TH1D.h>
@@ -33,7 +33,12 @@ ElectronCorrectionMod::ElectronCorrectionMod(const char *name, const char *title
   fCorrections = new TNtuple("fCorrections","Scale factors and resolutions for MC -> Data","etaMin:etaMax:scale:resolution");
 
 }
-
+//--------------------------------------------------------------------------------------------------
+ElectronCorrectionMod::~ElectronCorrectionMod()
+{
+  // Destructor
+  delete fCorrections;
+}
 //--------------------------------------------------------------------------------------------------
 void ElectronCorrectionMod::Begin()
 {
