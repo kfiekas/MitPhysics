@@ -1,4 +1,4 @@
-// $Id: ElectronCorrectionMod.cc,v 1.2 2011/01/21 09:19:55 dkralph Exp $
+// $Id: ElectronCorrectionMod.cc,v 1.3 2011/01/21 11:56:41 dkralph Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCorrectionMod.h"
 #include <TH1D.h>
@@ -47,6 +47,7 @@ void ElectronCorrectionMod::Process()
   LoadEventObject(fInElectronName,fElectrons);
   fIsMC = GetEventHeader()->IsMC();
   ElectronOArr *CorrectedElectrons = new ElectronOArr;
+  CorrectedElectrons->SetOwner(kTRUE);
   CorrectedElectrons->SetName(fCorrectedElectronsName);
 
   Double_t rescaledSmearedPt; //Temporary variable, just for aesthetics
@@ -60,7 +61,7 @@ void ElectronCorrectionMod::Process()
   // Copy to new array, correct the Pt
   for(UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
     Electron *el = new Electron(*(fElectrons->At(i)));
-    CorrectedElectrons->Add(el);
+    CorrectedElectrons->AddOwned(el);
 
     //Set fScale and fResolution
     SetCorrectionValues(el);
