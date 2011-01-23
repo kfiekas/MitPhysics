@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.9 2010/05/12 19:05:26 ceballos Exp $
+// $Id: GenFakeableObjsMod.h,v 1.10 2010/10/20 02:44:51 ceballos Exp $
 //
 // GenFakeableObjsMod
 //
@@ -97,9 +97,8 @@ namespace mithep
 
      enum ElectronFOType {
         kElFOUndef = 0,    //not defined
-        kElFOGsfPlusSC,    //"Gsf Track matched to Super Cluster"
-        kElFOReco,         //"Reco Electron with loose isolation"
-        kElFOLoose         //"Loose Electron with loose isolation"
+        kElFOIso,          //"Reco Electron with full isolation"
+        kElFOLooseIdLooseIso         //"Reco Electron with loose id and isolation
       };
       enum MuonFOType {
         kMuFOUndef = 0,    //not defined
