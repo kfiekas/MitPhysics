@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.14 2010/05/21 05:59:55 ceballos Exp $
+// $Id: PhotonIDMod.cc,v 1.15 2010/07/06 08:33:16 sixie Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -14,18 +14,19 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPhotonBranchName(Names::gkPhotonBrn),
   fGoodPhotonsName(ModNames::gkGoodPhotonsName),  
   fPhotonIDType("Custom"),
-  fPhotonIsoType("CombinedIso"),
+  fPhotonIsoType("Custom"),
   fPhotonPtMin(15.0),
-  fHadOverEmMax(0.05),
-  fApplySpikeRemoval(kTRUE),
+  fHadOverEmMax(0.02),
+  fApplySpikeRemoval(kFALSE),
   fApplyPixelSeed(kTRUE),
   fPhotonR9Min(0.5),
   fPhIdType(kIdUndef),
   fPhIsoType(kIsoUndef),
   fFiduciality(kTRUE),
-  fEtaWidthEB(0.013),
-  fEtaWidthEE(0.031),
+  fEtaWidthEB(0.01),
+  fEtaWidthEE(0.028),
   fAbsEtaMax(2.5),
+  fApplyR9Min(kFALSE),
   fPhotons(0)
 {
   // Constructor.
@@ -111,6 +112,10 @@ void PhotonIDMod::Process()
         }
         break;
       case kCustomIso:
+        {
+          if ( ph->HollowConeTrkIsoDr04() < (1.5 + 0.001*ph->Pt()) && ph->EcalRecHitIsoDr04()<(2.0+0.006*ph->Pt()) && ph->HcalTowerSumEtDr04()<(2.0+0.0025*ph->Pt()) )
+            isocut = kTRUE;
+        }
       default:
         break;
     }
@@ -118,15 +123,15 @@ void PhotonIDMod::Process()
     if (!isocut) 
       continue;
 
-    if (ph->R9() <= fPhotonR9Min) 
+    if ( fApplyR9Min && ph->R9() <= fPhotonR9Min) 
       continue;
 
     if (fFiduciality == kTRUE &&
         ph->IsEB() == kFALSE && ph->IsEE() == kFALSE) 
       continue;
 
-    if ((ph->IsEB() == kTRUE && ph->SCluster() && ph->SCluster()->EtaWidth() >= fEtaWidthEB) ||
-        (ph->IsEE() == kTRUE && ph->SCluster() && ph->SCluster()->EtaWidth() >= fEtaWidthEE))
+    if ((ph->IsEB() == kTRUE && ph->CoviEtaiEta() >= fEtaWidthEB) ||
+        (ph->IsEE() == kTRUE && ph->CoviEtaiEta() >= fEtaWidthEE))
       continue;
 
     if (ph->AbsEta() >= fAbsEtaMax) 
@@ -172,8 +177,6 @@ void PhotonIDMod::SlaveBegin()
     fPhIsoType = kCombinedIso;
   else if (fPhotonIsoType.CompareTo("Custom") == 0 ) {
     fPhIsoType = kCustomIso;
-    SendError(kWarning, "SlaveBegin",
-              "Custom photon isolation is not yet implemented.");
   } else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified photon isolation %s is not defined.",

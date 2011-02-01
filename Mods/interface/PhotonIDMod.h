@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.12 2009/12/06 14:59:43 ceballos Exp $
+// $Id: PhotonIDMod.h,v 1.13 2010/05/14 12:11:18 sixie Exp $
 //
 // PhotonIDMod
 //
@@ -51,6 +51,7 @@ namespace mithep
       void                SetEtaWidthEB(Double_t x)	    { fEtaWidthEB      = x;	   }
       void                SetEtaWidthEE(Double_t x)         { fEtaWidthEE      = x;	   }
       void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax       = x;	   }
+      void                SetApplyR9Min(Bool_t b)           { fApplyR9Min      = b;        }
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -85,6 +86,7 @@ namespace mithep
       Double_t            fEtaWidthEB;  	 //max Eta Width in ECAL Barrel
       Double_t            fEtaWidthEE;  	 //max Eta Width in ECAL End Cap
       Double_t            fAbsEtaMax;  	         //max Abs Eta
+      Bool_t              fApplyR9Min;           //apply R9 min
       const PhotonCol    *fPhotons;              //!photon branch
     
     ClassDef(PhotonIDMod, 1) // Photon identification module
