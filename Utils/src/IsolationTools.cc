@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.3 2009/03/03 18:11:19 bendavid Exp $
+// $Id: IsolationTools.cc,v 1.4 2009/07/20 04:55:33 loizides Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -115,4 +115,102 @@ Double_t IsolationTools::CaloTowerEmIsolation(const ThreeVector *p, Double_t ext
     }
   }
   return sumEt;
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandidate> *PFCands, 
+                                      	 const VertexCol *vertices, Double_t  delta_z,
+				     	 Double_t extRadius, Double_t intRadius, int isoType)
+{
+  //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
+  //annulus around the particle seed track.  
+
+  Double_t zLepton = 0.0;
+  if(p->BestTrk()) zLepton = p->BestTrk()->DzCorrected(*vertices->At(0));
+
+  Double_t ptSum =0.;  
+  for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
+    const PFCandidate *pf = PFCands->At(i);
+    
+    Bool_t isGoodType = kFALSE;
+    // all particles
+    if     (isoType == 0)                       		       isGoodType = kTRUE;
+    // charged particles only
+    else if(isoType == 1 && pf->Charge() != 0)  		       isGoodType = kTRUE;
+    // charged particles and gammas only
+    else if(isoType == 1 && 
+           (pf->Charge() != 0 || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
+
+    if(isGoodType == kFALSE) continue;
+
+    if(pf->TrackerTrk() && p->TrackerTrk() &&
+       pf->TrackerTrk() == p->TrackerTrk()) continue;
+
+    Double_t deltaZ = 0.0;
+    if(pf->BestTrk()) {
+      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertices->At(0)) - zLepton);
+    }
+
+    // ignore the pf candidate if it is too far away in Z
+    if (deltaZ > delta_z) 
+      continue;
+           
+    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    // add the pf pt if it is inside the extRadius and outside the intRadius
+    if ( dr < extRadius && 
+	 dr >= intRadius ) {
+      ptSum += pf->Pt();
+    }
+  }
+  return ptSum;
+}
+//--------------------------------------------------------------------------------------------------
+Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
+                                      	     const VertexCol *vertices, Double_t  delta_z,
+				     	     Double_t extRadius, Double_t intRadius, int isoType)
+{
+  //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
+  //annulus around the particle seed track.  
+
+  Double_t zLepton = 0.0;
+  if(p->BestTrk()) zLepton = p->BestTrk()->DzCorrected(*vertices->At(0));
+
+  Double_t ptSum =0.;  
+  for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
+    const PFCandidate *pf = PFCands->At(i);
+    
+    Bool_t isGoodType = kFALSE;
+    // all particles
+    if     (isoType == 0)                       		       isGoodType = kTRUE;
+    // charged particles only
+    else if(isoType == 1 && pf->Charge() != 0)  		       isGoodType = kTRUE;
+    // charged particles and gammas only
+    else if(isoType == 1 && 
+           (pf->Charge() != 0 || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
+
+    if(isGoodType == kFALSE) continue;
+
+    if(pf->TrackerTrk() && p->TrackerTrk() &&
+       pf->TrackerTrk() == p->TrackerTrk()) continue;
+
+    if(pf->GsfTrk() && p->GsfTrk() &&
+       pf->GsfTrk() == p->GsfTrk()) continue;
+
+    Double_t deltaZ = 0.0;
+    if(pf->BestTrk()) {
+      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertices->At(0)) - zLepton);
+    }
+
+    // ignore the pf candidate if it is too far away in Z
+    if (deltaZ > delta_z) 
+      continue;
+           
+    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    // add the pf pt if it is inside the extRadius and outside the intRadius
+    if ( dr < extRadius && 
+	 dr >= intRadius ) {
+      ptSum += pf->Pt();
+    }
+  }
+  return ptSum;
 }

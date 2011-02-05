@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.4 2009/05/11 08:01:31 loizides Exp $
+// $Id: IsolationTools.h,v 1.5 2009/07/20 04:55:33 loizides Exp $
 //
 // IsolationTools
 //
@@ -16,6 +16,10 @@
 #include "MitAna/DataTree/interface/BasicCluster.h"
 #include "MitAna/DataTree/interface/SuperCluster.h"
 #include "MitAna/DataTree/interface/CaloTower.h"
+#include "MitAna/DataTree/interface/VertexCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/PFCandidateCol.h"
 
 namespace mithep
 {
@@ -33,7 +37,12 @@ namespace mithep
       static Double_t CaloTowerEmIsolation(const ThreeVector *p, Double_t extRadius, 
                                            Double_t intRadius, Double_t etLow, 
                                            const mithep::Collection<mithep::CaloTower> *caloTowers);
-
+      static Double_t PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands, 
+                      	   	      const VertexCol *vertices, Double_t  delta_z,
+			   	      Double_t extRadius, Double_t intRadius, int isoType);
+      static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
+                      	     		  const VertexCol *vertices, Double_t  delta_z,
+			     		  Double_t extRadius, Double_t intRadius, int isoType);
     ClassDef(IsolationTools, 0) // Isolation tools
   };
 }
