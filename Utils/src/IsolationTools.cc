@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.4 2009/07/20 04:55:33 loizides Exp $
+// $Id: IsolationTools.cc,v 1.5 2011/02/05 05:48:09 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -119,7 +119,7 @@ Double_t IsolationTools::CaloTowerEmIsolation(const ThreeVector *p, Double_t ext
 
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandidate> *PFCands, 
-                                      	 const VertexCol *vertices, Double_t  delta_z,
+                                      	 const VertexCol *vertices, Double_t  delta_z, double ptMin,
 				     	 Double_t extRadius, Double_t intRadius, int isoType)
 {
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
@@ -134,14 +134,16 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
     
     Bool_t isGoodType = kFALSE;
     // all particles
-    if     (isoType == 0)                       		       isGoodType = kTRUE;
+    if     (isoType == 0)                       		   isGoodType = kTRUE;
     // charged particles only
-    else if(isoType == 1 && pf->Charge() != 0)  		       isGoodType = kTRUE;
+    else if(isoType == 1 && pf->BestTrk())                         isGoodType = kTRUE;
     // charged particles and gammas only
-    else if(isoType == 1 && 
-           (pf->Charge() != 0 || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
+    else if(isoType == 2 && 
+           (pf->BestTrk() || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
 
     if(isGoodType == kFALSE) continue;
+
+    if(pf->Pt() <= ptMin) continue;
 
     if(pf->TrackerTrk() && p->TrackerTrk() &&
        pf->TrackerTrk() == p->TrackerTrk()) continue;
@@ -152,7 +154,7 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
     }
 
     // ignore the pf candidate if it is too far away in Z
-    if (deltaZ > delta_z) 
+    if (deltaZ >= delta_z) 
       continue;
            
     Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
@@ -166,7 +168,7 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 }
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
-                                      	     const VertexCol *vertices, Double_t  delta_z,
+                                      	     const VertexCol *vertices, Double_t  delta_z, double ptMin,
 				     	     Double_t extRadius, Double_t intRadius, int isoType)
 {
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
@@ -181,14 +183,16 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     
     Bool_t isGoodType = kFALSE;
     // all particles
-    if     (isoType == 0)                       		       isGoodType = kTRUE;
+    if     (isoType == 0)                       		   isGoodType = kTRUE;
     // charged particles only
-    else if(isoType == 1 && pf->Charge() != 0)  		       isGoodType = kTRUE;
+    else if(isoType == 1 && pf->BestTrk())                         isGoodType = kTRUE;
     // charged particles and gammas only
-    else if(isoType == 1 && 
-           (pf->Charge() != 0 || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
+    else if(isoType == 2 && 
+           (pf->BestTrk() || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
 
     if(isGoodType == kFALSE) continue;
+
+    if(pf->Pt() <= ptMin) continue;
 
     if(pf->TrackerTrk() && p->TrackerTrk() &&
        pf->TrackerTrk() == p->TrackerTrk()) continue;
@@ -202,7 +206,7 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     }
 
     // ignore the pf candidate if it is too far away in Z
-    if (deltaZ > delta_z) 
+    if (deltaZ >= delta_z) 
       continue;
            
     Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
