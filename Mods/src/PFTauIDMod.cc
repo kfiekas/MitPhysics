@@ -1,4 +1,4 @@
-// $Id: PFTauIDMod.cc,v 1.1 2010/07/18 21:15:19 ceballos Exp $
+// $Id: PFTauIDMod.cc,v 1.2 2010/08/19 14:37:17 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/PFTauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -19,6 +19,7 @@ PFTauIDMod::PFTauIDMod(const char *name, const char *title) :
   fIsoGammaEtSumMax(3.0),
   fSignalMassMin(0.13),
   fSignalMassMax(2.00),
+  fIsHPSSel(kFALSE),
   fPFTaus(0)
 {
   // Constructor.
@@ -52,29 +53,44 @@ void PFTauIDMod::Process()
       }
     }
 
-    if (tauSystem.Pt() <= fPtMin)
-      continue;
-    
     if (nTrk != 1 && nTrk != 3)
-      continue;
-
-    if(!tau->LeadChargedHadronPFCand())
-      continue;
-
-    if(tau->LeadChargedHadronPFCand()->Pt() <= fPtLeadChargedHadronPFCandMin)
       continue;
 
     if (TMath::Abs(tau->Charge()) != 1)
       continue;
 
-    if (tau->IsoChargedHadronPtSum() >= fIsoChargedHadronPtSumMax)
+    if (tauSystem.Pt() <= fPtMin)
       continue;
 
-    if (tau->IsoGammaEtSum() >= fIsoGammaEtSumMax)
-      continue;
+    if (fIsHPSSel == kFALSE){
+      if(!tau->LeadChargedHadronPFCand())
+	continue;
 
-    if (tauChargedSystem.Mass() <= fSignalMassMin || tauChargedSystem.Mass() >= fSignalMassMax)
-      continue;
+      if(tau->LeadChargedHadronPFCand()->Pt() <= fPtLeadChargedHadronPFCandMin)
+	continue;
+
+      if (tau->IsoChargedHadronPtSum() >= fIsoChargedHadronPtSumMax)
+	continue;
+
+      if (tau->IsoGammaEtSum() >= fIsoGammaEtSumMax)
+	continue;
+
+      if (tauChargedSystem.Mass() <= fSignalMassMin || tauChargedSystem.Mass() >= fSignalMassMax)
+	continue;
+    }
+    else {
+      if(tau->DiscriminationAgainstElectron() == 0)
+        continue;
+
+      if(tau->DiscriminationAgainstMuon() == 0)
+        continue;
+
+      if(tau->DiscriminationByDecayModeFinding() == 0)
+        continue;
+
+      if(tau->DiscriminationByMediumIsolation() == 0)
+        continue;      
+    }
 
     // add good tau to output collection
     GoodTaus->Add(tau);
