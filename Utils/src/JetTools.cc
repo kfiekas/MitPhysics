@@ -300,10 +300,9 @@ Double_t JetTools::MtHiggs(const ParticleOArr * leptons,
   return mtHiggs;
 }
 
-void JetTools::Alpha(Double_t AlphaVar[2], const TrackCol *tracks, Jet *jet, const VertexCol *vertices, Double_t  delta_z, Double_t delta_cone){  
-  AlphaVar[0] = -1.0;
-  AlphaVar[1] = -1.0;
-  if(tracks->GetEntries() <= 0) return;
+Double_t JetTools::Beta(const TrackCol *tracks, Jet *jet, const Vertex *vertex, Double_t  delta_z, Double_t delta_cone){  
+
+  if(tracks->GetEntries() <= 0) return 1.0;
 
   double Pt_jets_X = 0. ;
   double Pt_jets_Y = 0. ;
@@ -314,7 +313,7 @@ void JetTools::Alpha(Double_t AlphaVar[2], const TrackCol *tracks, Jet *jet, con
     if(MathUtils::DeltaR(tracks->At(i)->Mom(),jet->Mom()) < delta_cone){
       Pt_jets_X_tot += tracks->At(i)->Px();
       Pt_jets_Y_tot += tracks->At(i)->Py();  
-      double pDz = TMath::Abs(tracks->At(i)->DzCorrected(*vertices->At(0)));
+      double pDz = TMath::Abs(tracks->At(i)->DzCorrected(*vertex));
       if(pDz < delta_z){
         Pt_jets_X += tracks->At(i)->Px();
         Pt_jets_Y += tracks->At(i)->Py();   
@@ -322,17 +321,14 @@ void JetTools::Alpha(Double_t AlphaVar[2], const TrackCol *tracks, Jet *jet, con
     }
   }
 
-  if(jet->Pt() > 0)
-    AlphaVar[0] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / jet->Pt();
   if(sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot) > 0)
-    AlphaVar[1] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+    return sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+
+  return 1.0;
 }
 
 
-void JetTools::Alpha(Double_t AlphaVar[2], const PFJet *jet, const VertexCol *vertices, Double_t  delta_z){  
-  AlphaVar[0] = -1.0;
-  AlphaVar[1] = -1.0;
-
+Double_t JetTools::Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_z){  
   double Pt_jets_X = 0. ;
   double Pt_jets_Y = 0. ;
   double Pt_jets_X_tot = 0. ;
@@ -342,16 +338,16 @@ void JetTools::Alpha(Double_t AlphaVar[2], const PFJet *jet, const VertexCol *ve
     if(jet->PFCand(i)->BestTrk()){
       Pt_jets_X_tot += jet->PFCand(i)->BestTrk()->Px();
       Pt_jets_Y_tot += jet->PFCand(i)->BestTrk()->Py();  
-      double pDz = TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertices->At(0)));
+      double pDz = TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertex));
       if(pDz < delta_z){
         Pt_jets_X += jet->PFCand(i)->BestTrk()->Px();
-        Pt_jets_Y += jet->PFCand(i)->BestTrk()->Py();   
+        Pt_jets_Y += jet->PFCand(i)->BestTrk()->Py();
       }
     }
   }
 
-  if(jet->Pt() > 0)
-    AlphaVar[0] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / jet->Pt();
   if(sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot) > 0)
-    AlphaVar[1] = sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+    return sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+
+  return 1.0;
 }

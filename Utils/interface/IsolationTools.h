@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.6 2011/02/05 05:48:13 ceballos Exp $
+// $Id: IsolationTools.h,v 1.7 2011/02/08 17:58:17 ceballos Exp $
 //
 // IsolationTools
 //
@@ -20,6 +20,7 @@
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
+#include "MitAna/DataTree/interface/TrackCol.h"
 
 namespace mithep
 {
@@ -43,6 +44,12 @@ namespace mithep
       static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                       	     		  const VertexCol *vertices, Double_t  delta_z, double ptMin,
 			     		  Double_t extRadius, Double_t intRadius, int isoType);
+      static Double_t BetaM(const TrackCol *tracks, const Muon *p, const VertexCol *vertices, 
+                            Double_t ptMin, Double_t  delta_z, Double_t extRadius,
+			    Double_t intRadius);
+      static Double_t BetaE(const TrackCol *tracks, const Electron *p, const VertexCol *vertices, 
+                            Double_t ptMin, Double_t  delta_z, Double_t extRadius,
+			    Double_t intRadius);
     ClassDef(IsolationTools, 0) // Isolation tools
   };
 }

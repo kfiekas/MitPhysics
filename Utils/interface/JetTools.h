@@ -35,8 +35,8 @@ namespace mithep {
     static Double_t Razor(const ParticleOArr *particles, const Met *met);
     static Double_t CosineOmega(const Particle *particles0, const Particle *particles1);
     static Double_t MtHiggs(const ParticleOArr *leptons, const Met *met, double metFraction[2], int nsel);
-    static void     Alpha(Double_t AlphaVar[2], const TrackCol *tracks, Jet *jet, const VertexCol *vertices, Double_t  delta_z, Double_t delta_cone);
-    static void     Alpha(Double_t AlphaVar[2], const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);
+    static Double_t Beta(const TrackCol *tracks, Jet *jet, const Vertex *vertex, Double_t  delta_z, Double_t delta_cone);
+    static Double_t Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_z);
     
     ClassDef(JetTools, 0)
   };

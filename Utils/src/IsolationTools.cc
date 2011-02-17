@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.5 2011/02/05 05:48:09 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.6 2011/02/08 17:58:17 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -217,4 +217,83 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     }
   }
   return ptSum;
+}
+//--------------------------------------------------------------------------------------------------
+Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const VertexCol *vertices, 
+                               Double_t ptMin, Double_t  delta_z, Double_t extRadius,
+			       Double_t intRadius){
+
+  if(tracks->GetEntries() <= 0) return 1.0;
+
+  double Pt_jets_X = 0. ;
+  double Pt_jets_Y = 0. ;
+  double Pt_jets_X_tot = 0. ;
+  double Pt_jets_Y_tot = 0. ;
+
+  for(int i=0;i<int(tracks->GetEntries());i++){
+    const Track *pTrack = tracks->At(i);
+
+    if(pTrack && p->TrackerTrk() &&
+       pTrack == p->TrackerTrk()) continue;
+
+    if(pTrack->Pt() <= ptMin) continue;
+
+    Double_t dr = MathUtils::DeltaR(pTrack->Mom(),p->Mom());
+    if ( dr < extRadius && dr >= intRadius ) {
+      Pt_jets_X_tot += pTrack->Px();
+      Pt_jets_Y_tot += pTrack->Py();  
+      double pDz = TMath::Abs(pTrack->DzCorrected(*vertices->At(0)));
+      if(pDz < delta_z){
+        Pt_jets_X += pTrack->Px();
+        Pt_jets_Y += pTrack->Py();
+      }
+    }
+  }
+
+  if(sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot) > 0)
+    return sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+
+  return 1.0;
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t IsolationTools::BetaE(const TrackCol *tracks, const Electron *p, const VertexCol *vertices, 
+                               Double_t ptMin, Double_t  delta_z, Double_t extRadius,
+			       Double_t intRadius){
+
+  if(!tracks) return 1.0;
+  if(tracks->GetEntries() <= 0) return 1.0;
+
+  double Pt_jets_X = 0. ;
+  double Pt_jets_Y = 0. ;
+  double Pt_jets_X_tot = 0. ;
+  double Pt_jets_Y_tot = 0. ;
+
+  for(int i=0;i<int(tracks->GetEntries());i++){
+    const Track *pTrack = tracks->At(i);
+
+    if(pTrack && p->TrackerTrk() &&
+       pTrack == p->TrackerTrk()) continue;
+
+    if(pTrack && p->GsfTrk() &&
+       pTrack == p->GsfTrk()) continue;
+
+    if(pTrack->Pt() <= ptMin) continue;
+
+    Double_t dr = MathUtils::DeltaR(pTrack->Mom(),p->Mom());
+    if ( dr < extRadius && dr >= intRadius ) {
+      Pt_jets_X_tot += pTrack->Px();
+      Pt_jets_Y_tot += pTrack->Py();  
+      double pDz = TMath::Abs(pTrack->DzCorrected(*vertices->At(0)));
+      if(pDz < delta_z){
+        Pt_jets_X += pTrack->Px();
+        Pt_jets_Y += pTrack->Py();
+      }
+    }
+  }
+
+  if(sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot) > 0)
+    return sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+
+  return 1.0;
 }
