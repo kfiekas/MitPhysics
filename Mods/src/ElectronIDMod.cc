@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.73 2011/01/21 09:26:06 dkralph Exp $
+// $Id: ElectronIDMod.cc,v 1.74 2011/01/21 11:25:28 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -19,6 +19,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
   fVertexName(ModNames::gkGoodVertexesName),
+  fBeamSpotName(Names::gkBeamSpotBrn),
   fElectronIDType("CustomTight"),
   fElectronIsoType("TrackJuraSliding"),
   fTrigObjectsName("HLTModTrigObjs"),
@@ -33,7 +34,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fCombIsolationCut(0.10),
   fApplyConvFilterType1(kTRUE),
   fApplyConvFilterType2(kFALSE),
-  fWrongHitsRequirement(kTRUE),
+  fNWrongHitsMax(1),
   fElectronsFromBranch(kTRUE),
   fNExpectedHitsInnerCut(999),
   fCombinedIdCut(kFALSE),
@@ -49,7 +50,8 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElIsoType(ElectronTools::kIsoUndef),
   fElectrons(0),
   fConversions(0),
-  fVertices(0)
+  fVertices(0),
+  fBeamSpot(0)
 {
   // Constructor.
 }
@@ -162,6 +164,7 @@ void ElectronIDMod::Process()
   // Process entries of the tree. 
 
   LoadEventObject(fElectronBranchName, fElectrons);
+  LoadEventObject(fBeamSpotName, fBeamSpot);
 
   //get trigger object collection if trigger matching is enabled
   const TriggerObjectCol *trigObjs = 0;
@@ -220,7 +223,7 @@ void ElectronIDMod::Process()
     if (fApplyConvFilterType1) {
       LoadEventObject(fConversionBranchName, fConversions);
       passConvVetoType1 = ElectronTools::PassConversionFilter(e, fConversions, 
-                                                         fWrongHitsRequirement);      
+                                                         fBeamSpot->At(0), fNWrongHitsMax);      
     }
     else {
       passConvVetoType1 = kTRUE;
@@ -283,6 +286,8 @@ void ElectronIDMod::SlaveBegin()
   // we just request the electron collection branch.
 
   ReqEventObject(fElectronBranchName, fElectrons,fElectronsFromBranch);
+  ReqEventObject(fBeamSpotName, fBeamSpot,kTRUE);
+
 
   if(fCombinedIdCut == kTRUE) {
     fElectronIDType  	  = "NoId";

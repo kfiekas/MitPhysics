@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GenFakeableObjsMod.h,v 1.10 2010/10/20 02:44:51 ceballos Exp $
+// $Id: GenFakeableObjsMod.h,v 1.11 2011/01/23 19:00:09 sixie Exp $
 //
 // GenFakeableObjsMod
 //
@@ -28,7 +28,7 @@ namespace mithep
       Bool_t        GetApplyConversionFilter()       const { return fApplyConvFilter;              }
       Bool_t        GetApplyD0Cut()                  const { return fApplyD0Cut;                   }
       Bool_t        GetChargeFilter()                const { return fChargeFilter;                 }
-      Bool_t        GetWrongHitsRequirement()        const { return fWrongHitsRequirement;         }
+      Bool_t        GetNWrongHitsMax()               const { return fNWrongHitsMax;                }
       Double_t      GetD0Cut()                       const { return fD0Cut;                        }
       Double_t      GetCombIsolationCut()            const { return fCombIsolationCut;             }
       Double_t      GetTrackIsolationCut()           const { return fTrackIsolationCut;            }
@@ -68,7 +68,7 @@ namespace mithep
       void SetEcalIsolationCut(Double_t cut)                 { fEcalIsolationCut           = cut;  }
       void SetHcalIsolationCut(Double_t cut)                 { fHcalIsolationCut           = cut;  }
       void SetChargeFilter(Bool_t b)                         { fChargeFilter               = b;    }
-      void SetWrongHitsRequirement(Bool_t b)                 { fWrongHitsRequirement       = b;    }
+      void SetNWrongHitsMax(UInt_t n)                        { fNWrongHitsMax              = n;    }
       void SetVetoTriggerJet(Bool_t b)                       { fVetoTriggerJet             = b;    }
       void SetVetoGenLeptons(Bool_t b)                       { fVetoGenLeptons             = b;    }
       void SetVetoCleanLeptons(Bool_t b)                     { fVetoCleanLeptons           = b;    }
@@ -112,7 +112,7 @@ namespace mithep
       void             SlaveBegin();
 
       Bool_t           fApplyConvFilter;               //whether remove conversions
-      Bool_t           fWrongHitsRequirement;          //whether to use wrong hits req for conversion removal
+      UInt_t           fNWrongHitsMax;                 //whether to use wrong hits req for conversion removal
       Bool_t           fApplyD0Cut;                    //whether apply d0 cut
       Bool_t           fChargeFilter;                  //whether apply GSF and CFT equal requirement
       Double_t         fD0Cut;                         //max d0

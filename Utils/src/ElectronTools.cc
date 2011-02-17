@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.17 2011/01/17 17:32:49 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.18 2011/01/21 11:25:29 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -246,8 +246,9 @@ Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType,
 
 //--------------------------------------------------------------------------------------------------
 Bool_t ElectronTools::PassConversionFilter(const Electron *ele, 
-                                           const DecayParticleCol *conversions, 
-                                           Bool_t WrongHitsRequirement) 
+                                           const DecayParticleCol *conversions,
+                                           const BaseVertex *vtx,
+                                           UInt_t nWrongHitsMax) 
 {
   Bool_t isGoodConversion = kFALSE;
 
@@ -265,21 +266,17 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
     // if match between the e-track and one of the conversion legs
     if (ConversionMatchFound == kTRUE){
       isGoodConversion =  (conversions->At(ifc)->Prob() > 1e-6) &&
-        (conversions->At(ifc)->Lxy() > 0) &&
-        (conversions->At(ifc)->Lz() > 0) &&
-        (conversions->At(ifc)->Position().Rho() > 2.0);
+        (conversions->At(ifc)->Quality().Quality(ConversionQuality::arbitratedMerged)) &&
+        (conversions->At(ifc)->LxyCorrected(vtx) > 2.0);
 
       if (isGoodConversion == kTRUE) {
         for (UInt_t d=0; d<conversions->At(ifc)->NDaughters(); d++) {
           const Track *trk = dynamic_cast<const ChargedParticle*>
             (conversions->At(ifc)->Daughter(d))->Trk();
           if (trk) {
-            // These requirements are not used for the GSF track
-            if (!(trk->NHits() >= 3 && trk->Prob() > 1e-6) && trk!=ele->GsfTrk())
-              isGoodConversion = kFALSE;
             const StableData *sd = dynamic_cast<const StableData*>
               (conversions->At(ifc)->DaughterDat(d));
-            if (WrongHitsRequirement && sd->NWrongHits() != 0)
+            if (sd->NWrongHits() > nWrongHitsMax)
               isGoodConversion = kFALSE;
           } else {
             isGoodConversion = kFALSE;

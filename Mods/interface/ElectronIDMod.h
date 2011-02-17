@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.38 2010/10/09 20:15:30 bendavid Exp $
+// $Id: ElectronIDMod.h,v 1.39 2011/01/21 09:26:21 dkralph Exp $
 //
 // ElectronIDMod
 //
@@ -80,7 +80,7 @@ namespace mithep
       void                SetApplyTriggerMatching(Bool_t b)      { fApplyTriggerMatching = b;  }
       void                SetTrackIsoCut(Double_t cut)           { fTrackIsolationCut  = cut;  }
       void                SetChargeFilter(Bool_t b)              { fChargeFilter = b;	       }
-      void                SetWrongHitsRequirement(Bool_t b)      { fWrongHitsRequirement = b;  }
+      void                SetNWrongHitsMax(UInt_t n)             { fNWrongHitsMax = n;         }
       void                SetCombinedIdCut(Bool_t b)             { fCombinedIdCut  = b;        }
       void                SetApplyEcalFiducial(Bool_t b)         { fApplyEcalFiducial = b;     }
       void                SetApplyEcalSeeded(Bool_t b)           { fApplyEcalSeeded = b;       }      
@@ -97,6 +97,7 @@ namespace mithep
       TString                   fConversionBranchName;   //name of electron collection (input)
       TString                   fGoodElectronsName;      //name of exported "good electrons" col
       TString                   fVertexName;	         //name of vertex collection
+      TString                   fBeamSpotName;           //name of beamspot collection
       TString                   fElectronIDType;         //type of electron ID we impose
       TString                   fElectronIsoType;        //type of electron Isolation we impose
       TString                   fTrigObjectsName;        //name of trigger object collection
@@ -111,7 +112,7 @@ namespace mithep
       Double_t                  fCombIsolationCut;       //cut value for combined isolation
       Bool_t                    fApplyConvFilterType1;   //whether remove conversions using fit method
       Bool_t                    fApplyConvFilterType2;   //whether remove conversions using DCotTheta method
-      Bool_t                    fWrongHitsRequirement;   //whether to use wrong hits req 
+      UInt_t                    fNWrongHitsMax;          //whether to use wrong hits req 
                                                          //for conversion removal
       Double_t                  fNExpectedHitsInnerCut;  //cut value for NExpectedHitsInner maximum
       Bool_t                    fCombinedIdCut;          //whether to use full combined id
@@ -131,6 +132,7 @@ namespace mithep
       const ElectronCol        *fElectrons;              //!electron collection
       const DecayParticleCol   *fConversions;            //!conversion collection
       const VertexCol          *fVertices;               //!vertices branches
+      const BeamSpotCol        *fBeamSpot;               //!beamspot branch
  
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

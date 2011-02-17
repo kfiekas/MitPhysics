@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.12 2010/10/26 10:26:28 sixie Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.14 2011/01/23 19:00:09 sixie Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -24,7 +24,7 @@ GenFakeableObjsMod::GenFakeableObjsMod(const char *name, const char *title) :
   BaseMod(name,title),
 
   fApplyConvFilter(kTRUE),
-  fWrongHitsRequirement(kTRUE),
+  fNWrongHitsMax(1),
   fApplyD0Cut(kTRUE),
   fChargeFilter(kTRUE),
   fD0Cut(0.02),
@@ -111,7 +111,7 @@ void GenFakeableObjsMod::SlaveBegin()
   electronID = new ElectronIDMod();
   electronID->SetApplyConversionFilterType1(kFALSE);
   electronID->SetApplyConversionFilterType1(fApplyConvFilter);    
-  electronID->SetWrongHitsRequirement(fWrongHitsRequirement);    
+  electronID->SetNWrongHitsMax(fNWrongHitsMax);    
   electronID->SetApplyD0Cut(fApplyD0Cut);    
   electronID->SetChargeFilter(fChargeFilter);    
   electronID->SetD0Cut(fD0Cut);
