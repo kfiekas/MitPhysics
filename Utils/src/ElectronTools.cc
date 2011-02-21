@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.18 2011/01/21 11:25:29 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.19 2011/02/17 13:44:55 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -248,7 +248,11 @@ Bool_t ElectronTools::PassCustomIso(const Electron *ele, EElIsoType isoType,
 Bool_t ElectronTools::PassConversionFilter(const Electron *ele, 
                                            const DecayParticleCol *conversions,
                                            const BaseVertex *vtx,
-                                           UInt_t nWrongHitsMax) 
+                                           UInt_t nWrongHitsMax,
+                                           Double_t probMin,
+                                           Double_t lxyMin,
+                                           Bool_t matchCkf,
+                                           Bool_t requireArbitratedMerged) 
 {
   Bool_t isGoodConversion = kFALSE;
 
@@ -257,7 +261,7 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
     for (UInt_t d=0; d<conversions->At(ifc)->NDaughters(); d++) {
       const Track *trk = dynamic_cast<const ChargedParticle*>
         (conversions->At(ifc)->Daughter(d))->Trk();
-      if (ele->GsfTrk() == trk) {
+      if (ele->GsfTrk() == trk || (matchCkf && ele->TrackerTrk()==trk) ) {
         ConversionMatchFound = kTRUE;
         break;
       }
@@ -265,9 +269,9 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
 
     // if match between the e-track and one of the conversion legs
     if (ConversionMatchFound == kTRUE){
-      isGoodConversion =  (conversions->At(ifc)->Prob() > 1e-6) &&
-        (conversions->At(ifc)->Quality().Quality(ConversionQuality::arbitratedMerged)) &&
-        (conversions->At(ifc)->LxyCorrected(vtx) > 2.0);
+      isGoodConversion =  (conversions->At(ifc)->Prob() > probMin) &&
+        (!requireArbitratedMerged || conversions->At(ifc)->Quality().Quality(ConversionQuality::arbitratedMerged)) &&
+        (conversions->At(ifc)->LxyCorrected(vtx) > lxyMin);
 
       if (isGoodConversion == kTRUE) {
         for (UInt_t d=0; d<conversions->At(ifc)->NDaughters(); d++) {
