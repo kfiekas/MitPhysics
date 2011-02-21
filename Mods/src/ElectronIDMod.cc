@@ -1,8 +1,9 @@
-// $Id: ElectronIDMod.cc,v 1.74 2011/01/21 11:25:28 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.75 2011/02/17 13:44:55 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
-#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/ElectronFwd.h"
+#include "MitAna/DataTree/interface/MuonFwd.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitAna/DataTree/interface/TriggerObjectCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
@@ -18,8 +19,12 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronBranchName(Names::gkElectronBrn),
   fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
+  fOldMuonsName("random"),  
+  fOldElectronsName("random"),  
   fVertexName(ModNames::gkGoodVertexesName),
   fBeamSpotName(Names::gkBeamSpotBrn),
+  fTrackName(Names::gkTrackBrn),
+  fPFCandidatesName(Names::gkPFCandidatesBrn),
   fElectronIDType("CustomTight"),
   fElectronIsoType("TrackJuraSliding"),
   fTrigObjectsName("HLTModTrigObjs"),
@@ -35,7 +40,6 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyConvFilterType1(kTRUE),
   fApplyConvFilterType2(kFALSE),
   fNWrongHitsMax(1),
-  fElectronsFromBranch(kTRUE),
   fNExpectedHitsInnerCut(999),
   fCombinedIdCut(kFALSE),
   fApplySpikeRemoval(kTRUE),
@@ -46,12 +50,17 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyEcalSeeded(kFALSE),
   fApplyCombinedIso(kTRUE),
   fApplyEcalFiducial(kFALSE),
+  fElectronsFromBranch(kTRUE),
   fElIdType(ElectronTools::kIdUndef),
   fElIsoType(ElectronTools::kIsoUndef),
   fElectrons(0),
   fConversions(0),
   fVertices(0),
-  fBeamSpot(0)
+  fBeamSpot(0),
+  fTracks(0),
+  fPFCandidates(0),
+  fOldMuons(0),
+  fOldElectrons(0)
 {
   // Constructor.
 }
@@ -105,7 +114,8 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
 
 
 //--------------------------------------------------------------------------------------------------
-Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIsoType isoType) const
+Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIsoType isoType,
+                                       const TrackCol *tracks, const Vertex *vertex) const
 {
 
   Bool_t isocut = kFALSE;
@@ -125,8 +135,25 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       break;
     case ElectronTools::kTrackJuraSliding:
     {
-      Double_t totalIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03();
-      if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03();
+      Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
+      Double_t totalIso = ele->TrackIsolationDr03() + (ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03())*beta;
+      if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + (TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03())*beta;
+      if (totalIso < (ele->Pt()*fCombIsolationCut) )
+        isocut = kTRUE;
+    }
+    break;
+    case ElectronTools::kPFIso:
+    {
+      Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
+      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 0, beta, fOldMuons, fOldElectrons);
+      if (totalIso < (ele->Pt()*fCombIsolationCut) )
+        isocut = kTRUE;
+    }
+    break;
+    case ElectronTools::kPFIsoNoL:
+    {
+      Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
+      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 3, beta, fOldMuons, fOldElectrons);
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
     }
@@ -163,8 +190,19 @@ void ElectronIDMod::Process()
 {
   // Process entries of the tree. 
 
-  LoadEventObject(fElectronBranchName, fElectrons);
+  if(fElIsoType != ElectronTools::kPFIsoNoL) {
+    LoadEventObject(fElectronBranchName, fElectrons);
+  }
+  else {
+    fElectrons    = GetObjThisEvt<ElectronOArr>(fElectronBranchName);
+    fOldMuons	  = GetObjThisEvt<MuonCol>(fOldMuonsName);
+    fOldElectrons = GetObjThisEvt<ElectronCol>(fOldElectronsName);
+  }
   LoadEventObject(fBeamSpotName, fBeamSpot);
+  LoadEventObject(fTrackName, fTracks);
+  LoadEventObject(fPFCandidatesName, fPFCandidates);
+
+  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
   //get trigger object collection if trigger matching is enabled
   const TriggerObjectCol *trigObjs = 0;
@@ -214,7 +252,7 @@ void ElectronIDMod::Process()
       continue;
 
     //apply Isolation Cut
-    Bool_t isocut = PassIsolationCut(e, fElIsoType);
+    Bool_t isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0));
     if (!isocut)
       continue;
 
@@ -248,7 +286,6 @@ void ElectronIDMod::Process()
 
     // apply d0 cut
     if (fApplyD0Cut) {
-      fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
       Bool_t passD0cut = ElectronTools::PassD0Cut(e, fVertices, fD0Cut);
       if (!passD0cut)
         continue;
@@ -285,9 +322,13 @@ void ElectronIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the electron collection branch.
 
-  ReqEventObject(fElectronBranchName, fElectrons,fElectronsFromBranch);
-  ReqEventObject(fBeamSpotName, fBeamSpot,kTRUE);
-
+   // In this case we cannot have a branch
+  if (fElectronIsoType.CompareTo("PFIsoNoL") != 0 ) {
+    ReqEventObject(fElectronBranchName, fElectrons,fElectronsFromBranch);
+  }
+  ReqEventObject(fBeamSpotName, fBeamSpot, kTRUE);
+  ReqEventObject(fTrackName, fTracks, kTRUE);
+  ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
 
   if(fCombinedIdCut == kTRUE) {
     fElectronIDType  	  = "NoId";
@@ -348,6 +389,10 @@ void ElectronIDMod::Setup()
     fElIsoType = ElectronTools::kTrackJuraCombined;
   else if(fElectronIsoType.CompareTo("TrackJuraSliding") == 0)
     fElIsoType = ElectronTools::kTrackJuraSliding;
+  else if (fElectronIsoType.CompareTo("PFIso") == 0 )
+    fElIsoType = ElectronTools::kPFIso;
+  else if (fElectronIsoType.CompareTo("PFIsoNoL") == 0 )
+    fElIsoType = ElectronTools::kPFIsoNoL;
   else if (fElectronIsoType.CompareTo("NoIso") == 0 )
     fElIsoType = ElectronTools::kNoIso;
   else if (fElectronIsoType.CompareTo("ZeeIso") == 0 )
@@ -375,5 +420,3 @@ void ElectronIDMod::Setup()
 
 
 }
-
-

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.26 2010/10/09 18:42:16 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.27 2010/10/29 16:19:46 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -18,7 +18,10 @@
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/MuonFwd.h"
 #include "MitAna/DataTree/interface/VertexFwd.h"
+#include "MitAna/DataTree/interface/TrackFwd.h"
+#include "MitAna/DataTree/interface/PFCandidateFwd.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
+#include "MitPhysics/Utils/interface/IsolationTools.h"
 
 namespace mithep 
 {
@@ -45,6 +48,8 @@ namespace mithep
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
       void               SetClassType(const char *type)       { fMuonClassType     = type;  }
       void               SetCleanMuonsName(const char *name)  { fCleanMuonsName    = name;  }   
+      void               SetOldMuonsName(const char *n)       { fOldMuonsName  = n;	    }  
+      void               SetOldElectronsName(const char *n)   { fOldElectronsName  = n;     }  
       void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
       void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
       void               SetD0Cut(Double_t cut)               { fD0Cut             = cut;   }
@@ -74,6 +79,8 @@ namespace mithep
         kTrackCaloCombined, //"TrackCaloCombined"
         kTrackCaloSliding,  //"TrackCaloSliding"
         kCustomIso,         //"Custom"
+        kPFIso,             //"PFIso"
+        kPFIsoNoL,          //"PFIsoNoL"
         kNoIso              //"NoIso"
       };
       enum EMuClassType {
@@ -92,7 +99,11 @@ namespace mithep
 
       TString            fMuonBranchName;      //name of muon collection (input)
       TString            fCleanMuonsName;      //name of exported "good muon" collection
+      TString            fOldMuonsName;        //name of imported "old muon" collection
+      TString            fOldElectronsName;    //name of imported "old electron" collection
       TString            fVertexName;	       //name of vertex collection
+      TString            fTrackName;	       //name of track collection
+      TString            fPFCandidatesName;    //name of pfcandidates collection
       TString            fMuonIDType;          //type of muon id scheme we impose
       TString            fMuonIsoType;         //type of muon isolations scheme we impose
       TString            fMuonClassType;       //type of muon class we impose
@@ -110,8 +121,11 @@ namespace mithep
       EMuClassType       fMuClassType;         //!muon class type (imposed)
       const MuonCol     *fMuons;               //!muon collection
       const VertexCol   *fVertices;            //!vertices branch
-      MuonTools         *fMuonTools;           //!muon tool
-    
+      const TrackCol    *fTracks;              //!track branch     
+      const PFCandidateCol *fPFCandidates;     //!pfcandidate branch
+      MuonCol	         *fOldMuons;	       //!pointer to old muon collection 
+      ElectronCol        *fOldElectrons;       //!pointer to old electron collection
+
     ClassDef(MuonIDMod, 1) // Muon identification module
   };
 }

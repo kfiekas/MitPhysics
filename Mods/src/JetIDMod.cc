@@ -1,10 +1,12 @@
-// $Id: JetIDMod.cc,v 1.20 2009/11/03 09:13:28 ceballos Exp $
+// $Id: JetIDMod.cc,v 1.21 2009/11/03 11:07:01 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataTree/interface/CaloJetCol.h"
+#include "MitAna/DataTree/interface/PFJetCol.h"
+#include "MitPhysics/Utils/interface/JetTools.h"
 
 using namespace mithep;
 
@@ -15,10 +17,13 @@ JetIDMod::JetIDMod(const char *name, const char *title) :
   BaseMod(name,title),
   fJetsName(ModNames::gkPubJetsName),
   fGoodJetsName(ModNames::gkGoodJetsName),  
+  fVertexName(ModNames::gkGoodVertexesName),
   fUseJetCorrection(kTRUE),
   fJetPtCut(35.0),
   fJetEtaMaxCut(5.0),
-  fJetEEMFractionMinCut(0.01)
+  fJetEEMFractionMinCut(0.01),
+  fApplyBetaCut(kFALSE),
+  fVertices(0)
 {
   // Constructor.
 }
@@ -38,6 +43,8 @@ void JetIDMod::Process()
 
   JetOArr *GoodJets = new JetOArr; 
   GoodJets->SetName(fGoodJetsName);
+
+  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
   // loop over jets
   for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
@@ -64,6 +71,20 @@ void JetIDMod::Process()
         passEEMFractionMinCut = kFALSE;
     }
     if(passEEMFractionMinCut == kFALSE)
+      continue;
+
+    Bool_t passBetaCut = kTRUE;
+    if(fApplyBetaCut > 0 && fVertices->GetEntries() > 0){
+      const PFJet *pfJet = dynamic_cast<const PFJet*>(jet); 
+      Double_t Beta = JetTools::Beta(pfJet, fVertices->At(0), 0.2);
+      Double_t Beta_other = 0.0;
+      for(UInt_t nv=1; nv<fVertices->GetEntries(); nv++){
+        Double_t BetaAux = JetTools::Beta(pfJet, fVertices->At(nv), 0.2);
+        if(BetaAux > Beta_other) Beta_other = BetaAux;
+      }
+      if(Beta_other > Beta) passBetaCut = kFALSE;
+    }
+    if(passBetaCut == kFALSE)
       continue;
 
     // add good jet to collection

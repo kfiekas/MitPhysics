@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.6 2011/02/08 17:58:17 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.7 2011/02/17 14:09:07 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -119,14 +119,16 @@ Double_t IsolationTools::CaloTowerEmIsolation(const ThreeVector *p, Double_t ext
 
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandidate> *PFCands, 
-                                      	 const VertexCol *vertices, Double_t  delta_z, double ptMin,
-				     	 Double_t extRadius, Double_t intRadius, int isoType)
+                                      	 const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
+				     	 Double_t extRadius, Double_t intRadius, int isoType,
+					 Double_t beta, const MuonCol *goodMuons, 
+					 const ElectronCol *goodElectrons)
 {
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
   //annulus around the particle seed track.  
 
   Double_t zLepton = 0.0;
-  if(p->BestTrk()) zLepton = p->BestTrk()->DzCorrected(*vertices->At(0));
+  if(p->BestTrk()) zLepton = p->BestTrk()->DzCorrected(*vertex);
 
   Double_t ptSum =0.;  
   for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
@@ -140,6 +142,8 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
     // charged particles and gammas only
     else if(isoType == 2 && 
            (pf->BestTrk() || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
+     // all particles, rejecting good leptons
+    else if(isoType == 3)                       		   isGoodType = kTRUE;
 
     if(isGoodType == kFALSE) continue;
 
@@ -150,7 +154,7 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 
     Double_t deltaZ = 0.0;
     if(pf->BestTrk()) {
-      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertices->At(0)) - zLepton);
+      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
     }
 
     // ignore the pf candidate if it is too far away in Z
@@ -161,21 +165,52 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
     // add the pf pt if it is inside the extRadius and outside the intRadius
     if ( dr < extRadius && 
 	 dr >= intRadius ) {
-      ptSum += pf->Pt();
+      Bool_t isLepton = kFALSE;
+      if(goodMuons && isoType == 3){
+        for (UInt_t nl=0; nl<goodMuons->GetEntries();nl++) {
+	  const Muon *m = goodMuons->At(nl);
+          if(pf->TrackerTrk() && m->TrackerTrk() &&
+	     pf->TrackerTrk() == m->TrackerTrk()) {
+	    isLepton = kTRUE;
+	    break;
+	  }
+	}
+      }
+      if(goodElectrons && isLepton == kFALSE && isoType == 3){
+        for (UInt_t nl=0; nl<goodElectrons->GetEntries();nl++) {
+	  const Electron *e = goodElectrons->At(nl);
+          if(pf->TrackerTrk() && e->TrackerTrk() &&
+	     pf->TrackerTrk() == e->TrackerTrk()) {
+	    isLepton = kTRUE;
+	    break;
+	  }
+          if(pf->GsfTrk() && e->GsfTrk() &&
+	     pf->GsfTrk() == e->GsfTrk()) {
+	    isLepton = kTRUE;
+	    break;
+	  }
+	}
+      }
+      if(isLepton == kFALSE){
+        if(pf->BestTrk()) ptSum += pf->Pt();
+        else              ptSum += pf->Pt()*beta;
+      }
     }
   }
   return ptSum;
 }
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
-                                      	     const VertexCol *vertices, Double_t  delta_z, double ptMin,
-				     	     Double_t extRadius, Double_t intRadius, int isoType)
+                                      	     const Vertex *vertex, Double_t delta_z, Double_t ptMin,
+				     	     Double_t extRadius, Double_t intRadius, int isoType,
+					     Double_t beta, const MuonCol *goodMuons, 
+					     const ElectronCol *goodElectrons)
 {
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
   //annulus around the particle seed track.  
 
   Double_t zLepton = 0.0;
-  if(p->BestTrk()) zLepton = p->BestTrk()->DzCorrected(*vertices->At(0));
+  if(p->BestTrk()) zLepton = p->BestTrk()->DzCorrected(*vertex);
 
   Double_t ptSum =0.;  
   for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
@@ -189,6 +224,8 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     // charged particles and gammas only
     else if(isoType == 2 && 
            (pf->BestTrk() || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
+    // all particles, rejecting good leptons
+    else if(isoType == 3)                       		   isGoodType = kTRUE;
 
     if(isGoodType == kFALSE) continue;
 
@@ -202,7 +239,7 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
 
     Double_t deltaZ = 0.0;
     if(pf->BestTrk()) {
-      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertices->At(0)) - zLepton);
+      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
     }
 
     // ignore the pf candidate if it is too far away in Z
@@ -213,13 +250,42 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     // add the pf pt if it is inside the extRadius and outside the intRadius
     if ( dr < extRadius && 
 	 dr >= intRadius ) {
-      ptSum += pf->Pt();
+      Bool_t isLepton = kFALSE;
+      if(goodMuons && isoType == 3){
+        for (UInt_t nl=0; nl<goodMuons->GetEntries();nl++) {
+	  const Muon *m = goodMuons->At(nl);
+          if(pf->TrackerTrk() && m->TrackerTrk() &&
+	     pf->TrackerTrk() == m->TrackerTrk()) {
+	    isLepton = kTRUE;
+	    break;
+	  }
+	}
+      }
+      if(goodElectrons && isLepton == kFALSE && isoType == 3){
+        for (UInt_t nl=0; nl<goodElectrons->GetEntries();nl++) {
+	  const Electron *e = goodElectrons->At(nl);
+          if(pf->TrackerTrk() && e->TrackerTrk() &&
+	     pf->TrackerTrk() == e->TrackerTrk()) {
+	    isLepton = kTRUE;
+	    break;
+	  }
+          if(pf->GsfTrk() && e->GsfTrk() &&
+	     pf->GsfTrk() == e->GsfTrk()) {
+	    isLepton = kTRUE;
+	    break;
+	  }
+	}
+      }
+      if(isLepton == kFALSE){
+        if(pf->BestTrk()) ptSum += pf->Pt();
+        else              ptSum += pf->Pt()*beta;
+      }
     }
   }
   return ptSum;
 }
 //--------------------------------------------------------------------------------------------------
-Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const VertexCol *vertices, 
+Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
                                Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			       Double_t intRadius){
 
@@ -242,7 +308,7 @@ Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const Vert
     if ( dr < extRadius && dr >= intRadius ) {
       Pt_jets_X_tot += pTrack->Px();
       Pt_jets_Y_tot += pTrack->Py();  
-      double pDz = TMath::Abs(pTrack->DzCorrected(*vertices->At(0)));
+      double pDz = TMath::Abs(pTrack->DzCorrected(*vertex));
       if(pDz < delta_z){
         Pt_jets_X += pTrack->Px();
         Pt_jets_Y += pTrack->Py();
@@ -257,7 +323,7 @@ Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const Vert
 }
 
 //--------------------------------------------------------------------------------------------------
-Double_t IsolationTools::BetaE(const TrackCol *tracks, const Electron *p, const VertexCol *vertices, 
+Double_t IsolationTools::BetaE(const TrackCol *tracks, const Electron *p, const Vertex *vertex, 
                                Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			       Double_t intRadius){
 
@@ -284,7 +350,7 @@ Double_t IsolationTools::BetaE(const TrackCol *tracks, const Electron *p, const 
     if ( dr < extRadius && dr >= intRadius ) {
       Pt_jets_X_tot += pTrack->Px();
       Pt_jets_Y_tot += pTrack->Py();  
-      double pDz = TMath::Abs(pTrack->DzCorrected(*vertices->At(0)));
+      double pDz = TMath::Abs(pTrack->DzCorrected(*vertex));
       if(pDz < delta_z){
         Pt_jets_X += pTrack->Px();
         Pt_jets_Y += pTrack->Py();

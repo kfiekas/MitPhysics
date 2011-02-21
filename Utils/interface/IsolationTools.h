@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.7 2011/02/08 17:58:17 ceballos Exp $
+// $Id: IsolationTools.h,v 1.8 2011/02/17 14:09:07 ceballos Exp $
 //
 // IsolationTools
 //
@@ -39,15 +39,19 @@ namespace mithep
                                            Double_t intRadius, Double_t etLow, 
                                            const mithep::Collection<mithep::CaloTower> *caloTowers);
       static Double_t PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands, 
-                      	   	      const VertexCol *vertices, Double_t  delta_z, double ptMin,
-			   	      Double_t extRadius, Double_t intRadius, int isoType);
+                      	   	      const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
+			   	      Double_t extRadius, Double_t intRadius, int isoType,
+				      Double_t beta, const MuonCol *goodMuons, 
+				      const ElectronCol *goodElectrons);
       static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
-                      	     		  const VertexCol *vertices, Double_t  delta_z, double ptMin,
-			     		  Double_t extRadius, Double_t intRadius, int isoType);
-      static Double_t BetaM(const TrackCol *tracks, const Muon *p, const VertexCol *vertices, 
+                      	     		  const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
+			     		  Double_t extRadius, Double_t intRadius, int isoType,
+				          Double_t beta, const MuonCol *goodMuons, 
+					  const ElectronCol *goodElectrons);
+      static Double_t BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
                             Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			    Double_t intRadius);
-      static Double_t BetaE(const TrackCol *tracks, const Electron *p, const VertexCol *vertices, 
+      static Double_t BetaE(const TrackCol *tracks, const Electron *p, const Vertex *vertex, 
                             Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			    Double_t intRadius);
     ClassDef(IsolationTools, 0) // Isolation tools

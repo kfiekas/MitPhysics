@@ -1,8 +1,9 @@
-	// $Id: MuonIDMod.cc,v 1.36 2010/10/29 16:20:07 ceballos Exp $
+	// $Id: MuonIDMod.cc,v 1.37 2011/01/21 11:25:28 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
-#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/MuonFwd.h"
+#include "MitAna/DataTree/interface/ElectronFwd.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -15,7 +16,11 @@ ClassImp(mithep::MuonIDMod)
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
+  fOldMuonsName("random"),  
+  fOldElectronsName("random"),  
   fVertexName(ModNames::gkGoodVertexesName),
+  fTrackName(Names::gkTrackBrn),
+  fPFCandidatesName(Names::gkPFCandidatesBrn),
   fMuonIDType("WWMuId"),
   fMuonIsoType("TrackCaloSliding"),  
   fMuonClassType("Global"),  
@@ -33,7 +38,10 @@ ClassImp(mithep::MuonIDMod)
   fMuClassType(kClassUndef),
   fMuons(0),
   fVertices(0),
-  fMuonTools(0)
+  fTracks(0),
+  fPFCandidates(0),
+  fOldMuons(0),
+  fOldElectrons(0)
 {
   // Constructor.
 }
@@ -43,10 +51,19 @@ void MuonIDMod::Process()
 {
   // Process entries of the tree. 
 
-  LoadEventObject(fMuonBranchName, fMuons);
+  if(fMuIsoType != kPFIsoNoL) {
+    LoadEventObject(fMuonBranchName, fMuons);
+  }
+  else {
+    fMuons = GetObjThisEvt<MuonOArr>(fMuonBranchName);
+  }
+  LoadEventObject(fTrackName, fTracks);
+  LoadEventObject(fPFCandidatesName, fPFCandidates);
 
   MuonOArr *CleanMuons = new MuonOArr;
   CleanMuons->SetName(fCleanMuonsName);
+
+  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
   for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
     const Muon *mu = fMuons->At(i);
@@ -181,14 +198,16 @@ void MuonIDMod::Process()
           (mu->IsoR03EmEt() + mu->IsoR03HadEt() < fCaloIsolationCut);
         break;
       case kTrackCaloCombined:
-        isocut = (1.0 * mu->IsoR03SumPt() + 1.0 * mu->IsoR03EmEt() + 
-                  1.0 * mu->IsoR03HadEt() < fCombIsolationCut);
+        isocut = (1.0 * mu->IsoR03SumPt() +
+	          1.0 * mu->IsoR03EmEt()  + 
+		  1.0 * mu->IsoR03HadEt() < fCombIsolationCut);
         break;
       case kTrackCaloSliding:
         { 
-          Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
-                              1.0 * mu->IsoR03EmEt() + 
-                              1.0 * mu->IsoR03HadEt();
+          Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
+          Double_t totalIso =  1.0 * mu->IsoR03SumPt() + 
+                              (1.0 * mu->IsoR03EmEt()  + 
+                               1.0 * mu->IsoR03HadEt()) * beta;
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 
@@ -197,6 +216,25 @@ void MuonIDMod::Process()
 	    isocut = kTRUE;
           else if(fReverseIsoCut == kTRUE)
 	    isocut = kFALSE;
+	}
+        break;
+      case kPFIso:
+        {
+          Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 0, beta, fOldMuons, fOldElectrons);
+          if (totalIso < (mu->Pt()*fCombIsolationCut) )
+            isocut = kTRUE;
+	}
+        break;
+      case kPFIsoNoL:
+        {
+          fOldMuons     = GetObjThisEvt<MuonCol>(fOldMuonsName);
+          fOldElectrons = GetObjThisEvt<ElectronCol>(fOldElectronsName);
+
+          Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 3, beta, fOldMuons, fOldElectrons);
+          if (totalIso < (mu->Pt()*fCombIsolationCut) )
+            isocut = kTRUE;
 	}
         break;
       case kNoIso:
@@ -211,7 +249,6 @@ void MuonIDMod::Process()
       continue;
 
     if (fApplyD0Cut) {
-      fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
       Bool_t passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut);
       if (!passD0cut)
         continue;
@@ -234,9 +271,12 @@ void MuonIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the muon collection branch.
 
-  ReqEventObject(fMuonBranchName, fMuons, kTRUE);
-
-  fMuonTools = new MuonTools;
+   // In this case we cannot have a branch
+  if (fMuonIsoType.CompareTo("PFIsoNoL") != 0) {
+    ReqEventObject(fMuonBranchName, fMuons, kTRUE);
+  }
+  ReqEventObject(fTrackName, fTracks, kTRUE);
+  ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
 
   if (fMuonIDType.CompareTo("WMuId") == 0) 
     fMuIDType = kWMuId;
@@ -267,6 +307,10 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kTrackCaloCombined;
   else if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0)
     fMuIsoType = kTrackCaloSliding;
+  else if (fMuonIsoType.CompareTo("PFIso") == 0)
+    fMuIsoType = kPFIso;
+  else if (fMuonIsoType.CompareTo("PFIsoNoL") == 0)
+    fMuIsoType = kPFIsoNoL;
   else if (fMuonIsoType.CompareTo("NoIso") == 0)
     fMuIsoType = kNoIso;
   else if (fMuonIsoType.CompareTo("Custom") == 0) {
