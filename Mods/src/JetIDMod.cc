@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.21 2009/11/03 11:07:01 ceballos Exp $
+// $Id: JetIDMod.cc,v 1.22 2011/02/21 13:50:20 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -73,16 +73,11 @@ void JetIDMod::Process()
     if(passEEMFractionMinCut == kFALSE)
       continue;
 
+    // Jet to vertex association cut
+    const PFJet *pfJet = dynamic_cast<const PFJet*>(jet);     
     Bool_t passBetaCut = kTRUE;
-    if(fApplyBetaCut > 0 && fVertices->GetEntries() > 0){
-      const PFJet *pfJet = dynamic_cast<const PFJet*>(jet); 
-      Double_t Beta = JetTools::Beta(pfJet, fVertices->At(0), 0.2);
-      Double_t Beta_other = 0.0;
-      for(UInt_t nv=1; nv<fVertices->GetEntries(); nv++){
-        Double_t BetaAux = JetTools::Beta(pfJet, fVertices->At(nv), 0.2);
-        if(BetaAux > Beta_other) Beta_other = BetaAux;
-      }
-      if(Beta_other > Beta) passBetaCut = kFALSE;
+    if (pfJet) {
+      passBetaCut =  JetTools::PassBetaVertexAssociationCut(dynamic_cast<const PFJet*>(jet), fVertices->At(0), fVertices, 0.2);
     }
     if(passBetaCut == kFALSE)
       continue;

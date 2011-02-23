@@ -37,7 +37,8 @@ namespace mithep {
     static Double_t MtHiggs(const ParticleOArr *leptons, const Met *met, double metFraction[2], int nsel);
     static Double_t Beta(const TrackCol *tracks, Jet *jet, const Vertex *vertex, Double_t  delta_z, Double_t delta_cone);
     static Double_t Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_z);
-    
+    static Bool_t   PassBetaVertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex, const VertexCol *vertices, Double_t delta_z);
+
     ClassDef(JetTools, 0)
   };
 

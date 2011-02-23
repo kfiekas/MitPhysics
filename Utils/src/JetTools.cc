@@ -351,3 +351,22 @@ Double_t JetTools::Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_
 
   return 1.0;
 }
+
+
+Bool_t  JetTools::PassBetaVertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex, const VertexCol *vertices, Double_t delta_z) {
+
+  Bool_t passBetaCut = kTRUE;
+  if(vertices->GetEntries() > 0) {
+    Double_t Beta = JetTools::Beta(jet, referenceVertex, 0.2);
+    Double_t Beta_other = 0.0;
+    for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
+      if (referenceVertex == vertices->At(nv)) continue;
+      Double_t BetaAux = JetTools::Beta(jet, vertices->At(nv), 0.2);
+      if(BetaAux > Beta_other) Beta_other = BetaAux;
+    }
+    if(Beta_other > Beta) passBetaCut = kFALSE;
+  }
+
+  return passBetaCut; 
+
+}
