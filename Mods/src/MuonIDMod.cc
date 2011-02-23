@@ -1,4 +1,4 @@
-	// $Id: MuonIDMod.cc,v 1.37 2011/01/21 11:25:28 ceballos Exp $
+	// $Id: MuonIDMod.cc,v 1.38 2011/02/21 13:50:20 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -16,13 +16,13 @@ ClassImp(mithep::MuonIDMod)
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
-  fOldMuonsName("random"),  
-  fOldElectronsName("random"),  
+  fNonIsolatedMuonsName("random"),  
+  fNonIsolatedElectronsName("random"),  
   fVertexName(ModNames::gkGoodVertexesName),
   fTrackName(Names::gkTrackBrn),
   fPFCandidatesName(Names::gkPFCandidatesBrn),
   fMuonIDType("WWMuId"),
-  fMuonIsoType("TrackCaloSliding"),  
+  fMuonIsoType("TrackCaloSliding"),
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
@@ -40,8 +40,8 @@ ClassImp(mithep::MuonIDMod)
   fVertices(0),
   fTracks(0),
   fPFCandidates(0),
-  fOldMuons(0),
-  fOldElectrons(0)
+  fNonIsolatedMuons(0),
+  fNonIsolatedElectrons(0)
 {
   // Constructor.
 }
@@ -221,18 +221,18 @@ void MuonIDMod::Process()
       case kPFIso:
         {
           Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 0, beta, fOldMuons, fOldElectrons);
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 0, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 	}
         break;
       case kPFIsoNoL:
         {
-          fOldMuons     = GetObjThisEvt<MuonCol>(fOldMuonsName);
-          fOldElectrons = GetObjThisEvt<ElectronCol>(fOldElectronsName);
+          fNonIsolatedMuons     = GetObjThisEvt<MuonCol>(fNonIsolatedMuonsName);
+          fNonIsolatedElectrons = GetObjThisEvt<ElectronCol>(fNonIsolatedElectronsName);
 
           Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 3, beta, fOldMuons, fOldElectrons);
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 3, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 	}

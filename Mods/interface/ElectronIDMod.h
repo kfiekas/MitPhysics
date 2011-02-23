@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.41 2011/02/21 13:50:20 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.42 2011/02/23 09:48:18 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -73,8 +73,8 @@ namespace mithep
       void                SetD0Cut(Double_t cut)                 { fD0Cut = cut;	       }
       void                SetEcalJurIsoCut(Double_t cut)         { fEcalJuraIsoCut     = cut;  }
       void                SetGoodElectronsName(const char *n)    { fGoodElectronsName  = n;    }  
-      void                SetOldMuonsName(const char *n)         { fOldMuonsName  = n;         }  
-      void                SetOldElectronsName(const char *n)     { fOldElectronsName  = n;     }  
+      void                SetOldMuonsName(const char *n)         { fNonIsolatedMuonsName  = n;    }  
+      void                SetOldElectronsName(const char *n)     { fNonIsolatedElectronsName  = n;}  
       void                SetGoodName(const char *n)             { SetGoodElectronsName(n);    }  
       void                SetHcalIsoCut(Double_t cut)            { fHcalIsolationCut   = cut;  }
       void                SetIDLikelihoodCut(Double_t cut)       { fIDLikelihoodCut    = cut;  }
@@ -108,8 +108,8 @@ namespace mithep
       TString                   fElectronBranchName;     //name of electron collection (input)
       TString                   fConversionBranchName;   //name of electron collection (input)
       TString                   fGoodElectronsName;      //name of exported "good electrons" col
-      TString                   fOldMuonsName;           //name of imported "old muon" collection
-      TString                   fOldElectronsName;       //name of imported "old electron" collection
+      TString                   fNonIsolatedMuonsName;    //name of imported "old muon" collection
+      TString                   fNonIsolatedElectronsName;//name of imported "old electron" collection
       TString                   fVertexName;	         //name of vertex collection
       TString                   fBeamSpotName;           //name of beamspot collection
       TString                   fTrackName;              //name of track collection
@@ -152,8 +152,8 @@ namespace mithep
       const TrackCol           *fTracks;                 //!Track branch     
       const PFCandidateCol     *fPFCandidates;           //!pfcandidate branch
 
-      MuonCol  	               *fOldMuons;		//!pointer to old muon collection 
-      ElectronCol	       *fOldElectrons;	        //!pointer to old electron collection
+      MuonCol  	               *fNonIsolatedMuons;	 //!pointer to old muon collection 
+      ElectronCol	       *fNonIsolatedElectrons;	 //!pointer to old electron collection
       ElectronLikelihood       *fLH;                    //LH
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

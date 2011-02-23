@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.76 2011/02/21 13:50:20 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.77 2011/02/23 09:48:19 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -19,8 +19,8 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronBranchName(Names::gkElectronBrn),
   fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
-  fOldMuonsName("random"),  
-  fOldElectronsName("random"),  
+  fNonIsolatedMuonsName("random"),  
+  fNonIsolatedElectronsName("random"),  
   fVertexName(ModNames::gkGoodVertexesName),
   fBeamSpotName(Names::gkBeamSpotBrn),
   fTrackName(Names::gkTrackBrn),
@@ -59,8 +59,8 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fBeamSpot(0),
   fTracks(0),
   fPFCandidates(0),
-  fOldMuons(0),
-  fOldElectrons(0),
+  fNonIsolatedMuons(0),
+  fNonIsolatedElectrons(0),
   fLH(0)
 {
   // Constructor.
@@ -165,7 +165,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kPFIso:
     {
       Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
-      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 0, beta, fOldMuons, fOldElectrons);
+      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 0, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
     }
@@ -173,7 +173,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kPFIsoNoL:
     {
       Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
-      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 3, beta, fOldMuons, fOldElectrons);
+      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 3, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
     }
@@ -215,8 +215,8 @@ void ElectronIDMod::Process()
   }
   else {
     fElectrons    = GetObjThisEvt<ElectronOArr>(fElectronBranchName);
-    fOldMuons	  = GetObjThisEvt<MuonCol>(fOldMuonsName);
-    fOldElectrons = GetObjThisEvt<ElectronCol>(fOldElectronsName);
+    fNonIsolatedMuons	  = GetObjThisEvt<MuonCol>(fNonIsolatedMuonsName);
+    fNonIsolatedElectrons = GetObjThisEvt<ElectronCol>(fNonIsolatedElectronsName);
   }
   LoadEventObject(fBeamSpotName, fBeamSpot);
   LoadEventObject(fTrackName, fTracks);

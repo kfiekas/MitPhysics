@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.27 2010/10/29 16:19:46 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.28 2011/02/21 13:50:20 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -48,8 +48,8 @@ namespace mithep
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
       void               SetClassType(const char *type)       { fMuonClassType     = type;  }
       void               SetCleanMuonsName(const char *name)  { fCleanMuonsName    = name;  }   
-      void               SetOldMuonsName(const char *n)       { fOldMuonsName  = n;	    }  
-      void               SetOldElectronsName(const char *n)   { fOldElectronsName  = n;     }  
+      void               SetOldMuonsName(const char *n)       { fNonIsolatedMuonsName  = n;	    }  
+      void               SetOldElectronsName(const char *n)   { fNonIsolatedElectronsName  = n;     }  
       void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
       void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
       void               SetD0Cut(Double_t cut)               { fD0Cut             = cut;   }
@@ -99,8 +99,8 @@ namespace mithep
 
       TString            fMuonBranchName;      //name of muon collection (input)
       TString            fCleanMuonsName;      //name of exported "good muon" collection
-      TString            fOldMuonsName;        //name of imported "old muon" collection
-      TString            fOldElectronsName;    //name of imported "old electron" collection
+      TString            fNonIsolatedMuonsName;    //name of imported "old muon" collection
+      TString            fNonIsolatedElectronsName;//name of imported "old electron" collection
       TString            fVertexName;	       //name of vertex collection
       TString            fTrackName;	       //name of track collection
       TString            fPFCandidatesName;    //name of pfcandidates collection
@@ -123,8 +123,8 @@ namespace mithep
       const VertexCol   *fVertices;            //!vertices branch
       const TrackCol    *fTracks;              //!track branch     
       const PFCandidateCol *fPFCandidates;     //!pfcandidate branch
-      MuonCol	         *fOldMuons;	       //!pointer to old muon collection 
-      ElectronCol        *fOldElectrons;       //!pointer to old electron collection
+      MuonCol	         *fNonIsolatedMuons;	//!pointer to old muon collection 
+      ElectronCol        *fNonIsolatedElectrons;//!pointer to old electron collection
 
     ClassDef(MuonIDMod, 1) // Muon identification module
   };
