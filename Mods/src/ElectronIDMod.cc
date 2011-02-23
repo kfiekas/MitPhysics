@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.75 2011/02/17 13:44:55 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.76 2011/02/21 13:50:20 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -60,9 +60,31 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fTracks(0),
   fPFCandidates(0),
   fOldMuons(0),
-  fOldElectrons(0)
+  fOldElectrons(0),
+  fLH(0)
 {
   // Constructor.
+}
+
+//--------------------------------------------------------------------------------------------------
+Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
+{
+  LikelihoodMeasurements measurements;
+  measurements.pt = ele->Pt();
+  measurements.subdet = (fabs(ele->Eta())<1.479) ? 0 : 1;
+  measurements.deltaPhi = TMath::Abs(ele->DeltaPhiSuperClusterTrackAtVtx());
+  measurements.deltaEta = TMath::Abs(ele->DeltaEtaSuperClusterTrackAtVtx());
+  measurements.eSeedClusterOverPout = ele->ESeedClusterOverPout();
+  measurements.eSuperClusterOverP = ele->ESuperClusterOverP();
+  measurements.hadronicOverEm = ele->HadronicOverEm();
+  measurements.sigmaIEtaIEta = ele->CoviEtaiEta();
+  measurements.sigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi());
+  measurements.fBrem = ele->FBrem();
+  measurements.nBremClusters = ele->NumberOfClusters() - 1;
+  double likelihood = fLH->result(measurements);
+
+  if(likelihood > fIDLikelihoodCut) return kTRUE;
+  return kFALSE;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -78,8 +100,7 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       idcut = ele->PassLooseID();
       break;
     case ElectronTools::kLikelihood:
-      idcut = (ele->Pt() >  15 && ele->IDLikelihood() > fIDLikelihoodCut) ||
-              (ele->Pt() <= 15 && ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint80Id));
+      idcut = Likelihood(ele);
       break;
     case ElectronTools::kNoId:
       idcut = kTRUE;
@@ -111,7 +132,6 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
   
   return idcut;
 }
-
 
 //--------------------------------------------------------------------------------------------------
 Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIsoType isoType,
@@ -419,4 +439,10 @@ void ElectronIDMod::Setup()
   }
 
 
+}
+
+//--------------------------------------------------------------------------------------------------
+void ElectronIDMod::Terminate()
+{
+  // Run finishing code on the computer (slave) that did the analysis
 }

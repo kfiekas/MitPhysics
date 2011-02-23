@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.19 2011/02/17 13:44:55 bendavid Exp $
+// $Id: ElectronTools.cc,v 1.20 2011/02/21 04:06:33 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -126,7 +126,7 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   
   if(ele->SCluster() == 0)
     return kFALSE;
-  Double_t eSeedOverPin = ele->ESeedClusterOverPIn(); 
+  Double_t eSeedOverPin = ele->ESeedClusterOverPIn();
   Double_t hOverE       = ele->HadronicOverEm();
   Double_t sigmaee      = ele->CoviEtaiEta();
   Double_t deltaPhiIn   = TMath::Abs(ele->DeltaPhiSuperClusterTrackAtVtx());
@@ -417,10 +417,12 @@ Int_t ElectronTools::Classify(const Electron *ele) {
 
 //--------------------------------------------------------------------------------------------------
 Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices, 
-                                 const DecayParticleCol *conversions, const Int_t typeCuts){
+                                 const DecayParticleCol *conversions, const Int_t typeCuts,
+				 Double_t beta){
 
 // original code on
 // http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoEgamma/ElectronIdentification/src/CutBasedElectronID.cc
+// beta must be computed with a DR cone of 0.4
 
   Double_t scEt   = ele->SCluster()->Et();
   Double_t scEta  = ele->SCluster()->Eta();
@@ -434,8 +436,8 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
 
   Int_t mishits = ele->BestTrk()->NExpectedHitsInner();
   Double_t tkIso   = ele->TrackIsolationDr03();
-  Double_t ecalIso = ele->EcalRecHitIsoDr04();
-  Double_t hcalIso  = ele->HcalTowerSumEtDr04();
+  Double_t ecalIso = ele->EcalRecHitIsoDr04()*beta;
+  Double_t hcalIso  = ele->HcalTowerSumEtDr04()*beta;
 
   int cat = Classify(ele);
   int eb;
@@ -513,6 +515,7 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
   Double_t cutseelTight[9] = {
   1.27e-02, 1.08e-02, 1.13e-02, 4.19e-02, 2.81e-02, 3.02e-02, 9.76e-03, 4.28e-02, 2.98e-02};
   
+  // SuperTight cuts
   Double_t cutdcotdistSuperTight[9] = {
   2.11e-02, 1.86e-02, 1.55e-02, 3.40e-02, 2.85e-02, 3.32e-02, 1.64e-02, 3.75e-02, 1.30e-04};
   Double_t cutdetainSuperTight[9] = {
@@ -545,6 +548,142 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
   1.09e-02, 1.05e-02, 1.05e-02, 3.24e-02, 2.81e-02, 2.95e-02, 9.77e-03, 2.75e-02, 2.95e-02};
   Double_t cutseelSuperTight[9] = {
   1.12e-02, 1.05e-02, 1.07e-02, 3.51e-02, 2.75e-02, 2.87e-02, 9.59e-03, 2.67e-02, 2.98e-02};
+
+  // HyperTight1 cuts
+  Double_t cutdcotdistHyperTight1[9] = {
+  1.48e-02, 1.50e-02, 8.25e-03, 3.16e-02, 2.85e-02, 3.15e-02, 6.62e-03, 3.48e-02, 3.63e-06};
+  Double_t cutdetainHyperTight1[9] = {
+  6.51e-03, 3.51e-03, 5.53e-03, 9.16e-03, 5.30e-03, 8.28e-03, 1.08e-02, 2.97e-02, 7.24e-03};
+  Double_t cutdetainlHyperTight1[9] = {
+  6.05e-03, 3.23e-03, 4.93e-03, 8.01e-03, 4.93e-03, 7.91e-03, 1.03e-02, 2.94e-02, 4.10e-03};
+  Double_t cutdphiinHyperTight1[9] = {
+  4.83e-02, 4.91e-02, 2.30e-01, 3.48e-02, 7.44e-02, 2.04e-01, 9.95e-02, 3.93e-01, 2.84e-01};
+  Double_t cutdphiinlHyperTight1[9] = {
+  4.74e-02, 4.51e-02, 2.18e-01, 2.99e-02, 7.37e-02, 2.11e-01, 9.99e-02, 3.53e-01, 2.89e-01};
+  Double_t cuteseedopcorHyperTight1[9] = {
+  7.72e-01, 9.90e-01, 1.01e+00, 8.55e-01, 9.11e-01, 7.72e-01, 9.17e-01, 1.06e+00, 7.63e-01};
+  Double_t cutfmishitsHyperTight1[9] = {
+  3.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01};
+  Double_t cuthoeHyperTight1[9] = {
+  6.17e-02, 3.70e-02, 1.41e-01, 2.91e-01, 3.82e-02, 1.34e-01, 4.19e-01, 3.87e-01, 3.93e-01};
+  Double_t cuthoelHyperTight1[9] = {
+  4.43e-02, 3.57e-02, 1.41e-01, 2.81e-01, 3.07e-02, 1.28e-01, 2.27e-01, 3.80e-01, 1.32e-01};
+  Double_t cutip_gsfHyperTight1[9] = {
+  1.21e-02, 1.76e-02, 6.01e-02, 2.96e-02, 1.74e-01, 9.70e-02, 7.74e-02, 1.33e-01, 7.80e-02};
+  Double_t cutip_gsflHyperTight1[9] = {
+  1.01e-02, 1.56e-02, 6.87e-02, 2.13e-02, 1.25e-01, 8.16e-02, 7.90e-02, 1.30e-01, 4.79e-02};
+  Double_t cutiso_sumHyperTight1[9] = {
+  7.92e+00, 6.85e+00, 7.87e+00, 6.77e+00, 4.47e+00, 5.28e+00, 6.57e+00, 1.02e+01, 1.78e+00};
+  Double_t cutiso_sumoetHyperTight1[9] = {
+  5.20e+00, 3.93e+00, 3.88e+00, 4.10e+00, 2.40e+00, 2.43e+00, 3.49e+00, 3.94e+00, 3.01e+00};
+  Double_t cutiso_sumoetlHyperTight1[9] = {
+  4.18e+00, 3.12e+00, 3.44e+00, 3.25e+00, 1.77e+00, 2.06e+00, 2.83e+00, 3.12e+00, 1.43e+00};
+  Double_t cutseeHyperTight1[9] = {
+  1.05e-02, 1.04e-02, 1.01e-02, 3.24e-02, 2.80e-02, 2.85e-02, 9.67e-03, 2.61e-02, 2.95e-02};
+  Double_t cutseelHyperTight1[9] = {
+  1.04e-02, 1.03e-02, 1.01e-02, 3.04e-02, 2.74e-02, 2.78e-02, 9.58e-03, 2.54e-02, 2.83e-02};
+
+  // HyperTight2 cuts
+  Double_t cutdcotdistHyperTight2[9] = {
+  1.15e-02, 1.07e-02, 4.01e-03, 2.97e-02, 2.85e-02, 3.10e-02, 9.34e-04, 3.40e-02, 2.82e-07};
+  Double_t cutdetainHyperTight2[9] = {
+  5.29e-03, 2.56e-03, 4.89e-03, 7.89e-03, 5.30e-03, 7.37e-03, 8.91e-03, 9.36e-03, 5.94e-03};
+  Double_t cutdetainlHyperTight2[9] = {
+  4.48e-03, 2.59e-03, 4.42e-03, 6.54e-03, 4.93e-03, 6.98e-03, 8.49e-03, 9.06e-03, -4.81e-03};
+  Double_t cutdphiinHyperTight2[9] = {
+  2.41e-02, 3.83e-02, 1.48e-01, 2.91e-02, 3.15e-02, 1.57e-01, 8.90e-02, 1.02e-01, 2.81e-01};
+  Double_t cutdphiinlHyperTight2[9] = {
+  2.13e-02, 3.79e-02, 1.25e-01, 2.24e-02, 3.69e-02, 1.64e-01, 9.99e-02, 9.23e-02, 2.37e-01};
+  Double_t cuteseedopcorHyperTight2[9] = {
+  1.03e+00, 9.95e-01, 1.03e+00, 1.01e+00, 9.46e-01, 9.03e-01, 9.97e-01, 1.14e+00, 8.00e-01};
+  Double_t cutfmishitsHyperTight2[9] = {
+  1.50e+00, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, -5.00e-01};
+  Double_t cuthoeHyperTight2[9] = {
+  4.94e-02, 3.45e-02, 1.40e-01, 2.02e-01, 3.82e-02, 1.19e-01, 1.23e-01, 3.82e-01, 2.50e-01};
+  Double_t cuthoelHyperTight2[9] = {
+  4.04e-02, 3.42e-02, 1.31e-01, 1.85e-01, 3.01e-02, 1.27e-01, 2.27e-01, 3.80e-01, 1.32e-01};
+  Double_t cutip_gsfHyperTight2[9] = {
+  1.14e-02, 1.38e-02, 5.29e-02, 1.87e-02, 1.31e-01, 8.63e-02, 7.74e-02, 1.04e-01, 2.42e-02};
+  Double_t cutip_gsflHyperTight2[9] = {
+  9.83e-03, 1.35e-02, 4.27e-02, 1.72e-02, 1.25e-01, 7.92e-02, 7.90e-02, 1.30e-01, 3.40e-02};
+  Double_t cutiso_sumHyperTight2[9] = {
+  6.40e+00, 5.77e+00, 6.54e+00, 5.22e+00, 3.86e+00, 4.63e+00, 6.31e+00, 1.02e+01, 1.78e+00};
+  Double_t cutiso_sumoetHyperTight2[9] = {
+  4.03e+00, 3.03e+00, 3.24e+00, 3.13e+00, 2.05e+00, 2.01e+00, 2.99e+00, 3.44e+00, 2.76e+00};
+  Double_t cutiso_sumoetlHyperTight2[9] = {
+  3.08e+00, 2.31e+00, 2.84e+00, 2.53e+00, 1.65e+00, 1.72e+00, 2.34e+00, 3.11e+00, 1.35e+00};
+  Double_t cutseeHyperTight2[9] = {
+  1.03e-02, 1.03e-02, 9.88e-03, 3.03e-02, 2.79e-02, 2.79e-02, 9.67e-03, 2.52e-02, 2.58e-02};
+  Double_t cutseelHyperTight2[9] = {
+  1.02e-02, 1.02e-02, 9.80e-03, 2.90e-02, 2.74e-02, 2.75e-02, 9.58e-03, 2.49e-02, 2.50e-02};
+
+  // HyperTight3 cuts
+  Double_t cutdcotdistHyperTight3[9] = {
+  9.63e-03, 5.11e-03, 1.95e-04, 2.97e-02, 2.85e-02, 2.18e-02, 2.61e-05, 2.57e-02, 2.82e-07};
+  Double_t cutdetainHyperTight3[9] = {
+  4.86e-03, 2.29e-03, 4.40e-03, 7.79e-03, 4.07e-03, 6.33e-03, 7.70e-03, 7.93e-03, 5.94e-03};
+  Double_t cutdetainlHyperTight3[9] = {
+  4.48e-03, 2.30e-03, 4.14e-03, 6.04e-03, 3.87e-03, 6.09e-03, 7.97e-03, 8.04e-03, -4.81e-03};
+  Double_t cutdphiinHyperTight3[9] = {
+  2.41e-02, 2.88e-02, 7.39e-02, 2.91e-02, 1.91e-02, 1.14e-01, 3.61e-02, 8.92e-02, 2.81e-01};
+  Double_t cutdphiinlHyperTight3[9] = {
+  1.95e-02, 3.42e-02, 8.06e-02, 2.22e-02, 2.26e-02, 9.73e-02, 4.51e-02, 9.23e-02, 2.37e-01};
+  Double_t cuteseedopcorHyperTight3[9] = {
+  1.07e+00, 1.01e+00, 1.08e+00, 1.01e+00, 9.69e-01, 9.10e-01, 1.04e+00, 1.20e+00, 8.00e-01};
+  Double_t cutfmishitsHyperTight3[9] = {
+  5.00e-01, 1.50e+00, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, -5.00e-01};
+  Double_t cuthoeHyperTight3[9] = {
+  3.52e-02, 3.45e-02, 1.33e-01, 1.88e-01, 2.72e-02, 1.19e-01, 9.28e-02, 2.46e-01, 2.50e-01};
+  Double_t cuthoelHyperTight3[9] = {
+  4.04e-02, 3.40e-02, 1.31e-01, 1.84e-01, 2.64e-02, 1.18e-01, 9.76e-02, 2.53e-01, 1.32e-01};
+  Double_t cutip_gsfHyperTight3[9] = {
+  1.14e-02, 1.26e-02, 3.79e-02, 1.68e-02, 1.21e-01, 5.29e-02, 7.74e-02, 3.35e-02, 2.42e-02};
+  Double_t cutip_gsflHyperTight3[9] = {
+  9.83e-03, 1.18e-02, 3.59e-02, 1.56e-02, 1.20e-01, 5.36e-02, 7.90e-02, 2.88e-02, 3.40e-02};
+  Double_t cutiso_sumHyperTight3[9] = {
+  5.40e+00, 5.41e+00, 5.88e+00, 4.32e+00, 3.86e+00, 4.33e+00, 5.87e+00, 9.05e+00, 1.78e+00};
+  Double_t cutiso_sumoetHyperTight3[9] = {
+  3.03e+00, 2.50e+00, 2.58e+00, 2.44e+00, 1.91e+00, 1.76e+00, 2.92e+00, 3.13e+00, 2.76e+00};
+  Double_t cutiso_sumoetlHyperTight3[9] = {
+  2.36e+00, 2.02e+00, 2.29e+00, 1.89e+00, 1.65e+00, 1.69e+00, 2.03e+00, 2.79e+00, 1.35e+00};
+  Double_t cutseeHyperTight3[9] = {
+  1.03e-02, 1.01e-02, 9.84e-03, 2.89e-02, 2.74e-02, 2.73e-02, 9.47e-03, 2.44e-02, 2.58e-02};
+  Double_t cutseelHyperTight3[9] = {
+  1.02e-02, 1.00e-02, 9.73e-03, 2.79e-02, 2.73e-02, 2.69e-02, 9.40e-03, 2.46e-02, 2.50e-02};
+
+  // HyperTight4 cuts
+  Double_t cutdcotdistHyperTight4[9] = {
+  2.70e-04, 1.43e-04, 1.95e-04, 2.64e-03, 2.82e-02, 1.64e-02, 2.61e-05, 2.57e-02, 2.82e-07};
+  Double_t cutdetainHyperTight4[9] = {
+  2.44e-03, 1.67e-03, 2.26e-03, 3.43e-03, 3.51e-03, 3.52e-03, 2.98e-03, 4.79e-03, 5.94e-03};
+  Double_t cutdetainlHyperTight4[9] = {
+  2.34e-03, 1.29e-03, 2.30e-03, 3.30e-03, 3.61e-03, 3.84e-03, 2.53e-03, 3.66e-03, -4.81e-03};
+  Double_t cutdphiinHyperTight4[9] = {
+  8.44e-03, 5.21e-03, 2.18e-02, 1.39e-02, 7.82e-03, 1.52e-02, 2.59e-02, 3.87e-02, 2.81e-01};
+  Double_t cutdphiinlHyperTight4[9] = {
+  5.77e-03, 3.20e-03, 2.85e-02, 2.22e-02, 7.00e-03, 1.84e-02, 2.91e-02, 4.40e-02, 2.37e-01};
+  Double_t cuteseedopcorHyperTight4[9] = {
+  1.15e+00, 1.01e+00, 1.21e+00, 1.07e+00, 9.69e-01, 9.10e-01, 1.08e+00, 1.36e+00, 8.00e-01};
+  Double_t cutfmishitsHyperTight4[9] = {
+  5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, 5.00e-01, -5.00e-01};
+  Double_t cuthoeHyperTight4[9] = {
+  2.39e-02, 2.68e-02, 2.12e-02, 1.03e-01, 9.92e-03, 7.07e-02, 7.12e-02, 1.48e-01, 2.50e-01};
+  Double_t cuthoelHyperTight4[9] = {
+  2.87e-02, 1.94e-02, 2.16e-02, 5.68e-02, 1.35e-02, 4.04e-02, 7.98e-02, 1.50e-01, 1.32e-01};
+  Double_t cutip_gsfHyperTight4[9] = {
+  7.61e-03, 5.22e-03, 3.79e-02, 1.02e-02, 4.62e-02, 1.82e-02, 7.74e-02, 3.35e-02, 2.42e-02};
+  Double_t cutip_gsflHyperTight4[9] = {
+  7.81e-03, 4.25e-03, 3.08e-02, 1.04e-02, 2.35e-02, 2.45e-02, 7.90e-02, 2.88e-02, 3.40e-02};
+  Double_t cutiso_sumHyperTight4[9] = {
+  5.40e+00, 5.41e+00, 5.88e+00, 4.32e+00, 3.86e+00, 4.33e+00, 5.86e+00, 9.05e+00, 1.78e+00};
+  Double_t cutiso_sumoetHyperTight4[9] = {
+  2.53e+00, 2.10e+00, 1.87e+00, 1.84e+00, 1.79e+00, 1.61e+00, 2.53e+00, 1.98e+00, 2.76e+00};
+  Double_t cutiso_sumoetlHyperTight4[9] = {
+  2.28e+00, 2.02e+00, 2.04e+00, 1.69e+00, 1.65e+00, 1.61e+00, 2.03e+00, 1.82e+00, 1.35e+00};
+  Double_t cutseeHyperTight4[9] = {
+  9.99e-03, 9.61e-03, 9.65e-03, 2.75e-02, 2.61e-02, 2.64e-02, 9.18e-03, 2.44e-02, 2.58e-02};
+  Double_t cutseelHyperTight4[9] = {
+  9.66e-03, 9.69e-03, 9.58e-03, 2.73e-02, 2.66e-02, 2.66e-02, 8.64e-03, 2.46e-02, 2.50e-02};
 
   Double_t cutdcotdist[9];
   Double_t cutdetain[9];
@@ -598,7 +737,7 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
     memcpy(cutsee        ,cutseeTight	     ,sizeof(cutseeTight));
     memcpy(cutseel       ,cutseelTight	     ,sizeof(cutseelTight));
   }
-  else {
+  else if(typeCuts == 2) {
     memcpy(cutdcotdist   ,cutdcotdistSuperTight   ,sizeof(cutdcotdistSuperTight));
     memcpy(cutdetain     ,cutdetainSuperTight     ,sizeof(cutdetainSuperTight));
     memcpy(cutdetainl    ,cutdetainlSuperTight    ,sizeof(cutdetainlSuperTight));
@@ -616,7 +755,81 @@ Int_t ElectronTools::PassTightId(const Electron *ele, const VertexCol *vertices,
     memcpy(cutsee        ,cutseeSuperTight	  ,sizeof(cutseeSuperTight));
     memcpy(cutseel       ,cutseelSuperTight	  ,sizeof(cutseelSuperTight));
   }
-
+  else if(typeCuts == 3) {
+    memcpy(cutdcotdist   ,cutdcotdistHyperTight1   ,sizeof(cutdcotdistHyperTight1));
+    memcpy(cutdetain     ,cutdetainHyperTight1     ,sizeof(cutdetainHyperTight1));
+    memcpy(cutdetainl    ,cutdetainlHyperTight1    ,sizeof(cutdetainlHyperTight1));
+    memcpy(cutdphiin     ,cutdphiinHyperTight1     ,sizeof(cutdphiinHyperTight1));
+    memcpy(cutdphiinl    ,cutdphiinlHyperTight1    ,sizeof(cutdphiinlHyperTight1));
+    memcpy(cuteseedopcor ,cuteseedopcorHyperTight1 ,sizeof(cuteseedopcorHyperTight1));
+    memcpy(cutfmishits   ,cutfmishitsHyperTight1   ,sizeof(cutfmishitsHyperTight1));
+    memcpy(cuthoe        ,cuthoeHyperTight1	  ,sizeof(cuthoeHyperTight1));
+    memcpy(cuthoel       ,cuthoelHyperTight1	  ,sizeof(cuthoelHyperTight1));
+    memcpy(cutip_gsf     ,cutip_gsfHyperTight1     ,sizeof(cutip_gsfHyperTight1));
+    memcpy(cutip_gsfl    ,cutip_gsflHyperTight1    ,sizeof(cutip_gsflHyperTight1));
+    memcpy(cutiso_sum    ,cutiso_sumHyperTight1    ,sizeof(cutiso_sumHyperTight1));
+    memcpy(cutiso_sumoet ,cutiso_sumoetHyperTight1 ,sizeof(cutiso_sumoetHyperTight1));
+    memcpy(cutiso_sumoetl,cutiso_sumoetlHyperTight1,sizeof(cutiso_sumoetlHyperTight1));
+    memcpy(cutsee        ,cutseeHyperTight1	  ,sizeof(cutseeHyperTight1));
+    memcpy(cutseel       ,cutseelHyperTight1	  ,sizeof(cutseelHyperTight1));
+  }
+  else if(typeCuts == 4) {
+    memcpy(cutdcotdist   ,cutdcotdistHyperTight2   ,sizeof(cutdcotdistHyperTight2));
+    memcpy(cutdetain     ,cutdetainHyperTight2     ,sizeof(cutdetainHyperTight2));
+    memcpy(cutdetainl    ,cutdetainlHyperTight2    ,sizeof(cutdetainlHyperTight2));
+    memcpy(cutdphiin     ,cutdphiinHyperTight2     ,sizeof(cutdphiinHyperTight2));
+    memcpy(cutdphiinl    ,cutdphiinlHyperTight2    ,sizeof(cutdphiinlHyperTight2));
+    memcpy(cuteseedopcor ,cuteseedopcorHyperTight2 ,sizeof(cuteseedopcorHyperTight2));
+    memcpy(cutfmishits   ,cutfmishitsHyperTight2   ,sizeof(cutfmishitsHyperTight2));
+    memcpy(cuthoe        ,cuthoeHyperTight2	  ,sizeof(cuthoeHyperTight2));
+    memcpy(cuthoel       ,cuthoelHyperTight2	  ,sizeof(cuthoelHyperTight2));
+    memcpy(cutip_gsf     ,cutip_gsfHyperTight2     ,sizeof(cutip_gsfHyperTight2));
+    memcpy(cutip_gsfl    ,cutip_gsflHyperTight2    ,sizeof(cutip_gsflHyperTight2));
+    memcpy(cutiso_sum    ,cutiso_sumHyperTight2    ,sizeof(cutiso_sumHyperTight2));
+    memcpy(cutiso_sumoet ,cutiso_sumoetHyperTight2 ,sizeof(cutiso_sumoetHyperTight2));
+    memcpy(cutiso_sumoetl,cutiso_sumoetlHyperTight2,sizeof(cutiso_sumoetlHyperTight2));
+    memcpy(cutsee        ,cutseeHyperTight2	  ,sizeof(cutseeHyperTight2));
+    memcpy(cutseel       ,cutseelHyperTight2	  ,sizeof(cutseelHyperTight2));
+  }
+  else if(typeCuts == 5) {
+    memcpy(cutdcotdist   ,cutdcotdistHyperTight3   ,sizeof(cutdcotdistHyperTight3));
+    memcpy(cutdetain     ,cutdetainHyperTight3     ,sizeof(cutdetainHyperTight3));
+    memcpy(cutdetainl    ,cutdetainlHyperTight3    ,sizeof(cutdetainlHyperTight3));
+    memcpy(cutdphiin     ,cutdphiinHyperTight3     ,sizeof(cutdphiinHyperTight3));
+    memcpy(cutdphiinl    ,cutdphiinlHyperTight3    ,sizeof(cutdphiinlHyperTight3));
+    memcpy(cuteseedopcor ,cuteseedopcorHyperTight3 ,sizeof(cuteseedopcorHyperTight3));
+    memcpy(cutfmishits   ,cutfmishitsHyperTight3   ,sizeof(cutfmishitsHyperTight3));
+    memcpy(cuthoe        ,cuthoeHyperTight3	  ,sizeof(cuthoeHyperTight3));
+    memcpy(cuthoel       ,cuthoelHyperTight3	  ,sizeof(cuthoelHyperTight3));
+    memcpy(cutip_gsf     ,cutip_gsfHyperTight3     ,sizeof(cutip_gsfHyperTight3));
+    memcpy(cutip_gsfl    ,cutip_gsflHyperTight3    ,sizeof(cutip_gsflHyperTight3));
+    memcpy(cutiso_sum    ,cutiso_sumHyperTight3    ,sizeof(cutiso_sumHyperTight3));
+    memcpy(cutiso_sumoet ,cutiso_sumoetHyperTight3 ,sizeof(cutiso_sumoetHyperTight3));
+    memcpy(cutiso_sumoetl,cutiso_sumoetlHyperTight3,sizeof(cutiso_sumoetlHyperTight3));
+    memcpy(cutsee        ,cutseeHyperTight3	  ,sizeof(cutseeHyperTight3));
+    memcpy(cutseel       ,cutseelHyperTight3	  ,sizeof(cutseelHyperTight3));
+  }
+  else if(typeCuts == 6) {
+    memcpy(cutdcotdist   ,cutdcotdistHyperTight4   ,sizeof(cutdcotdistHyperTight4));
+    memcpy(cutdetain     ,cutdetainHyperTight4     ,sizeof(cutdetainHyperTight4));
+    memcpy(cutdetainl    ,cutdetainlHyperTight4    ,sizeof(cutdetainlHyperTight4));
+    memcpy(cutdphiin     ,cutdphiinHyperTight4     ,sizeof(cutdphiinHyperTight4));
+    memcpy(cutdphiinl    ,cutdphiinlHyperTight4    ,sizeof(cutdphiinlHyperTight4));
+    memcpy(cuteseedopcor ,cuteseedopcorHyperTight4 ,sizeof(cuteseedopcorHyperTight4));
+    memcpy(cutfmishits   ,cutfmishitsHyperTight4   ,sizeof(cutfmishitsHyperTight4));
+    memcpy(cuthoe        ,cuthoeHyperTight4	  ,sizeof(cuthoeHyperTight4));
+    memcpy(cuthoel       ,cuthoelHyperTight4	  ,sizeof(cuthoelHyperTight4));
+    memcpy(cutip_gsf     ,cutip_gsfHyperTight4     ,sizeof(cutip_gsfHyperTight4));
+    memcpy(cutip_gsfl    ,cutip_gsflHyperTight4    ,sizeof(cutip_gsflHyperTight4));
+    memcpy(cutiso_sum    ,cutiso_sumHyperTight4    ,sizeof(cutiso_sumHyperTight4));
+    memcpy(cutiso_sumoet ,cutiso_sumoetHyperTight4 ,sizeof(cutiso_sumoetHyperTight4));
+    memcpy(cutiso_sumoetl,cutiso_sumoetlHyperTight4,sizeof(cutiso_sumoetlHyperTight4));
+    memcpy(cutsee        ,cutseeHyperTight4	  ,sizeof(cutseeHyperTight4));
+    memcpy(cutseel       ,cutseelHyperTight4	  ,sizeof(cutseelHyperTight4));
+  }
+  else {
+    return 0;
+  }
   int result = 0;
   
   const int ncuts = 10;

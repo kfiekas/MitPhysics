@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.40 2011/02/17 13:44:54 bendavid Exp $
+// $Id: ElectronIDMod.h,v 1.41 2011/02/21 13:50:20 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -22,6 +22,11 @@
 #include "MitAna/DataTree/interface/PFCandidateFwd.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitPhysics/ElectronLikelihood/interface/ElectronLikelihood.h"
+#include "MitPhysics/ElectronLikelihood/interface/LikelihoodSwitches.h"
+#include "MitPhysics/ElectronLikelihood/interface/LikelihoodMeasurements.h"
+#include <TFile.h>
+#include <TDirectory.h>
 
 namespace mithep 
 {
@@ -53,6 +58,7 @@ namespace mithep
       Bool_t              GetApplyTriggerMatching()       const { return fApplyTriggerMatching;   }
       Double_t            GetTrackIsoCut()            	  const { return fTrackIsolationCut;	  }
       Bool_t              GetChargeFilter()           	  const { return fChargeFilter; 	  }
+      Bool_t              Likelihood(const Electron *ele) const;
       Bool_t              PassIDCut(const Electron *el, ElectronTools::EElIdType idType) const;
       Bool_t              PassIsolationCut(const Electron *el, ElectronTools::EElIsoType isoType,
                                            const TrackCol *tracks, const Vertex *vertex) const;
@@ -91,12 +97,13 @@ namespace mithep
       void                SetApplyEcalSeeded(Bool_t b)           { fApplyEcalSeeded = b;       }      
       void                SetApplyCombinedIso(Bool_t b)          { fApplyCombinedIso = b;      }      
       void                SetElectronsFromBranch(Bool_t b)       { fElectronsFromBranch = b;   }      
+      void                SetLH(ElectronLikelihood *l)	         { fLH = l;  	               }
       void                Setup();
 
     protected:
       void                Process();
       void                SlaveBegin();
-
+      void                Terminate();
 
       TString                   fElectronBranchName;     //name of electron collection (input)
       TString                   fConversionBranchName;   //name of electron collection (input)
@@ -147,7 +154,7 @@ namespace mithep
 
       MuonCol  	               *fOldMuons;		//!pointer to old muon collection 
       ElectronCol	       *fOldElectrons;	        //!pointer to old electron collection
-
+      ElectronLikelihood       *fLH;                    //LH
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };
 }

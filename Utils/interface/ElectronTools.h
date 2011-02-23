@@ -46,8 +46,10 @@ namespace mithep {
         kTrackJuraCombined, //"TrackJuraCombined"
         kTrackJuraSliding,  //"TrackJuraSliding"
         kNoIso,             //"NoIso"
+        kPFIso,             //"PFIso"
+        kPFIsoNoL,          //"PFIsoNoL"
         kZeeIso,            //"ZeeIso"
-        kCustomIso,          //"Custom"
+        kCustomIso,         //"Custom"
         kVBTFWorkingPoint95Iso,
         kVBTFWorkingPoint90Iso,
         kVBTFWorkingPoint85Iso,
@@ -68,7 +70,8 @@ namespace mithep {
       static Bool_t       PassTriggerMatching(const Electron *ele, const TriggerObjectCol *trigobjs);
       static Int_t        Classify(const Electron *ele);
       static Int_t        PassTightId(const Electron *ele, const VertexCol *vertices, 
-                                      const DecayParticleCol *conversions, const Int_t typeCuts);
+                                      const DecayParticleCol *conversions, const Int_t typeCuts,
+                                      Double_t beta = 1.0);
       static bool         compute_cut(double x, double et, double cut_min, double cut_max, bool gtn=false);
 
     ClassDef(ElectronTools, 0) // Muon tools
