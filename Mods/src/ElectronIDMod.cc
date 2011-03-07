@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.77 2011/02/23 09:48:19 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.78 2011/02/23 10:37:12 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -156,6 +156,16 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kTrackJuraSliding:
     {
       Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
+      if(beta == 0) beta = 1.0;
+      Double_t totalIso = ele->TrackIsolationDr03() + (ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03())*beta;
+      if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + (TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03())*beta;
+      if (totalIso < (ele->Pt()*fCombIsolationCut) )
+        isocut = kTRUE;
+    }
+    break;
+    case ElectronTools::kTrackJuraSlidingNoBeta:
+    {
+      Double_t beta = 1.0; 
       Double_t totalIso = ele->TrackIsolationDr03() + (ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03())*beta;
       if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + (TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03())*beta;
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
@@ -165,6 +175,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kPFIso:
     {
       Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
+      if(beta == 0) beta = 1.0;
       Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 0, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
@@ -173,6 +184,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kPFIsoNoL:
     {
       Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
+      if(beta == 0) beta = 1.0;
       Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 3, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
@@ -409,6 +421,8 @@ void ElectronIDMod::Setup()
     fElIsoType = ElectronTools::kTrackJuraCombined;
   else if(fElectronIsoType.CompareTo("TrackJuraSliding") == 0)
     fElIsoType = ElectronTools::kTrackJuraSliding;
+  else if(fElectronIsoType.CompareTo("TrackJuraSlidingNoBeta") == 0)
+    fElIsoType = ElectronTools::kTrackJuraSlidingNoBeta;
   else if (fElectronIsoType.CompareTo("PFIso") == 0 )
     fElIsoType = ElectronTools::kPFIso;
   else if (fElectronIsoType.CompareTo("PFIsoNoL") == 0 )

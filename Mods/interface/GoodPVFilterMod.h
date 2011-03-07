@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GoodPVFilterMod.h,v 1.2 2010/04/23 12:30:20 bendavid Exp $
+// $Id: GoodPVFilterMod.h,v 1.3 2010/10/20 02:44:52 ceballos Exp $
 //
 // GoodPVFilterMod
 //
@@ -36,11 +36,12 @@ namespace mithep
       Int_t                       GetNEvents()      const { return fNEvents;       }
       Int_t                       GetNAccepted()    const { return fNAcceped;      }
       Int_t                       GetNFailed()      const { return fNFailed;       }
-      void                        SetAbortIfNotAccepted(Bool_t b)   { fAbort         = b; }
-      void                        SetMinVertexNTracks(UInt_t n)     { fMinVertexNTracks = n; }
-      void                        SetMinNDof(UInt_t n)              { fMinNDof = n; }
-      void                        SetMaxAbsZ(Double_t x)  { fMaxAbsZ = x; }
-      void                        SetMaxRho(Double_t x)   { fMaxRho = x; }
+      void                        SetAbortIfNotAccepted(Bool_t b)   { fAbort = b;           }
+      void                        SetMinVertexNTracks(UInt_t n)     { fMinVertexNTracks = n;}
+      void                        SetMinNDof(UInt_t n)              { fMinNDof = n; 	    }
+      void                        SetMaxAbsZ(Double_t x)  	    { fMaxAbsZ = x; 	    }
+      void                        SetMaxRho(Double_t x)   	    { fMaxRho = x;          }
+      void                        SetVertexesName(TString s)        { fVertexesName = s;    }
 
     protected:
       void                        BeginRun();

@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.7 2011/02/17 14:09:07 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.8 2011/02/21 13:50:20 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -289,6 +289,7 @@ Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const Vert
                                Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			       Double_t intRadius){
 
+  if(!tracks) return 1.0;
   if(tracks->GetEntries() <= 0) return 1.0;
 
   double Pt_jets_X = 0. ;

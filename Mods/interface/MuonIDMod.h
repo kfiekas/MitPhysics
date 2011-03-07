@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.28 2011/02/21 13:50:20 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.29 2011/02/23 10:37:12 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -74,14 +74,15 @@ namespace mithep
         kCustomId           //"Custom"
       };
       enum EMuIsoType {
-        kIsoUndef = 0,      //not defined
-        kTrackCalo,         //"TrackCalo"
-        kTrackCaloCombined, //"TrackCaloCombined"
-        kTrackCaloSliding,  //"TrackCaloSliding"
-        kCustomIso,         //"Custom"
-        kPFIso,             //"PFIso"
-        kPFIsoNoL,          //"PFIsoNoL"
-        kNoIso              //"NoIso"
+        kIsoUndef = 0,      	  //not defined
+        kTrackCalo,         	  //"TrackCalo"
+        kTrackCaloCombined, 	  //"TrackCaloCombined"
+        kTrackCaloSliding,  	  //"TrackCaloSliding"
+        kTrackCaloSlidingNoBeta,  //"TrackCaloSlidingNoBeta"
+        kCustomIso,         	  //"Custom"
+        kPFIso,             	  //"PFIso"
+        kPFIsoNoL,          	  //"PFIsoNoL"
+        kNoIso              	  //"NoIso"
       };
       enum EMuClassType {
         kClassUndef = 0,    //not defined

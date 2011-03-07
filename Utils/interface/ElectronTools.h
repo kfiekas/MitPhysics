@@ -40,16 +40,17 @@ namespace mithep {
       };
 
       enum EElIsoType {
-        kIsoUndef = 0,      //not defined
-        kTrackCalo,         //"TrackCalo"
-        kTrackJura,         //"TrackJura"
-        kTrackJuraCombined, //"TrackJuraCombined"
-        kTrackJuraSliding,  //"TrackJuraSliding"
-        kNoIso,             //"NoIso"
-        kPFIso,             //"PFIso"
-        kPFIsoNoL,          //"PFIsoNoL"
-        kZeeIso,            //"ZeeIso"
-        kCustomIso,         //"Custom"
+        kIsoUndef = 0,      	  //not defined
+        kTrackCalo,         	  //"TrackCalo"
+        kTrackJura,         	  //"TrackJura"
+        kTrackJuraCombined, 	  //"TrackJuraCombined"
+        kTrackJuraSliding,  	  //"TrackJuraSliding"
+        kTrackJuraSlidingNoBeta,  //"TrackJuraSlidingNoBeta"
+        kNoIso,             	  //"NoIso"
+        kPFIso,             	  //"PFIso"
+        kPFIsoNoL,          	  //"PFIsoNoL"
+        kZeeIso,            	  //"ZeeIso"
+        kCustomIso,         	  //"Custom"
         kVBTFWorkingPoint95Iso,
         kVBTFWorkingPoint90Iso,
         kVBTFWorkingPoint85Iso,

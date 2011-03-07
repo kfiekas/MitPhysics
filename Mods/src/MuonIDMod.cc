@@ -1,4 +1,4 @@
-	// $Id: MuonIDMod.cc,v 1.38 2011/02/21 13:50:20 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.39 2011/02/23 10:37:12 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -205,6 +205,7 @@ void MuonIDMod::Process()
       case kTrackCaloSliding:
         { 
           Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
+          if(beta == 0) beta = 1.0;
           Double_t totalIso =  1.0 * mu->IsoR03SumPt() + 
                               (1.0 * mu->IsoR03EmEt()  + 
                                1.0 * mu->IsoR03HadEt()) * beta;
@@ -218,9 +219,20 @@ void MuonIDMod::Process()
 	    isocut = kFALSE;
 	}
         break;
+      case kTrackCaloSlidingNoBeta:
+        { 
+          Double_t beta = 1.0; 
+          Double_t totalIso =  1.0 * mu->IsoR03SumPt() + 
+                              (1.0 * mu->IsoR03EmEt()  + 
+                               1.0 * mu->IsoR03HadEt()) * beta;
+          if (totalIso < (mu->Pt()*fCombIsolationCut) )
+            isocut = kTRUE;
+	}
+        break;
       case kPFIso:
         {
           Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
+          if(beta == 0) beta = 1.0;
           Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 0, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
@@ -232,6 +244,7 @@ void MuonIDMod::Process()
           fNonIsolatedElectrons = GetObjThisEvt<ElectronCol>(fNonIsolatedElectronsName);
 
           Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
+          if(beta == 0) beta = 1.0;
           Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 3, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
@@ -307,6 +320,8 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kTrackCaloCombined;
   else if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0)
     fMuIsoType = kTrackCaloSliding;
+  else if (fMuonIsoType.CompareTo("TrackCaloSlidingNoBeta") == 0)
+    fMuIsoType = kTrackCaloSlidingNoBeta;
   else if (fMuonIsoType.CompareTo("PFIso") == 0)
     fMuIsoType = kPFIso;
   else if (fMuonIsoType.CompareTo("PFIsoNoL") == 0)
