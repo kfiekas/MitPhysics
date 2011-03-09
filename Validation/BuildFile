@@ -1,8 +1,0 @@
-# -*- Makefile -*-
-# $Id: BuildFile,v 1.1 2008/10/15 06:05:02 loizides Exp $
-
-<use name=MitPhysics/Mods>
-#<flags CXXFLAGS="-g">
-<export>
-   <lib name=MitPhysicsValidation>
-</export>
