@@ -32,6 +32,7 @@ namespace mithep
       Double_t            GetSignalMassMin()   	   	    const { return fSignalMassMin;		  }
       Double_t            GetSignalMassMax()       	    const { return fSignalMassMax;		  }
       Bool_t              GetIsHPSSel()       	            const { return fIsHPSSel;		          }
+      // note: for safety, tau name is determined by fIsHPSSel in SlaveBegin()
       void                SetPFTausName(const char *n)               { fPFTausName	    	     = n; }
       void                SetPtMin(Double_t x)                       { fPtMin 	           	     = x; }
       void                SetPtLeadChargedHadronPFCandMin(Double_t x){ fPtLeadChargedHadronPFCandMin = x; }
