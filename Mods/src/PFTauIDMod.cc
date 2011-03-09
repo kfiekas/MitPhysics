@@ -123,6 +123,8 @@ void PFTauIDMod::SlaveBegin()
 {
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the Tau collection branch.
+
+  // note: for safety, this overrides SetPFTausName
   if(fIsHPSSel) {
     fPFTausName = TString(Names::gkHPSTauBrn);
   }
