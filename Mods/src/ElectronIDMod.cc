@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.78 2011/02/23 10:37:12 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.79 2011/03/07 12:45:52 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -61,7 +61,9 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fPFCandidates(0),
   fNonIsolatedMuons(0),
   fNonIsolatedElectrons(0),
-  fLH(0)
+  fLH(0),
+  fPileupEnergyDensityName(Names::gkPileupEnergyDensityBrn),
+  fPileupEnergyDensity(0)
 {
   // Constructor.
 }
@@ -135,7 +137,8 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
 
 //--------------------------------------------------------------------------------------------------
 Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIsoType isoType,
-                                       const TrackCol *tracks, const Vertex *vertex) const
+                                       const TrackCol *tracks, const Vertex *vertex, 
+				       const Double_t rho) const
 {
 
   Bool_t isocut = kFALSE;
@@ -155,19 +158,21 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       break;
     case ElectronTools::kTrackJuraSliding:
     {
-      Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
-      if(beta == 0) beta = 1.0;
-      Double_t totalIso = ele->TrackIsolationDr03() + (ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03())*beta;
-      if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + (TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03())*beta;
+      //Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
+      //if(beta == 0) beta = 1.0;
+      //Double_t totalIso = ele->TrackIsolationDr03() + (ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03())*beta;
+      //if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + (TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03())*beta;
+      //if(beta == 0) beta = 1.0;
+      Double_t totalIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03() - rho * TMath::Pi() * 0.3 * 0.3, 0.0);
+      if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + TMath::Max(TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03() - rho * TMath::Pi() * 0.3 * 0.3, 0.0);
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
     }
     break;
-    case ElectronTools::kTrackJuraSlidingNoBeta:
+    case ElectronTools::kTrackJuraSlidingNoCorrection:
     {
-      Double_t beta = 1.0; 
-      Double_t totalIso = ele->TrackIsolationDr03() + (ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03())*beta;
-      if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + (TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03())*beta;
+      Double_t totalIso = ele->TrackIsolationDr03() + (ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03());
+      if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + (TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03());
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
     }
@@ -233,7 +238,9 @@ void ElectronIDMod::Process()
   LoadEventObject(fBeamSpotName, fBeamSpot);
   LoadEventObject(fTrackName, fTracks);
   LoadEventObject(fPFCandidatesName, fPFCandidates);
-
+  if(fElIsoType == ElectronTools::kTrackJuraSliding) {
+    LoadEventObject(fPileupEnergyDensityName, fPileupEnergyDensity);
+  }
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
   //get trigger object collection if trigger matching is enabled
@@ -284,7 +291,11 @@ void ElectronIDMod::Process()
       continue;
 
     //apply Isolation Cut
-    Bool_t isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0));
+    Double_t Rho = 0.0;
+    if(fElIsoType == ElectronTools::kTrackJuraSliding) {
+     Rho = fPileupEnergyDensity->At(0)->Rho();
+    }
+    Bool_t isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0), Rho);
     if (!isocut)
       continue;
 
@@ -361,6 +372,9 @@ void ElectronIDMod::SlaveBegin()
   ReqEventObject(fBeamSpotName, fBeamSpot, kTRUE);
   ReqEventObject(fTrackName, fTracks, kTRUE);
   ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
+  if (fElectronIsoType.CompareTo("TrackJuraSliding") == 0 ) {
+    ReqEventObject(fPileupEnergyDensityName, fPileupEnergyDensity, kTRUE);
+  }
 
   if(fCombinedIdCut == kTRUE) {
     fElectronIDType  	  = "NoId";
@@ -421,8 +435,8 @@ void ElectronIDMod::Setup()
     fElIsoType = ElectronTools::kTrackJuraCombined;
   else if(fElectronIsoType.CompareTo("TrackJuraSliding") == 0)
     fElIsoType = ElectronTools::kTrackJuraSliding;
-  else if(fElectronIsoType.CompareTo("TrackJuraSlidingNoBeta") == 0)
-    fElIsoType = ElectronTools::kTrackJuraSlidingNoBeta;
+  else if(fElectronIsoType.CompareTo("TrackJuraSlidingNoCorrection") == 0)
+    fElIsoType = ElectronTools::kTrackJuraSlidingNoCorrection;
   else if (fElectronIsoType.CompareTo("PFIso") == 0 )
     fElIsoType = ElectronTools::kPFIso;
   else if (fElectronIsoType.CompareTo("PFIsoNoL") == 0 )

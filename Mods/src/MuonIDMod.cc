@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.39 2011/02/23 10:37:12 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.40 2011/03/07 12:45:52 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -41,7 +41,9 @@ ClassImp(mithep::MuonIDMod)
   fTracks(0),
   fPFCandidates(0),
   fNonIsolatedMuons(0),
-  fNonIsolatedElectrons(0)
+  fNonIsolatedElectrons(0),
+  fPileupEnergyDensityName(Names::gkPileupEnergyDensityBrn),
+  fPileupEnergyDensity(0)
 {
   // Constructor.
 }
@@ -59,7 +61,9 @@ void MuonIDMod::Process()
   }
   LoadEventObject(fTrackName, fTracks);
   LoadEventObject(fPFCandidatesName, fPFCandidates);
-
+  if(fMuIsoType == kTrackCaloSliding) {
+    LoadEventObject(fPileupEnergyDensityName, fPileupEnergyDensity);
+  }
   MuonOArr *CleanMuons = new MuonOArr;
   CleanMuons->SetName(fCleanMuonsName);
 
@@ -204,11 +208,10 @@ void MuonIDMod::Process()
         break;
       case kTrackCaloSliding:
         { 
-          Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
-          if(beta == 0) beta = 1.0;
-          Double_t totalIso =  1.0 * mu->IsoR03SumPt() + 
-                              (1.0 * mu->IsoR03EmEt()  + 
-                               1.0 * mu->IsoR03HadEt()) * beta;
+          //Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
+          //if(beta == 0) beta = 1.0;
+          const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
+          Double_t totalIso =  mu->IsoR03SumPt() + TMath::Max(mu->IsoR03EmEt() + mu->IsoR03HadEt() - rho->Rho() * TMath::Pi() * 0.3 * 0.3, 0.0);
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 
@@ -219,12 +222,11 @@ void MuonIDMod::Process()
 	    isocut = kFALSE;
 	}
         break;
-      case kTrackCaloSlidingNoBeta:
+      case kTrackCaloSlidingNoCorrection:
         { 
-          Double_t beta = 1.0; 
           Double_t totalIso =  1.0 * mu->IsoR03SumPt() + 
-                              (1.0 * mu->IsoR03EmEt()  + 
-                               1.0 * mu->IsoR03HadEt()) * beta;
+                               1.0 * mu->IsoR03EmEt()  + 
+                               1.0 * mu->IsoR03HadEt();
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 	}
@@ -290,6 +292,9 @@ void MuonIDMod::SlaveBegin()
   }
   ReqEventObject(fTrackName, fTracks, kTRUE);
   ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
+  if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0) {
+    ReqEventObject(fPileupEnergyDensityName, fPileupEnergyDensity, kTRUE);
+  }
 
   if (fMuonIDType.CompareTo("WMuId") == 0) 
     fMuIDType = kWMuId;
@@ -320,8 +325,8 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kTrackCaloCombined;
   else if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0)
     fMuIsoType = kTrackCaloSliding;
-  else if (fMuonIsoType.CompareTo("TrackCaloSlidingNoBeta") == 0)
-    fMuIsoType = kTrackCaloSlidingNoBeta;
+  else if (fMuonIsoType.CompareTo("TrackCaloSlidingNoCorrection") == 0)
+    fMuIsoType = kTrackCaloSlidingNoCorrection;
   else if (fMuonIsoType.CompareTo("PFIso") == 0)
     fMuIsoType = kPFIso;
   else if (fMuonIsoType.CompareTo("PFIsoNoL") == 0)

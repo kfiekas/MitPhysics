@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.42 2011/02/23 09:48:18 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.43 2011/02/23 10:37:12 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -25,6 +25,7 @@
 #include "MitPhysics/ElectronLikelihood/interface/ElectronLikelihood.h"
 #include "MitPhysics/ElectronLikelihood/interface/LikelihoodSwitches.h"
 #include "MitPhysics/ElectronLikelihood/interface/LikelihoodMeasurements.h"
+#include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include <TFile.h>
 #include <TDirectory.h>
 
@@ -61,7 +62,8 @@ namespace mithep
       Bool_t              Likelihood(const Electron *ele) const;
       Bool_t              PassIDCut(const Electron *el, ElectronTools::EElIdType idType) const;
       Bool_t              PassIsolationCut(const Electron *el, ElectronTools::EElIsoType isoType,
-                                           const TrackCol *tracks, const Vertex *vertex) const;
+                                           const TrackCol *tracks, const Vertex *vertex, 
+					   const Double_t rho) const;
       Bool_t              GetCombinedIdCut()               const { return fCombinedIdCut;      }
       void                SetApplyConversionFilterType1(Bool_t b){ fApplyConvFilterType1 = b;  }
       void                SetApplyConversionFilterType2(Bool_t b){ fApplyConvFilterType2 = b;  }
@@ -155,6 +157,9 @@ namespace mithep
       MuonCol  	               *fNonIsolatedMuons;	 //!pointer to old muon collection 
       ElectronCol	       *fNonIsolatedElectrons;	 //!pointer to old electron collection
       ElectronLikelihood       *fLH;                    //LH
+      TString                   fPileupEnergyDensityName;
+      const PileupEnergyDensityCol *fPileupEnergyDensity;
+
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };
 }

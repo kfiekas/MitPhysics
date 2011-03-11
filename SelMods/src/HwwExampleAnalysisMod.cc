@@ -28,7 +28,8 @@ HwwExampleAnalysisMod::HwwExampleAnalysisMod(const char *name, const char *title
   fMuons(0),
   fMet(0),
   fVertices(0),
-  fCaloJet0(0)
+  fCaloJet0(0),
+  fNEventsSelected(0)
 {
   // Constructor.
 }
@@ -348,7 +349,7 @@ void HwwExampleAnalysisMod::Process()
                          false, false, false, false, false};
   
   if(CleanLeptons->At(0)->Pt() >  20.0 &&
-     CleanLeptons->At(1)->Pt() >= 20.0) passCut[0] = true;
+     CleanLeptons->At(1)->Pt() >  20.0) passCut[0] = true;
   
   if(zDiffMax < 1.0)                    passCut[1] = true;
   
@@ -372,13 +373,14 @@ void HwwExampleAnalysisMod::Process()
     passCut[4] = true;
     if(METdeltaPhilEt > 20) passCut[5] = true;
   }
-  
+
   //*********************************************************************************************
   //Make Selection Histograms. Number of events passing each level of cut
   //*********************************************************************************************  
   bool passAllCuts = true;
   for(int c=0; c<nCuts; c++) passAllCuts = passAllCuts & passCut[c];
-    
+  if(passAllCuts) fNEventsSelected++;
+
   //Cut Selection Histograms
   fHWWSelection->Fill(-1,NNLOWeight->GetVal());
   if (finalstateType == 10 )
@@ -504,6 +506,7 @@ void HwwExampleAnalysisMod::SlaveTerminate()
   
   // Run finishing code on the computer (slave) that did the analysis. For this
   // module, we dont do anything here.
+  cout << "selected events on HwwExampleAnalysisMod: " << fNEventsSelected << endl;
 
 } 
 //--------------------------------------------------------------------------------------------------

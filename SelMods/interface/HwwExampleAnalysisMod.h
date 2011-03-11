@@ -57,6 +57,7 @@ namespace mithep
       const MetCol            *fMet;                     //!Missing Et branch
       const VertexCol         *fVertices;                //!Vertex branch
       const CaloJetCol        *fCaloJet0;                //!Jet branch
+      Int_t                    fNEventsSelected;         //selected events
 
       TH1D                    *fHWWSelection;
       TH1D                    *fHWWToEESelection;

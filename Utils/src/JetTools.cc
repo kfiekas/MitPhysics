@@ -288,10 +288,18 @@ Double_t JetTools::MtHiggs(const ParticleOArr * leptons,
       - met->Px()*dilepton->Px() - met->Py()*dilepton->Py()
       - leptons->At(0)->Px()*leptons->At(1)->Px() - leptons->At(0)->Py()*leptons->At(1)->Py());
   }
+  else if(nsel == 7){ // Use of M mass and mnu == 0, no fancy stuff
+    enell = TMath::Sqrt(dilepton->Pt()*dilepton->Pt() + dilepton->Mass()*dilepton->Mass());
+    enenn = TMath::Sqrt(met->Pt() *met->Pt()  + 0.0*0.0);
+    enex  = dilepton->Px() + met->Px();
+    eney  = dilepton->Py() + met->Py();
+    mtHiggs = (enell+enenn)*(enell+enenn) - enex*enex - eney*eney;
+  }
 
   if(nsel >= 0 && nsel <= 4){
     mtHiggs = mll*mll + mnu*mnu + 2.0*(enell*enenn - enex*enex - eney*eney);
   }
+
   if(mtHiggs <= 0) mtHiggs = 0.0;
   else             mtHiggs = TMath::Sqrt(mtHiggs);
 

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.29 2011/02/23 10:37:12 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.30 2011/03/07 12:45:52 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -22,6 +22,7 @@
 #include "MitAna/DataTree/interface/PFCandidateFwd.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 
 namespace mithep 
 {
@@ -74,15 +75,15 @@ namespace mithep
         kCustomId           //"Custom"
       };
       enum EMuIsoType {
-        kIsoUndef = 0,      	  //not defined
-        kTrackCalo,         	  //"TrackCalo"
-        kTrackCaloCombined, 	  //"TrackCaloCombined"
-        kTrackCaloSliding,  	  //"TrackCaloSliding"
-        kTrackCaloSlidingNoBeta,  //"TrackCaloSlidingNoBeta"
-        kCustomIso,         	  //"Custom"
-        kPFIso,             	  //"PFIso"
-        kPFIsoNoL,          	  //"PFIsoNoL"
-        kNoIso              	  //"NoIso"
+        kIsoUndef = 0,      	       //"not defined"
+        kTrackCalo,         	       //"TrackCalo"
+        kTrackCaloCombined, 	       //"TrackCaloCombined"
+        kTrackCaloSliding,  	       //"TrackCaloSliding"
+        kTrackCaloSlidingNoCorrection, //"TrackCaloSlidingNoCorrection"
+        kCustomIso,         	       //"Custom"
+        kPFIso,             	       //"PFIso"
+        kPFIsoNoL,          	       //"PFIsoNoL"
+        kNoIso              	       //"NoIso"
       };
       enum EMuClassType {
         kClassUndef = 0,    //not defined
@@ -126,6 +127,8 @@ namespace mithep
       const PFCandidateCol *fPFCandidates;     //!pfcandidate branch
       MuonCol	         *fNonIsolatedMuons;	//!pointer to old muon collection 
       ElectronCol        *fNonIsolatedElectrons;//!pointer to old electron collection
+      TString             fPileupEnergyDensityName;
+      const PileupEnergyDensityCol *fPileupEnergyDensity;
 
     ClassDef(MuonIDMod, 1) // Muon identification module
   };
