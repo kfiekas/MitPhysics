@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.1 2011/03/14 18:05:56 mzanetti Exp $
+// $Id: MetTools.cc,v 1.2 2011/03/15 08:35:01 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -24,7 +24,7 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
 
     // charged
-    if (fPFCandidates->At(i)->TrackerTrk()){
+    if (fPFCandidates->At(i)->HasTrackerTrk()){
 
       bool isMuonTrack = false;
       for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
@@ -50,8 +50,8 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
     }
   }
 
-  mithep::Met fCorrectedMet(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
-  mithep::Met fCorrectedTrackMet(trackNumeratorX, trackNumeratorY);
+  fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
+  fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
 }
 
 MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, const Vertex *fVertex, 
@@ -70,11 +70,11 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
 
     // charged
-    if (fPFCandidates->At(i)->TrackerTrk()){
+    if (fPFCandidates->At(i)->HasTrackerTrk()){
       bool isElectronTrack = false;
       for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
-	if ((fElectrons->At(m)->TrackerTrk() && fPFCandidates->At(i)->TrackerTrk() && fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
-	    (fElectrons->At(m)->GsfTrk()     && fPFCandidates->At(i)->GsfTrk()     && fElectrons->At(m)->GsfTrk()     == fPFCandidates->At(i)->GsfTrk())) {
+	if ( (fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
+	     (fElectrons->At(m)->HasGsfTrk() and fElectrons->At(m)->GsfTrk() == fPFCandidates->At(i)->GsfTrk()) ) {
 	  isElectronTrack = true;
 	  break;
 	}
@@ -95,8 +95,9 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
       }
     }
   }
-  mithep::Met fCorrectedMet(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
-  mithep::Met fCorrectedTrackMet(trackNumeratorX, trackNumeratorY);
+
+  fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
+  fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
 }
 
 MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, 
@@ -121,7 +122,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
 
     // charged
-    if (fPFCandidates->At(i)->TrackerTrk()){
+    if (fPFCandidates->At(i)->HasTrackerTrk()){
       bool isMuonTrack = false;
       for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
 	if (fMuons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) {
@@ -133,8 +134,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       
       bool isElectronTrack = false;
       for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
-	if ((fElectrons->At(m)->TrackerTrk() && fPFCandidates->At(i)->TrackerTrk() && fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
-	    (fElectrons->At(m)->GsfTrk()     && fPFCandidates->At(i)->GsfTrk()     && fElectrons->At(m)->GsfTrk()     == fPFCandidates->At(i)->GsfTrk())) {
+	if ( (fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
+	     (fElectrons->At(m)->HasGsfTrk() and fElectrons->At(m)->GsfTrk() == fPFCandidates->At(i)->GsfTrk()) ) {
 	  isElectronTrack = true;
 	  break;
 	}
@@ -155,16 +156,16 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       }
     }
   }
-  mithep::Met fCorrectedMet(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
-  mithep::Met fCorrectedTrackMet(trackNumeratorX, trackNumeratorY);
+  fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
+  fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
 }
 
-Met MetTools::GetMimumMet(const Met *UncorrectedMet) {
+Met MetTools::GetMinimumMet(const Met *UncorrectedMet) {
 
   return (fCorrectedMet.Pt() < UncorrectedMet->Pt()) ?  fCorrectedMet : *UncorrectedMet; 
 }
 
-Met MetTools::GetMimumTrackMet(const Met *UncorrectedMet) {
+Met MetTools::GetMinimumTrackMet(const Met *UncorrectedMet) {
 
   return (fCorrectedTrackMet.Pt() < UncorrectedMet->Pt()) ?  fCorrectedTrackMet : *UncorrectedMet; 
 }
