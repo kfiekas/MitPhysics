@@ -32,9 +32,9 @@ namespace mithep {
     ~MetTools() {}
     
     Met GetCorrectedMet() { return fCorrectedMet; }
-    Met GetMimumMet(const Met *UncorrectedMet);
+    Met GetMinimumMet(const Met *UncorrectedMet);
     Met GetCorrectedTrackMet() { return fCorrectedTrackMet; }
-    Met GetMimumTrackMet(const Met *UncorrectedMet);
+    Met GetMinimumTrackMet(const Met *UncorrectedMet);
 
     template<class V>
     double GetProjectedMet(const V *fV, const Met *UncorrectedMet);
