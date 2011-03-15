@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.13 2010/10/29 16:18:05 ceballos Exp $
+// $Id: MuonTools.cc,v 1.14 2011/01/21 11:25:29 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -429,19 +429,25 @@ TH2D *MuonTools::LoadHisto(const char *name, TFile *file) const
   return ret;
 }
 //--------------------------------------------------------------------------------------------------
-Bool_t MuonTools::PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut) 
+Bool_t MuonTools::PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut, Int_t nVertex) 
 {
   Bool_t d0cut = kFALSE;
   const Track *mt = mu->BestTrk();
   if (!mt) return kFALSE;
 
   Double_t d0_real = 1e30;
-  for(UInt_t i0 = 0; i0 < vertices->GetEntries(); i0++) {
-    if(vertices->At(i0)->NTracks() > 0){
-      Double_t pD0 = mt->D0Corrected(*vertices->At(i0));
-      d0_real = TMath::Abs(pD0);
-      break;
+  if(nVertex >= 0) d0_real = TMath::Abs(mt->D0Corrected(*vertices->At(nVertex)));
+  else            {
+    Double_t distVtx = 999.0;
+    Int_t closestVtx = 0;
+    for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
+      double dz = TMath::Abs(mt->DzCorrected(*vertices->At(nv)));
+      if(dz < distVtx) {
+	distVtx    = dz;
+        closestVtx = nv;
+      }
     }
+    d0_real = TMath::Abs(mt->D0Corrected(*vertices->At(closestVtx)));
   }
   if(d0_real < fD0Cut) d0cut = kTRUE;
   
@@ -464,6 +470,26 @@ Bool_t MuonTools::PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double
   if(d0_real < fD0Cut) d0cut = kTRUE;
   
   return d0cut;
+}
+
+//--------------------------------------------------------------------------------------------------
+Bool_t MuonTools::PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t fDZCut) 
+{
+  Bool_t dzcut = kFALSE;
+  const Track *mt = mu->BestTrk();
+  if (!mt) return kFALSE;
+
+  Double_t distVtx = 999.0;
+  for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
+    double dz = TMath::Abs(mt->DzCorrected(*vertices->At(nv)));
+    if(dz < distVtx) {
+      distVtx = dz;
+    }
+  }
+
+  if(distVtx < fDZCut) dzcut = kTRUE;
+  
+  return dzcut;
 }
 
 //--------------------------------------------------------------------------------------------------

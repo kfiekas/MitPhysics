@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.30 2011/03/07 12:45:52 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.31 2011/03/11 15:13:13 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -46,6 +46,7 @@ namespace mithep
       Bool_t             GetReverseD0Cut()              const { return fReverseD0Cut;       }
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
       void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
+      void               SetApplyDZCut(Bool_t b)              { fApplyDZCut        = b;     }
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
       void               SetClassType(const char *type)       { fMuonClassType     = type;  }
       void               SetCleanMuonsName(const char *name)  { fCleanMuonsName    = name;  }   
@@ -54,6 +55,8 @@ namespace mithep
       void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
       void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
       void               SetD0Cut(Double_t cut)               { fD0Cut             = cut;   }
+      void               SetDZCut(Double_t cut)               { fDZCut             = cut;   }
+      void               SetWhichVertex(Int_t d)              { fWhichVertex = d;           }
       void               SetEtaCut(Double_t cut)              { fEtaCut            = cut;   }
       void               SetIDType(const char *type)          { fMuonIDType        = type;  }
       void               SetInputName(const char *name)       { fMuonBranchName    = name;  }   
@@ -104,6 +107,7 @@ namespace mithep
       TString            fNonIsolatedMuonsName;    //name of imported "old muon" collection
       TString            fNonIsolatedElectronsName;//name of imported "old electron" collection
       TString            fVertexName;	       //name of vertex collection
+      TString            fBeamSpotName;        //name of beamspot collection
       TString            fTrackName;	       //name of track collection
       TString            fPFCandidatesName;    //name of pfcandidates collection
       TString            fMuonIDType;          //type of muon id scheme we impose
@@ -114,7 +118,10 @@ namespace mithep
       Double_t           fCombIsolationCut;    //cut value for combined isolation
       Double_t           fMuonPtMin;           //min muon pt
       Bool_t             fApplyD0Cut;          //=true then apply d0 cut (def=1)
+      Bool_t             fApplyDZCut;          //=true then apply dz cut (def=1)
       Double_t           fD0Cut;               //max d0
+      Double_t           fDZCut;               //max dz
+      Int_t              fWhichVertex;         //vertex to use (-2: beamspot, -1: closest in Z)
       Double_t           fEtaCut;              //max eta, absolute value
       Bool_t             fReverseIsoCut;       //apply reversion iso cut (default=0)
       Bool_t             fReverseD0Cut;        //apply reversion d0 cut (default=0)
@@ -123,6 +130,7 @@ namespace mithep
       EMuClassType       fMuClassType;         //!muon class type (imposed)
       const MuonCol     *fMuons;               //!muon collection
       const VertexCol   *fVertices;            //!vertices branch
+      const BeamSpotCol *fBeamSpot;            //!beamspot branch
       const TrackCol    *fTracks;              //!track branch     
       const PFCandidateCol *fPFCandidates;     //!pfcandidate branch
       MuonCol	         *fNonIsolatedMuons;	//!pointer to old muon collection 

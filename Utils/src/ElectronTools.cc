@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.21 2011/02/23 09:48:19 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.22 2011/03/15 08:33:42 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -308,17 +308,23 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, Double_t fD0Cut) 
+Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, Double_t fD0Cut, Int_t nVertex) 
 {
   Bool_t d0cut = kFALSE;
-  // d0 cut
-  Double_t d0_real = 99999;
-  for(UInt_t i0 = 0; i0 < vertices->GetEntries(); i0++) {
-    if(vertices->At(i0)->NTracks() > 0){
-      Double_t pD0 = ele->GsfTrk()->D0Corrected(*vertices->At(i0));
-      d0_real = TMath::Abs(pD0);
-      break;
+
+  Double_t d0_real = 1e30;
+  if(nVertex >= 0) d0_real = TMath::Abs(ele->GsfTrk()->D0Corrected(*vertices->At(nVertex)));
+  else            {
+    Double_t distVtx = 999.0;
+    Int_t closestVtx = 0;
+    for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
+      double dz = TMath::Abs(ele->GsfTrk()->DzCorrected(*vertices->At(nv)));
+      if(dz < distVtx) {
+	distVtx    = dz;
+        closestVtx = nv;
+      }
     }
+    d0_real = TMath::Abs(ele->GsfTrk()->D0Corrected(*vertices->At(closestVtx)));
   }
   if(d0_real < fD0Cut) d0cut = kTRUE;
   
@@ -338,6 +344,23 @@ Bool_t ElectronTools::PassD0Cut(const Electron *ele, const BeamSpotCol *beamspot
   if(d0_real < fD0Cut) d0cut = kTRUE;
   
   return d0cut;
+}
+
+//--------------------------------------------------------------------------------------------------
+Bool_t ElectronTools::PassDZCut(const Electron *ele, const VertexCol *vertices, Double_t fDZCut) 
+{
+  Bool_t dzcut = kFALSE;
+
+  Double_t distVtx = 999.0;
+  for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
+    double dz = TMath::Abs(ele->GsfTrk()->DzCorrected(*vertices->At(nv)));
+    if(dz < distVtx) {
+      distVtx	 = dz;
+    }
+  }
+  if(distVtx < fDZCut) dzcut = kTRUE;
+  
+  return dzcut;
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.43 2011/02/23 10:37:12 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.44 2011/03/11 15:13:13 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -41,6 +41,7 @@ namespace mithep
       Bool_t              GetApplyConversionFilterType2() const { return fApplyConvFilterType2;	  }
       Bool_t              GetApplySpikeRemoval()      	  const { return fApplySpikeRemoval;	  }
       Bool_t              GetApplyD0Cut()             	  const { return fApplyD0Cut;		  }
+      Bool_t              GetApplyDZCut()             	  const { return fApplyDZCut;		  }
       Double_t            GetCaloIsoCut()             	  const { return fCaloIsolationCut;	  }
       Double_t            GetEcalJurIsoCut()          	  const { return fEcalJuraIsoCut;	  }
       Double_t            GetCombIsoCut()             	  const { return fCombIsolationCut;	  }
@@ -70,9 +71,12 @@ namespace mithep
       void                SetNExpectedHitsInnerCut(Double_t cut) {fNExpectedHitsInnerCut = cut;}
       void                SetApplySpikeRemoval(Bool_t b)         { fApplySpikeRemoval  = b;    }
       void                SetApplyD0Cut(Bool_t b)                { fApplyD0Cut         = b;    }
+      void                SetApplyDZCut(Bool_t b)                { fApplyDZCut         = b;    }
       void                SetCaloIsoCut(Double_t cut)            { fCaloIsolationCut   = cut;  }
       void                SetCombIsoCut(Double_t cut)            { fCombIsolationCut  = cut;   }
       void                SetD0Cut(Double_t cut)                 { fD0Cut = cut;	       }
+      void                SetDZCut(Double_t cut)                 { fDZCut = cut;	       }
+      void                SetWhichVertex(Int_t d) 		 { fWhichVertex = d; 	       }
       void                SetEcalJurIsoCut(Double_t cut)         { fEcalJuraIsoCut     = cut;  }
       void                SetGoodElectronsName(const char *n)    { fGoodElectronsName  = n;    }  
       void                SetOldMuonsName(const char *n)         { fNonIsolatedMuonsName  = n;    }  
@@ -134,10 +138,13 @@ namespace mithep
                                                          //for conversion removal
       Double_t                  fNExpectedHitsInnerCut;  //cut value for NExpectedHitsInner maximum
       Bool_t                    fCombinedIdCut;          //whether to use full combined id
-      Bool_t                    fApplySpikeRemoval;      //whether apply d0 cut
+      Bool_t                    fApplySpikeRemoval;      //whether spike removal
       Bool_t                    fApplyD0Cut;             //whether apply d0 cut
+      Bool_t                    fApplyDZCut;             //whether apply dz cut
       Bool_t                    fChargeFilter;           //whether apply GSF and CFT equal requirement
       Double_t                  fD0Cut;                  //max d0
+      Double_t                  fDZCut;                  //max dz
+      Int_t                     fWhichVertex;            //vertex to use (-2: beamspot, -1: closest in Z)
       Bool_t                    fReverseIsoCut;          //apply reversion iso cut (default=0)
       Bool_t                    fReverseD0Cut;           //apply reversion d0 cut (default=0)
       Bool_t                    fApplyTriggerMatching;   //match to hlt electron (default=0)

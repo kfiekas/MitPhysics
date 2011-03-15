@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.40 2011/03/07 12:45:52 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.41 2011/03/11 15:13:09 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -19,6 +19,7 @@ ClassImp(mithep::MuonIDMod)
   fNonIsolatedMuonsName("random"),  
   fNonIsolatedElectronsName("random"),  
   fVertexName(ModNames::gkGoodVertexesName),
+  fBeamSpotName(Names::gkBeamSpotBrn),
   fTrackName(Names::gkTrackBrn),
   fPFCandidatesName(Names::gkPFCandidatesBrn),
   fMuonIDType("WWMuId"),
@@ -29,7 +30,10 @@ ClassImp(mithep::MuonIDMod)
   fCombIsolationCut(0.15),
   fMuonPtMin(10),
   fApplyD0Cut(kTRUE),
+  fApplyDZCut(kTRUE),
   fD0Cut(0.020),
+  fDZCut(0.20),
+  fWhichVertex(-1),
   fEtaCut(2.4),
   fReverseIsoCut(kFALSE),
   fReverseD0Cut(kFALSE),
@@ -38,6 +42,7 @@ ClassImp(mithep::MuonIDMod)
   fMuClassType(kClassUndef),
   fMuons(0),
   fVertices(0),
+  fBeamSpot(0),
   fTracks(0),
   fPFCandidates(0),
   fNonIsolatedMuons(0),
@@ -59,6 +64,7 @@ void MuonIDMod::Process()
   else {
     fMuons = GetObjThisEvt<MuonOArr>(fMuonBranchName);
   }
+  LoadEventObject(fBeamSpotName, fBeamSpot);
   LoadEventObject(fTrackName, fTracks);
   LoadEventObject(fPFCandidatesName, fPFCandidates);
   if(fMuIsoType == kTrackCaloSliding) {
@@ -263,9 +269,19 @@ void MuonIDMod::Process()
     if (isocut == kFALSE)
       continue;
 
+    // apply d0 cut
     if (fApplyD0Cut) {
-      Bool_t passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut);
+      Bool_t passD0cut = kTRUE;
+      if(fWhichVertex >= -1) passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut, fWhichVertex);
+      else                   passD0cut = MuonTools::PassD0Cut(mu, fBeamSpot, fD0Cut);
       if (!passD0cut)
+        continue;
+    }
+
+    // apply dz cut
+    if (fApplyDZCut) {
+      Bool_t passDZcut = MuonTools::PassDZCut(mu, fVertices, fDZCut);
+      if (!passDZcut)
         continue;
     }
 
@@ -290,6 +306,7 @@ void MuonIDMod::SlaveBegin()
   if (fMuonIsoType.CompareTo("PFIsoNoL") != 0) {
     ReqEventObject(fMuonBranchName, fMuons, kTRUE);
   }
+  ReqEventObject(fBeamSpotName, fBeamSpot, kTRUE);
   ReqEventObject(fTrackName, fTracks, kTRUE);
   ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
   if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0) {
