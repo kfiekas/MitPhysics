@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.20 2011/02/21 04:06:33 bendavid Exp $
+// $Id: ElectronTools.cc,v 1.21 2011/02/23 09:48:19 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -99,6 +99,9 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     case kVBTFWorkingPoint80Id:
       memcpy(fCuts,VBTFWorkingPoint80,sizeof(fCuts));
       break;
+    case kVBTFWorkingPoint80LowPtId:
+      memcpy(fCuts,VBTFWorkingPoint80,sizeof(fCuts));
+      break;
     case kVBTFWorkingPoint70Id:
       memcpy(fCuts,VBTFWorkingPoint70,sizeof(fCuts));
       break;
@@ -151,6 +154,14 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   if(eSeedOverPin<fCuts[4][cat+4*eb])
     return kFALSE;
 
+  // Cuts only for pt<20 region and kVBTFWorkingPoint80LowPtId
+  if(ele->Pt() < 20 && idType == kVBTFWorkingPoint80LowPtId) {
+    Bool_t isGoodLowPtEl = fBrem > 0.15 ||
+                          (ele->AbsEta() < 1.0 && eOverP > 0.95 && 
+			   TMath::Abs(ele->Charge()*ele->DeltaPhiSuperClusterTrackAtVtx()) < 0.006);
+    if(!isGoodLowPtEl) return kFALSE;
+  }
+  
   return kTRUE;
 }
 

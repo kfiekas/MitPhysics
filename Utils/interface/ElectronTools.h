@@ -36,6 +36,7 @@ namespace mithep {
         kVBTFWorkingPoint90Id,
         kVBTFWorkingPoint85Id,
         kVBTFWorkingPoint80Id,
+        kVBTFWorkingPoint80LowPtId,
         kVBTFWorkingPoint70Id
       };
 
