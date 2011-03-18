@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.8 2010/09/27 15:49:24 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.9 2010/10/19 22:25:25 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -62,11 +62,14 @@ void HKFactorProducer::Process()
 
       if(ptH >= 0) {
 	// calculate bin size
-	Double_t binsize = fPt_histo->GetXaxis()->GetXmax()/fPt_histo->GetNbinsX();
-	// get bin
-	Int_t bin = Int_t((ptH/binsize)) + 1;
-	// overflow protection: use last entry
-	if(bin > fPt_histo->GetNbinsX()) bin=fPt_histo->GetNbinsX();
+	Double_t binsize = (fPt_histo->GetXaxis()->GetXmax()-fPt_histo->GetXaxis()->GetXmin())/fPt_histo->GetNbinsX();
+	Int_t bin = 0;
+	// underflow protection: use underflow entry
+	if(ptH >= fPt_histo->GetXaxis()->GetXmin()){
+	  bin = Int_t((ptH-fPt_histo->GetXaxis()->GetXmin())/binsize) + 1;
+	}
+	// overflow protection: use overflow entry
+	if(bin > fPt_histo->GetNbinsX()) bin=fPt_histo->GetNbinsX()+1;
 	theWeight = fPt_histo->GetBinContent(bin);
 
 	if (0) {
