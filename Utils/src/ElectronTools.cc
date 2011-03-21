@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.22 2011/03/15 08:33:42 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.23 2011/03/15 12:02:49 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -157,8 +157,7 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   // Cuts only for pt<20 region and kVBTFWorkingPoint80LowPtId
   if(ele->Pt() < 20 && idType == kVBTFWorkingPoint80LowPtId) {
     Bool_t isGoodLowPtEl = fBrem > 0.15 ||
-                          (ele->AbsEta() < 1.0 && eOverP > 0.95 && 
-			   TMath::Abs(ele->Charge()*ele->DeltaPhiSuperClusterTrackAtVtx()) < 0.006);
+                          (ele->AbsEta() < 1.0 && eOverP > 0.95);
     if(!isGoodLowPtEl) return kFALSE;
   }
   
