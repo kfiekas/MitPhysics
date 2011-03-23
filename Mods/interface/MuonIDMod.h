@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.31 2011/03/11 15:13:13 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.32 2011/03/15 12:02:20 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -42,8 +42,6 @@ namespace mithep
       const char        *GetIsoType()                   const { return fMuonIsoType;        }
       const char        *GetOutputName()                const { return GetCleanMuonsName(); }   
       Double_t           GetPtMin()                     const { return fMuonPtMin;          }
-      Bool_t             GetReverseIsoCut()             const { return fReverseIsoCut;      }
-      Bool_t             GetReverseD0Cut()              const { return fReverseD0Cut;       }
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
       void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
       void               SetApplyDZCut(Bool_t b)              { fApplyDZCut        = b;     }
@@ -63,8 +61,6 @@ namespace mithep
       void               SetIsoType(const char *type)         { fMuonIsoType       = type;  }
       void               SetOutputName(const char *name)      { SetCleanMuonsName(name);    }   
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
-      void               SetReverseIsoCut(Bool_t b)           { fReverseIsoCut     = b;     }
-      void               SetReverseD0Cut(Bool_t b)            { fReverseD0Cut      = b;     }
       void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
 
       enum EMuIdType {
@@ -123,8 +119,6 @@ namespace mithep
       Double_t           fDZCut;               //max dz
       Int_t              fWhichVertex;         //vertex to use (-2: beamspot, -1: closest in Z)
       Double_t           fEtaCut;              //max eta, absolute value
-      Bool_t             fReverseIsoCut;       //apply reversion iso cut (default=0)
-      Bool_t             fReverseD0Cut;        //apply reversion d0 cut (default=0)
       EMuIdType          fMuIDType;            //!muon id type (imposed)
       EMuIsoType         fMuIsoType;           //!muon iso type (imposed)
       EMuClassType       fMuClassType;         //!muon class type (imposed)

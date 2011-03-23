@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.44 2011/03/11 15:13:13 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.45 2011/03/15 12:02:20 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -55,8 +55,6 @@ namespace mithep
       const char         *GetOutputName()             	  const { return GetGoodElectronsName();  }
       Double_t            GetPtMin()                  	  const { return fElectronPtMin;	  }
       Double_t            GetEtaMax()                  	  const { return fElectronEtaMax;	  }
-      Bool_t              GetReverseD0Cut()           	  const { return fReverseD0Cut; 	  }
-      Bool_t              GetReverseIsoCut()          	  const { return fReverseIsoCut;	  }
       Bool_t              GetApplyTriggerMatching()       const { return fApplyTriggerMatching;   }
       Double_t            GetTrackIsoCut()            	  const { return fTrackIsolationCut;	  }
       Bool_t              GetChargeFilter()           	  const { return fChargeFilter; 	  }
@@ -92,8 +90,6 @@ namespace mithep
       void                SetPtMin(Double_t pt)                  { fElectronPtMin      = pt;   }
       void                SetEtMin(Double_t et)                  { fElectronEtMin      = et;   }      
       void                SetEtaMax(Double_t eta)                { fElectronEtaMax     = eta;  }
-      void                SetReverseD0Cut(Bool_t b)              { fReverseD0Cut = b;	       }
-      void                SetReverseIsoCut(Bool_t b)             { fReverseIsoCut = b;         }
       void                SetApplyTriggerMatching(Bool_t b)      { fApplyTriggerMatching = b;  }
       void                SetTrackIsoCut(Double_t cut)           { fTrackIsolationCut  = cut;  }
       void                SetChargeFilter(Bool_t b)              { fChargeFilter = b;	       }
@@ -145,8 +141,6 @@ namespace mithep
       Double_t                  fD0Cut;                  //max d0
       Double_t                  fDZCut;                  //max dz
       Int_t                     fWhichVertex;            //vertex to use (-2: beamspot, -1: closest in Z)
-      Bool_t                    fReverseIsoCut;          //apply reversion iso cut (default=0)
-      Bool_t                    fReverseD0Cut;           //apply reversion d0 cut (default=0)
       Bool_t                    fApplyTriggerMatching;   //match to hlt electron (default=0)
       Bool_t                    fApplyEcalSeeded;        //require ecal seeded flag
       Bool_t                    fApplyCombinedIso;       //apply combined isolation

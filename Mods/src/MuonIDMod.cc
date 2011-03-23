@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.41 2011/03/11 15:13:09 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.42 2011/03/15 12:02:20 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -35,8 +35,6 @@ ClassImp(mithep::MuonIDMod)
   fDZCut(0.20),
   fWhichVertex(-1),
   fEtaCut(2.4),
-  fReverseIsoCut(kFALSE),
-  fReverseD0Cut(kFALSE),
   fMuIDType(kIdUndef),
   fMuIsoType(kIsoUndef),
   fMuClassType(kClassUndef),
@@ -214,18 +212,12 @@ void MuonIDMod::Process()
         break;
       case kTrackCaloSliding:
         { 
-          //Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
-          //if(beta == 0) beta = 1.0;
           const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
           Double_t totalIso =  mu->IsoR03SumPt() + TMath::Max(mu->IsoR03EmEt() + mu->IsoR03HadEt() - rho->Rho() * TMath::Pi() * 0.3 * 0.3, 0.0);
-          if (totalIso < (mu->Pt()*fCombIsolationCut) )
+          if      (mu->Pt() >  20.0 && totalIso < (mu->Pt()*0.15) )
             isocut = kTRUE;
-
-	  if     (fReverseIsoCut == kTRUE &&
-    	          isocut == kFALSE && totalIso < 10)
-	    isocut = kTRUE;
-          else if(fReverseIsoCut == kTRUE)
-	    isocut = kFALSE;
+          else if (mu->Pt() <= 20.0 && totalIso < (mu->Pt()*0.10) )
+            isocut = kTRUE;
 	}
         break;
       case kTrackCaloSlidingNoCorrection:
