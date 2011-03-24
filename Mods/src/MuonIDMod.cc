@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.42 2011/03/15 12:02:20 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.43 2011/03/23 11:39:57 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -264,6 +264,8 @@ void MuonIDMod::Process()
     // apply d0 cut
     if (fApplyD0Cut) {
       Bool_t passD0cut = kTRUE;
+      if      (mu->Pt() >  20.0) fD0Cut = 0.02;
+      else if (mu->Pt() <= 20.0) fD0Cut = 0.01;
       if(fWhichVertex >= -1) passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut, fWhichVertex);
       else                   passD0cut = MuonTools::PassD0Cut(mu, fBeamSpot, fD0Cut);
       if (!passD0cut)
