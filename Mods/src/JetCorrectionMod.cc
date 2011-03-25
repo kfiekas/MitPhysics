@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.4 2010/05/10 15:15:44 bendavid Exp $
+// $Id: JetCorrectionMod.cc,v 1.5 2010/08/17 22:07:31 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -18,6 +18,7 @@ JetCorrectionMod::JetCorrectionMod(const char *name, const char *title) :
   BaseMod(name,title),
   fJetsName(ModNames::gkPubJetsName),
   fCorrectedJetsName(ModNames::gkCorrectedJetsName),  
+  fRhoBranchName("Rho"),
   fJetCorrector(0)
 {
   // Constructor.
@@ -41,13 +42,16 @@ void JetCorrectionMod::SlaveBegin()
      correctionParameters.push_back(JetCorrectorParameters(*it));
    }
   
+   //rho for L1 fastjet correction
+   ReqBranch(fRhoBranchName, fRho);
+
    //initialize jet corrector class
    fJetCorrector = new FactorizedJetCorrector(correctionParameters);
 
    //keep track of which corrections are enabled
    for (std::vector<JetCorrectorParameters>::const_iterator it = correctionParameters.begin(); it != correctionParameters.end(); ++it) {
      std::string ss = it->definitions().level();
-     if (ss == "L1Offset") 
+     if (ss == "L1Offset" or fEnabledL1Correction) 
        fEnabledCorrectionMask.SetBit(Jet::L1);
      else if (ss == "L2Relative")
        fEnabledCorrectionMask.SetBit(Jet::L2);
@@ -90,6 +94,9 @@ void JetCorrectionMod::Process()
 
   std::vector<float> corrections;
 
+  // get the energy density from the event
+  LoadBranch(fRhoBranchName);
+
   // loop over jets
   for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
     const Jet *inJet = inJets->At(i);
@@ -124,8 +131,10 @@ void JetCorrectionMod::Process()
       cumulativeCorrection = corrections.at(j);
       Jet::ECorr currentLevel = fEnabledCorrections.at(j);
       jet->EnableCorrection(currentLevel);
-      if (currentLevel==Jet::L1)
-        jet->SetL1OffsetCorrectionScale(currentCorrection);
+      if (currentLevel==Jet::L1) {
+        if (fEnabledL1Correction) ApplyL1FastJetCorrection(jet);
+	else  jet->SetL1OffsetCorrectionScale(currentCorrection);
+      }
       else if (currentLevel==Jet::L2)
         jet->SetL2RelativeCorrectionScale(currentCorrection);
       else if (currentLevel==Jet::L3)
@@ -158,6 +167,31 @@ void JetCorrectionMod::Process()
   // add to event for other modules to use
   AddObjThisEvt(CorrectedJets);
 }
+
+
+//--------------------------------------------------------------------------------------------------
+void JetCorrectionMod::ApplyL1FastJetCorrection(float maxEta)
+{
+  fEnabledL1Correction = true;
+  rhoEtaMax = maxEta;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+void JetCorrectionMod::ApplyL1FastJetCorrection(Jet *jet)
+{
+  double rho = 0;
+  const PileupEnergyDensity *fR = fRho->At(0);
+  if (rhoEtaMax > 2.5) rho = fR->RhoHighEta();
+  else rho = fR->Rho();
+
+  Double_t l1Scale = (jet->Pt() - rho*jet->JetArea())/jet->Pt();
+  l1Scale = (l1Scale>0) ? l1Scale : 0.0;
+
+  jet->SetL1OffsetCorrectionScale(l1Scale);
+
+}
+
 
 //--------------------------------------------------------------------------------------------------
 void JetCorrectionMod::AddCorrectionFromRelease(const std::string &path)

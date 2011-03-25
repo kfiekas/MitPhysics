@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.3 2010/05/10 15:15:43 bendavid Exp $
+// $Id: JetCorrectionMod.h,v 1.4 2010/08/17 22:07:31 bendavid Exp $
 //
 // JetCorrectionMod
 //
@@ -16,6 +16,7 @@
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Jet.h"
+#include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitAna/DataCont/interface/Types.h"
  
 class FactorizedJetCorrector;
@@ -25,7 +26,7 @@ namespace mithep
   {
     public:
       JetCorrectionMod(const char *name="JetCorrectionMod", 
-               const char *title="Jet correction module");
+		       const char *title="Jet correction module");
      ~JetCorrectionMod();
 
       const char       *GetInputName()                 const      { return fJetsName;               }   
@@ -34,10 +35,12 @@ namespace mithep
       const char       *GetOutputName()                const      { return GetCorrectedJetsName();  }
       void              AddCorrectionFromRelease(const std::string &path);
       void              AddCorrectionFromFile(const std::string &file);    
+      void              ApplyL1FastJetCorrection(float maxEta=2.5); 
+      void              ApplyL1FastJetCorrection(Jet * jet);
       void              SetCorrectedJetsName(const char *name)    { fCorrectedJetsName = name;      }     
       void              SetCorrectedName(const char *name)        { SetCorrectedJetsName(name);     }    
       void              SetInputName(const char *name)            { fJetsName = name;               }  
-      void              SetOutputName(const char *name)           { SetCorrectedJetsName(name);     }          
+
 
     protected:
       void              SlaveBegin();
@@ -45,13 +48,18 @@ namespace mithep
 
       TString           fJetsName;              //name of jet collection (input)
       TString           fCorrectedJetsName;     //name of good jets collection (output)
-      //std::vector<JetCorrectorParameters> fCorrectionParameters; //list of corrections files (full paths)
+      TString           fRhoBranchName;         //name of pileup energy density collection
+
       std::vector<std::string> fCorrectionFiles; //list of jet correction files
       FactorizedJetCorrector *fJetCorrector;      //!CMSSW/FWLite jet corrections module
+      const PileupEnergyDensityCol *fRho;        // collection of pileup energy density collection
+
       BitMask8          fEnabledCorrectionMask; //bitmask of enabled corrections
       std::vector<Jet::ECorr> fEnabledCorrections; //vector of enabled corrections
+      bool              fEnabledL1Correction; //switch on L1 correction
+      float             rhoEtaMax; //parameter to choose which rho to use for L1 correction
 
-      ClassDef(JetCorrectionMod, 1) // Jet identification module
+      ClassDef(JetCorrectionMod, 2) // Jet identification module
   };
 }
 #endif
