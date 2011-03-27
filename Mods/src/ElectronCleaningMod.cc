@@ -1,4 +1,4 @@
-// $Id: ElectronCleaningMod.cc,v 1.9 2009/06/15 15:00:21 loizides Exp $
+// $Id: ElectronCleaningMod.cc,v 1.10 2010/06/28 21:08:19 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -36,7 +36,6 @@ void ElectronCleaningMod::Process()
     const Electron *e = GoodElectrons->At(i);   
 
     FourVectorM mom(e->Mom());
-    const Track *trtrack = e->TrackerTrk();
 
     // Check whether it overlaps with a good muon: If the muon and electron both have
     // tracker tracks then compare the tracks, otherwise
