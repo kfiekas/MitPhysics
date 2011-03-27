@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.5 2010/08/17 22:07:31 bendavid Exp $
+// $Id: JetCorrectionMod.cc,v 1.6 2011/03/25 18:37:06 mzanetti Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -14,12 +14,14 @@ using namespace mithep;
 ClassImp(mithep::JetCorrectionMod)
 
 //--------------------------------------------------------------------------------------------------
-JetCorrectionMod::JetCorrectionMod(const char *name, const char *title) : 
-  BaseMod(name,title),
-  fJetsName(ModNames::gkPubJetsName),
-  fCorrectedJetsName(ModNames::gkCorrectedJetsName),  
-  fRhoBranchName("Rho"),
-  fJetCorrector(0)
+  JetCorrectionMod::JetCorrectionMod(const char *name, const char *title) : 
+    BaseMod(name,title),
+    fJetsName(ModNames::gkPubJetsName),
+    fCorrectedJetsName(ModNames::gkCorrectedJetsName),  
+    fRhoBranchName("Rho"),
+    fEnabledL1Correction(kFALSE),
+    rhoEtaMax(5.0),
+    fJetCorrector(0)
 {
   // Constructor.
 }
@@ -36,42 +38,45 @@ JetCorrectionMod::~JetCorrectionMod()
 //--------------------------------------------------------------------------------------------------
 void JetCorrectionMod::SlaveBegin()
 {
-   //fill JetCorrectorParameters from files
-   std::vector<JetCorrectorParameters> correctionParameters;
-   for (std::vector<std::string>::const_iterator it = fCorrectionFiles.begin(); it!=fCorrectionFiles.end(); ++it) {
-     correctionParameters.push_back(JetCorrectorParameters(*it));
-   }
+  //fill JetCorrectorParameters from files
+  std::vector<JetCorrectorParameters> correctionParameters;
+  for (std::vector<std::string>::const_iterator it = fCorrectionFiles.begin(); it!=fCorrectionFiles.end(); ++it) {
+    correctionParameters.push_back(JetCorrectorParameters(*it));
+  }
   
-   //rho for L1 fastjet correction
-   ReqBranch(fRhoBranchName, fRho);
+  //rho for L1 fastjet correction
+  ReqBranch(fRhoBranchName, fRho);
 
-   //initialize jet corrector class
-   fJetCorrector = new FactorizedJetCorrector(correctionParameters);
+  //initialize jet corrector class
+  fJetCorrector = new FactorizedJetCorrector(correctionParameters);
 
-   //keep track of which corrections are enabled
-   for (std::vector<JetCorrectorParameters>::const_iterator it = correctionParameters.begin(); it != correctionParameters.end(); ++it) {
-     std::string ss = it->definitions().level();
-     if (ss == "L1Offset" or fEnabledL1Correction) 
-       fEnabledCorrectionMask.SetBit(Jet::L1);
-     else if (ss == "L2Relative")
-       fEnabledCorrectionMask.SetBit(Jet::L2);
-     else if (ss == "L3Absolute")
-       fEnabledCorrectionMask.SetBit(Jet::L3);
-     else if (ss == "L4EMF")
-       fEnabledCorrectionMask.SetBit(Jet::L4);
-     else if (ss == "L5Flavor")
-       fEnabledCorrectionMask.SetBit(Jet::L5);
-     else if (ss == "L6SLB")
-       fEnabledCorrectionMask.SetBit(Jet::L6);
-     else if (ss == "L7Parton")
-       fEnabledCorrectionMask.SetBit(Jet::L7);
-   }
+  //keep track of which corrections are enabled
+  for (std::vector<JetCorrectorParameters>::const_iterator it = correctionParameters.begin(); it != correctionParameters.end(); ++it) {
+    std::string ss = it->definitions().level();
+    if (ss == "L1Offset" || fEnabledL1Correction) 
+      fEnabledCorrectionMask.SetBit(Jet::L1);
+     
+    if (ss == "L2Relative")
+      fEnabledCorrectionMask.SetBit(Jet::L2);
+    else if (ss == "L3Absolute")
+      fEnabledCorrectionMask.SetBit(Jet::L3);
+    else if (ss == "L4EMF")
+      fEnabledCorrectionMask.SetBit(Jet::L4);
+    else if (ss == "L5Flavor")
+      fEnabledCorrectionMask.SetBit(Jet::L5);
+    else if (ss == "L6SLB")
+      fEnabledCorrectionMask.SetBit(Jet::L6);
+    else if (ss == "L7Parton")
+      fEnabledCorrectionMask.SetBit(Jet::L7);
+  }
    
-   for (UInt_t l=0; l<8; l=l+1) {
-     if (fEnabledCorrectionMask.TestBit(l)) {
-       fEnabledCorrections.push_back(Jet::ECorr(l));
-     }
-   }
+  for (UInt_t l=0; l<8; l=l+1) {
+    if (fEnabledCorrectionMask.TestBit(l)) {
+      fEnabledCorrections.push_back(Jet::ECorr(l));
+    }
+  }
+
+   
 
 }
 
@@ -99,6 +104,7 @@ void JetCorrectionMod::Process()
 
   // loop over jets
   for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
+
     const Jet *inJet = inJets->At(i);
 
     //copy input jet, using special function to copy full derived class
@@ -121,7 +127,7 @@ void JetCorrectionMod::Process()
     else {
       fJetCorrector->setJetEMF(-99.0);
     }
-    
+
     corrections = fJetCorrector->getSubCorrections();
     
     //set and enable correction factors in the output jet
@@ -134,6 +140,7 @@ void JetCorrectionMod::Process()
       if (currentLevel==Jet::L1) {
         if (fEnabledL1Correction) ApplyL1FastJetCorrection(jet);
 	else  jet->SetL1OffsetCorrectionScale(currentCorrection);
+
       }
       else if (currentLevel==Jet::L2)
         jet->SetL2RelativeCorrectionScale(currentCorrection);
