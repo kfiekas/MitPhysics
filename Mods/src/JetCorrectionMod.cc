@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.6 2011/03/25 18:37:06 mzanetti Exp $
+// $Id: JetCorrectionMod.cc,v 1.7 2011/03/27 12:27:05 sixie Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -127,7 +127,6 @@ void JetCorrectionMod::Process()
     else {
       fJetCorrector->setJetEMF(-99.0);
     }
-
     corrections = fJetCorrector->getSubCorrections();
     
     //set and enable correction factors in the output jet
@@ -136,7 +135,6 @@ void JetCorrectionMod::Process()
       Double_t currentCorrection = corrections.at(j)/cumulativeCorrection;
       cumulativeCorrection = corrections.at(j);
       Jet::ECorr currentLevel = fEnabledCorrections.at(j);
-      jet->EnableCorrection(currentLevel);
       if (currentLevel==Jet::L1) {
         if (fEnabledL1Correction) ApplyL1FastJetCorrection(jet);
 	else  jet->SetL1OffsetCorrectionScale(currentCorrection);
@@ -154,6 +152,9 @@ void JetCorrectionMod::Process()
         jet->SetL6LSBCorrectionScale(currentCorrection);
       else if (currentLevel==Jet::L7)
         jet->SetL7PartonCorrectionScale(currentCorrection);
+
+      //enable corrections after setting them
+      jet->EnableCorrection(currentLevel);
     }
     
     if (0) {
