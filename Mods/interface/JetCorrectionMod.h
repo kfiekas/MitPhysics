@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.4 2010/08/17 22:07:31 bendavid Exp $
+// $Id: JetCorrectionMod.h,v 1.5 2011/03/25 18:37:06 mzanetti Exp $
 //
 // JetCorrectionMod
 //
@@ -49,15 +49,15 @@ namespace mithep
       TString           fJetsName;              //name of jet collection (input)
       TString           fCorrectedJetsName;     //name of good jets collection (output)
       TString           fRhoBranchName;         //name of pileup energy density collection
+      bool              fEnabledL1Correction; //switch on L1 correction
+      float             rhoEtaMax; //parameter to choose which rho to use for L1 correction
+      FactorizedJetCorrector *fJetCorrector;      //!CMSSW/FWLite jet corrections module
 
       std::vector<std::string> fCorrectionFiles; //list of jet correction files
-      FactorizedJetCorrector *fJetCorrector;      //!CMSSW/FWLite jet corrections module
       const PileupEnergyDensityCol *fRho;        // collection of pileup energy density collection
 
       BitMask8          fEnabledCorrectionMask; //bitmask of enabled corrections
       std::vector<Jet::ECorr> fEnabledCorrections; //vector of enabled corrections
-      bool              fEnabledL1Correction; //switch on L1 correction
-      float             rhoEtaMax; //parameter to choose which rho to use for L1 correction
 
       ClassDef(JetCorrectionMod, 2) // Jet identification module
   };
