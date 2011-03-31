@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.7 2011/03/27 12:27:05 sixie Exp $
+// $Id: JetCorrectionMod.cc,v 1.8 2011/03/27 16:57:25 sixie Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -45,7 +45,9 @@ void JetCorrectionMod::SlaveBegin()
   }
   
   //rho for L1 fastjet correction
-  ReqBranch(fRhoBranchName, fRho);
+  if (fEnabledL1Correction) {
+    ReqBranch(fRhoBranchName, fRho);
+  }
 
   //initialize jet corrector class
   fJetCorrector = new FactorizedJetCorrector(correctionParameters);
@@ -100,7 +102,9 @@ void JetCorrectionMod::Process()
   std::vector<float> corrections;
 
   // get the energy density from the event
-  LoadBranch(fRhoBranchName);
+  if (fEnabledL1Correction) {
+    LoadBranch(fRhoBranchName);
+  }
 
   // loop over jets
   for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
