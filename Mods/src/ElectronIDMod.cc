@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.80 2011/03/11 15:13:09 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.81 2011/03/15 12:02:20 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -39,7 +39,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fCombIsolationCut(0.10),
   fApplyConvFilterType1(kTRUE),
   fApplyConvFilterType2(kFALSE),
-  fNWrongHitsMax(1),
+  fNWrongHitsMax(0),
   fNExpectedHitsInnerCut(999),
   fCombinedIdCut(kFALSE),
   fApplySpikeRemoval(kTRUE),
@@ -310,7 +310,7 @@ void ElectronIDMod::Process()
     if (fApplyConvFilterType1) {
       LoadEventObject(fConversionBranchName, fConversions);
       passConvVetoType1 = ElectronTools::PassConversionFilter(e, fConversions, 
-                                                         fBeamSpot->At(0), fNWrongHitsMax);      
+                                                         fBeamSpot->At(0), 0, 1e-6, 2.0, kTRUE, kFALSE);      
     }
     else {
       passConvVetoType1 = kTRUE;

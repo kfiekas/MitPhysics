@@ -61,8 +61,8 @@ namespace mithep {
 
       static Bool_t       PassChargeFilter(const Electron *el);
       static Bool_t       PassConversionFilter(const Electron *el, const DecayParticleCol *conversions, 
-                                               const BaseVertex *vtx, UInt_t nWrongHitsMax=1, Double_t probMin=1e-6,
-                                               Double_t lxyMin = 2.0, Bool_t matchCkf = kFALSE, Bool_t requireArbitratedMerged = kTRUE);
+                                               const BaseVertex *vtx, UInt_t nWrongHitsMax=0, Double_t probMin=1e-6,
+                                               Double_t lxyMin = 2.0, Bool_t matchCkf = kTRUE, Bool_t requireArbitratedMerged = kFALSE);
       static Bool_t       PassCustomID(const Electron *el, EElIdType idType);
       static Bool_t       PassCustomIso(const Electron *el, EElIsoType isoType,
                                         Bool_t useCombineIso = kTRUE);
