@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.24 2011/03/21 12:25:36 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.25 2011/04/05 05:03:25 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -159,8 +159,6 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   if (ele->IsEB()) 
     eb = 0;
 
-  std::cout <<   eb << " " <<fCuts[0][0] << " " <<fCuts[0][4] << " " << idType << std::endl;
- 
   if (hOverE>fCuts[0][cat+4*eb])
     return kFALSE;
 
