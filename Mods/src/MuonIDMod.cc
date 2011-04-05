@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.44 2011/03/24 13:53:03 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.45 2011/04/05 05:03:47 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -214,10 +214,13 @@ void MuonIDMod::Process()
         { 
           const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
           Double_t totalIso =  mu->IsoR03SumPt() + TMath::Max(mu->IsoR03EmEt() + mu->IsoR03HadEt() - rho->Rho() * TMath::Pi() * 0.3 * 0.3, 0.0);
-          if      (mu->Pt() >  20.0 && totalIso < (mu->Pt()*0.15) )
-            isocut = kTRUE;
-          else if (mu->Pt() <= 20.0 && totalIso < (mu->Pt()*0.10) )
-            isocut = kTRUE;
+          // trick to change the signal region cut
+          double theIsoCut = fCombIsolationCut;
+	  if(theIsoCut < 0.20){
+	    if(mu->Pt() >  20.0) theIsoCut = 0.15;
+	    else                 theIsoCut = 0.10;
+	  }
+	  if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
 	}
         break;
       case kTrackCaloSlidingNoCorrection:
@@ -225,8 +228,13 @@ void MuonIDMod::Process()
           Double_t totalIso =  1.0 * mu->IsoR03SumPt() + 
                                1.0 * mu->IsoR03EmEt()  + 
                                1.0 * mu->IsoR03HadEt();
-          if (totalIso < (mu->Pt()*fCombIsolationCut) )
-            isocut = kTRUE;
+          // trick to change the signal region cut
+          double theIsoCut = fCombIsolationCut;
+	  if(theIsoCut < 0.20){
+	    if(mu->Pt() >  20.0) theIsoCut = 0.15;
+	    else                 theIsoCut = 0.10;
+	  }
+	  if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
 	}
         break;
       case kPFIso:
@@ -264,8 +272,10 @@ void MuonIDMod::Process()
     // apply d0 cut
     if (fApplyD0Cut) {
       Bool_t passD0cut = kTRUE;
-      if      (mu->Pt() >  20.0) fD0Cut = 0.02;
-      else if (mu->Pt() <= 20.0) fD0Cut = 0.01;
+      if(fD0Cut < 0.05) { // trick to change the signal region cut
+        if      (mu->Pt() >  20.0) fD0Cut = 0.02;
+        else if (mu->Pt() <= 20.0) fD0Cut = 0.01;
+      }
       if(fWhichVertex >= -1) passD0cut = MuonTools::PassD0Cut(mu, fVertices, fD0Cut, fWhichVertex);
       else                   passD0cut = MuonTools::PassD0Cut(mu, fBeamSpot, fD0Cut);
       if (!passD0cut)

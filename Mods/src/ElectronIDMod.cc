@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.82 2011/04/04 23:43:29 bendavid Exp $
+// $Id: ElectronIDMod.cc,v 1.83 2011/04/05 04:57:48 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -164,11 +164,6 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       break;
     case ElectronTools::kTrackJuraSliding:
     {
-      //Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
-      //if(beta == 0) beta = 1.0;
-      //Double_t totalIso = ele->TrackIsolationDr03() + (ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03())*beta;
-      //if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + (TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03())*beta;
-      //if(beta == 0) beta = 1.0;
       Double_t totalIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03() - rho * TMath::Pi() * 0.3 * 0.3, 0.0);
       if(ele->SCluster()->AbsEta() < 1.479) totalIso = ele->TrackIsolationDr03() + TMath::Max(TMath::Max(ele->EcalRecHitIsoDr03() - 1.0, 0.0) + ele->HcalTowerSumEtDr03() - rho * TMath::Pi() * 0.3 * 0.3, 0.0);
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
