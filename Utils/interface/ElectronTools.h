@@ -36,7 +36,7 @@ namespace mithep {
         kVBTFWorkingPoint90Id,
         kVBTFWorkingPoint85Id,
         kVBTFWorkingPoint80Id,
-        kVBTFWorkingPoint80LowPtId,
+        kVBTFWorkingPointLowPtId,
         kVBTFWorkingPoint70Id
       };
 
@@ -68,7 +68,7 @@ namespace mithep {
                                         Bool_t useCombineIso = kTRUE);
       static Bool_t       PassD0Cut(const Electron *el, const VertexCol *vertices, Double_t fD0Cut, Int_t nVertex = 0);
       static Bool_t       PassD0Cut(const Electron *el, const BeamSpotCol *beamspots, Double_t fD0Cut);
-      static Bool_t       PassDZCut(const Electron *el, const VertexCol *vertices, Double_t fDZCut);
+      static Bool_t       PassDZCut(const Electron *el, const VertexCol *vertices, Double_t fDZCut, Int_t nVertex = 0);
       static Bool_t       PassSpikeRemovalFilter(const Electron *ele);
       static Bool_t       PassTriggerMatching(const Electron *ele, const TriggerObjectCol *trigobjs);
       static Int_t        Classify(const Electron *ele);
