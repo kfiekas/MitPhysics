@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.81 2011/03/15 12:02:20 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.82 2011/04/04 23:43:29 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -128,8 +128,8 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
     case ElectronTools::kVBTFWorkingPoint80Id:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint80Id);
       break;
-    case ElectronTools::kVBTFWorkingPoint80LowPtId:
-      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint80LowPtId);
+    case ElectronTools::kVBTFWorkingPointLowPtId:
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointLowPtId);
       break;
     case ElectronTools::kVBTFWorkingPoint70Id:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint70Id);
@@ -344,7 +344,7 @@ void ElectronIDMod::Process()
 
     // apply dz cut
     if (fApplyDZCut) {
-      Bool_t passDZcut = ElectronTools::PassDZCut(e, fVertices, fDZCut);
+      Bool_t passDZcut = ElectronTools::PassDZCut(e, fVertices, fDZCut, fWhichVertex);
       if (!passDZcut)
         continue;
     }
@@ -431,8 +431,8 @@ void ElectronIDMod::Setup()
     fElIdType = ElectronTools::kVBTFWorkingPoint90Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint80Id") == 0) 
     fElIdType = ElectronTools::kVBTFWorkingPoint80Id;
-  else if (fElectronIDType.CompareTo("VBTFWorkingPoint80LowPtId") == 0) 
-    fElIdType = ElectronTools::kVBTFWorkingPoint80LowPtId;
+  else if (fElectronIDType.CompareTo("VBTFWorkingPointLowPtId") == 0) 
+    fElIdType = ElectronTools::kVBTFWorkingPointLowPtId;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint85Id") == 0) 
     fElIdType = ElectronTools::kVBTFWorkingPoint85Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint70Id") == 0) 
