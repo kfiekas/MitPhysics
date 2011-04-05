@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.43 2011/03/23 11:39:57 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.44 2011/03/24 13:53:03 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -274,7 +274,7 @@ void MuonIDMod::Process()
 
     // apply dz cut
     if (fApplyDZCut) {
-      Bool_t passDZcut = MuonTools::PassDZCut(mu, fVertices, fDZCut);
+      Bool_t passDZcut = MuonTools::PassDZCut(mu, fVertices, fDZCut, fWhichVertex);
       if (!passDZcut)
         continue;
     }

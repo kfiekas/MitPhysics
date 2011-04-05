@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.23 2011/03/15 12:02:49 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.24 2011/03/21 12:25:36 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -80,6 +80,24 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
   };            
 
+  Double_t VBTFWorkingPoint80NoHOverEE[6][8] = {
+    {0.04,  0.04,  0.04,  0.04,  1.000,  1.000,  1.000,  1.000}, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
+    {0.06,  0.06,  0.06,  0.06,  0.03,   0.03,   0.03,   0.03 }, //deltaphiin
+    {0.004, 0.004, 0.004, 0.004, 0.007,  0.007,  0.007,  0.007}, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0  }, //eoverp
+    {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
+  };            
+
+  Double_t VBTFWorkingPoint70NoHOverEE[6][8] = {
+    {0.025, 0.025, 0.025, 0.025, 1.000,  1.000,  1.000,  1.000}, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
+    {0.03,  0.03,  0.03,  0.03,  0.02,   0.02,   0.02,   0.02 }, //deltaphiin
+    {0.004, 0.004, 0.004, 0.004, 0.005,  0.005,  0.005,  0.005}, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0  }, //eoverp
+    {0.0,   0.0,   0,     0,     0,      0,      0,      0    }  //extra cuts fbrem and E_Over_P 
+  };            
+
   switch (idType) {
     case kCustomIdTight:    
       memcpy(fCuts,tightcuts,sizeof(fCuts));
@@ -99,8 +117,11 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     case kVBTFWorkingPoint80Id:
       memcpy(fCuts,VBTFWorkingPoint80,sizeof(fCuts));
       break;
-    case kVBTFWorkingPoint80LowPtId:
-      memcpy(fCuts,VBTFWorkingPoint80,sizeof(fCuts));
+    case kVBTFWorkingPointLowPtId:
+      if(ele->Pt() < 20)
+        memcpy(fCuts,VBTFWorkingPoint70NoHOverEE,sizeof(fCuts));
+      else
+        memcpy(fCuts,VBTFWorkingPoint80NoHOverEE,sizeof(fCuts));
       break;
     case kVBTFWorkingPoint70Id:
       memcpy(fCuts,VBTFWorkingPoint70,sizeof(fCuts));
@@ -109,7 +130,6 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
       memset(fCuts,0,sizeof(fCuts));
       break;
   }
-
 
   // Based on RecoEgamma/ElectronIdentification/src/CutBasedElectronID.cc.
   Double_t eOverP = ele->ESuperClusterOverP();
@@ -138,6 +158,8 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   Int_t eb = 1;
   if (ele->IsEB()) 
     eb = 0;
+
+  std::cout <<   eb << " " <<fCuts[0][0] << " " <<fCuts[0][4] << " " << idType << std::endl;
  
   if (hOverE>fCuts[0][cat+4*eb])
     return kFALSE;
@@ -154,8 +176,8 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   if(eSeedOverPin<fCuts[4][cat+4*eb])
     return kFALSE;
 
-  // Cuts only for pt<20 region and kVBTFWorkingPoint80LowPtId
-  if(ele->Pt() < 20 && idType == kVBTFWorkingPoint80LowPtId) {
+  // Cuts only for pt<20 region and kVBTFWorkingPointLowPtId
+  if(ele->Pt() < 20 && idType == kVBTFWorkingPointLowPtId) {
     Bool_t isGoodLowPtEl = fBrem > 0.15 ||
                           (ele->AbsEta() < 1.0 && eOverP > 0.95);
     if(!isGoodLowPtEl) return kFALSE;
@@ -346,17 +368,21 @@ Bool_t ElectronTools::PassD0Cut(const Electron *ele, const BeamSpotCol *beamspot
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t ElectronTools::PassDZCut(const Electron *ele, const VertexCol *vertices, Double_t fDZCut) 
+Bool_t ElectronTools::PassDZCut(const Electron *ele, const VertexCol *vertices, Double_t fDZCut, Int_t nVertex) 
 {
   Bool_t dzcut = kFALSE;
 
   Double_t distVtx = 999.0;
-  for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
-    double dz = TMath::Abs(ele->GsfTrk()->DzCorrected(*vertices->At(nv)));
-    if(dz < distVtx) {
-      distVtx	 = dz;
+  if(nVertex >= 0) distVtx = TMath::Abs(ele->GsfTrk()->DzCorrected(*vertices->At(nVertex)));
+  else {
+    for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
+      double dz = TMath::Abs(ele->GsfTrk()->DzCorrected(*vertices->At(nv)));
+      if(dz < distVtx) {
+        distVtx	 = dz;
+      }
     }
   }
+
   if(distVtx < fDZCut) dzcut = kTRUE;
   
   return dzcut;

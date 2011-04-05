@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.14 2011/01/21 11:25:29 ceballos Exp $
+// $Id: MuonTools.cc,v 1.15 2011/03/15 12:02:49 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -473,17 +473,20 @@ Bool_t MuonTools::PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t MuonTools::PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t fDZCut) 
+Bool_t MuonTools::PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t fDZCut, Int_t nVertex) 
 {
   Bool_t dzcut = kFALSE;
   const Track *mt = mu->BestTrk();
   if (!mt) return kFALSE;
 
   Double_t distVtx = 999.0;
-  for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
-    double dz = TMath::Abs(mt->DzCorrected(*vertices->At(nv)));
-    if(dz < distVtx) {
-      distVtx = dz;
+  if(nVertex >= 0) distVtx = TMath::Abs(mt->DzCorrected(*vertices->At(nVertex)));
+  else {
+    for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
+      double dz = TMath::Abs(mt->DzCorrected(*vertices->At(nv)));
+      if(dz < distVtx) {
+        distVtx = dz;
+      }
     }
   }
 

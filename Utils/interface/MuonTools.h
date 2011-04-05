@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.14 2011/01/21 11:25:26 ceballos Exp $
+// $Id: MuonTools.h,v 1.15 2011/03/15 12:02:49 ceballos Exp $
 //
 // MuonTools
 //
@@ -52,7 +52,7 @@ namespace mithep {
       Double_t      GetSegmentCompatability(const mithep::Muon *iMuon)             const;
       static Bool_t PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut, Int_t nVertex = 0); 
       static Bool_t PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double_t fD0Cut);
-      static Bool_t PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t fDZCut);
+      static Bool_t PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t fDZCut, Int_t nVertex = 0);
       static Bool_t PassSoftMuonCut(const Muon *mu, const VertexCol *vertices); 
 
     protected:
