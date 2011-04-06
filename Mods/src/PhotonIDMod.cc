@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.16 2011/02/01 17:02:22 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.17 2011/04/06 18:03:48 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -16,7 +16,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fGoodPhotonsName   (ModNames::gkGoodPhotonsName),
   fTrackBranchName   (Names::gkTrackBrn),
   fBeamspotBranchName(Names::gkBeamSpotBrn),
-  fPileUpDenName     ("Rho"),
+  fPileUpDenName     (Names::gkPileupEnergyDensityBrn),
   fPhotonIDType("Custom"),
   fPhotonIsoType("Custom"),
   fPhotonPtMin(15.0),
