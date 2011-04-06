@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.8 2011/02/21 13:50:20 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.9 2011/03/07 12:46:02 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -364,3 +364,30 @@ Double_t IsolationTools::BetaE(const TrackCol *tracks, const Electron *p, const 
 
   return 1.0;
 }
+
+
+// method added by F.Stoeckli: computes the track isolation with NO constrint on the OV-track compatibility
+Double_t IsolationTools::TrackIsolationNoPV(const mithep::Particle* p, const BaseVertex* bsp, 
+					    Double_t extRadius, 
+					    Double_t intRadius, 
+					    Double_t ptLow, 
+					    Double_t etaStrip,
+					    Double_t maxD0,
+					    mithep::TrackQuality::EQuality quality,
+					    const mithep::Collection<mithep::Track> *tracks) {
+  
+  // loop over all tracks
+  Double_t tPt = 0.;
+  for(UInt_t i=0; i<tracks->GetEntries(); ++i) {
+    const Track* t = tracks->At(i);
+    if ( t->Pt() < ptLow ) continue;
+    if ( ! t->Quality().Quality(quality) ) continue;
+    // only check for beamspot if available, otherwise ignore cut
+    if ( bsp && fabs(t->D0Corrected( *bsp) ) > maxD0) continue;
+    Double_t dR   = MathUtils::DeltaR(t->Mom(),p->Mom());
+    Double_t dEta = fabs(t->Eta()-p->Eta());
+    if(dR < extRadius && dR > intRadius && dEta > etaStrip) tPt += t->Pt();
+  }
+  return tPt;
+}
+

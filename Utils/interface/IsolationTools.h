@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.8 2011/02/17 14:09:07 ceballos Exp $
+// $Id: IsolationTools.h,v 1.9 2011/02/21 13:50:20 ceballos Exp $
 //
 // IsolationTools
 //
@@ -54,6 +54,17 @@ namespace mithep
       static Double_t BetaE(const TrackCol *tracks, const Electron *p, const Vertex *vertex, 
                             Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			    Double_t intRadius);
+
+      // method added by F.Stoeckli: computes the track isolation with NO constrint on the OV-track compatibility
+      static Double_t TrackIsolationNoPV(const mithep::Particle*, const BaseVertex*, 
+					 Double_t extRadius, 
+					 Double_t intRadius, 
+					 Double_t ptLow, 
+					 Double_t etaStrip,
+					 Double_t maxD0,
+					 mithep::TrackQuality::EQuality,
+					 const mithep::Collection<mithep::Track> *tracks);
+
     ClassDef(IsolationTools, 0) // Isolation tools
   };
 }

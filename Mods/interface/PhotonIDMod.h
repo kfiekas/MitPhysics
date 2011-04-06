@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.13 2010/05/14 12:11:18 sixie Exp $
+// $Id: PhotonIDMod.h,v 1.14 2011/02/01 17:02:21 bendavid Exp $
 //
 // PhotonIDMod
 //
@@ -14,6 +14,9 @@
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/PhotonFwd.h"
+#include "MitAna/DataTree/interface/TrackCol.h"
+#include "MitAna/DataTree/interface/BeamSpotCol.h"
+#include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 
 namespace mithep 
 {
@@ -44,6 +47,8 @@ namespace mithep
       void                SetHadOverEmMax(Double_t hoe)     { fHadOverEmMax    = hoe;      }
       void                SetIDType(const char *type)       { fPhotonIDType    = type;     }
       void                SetInputName(const char *n)       { fPhotonBranchName= n;        }   
+      void                SetTrackName(const char *n)       { fTrackBranchName = n;        }   
+      void                SetBeamspotName(const char *n)    { fBeamspotBranchName = n;     }   
       void                SetIsoType(const char *type)      { fPhotonIsoType   = type;     }
       void                SetOutputName(const char *n)      { SetGoodPhotonsName(n);       }    
       void                SetPtMin(Double_t pt)             { fPhotonPtMin     = pt;       }
@@ -52,7 +57,10 @@ namespace mithep
       void                SetEtaWidthEE(Double_t x)         { fEtaWidthEE      = x;	   }
       void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax       = x;	   }
       void                SetApplyR9Min(Bool_t b)           { fApplyR9Min      = b;        }
-
+      void                SetEffAreas(Double_t ecal, Double_t hcal, Double_t track) { 
+	fEffAreaEcal = ecal; fEffAreaHcal = hcal; fEffAreaTrack = track;}
+    
+    
       enum EPhIdType {
         kIdUndef = 0,       //not defined
         kTight,             //"Tight"
@@ -64,7 +72,8 @@ namespace mithep
         kIsoUndef = 0,      //not defined        
         kNoIso,             //"NoIso"
         kCombinedIso,       //"CombinedIso"
-        kCustomIso          //"Custom"
+        kCustomIso,         //"Custom"
+	kMITPUCorrected     //PileUp Corrected Hgg Isolation
       };
 
     protected:
@@ -73,6 +82,9 @@ namespace mithep
 
       TString             fPhotonBranchName;     //name of photon collection (input)
       TString             fGoodPhotonsName;      //name of exported "good photon" collection
+      TString             fTrackBranchName;      // name of the track collection (only needed for PU corrected isolation)
+      TString             fBeamspotBranchName;   //name of the Beamspot collection (only needed for PU corrected isolation)
+      TString             fPileUpDenName;        //name of the PU density collection
       TString             fPhotonIDType;         //type of photon identification we impose
       TString             fPhotonIsoType;        //type of photon isolation we impose
       Double_t            fPhotonPtMin;          //min pt cut
@@ -87,8 +99,15 @@ namespace mithep
       Double_t            fEtaWidthEE;  	 //max Eta Width in ECAL End Cap
       Double_t            fAbsEtaMax;  	         //max Abs Eta
       Bool_t              fApplyR9Min;           //apply R9 min
+      Double_t            fEffAreaEcal;
+      Double_t            fEffAreaHcal;
+      Double_t            fEffAreaTrack;
       const PhotonCol    *fPhotons;              //!photon branch
-    
+      const TrackCol     *fTracks;               //!track branch
+      const BeamSpotCol  *fBeamspots;            //!beamspot branch    
+      const PileupEnergyDensityCol *fPileUpDen;
+
+
     ClassDef(PhotonIDMod, 1) // Photon identification module
   };
 }

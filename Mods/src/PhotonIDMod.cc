@@ -1,8 +1,9 @@
-// $Id: PhotonIDMod.cc,v 1.15 2010/07/06 08:33:16 sixie Exp $
+// $Id: PhotonIDMod.cc,v 1.16 2011/02/01 17:02:22 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Utils/interface/IsolationTools.h"
 
 using namespace mithep;
 
@@ -11,8 +12,11 @@ ClassImp(mithep::PhotonIDMod)
 //--------------------------------------------------------------------------------------------------
 PhotonIDMod::PhotonIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
-  fPhotonBranchName(Names::gkPhotonBrn),
-  fGoodPhotonsName(ModNames::gkGoodPhotonsName),  
+  fPhotonBranchName  (Names::gkPhotonBrn),
+  fGoodPhotonsName   (ModNames::gkGoodPhotonsName),
+  fTrackBranchName   (Names::gkTrackBrn),
+  fBeamspotBranchName(Names::gkBeamSpotBrn),
+  fPileUpDenName     ("Rho"),
   fPhotonIDType("Custom"),
   fPhotonIsoType("Custom"),
   fPhotonPtMin(15.0),
@@ -27,7 +31,14 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fEtaWidthEE(0.028),
   fAbsEtaMax(2.5),
   fApplyR9Min(kFALSE),
-  fPhotons(0)
+  fEffAreaEcal(0.139),
+  fEffAreaHcal(0.056),
+  fEffAreaTrack(0.296),
+  fPhotons(0),
+  fTracks(0),
+  fBeamspots(0),
+  fPileUpDen(0)
+  
 {
   // Constructor.
 }
@@ -37,8 +48,19 @@ void PhotonIDMod::Process()
 {
   // Process entries of the tree. 
 
-  LoadEventObject(fPhotonBranchName, fPhotons);
+  LoadEventObject(fPhotonBranchName,   fPhotons);
+  LoadEventObject(fTrackBranchName,    fTracks);
+  LoadEventObject(fBeamspotBranchName, fBeamspots);
+  LoadEventObject(fPileUpDenName,      fPileUpDen);
 
+  const BaseVertex *bsp = NULL;
+  if(fBeamspots->GetEntries() > 0)
+    bsp = dynamic_cast<const BaseVertex*>(fBeamspots->At(0));
+
+  Double_t _tRho = -1.;
+  if(fPileUpDen->GetEntries() > 0)
+    _tRho = (Double_t) fPileUpDen->At(0)->Rho();
+  
   PhotonOArr *GoodPhotons = new PhotonOArr;
   GoodPhotons->SetName(fGoodPhotonsName);
 
@@ -116,13 +138,36 @@ void PhotonIDMod::Process()
           if ( ph->HollowConeTrkIsoDr04() < (1.5 + 0.001*ph->Pt()) && ph->EcalRecHitIsoDr04()<(2.0+0.006*ph->Pt()) && ph->HcalTowerSumEtDr04()<(2.0+0.0025*ph->Pt()) )
             isocut = kTRUE;
         }
-      default:
-        break;
+	break;
+	
+    case kMITPUCorrected:
+      {
+	// compute the PU corrections only if Rho is available
+	// ... otherwise (_tRho = -1.0) it's the std isolation
+	isocut = kTRUE;
+	Double_t EcalCorrISO =   ph->EcalRecHitIsoDr04();
+	if(_tRho > -0.5 ) EcalCorrISO -= _tRho * fEffAreaEcal;
+	if ( EcalCorrISO > (2.0+0.006*ph->Pt()) ) isocut = kFALSE; 
+	if ( isocut ) {
+	  Double_t HcalCorrISO = ph->HcalTowerSumEtDr04(); 
+	  if(_tRho > -0.5 ) HcalCorrISO -= _tRho * fEffAreaHcal;
+	  if ( HcalCorrISO > (2.0+0.0025*ph->Pt()) ) isocut = kFALSE;
+	}
+	if ( isocut ) {
+	  Double_t TrackCorrISO = IsolationTools::TrackIsolationNoPV(ph, bsp, 0.4, 0.04, 0.0, 0.015, 0.1, TrackQuality::highPurity, fTracks);
+	  if(_tRho > -0.5 )
+	    TrackCorrISO -= _tRho * fEffAreaTrack;
+	  if ( TrackCorrISO > (1.5 + 0.001*ph->Pt()) ) isocut = kFALSE;
+	}
+	break;
+      }
+    default:
+      break;
     }
-
+    
     if (!isocut) 
       continue;
-
+    
     if ( fApplyR9Min && ph->R9() <= fPhotonR9Min) 
       continue;
 
@@ -154,7 +199,10 @@ void PhotonIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the photon collection branch.
 
-  ReqEventObject(fPhotonBranchName, fPhotons, kTRUE);
+  ReqEventObject(fPhotonBranchName,   fPhotons,   kTRUE);
+  ReqEventObject(fTrackBranchName,    fTracks,    kTRUE);
+  ReqEventObject(fBeamspotBranchName, fBeamspots, kTRUE);
+  ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
 
   if (fPhotonIDType.CompareTo("Tight") == 0) 
     fPhIdType = kTight;
@@ -175,9 +223,11 @@ void PhotonIDMod::SlaveBegin()
     fPhIsoType = kNoIso;
   else if (fPhotonIsoType.CompareTo("CombinedIso") == 0 )
     fPhIsoType = kCombinedIso;
-  else if (fPhotonIsoType.CompareTo("Custom") == 0 ) {
+  else if (fPhotonIsoType.CompareTo("Custom") == 0 )
     fPhIsoType = kCustomIso;
-  } else {
+  else if (fPhotonIsoType.CompareTo("MITPUCorrected") == 0 )
+    fPhIsoType = kMITPUCorrected;
+  else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified photon isolation %s is not defined.",
               fPhotonIsoType.Data());
