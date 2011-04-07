@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.8 2011/03/27 16:57:25 sixie Exp $
+// $Id: JetCorrectionMod.cc,v 1.9 2011/03/31 16:34:49 sixie Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -52,13 +52,15 @@ void JetCorrectionMod::SlaveBegin()
   //initialize jet corrector class
   fJetCorrector = new FactorizedJetCorrector(correctionParameters);
 
+  if (fEnabledL1Correction)
+    fEnabledCorrectionMask.SetBit(Jet::L1);
+
   //keep track of which corrections are enabled
   for (std::vector<JetCorrectorParameters>::const_iterator it = correctionParameters.begin(); it != correctionParameters.end(); ++it) {
     std::string ss = it->definitions().level();
-    if (ss == "L1Offset" || fEnabledL1Correction) 
-      fEnabledCorrectionMask.SetBit(Jet::L1);
-     
-    if (ss == "L2Relative")
+    if (ss == "L1Offset")
+      fEnabledCorrectionMask.SetBit(Jet::L1);    
+    else if (ss == "L2Relative")
       fEnabledCorrectionMask.SetBit(Jet::L2);
     else if (ss == "L3Absolute")
       fEnabledCorrectionMask.SetBit(Jet::L3);
@@ -74,7 +76,9 @@ void JetCorrectionMod::SlaveBegin()
    
   for (UInt_t l=0; l<8; l=l+1) {
     if (fEnabledCorrectionMask.TestBit(l)) {
-      fEnabledCorrections.push_back(Jet::ECorr(l));
+      if (!fEnabledL1Correction || l != 0) {
+        fEnabledCorrections.push_back(Jet::ECorr(l));
+      }
     }
   }
 
@@ -135,14 +139,22 @@ void JetCorrectionMod::Process()
     
     //set and enable correction factors in the output jet
     Double_t cumulativeCorrection = 1.0;
+
+    if (fEnabledL1Correction) {
+      ApplyL1FastJetCorrection(jet);
+      jet->EnableCorrection(Jet::L1);
+    }
+
     for (UInt_t j=0; j<corrections.size(); ++j) {
       Double_t currentCorrection = corrections.at(j)/cumulativeCorrection;
       cumulativeCorrection = corrections.at(j);
       Jet::ECorr currentLevel = fEnabledCorrections.at(j);
       if (currentLevel==Jet::L1) {
-        if (fEnabledL1Correction) ApplyL1FastJetCorrection(jet);
-	else  jet->SetL1OffsetCorrectionScale(currentCorrection);
-
+        if (!fEnabledL1Correction) {
+          jet->SetL1OffsetCorrectionScale(currentCorrection);
+        } else {
+          cout << "Warning: You are applying both FastJet And L1Offset Corrections\n";
+        }
       }
       else if (currentLevel==Jet::L2)
         jet->SetL2RelativeCorrectionScale(currentCorrection);
