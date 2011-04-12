@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.3 2011/03/15 10:56:35 mzanetti Exp $
+// $Id: MetTools.cc,v 1.4 2011/04/12 07:30:29 mzanetti Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -126,8 +126,8 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
     // jets
     bool inTheJet = false;
     for (UInt_t j = 0; j < pfJets->GetEntries(); ++j) {
-      for (UInt_t c=0;c<pfJets->At(j)->NPFCands();c++){
-	if (pfJets->At(j)->PFCand(j) == fPFCandidates->At(i)) {
+      for (UInt_t c=0;c<pfJets->At(j)->NPFCands();++c){
+	if (pfJets->At(j)->PFCand(c) == fPFCandidates->At(i)) {
 	  inTheJet=true;
 	  break;
 	}
@@ -192,8 +192,8 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
     // jets
     bool inTheJet = false;
     for (UInt_t j = 0; j < pfJets->GetEntries(); ++j) {
-      for (UInt_t c=0;c<pfJets->At(j)->NPFCands();c++){
-	if (pfJets->At(j)->PFCand(j) == fPFCandidates->At(i)) {
+      for (UInt_t c=0;c<pfJets->At(j)->NPFCands();++c){
+	if (pfJets->At(j)->PFCand(c) == fPFCandidates->At(i)) {
 	  inTheJet=true;
 	  break;
 	}
@@ -326,8 +326,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
     // jets
     bool inTheJet = false;
     for (UInt_t j = 0; j < pfJets->GetEntries(); ++j) {
-      for (UInt_t c=0;c<pfJets->At(j)->NPFCands();c++){
-	if (pfJets->At(j)->PFCand(j) == fPFCandidates->At(i)) {
+      for (UInt_t c=0;c<pfJets->At(j)->NPFCands();++c){
+	if (pfJets->At(j)->PFCand(c) == fPFCandidates->At(i)) {
 	  inTheJet=true;
 	  break;
 	}
