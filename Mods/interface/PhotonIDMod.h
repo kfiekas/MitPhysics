@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.14 2011/02/01 17:02:21 bendavid Exp $
+// $Id: PhotonIDMod.h,v 1.15 2011/04/06 18:03:48 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -17,6 +17,8 @@
 #include "MitAna/DataTree/interface/TrackCol.h"
 #include "MitAna/DataTree/interface/BeamSpotCol.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
+#include "MitAna/DataTree/interface/DecayParticleCol.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
 
 namespace mithep 
 {
@@ -42,6 +44,10 @@ namespace mithep
       Double_t            GetAbsEtaMax()	      const { return fAbsEtaMax;	   }
       void                SetApplySpikeRemoval(Bool_t b)    { fApplySpikeRemoval  = b;     }
       void                SetApplyPixelSeed(Bool_t b)       { fApplyPixelSeed  = b;        }
+      void                SetApplyElectronVeto(Bool_t b)    { fApplyElectronVeto = b;      }
+      void                SetApplyElectronVetoConvRecovery(Bool_t b) { fApplyElectronVetoConvRecovery = b; }
+      void                SetApplyConversionId(Bool_t b)    { fApplyConversionId = b;      }
+      void                SetApplyTriggerMatching(Bool_t b)      { fApplyTriggerMatching = b;  }      
       void                SetGoodName(const char *n)        { SetGoodPhotonsName(n);       }   
       void                SetGoodPhotonsName(const char *n) { fGoodPhotonsName = n;        }   
       void                SetHadOverEmMax(Double_t hoe)     { fHadOverEmMax    = hoe;      }
@@ -59,6 +65,8 @@ namespace mithep
       void                SetApplyR9Min(Bool_t b)           { fApplyR9Min      = b;        }
       void                SetEffAreas(Double_t ecal, Double_t hcal, Double_t track) { 
 	fEffAreaEcal = ecal; fEffAreaHcal = hcal; fEffAreaTrack = track;}
+      void                SetTriggerObjectsName(const char *n)   { fTrigObjectsName = n;       }
+	
     
     
       enum EPhIdType {
@@ -84,13 +92,20 @@ namespace mithep
       TString             fGoodPhotonsName;      //name of exported "good photon" collection
       TString             fTrackBranchName;      // name of the track collection (only needed for PU corrected isolation)
       TString             fBeamspotBranchName;   //name of the Beamspot collection (only needed for PU corrected isolation)
-      TString             fPileUpDenName;        //name of the PU density collection
+      TString             fPileUpDenName;        //name of the PU density collection      
+      TString             fConversionName;       //name of conversion branch
+      TString             fElectronName;
+      TString             fTrigObjectsName;        //name of trigger object collection      
       TString             fPhotonIDType;         //type of photon identification we impose
       TString             fPhotonIsoType;        //type of photon isolation we impose
       Double_t            fPhotonPtMin;          //min pt cut
       Double_t            fHadOverEmMax;         //maximum of hadronic/em energy
       Bool_t              fApplySpikeRemoval;    //whether apply spike removal      
       Bool_t              fApplyPixelSeed;       //=true then apply pixel seed constraint
+      Bool_t              fApplyElectronVeto;    //=true then apply electron veto (with no conversion recovery)
+      Bool_t              fApplyElectronVetoConvRecovery; //=true then apply electron veto with conversion recovery
+      Bool_t              fApplyConversionId;    //=true then apply conversion id cuts
+      Bool_t              fApplyTriggerMatching;   //match to hlt photon (default=0)      
       Double_t            fPhotonR9Min;          //min R9 value
       EPhIdType           fPhIdType;             //!identification scheme
       EPhIsoType          fPhIsoType;            //!isolation scheme
@@ -105,7 +120,9 @@ namespace mithep
       const PhotonCol    *fPhotons;              //!photon branch
       const TrackCol     *fTracks;               //!track branch
       const BeamSpotCol  *fBeamspots;            //!beamspot branch    
-      const PileupEnergyDensityCol *fPileUpDen;
+      const PileupEnergyDensityCol *fPileUpDen;  //!rho branch
+      const DecayParticleCol *fConversions;      //!conversion branch
+      const ElectronCol  *fElectrons;            //!electron branch
 
 
     ClassDef(PhotonIDMod, 1) // Photon identification module

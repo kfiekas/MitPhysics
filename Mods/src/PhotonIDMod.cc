@@ -1,9 +1,10 @@
-// $Id: PhotonIDMod.cc,v 1.17 2011/04/06 18:03:48 fabstoec Exp $
+// $Id: PhotonIDMod.cc,v 1.18 2011/04/06 18:09:20 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitPhysics/Utils/interface/PhotonTools.h"
 
 using namespace mithep;
 
@@ -17,12 +18,18 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fTrackBranchName   (Names::gkTrackBrn),
   fBeamspotBranchName(Names::gkBeamSpotBrn),
   fPileUpDenName     (Names::gkPileupEnergyDensityBrn),
+  fConversionName    ("MergedConversions"),
+  fElectronName      ("Electrons"),
   fPhotonIDType("Custom"),
   fPhotonIsoType("Custom"),
   fPhotonPtMin(15.0),
   fHadOverEmMax(0.02),
   fApplySpikeRemoval(kFALSE),
   fApplyPixelSeed(kTRUE),
+  fApplyElectronVeto(kFALSE),
+  fApplyElectronVetoConvRecovery(kFALSE),
+  fApplyConversionId(kFALSE),
+  fApplyTriggerMatching(kFALSE),
   fPhotonR9Min(0.5),
   fPhIdType(kIdUndef),
   fPhIsoType(kIsoUndef),
@@ -37,7 +44,9 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPhotons(0),
   fTracks(0),
   fBeamspots(0),
-  fPileUpDen(0)
+  fPileUpDen(0),
+  fConversions(0),
+  fElectrons(0)
   
 {
   // Constructor.
@@ -49,17 +58,30 @@ void PhotonIDMod::Process()
   // Process entries of the tree. 
 
   LoadEventObject(fPhotonBranchName,   fPhotons);
-  LoadEventObject(fTrackBranchName,    fTracks);
-  LoadEventObject(fBeamspotBranchName, fBeamspots);
-  LoadEventObject(fPileUpDenName,      fPileUpDen);
-
+  
   const BaseVertex *bsp = NULL;
-  if(fBeamspots->GetEntries() > 0)
-    bsp = dynamic_cast<const BaseVertex*>(fBeamspots->At(0));
-
   Double_t _tRho = -1.;
-  if(fPileUpDen->GetEntries() > 0)
-    _tRho = (Double_t) fPileUpDen->At(0)->Rho();
+  const TriggerObjectCol *trigObjs = 0;  
+  if (fPhotons->GetEntries()>0) {
+    LoadEventObject(fTrackBranchName,    fTracks);
+    LoadEventObject(fBeamspotBranchName, fBeamspots);
+    LoadEventObject(fPileUpDenName,      fPileUpDen);
+    LoadEventObject(fConversionName,     fConversions);
+    LoadEventObject(fElectronName,       fElectrons);
+
+    
+    if(fBeamspots->GetEntries() > 0)
+      bsp = fBeamspots->At(0);
+
+    if(fPileUpDen->GetEntries() > 0)
+      _tRho = (Double_t) fPileUpDen->At(0)->Rho();
+    
+    //get trigger object collection if trigger matching is enabled
+    if (fApplyTriggerMatching) {
+      trigObjs = GetHLTObjects(fTrigObjectsName);
+    }    
+  
+  }
   
   PhotonOArr *GoodPhotons = new PhotonOArr;
   GoodPhotons->SetName(fGoodPhotonsName);
@@ -98,6 +120,14 @@ void PhotonIDMod::Process()
     if (fApplyPixelSeed == kTRUE &&
         ph->HasPixelSeed() == kTRUE) 
       continue;
+
+    if (fApplyElectronVeto && !PhotonTools::PassElectronVeto(ph,fElectrons) ) continue;
+
+    if (fApplyElectronVetoConvRecovery && !PhotonTools::PassElectronVetoConvRecovery(ph,fElectrons,fConversions,bsp) ) continue;
+
+    if (fApplyConversionId && !PhotonTools::PassConversionId(ph,PhotonTools::MatchedConversion(ph,fConversions,bsp))) continue;
+
+    if (fApplyTriggerMatching && !PhotonTools::PassTriggerMatching(ph,trigObjs)) continue;
 
     Bool_t idcut = kFALSE;
     switch (fPhIdType) {
@@ -203,6 +233,9 @@ void PhotonIDMod::SlaveBegin()
   ReqEventObject(fTrackBranchName,    fTracks,    kTRUE);
   ReqEventObject(fBeamspotBranchName, fBeamspots, kTRUE);
   ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
+  ReqEventObject(fConversionName,     fConversions, kTRUE);
+  ReqEventObject(fElectronName,       fElectrons, kTRUE);
+  
 
   if (fPhotonIDType.CompareTo("Tight") == 0) 
     fPhIdType = kTight;
