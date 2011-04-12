@@ -1,8 +1,11 @@
 #include "MitPhysics/Utils/interface/JetTools.h"
+#include <algorithm>
+#include <vector>
 
 ClassImp(mithep::JetTools)
 
 using namespace mithep;
+
  
 JetTools::JetTools()
 {
@@ -337,27 +340,44 @@ Double_t JetTools::Beta(const TrackCol *tracks, Jet *jet, const Vertex *vertex, 
 
 
 Double_t JetTools::Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_z){  
-  double Pt_jets_X = 0. ;
-  double Pt_jets_Y = 0. ;
-  double Pt_jets_X_tot = 0. ;
-  double Pt_jets_Y_tot = 0. ;
+  double Pt_jets= 0. ;
+  double Pt_jetsTot = 0. ;
 
   for(UInt_t i=0;i<jet->NPFCands();i++){
     if(jet->PFCand(i)->BestTrk()){
-      Pt_jets_X_tot += jet->PFCand(i)->BestTrk()->Px();
-      Pt_jets_Y_tot += jet->PFCand(i)->BestTrk()->Py();  
+      Pt_jetsTot += jet->PFCand(i)->BestTrk()->Pt();
       double pDz = TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertex));
       if(pDz < delta_z){
-        Pt_jets_X += jet->PFCand(i)->BestTrk()->Px();
-        Pt_jets_Y += jet->PFCand(i)->BestTrk()->Py();
+        Pt_jets += jet->PFCand(i)->BestTrk()->Pt();
       }
     }
   }
 
-  if(sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot) > 0)
-    return sqrt(Pt_jets_X*Pt_jets_X + Pt_jets_Y*Pt_jets_Y) / sqrt(Pt_jets_X_tot*Pt_jets_X_tot + Pt_jets_Y_tot*Pt_jets_Y_tot);
+  Double_t beta = 1.0;
+  if (Pt_jetsTot > 0)
+    beta = Pt_jets/Pt_jetsTot;
 
-  return 1.0;
+  return beta;
+}
+
+Double_t JetTools::Beta2(const PFJet *jet, const Vertex *vertex, Double_t  delta_z){  
+  double Pt_jets= 0. ;
+  double Pt_jetsTot = 0. ;
+
+  for(UInt_t i=0;i<jet->NPFCands();i++){
+    if(jet->PFCand(i)->BestTrk()){
+      Pt_jetsTot += jet->PFCand(i)->BestTrk()->Pt()*jet->PFCand(i)->BestTrk()->Pt();
+      double pDz = TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertex));
+      if(pDz < delta_z){
+        Pt_jets += jet->PFCand(i)->BestTrk()->Pt()*jet->PFCand(i)->BestTrk()->Pt();
+      }
+    }
+  }
+
+  Double_t beta = 1.0;
+  if (Pt_jetsTot > 0)
+    beta = Pt_jets/Pt_jetsTot;
+  return beta;
 }
 
 
@@ -377,4 +397,83 @@ Bool_t  JetTools::PassBetaVertexAssociationCut(const PFJet *jet, const Vertex *r
 
   return passBetaCut; 
 
+}
+
+Bool_t  JetTools::PassBeta2VertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex, const VertexCol *vertices, Double_t delta_z) {
+
+  Bool_t passBetaCut = kTRUE;
+  if(vertices->GetEntries() > 0) {
+    Double_t Beta = JetTools::Beta2(jet, referenceVertex, 0.2);
+    Double_t Beta_other = 0.0;
+    for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
+      if (referenceVertex == vertices->At(nv)) continue;
+      Double_t BetaAux = JetTools::Beta2(jet, vertices->At(nv), 0.2);
+      if(BetaAux > Beta_other) Beta_other = BetaAux;
+    }
+    if(Beta_other > Beta) passBetaCut = kFALSE;
+  }
+
+  return passBetaCut; 
+
+}
+
+
+Int_t JetTools::MaxBetaVertexIndex(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z=0.2){  
+  
+  Int_t vertexIndex = -1;
+  double beta = -0.1;
+  for (UInt_t v=0; v < vertices->GetEntries(); v++){
+    Double_t betaTmp = JetTools::Beta(jet, vertices->At(v), delta_z);
+    if (betaTmp > beta) {
+      beta = betaTmp;
+      vertexIndex = v;
+    }
+  }
+  return vertexIndex;
+
+}
+
+Int_t JetTools::MaxBeta2VertexIndex(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z=0.2){  
+  
+  Int_t vertexIndex = -1;
+  double beta = -0.1;
+  for (UInt_t v=0; v < vertices->GetEntries(); v++){
+    Double_t betaTmp = JetTools::Beta2(jet, vertices->At(v), delta_z);
+    if (betaTmp > beta) {
+      beta = betaTmp;
+      vertexIndex = v;
+    }
+  }
+  return vertexIndex;
+
+}
+
+
+Int_t JetTools::JetToPVAssociation(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z=0.2){  
+
+  std::vector<float> verticesPt2(vertices->GetEntries());
+  for(UInt_t i=0;i<jet->NPFCands();i++){
+    if(jet->PFCand(i)->BestTrk()){
+      double minDZ = delta_z;
+      int trackVertexIndex = -1;
+      for (UInt_t v=0; v < vertices->GetEntries(); v++){
+	if (minDZ > TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertices->At(v)))) {
+	  minDZ = TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertices->At(v)));
+	  trackVertexIndex = v;
+	}
+      }
+      if (trackVertexIndex < 0) continue;
+      verticesPt2[trackVertexIndex]+= jet->PFCand(i)->BestTrk()->Pt()*jet->PFCand(i)->BestTrk()->Pt();
+    }
+  }
+
+  Int_t vertexIndex = 0;
+  float pt2Max = 0; 
+  for (uint i=0; i < verticesPt2.size(); ++i){
+    if (pt2Max < verticesPt2[i]) {
+      pt2Max = verticesPt2[i];
+      vertexIndex = i;
+    }
+  }
+  return vertexIndex;
 }

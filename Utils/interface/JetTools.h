@@ -38,6 +38,11 @@ namespace mithep {
     static Double_t Beta(const TrackCol *tracks, Jet *jet, const Vertex *vertex, Double_t  delta_z, Double_t delta_cone);
     static Double_t Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_z);
     static Bool_t   PassBetaVertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex, const VertexCol *vertices, Double_t delta_z);
+    static Double_t Beta2(const PFJet *jet, const Vertex *vertex, Double_t  delta_z);
+    static Bool_t   PassBeta2VertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex, const VertexCol *vertices, Double_t delta_z);
+    static Int_t    MaxBetaVertexIndex(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);
+    static Int_t    MaxBeta2VertexIndex(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);    
+    static Int_t    JetToPVAssociation(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);    
 
     ClassDef(JetTools, 0)
   };
