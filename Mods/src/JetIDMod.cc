@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.23 2011/02/23 11:38:09 sixie Exp $
+// $Id: JetIDMod.cc,v 1.24 2011/03/11 15:13:09 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -83,7 +83,7 @@ void JetIDMod::Process()
       continue;
 
     // add good jet to collection
-    GoodJets->Add(jet);             
+    GoodJets->Add(jet);
   }
 
   // sort according to pt

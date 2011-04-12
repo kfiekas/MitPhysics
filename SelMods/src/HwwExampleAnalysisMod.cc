@@ -9,6 +9,7 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Utils/interface/MetTools.h"
 #include "MitAna/DataTree/interface/ParticleCol.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -23,12 +24,12 @@ HwwExampleAnalysisMod::HwwExampleAnalysisMod(const char *name, const char *title
   fMetName("NoDefaultNameSet"),
   fCleanJetsName("NoDefaultNameSet"),
   fCleanJetsNoPtCutName("NoDefaultNameSet"),
-  fCaloJetName0("AKt5Jets"),
   fVertexName(ModNames::gkGoodVertexesName),
+  fPFCandidatesName(Names::gkPFCandidatesBrn),
   fMuons(0),
   fMet(0),
   fVertices(0),
-  fCaloJet0(0),
+  fPFCandidates(0),
   fNEventsSelected(0)
 {
   // Constructor.
@@ -49,8 +50,8 @@ void HwwExampleAnalysisMod::SlaveBegin()
   // branches. For this module, we request a branch of the MitTree.
 
   // Load Branches
-  ReqBranch(fMuonBranchName,  fMuons);
-  ReqBranch(fCaloJetName0,    fCaloJet0);
+  ReqBranch(fMuonBranchName,   fMuons);
+  ReqBranch(fPFCandidatesName, fPFCandidates);
 
   //Create your histograms here
 
@@ -124,8 +125,8 @@ void HwwExampleAnalysisMod::Process()
 {
   // Process entries of the tree. For this module, we just load the branches and  
   LoadBranch(fMuonBranchName);
-  LoadBranch(fCaloJetName0);
- 
+  LoadBranch(fPFCandidatesName);
+
   //Obtain all the good objects from the event cleaning module
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
   ObjArray<Muon> *CleanMuons = dynamic_cast<ObjArray<Muon>* >(FindObjThisEvt(ModNames::gkCleanMuonsName));
@@ -139,9 +140,9 @@ void HwwExampleAnalysisMod::Process()
   TParameter<Double_t> *NNLOWeight = GetObjThisEvt<TParameter<Double_t> >("NNLOWeight");
 
   MetCol *met = dynamic_cast<ObjArray<Met>* >(FindObjThisEvt(fMetName));
-  const Met *caloMet = 0;
+  const Met *stdMet = 0;
   if (met) {
-    caloMet = met->At(0);
+    stdMet = met->At(0);
   } else {
     cout << "Error: Met Collection " << fMetName << " could not be loaded.\n";
     return;
@@ -180,28 +181,23 @@ void HwwExampleAnalysisMod::Process()
   //***********************************************************************************************
   //|Z_vert-Z_l| maximum
   //***********************************************************************************************
+  std::vector<double> leptonsDz;
   double zDiffMax = 0.0;
   if(fVertices->GetEntries() > 0) {
     for (UInt_t j=0; j<CleanMuons->GetEntries(); j++) {
-      double pDz = 0.0;
-      for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-        if(fVertices->At(i0)->NTracks() > 0){
-	  pDz = TMath::Abs(CleanMuons->At(j)->BestTrk()->DzCorrected(*fVertices->At(i0)));
-          break;
-        }
-      }
-      if(pDz > zDiffMax) zDiffMax = pDz;
+      double pDz = CleanMuons->At(j)->BestTrk()->DzCorrected(*fVertices->At(0));
+      leptonsDz.push_back(pDz);
     }
     for (UInt_t j=0; j<CleanElectrons->GetEntries(); j++) {   
-      double pDz = 0.0;
-      for(uint i0 = 0; i0 < fVertices->GetEntries(); i0++) {
-        if(fVertices->At(i0)->NTracks() > 0){
-	  pDz = TMath::Abs(CleanElectrons->At(j)->GsfTrk()->DzCorrected(*fVertices->At(i0)));
-          break;
-        }
-      }
-      if(pDz > zDiffMax) zDiffMax = pDz;
+      double pDz = CleanElectrons->At(j)->GsfTrk()->DzCorrected(*fVertices->At(0));
+      leptonsDz.push_back(pDz);
     }
+    for(UInt_t t=0; t<leptonsDz.size(); t++) {
+      for(UInt_t i=t+1; i<leptonsDz.size(); i++) {
+        if(TMath::Abs(leptonsDz[t]-leptonsDz[i]) > zDiffMax) zDiffMax = TMath::Abs(leptonsDz[t]-leptonsDz[i]);
+      }
+    }
+    leptonsDz.clear();
   }
 
   //***********************************************************************************************
@@ -213,27 +209,29 @@ void HwwExampleAnalysisMod::Process()
 
   double deltaEtaLeptons = CleanLeptons->At(0)->Eta() - CleanLeptons->At(1)->Eta();
 
-  double deltaPhiDileptonMet = MathUtils::DeltaPhi(caloMet->Phi(), 
+  double deltaPhiDileptonMet = MathUtils::DeltaPhi(stdMet->Phi(), 
                                                    dilepton->Phi())*180.0 / TMath::Pi();
 
-  double mtHiggs = TMath::Sqrt(2.0*dilepton->Pt() * caloMet->Pt()*
+  double mtHiggs = TMath::Sqrt(2.0*dilepton->Pt() * stdMet->Pt()*
 			       (1.0 - cos(deltaPhiDileptonMet * TMath::Pi() / 180.0)));
 
   //angle between MET and closest lepton
-  double deltaPhiMetLepton[2] = {MathUtils::DeltaPhi(caloMet->Phi(), CleanLeptons->At(0)->Phi()),
-                                 MathUtils::DeltaPhi(caloMet->Phi(), CleanLeptons->At(1)->Phi())};
+  double deltaPhiMetLepton[2] = {MathUtils::DeltaPhi(stdMet->Phi(), CleanLeptons->At(0)->Phi()),
+                                 MathUtils::DeltaPhi(stdMet->Phi(), CleanLeptons->At(1)->Phi())};
   
-  double mTW[2] = {TMath::Sqrt(2.0*CleanLeptons->At(0)->Pt()*caloMet->Pt()*
+  double mTW[2] = {TMath::Sqrt(2.0*CleanLeptons->At(0)->Pt()*stdMet->Pt()*
                                (1.0 - cos(deltaPhiMetLepton[0]))),
-		   TMath::Sqrt(2.0*CleanLeptons->At(1)->Pt()*caloMet->Pt()*
+		   TMath::Sqrt(2.0*CleanLeptons->At(1)->Pt()*stdMet->Pt()*
                                (1.0 - cos(deltaPhiMetLepton[1])))};
 
   double minDeltaPhiMetLepton = (deltaPhiMetLepton[0] < deltaPhiMetLepton[1])?
     deltaPhiMetLepton[0]:deltaPhiMetLepton[1];
 
-  double METdeltaPhilEt = caloMet->Pt();
-  if(minDeltaPhiMetLepton < TMath::Pi()/2.)
-      METdeltaPhilEt = METdeltaPhilEt * sin(minDeltaPhiMetLepton);
+  MetTools metTools(CleanMuons, CleanElectrons, fPFCandidates, fVertices->At(0), 0.2, 8.0, 5.0);
+  double pMET[2] = {metTools.GetProjectedMet(CleanLeptons,stdMet),
+  		    metTools.GetProjectedTrackMet(CleanLeptons)};
+
+  double METdeltaPhilEt = TMath::Min(pMET[0],pMET[1]);
 
   //count the number of central Jets for vetoing and b-tagging
   vector<Jet*> sortedJetsAll;
@@ -244,47 +242,22 @@ void HwwExampleAnalysisMod::Process()
    			 CleanJetsNoPtCut->At(i)->Py(),
    			 CleanJetsNoPtCut->At(i)->Pz(),
    			 CleanJetsNoPtCut->At(i)->E() );
-
-    int nCloseStdJet = -1;
-    double deltaRMin = 999.;
-    for(UInt_t nj=0; nj<fCaloJet0->GetEntries(); nj++){
-      const CaloJet *jet = fCaloJet0->At(nj);
-      Double_t deltaR = MathUtils::DeltaR(jet_a->Mom(),jet->Mom());
-      if(deltaR < deltaRMin) {
-   	nCloseStdJet = nj;
-   	deltaRMin = deltaR;
-      }
-    }
-    if(nCloseStdJet >= 0 && deltaRMin < 0.5){
-      jet_a->SetMatchedMCFlavor(fCaloJet0->At(nCloseStdJet)->MatchedMCFlavor());
-      jet_a->SetCombinedSecondaryVertexBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->CombinedSecondaryVertexBJetTagsDisc());
-      jet_a->SetCombinedSecondaryVertexMVABJetTagsDisc(fCaloJet0->At(nCloseStdJet)->CombinedSecondaryVertexMVABJetTagsDisc());
-      jet_a->SetJetProbabilityBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->JetProbabilityBJetTagsDisc());
-      jet_a->SetJetBProbabilityBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->JetBProbabilityBJetTagsDisc());
-      jet_a->SetTrackCountingHighEffBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->TrackCountingHighEffBJetTagsDisc());
-      jet_a->SetTrackCountingHighPurBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->TrackCountingHighPurBJetTagsDisc());
-      jet_a->SetSimpleSecondaryVertexBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->SimpleSecondaryVertexBJetTagsDisc());
-      jet_a->SetSimpleSecondaryVertexHighEffBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->SimpleSecondaryVertexHighEffBJetTagsDisc());
-      jet_a->SetSimpleSecondaryVertexHighPurBJetTagsDisc(fCaloJet0->At(nCloseStdJet)->SimpleSecondaryVertexHighPurBJetTagsDisc());
-    }
-    else {
-      jet_a->SetMatchedMCFlavor(CleanJetsNoPtCut->At(i)->MatchedMCFlavor());
-      jet_a->SetCombinedSecondaryVertexBJetTagsDisc(CleanJetsNoPtCut->At(i)->CombinedSecondaryVertexBJetTagsDisc());
-      jet_a->SetCombinedSecondaryVertexMVABJetTagsDisc(CleanJetsNoPtCut->At(i)->CombinedSecondaryVertexMVABJetTagsDisc());
-      jet_a->SetJetProbabilityBJetTagsDisc(CleanJetsNoPtCut->At(i)->JetProbabilityBJetTagsDisc());
-      jet_a->SetJetBProbabilityBJetTagsDisc(CleanJetsNoPtCut->At(i)->JetBProbabilityBJetTagsDisc());
-      jet_a->SetTrackCountingHighEffBJetTagsDisc(CleanJetsNoPtCut->At(i)->TrackCountingHighEffBJetTagsDisc());
-      jet_a->SetTrackCountingHighPurBJetTagsDisc(CleanJetsNoPtCut->At(i)->TrackCountingHighPurBJetTagsDisc());
-      jet_a->SetSimpleSecondaryVertexBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexBJetTagsDisc());
-      jet_a->SetSimpleSecondaryVertexHighEffBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexHighEffBJetTagsDisc());
-      jet_a->SetSimpleSecondaryVertexHighPurBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexHighPurBJetTagsDisc());
-    }
+    jet_a->SetMatchedMCFlavor(CleanJetsNoPtCut->At(i)->MatchedMCFlavor());
+    jet_a->SetCombinedSecondaryVertexBJetTagsDisc(CleanJetsNoPtCut->At(i)->CombinedSecondaryVertexBJetTagsDisc());
+    jet_a->SetCombinedSecondaryVertexMVABJetTagsDisc(CleanJetsNoPtCut->At(i)->CombinedSecondaryVertexMVABJetTagsDisc());
+    jet_a->SetJetProbabilityBJetTagsDisc(CleanJetsNoPtCut->At(i)->JetProbabilityBJetTagsDisc());
+    jet_a->SetJetBProbabilityBJetTagsDisc(CleanJetsNoPtCut->At(i)->JetBProbabilityBJetTagsDisc());
+    jet_a->SetTrackCountingHighEffBJetTagsDisc(CleanJetsNoPtCut->At(i)->TrackCountingHighEffBJetTagsDisc());
+    jet_a->SetTrackCountingHighPurBJetTagsDisc(CleanJetsNoPtCut->At(i)->TrackCountingHighPurBJetTagsDisc());
+    jet_a->SetSimpleSecondaryVertexBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexBJetTagsDisc());
+    jet_a->SetSimpleSecondaryVertexHighEffBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexHighEffBJetTagsDisc());
+    jet_a->SetSimpleSecondaryVertexHighPurBJetTagsDisc(CleanJetsNoPtCut->At(i)->SimpleSecondaryVertexHighPurBJetTagsDisc());
     sortedJetsAll.push_back(jet_a);
   }
 
   for(UInt_t i=0; i<CleanJets->GetEntries(); i++){
     if(TMath::Abs(CleanJets->At(i)->Eta()) < 5.0 &&
-       CleanJets->At(i)->Pt() > 25.0){
+       CleanJets->At(i)->Pt() > 30.0){
       Jet* jet_b = new Jet(CleanJets->At(i)->Px(),
      			   CleanJets->At(i)->Py(),
    			   CleanJets->At(i)->Pz(),
@@ -348,12 +321,15 @@ void HwwExampleAnalysisMod::Process()
   bool passCut[nCuts] = {false, false, false, false, false,
                          false, false, false, false, false};
   
-  if(CleanLeptons->At(0)->Pt() >  20.0 &&
-     CleanLeptons->At(1)->Pt() >  20.0) passCut[0] = true;
+  Bool_t PreselPtCut = kTRUE;
+  if(CleanLeptons->At(0)->Pt() <= 20) PreselPtCut = kFALSE;
+  if(CleanLeptons->At(1)->Pt() <= 10) PreselPtCut = kFALSE;
+  if(CleanLeptons->At(1)->ObjType() == kElectron && CleanLeptons->At(1)->Pt() <= 15) PreselPtCut = kFALSE;
+  if(PreselPtCut == kTRUE)              passCut[0] = true;
   
-  if(zDiffMax < 1.0)                    passCut[1] = true;
+  if(zDiffMax < 100000.0)               passCut[1] = true;
   
-  if(caloMet->Pt()    > 20.0)           passCut[2] = true;
+  if(stdMet->Pt()    > 20.0)            passCut[2] = true;
   
   if(dilepton->Mass() > 12.0)           passCut[3] = true;
   
@@ -417,8 +393,8 @@ void HwwExampleAnalysisMod::Process()
   fLeptonEta->Fill(CleanLeptons->At(1)->Eta(),NNLOWeight->GetVal());
   fLeptonPtMax->Fill(CleanLeptons->At(0)->Pt(),NNLOWeight->GetVal());
   fLeptonPtMin->Fill(CleanLeptons->At(1)->Pt(),NNLOWeight->GetVal());
-  fMetPtHist->Fill(caloMet->Pt(),NNLOWeight->GetVal());                             
-  fMetPhiHist->Fill(caloMet->Phi(),NNLOWeight->GetVal());                            
+  fMetPtHist->Fill(stdMet->Pt(),NNLOWeight->GetVal());                             
+  fMetPhiHist->Fill(stdMet->Phi(),NNLOWeight->GetVal());                            
   fDeltaPhiLeptons->Fill(deltaPhiLeptons,NNLOWeight->GetVal());
   fDeltaEtaLeptons->Fill(deltaEtaLeptons,NNLOWeight->GetVal());
   fDileptonMass->Fill(dilepton->Mass(),NNLOWeight->GetVal());    
@@ -447,7 +423,7 @@ void HwwExampleAnalysisMod::Process()
     }
   }
   if (pass) {
-    fMetPtHist_NMinusOne->Fill(caloMet->Pt(),NNLOWeight->GetVal());  
+    fMetPtHist_NMinusOne->Fill(stdMet->Pt(),NNLOWeight->GetVal());  
   }
 
   // dilepton mass
@@ -490,7 +466,7 @@ void HwwExampleAnalysisMod::Process()
     fMtLepton1_afterCuts->Fill(mTW[0],NNLOWeight->GetVal());
     fMtLepton2_afterCuts->Fill(mTW[1],NNLOWeight->GetVal());
     fMtHiggs_afterCuts->Fill(mtHiggs,NNLOWeight->GetVal());
-    fLeptonPtPlusMet_afterCuts->Fill(CleanLeptons->At(0)->Pt()+CleanLeptons->At(1)->Pt()+caloMet->Pt(),NNLOWeight->GetVal());
+    fLeptonPtPlusMet_afterCuts->Fill(CleanLeptons->At(0)->Pt()+CleanLeptons->At(1)->Pt()+stdMet->Pt(),NNLOWeight->GetVal());
   }
   
   delete dilepton;
