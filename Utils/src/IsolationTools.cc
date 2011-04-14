@@ -1,6 +1,7 @@
-// $Id: IsolationTools.cc,v 1.9 2011/03/07 12:46:02 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.10 2011/04/06 18:03:48 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 ClassImp(mithep::IsolationTools)
@@ -374,7 +375,9 @@ Double_t IsolationTools::TrackIsolationNoPV(const mithep::Particle* p, const Bas
 					    Double_t etaStrip,
 					    Double_t maxD0,
 					    mithep::TrackQuality::EQuality quality,
-					    const mithep::Collection<mithep::Track> *tracks) {
+					    const mithep::Collection<mithep::Track> *tracks,
+                                            UInt_t maxNExpectedHitsInner,
+                                            const mithep::DecayParticleCol *conversions) {
   
   // loop over all tracks
   Double_t tPt = 0.;
@@ -384,6 +387,8 @@ Double_t IsolationTools::TrackIsolationNoPV(const mithep::Particle* p, const Bas
     if ( ! t->Quality().Quality(quality) ) continue;
     // only check for beamspot if available, otherwise ignore cut
     if ( bsp && fabs(t->D0Corrected( *bsp) ) > maxD0) continue;
+    if (t->NExpectedHitsInner()>maxNExpectedHitsInner) continue;
+    if (conversions && PhotonTools::MatchedConversion(t,conversions,bsp)) continue;
     Double_t dR   = MathUtils::DeltaR(t->Mom(),p->Mom());
     Double_t dEta = fabs(t->Eta()-p->Eta());
     if(dR < extRadius && dR > intRadius && dEta > etaStrip) tPt += t->Pt();

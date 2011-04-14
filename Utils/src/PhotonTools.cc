@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.24 2011/03/21 12:25:36 ceballos Exp $
+// $Id: PhotonTools.cc,v 1.1 2011/04/12 22:14:21 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -105,6 +105,29 @@ const DecayParticle *PhotonTools::MatchedConversion(const Photon *p, const Decay
   }
   
   return match;
+  
+}
+
+//--------------------------------------------------------------------------------------------------
+const DecayParticle *PhotonTools::MatchedConversion(const Track *t, const DecayParticleCol *conversions, 
+                                               const BaseVertex *vtx, Int_t nWrongHitsMax, Double_t probMin,
+                                               Double_t lxyMin) {
+  
+  for (UInt_t i=0; i<conversions->GetEntries(); ++i) {
+    const DecayParticle *c = conversions->At(i);
+    if (c->Prob()>probMin && c->LxyCorrected(vtx)>lxyMin) {
+      Int_t nhb1 = dynamic_cast<const StableData*>(c->DaughterDat(0))->NHitsBeforeVtx();
+      Int_t nhb2 = dynamic_cast<const StableData*>(c->DaughterDat(1))->NHitsBeforeVtx();
+      if (TMath::Max(nhb1,nhb2)<=nWrongHitsMax) {
+        const Track *ct1 = dynamic_cast<const ChargedParticle*>(c->Daughter(0))->Trk();
+        const Track *ct2 = dynamic_cast<const ChargedParticle*>(c->Daughter(1))->Trk();
+        if (t==ct1 || t==ct2) return c;
+      }
+    }
+    
+  }
+  
+  return 0;
   
 }
 

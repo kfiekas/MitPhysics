@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.9 2011/02/21 13:50:20 ceballos Exp $
+// $Id: IsolationTools.h,v 1.10 2011/04/06 18:03:48 fabstoec Exp $
 //
 // IsolationTools
 //
@@ -21,6 +21,7 @@
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/TrackCol.h"
+#include "MitAna/DataTree/interface/DecayParticleCol.h"
 
 namespace mithep
 {
@@ -63,7 +64,9 @@ namespace mithep
 					 Double_t etaStrip,
 					 Double_t maxD0,
 					 mithep::TrackQuality::EQuality,
-					 const mithep::Collection<mithep::Track> *tracks);
+					 const mithep::Collection<mithep::Track> *tracks,
+                                         UInt_t maxNExpectedHitsInner = 999,
+                                         const mithep::DecayParticleCol *conversions = 0);
 
     ClassDef(IsolationTools, 0) // Isolation tools
   };

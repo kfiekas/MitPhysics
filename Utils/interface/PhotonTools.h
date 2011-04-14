@@ -48,7 +48,10 @@ namespace mithep {
       static Bool_t       PassTriggerMatching(const Photon *p, const TriggerObjectCol *trigobjs);
       static const DecayParticle *MatchedConversion(const Photon *p, const DecayParticleCol *conversions, 
                                                const BaseVertex *vtx, Int_t nWrongHitsMax=1, Double_t probMin=1e-6,
-                                               Double_t lxyMin = 2.0, Double_t dRMin = 0.1);  
+                                               Double_t lxyMin = 2.0, Double_t dRMin = 0.1); 
+      static const DecayParticle *MatchedConversion(const Track *t, const DecayParticleCol *conversions, 
+                                               const BaseVertex *vtx, Int_t nWrongHitsMax=1, Double_t probMin=1e-6,
+                                               Double_t lxyMin = 2.0);                                               
       static DiphotonR9EtaCats DiphotonR9EtaCat(const Photon *p1, const Photon *p2);
       static DiphotonR9EtaConversionCats DiphotonR9EtaConversionCat(const Photon *p1, const Photon *p2, const DecayParticleCol *conversions, const BaseVertex *v);
 
