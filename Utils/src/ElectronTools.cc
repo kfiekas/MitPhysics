@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.25 2011/04/05 05:03:25 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.26 2011/04/05 05:40:06 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -282,7 +282,8 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
                                            Double_t probMin,
                                            Double_t lxyMin,
                                            Bool_t matchCkf,
-                                           Bool_t requireArbitratedMerged) 
+                                           Bool_t requireArbitratedMerged,
+                                           Double_t trkptMin) 
 {
   Bool_t isGoodConversion = kFALSE;
 
@@ -308,6 +309,7 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
           const Track *trk = dynamic_cast<const ChargedParticle*>
             (conversions->At(ifc)->Daughter(d))->Trk();
           if (trk) {
+            if (trk->Pt()<trkptMin) isGoodConversion = kFALSE;
             const StableData *sd = dynamic_cast<const StableData*>
               (conversions->At(ifc)->DaughterDat(d));
             if (sd->NWrongHits() > nWrongHitsMax)
