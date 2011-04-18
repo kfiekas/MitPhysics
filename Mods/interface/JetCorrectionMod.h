@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.5 2011/03/25 18:37:06 mzanetti Exp $
+// $Id: JetCorrectionMod.h,v 1.6 2011/03/28 14:05:34 ceballos Exp $
 //
 // JetCorrectionMod
 //
@@ -52,6 +52,8 @@ namespace mithep
       bool              fEnabledL1Correction; //switch on L1 correction
       float             rhoEtaMax; //parameter to choose which rho to use for L1 correction
       FactorizedJetCorrector *fJetCorrector;      //!CMSSW/FWLite jet corrections module
+      TString           fEvtHdrName;	          // name of event header branch
+      const EventHeader *fEventHeader;            // event header for current event
 
       std::vector<std::string> fCorrectionFiles; //list of jet correction files
       const PileupEnergyDensityCol *fRho;        // collection of pileup energy density collection

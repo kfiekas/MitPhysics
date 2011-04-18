@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.9 2011/03/31 16:34:49 sixie Exp $
+// $Id: JetCorrectionMod.cc,v 1.10 2011/04/07 15:53:45 sixie Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -21,7 +21,9 @@ ClassImp(mithep::JetCorrectionMod)
     fRhoBranchName("Rho"),
     fEnabledL1Correction(kFALSE),
     rhoEtaMax(5.0),
-    fJetCorrector(0)
+    fJetCorrector(0),
+    fEvtHdrName(Names::gkEvtHeaderBrn),
+    fEventHeader(0)
 {
   // Constructor.
 }
@@ -48,6 +50,7 @@ void JetCorrectionMod::SlaveBegin()
   if (fEnabledL1Correction) {
     ReqBranch(fRhoBranchName, fRho);
   }
+  ReqBranch(fEvtHdrName, fEventHeader);
 
   //initialize jet corrector class
   fJetCorrector = new FactorizedJetCorrector(correctionParameters);
@@ -109,6 +112,7 @@ void JetCorrectionMod::Process()
   if (fEnabledL1Correction) {
     LoadBranch(fRhoBranchName);
   }
+  LoadBranch(fEvtHdrName);
 
   // loop over jets
   for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
@@ -174,11 +178,13 @@ void JetCorrectionMod::Process()
     }
     
     if (0) {
-      printf("In L2 = %5f, Out L2 = %5f\n",inJet->L2RelativeCorrectionScale(),jet->L2RelativeCorrectionScale());
-      printf("In L3 = %5f, Out L3 = %5f\n",inJet->L3AbsoluteCorrectionScale(),jet->L3AbsoluteCorrectionScale());
-      printf("In RawPt = %5f, Out RawPt = %5f\n",inJet->RawMom().Pt(),jet->RawMom().Pt());
-      printf("In Pt = %5f, Out Pt = %5f\n",inJet->Pt(),jet->Pt());
-      printf("Pt Ratio          = %5f\n", jet->Pt()/inJet->Pt());
+      printf("JetCorrectionMod(run/evt/lum/rhoEtaMax): %d %d %d %1f ",fEventHeader->RunNum(),fEventHeader->EvtNum(),fEventHeader->LumiSec(),rhoEtaMax);
+      printf("In Pt = %5f, Out Pt = %5f ",inJet->Pt(),jet->Pt());
+      printf("In L1 = %5f, Out L1 = %5f ",inJet->L1OffsetCorrectionScale(),jet->L1OffsetCorrectionScale());
+      printf("In L2 = %5f, Out L2 = %5f ",inJet->L2RelativeCorrectionScale(),jet->L2RelativeCorrectionScale());
+      printf("In L3 = %5f, Out L3 = %5f ",inJet->L3AbsoluteCorrectionScale(),jet->L3AbsoluteCorrectionScale());
+      const PileupEnergyDensity *fR = fRho->At(0);
+      printf("Rho(2.5) = %5f, Rho(5.0)  = %5f, Area: %5f\n",fR->Rho(),fR->RhoHighEta(),jet->JetArea());
     }
 
     // add corrected jet to collection
