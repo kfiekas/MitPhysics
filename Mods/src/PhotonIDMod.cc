@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.18 2011/04/06 18:09:20 fabstoec Exp $
+// $Id: PhotonIDMod.cc,v 1.19 2011/04/12 22:14:21 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -38,9 +38,12 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fEtaWidthEE(0.028),
   fAbsEtaMax(2.5),
   fApplyR9Min(kFALSE),
-  fEffAreaEcal(0.139),
-  fEffAreaHcal(0.056),
-  fEffAreaTrack(0.296),
+  fEffAreaEcalEE(0.071),
+  fEffAreaHcalEE(0.095),
+  fEffAreaTrackEE(0.269),
+  fEffAreaEcalEB(0.162),
+  fEffAreaHcalEB(0.042),
+  fEffAreaTrackEB(0.317),
   fPhotons(0),
   fTracks(0),
   fBeamspots(0),
@@ -175,6 +178,16 @@ void PhotonIDMod::Process()
 	// compute the PU corrections only if Rho is available
 	// ... otherwise (_tRho = -1.0) it's the std isolation
 	isocut = kTRUE;
+	Double_t fEffAreaEcal = fEffAreaEcalEB;
+	Double_t fEffAreaHcal = fEffAreaHcalEB;
+	Double_t fEffAreaTrack = fEffAreaTrackEB;
+
+	if( abs(ph->Eta()) > 1.5 ) {
+	  fEffAreaEcal = fEffAreaEcalEE;
+	  fEffAreaHcal = fEffAreaHcalEE;
+	  fEffAreaTrack = fEffAreaTrackEE;
+	}	  
+	  
 	Double_t EcalCorrISO =   ph->EcalRecHitIsoDr04();
 	if(_tRho > -0.5 ) EcalCorrISO -= _tRho * fEffAreaEcal;
 	if ( EcalCorrISO > (2.0+0.006*ph->Pt()) ) isocut = kFALSE; 

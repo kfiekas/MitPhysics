@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.15 2011/04/06 18:03:48 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.16 2011/04/12 22:14:21 bendavid Exp $
 //
 // PhotonIDMod
 //
@@ -64,10 +64,15 @@ namespace mithep
       void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax       = x;	   }
       void                SetApplyR9Min(Bool_t b)           { fApplyR9Min      = b;        }
       void                SetEffAreas(Double_t ecal, Double_t hcal, Double_t track) { 
-	fEffAreaEcal = ecal; fEffAreaHcal = hcal; fEffAreaTrack = track;}
+	fEffAreaEcalEE = ecal; fEffAreaHcalEE = hcal; fEffAreaTrackEE = track;
+	fEffAreaEcalEB = ecal; fEffAreaHcalEB = hcal; fEffAreaTrackEB = track;
+      }
+      void                SetEffAreasEEEB(Double_t ecalEE, Double_t hcalEE, Double_t trackEE,
+					  Double_t ecalEB, Double_t hcalEB, Double_t trackEB) { 
+	fEffAreaEcalEE = ecalEE; fEffAreaHcalEE = hcalEE; fEffAreaTrackEE = trackEE;
+	fEffAreaEcalEB = ecalEB; fEffAreaHcalEB = hcalEB; fEffAreaTrackEB = trackEB;
+      }
       void                SetTriggerObjectsName(const char *n)   { fTrigObjectsName = n;       }
-	
-    
     
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -114,9 +119,12 @@ namespace mithep
       Double_t            fEtaWidthEE;  	 //max Eta Width in ECAL End Cap
       Double_t            fAbsEtaMax;  	         //max Abs Eta
       Bool_t              fApplyR9Min;           //apply R9 min
-      Double_t            fEffAreaEcal;
-      Double_t            fEffAreaHcal;
-      Double_t            fEffAreaTrack;
+      Double_t            fEffAreaEcalEE;
+      Double_t            fEffAreaHcalEE;
+      Double_t            fEffAreaTrackEE;
+      Double_t            fEffAreaEcalEB;
+      Double_t            fEffAreaHcalEB;
+      Double_t            fEffAreaTrackEB;
       const PhotonCol    *fPhotons;              //!photon branch
       const TrackCol     *fTracks;               //!track branch
       const BeamSpotCol  *fBeamspots;            //!beamspot branch    
