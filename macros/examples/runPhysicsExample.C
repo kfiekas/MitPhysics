@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.12 2010/11/17 19:38:29 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.13 2010/12/22 20:20:40 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -30,15 +30,16 @@
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/MetCol.h" 
+#include "MitAna/DataTree/interface/PFMetCol.h" 
 #include "MitAna/DataTree/interface/CaloMetCol.h"
 #include "MitPhysics/SelMods/interface/HwwExampleAnalysisMod.h"
 #include "MitPhysics/SelMods/interface/WBFExampleAnalysisMod.h"
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
-		       const char *book	      = "cern/filler/015",
-                       const char *dataset    = "f10-h150ww2l-wbf-z2-v12",
+void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
+		       const char *book	      = "cern/filefi/020",
+                       const char *dataset    = "p11-h160ww2l-gf-v1g1-pu",
                        const char *fileset    = "0000",
                        const char *skim       = "noskim",
                        const char *outputName = "histo",
@@ -55,15 +56,24 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   //------------------------------------------------------------------------------------------------
   // set up information
   //------------------------------------------------------------------------------------------------
-  Bool_t applyISRFilter = kFALSE;
-  Bool_t applyMllGenCut = kFALSE;
-  Bool_t isData         = kFALSE;
-  Bool_t isElData       = kFALSE;
+  Bool_t applyISRFilter     = kFALSE;
+  Bool_t applyMllGenCut     = kFALSE;
+  Bool_t isData             = kFALSE;
+  Bool_t isDataMuonElectron = kFALSE;
+  Bool_t isDataDMuon        = kFALSE;
+  Bool_t isDataSMuon        = kFALSE;
+  Bool_t isDataDElectron    = kFALSE;
+  Bool_t isDataSElectron    = kFALSE;
   int processId         = -999999999; // use 999 for MCatNLO MC sample, 102 for H->WW
-  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_3_9_7/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
+  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_4_1_3_patch2/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
 
-  if(sampleID > 1000) isData   = kTRUE;
-  if(sampleID > 2000) isElData = kTRUE;
+  if(sampleID >= 1000) isData             = kTRUE;
+
+  if(sampleID >= 1000) isDataMuonElectron = kTRUE;
+  if(sampleID >= 2000) isDataDMuon	  = kTRUE;
+  if(sampleID >= 3000) isDataSMuon	  = kTRUE;
+  if(sampleID >= 4000) isDataDElectron	  = kTRUE;
+  if(sampleID >= 5000) isDataSElectron	  = kTRUE;
 
   //------------------------------------------------------------------------------------------------
   // generator information
@@ -96,7 +106,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
   runLumiSelectionMod->SetAcceptMC(!isData);    
-  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_3_9_7/src/json/merged_JsonReRecoSep17_JsonStreamExpressV2.txt");
+  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_4_1_3_patch2/src/json/json_DCSONLY_ManualCert.txt"); // L = 23.2
 
   //------------------------------------------------------------------------------------------------
   // PV filter selection
@@ -106,6 +116,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   goodPVFilterMod->SetMinNDof(4);
   goodPVFilterMod->SetMaxAbsZ(24.0);
   goodPVFilterMod->SetMaxRho(2.0);
+  goodPVFilterMod->SetVertexesName("DAPrimaryVertexes");
 
   //------------------------------------------------------------------------------------------------
   // HLT information
@@ -116,27 +127,27 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
     hltmod->AddTrigger("HLT_Mu9");
     hltmod->AddTrigger("!HLT_Mu9");
   }
-  else if(isElData == kFALSE){
-    hltmod->AddTrigger("HLT_Mu9",136033,147116);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele10_LW_L1R",136033,139980);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_L1R",140058,141882);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,144114);
-    hltmod->AddTrigger("HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147116);
-
-    hltmod->AddTrigger("HLT_Mu15_v1",147196,999999);
-    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TightEleId_L1R",147196,148058);
-    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TighterEleIdIsol_L1R_v2",148819,149064);
-    hltmod->AddTrigger("HLT_Mu15_v1&HLT_Ele17_SW_TighterEleIdIsol_L1R_v3",149181,999999);
+  else if(isData == true && isDataMuonElectron == true) {
+    hltmod->AddTrigger("HLT_Mu17_Ele8_CaloIdL_v1",150000,161176);
+    hltmod->AddTrigger("HLT_Mu8_Ele17_CaloIdL_v1",150000,161176);
+    hltmod->AddTrigger("HLT_Mu17_Ele8_CaloIdL_v2",161179,999999);
+    hltmod->AddTrigger("HLT_Mu8_Ele17_CaloIdL_v2",161179,999999);
   }
-  else {
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele10_LW_L1R",136033,139980);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_L1R",140058,141882);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele15_SW_CaloEleId_L1R",141956,144114);
-    hltmod->AddTrigger("!HLT_Mu9&HLT_Ele17_SW_CaloEleId_L1R",146428,147116);
-
-    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TightEleId_L1R",147196,148058);
-    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TighterEleIdIsol_L1R_v2",148819,149064);
-    hltmod->AddTrigger("!HLT_Mu15_v1&HLT_Ele17_SW_TighterEleIdIsol_L1R_v3",149181,999999);
+  else if(isData == true && isDataDMuon == true) {
+    hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdL_v1&!HLT_Mu17_Ele8_CaloIdL_v1&HLT_DoubleMu7_v1",150000,161176);
+    hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdL_v2&!HLT_Mu17_Ele8_CaloIdL_v2&HLT_DoubleMu7_v1",161179,999999);
+  }
+  else if(isData == true && isDataSMuon == true) {
+    hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdL_v1&!HLT_Mu17_Ele8_CaloIdL_v1&!HLT_DoubleMu7_v1&HLT_Mu15_v2",150000,161176);
+    hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdL_v2&!HLT_Mu17_Ele8_CaloIdL_v2&!HLT_DoubleMu7_v1&HLT_Mu15_v2",161179,999999);
+  }
+  else if(isData == true && isDataDElectron == true) {
+    hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdL_v1&!HLT_Mu17_Ele8_CaloIdL_v1&!HLT_DoubleMu7_v1&!HLT_Mu15_v2&HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1",150000,161176);
+    hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdL_v2&!HLT_Mu17_Ele8_CaloIdL_v2&!HLT_DoubleMu7_v1&!HLT_Mu15_v2&HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2",161179,999999);
+  }
+  else if(isData == true && isDataSElectron == true) {
+    hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdL_v1&!HLT_Mu17_Ele8_CaloIdL_v1&!HLT_DoubleMu7_v1&!HLT_Mu15_v2&!HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1&HLT_Ele27_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v1",150000,161176);
+    hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdL_v2&!HLT_Mu17_Ele8_CaloIdL_v2&!HLT_DoubleMu7_v1&!HLT_Mu15_v2&!HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2&HLT_Ele27_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v2",161179,999999);
   }
   hltmod->SetTrigObjsName("myhltobjs");
 
@@ -147,51 +158,43 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   pubJet->SetInputName("AKt5PFJets");
   pubJet->SetOutputName("PubAKt5PFJets");
 
-  PublisherMod<Met,Met> *pubMet = new PublisherMod<Met,Met>("MetPub");
-  pubMet->SetInputName("TCMet");
-  pubMet->SetOutputName("PubTCMet");
-
-  PublisherMod<CaloMet> *pubCaloMet = new PublisherMod<CaloMet>;
-  pubCaloMet->SetName("CaloMetPub");
-  pubCaloMet->SetInputName("CorMuonMet");
-  pubCaloMet->SetOutputName("pubCaloMet");
+  PublisherMod<PFMet,Met> *pubMet = new PublisherMod<PFMet,Met>("MetPub");
+  pubMet->SetInputName("PFMet");
+  pubMet->SetOutputName("PubPFMet");
 
   //------------------------------------------------------------------------------------------------
   // Apply Jet Corrections
   //------------------------------------------------------------------------------------------------
   JetCorrectionMod *jetCorr = new JetCorrectionMod;
-  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_9_7/src/MitPhysics/data/START38_V13_AK5PF_L2Relative.txt"); 
-  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_9_7/src/MitPhysics/data/START38_V13_AK5PF_L3Absolute.txt");
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_1_3_patch2/src/MitPhysics/data/START38_V13_AK5PF_L2Relative.txt"); 
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_1_3_patch2/src/MitPhysics/data/START38_V13_AK5PF_L3Absolute.txt");
   if(isData == true){ 
-    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_3_9_7/src/MitPhysics/data/START38_V13_AK5PF_L2L3Residual.txt");
+    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_1_3_patch2/src/MitPhysics/data/START38_V13_AK5PF_L2L3Residual.txt");
   }
   jetCorr->SetInputName(pubJet->GetOutputName());
+  jetCorr->ApplyL1FastJetCorrection(5.0);
   jetCorr->SetCorrectedName("CorrectedJets");
-
-  //------------------------------------------------------------------------------------------------
-  // Apply Met Corrections
-  //------------------------------------------------------------------------------------------------
-  CaloMetCorrectionMod *metCaloCorr = new CaloMetCorrectionMod;
-  metCaloCorr->SetInputName(pubCaloMet->GetOutputName());
-  metCaloCorr->SetCorrectedJetsName(jetCorr->GetOutputName());
-  metCaloCorr->SetOutputName("pubCaloCorrectedMet");
 
   //------------------------------------------------------------------------------------------------
   // object id and cleaning sequence
   //------------------------------------------------------------------------------------------------
-  MuonIDMod           *muonID        = new MuonIDMod;  
+  MuonIDMod *muonID = new MuonIDMod;
   muonID->SetClassType("Global");
   muonID->SetIDType("WWMuId");
-  muonID->SetIsoType("TrackCaloSliding");
+  muonID->SetIsoType("TrackCaloSlidingNoCorrection");
   muonID->SetApplyD0Cut(kTRUE);
+  muonID->SetApplyDZCut(kTRUE);
+  muonID->SetWhichVertex(0);
 
-  ElectronIDMod       *electronID    = new ElectronIDMod;
-  electronID->SetIDType("VBTFWorkingPoint80Id");
-  electronID->SetIsoType("TrackJuraSliding");
-  electronID->SetApplyConversionFilterType1(kFALSE);
-  electronID->SetApplyConversionFilterType2(kTRUE);
+  ElectronIDMod *electronID = new ElectronIDMod;
+  electronID->SetIDType("VBTFWorkingPointLowPtId");
+  electronID->SetIsoType("TrackJuraSlidingNoCorrection");
+  electronID->SetApplyConversionFilterType1(kTRUE);
+  electronID->SetApplyConversionFilterType2(kFALSE);
   electronID->SetChargeFilter(kFALSE);
   electronID->SetApplyD0Cut(kTRUE);
+  electronID->SetApplyDZCut(kTRUE);
+  electronID->SetWhichVertex(0);
   electronID->SetNExpectedHitsInnerCut(0);
 
   // Object ID and Cleaning Sequence
@@ -199,10 +202,11 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   TauIDMod            *tauID         = new TauIDMod;
   JetIDMod            *jetID         = new JetIDMod;
   jetID->SetInputName(jetCorr->GetOutputName());
-  jetID->SetPtCut(25.0);
+  jetID->SetPtCut(30.0);
   jetID->SetEtaMaxCut(5.0);
   jetID->SetJetEEMFractionMinCut(0.0);
   jetID->SetOutputName("GoodJets");
+  jetID->SetApplyBetaCut(kFALSE);
 
   ElectronCleaningMod *electronCleaning = new ElectronCleaningMod;
   PhotonCleaningMod   *photonCleaning   = new PhotonCleaningMod;
@@ -217,6 +221,7 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   jetIDNoPtCut->SetEtaMaxCut(5.0);
   jetIDNoPtCut->SetJetEEMFractionMinCut(0.0);
   jetIDNoPtCut->SetOutputName("GoodJetsNoPtCut");
+  jetIDNoPtCut->SetApplyBetaCut(kFALSE);
 
   JetCleaningMod      *jetCleaningNoPtCut = new JetCleaningMod;
   jetCleaningNoPtCut->SetGoodJetsName("GoodJetsNoPtCut");
@@ -254,10 +259,8 @@ void runPhysicsExample(const char *catalogDir = "/home/ceballos/catalog",
   photonID->Add(tauID);
   tauID->Add(pubJet);
   pubJet->Add(pubMet); 
-  pubMet->Add(pubCaloMet); 
-  pubCaloMet->Add(jetCorr);
-  jetCorr->Add(metCaloCorr);
-  metCaloCorr->Add(jetID);
+  pubMet->Add(jetCorr);
+  jetCorr->Add(jetID);
   jetID->Add(electronCleaning);
   electronCleaning->Add(photonCleaning);
   photonCleaning->Add(tauCleaning);
