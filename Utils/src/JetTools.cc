@@ -291,12 +291,10 @@ Double_t JetTools::MtHiggs(const ParticleOArr * leptons,
       - met->Px()*dilepton->Px() - met->Py()*dilepton->Py()
       - leptons->At(0)->Px()*leptons->At(1)->Px() - leptons->At(0)->Py()*leptons->At(1)->Py());
   }
-  else if(nsel == 7){ // Use of M mass and mnu == 0, no fancy stuff
-    enell   = TMath::Sqrt(dilepton->Pt()*dilepton->Pt() + dilepton->Mass()*dilepton->Mass());
-    enenn   = TMath::Sqrt(met->Pt()*met->Pt() + 0.0*0.0);
-    enex    = dilepton->Px() + met->Px();
-    eney    = dilepton->Py() + met->Py();
-    mtHiggs = (enell+enenn)*(enell+enenn) - enex*enex - eney*eney;
+  else if(nsel == 7){ // Use of M mass and mnu == 0
+    double deltaPhiDileptonMet = MathUtils::DeltaPhi(dilepton->Phi(), 
+   						     met->Phi());
+    mtHiggs = 2.0*dilepton->Pt()*met->Pt()*(1.0 - cos(deltaPhiDileptonMet));
   }
 
   if(nsel >= 0 && nsel <= 4){
