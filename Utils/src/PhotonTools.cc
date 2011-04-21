@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.1 2011/04/12 22:14:21 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.2 2011/04/14 22:05:42 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -88,16 +88,17 @@ const DecayParticle *PhotonTools::MatchedConversion(const Photon *p, const Decay
                                                Double_t lxyMin, Double_t dRMin) {
   
   const DecayParticle *match = 0;
-  Double_t drsmallest = 999.;
+  Double_t rhosmallest = 999.;
   for (UInt_t i=0; i<conversions->GetEntries(); ++i) {
     const DecayParticle *c = conversions->At(i);
     ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
     Double_t dr = MathUtils::DeltaR(*c,dirconvsc);
-    if (dr<dRMin && dr<drsmallest && c->Prob()>probMin && c->LxyCorrected(vtx)>lxyMin) {
+    Double_t rho = c->Position().Rho();
+    if (dr<dRMin && rho<rhosmallest && c->Prob()>probMin && c->LxyCorrected(vtx)>lxyMin) {
       Int_t nhb1 = dynamic_cast<const StableData*>(c->DaughterDat(0))->NHitsBeforeVtx();
       Int_t nhb2 = dynamic_cast<const StableData*>(c->DaughterDat(1))->NHitsBeforeVtx();
       if (TMath::Max(nhb1,nhb2)<=nWrongHitsMax) {
-        drsmallest = dr;
+        rhosmallest = rho;
         match = c;
       }
     }
