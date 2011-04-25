@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.4 2011/04/12 07:30:29 mzanetti Exp $
+// $Id: MetTools.cc,v 1.5 2011/04/12 23:17:06 mzanetti Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -70,7 +70,7 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
 
     // charged
-    if (fPFCandidates->At(i)->HasTrackerTrk()){
+    if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()){
       bool isElectronTrack = false;
       for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
 	if ( (fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
@@ -81,7 +81,8 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
       }      
       if (isElectronTrack) continue;
 
-      if (fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) {
+      if ((fPFCandidates->At(i)->HasTrackerTrk() && fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) ||
+          (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
       }
@@ -203,7 +204,7 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
     if (inTheJet) continue;
 
     // charged
-    if (fPFCandidates->At(i)->HasTrackerTrk()){
+    if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()){
       bool isElectronTrack = false;
       for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
 	if ( (fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
@@ -214,7 +215,8 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
       }      
       if (isElectronTrack) continue;
 
-      if (fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) {
+      if ((fPFCandidates->At(i)->HasTrackerTrk() && fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) ||
+          (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
       }
@@ -256,7 +258,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
 
     // charged
-    if (fPFCandidates->At(i)->HasTrackerTrk()){
+    if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()){
       bool isMuonTrack = false;
       for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
 	if (fMuons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) {
@@ -276,7 +278,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       }      
       if (isElectronTrack) continue;
 
-      if (fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) {
+      if ((fPFCandidates->At(i)->HasTrackerTrk() && fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) ||
+          (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
       }
@@ -338,7 +341,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 
 
     // charged
-    if (fPFCandidates->At(i)->HasTrackerTrk()){
+    if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()){
       bool isMuonTrack = false;
       for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
 	if (fMuons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) {
@@ -358,7 +361,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       }      
       if (isElectronTrack) continue;
 
-      if (fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) {
+      if ((fPFCandidates->At(i)->HasTrackerTrk() && fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) ||
+          (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
       }
