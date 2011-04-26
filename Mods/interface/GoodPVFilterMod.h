@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GoodPVFilterMod.h,v 1.3 2010/10/20 02:44:52 ceballos Exp $
+// $Id: GoodPVFilterMod.h,v 1.4 2011/03/07 12:45:52 ceballos Exp $
 //
 // GoodPVFilterMod
 //
@@ -16,6 +16,7 @@
 #include <TString.h>
 #include <TH1F.h>
 #include "MitAna/DataTree/interface/VertexFwd.h" 
+#include "MitAna/DataTree/interface/PileupInfoFwd.h"
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 
 namespace mithep 
@@ -36,12 +37,16 @@ namespace mithep
       Int_t                       GetNEvents()      const { return fNEvents;       }
       Int_t                       GetNAccepted()    const { return fNAcceped;      }
       Int_t                       GetNFailed()      const { return fNFailed;       }
+      TString                     GetOutputName()   const { return fGoodVertexesName; }
       void                        SetAbortIfNotAccepted(Bool_t b)   { fAbort = b;           }
+      void                        SetIsMC(Bool_t b)                 { fIsMC = b;            }
       void                        SetMinVertexNTracks(UInt_t n)     { fMinVertexNTracks = n;}
       void                        SetMinNDof(UInt_t n)              { fMinNDof = n; 	    }
       void                        SetMaxAbsZ(Double_t x)  	    { fMaxAbsZ = x; 	    }
       void                        SetMaxRho(Double_t x)   	    { fMaxRho = x;          }
       void                        SetVertexesName(TString s)        { fVertexesName = s;    }
+      void                        SetOutputName(TString s)          { fGoodVertexesName = s; }
+      
 
     protected:
       void                        BeginRun();
@@ -53,21 +58,27 @@ namespace mithep
       void                        SlaveTerminate();
 
       Bool_t                      fAbort;         //=true then abort (sub-)modules if not accepted
+      Bool_t                      fIsMC;
       UInt_t                      fMinVertexNTracks; //minimum number of tracks for the vertex
       UInt_t                      fMinNDof;       //minimum number of degrees of freedom
       Double_t                    fMaxAbsZ;       //maximum abs(z) of the vertex
       Double_t                    fMaxRho;        //maximum rho of the vertex
       TString                     fVertexesName;  //Name of PV collection
       TString                     fGoodVertexesName; //Name of newPV collection
+      TString                     fPileupInfoName;
       Int_t                       fNEvents;       //!number of processed events
       Int_t                       fNAcceped;      //!number of accepted events
       Int_t                       fNFailed;       //!number of failed events
       const VertexCol            *fVertexes;      //!PV collection
       const VertexCol            *fGoodVertexes;  //!Good PV collection
+      const PileupInfoCol        *fPileupInfo;         //!      
       TH1F                       *hVertexNTracks;
       TH1F                       *hVertexNDof;
       TH1F                       *hVertexRho;
       TH1F                       *hVertexZ;
+      TH1F                       *hNVtx;
+      TH1F                       *hNGoodVtx;
+      TH1F                       *hNGenVtx;
 
     ClassDef(GoodPVFilterMod, 1) // L1 TAM module
   };

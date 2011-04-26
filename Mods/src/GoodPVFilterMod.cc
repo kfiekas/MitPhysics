@@ -1,4 +1,4 @@
-// $Id: GoodPVFilterMod.cc,v 1.5 2010/10/23 04:48:34 ceballos Exp $
+// $Id: GoodPVFilterMod.cc,v 1.6 2010/11/18 09:30:45 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
@@ -6,6 +6,8 @@
 #include "MitAna/DataTree/interface/Names.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataTree/interface/Vertex.h"
+#include "MitAna/DataTree/interface/PileupInfo.h"
+
 
 using namespace mithep;
 
@@ -21,6 +23,7 @@ GoodPVFilterMod::GoodPVFilterMod(const char *name, const char *title) :
   fMaxRho(2.0),
   fVertexesName(Names::gkPVBrn),
   fGoodVertexesName(ModNames::gkGoodVertexesName),
+  fPileupInfoName("PileupInfo"),
   fNEvents(0),
   fNAcceped(0),
   fNFailed(0),
@@ -72,7 +75,8 @@ void GoodPVFilterMod::Process()
 {
   
   LoadBranch(fVertexesName);
-
+  if (fIsMC) LoadBranch(fPileupInfoName);
+  
   VertexOArr *GoodVertexes = new VertexOArr;
   GoodVertexes->SetName(fGoodVertexesName);
   
@@ -114,9 +118,14 @@ void GoodPVFilterMod::Process()
     }
   }
 
+  //fill histograms
+  hNVtx->Fill(fVertexes->GetEntries());
+  hNGoodVtx->Fill(GoodVertexes->GetEntries());
+  if (fIsMC) hNGenVtx->Fill(1 + fPileupInfo->At(0)->GetPU_NumInteractions());
+
   // add objects for other modules to use
   AddObjThisEvt(GoodVertexes);  
-
+  
   // take action if failed
   if (!goodVertex) {
     ++fNFailed;
@@ -138,6 +147,7 @@ void GoodPVFilterMod::SlaveBegin()
 {
 
   ReqBranch(fVertexesName, fVertexes);
+  if (fIsMC)   ReqBranch(fPileupInfoName, fPileupInfo);
   
   hVertexNTracks = new TH1F("hVertexNTracks", "hVertexNTracks", 401, -0.5,400.5);
   AddOutput(hVertexNTracks);
@@ -150,6 +160,15 @@ void GoodPVFilterMod::SlaveBegin()
   
   hVertexRho = new TH1F("hVertexRho", "hVertexRho", 100, 0.0, 20.0);
   AddOutput(hVertexRho);
+  
+  hNVtx = new TH1F("hNVtx", "hNVtx", 51, -0.5, 50.5);
+  AddOutput(hNVtx);  
+  
+  hNGoodVtx = new TH1F("hNGoodVtx", "hNGoodVtx", 51, -0.5, 50.5);
+  AddOutput(hNGoodVtx);   
+  
+  hNGenVtx = new TH1F("hNGenVtx", "hNGenVtx", 51, -0.5, 50.5);
+  AddOutput(hNGenVtx);      
   
 }
 
