@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.45 2011/03/15 12:02:20 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.46 2011/03/23 11:39:57 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -100,6 +100,7 @@ namespace mithep
       void                SetApplyCombinedIso(Bool_t b)          { fApplyCombinedIso = b;      }      
       void                SetElectronsFromBranch(Bool_t b)       { fElectronsFromBranch = b;   }      
       void                SetLH(ElectronLikelihood *l)	         { fLH = l;  	               }
+      void                SetVertexName(TString name)            { fVertexName = name;         }
       void                Setup();
 
     protected:
