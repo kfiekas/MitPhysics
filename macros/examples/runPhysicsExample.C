@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.13 2010/12/22 20:20:40 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.14 2011/04/20 13:00:21 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -39,7 +39,7 @@
 //--------------------------------------------------------------------------------------------------
 void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
 		       const char *book	      = "cern/filefi/020",
-                       const char *dataset    = "p11-h160ww2l-gf-v1g1-pu",
+                       const char *dataset    = "p11-vvj-v1g1-pu",
                        const char *fileset    = "0000",
                        const char *skim       = "noskim",
                        const char *outputName = "histo",
@@ -65,7 +65,7 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   Bool_t isDataDElectron    = kFALSE;
   Bool_t isDataSElectron    = kFALSE;
   int processId         = -999999999; // use 999 for MCatNLO MC sample, 102 for H->WW
-  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_4_1_3_patch2/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
+  TString fInputFilenameKF = "/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/HWW_KFactors_160_10TeV.dat";
 
   if(sampleID >= 1000) isData             = kTRUE;
 
@@ -106,7 +106,7 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
   runLumiSelectionMod->SetAcceptMC(!isData);    
-  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_4_1_3_patch2/src/json/json_DCSONLY_ManualCert.txt"); // L = 23.2
+  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_4_2_2/src/json/json_DCSONLY_ManualCert.txt"); // L = 23.2
 
   //------------------------------------------------------------------------------------------------
   // PV filter selection
@@ -166,10 +166,10 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   // Apply Jet Corrections
   //------------------------------------------------------------------------------------------------
   JetCorrectionMod *jetCorr = new JetCorrectionMod;
-  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_1_3_patch2/src/MitPhysics/data/START38_V13_AK5PF_L2Relative.txt"); 
-  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_1_3_patch2/src/MitPhysics/data/START38_V13_AK5PF_L3Absolute.txt");
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START38_V13_AK5PF_L2Relative.txt"); 
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START38_V13_AK5PF_L3Absolute.txt");
   if(isData == true){ 
-    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_1_3_patch2/src/MitPhysics/data/START38_V13_AK5PF_L2L3Residual.txt");
+    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START38_V13_AK5PF_L2L3Residual.txt");
   }
   jetCorr->SetInputName(pubJet->GetOutputName());
   jetCorr->ApplyL1FastJetCorrection(5.0);
