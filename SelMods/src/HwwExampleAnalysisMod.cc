@@ -295,6 +295,7 @@ void HwwExampleAnalysisMod::Process()
   double maxBtag = -99999.;
   double imaxBtag = -1;
   for(UInt_t i=0; i<sortedJetsLowPt.size(); i++){
+    if(sortedJetsLowPt[i]->Pt() <= 7) continue;
     if(sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc() > maxBtag){
       maxBtag  = sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc();
       imaxBtag = i;
