@@ -1,4 +1,4 @@
-// $Id: JetCleaningMod.cc,v 1.16 2010/06/18 06:08:46 ceballos Exp $
+// $Id: JetCleaningMod.cc,v 1.17 2010/06/28 21:07:06 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitAna/DataTree/interface/JetCol.h"
@@ -65,8 +65,8 @@ void JetCleaningMod::Process()
     if (CleanElectrons) {
       UInt_t n = CleanElectrons->GetEntries();
       for (UInt_t j=0; j<n; ++j) {
-        Double_t deltaR = MathUtils::DeltaR(CleanElectrons->At(j)->SCluster()->Phi(),
-                                            CleanElectrons->At(j)->SCluster()->Eta(), 
+        Double_t deltaR = MathUtils::DeltaR(CleanElectrons->At(j)->Phi(),
+                                            CleanElectrons->At(j)->Eta(), 
                                             jet->Phi(), jet->Eta());  
         if (deltaR < fMinDeltaRToElectron) {
           isElectronOverlap = kTRUE;
