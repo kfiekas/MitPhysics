@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.16 2011/04/05 05:03:30 ceballos Exp $
+// $Id: MuonTools.cc,v 1.17 2011/04/29 13:24:50 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -499,7 +499,7 @@ Bool_t MuonTools::PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t 
 Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices) 
 {
   if(mu->Pt() <= 3.0) return kFALSE;
-  
+
   if(!mu->IsTrackerMuon()) return kFALSE;
   
   if(!mu->Quality().Quality(MuonQuality::TMLastStationAngTight)) return kFALSE;
