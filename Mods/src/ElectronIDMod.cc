@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.84 2011/04/05 06:37:07 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.85 2011/05/02 16:02:33 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -115,6 +115,9 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       break;
     case ElectronTools::kCustomIdTight:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kCustomIdTight);
+      break;
+    case ElectronTools::kVBTFWorkingPointFakeableId:
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId);
       break;
     case ElectronTools::kVBTFWorkingPoint95Id:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint95Id);
@@ -420,6 +423,8 @@ void ElectronIDMod::Setup()
     fElIdType = ElectronTools::kCustomIdLoose;
   else if (fElectronIDType.CompareTo("CustomTight") == 0) 
     fElIdType = ElectronTools::kCustomIdTight;
+  else if (fElectronIDType.CompareTo("VBTFWorkingPointFakeableId") == 0) 
+    fElIdType = ElectronTools::kVBTFWorkingPointFakeableId;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint95Id") == 0) 
     fElIdType = ElectronTools::kVBTFWorkingPoint95Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint90Id") == 0) 

@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.26 2011/04/05 05:40:06 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.27 2011/04/18 21:01:12 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -34,6 +34,15 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     {0.0078, 0.00259, 0.0062, 0.0, 0.0078,0.0061, 0.0061, 0.0}, //deltaetain
     {0.3, 0.92, 0.211, 0.0, 0.42, 0.88, 0.68, 0.0},             //eoverp
     {0.8,0.2,0,0,0,0,0,0}};                                     //extra cuts fbrem and E_Over_P 
+
+  Double_t VBTFWorkingPointFakeable[6][8] = {
+    {0.12,  0.12,  0.12,  0.12,  0.10,   0.10,   0.10,   0.10  }, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03  }, //sigmaetaeta
+    {0.15,  0.15,  0.15,  0.15,  0.10,   0.10,   0.10,   0.10  }, //deltaphiin
+    {0.007, 0.007, 0.007, 0.007, 0.009,  0.009,  0.009,  0.009 }, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0   }, //eoverp
+    {0.0,   0.0,   0,     0,     0,      0,      0,      0     }  //extra cuts fbrem and E_Over_P 
+  };            
 
   Double_t VBTFWorkingPoint95[6][8] = {
     {0.15,  0.15,  0.15,  0.15,  0.07,   0.07,   0.07,   0.07  }, //hovere
@@ -81,7 +90,7 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   };            
 
   Double_t VBTFWorkingPoint80NoHOverEE[6][8] = {
-    {0.04,  0.04,  0.04,  0.04,  1.000,  1.000,  1.000,  1.000}, //hovere
+    {0.04,  0.04,  0.04,  0.04,  0.10,   0.10,   0.10,   0.10 }, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
     {0.06,  0.06,  0.06,  0.06,  0.03,   0.03,   0.03,   0.03 }, //deltaphiin
     {0.004, 0.004, 0.004, 0.004, 0.007,  0.007,  0.007,  0.007}, //deltaetain
@@ -90,7 +99,7 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   };            
 
   Double_t VBTFWorkingPoint70NoHOverEE[6][8] = {
-    {0.025, 0.025, 0.025, 0.025, 1.000,  1.000,  1.000,  1.000}, //hovere
+    {0.025, 0.025, 0.025, 0.025, 0.10,   0.10,   0.10,   0.10 }, //hovere
     {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
     {0.03,  0.03,  0.03,  0.03,  0.02,   0.02,   0.02,   0.02 }, //deltaphiin
     {0.004, 0.004, 0.004, 0.004, 0.005,  0.005,  0.005,  0.005}, //deltaetain
@@ -104,6 +113,9 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
       break;
     case kCustomIdLoose:
       memcpy(fCuts,loosecuts,sizeof(fCuts));
+      break;
+    case kVBTFWorkingPointFakeableId:
+      memcpy(fCuts,VBTFWorkingPointFakeable,sizeof(fCuts));
       break;
     case kVBTFWorkingPoint95Id:
       memcpy(fCuts,VBTFWorkingPoint95,sizeof(fCuts));

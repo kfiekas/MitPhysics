@@ -32,6 +32,7 @@ namespace mithep {
         kZeeId,             //"ZeeId"
         kCustomIdLoose,     //"CustomLoose"
         kCustomIdTight,     //"CustomTight"
+        kVBTFWorkingPointFakeableId,
         kVBTFWorkingPoint95Id,
         kVBTFWorkingPoint90Id,
         kVBTFWorkingPoint85Id,
