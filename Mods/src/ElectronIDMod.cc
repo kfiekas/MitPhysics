@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.83 2011/04/05 04:57:48 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.84 2011/04/05 06:37:07 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -154,9 +154,9 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
         (ele->CaloIsolation() < fCaloIsolationCut);
       break;
     case ElectronTools::kTrackJura:
-      isocut = (ele->TrackIsolationDr03() < fTrackIsolationCut) &&
-        (ele->EcalRecHitIsoDr03() < fEcalJuraIsoCut) &&
-        (ele->HcalTowerSumEtDr03() < fHcalIsolationCut);
+      isocut = (ele->TrackIsolationDr03() < ele->Pt()*fTrackIsolationCut) &&
+               (ele->EcalRecHitIsoDr03()  < ele->Pt()*fEcalJuraIsoCut) &&
+               (ele->HcalTowerSumEtDr03() < ele->Pt()*fHcalIsolationCut);
       break;
     case ElectronTools::kTrackJuraCombined:
       isocut = (ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() 
