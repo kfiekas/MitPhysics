@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.10 2011/04/06 18:03:48 fabstoec Exp $
+// $Id: IsolationTools.cc,v 1.11 2011/04/14 22:05:42 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -148,7 +148,9 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 
     if(isGoodType == kFALSE) continue;
 
-    if(pf->Pt() <= ptMin) continue;
+    if( pf->BestTrk() && pf->Pt() <= 0.1)   continue;
+
+    if(!pf->BestTrk() && pf->Pt() <= ptMin) continue;
 
     if(pf->TrackerTrk() && p->TrackerTrk() &&
        pf->TrackerTrk() == p->TrackerTrk()) continue;
@@ -230,7 +232,9 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
 
     if(isGoodType == kFALSE) continue;
 
-    if(pf->Pt() <= ptMin) continue;
+    if( pf->BestTrk() && pf->Pt() <= 0.1)   continue;
+
+    if(!pf->BestTrk() && pf->Pt() <= ptMin) continue;
 
     if(pf->TrackerTrk() && p->TrackerTrk() &&
        pf->TrackerTrk() == p->TrackerTrk()) continue;
