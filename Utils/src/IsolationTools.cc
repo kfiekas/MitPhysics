@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.12 2011/05/07 06:05:38 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.13 2011/05/10 10:39:14 mzanetti Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -233,9 +233,12 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
 
     if(isGoodType == kFALSE) continue;
 
+
+    // 0.1 pt cut applied to charged
     if( pf->BestTrk() && pf->Pt() <= 0.1)   continue;
 
-    if(!pf->BestTrk() && pf->Pt() <= ptMin) continue;
+    // pt cut applied to neutrals
+    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
     if(pf->TrackerTrk() && p->TrackerTrk() &&
        pf->TrackerTrk() == p->TrackerTrk()) continue;
@@ -282,10 +285,21 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
 	  }
 	}
       }
-      if(isLepton == kFALSE){
-        if(pf->BestTrk()) ptSum += pf->Pt();
-        else              ptSum += pf->Pt()*beta;
-      }
+
+      if (isLepton == kTRUE) continue;
+
+      //EtaStrip Veto for Gamma 
+      if (pf->PFType() == PFCandidate::eGamma && fabs(p->Eta() - pf->Eta()) < 0.025) continue;
+
+      //InnerCone (One Tower = dR < 0.07) Veto for non-gamma neutrals
+      if (!pf->HasTrk() && pf->PFType() == PFCandidate::eNeutralHadron
+          && MathUtils::DeltaR(p->Mom(), pf->Mom()) < 0.07 ) continue; 
+
+
+      if(pf->BestTrk()) ptSum += pf->Pt();
+      else              ptSum += pf->Pt()*beta;
+      
+
     }
   }
   return ptSum;
