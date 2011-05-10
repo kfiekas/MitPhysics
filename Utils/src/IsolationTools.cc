@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.11 2011/04/14 22:05:42 bendavid Exp $
+// $Id: IsolationTools.cc,v 1.12 2011/05/07 06:05:38 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -148,9 +148,10 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 
     if(isGoodType == kFALSE) continue;
 
+    // 0.1 pt cut applied to charged
     if( pf->BestTrk() && pf->Pt() <= 0.1)   continue;
-
-    if(!pf->BestTrk() && pf->Pt() <= ptMin) continue;
+    // pt cut applied to neutrals
+    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
     if(pf->TrackerTrk() && p->TrackerTrk() &&
        pf->TrackerTrk() == p->TrackerTrk()) continue;
