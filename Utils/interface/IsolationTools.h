@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.10 2011/04/06 18:03:48 fabstoec Exp $
+// $Id: IsolationTools.h,v 1.11 2011/04/14 22:05:42 bendavid Exp $
 //
 // IsolationTools
 //
@@ -41,9 +41,11 @@ namespace mithep
                                            const mithep::Collection<mithep::CaloTower> *caloTowers);
       static Double_t PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands, 
                       	   	      const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
-			   	      Double_t extRadius, Double_t intRadius, int isoType,
-				      Double_t beta, const MuonCol *goodMuons, 
-				      const ElectronCol *goodElectrons);
+			   	      Double_t extRadius, Double_t intRadius);
+      static Double_t PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands, const Vertex *vertex, 
+				      const MuonCol *goodMuons, const ElectronCol *goodElectrons,
+				      Double_t  delta_z = 0.2, Double_t ptMin = 1.0, Double_t extRadius = 0.4,
+				      Double_t intRadius = 0.0, int isoType = 0, Double_t beta = 1.0);
       static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                       	     		  const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
 			     		  Double_t extRadius, Double_t intRadius, int isoType,

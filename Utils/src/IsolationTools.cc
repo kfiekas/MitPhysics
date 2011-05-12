@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.13 2011/05/10 10:39:14 mzanetti Exp $
+// $Id: IsolationTools.cc,v 1.14 2011/05/10 13:04:15 sixie Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -121,9 +121,46 @@ Double_t IsolationTools::CaloTowerEmIsolation(const ThreeVector *p, Double_t ext
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandidate> *PFCands, 
                                       	 const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
-				     	 Double_t extRadius, Double_t intRadius, int isoType,
-					 Double_t beta, const MuonCol *goodMuons, 
-					 const ElectronCol *goodElectrons)
+				     	 Double_t extRadius, Double_t intRadius)
+{
+  //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
+  //annulus around the particle seed track.  
+
+  Double_t zLepton = 0.0;
+  if(p->BestTrk()) zLepton = p->BestTrk()->DzCorrected(*vertex);
+
+  Double_t ptSum =0.;  
+  for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
+    const PFCandidate *pf = PFCands->At(i);
+    
+    // pt cut applied to neutrals
+    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
+
+    // exclude muon
+    if(pf->TrackerTrk() && p->TrackerTrk() &&
+       pf->TrackerTrk() == p->TrackerTrk()) continue;
+
+    // ignore the pf candidate if it is too far away in Z
+    Double_t deltaZ = 0.0;
+    if(pf->HasTrk()) {
+      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+    }
+    if (deltaZ >= delta_z) 
+      continue;
+
+    // add the pf pt if it is inside the extRadius and outside the intRadius           
+    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    if ( dr < extRadius && dr >= intRadius ) ptSum += pf->Pt();
+  
+  }
+  return ptSum;
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandidate> *PFCands, const Vertex *vertex, 
+					 const MuonCol *goodMuons, const ElectronCol *goodElectrons,
+					 Double_t  delta_z, Double_t ptMin, Double_t extRadius,
+					 Double_t intRadius, int isoType, Double_t beta)
 {
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
   //annulus around the particle seed track.  
@@ -203,6 +240,7 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
   }
   return ptSum;
 }
+
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                                       	     const Vertex *vertex, Double_t delta_z, Double_t ptMin,
