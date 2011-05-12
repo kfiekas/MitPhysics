@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.47 2011/05/12 12:56:08 mzanetti Exp $
+// $Id: MuonIDMod.cc,v 1.48 2011/05/12 21:31:42 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -23,11 +23,11 @@ ClassImp(mithep::MuonIDMod)
   fTrackName(Names::gkTrackBrn),
   fPFCandidatesName(Names::gkPFCandidatesBrn),
   fMuonIDType("WWMuId"),
-  fMuonIsoType("TrackCaloSliding"),
+  fMuonIsoType("PFIso"),
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
-  fCombIsolationCut(0.15),
+  fCombIsolationCut(-1.0),
   fMuonPtMin(10),
   fApplyD0Cut(kTRUE),
   fApplyDZCut(kTRUE),
@@ -239,10 +239,18 @@ void MuonIDMod::Process()
         break;
       case kPFIso:
         {
-          Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.1, 0.4, 0.0); 
-          if(beta == 0) beta = 1.0;
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0),0.1,1.0, 0.4, 0.0);
-          if (totalIso < (mu->Pt()*fCombIsolationCut) )
+          Double_t pfIsoCutValue = 9999;
+          if(fCombIsolationCut > 0){
+            pfIsoCutValue = fCombIsolationCut;
+          } else {
+            if (mu->Pt() > 20) {
+              pfIsoCutValue = 0.17;
+            } else {
+              pfIsoCutValue = 0.13;
+            }
+          }
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0),0.2, 1.0, 0.4, 0.0);
+          if (totalIso < (mu->Pt()*pfIsoCutValue) )
             isocut = kTRUE;
 	}
         break;
