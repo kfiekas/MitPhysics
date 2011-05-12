@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.14 2011/05/10 13:04:15 sixie Exp $
+// $Id: IsolationTools.cc,v 1.15 2011/05/12 12:26:42 mzanetti Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -244,9 +244,67 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                                       	     const Vertex *vertex, Double_t delta_z, Double_t ptMin,
+				     	     Double_t extRadius, Double_t intRadius) 
+{
+
+  //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
+  //annulus around the particle seed track.  
+
+  Double_t zLepton = 0.0;
+  if(p->BestTrk()) zLepton = p->BestTrk()->DzCorrected(*vertex);
+
+  Double_t ptSum =0.;  
+  for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
+    const PFCandidate *pf = PFCands->At(i);
+    
+    // 0.1 pt cut applied to charged
+    if( pf->BestTrk() && pf->Pt() <= 0.1)   continue;
+
+    // pt cut applied to neutrals
+    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
+
+    if(pf->TrackerTrk() && p->TrackerTrk() &&
+       pf->TrackerTrk() == p->TrackerTrk()) continue;
+
+    if(pf->GsfTrk() && p->GsfTrk() &&
+       pf->GsfTrk() == p->GsfTrk()) continue;
+
+    Double_t deltaZ = 0.0;
+    if(pf->BestTrk()) {
+      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+    }
+
+    // ignore the pf candidate if it is too far away in Z
+    if (deltaZ >= delta_z) 
+      continue;
+           
+    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    // add the pf pt if it is inside the extRadius and outside the intRadius
+    if ( dr < extRadius && 
+	 dr >= intRadius ) {
+
+      //EtaStrip Veto for Gamma 
+      if (pf->PFType() == PFCandidate::eGamma && fabs(p->Eta() - pf->Eta()) < 0.025) continue;
+
+      //InnerCone (One Tower = dR < 0.07) Veto for non-gamma neutrals
+      if (!pf->HasTrk() && pf->PFType() == PFCandidate::eNeutralHadron
+          && MathUtils::DeltaR(p->Mom(), pf->Mom()) < 0.07 ) continue; 
+
+      ptSum += pf->Pt();            
+
+    }
+  }
+  return ptSum;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
+                                      	     const Vertex *vertex, const MuonCol *goodMuons, 
+					     const ElectronCol *goodElectrons, 
+                                             Double_t delta_z, Double_t ptMin,
 				     	     Double_t extRadius, Double_t intRadius, int isoType,
-					     Double_t beta, const MuonCol *goodMuons, 
-					     const ElectronCol *goodElectrons)
+					     Double_t beta)
 {
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
   //annulus around the particle seed track.  
