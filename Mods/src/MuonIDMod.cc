@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.45 2011/04/05 05:03:47 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.46 2011/04/05 06:37:07 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -241,7 +241,7 @@ void MuonIDMod::Process()
         {
           Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
           if(beta == 0) beta = 1.0;
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 0, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0));
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 	}
@@ -253,7 +253,7 @@ void MuonIDMod::Process()
 
           Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
           if(beta == 0) beta = 1.0;
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.2, 0.5, 0.3, 0.02, 3, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), fNonIsolatedMuons, fNonIsolatedElectrons, 0.2, 1.0, 0.4, 0.0, 3);
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 	}
