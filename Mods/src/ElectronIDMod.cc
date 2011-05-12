@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.85 2011/05/02 16:02:33 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.86 2011/05/02 16:54:58 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -26,7 +26,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fTrackName(Names::gkTrackBrn),
   fPFCandidatesName(Names::gkPFCandidatesBrn),
   fElectronIDType("CustomTight"),
-  fElectronIsoType("TrackJuraSliding"),
+  fElectronIsoType("PFIso"),
   fTrigObjectsName("HLTModTrigObjs"),
   fElectronPtMin(10),
   fElectronEtMin(0.0),  
@@ -183,18 +183,27 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     break;
     case ElectronTools::kPFIso:
     {
-      Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
-      if(beta == 0) beta = 1.0;
-      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 0, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
-      if (totalIso < (ele->Pt()*fCombIsolationCut) )
-        isocut = kTRUE;
+      Double_t pfIsoCutValue = 9999;
+      if (fabs(ele->SCluster()->Eta()) < 1.479) {
+        if (ele->Pt() > 20) {
+          pfIsoCutValue = 0.18;
+        } else {
+          pfIsoCutValue = 0.14;
+        }
+      } else {
+        pfIsoCutValue = 0.10;
+      }
+
+      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.1, 1.0, 0.4, 0.0);
+      if (totalIso < (ele->Pt()*pfIsoCutValue) )
+        isocut = kTRUE;     
     }
     break;
     case ElectronTools::kPFIsoNoL:
     {
       Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
       if(beta == 0) beta = 1.0;
-      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 0.5, 0.3, 0.02, 3, beta, fNonIsolatedMuons, fNonIsolatedElectrons);
+      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, fNonIsolatedMuons, fNonIsolatedElectrons, 0.1, 1.0, 0.4, 0.0, 3, beta);
       if (totalIso < (ele->Pt()*fCombIsolationCut) )
         isocut = kTRUE;
     }
