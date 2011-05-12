@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.46 2011/04/05 06:37:07 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.47 2011/05/12 12:56:08 mzanetti Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -239,9 +239,9 @@ void MuonIDMod::Process()
         break;
       case kPFIso:
         {
-          Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
+          Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.1, 0.4, 0.0); 
           if(beta == 0) beta = 1.0;
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0));
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0),0.1,1.0, 0.4, 0.0);
           if (totalIso < (mu->Pt()*fCombIsolationCut) )
             isocut = kTRUE;
 	}
