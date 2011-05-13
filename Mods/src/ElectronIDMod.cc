@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.87 2011/05/12 21:31:02 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.88 2011/05/12 23:15:48 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -47,7 +47,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyDZCut(kTRUE),
   fChargeFilter(kTRUE),
   fD0Cut(0.020),
-  fDZCut(0.20),
+  fDZCut(0.10),
   fWhichVertex(-1),
   fApplyTriggerMatching(kFALSE),
   fApplyEcalSeeded(kFALSE),
@@ -197,9 +197,9 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
           pfIsoCutValue = 0.10;
         }
       }
-      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.2, 1.0, 0.4, 0.0);
+      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.1, 1.0, 0.4, 0.0);
       if (totalIso < (ele->Pt()*pfIsoCutValue) )
-        isocut = kTRUE;     
+        isocut = kTRUE;
     }
     break;
     case ElectronTools::kPFIsoNoL:

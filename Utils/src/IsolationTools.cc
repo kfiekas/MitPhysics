@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.15 2011/05/12 12:26:42 mzanetti Exp $
+// $Id: IsolationTools.cc,v 1.16 2011/05/12 16:08:36 sixie Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -185,8 +185,6 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 
     if(isGoodType == kFALSE) continue;
 
-    // 0.1 pt cut applied to charged
-    if( pf->BestTrk() && pf->Pt() <= 0.1)   continue;
     // pt cut applied to neutrals
     if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
@@ -257,9 +255,6 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
   for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
     const PFCandidate *pf = PFCands->At(i);
     
-    // 0.1 pt cut applied to charged
-    if( pf->BestTrk() && pf->Pt() <= 0.1)   continue;
-
     // pt cut applied to neutrals
     if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
@@ -328,10 +323,6 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     else if(isoType == 3)                       		   isGoodType = kTRUE;
 
     if(isGoodType == kFALSE) continue;
-
-
-    // 0.1 pt cut applied to charged
-    if( pf->BestTrk() && pf->Pt() <= 0.1)   continue;
 
     // pt cut applied to neutrals
     if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;

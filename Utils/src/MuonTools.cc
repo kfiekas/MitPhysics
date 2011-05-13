@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.17 2011/04/29 13:24:50 ceballos Exp $
+// $Id: MuonTools.cc,v 1.18 2011/04/30 21:01:11 sixie Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -508,7 +508,7 @@ Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices)
 
   if(!PassD0Cut(mu, vertices, 0.2, 0)) return kFALSE;
 
-  if(!PassDZCut(mu, vertices, 0.2, 0)) return kFALSE;
+  if(!PassDZCut(mu, vertices, 0.1, 0)) return kFALSE;
   
   Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
                       1.0 * mu->IsoR03EmEt() + 

@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.48 2011/05/12 21:31:42 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.49 2011/05/12 23:15:48 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -32,7 +32,7 @@ ClassImp(mithep::MuonIDMod)
   fApplyD0Cut(kTRUE),
   fApplyDZCut(kTRUE),
   fD0Cut(0.020),
-  fDZCut(0.20),
+  fDZCut(0.10),
   fWhichVertex(-1),
   fEtaCut(2.4),
   fMuIDType(kIdUndef),
@@ -249,7 +249,7 @@ void MuonIDMod::Process()
               pfIsoCutValue = 0.13;
             }
           }
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0),0.2, 1.0, 0.4, 0.0);
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.4, 0.0);
           if (totalIso < (mu->Pt()*pfIsoCutValue) )
             isocut = kTRUE;
 	}
