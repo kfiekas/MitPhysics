@@ -227,7 +227,7 @@ void HwwExampleAnalysisMod::Process()
   double minDeltaPhiMetLepton = (deltaPhiMetLepton[0] < deltaPhiMetLepton[1])?
     deltaPhiMetLepton[0]:deltaPhiMetLepton[1];
 
-  MetTools metTools(CleanMuons, CleanElectrons, fPFCandidates, fVertices->At(0), 0.2, 8.0, 5.0);
+  MetTools metTools(CleanMuons, CleanElectrons, fPFCandidates, fVertices->At(0), 0.1, 8.0, 5.0);
   double pMET[2] = {metTools.GetProjectedMet(CleanLeptons,stdMet),
   		    metTools.GetProjectedTrackMet(CleanLeptons)};
 
