@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.49 2011/05/12 23:15:48 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.50 2011/05/13 08:27:15 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -243,11 +243,19 @@ void MuonIDMod::Process()
           if(fCombIsolationCut > 0){
             pfIsoCutValue = fCombIsolationCut;
           } else {
-            if (mu->Pt() > 20) {
-              pfIsoCutValue = 0.17;
+            if (mu->AbsEta() < 1.479) {
+              if (mu->Pt() > 20) {
+        	pfIsoCutValue = 0.22;
+              } else {
+        	pfIsoCutValue = 0.11;
+              }
             } else {
-              pfIsoCutValue = 0.13;
-            }
+              if (mu->Pt() > 20) {
+                pfIsoCutValue = 0.20;
+              } else {
+                pfIsoCutValue = 0.11;
+              }
+	    }
           }
           Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.4, 0.0);
           if (totalIso < (mu->Pt()*pfIsoCutValue) )
