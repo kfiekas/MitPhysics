@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.19 2011/04/12 22:14:21 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.20 2011/04/19 09:13:36 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -36,7 +36,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fFiduciality(kTRUE),
   fEtaWidthEB(0.01),
   fEtaWidthEE(0.028),
-  fAbsEtaMax(2.5),
+  fAbsEtaMax(999.99),
   fApplyR9Min(kFALSE),
   fEffAreaEcalEE(0.071),
   fEffAreaHcalEE(0.095),
@@ -68,7 +68,7 @@ void PhotonIDMod::Process()
   if (fPhotons->GetEntries()>0) {
     LoadEventObject(fTrackBranchName,    fTracks);
     LoadEventObject(fBeamspotBranchName, fBeamspots);
-    LoadEventObject(fPileUpDenName,      fPileUpDen);
+    if (fPhIsoType == kMITPUCorrected) LoadEventObject(fPileUpDenName,      fPileUpDen);
     LoadEventObject(fConversionName,     fConversions);
     LoadEventObject(fElectronName,       fElectrons);
 
@@ -76,7 +76,7 @@ void PhotonIDMod::Process()
     if(fBeamspots->GetEntries() > 0)
       bsp = fBeamspots->At(0);
 
-    if(fPileUpDen->GetEntries() > 0)
+    if(fPhIsoType == kMITPUCorrected && fPileUpDen->GetEntries() > 0)
       _tRho = (Double_t) fPileUpDen->At(0)->Rho();
     
     //get trigger object collection if trigger matching is enabled
@@ -96,6 +96,7 @@ void PhotonIDMod::Process()
       continue;
 
 
+    Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
     
     Bool_t passSpikeRemovalFilter = kTRUE;
 
@@ -182,7 +183,7 @@ void PhotonIDMod::Process()
 	Double_t fEffAreaHcal = fEffAreaHcalEB;
 	Double_t fEffAreaTrack = fEffAreaTrackEB;
 
-	if( abs(ph->Eta()) > 1.5 ) {
+	if( !isbarrel ) {
 	  fEffAreaEcal = fEffAreaEcalEE;
 	  fEffAreaHcal = fEffAreaHcalEE;
 	  fEffAreaTrack = fEffAreaTrackEE;
@@ -215,11 +216,11 @@ void PhotonIDMod::Process()
       continue;
 
     if (fFiduciality == kTRUE &&
-        ph->IsEB() == kFALSE && ph->IsEE() == kFALSE) 
+        (ph->SCluster()->AbsEta()>=2.5 || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566) ) ) 
       continue;
 
-    if ((ph->IsEB() == kTRUE && ph->CoviEtaiEta() >= fEtaWidthEB) ||
-        (ph->IsEE() == kTRUE && ph->CoviEtaiEta() >= fEtaWidthEE))
+    if ((isbarrel && ph->CoviEtaiEta() >= fEtaWidthEB) ||
+        (!isbarrel && ph->CoviEtaiEta() >= fEtaWidthEE))
       continue;
 
     if (ph->AbsEta() >= fAbsEtaMax) 
@@ -245,10 +246,10 @@ void PhotonIDMod::SlaveBegin()
   ReqEventObject(fPhotonBranchName,   fPhotons,   kTRUE);
   ReqEventObject(fTrackBranchName,    fTracks,    kTRUE);
   ReqEventObject(fBeamspotBranchName, fBeamspots, kTRUE);
-  ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
   ReqEventObject(fConversionName,     fConversions, kTRUE);
   ReqEventObject(fElectronName,       fElectrons, kTRUE);
   
+
 
   if (fPhotonIDType.CompareTo("Tight") == 0) 
     fPhIdType = kTight;
@@ -279,4 +280,8 @@ void PhotonIDMod::SlaveBegin()
               fPhotonIsoType.Data());
     return;
   }
+  
+
+  if (    fPhIsoType == kMITPUCorrected) ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
+
 }

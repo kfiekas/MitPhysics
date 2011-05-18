@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.16 2011/04/12 22:14:21 bendavid Exp $
+// $Id: PhotonIDMod.h,v 1.17 2011/04/19 09:13:37 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -63,6 +63,7 @@ namespace mithep
       void                SetEtaWidthEE(Double_t x)         { fEtaWidthEE      = x;	   }
       void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax       = x;	   }
       void                SetApplyR9Min(Bool_t b)           { fApplyR9Min      = b;        }
+      void                SetApplyFiduciality(Bool_t b)     { fFiduciality = b;            }      
       void                SetEffAreas(Double_t ecal, Double_t hcal, Double_t track) { 
 	fEffAreaEcalEE = ecal; fEffAreaHcalEE = hcal; fEffAreaTrackEE = track;
 	fEffAreaEcalEB = ecal; fEffAreaHcalEB = hcal; fEffAreaTrackEB = track;
