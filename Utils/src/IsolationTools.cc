@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.16 2011/05/12 16:08:36 sixie Exp $
+// $Id: IsolationTools.cc,v 1.17 2011/05/13 08:27:16 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -132,25 +132,28 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
   Double_t ptSum =0.;  
   for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
     const PFCandidate *pf = PFCands->At(i);
-    
-    // pt cut applied to neutrals
-    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
     // exclude muon
     if(pf->TrackerTrk() && p->TrackerTrk() &&
        pf->TrackerTrk() == p->TrackerTrk()) continue;
+
+    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    
+    // pt cut applied to neutrals
+    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
     // ignore the pf candidate if it is too far away in Z
     Double_t deltaZ = 0.0;
     if(pf->HasTrk()) {
       deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
     }
-    if (deltaZ >= delta_z) 
-      continue;
-
-    // add the pf pt if it is inside the extRadius and outside the intRadius           
-    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
-    if ( dr < extRadius && dr >= intRadius ) ptSum += pf->Pt();
+    if (deltaZ >= delta_z) continue;
+      
+    // inner cone veto for gammas
+    if (pf->PFType() == PFCandidate::eGamma && dr < intRadius) continue;
+    
+    // add the pf pt if it is inside the extRadius 
+    if ( dr < extRadius ) ptSum += pf->Pt();
   
   }
   return ptSum;
@@ -201,9 +204,12 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
       continue;
            
     Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
+
+    // inner cone veto for gammas
+    if (pf->PFType() == PFCandidate::eGamma && dr < intRadius) continue;
+
     // add the pf pt if it is inside the extRadius and outside the intRadius
-    if ( dr < extRadius && 
-	 dr >= intRadius ) {
+    if (dr < extRadius ) {
       Bool_t isLepton = kFALSE;
       if(goodMuons && isoType == 3){
         for (UInt_t nl=0; nl<goodMuons->GetEntries();nl++) {
