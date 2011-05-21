@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.90 2011/05/13 16:07:51 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.91 2011/05/16 18:21:42 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -189,9 +189,9 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       } else {
         if (ele->SCluster()->AbsEta() < 1.479) {
           if (ele->Pt() > 20) {
-            pfIsoCutValue = 0.15;
+            pfIsoCutValue = 0.13;
           } else {
-            pfIsoCutValue = 0.15;
+            pfIsoCutValue = 0.13;
           }
         } else {
           if (ele->Pt() > 20) {
