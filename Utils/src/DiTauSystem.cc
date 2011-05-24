@@ -1,6 +1,7 @@
-// $Id: DiTauSystem.cc,v 1.6 2009/01/20 10:28:36 loizides Exp $
+// $Id: DiTauSystem.cc,v 1.7 2009/07/20 04:55:33 loizides Exp $
 
 #include "MitPhysics/Utils/interface/DiTauSystem.h"
+#include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/CompositeParticle.h"
 #include "MitAna/DataTree/interface/Met.h"
 #include "MitAna/DataTree/interface/Particle.h"
@@ -62,4 +63,30 @@ void DiTauSystem::Init()
     fMT      = (fETll+fETnn)*(fETll+fETnn)-(ptll+ptmis)*(ptll+ptmis);
     (fMT > 0) ? fMT=TMath::Sqrt(fMT) : fMT=0;
   }
+
+  Double_t phi1     = fT1->Phi();
+  Double_t phi2     = fT2->Phi();
+  Double_t dphi     = MathUtils::DeltaPhi(phi1, phi2);
+  Double_t dphiHalf = dphi/2.;
+  Double_t projPhi  = 0;
+  if ( phi1 > phi2 ) 
+    if ( phi1 - phi2 < TMath::Pi() ) 
+      projPhi = phi1 - dphiHalf;
+    else
+      projPhi = phi1 + dphiHalf;
+  else
+     if ( phi2 - phi1 < TMath::Pi() ) 
+       projPhi = phi2 - dphiHalf;
+     else
+       projPhi = phi2 + dphiHalf;
+
+  Double_t projX  =  cos(projPhi);
+  Double_t projY  =  sin(projPhi);
+
+  fProj    = higgs.Px()*projX + higgs.Py()*projY; 
+  fProjVis = tt.Px()*projX    + tt.Py()*projY; 
+  fProjMet = fMet->Px()*projX + fMet->Py()*projY; 
+  fProjPhi = projPhi;
+  fHt      = fMet->Pt()+ fT1->Pt() + fT2->Pt();
+  
 }
