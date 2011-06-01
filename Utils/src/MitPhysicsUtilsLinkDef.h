@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.6 2011/04/12 22:14:21 bendavid Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.7 2011/05/16 13:26:48 bendavid Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -14,6 +14,8 @@
 #include "MitPhysics/Utils/interface/JetTools.h"
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/VertexMVA.h"
+#include "MitPhysics/Utils/interface/PUReweigthing.h"
+
 
 #endif
 
@@ -38,5 +40,6 @@
 #pragma link C++ enum mithep::ElectronTools::EElIsoType;
 #pragma link C++ class mithep::VertexTools;
 #pragma link C++ class mithep::VertexMVA;
+#pragma link C++ class mithep::PUReweigthing;
 
 #endif
