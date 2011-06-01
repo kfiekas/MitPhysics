@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.15 2011/05/13 08:27:15 ceballos Exp $
+// $Id: IsolationTools.h,v 1.16 2011/05/20 13:25:40 mzanetti Exp $
 //
 // IsolationTools
 //
@@ -71,6 +71,19 @@ namespace mithep
 					 const mithep::Collection<mithep::Track> *tracks,
                                          UInt_t maxNExpectedHitsInner = 999,
                                          const mithep::DecayParticleCol *conversions = 0);
+
+      // methods for Hgg BaseLien Selection. These isoaltion are stupid, but what can we do.... ;(
+      static Double_t CiCTrackIsolation(const mithep::Particle*, 
+					const BaseVertex*, 
+					Double_t extRadius, 
+					Double_t intRadius, 
+					Double_t ptLow, 
+					Double_t etaStrip,
+					Double_t maxD0,
+					Double_t maxDZ,
+					const mithep::Collection<mithep::Track> *tracks,
+					const mithep::Collection<mithep::Vertex> *vtxs = NULL);
+
 
     ClassDef(IsolationTools, 0) // Isolation tools
   };

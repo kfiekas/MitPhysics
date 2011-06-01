@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.17 2011/04/19 09:13:37 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.18 2011/05/18 14:01:18 bendavid Exp $
 //
 // PhotonIDMod
 //
@@ -80,13 +80,16 @@ namespace mithep
         kTight,             //"Tight"
         kLoose,             //"Loose"
         kLooseEM,           //"LooseEM"
+	kBaseLineId,        //"2011" Hgg BaseLine CiC
         kCustomId           //"Custom"
       };
+
       enum EPhIsoType {
         kIsoUndef = 0,      //not defined        
         kNoIso,             //"NoIso"
         kCombinedIso,       //"CombinedIso"
         kCustomIso,         //"Custom"
+	kBaseLineIso,       //"2011" Hgg BaseLine CiC
 	kMITPUCorrected     //PileUp Corrected Hgg Isolation
       };
 

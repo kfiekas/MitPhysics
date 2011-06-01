@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.2 2011/04/14 22:05:42 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.3 2011/04/21 15:07:40 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -48,6 +48,19 @@ Bool_t PhotonTools::PassElectronVeto(const Photon *p, const ElectronCol *els) {
   
   return pass;
 }
+
+//--------------------------------------------------------------------------------------------------
+Double_t PhotonTools::ElectronVetoCiC(const Photon *p, const ElectronCol *els) {
+  
+  for (UInt_t i=0; i<els->GetEntries(); ++i) {
+    const Electron *e = els->At(i);
+    if (e->SCluster()==p->SCluster() && e->GsfTrk()->NExpectedHitsInner()==0)
+      return sqrt(pow(e->DeltaEtaSuperClusterTrackAtVtx(),2)+pow(e->DeltaPhiSuperClusterTrackAtVtx(),2));
+  }
+
+  return -100.;
+}
+
 
 //--------------------------------------------------------------------------------------------------
 Bool_t PhotonTools::PassElectronVetoConvRecovery(const Photon *p, const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v) {
@@ -163,4 +176,14 @@ PhotonTools::DiphotonR9EtaConversionCats PhotonTools::DiphotonR9EtaConversionCat
     else return kNewCat6;
   }
   
+}
+
+PhotonTools::CiCBaseLineCats PhotonTools::CiCBaseLineCat(const Photon *p) {
+  if( p->IsEB() ) {
+    if ( p->R9() > 0.94 ) return kCiCCat1;
+    else return kCiCCat2;
+  } else {
+    if ( p->R9() > 0.94 ) return kCiCCat3;
+    else return kCiCCat4;
+  }
 }

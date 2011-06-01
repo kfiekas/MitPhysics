@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.17 2011/05/13 08:27:16 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.18 2011/05/20 13:25:40 mzanetti Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -506,5 +506,47 @@ Double_t IsolationTools::TrackIsolationNoPV(const mithep::Particle* p, const Bas
     if(dR < extRadius && dR > intRadius && dEta > etaStrip) tPt += t->Pt();
   }
   return tPt;
+}
+
+
+Double_t IsolationTools::CiCTrackIsolation(const mithep::Particle* p, 
+					   const BaseVertex* theVtx, 
+					   Double_t extRadius, 
+					   Double_t intRadius, 
+					   Double_t ptLow, 
+					   Double_t etaStrip,
+					   Double_t maxD0,
+					   Double_t maxDZ,
+					   const mithep::Collection<mithep::Track> *tracks,
+					   const mithep::Collection<mithep::Vertex> *vtxs) {
+  
+  UInt_t numVtx = 1;
+  const BaseVertex* iVtx = theVtx;
+  if( vtxs ) { 
+    numVtx = vtxs->GetEntries();
+    if (numVtx > 0)
+      iVtx = vtxs->At(0);
+    else
+      return 0.;
+  }
+  
+  Double_t iIso = 0.;
+  Double_t maxIso = 0.;
+
+  for(UInt_t i=0; i<numVtx; ++i) {
+    iIso = 0.;
+    for(UInt_t i=0; i<tracks->GetEntries(); ++i) {
+      const Track* t = tracks->At(i);
+      if ( t->Pt() < ptLow ) continue;
+      // only check for beamspot if available, otherwise ignore cut
+      if ( fabs(t->D0Corrected( *iVtx )) > maxD0) continue;
+      if ( fabs(t->DzCorrected( *iVtx )) > maxDZ) continue;
+      Double_t dR   = MathUtils::DeltaR(t->Mom(),p->Mom());
+      Double_t dEta = fabs(t->Eta()-p->Eta());
+      if(dR < extRadius && dR > intRadius && dEta > etaStrip) iIso += t->Pt();      
+    }
+    if ( iIso > maxIso ) maxIso = iIso;
+  }
+  return iIso;
 }
 
