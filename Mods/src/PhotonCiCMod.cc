@@ -1,4 +1,4 @@
-// $Id: PhotonCiCMod.cc,v 1.21 2011/05/18 14:01:19 bendavid Exp $
+// $Id: PhotonCiCMod.cc,v 1.1 2011/06/01 18:11:52 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/PhotonCiCMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -18,7 +18,7 @@ PhotonCiCMod::PhotonCiCMod(const char *name, const char *title) :
   fTrackBranchName   (Names::gkTrackBrn),
   fPileUpDenName     (Names::gkPileupEnergyDensityBrn),
   fElectronName      ("Electrons"),
-  fPhotonPtMin(15.0),
+  fPhotonPtMin(20.0),
   fApplySpikeRemoval(kFALSE),
   fAbsEtaMax(999.99),
   fPhotons(0),
@@ -40,6 +40,10 @@ void PhotonCiCMod::Process()
   // Process entries of the tree. 
 
   LoadEventObject(fPhotonBranchName,   fPhotons);
+
+  PhotonOArr *GoodPhotons = new PhotonOArr;
+  GoodPhotons->SetName(fGoodPhotonsName);
+  
   
   Double_t _tRho = -1.;
   if (fPhotons->GetEntries()>0) {
@@ -51,10 +55,12 @@ void PhotonCiCMod::Process()
     if(fPileUpDen->GetEntries() > 0)
       _tRho = (Double_t) fPileUpDen->At(0)->Rho();    
   
-  } else return;
+  } else {
+    AddObjThisEvt(GoodPhotons);
+    return;
+  }
+    
   
-  PhotonOArr *GoodPhotons = new PhotonOArr;
-  GoodPhotons->SetName(fGoodPhotonsName);
 
   std::vector<const Photon*> phCat1;
   std::vector<const Photon*> phCat2;
@@ -65,7 +71,10 @@ void PhotonCiCMod::Process()
   const BaseVertex* theVtx = NULL;
   if(fPV->GetEntries() > 0)
     theVtx = fPV->At(0);
-  else return;
+  else {
+    AddObjThisEvt(GoodPhotons);
+    return;
+  }
 
   float cic4_allcuts_temp_sublead[] = { 
     3.77459,     2.18305,     1.76811,     1.30029,
@@ -82,6 +91,9 @@ void PhotonCiCMod::Process()
 
     if (ph->Pt() <= fPhotonPtMin) continue;
     if (ph->AbsEta() >= fAbsEtaMax) continue;
+    
+    if (  ph->SCluster()->AbsEta()>=2.5 || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566)  ) 
+      continue;
     
     Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
     
@@ -165,14 +177,14 @@ void PhotonCiCMod::Process()
   } else {
     if(phCat3.size() > 1) {
       // one must be a Endcap photons... (stupid, but that's how it is in CiC)
-      if(phCat3[0]->SCluster()->AbsEta() > 1.5 || phCat3[1]->SCluster()->AbsEta()) {
+      if(phCat3[0]->SCluster()->AbsEta() > 1.5 || phCat3[1]->SCluster()->AbsEta() > 1.5) {
 	GoodPhotons->Add(phCat3[0]);
 	GoodPhotons->Add(phCat3[1]);
 	foundCat=true;
       }
       if (!foundCat) {
 	if(phCat4.size() > 1) {
-	  if(phCat4[0]->SCluster()->AbsEta() > 1.5 || phCat4[1]->SCluster()->AbsEta()) {
+	  if(phCat4[0]->SCluster()->AbsEta() > 1.5 || phCat4[1]->SCluster()->AbsEta() > 1.5) {
 	    GoodPhotons->Add(phCat4[0]);
 	    GoodPhotons->Add(phCat4[1]);
 	  }
