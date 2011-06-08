@@ -11,7 +11,8 @@ struct LikelihoodMeasurements {
     hadronicOverEm,
     sigmaIEtaIEta,
     sigmaIPhiIPhi,
-    fBrem;
+    fBrem,
+    OneOverEMinusOneOverP;
   int nBremClusters;
 };
 

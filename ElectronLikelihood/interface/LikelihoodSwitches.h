@@ -13,6 +13,7 @@ struct LikelihoodSwitches {
     m_useSigmaPhiPhi (false) {} ;
 
   bool m_useEoverP ;
+  bool m_useOneOverEMinusOneOverP ;
   bool m_useDeltaEta ;
   bool m_useDeltaPhi ;
   bool m_useHoverE ;

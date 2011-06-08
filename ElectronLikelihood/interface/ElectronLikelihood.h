@@ -16,8 +16,8 @@ class ElectronLikelihood {
   ElectronLikelihood () {} ;
 
   //! ctor
-  ElectronLikelihood (TDirectory *EBlt15dir, TDirectory *EElt15dir,
-                      TDirectory *EBgt15dir, TDirectory *EEgt15dir,
+  ElectronLikelihood (TDirectory *EB0lt15dir, TDirectory *EB1lt15dir, TDirectory *EElt15dir,
+                      TDirectory *EB0gt15dir, TDirectory *EB1gt15dir, TDirectory *EEgt15dir,
 		      LikelihoodSwitches eleIDSwitches,
 		      std::string signalWeightSplitting,
 		      std::string backgroundWeightSplitting,
@@ -29,13 +29,15 @@ class ElectronLikelihood {
 
   //! get the result of the algorithm
   float result (const LikelihoodMeasurements electron) const;
+  //! get the log-expanded result of the algorithm
+  float resultLog (const LikelihoodMeasurements electron) const;
 
  private:
 
   //! build the likelihood model from histograms 
   //! in Barrel file and Endcap file
-  void Setup (TDirectory *EBlt15dir, TDirectory *EElt15dir,
-              TDirectory *EBgt15dir, TDirectory *EEgt15dir,
+  void Setup (TDirectory *EB0lt15dir, TDirectory *EB1lt15dir, TDirectory *EElt15dir,
+              TDirectory *EB0gt15dir, TDirectory *EB1gt15dir, TDirectory *EEgt15dir,
 	      std::string signalWeightSplitting,
 	      std::string backgroundWeightSplitting,
 	      bool splitSignalPdfs,
@@ -46,9 +48,9 @@ class ElectronLikelihood {
   void getInputVar (std::vector<float> &measuremnts) const ;
 
   //! likelihood below 15GeV/c
-  LikelihoodPdfProduct *_EBlt15lh, *_EElt15lh;
+  LikelihoodPdfProduct *_EB0lt15lh, *_EB1lt15lh, *_EElt15lh;
   //! likelihood above 15GeV/c
-  LikelihoodPdfProduct *_EBgt15lh, *_EEgt15lh;
+  LikelihoodPdfProduct *_EB0gt15lh, *_EB1gt15lh, *_EEgt15lh;
 
   //! general parameters of all the ele id algorithms
   LikelihoodSwitches m_eleIDSwitches ;

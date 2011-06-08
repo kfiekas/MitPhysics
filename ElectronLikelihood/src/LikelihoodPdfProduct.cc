@@ -81,7 +81,6 @@ LikelihoodPdfProduct::getRatio(const char* specname,
 {
   float sigProb=0, bkgProb=0;
   std::vector<LikelihoodSpecies*>::const_iterator specItr;
-  Int_t c=0;
   for(specItr=_specList.begin();specItr!=_specList.end();specItr++) {
     LikelihoodSpecies* species = *specItr;
     std::map<std::string,float> splitFractions = species->getSplitFractions();
@@ -90,17 +89,12 @@ LikelihoodPdfProduct::getRatio(const char* specname,
     float splitFr= (splitFractions.size()==0) ? 1. : iter->second;
     if(strcmp(species->getName(),specname)==0) sigProb=splitFr*getSpeciesProb(specname,measurements,gsfClass);
     else bkgProb+=splitFr*getSpeciesProb(species->getName(),measurements,gsfClass);
-//     std::cout << specname << " " <<  c << " " << splitFr << " " << getSpeciesProb(specname,measurements,gsfClass) << std::endl;
-    c++;
   }
-//   std::cout << "prob: " << sigProb << " " << bkgProb << std::endl;
-
   if(sigProb+bkgProb>0)
     return sigProb/(sigProb+bkgProb);
   else
     return -1.;
 }
-
 
 
 float 
@@ -115,9 +109,9 @@ LikelihoodPdfProduct::getSpeciesProb(const char* specName,
     if(strcmp(species->getName(),specName)==0) {
       for(unsigned int ipdf=0; ipdf< species->getListOfPdfs().size(); ipdf++) {
 	bareProb*=species->getListOfPdfs().at(ipdf)->getVal(measurements.at(ipdf),gsfClass);
-//          std::cout << "ipdf = " << ipdf << " class = " << gsfClass << "\tmeasurement = " << measurements.at(ipdf) 
-//                    << " this prob = " << species->getListOfPdfs().at(ipdf)->getVal(measurements.at(ipdf),gsfClass)
-//                    << " bare prob = " << bareProb << std::endl;
+//         std::cout << "ipdf = " << ipdf << " class = " << gsfClass << "\tmeasurement = " << measurements.at(ipdf) 
+//                   << " this prob = " << species->getListOfPdfs().at(ipdf)->getVal(measurements.at(ipdf),gsfClass)
+//                   << " bare prob = " << bareProb << std::endl;
       }
       priorWeight=species->getPrior();
       break;
