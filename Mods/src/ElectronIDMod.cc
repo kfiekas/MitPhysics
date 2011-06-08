@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.92 2011/05/21 17:05:58 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.93 2011/06/08 06:14:56 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -88,8 +88,6 @@ Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
   measurements.nBremClusters = ele->NumberOfClusters() - 1;
   measurements.OneOverEMinusOneOverP = (1.0 / ele->SCluster()->Energy()) - (1.0 / ele->BestTrk()->P());
   double likelihood = fLH->result(measurements);
-
-  std::cout << "ele likelihood: " << ele->Pt() << " " << ele->Eta() << " " << ele->Phi() << " : " << likelihood << std::endl;
 
   if (likelihood > fIDLikelihoodCut) return kTRUE;
   return kFALSE;
