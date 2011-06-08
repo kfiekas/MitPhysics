@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.91 2011/05/16 18:21:42 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.92 2011/05/21 17:05:58 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -86,9 +86,12 @@ Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
   measurements.sigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi());
   measurements.fBrem = ele->FBrem();
   measurements.nBremClusters = ele->NumberOfClusters() - 1;
+  measurements.OneOverEMinusOneOverP = (1.0 / ele->SCluster()->Energy()) - (1.0 / ele->BestTrk()->P());
   double likelihood = fLH->result(measurements);
 
-  if(likelihood > fIDLikelihoodCut) return kTRUE;
+  std::cout << "ele likelihood: " << ele->Pt() << " " << ele->Eta() << " " << ele->Phi() << " : " << likelihood << std::endl;
+
+  if (likelihood > fIDLikelihoodCut) return kTRUE;
   return kFALSE;
 }
 
@@ -429,9 +432,10 @@ void ElectronIDMod::Setup()
     fElIdType = ElectronTools::kTight;
   else if (fElectronIDType.CompareTo("Loose") == 0) 
     fElIdType = ElectronTools::kLoose;
-  else if (fElectronIDType.CompareTo("Likelihood") == 0) 
+  else if (fElectronIDType.CompareTo("Likelihood") == 0) {
+    if (!fLH) { cout << "Error: Likelihood not initialized.\n"; assert(0); }
     fElIdType = ElectronTools::kLikelihood;
-  else if (fElectronIDType.CompareTo("NoId") == 0) 
+  } else if (fElectronIDType.CompareTo("NoId") == 0) 
     fElIdType = ElectronTools::kNoId;
   else if (fElectronIDType.CompareTo("ZeeId") == 0) 
     fElIdType = ElectronTools::kZeeId;
