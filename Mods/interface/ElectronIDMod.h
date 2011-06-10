@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.46 2011/03/23 11:39:57 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.47 2011/04/26 18:57:55 bendavid Exp $
 //
 // ElectronIDMod
 //
@@ -158,7 +158,7 @@ namespace mithep
 
       MuonCol  	               *fNonIsolatedMuons;	 //!pointer to old muon collection 
       ElectronCol	       *fNonIsolatedElectrons;	 //!pointer to old electron collection
-      ElectronLikelihood       *fLH;                    //LH
+      ElectronLikelihood       *fLH;                     //LH
       TString                   fPileupEnergyDensityName;
       const PileupEnergyDensityCol *fPileupEnergyDensity;
 

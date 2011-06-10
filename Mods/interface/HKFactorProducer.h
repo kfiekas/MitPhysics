@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: HKFactorProducer.h,v 1.4 2009/12/07 11:39:50 ceballos Exp $
+// $Id: HKFactorProducer.h,v 1.5 2010/10/19 22:25:25 ceballos Exp $
 //
 // HKFactorProducer
 //
@@ -33,10 +33,12 @@ namespace mithep
       void               SetMCEventInfoName(const char *s) { fMCEvInfoName  = s; }
       void               SetIsData(Bool_t b)               { fIsData        = b; }	 
       void               SetMakePDFNtuple(Bool_t b)        { fMakePDFNtuple = b; }	 
+      void               SetOutputName(const char *f)      { fOutputName    = f; }
 
     protected:
       void               Process();
       void               SlaveBegin();
+      void               SlaveTerminate();
 
       Int_t              fProcessID;        //process id (from pythia)
       TString            fInputFileName;    //input file name
@@ -47,9 +49,11 @@ namespace mithep
       HWWKfactorList    *fPt_histo;         //!histogram with weights read from input file
       const MCEventInfo *fMCEventInfo;      //!event info branch pointer
       TH1D              *hDHKFactor[10];    //!output histograms
+      TFile             *fOutputFile; 	    //output file handle
+      TString            fOutputName; 	    //output file name
 
-      float             fTreeVariables[8];            //Ntuple variables
-      TTree            *fTree;                        //ntuple tree
+      float              fTreeVariables[8]; //Ntuple variables
+      TTree             *fTree;             //ntuple tree
 
     ClassDef(HKFactorProducer, 1) // Module to produce k factors
   };

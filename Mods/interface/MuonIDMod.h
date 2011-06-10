@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.32 2011/03/15 12:02:20 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.33 2011/03/23 11:39:57 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -69,7 +69,8 @@ namespace mithep
         kZMuId,             //"ZMuId"
         kTight,             //"Tight"
         kLoose,             //"Loose"
-        kWWMuId,            //"WWMuId"
+        kWWMuIdV1,          //"WWMuIdV1"
+        kWWMuIdV2,          //"WWMuIdV2"
         kNoId,              //"NoId"
         kCustomId           //"Custom"
       };
@@ -88,6 +89,7 @@ namespace mithep
         kClassUndef = 0,    //not defined
         kAll,               //"All"
         kGlobal,            //"Global"
+        kGlobalTracker,     //"GlobalTracker"
         kSta,               //"Standalone"
         kTrackerMuon,       //"TrackerMuon"
         kCaloMuon,          //"CaloMuon"

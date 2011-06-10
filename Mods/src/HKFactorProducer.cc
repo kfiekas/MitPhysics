@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.9 2010/10/19 22:25:25 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.10 2011/03/18 13:46:57 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -8,6 +8,7 @@
 #include <TH2D.h>
 #include <TParameter.h>
 #include <TTree.h>
+#include <TFile.h>
 
 using namespace mithep;
 
@@ -23,7 +24,9 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
   fIsData(kFALSE),
   fMakePDFNtuple(kFALSE),
   fPt_histo(0),
-  fMCEventInfo(0)
+  fMCEventInfo(0),
+  fOutputFile(0),
+  fOutputName("ntuple.root")
 {
   // Constructor
 }
@@ -32,7 +35,6 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
 HKFactorProducer::~HKFactorProducer()
 {
   // Destructor
-
   delete fPt_histo;
 }
 
@@ -142,10 +144,17 @@ void HKFactorProducer::SlaveBegin()
   //***********************************************************************************************
   if (fMakePDFNtuple == kTRUE){
     printf("... init PDF ntuple ...\n");
+    fOutputFile = new TFile(fOutputName, "RECREATE");
     fTree = new TTree("PDFTree", "PDFTree");
     const char* TreeFormat;
     TreeFormat = "weight/F:lq:lid1:lx1:lpdf1:lid2:lx2:lpdf2";
     fTree->Branch("H", &fTreeVariables,TreeFormat);    
-    AddOutput(fTree);
   }
+}
+
+//--------------------------------------------------------------------------------------------------
+void HKFactorProducer::SlaveTerminate(){
+  fOutputFile->cd();
+  fTree->Write();
+  fOutputFile->Close();
 }

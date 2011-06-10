@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.51 2011/05/16 18:21:42 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.52 2011/05/21 17:05:58 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -22,7 +22,7 @@ ClassImp(mithep::MuonIDMod)
   fBeamSpotName(Names::gkBeamSpotBrn),
   fTrackName(Names::gkTrackBrn),
   fPFCandidatesName(Names::gkPFCandidatesBrn),
-  fMuonIDType("WWMuId"),
+  fMuonIDType("WWMuIdV1"),
   fMuonIsoType("PFIso"),
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
@@ -90,6 +90,20 @@ void MuonIDMod::Process()
       case kGlobal:
         pass = mu->HasGlobalTrk() && mu->IsTrackerMuon();
         if (pass && mu->TrackerTrk()) {
+          pt  = mu->TrackerTrk()->Pt();
+	  eta = TMath::Abs(mu->TrackerTrk()->Eta());
+        }
+	else {
+          pt  = mu->Pt();
+	  eta = TMath::Abs(mu->Eta());
+	}
+	break;
+      case kGlobalTracker:
+        pass = (mu->HasGlobalTrk() && mu->GlobalTrk()->Chi2()/mu->GlobalTrk()->Ndof() < 10 &&
+	       (mu->NSegments() > 1 || mu->NMatches() > 1) && mu->NValidHits() > 0) ||
+	       (mu->IsTrackerMuon() &&
+	        mu->Quality().Quality(MuonQuality::TMLastStationTight));
+        if (pass) {
           pt  = mu->TrackerTrk()->Pt();
 	  eta = TMath::Abs(mu->TrackerTrk()->Eta());
         }
@@ -180,15 +194,22 @@ void MuonIDMod::Process()
 		 RChi2 < 10.0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
-      case kWWMuId:
+      case kWWMuIdV1:
         idpass = mu->BestTrk() != 0 &&
 	         mu->BestTrk()->NHits() > 10 &&
+		 mu->BestTrk()->NPixelHits() > 0 &&
+		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1 &&
 		 RChi2 < 10.0 &&
 		(mu->NSegments() > 1 || mu->NMatches() > 1) &&
+		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
+        break;
+      case kWWMuIdV2:
+        idpass = mu->BestTrk() != 0 &&
+	         mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->NPixelHits() > 0 &&
-		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight) &&
 		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1;
         break;
+
       case kNoId:
         idpass = kTRUE;
         break;
@@ -341,8 +362,10 @@ void MuonIDMod::SlaveBegin()
     fMuIDType = kTight;
   else if (fMuonIDType.CompareTo("Loose") == 0) 
     fMuIDType = kLoose;
-  else if (fMuonIDType.CompareTo("WWMuId") == 0) 
-    fMuIDType = kWWMuId;
+  else if (fMuonIDType.CompareTo("WWMuIdV1") == 0) 
+    fMuIDType = kWWMuIdV1;
+  else if (fMuonIDType.CompareTo("WWMuIdV2") == 0) 
+    fMuIDType = kWWMuIdV2;
   else if (fMuonIDType.CompareTo("NoId") == 0) 
     fMuIDType = kNoId;
   else if (fMuonIDType.CompareTo("Custom") == 0) {
@@ -385,6 +408,8 @@ void MuonIDMod::SlaveBegin()
     fMuClassType = kAll;
   else if (fMuonClassType.CompareTo("Global") == 0) 
     fMuClassType = kGlobal;
+  else if (fMuonClassType.CompareTo("GlobalTracker") == 0) 
+    fMuClassType = kGlobalTracker;
   else if (fMuonClassType.CompareTo("Standalone") == 0) 
     fMuClassType = kSta;
   else if (fMuonClassType.CompareTo("TrackerMuon") == 0) 

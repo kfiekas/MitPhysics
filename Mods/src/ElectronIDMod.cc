@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.93 2011/06/08 06:14:56 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.94 2011/06/08 14:27:21 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -31,7 +31,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronPtMin(10),
   fElectronEtMin(0.0),  
   fElectronEtaMax(2.5),
-  fIDLikelihoodCut(0.75),
+  fIDLikelihoodCut(-999.0),
   fTrackIsolationCut(5.0),
   fCaloIsolationCut(5.0),
   fEcalJuraIsoCut(5.0),
@@ -76,7 +76,9 @@ Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
 {
   LikelihoodMeasurements measurements;
   measurements.pt = ele->Pt();
-  measurements.subdet = (fabs(ele->Eta())<1.479) ? 0 : 1;
+  if (ele->IsEB() && ele->AbsEta()<1.0) measurements.subdet = 0;
+  else if (ele->IsEB())                 measurements.subdet = 1;
+  else                                  measurements.subdet = 2;
   measurements.deltaPhi = TMath::Abs(ele->DeltaPhiSuperClusterTrackAtVtx());
   measurements.deltaEta = TMath::Abs(ele->DeltaEtaSuperClusterTrackAtVtx());
   measurements.eSeedClusterOverPout = ele->ESeedClusterOverPout();
@@ -89,7 +91,35 @@ Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
   measurements.OneOverEMinusOneOverP = (1.0 / ele->SCluster()->Energy()) - (1.0 / ele->BestTrk()->P());
   double likelihood = fLH->result(measurements);
 
-  if (likelihood > fIDLikelihoodCut) return kTRUE;
+  double newLik = 0.0;
+  if     (likelihood<=0) newLik = -20.0;
+  else if(likelihood>=1) newLik =  20.0;
+  else                   newLik = log(likelihood/(1.0-likelihood));
+
+  double likCut = fIDLikelihoodCut;
+  if(likCut > -900){
+    if(ele->Pt() > 20){
+      if(ele->SCluster()->AbsEta() < 1.479){
+        if(ele->NumberOfClusters() - 1 == 0) likCut = -1.497;
+	else                                 likCut = -1.521;
+      }
+      else  {                                
+        if(ele->NumberOfClusters() - 1 == 0) likCut = -2.571;
+	else                                 likCut = -0.657;
+      }
+    }
+    else {
+      if(ele->SCluster()->AbsEta() < 1.479){
+        if(ele->NumberOfClusters() - 1 == 0) likCut =  1.193;
+	else                                 likCut =  1.345;
+      }
+      else  {                                
+        if(ele->NumberOfClusters() - 1 == 0) likCut =  0.810;
+	else                                 likCut =  3.021;
+      }
+    }
+  }
+  if (newLik > likCut) return kTRUE;
   return kFALSE;
 }
 
