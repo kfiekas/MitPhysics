@@ -1,4 +1,4 @@
-// $Id: GoodPVFilterMod.cc,v 1.6 2010/11/18 09:30:45 ceballos Exp $
+// $Id: GoodPVFilterMod.cc,v 1.7 2011/04/26 19:01:33 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
@@ -17,6 +17,7 @@ ClassImp(mithep::GoodPVFilterMod)
 GoodPVFilterMod::GoodPVFilterMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fAbort(kTRUE),
+  fIsMC(kFALSE),
   fMinVertexNTracks(0),
   fMinNDof(5),
   fMaxAbsZ(15.0),
