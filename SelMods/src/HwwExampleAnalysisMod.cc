@@ -238,6 +238,7 @@ void HwwExampleAnalysisMod::Process()
   vector<Jet*> sortedJets;
   vector<Jet*> sortedJetsLowPt;
   for(UInt_t i=0; i<CleanJetsNoPtCut->GetEntries(); i++){
+    if(CleanJetsNoPtCut->At(i)->RawMom().Pt() <= 7) continue;
     Jet* jet_a = new Jet(CleanJetsNoPtCut->At(i)->Px(),
    			 CleanJetsNoPtCut->At(i)->Py(),
    			 CleanJetsNoPtCut->At(i)->Pz(),
@@ -295,7 +296,6 @@ void HwwExampleAnalysisMod::Process()
   double maxBtag = -99999.;
   double imaxBtag = -1;
   for(UInt_t i=0; i<sortedJetsLowPt.size(); i++){
-    if(sortedJetsLowPt[i]->Pt() <= 7) continue;
     if(sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc() > maxBtag){
       maxBtag  = sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc();
       imaxBtag = i;
@@ -325,7 +325,7 @@ void HwwExampleAnalysisMod::Process()
   Bool_t PreselPtCut = kTRUE;
   if(CleanLeptons->At(0)->Pt() <= 20) PreselPtCut = kFALSE;
   if(CleanLeptons->At(1)->Pt() <= 10) PreselPtCut = kFALSE;
-  if(CleanLeptons->At(1)->ObjType() == kElectron && CleanLeptons->At(1)->Pt() <= 15) PreselPtCut = kFALSE;
+  //if(CleanLeptons->At(1)->ObjType() == kElectron && CleanLeptons->At(1)->Pt() <= 15) PreselPtCut = kFALSE;
   if(PreselPtCut == kTRUE)              passCut[0] = true;
   
   if(zDiffMax < 100000.0)               passCut[1] = true;
