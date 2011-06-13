@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.94 2011/06/08 14:27:21 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.95 2011/06/10 10:42:29 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -88,13 +88,24 @@ Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
   measurements.sigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi());
   measurements.fBrem = ele->FBrem();
   measurements.nBremClusters = ele->NumberOfClusters() - 1;
-  measurements.OneOverEMinusOneOverP = (1.0 / ele->SCluster()->Energy()) - (1.0 / ele->BestTrk()->P());
+  //measurements.OneOverEMinusOneOverP = (1.0 / ele->SCluster()->Energy()) - (1.0 / ele->BestTrk()->P());
+  measurements.OneOverEMinusOneOverP = (1.0 / ele->ESuperClusterOverP() / ele->BestTrk()->P()) - (1.0 / ele->BestTrk()->P());
   double likelihood = fLH->result(measurements);
 
   double newLik = 0.0;
   if     (likelihood<=0) newLik = -20.0;
   else if(likelihood>=1) newLik =  20.0;
   else                   newLik = log(likelihood/(1.0-likelihood));
+
+  Bool_t isDebug = kFALSE;
+  if(isDebug == kTRUE){
+    printf("LIKELIHOOD: %f %d %f %f %f %f %f %f %f %f %d %f %f %f - %f %f\n",measurements.pt,measurements.subdet,
+    measurements.deltaPhi          ,measurements.deltaEta      ,measurements.eSeedClusterOverPout,
+    measurements.eSuperClusterOverP,measurements.hadronicOverEm,measurements.sigmaIEtaIEta,
+    measurements.sigmaIPhiIPhi     ,measurements.fBrem         ,measurements.nBremClusters,
+    measurements.OneOverEMinusOneOverP,ele->SCluster()->Energy(),ele->BestTrk()->P(),
+    likelihood,newLik);
+  }
 
   double likCut = fIDLikelihoodCut;
   if(likCut > -900){

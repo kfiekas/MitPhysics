@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.10 2011/03/18 13:46:57 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.11 2011/06/10 10:42:29 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -154,7 +154,9 @@ void HKFactorProducer::SlaveBegin()
 
 //--------------------------------------------------------------------------------------------------
 void HKFactorProducer::SlaveTerminate(){
-  fOutputFile->cd();
-  fTree->Write();
-  fOutputFile->Close();
+  if (fMakePDFNtuple == kTRUE){
+    fOutputFile->cd();
+    fTree->Write();
+    fOutputFile->Close();
+ }
 }

@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.10 2011/04/07 15:53:45 sixie Exp $
+// $Id: JetCorrectionMod.cc,v 1.11 2011/04/18 22:20:22 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -19,6 +19,7 @@ ClassImp(mithep::JetCorrectionMod)
     fJetsName(ModNames::gkPubJetsName),
     fCorrectedJetsName(ModNames::gkCorrectedJetsName),  
     fRhoBranchName("Rho"),
+    fPFCandidatesName(Names::gkPFCandidatesBrn),
     fEnabledL1Correction(kFALSE),
     rhoEtaMax(5.0),
     fJetCorrector(0),
@@ -47,21 +48,19 @@ void JetCorrectionMod::SlaveBegin()
   }
   
   //rho for L1 fastjet correction
-  if (fEnabledL1Correction) {
-    ReqBranch(fRhoBranchName, fRho);
-  }
+  ReqBranch(fRhoBranchName, fRho);
+  ReqBranch(fPFCandidatesName, fPFCandidates);
   ReqBranch(fEvtHdrName, fEventHeader);
 
   //initialize jet corrector class
   fJetCorrector = new FactorizedJetCorrector(correctionParameters);
 
-  if (fEnabledL1Correction)
-    fEnabledCorrectionMask.SetBit(Jet::L1);
-
   //keep track of which corrections are enabled
   for (std::vector<JetCorrectorParameters>::const_iterator it = correctionParameters.begin(); it != correctionParameters.end(); ++it) {
     std::string ss = it->definitions().level();
-    if (ss == "L1Offset")
+    if      (ss == "L1Offset")
+      fEnabledCorrectionMask.SetBit(Jet::L1);    
+    else if (ss == "L1FastJet")
       fEnabledCorrectionMask.SetBit(Jet::L1);    
     else if (ss == "L2Relative")
       fEnabledCorrectionMask.SetBit(Jet::L2);
@@ -76,17 +75,12 @@ void JetCorrectionMod::SlaveBegin()
     else if (ss == "L7Parton")
       fEnabledCorrectionMask.SetBit(Jet::L7);
   }
-   
+
   for (UInt_t l=0; l<8; l=l+1) {
     if (fEnabledCorrectionMask.TestBit(l)) {
-      if (!fEnabledL1Correction || l != 0) {
-        fEnabledCorrections.push_back(Jet::ECorr(l));
-      }
+      fEnabledCorrections.push_back(Jet::ECorr(l));
     }
   }
-
-   
-
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -109,9 +103,8 @@ void JetCorrectionMod::Process()
   std::vector<float> corrections;
 
   // get the energy density from the event
-  if (fEnabledL1Correction) {
-    LoadBranch(fRhoBranchName);
-  }
+  LoadBranch(fRhoBranchName);
+  LoadBranch(fPFCandidatesName);
   LoadBranch(fEvtHdrName);
 
   // loop over jets
@@ -124,12 +117,15 @@ void JetCorrectionMod::Process()
 
     //cache uncorrected momentum
     const FourVectorM rawMom = jet->RawMom();
-    
+
     //compute correction factors
     fJetCorrector->setJetEta(rawMom.Eta());
     fJetCorrector->setJetPt(rawMom.Pt());
     fJetCorrector->setJetPhi(rawMom.Phi());
     fJetCorrector->setJetE(rawMom.E());
+    const PileupEnergyDensity *fR = fRho->At(0);
+    fJetCorrector->setRho(fR->RhoHighEta());
+    fJetCorrector->setJetA(jet->JetArea());
     
     //emf only valid for CaloJets
     const CaloJet *caloJet = dynamic_cast<const CaloJet*>(jet);
@@ -144,22 +140,12 @@ void JetCorrectionMod::Process()
     //set and enable correction factors in the output jet
     Double_t cumulativeCorrection = 1.0;
 
-    if (fEnabledL1Correction) {
-      ApplyL1FastJetCorrection(jet);
-      jet->EnableCorrection(Jet::L1);
-    }
-
     for (UInt_t j=0; j<corrections.size(); ++j) {
       Double_t currentCorrection = corrections.at(j)/cumulativeCorrection;
       cumulativeCorrection = corrections.at(j);
       Jet::ECorr currentLevel = fEnabledCorrections.at(j);
-      if (currentLevel==Jet::L1) {
-        if (!fEnabledL1Correction) {
-          jet->SetL1OffsetCorrectionScale(currentCorrection);
-        } else {
-          cout << "Warning: You are applying both FastJet And L1Offset Corrections\n";
-        }
-      }
+      if (currentLevel==Jet::L1)
+        jet->SetL1OffsetCorrectionScale(currentCorrection);
       else if (currentLevel==Jet::L2)
         jet->SetL2RelativeCorrectionScale(currentCorrection);
       else if (currentLevel==Jet::L3)
@@ -200,10 +186,11 @@ void JetCorrectionMod::Process()
 
 
 //--------------------------------------------------------------------------------------------------
-void JetCorrectionMod::ApplyL1FastJetCorrection(float maxEta)
+void JetCorrectionMod::ApplyL1FastJetCorrection(float maxEta, bool useFixedGrid)
 {
   fEnabledL1Correction = true;
   rhoEtaMax = maxEta;
+  fUseFixedGrid = useFixedGrid;
 }
 
 
@@ -211,15 +198,53 @@ void JetCorrectionMod::ApplyL1FastJetCorrection(float maxEta)
 void JetCorrectionMod::ApplyL1FastJetCorrection(Jet *jet)
 {
   double rho = 0;
-  const PileupEnergyDensity *fR = fRho->At(0);
-  if (rhoEtaMax > 2.5) rho = fR->RhoHighEta();
-  else rho = fR->Rho();
+  
+  if(fUseFixedGrid) {
+    // define 8 eta bins
+    vector<Float_t> etabins;
+    for (Int_t i=0;i<8;++i) etabins.push_back(-rhoEtaMax + 2*rhoEtaMax/7.0*i);
+    //define 10 phi bins
+    vector<Float_t> phibins;
+    for (Int_t i=0;i<10;i++) phibins.push_back(-TMath::Pi()+(2*i+1)*TMath::TwoPi()/20.);
+  
+    Float_t etadist = etabins[1]-etabins[0];
+    Float_t phidist = phibins[1]-phibins[0];
+    Float_t etahalfdist = (etabins[1]-etabins[0])/2.;
+    Float_t phihalfdist = (phibins[1]-phibins[0])/2.;
 
+    vector<Float_t> sumPFNallSMDQ;
+    sumPFNallSMDQ.reserve(80);
+    for (UInt_t ieta=0;ieta<etabins.size();++ieta) {
+      for (UInt_t iphi=0;iphi<phibins.size();++iphi) {
+        Float_t pfniso_ieta_iphi = 0;
+        assert(fPFCandidates);
+        for(UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {      
+          const PFCandidate *pfcand = fPFCandidates->At(i);
+	  if (fabs(etabins[ieta] - pfcand->Eta()) > etahalfdist) continue;
+	  if (fabs(MathUtils::DeltaPhi((Double_t)phibins[iphi],(Double_t)(pfcand->Phi()))) > phihalfdist) continue;
+	  pfniso_ieta_iphi+=pfcand->Pt();
+        }
+        sumPFNallSMDQ.push_back(pfniso_ieta_iphi);
+      }
+    }
+
+    Float_t evt_smdq = 0;
+    sort(sumPFNallSMDQ.begin(),sumPFNallSMDQ.end());
+  
+    if(sumPFNallSMDQ.size()%2) evt_smdq = sumPFNallSMDQ[(sumPFNallSMDQ.size()-1)/2];
+    else                       evt_smdq = (sumPFNallSMDQ[sumPFNallSMDQ.size()/2]+sumPFNallSMDQ[(sumPFNallSMDQ.size()-2)/2])/2.;
+    rho = evt_smdq/(etadist*phidist);    
+    
+  } else {
+    const PileupEnergyDensity *fR = fRho->At(0);
+    if (rhoEtaMax > 2.5) rho = fR->RhoHighEta();
+    else rho = fR->Rho();
+  }
+  
   Double_t l1Scale = (jet->Pt() - rho*jet->JetArea())/jet->Pt();
   l1Scale = (l1Scale>0) ? l1Scale : 0.0;
 
   jet->SetL1OffsetCorrectionScale(l1Scale);
-
 }
 
 
