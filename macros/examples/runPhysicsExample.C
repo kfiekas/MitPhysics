@@ -1,6 +1,6 @@
 //root -l -q -b $CMSSW_BASE/src/MitHiggs/macros/runMacros/runHwwExampleAnalysis.C+\(\"0000\",\"noskim\",\"s8-h190ww2l-gf-mc3\",\"mit/filler/011\",\"/home/mitprod/catalog\",\"HwwExampleAnalysis\",1000,1\)
 
-// $Id: runPhysicsExample.C,v 1.15 2011/04/29 15:30:21 ceballos Exp $
+// $Id: runPhysicsExample.C,v 1.16 2011/04/29 16:18:16 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>
@@ -106,7 +106,7 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   //------------------------------------------------------------------------------------------------
   RunLumiSelectionMod *runLumiSelectionMod = new RunLumiSelectionMod;
   runLumiSelectionMod->SetAcceptMC(!isData);    
-  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_4_2_2/src/json/json_DCSONLY_ManualCert.txt"); // L = 23.2
+  runLumiSelectionMod->AddJSONFile("/home/ceballos/releases/CMSSW_4_2_2/src/json/Cert_160404-166502_7TeV_PromptReco_Collisions11_JSON.txt");
 
   //------------------------------------------------------------------------------------------------
   // PV filter selection
@@ -173,29 +173,29 @@ void runPhysicsExample(const char *catalogDir = "/home/mitprod/catalog",
   // Apply Jet Corrections
   //------------------------------------------------------------------------------------------------
   JetCorrectionMod *jetCorr = new JetCorrectionMod;
-  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START38_V13_AK5PF_L2Relative.txt"); 
-  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START38_V13_AK5PF_L3Absolute.txt");
-  if(isData == true){ 
-    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START38_V13_AK5PF_L2L3Residual.txt");
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START41_V0_AK5PF_L1FastJet.txt"); 
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START41_V0_AK5PF_L2Relative.txt"); 
+  jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START41_V0_AK5PF_L3Absolute.txt");
+  if(isData == true){
+    jetCorr->AddCorrectionFromFile("/home/ceballos/releases/CMSSW_4_2_2/src/MitPhysics/data/START41_V0_AK5PF_L2L3Residual.txt");  
   }
-  jetCorr->SetInputName(pubJet->GetOutputName());
-  jetCorr->ApplyL1FastJetCorrection(5.0);
+  jetCorr->SetInputName(pubJet1->GetOutputName());
   jetCorr->SetCorrectedName("CorrectedJets");
 
   //------------------------------------------------------------------------------------------------
   // object id and cleaning sequence
   //------------------------------------------------------------------------------------------------
   MuonIDMod *muonID = new MuonIDMod;
-  muonID->SetClassType("Global");
-  muonID->SetIDType("WWMuId");
-  muonID->SetIsoType("TrackCaloSlidingNoCorrection");
+  muonID->SetClassType("GlobalTracker");
+  muonID->SetIDType("WWMuIdV2");
+  muonID->SetIsoType("PFIso");
   muonID->SetApplyD0Cut(kTRUE);
   muonID->SetApplyDZCut(kTRUE);
   muonID->SetWhichVertex(0);
 
   ElectronIDMod *electronID = new ElectronIDMod;
   electronID->SetIDType("VBTFWorkingPointLowPtId");
-  electronID->SetIsoType("TrackJuraSlidingNoCorrection");
+  electronID->SetIsoType("PFIso");
   electronID->SetApplyConversionFilterType1(kTRUE);
   electronID->SetApplyConversionFilterType2(kFALSE);
   electronID->SetChargeFilter(kFALSE);
