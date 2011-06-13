@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.6 2011/03/28 14:05:34 ceballos Exp $
+// $Id: JetCorrectionMod.h,v 1.7 2011/04/18 22:20:14 ceballos Exp $
 //
 // JetCorrectionMod
 //
@@ -17,6 +17,7 @@
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/Jet.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
+#include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataCont/interface/Types.h"
  
 class FactorizedJetCorrector;
@@ -35,7 +36,7 @@ namespace mithep
       const char       *GetOutputName()                const      { return GetCorrectedJetsName();  }
       void              AddCorrectionFromRelease(const std::string &path);
       void              AddCorrectionFromFile(const std::string &file);    
-      void              ApplyL1FastJetCorrection(float maxEta=2.5); 
+      void              ApplyL1FastJetCorrection(float maxEta=2.5, bool useFixedGrid=false); 
       void              ApplyL1FastJetCorrection(Jet * jet);
       void              SetCorrectedJetsName(const char *name)    { fCorrectedJetsName = name;      }     
       void              SetCorrectedName(const char *name)        { SetCorrectedJetsName(name);     }    
@@ -49,17 +50,21 @@ namespace mithep
       TString           fJetsName;              //name of jet collection (input)
       TString           fCorrectedJetsName;     //name of good jets collection (output)
       TString           fRhoBranchName;         //name of pileup energy density collection
+      TString           fPFCandidatesName;      //name of PF candidates colleciont
       bool              fEnabledL1Correction; //switch on L1 correction
       float             rhoEtaMax; //parameter to choose which rho to use for L1 correction
       FactorizedJetCorrector *fJetCorrector;      //!CMSSW/FWLite jet corrections module
       TString           fEvtHdrName;	          // name of event header branch
       const EventHeader *fEventHeader;            // event header for current event
 
-      std::vector<std::string> fCorrectionFiles; //list of jet correction files
-      const PileupEnergyDensityCol *fRho;        // collection of pileup energy density collection
-
-      BitMask8          fEnabledCorrectionMask; //bitmask of enabled corrections
+      std::vector<std::string> fCorrectionFiles;   //list of jet correction files
+      const PileupEnergyDensityCol *fRho;          // collection of pileup energy density collection
+      const PFCandidateCol         *fPFCandidates; // particle flow candidates collection handle
+      
+      BitMask8          fEnabledCorrectionMask;    //bitmask of enabled corrections
       std::vector<Jet::ECorr> fEnabledCorrections; //vector of enabled corrections
+
+      bool              fUseFixedGrid;             // flag to use fixed grid method to compute energy density 
 
       ClassDef(JetCorrectionMod, 2) // Jet identification module
   };
