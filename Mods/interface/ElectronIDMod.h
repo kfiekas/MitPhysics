@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.47 2011/04/26 18:57:55 bendavid Exp $
+// $Id: ElectronIDMod.h,v 1.48 2011/06/10 10:42:36 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -45,6 +45,7 @@ namespace mithep
       Double_t            GetCaloIsoCut()             	  const { return fCaloIsolationCut;	  }
       Double_t            GetEcalJurIsoCut()          	  const { return fEcalJuraIsoCut;	  }
       Double_t            GetCombIsoCut()             	  const { return fCombIsolationCut;	  }
+      Double_t            GetPFIsoCut()             	  const { return fPFIsolationCut;	  }
       const char         *GetGoodName()                   const { return GetGoodElectronsName();  }
       const char         *GetGoodElectronsName()          const { return fGoodElectronsName;	  }
       Double_t            GetHcalIsoCut()             	  const { return fHcalIsolationCut;	  }
@@ -71,7 +72,8 @@ namespace mithep
       void                SetApplyD0Cut(Bool_t b)                { fApplyD0Cut         = b;    }
       void                SetApplyDZCut(Bool_t b)                { fApplyDZCut         = b;    }
       void                SetCaloIsoCut(Double_t cut)            { fCaloIsolationCut   = cut;  }
-      void                SetCombIsoCut(Double_t cut)            { fCombIsolationCut  = cut;   }
+      void                SetCombIsoCut(Double_t cut)            { fCombIsolationCut   = cut;  }
+      void                SetPFIsoCut(Double_t cut)              { fPFIsolationCut     = cut;  }
       void                SetD0Cut(Double_t cut)                 { fD0Cut = cut;	       }
       void                SetDZCut(Double_t cut)                 { fDZCut = cut;	       }
       void                SetWhichVertex(Int_t d) 		 { fWhichVertex = d; 	       }
@@ -129,6 +131,7 @@ namespace mithep
       Double_t                  fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
       Double_t                  fHcalIsolationCut;       //cut value for hcal isolation
       Double_t                  fCombIsolationCut;       //cut value for combined isolation
+      Double_t                  fPFIsolationCut;         //cut value for PF isolation, default -1.0
       Bool_t                    fApplyConvFilterType1;   //whether remove conversions using fit method
       Bool_t                    fApplyConvFilterType2;   //whether remove conversions using DCotTheta method
       UInt_t                    fNWrongHitsMax;          //whether to use wrong hits req 

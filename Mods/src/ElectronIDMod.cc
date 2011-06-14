@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.95 2011/06/10 10:42:29 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.96 2011/06/13 15:29:13 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -36,7 +36,8 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fCaloIsolationCut(5.0),
   fEcalJuraIsoCut(5.0),
   fHcalIsolationCut(5.0),
-  fCombIsolationCut(-1.0),
+  fCombIsolationCut(0.1),
+  fPFIsolationCut(-1.0),
   fApplyConvFilterType1(kTRUE),
   fApplyConvFilterType2(kFALSE),
   fNWrongHitsMax(0),
@@ -226,8 +227,10 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kPFIso:
     {
       Double_t pfIsoCutValue = 9999;
-      if(fCombIsolationCut > 0){
-        pfIsoCutValue = fCombIsolationCut;
+      //if(fCombIsolationCut > 0){
+      if(fPFIsolationCut > 0){
+        //pfIsoCutValue = fCombIsolationCut;
+        pfIsoCutValue = fPFIsolationCut;
       } else {
         if (ele->SCluster()->AbsEta() < 1.479) {
           if (ele->Pt() > 20) {
@@ -253,7 +256,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       Double_t beta = IsolationTools::BetaE(tracks, ele, vertex, 0.0, 0.2, 0.3, 0.02); 
       if(beta == 0) beta = 1.0;
       Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, fNonIsolatedMuons, fNonIsolatedElectrons, 0.1, 1.0, 0.4, 0.0, 3, beta);
-      if (totalIso < (ele->Pt()*fCombIsolationCut) )
+      if (totalIso < (ele->Pt()*fPFIsolationCut) )
         isocut = kTRUE;
     }
     break;
