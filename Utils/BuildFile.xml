@@ -2,6 +2,7 @@
 <use   name="MitAna/DataUtil"/>
 <use   name="MitCommon/MathTools"/>
 <use   name="root"/>
+<use   name="roottmva"/>
 <export>
   <lib   name="1"/>
 </export>
