@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.96 2011/06/13 15:29:13 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.97 2011/06/14 11:08:36 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -42,6 +42,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fApplyConvFilterType2(kFALSE),
   fNWrongHitsMax(0),
   fNExpectedHitsInnerCut(999),
+  fInvertNExpectedHitsInnerCut(kFALSE),
   fCombinedIdCut(kFALSE),
   fApplySpikeRemoval(kTRUE),
   fApplyD0Cut(kTRUE),
@@ -389,8 +390,12 @@ void ElectronIDMod::Process()
     if (passConvVetoType2 == kFALSE) continue;
 
     // apply NExpectedHitsInner Cut
-    if(fNExpectedHitsInnerCut < 999 && 
+    if(fInvertNExpectedHitsInnerCut == kFALSE && fNExpectedHitsInnerCut < 999 && 
        e->CorrectedNExpectedHitsInner() > fNExpectedHitsInnerCut) continue;
+
+    // apply NExpectedHitsInner inverted Cut
+    if(fInvertNExpectedHitsInnerCut == kTRUE && fNExpectedHitsInnerCut < 999 && 
+       e->CorrectedNExpectedHitsInner() <= fNExpectedHitsInnerCut) continue;
 
     // apply d0 cut
     if (fApplyD0Cut) {

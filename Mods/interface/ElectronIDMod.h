@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.48 2011/06/10 10:42:36 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.49 2011/06/14 11:08:36 fabstoec Exp $
 //
 // ElectronIDMod
 //
@@ -67,7 +67,8 @@ namespace mithep
       Bool_t              GetCombinedIdCut()               const { return fCombinedIdCut;      }
       void                SetApplyConversionFilterType1(Bool_t b){ fApplyConvFilterType1 = b;  }
       void                SetApplyConversionFilterType2(Bool_t b){ fApplyConvFilterType2 = b;  }
-      void                SetNExpectedHitsInnerCut(Double_t cut) {fNExpectedHitsInnerCut = cut;}
+      void                SetNExpectedHitsInnerCut(Int_t cut)    { fNExpectedHitsInnerCut = cut;}
+      void                SetInvertNExpectedHitsInnerCut(Bool_t b){ fInvertNExpectedHitsInnerCut = b;}
       void                SetApplySpikeRemoval(Bool_t b)         { fApplySpikeRemoval  = b;    }
       void                SetApplyD0Cut(Bool_t b)                { fApplyD0Cut         = b;    }
       void                SetApplyDZCut(Bool_t b)                { fApplyDZCut         = b;    }
@@ -136,7 +137,8 @@ namespace mithep
       Bool_t                    fApplyConvFilterType2;   //whether remove conversions using DCotTheta method
       UInt_t                    fNWrongHitsMax;          //whether to use wrong hits req 
                                                          //for conversion removal
-      Double_t                  fNExpectedHitsInnerCut;  //cut value for NExpectedHitsInner maximum
+      Int_t                     fNExpectedHitsInnerCut;  //cut value for NExpectedHitsInner maximum
+      Bool_t                    fInvertNExpectedHitsInnerCut; //whether to invert NExpectedHitsInner cut
       Bool_t                    fCombinedIdCut;          //whether to use full combined id
       Bool_t                    fApplySpikeRemoval;      //whether spike removal
       Bool_t                    fApplyD0Cut;             //whether apply d0 cut
