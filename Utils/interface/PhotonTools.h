@@ -12,6 +12,7 @@
 #define MITPHYSICS_UTILS_PHOTONTOOLS_H
 
 #include "MitAna/DataTree/interface/Photon.h"
+#include "MitAna/DataTree/interface/TrackCol.h"
 #include "MitAna/DataTree/interface/Electron.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/BaseVertex.h"
@@ -63,6 +64,17 @@ namespace mithep {
       static DiphotonR9EtaCats DiphotonR9EtaCat(const Photon *p1, const Photon *p2);
       static DiphotonR9EtaConversionCats DiphotonR9EtaConversionCat(const Photon *p1, const Photon *p2, const DecayParticleCol *conversions, const BaseVertex *v);
       static CiCBaseLineCats CiCBaseLineCat(const Photon *p);
+
+      static const DecayParticle *MatchedCiCConversion(const Photon *p, const DecayParticleCol *conversions, 
+						       Double_t dPhiMin=0.1, Double_t dEtaMin=0.1);
+
+      static bool PassCiCSelection(Photon* ph, 
+				   const Vertex* vtx, 
+				   const TrackCol*    trackCol,
+				   const ElectronCol* eleCol,
+				   const VertexCol*   vtxCol,
+				   double rho, double ptmin,
+				   bool print = false, float* kin=NULL);
 
     ClassDef(PhotonTools, 0) // Muon tools
   };

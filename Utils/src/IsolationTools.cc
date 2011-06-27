@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.18 2011/05/20 13:25:40 mzanetti Exp $
+// $Id: IsolationTools.cc,v 1.19 2011/06/01 18:11:52 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -509,7 +509,7 @@ Double_t IsolationTools::TrackIsolationNoPV(const mithep::Particle* p, const Bas
 }
 
 
-Double_t IsolationTools::CiCTrackIsolation(const mithep::Particle* p, 
+Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p, 
 					   const BaseVertex* theVtx, 
 					   Double_t extRadius, 
 					   Double_t intRadius, 
@@ -518,7 +518,9 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Particle* p,
 					   Double_t maxD0,
 					   Double_t maxDZ,
 					   const mithep::Collection<mithep::Track> *tracks,
-					   const mithep::Collection<mithep::Vertex> *vtxs) {
+					   unsigned int* worstVtxIndex,
+					   const mithep::Collection<mithep::Vertex> *vtxs,
+					   bool print) {
   
   UInt_t numVtx = 1;
   const BaseVertex* iVtx = theVtx;
@@ -530,23 +532,103 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Particle* p,
       return 0.;
   }
   
+
+  if(print) {
+    std::cout<<" Testing photon with"<<std::endl;
+    std::cout<<"             Et  = "<<p->Et()<<std::endl;
+    std::cout<<"             Eta = "<<p->Eta()<<std::endl;
+    std::cout<<"             Phi = "<<p->Phi()<<std::endl;
+  }
+
   Double_t iIso = 0.;
   Double_t maxIso = 0.;
+  
+  if(worstVtxIndex)
+    *worstVtxIndex=0;
 
   for(UInt_t i=0; i<numVtx; ++i) {
+
+    if(i>0) iVtx = vtxs->At(i);
+
+
+    if(print) {
+      std::cout<<"   Vertex #"<<i<<std::endl;
+      std::cout<<"       with X = "<<iVtx->X()<<std::endl;
+      std::cout<<"       with Y = "<<iVtx->Y()<<std::endl;
+      std::cout<<"       with Z = "<<iVtx->Z()<<std::endl;
+    }
+
+    // compute the ph momentum with respect to this Vtx
+    FourVectorM phMom = p->MomVtx(iVtx->Position());
+
+    if(print) {
+      std::cout<<"         photon has changed to:"<<std::endl;
+      std::cout<<"             Et  = "<<phMom.Et()<<std::endl;
+      std::cout<<"             eta = "<<phMom.Eta()<<std::endl;
+      std::cout<<"             Phi = "<<phMom.Phi()<<std::endl;
+    }
+    
     iIso = 0.;
-    for(UInt_t i=0; i<tracks->GetEntries(); ++i) {
-      const Track* t = tracks->At(i);
+    for(UInt_t j=0; j<tracks->GetEntries(); ++j) {
+      const Track* t = tracks->At(j);
+
+      //Double_t dR   = MathUtils::DeltaR(t->Mom(),p->Mom());
+      //Double_t dEta = TMath::Abs(t->Eta()-p->Eta());
+
+      Double_t dR   = MathUtils::DeltaR(t->Mom(),phMom);
+      Double_t dEta = TMath::Abs(t->Eta()-phMom.Eta());
+
+      if(print) {
+	  std::cout<<"              passing track #"<<j<<std::endl;
+	  std::cout<<"                          pt = "<<t->Pt()<<std::endl;
+	  std::cout<<"                         eta = "<<t->Eta()<<std::endl;
+	  std::cout<<"                         phi = "<<t->Phi()<<std::endl;
+	  std::cout<<"                          d0 = "<<fabs(t->D0Corrected( *iVtx ))<<std::endl;
+	  std::cout<<"                          dZ = "<<fabs(t->DzCorrected( *iVtx ))<<std::endl;
+	  std::cout<<"                          dR = "<<dR<<std::endl;
+	  std::cout<<"                        dEta = "<<dEta<<std::endl;
+	  std::cout<<"                          vx = "<<t->X0()<<std::endl;
+	  std::cout<<"                          vy = "<<t->Y0()<<std::endl;
+	  std::cout<<"                          vz = "<<t->Z0()<<std::endl;
+      }
+
       if ( t->Pt() < ptLow ) continue;
       // only check for beamspot if available, otherwise ignore cut
       if ( fabs(t->D0Corrected( *iVtx )) > maxD0) continue;
       if ( fabs(t->DzCorrected( *iVtx )) > maxDZ) continue;
-      Double_t dR   = MathUtils::DeltaR(t->Mom(),p->Mom());
-      Double_t dEta = fabs(t->Eta()-p->Eta());
-      if(dR < extRadius && dR > intRadius && dEta > etaStrip) iIso += t->Pt();      
-    }
-    if ( iIso > maxIso ) maxIso = iIso;
-  }
-  return iIso;
-}
 
+
+      if(dR < extRadius && dR > intRadius && dEta > etaStrip) {
+	iIso += t->Pt();
+
+	if(print) {
+	  std::cout<<"              passing track #"<<j<<std::endl;
+	  std::cout<<"                          pt = "<<t->Pt()<<std::endl;
+	  std::cout<<"                         eta = "<<t->Eta()<<std::endl;
+	  std::cout<<"                         phi = "<<t->Phi()<<std::endl;
+	  std::cout<<"                          d0 = "<<fabs(t->D0Corrected( *iVtx ))<<std::endl;
+	  std::cout<<"                          dZ = "<<fabs(t->DzCorrected( *iVtx ))<<std::endl;
+	  std::cout<<"                          dR = "<<dR<<std::endl;
+	  std::cout<<"                        dEta = "<<dEta<<std::endl;
+	  std::cout<<"                          vx = "<<t->X0()<<std::endl;
+	  std::cout<<"                          vy = "<<t->Y0()<<std::endl;
+	  std::cout<<"                          vz = "<<t->Z0()<<std::endl;
+	  std::cout<<"                             new  tIso = "<<iIso<<std::endl;
+	}
+      }
+    }
+    if ( iIso > maxIso ) {
+      maxIso = iIso;
+      if(worstVtxIndex)
+	*worstVtxIndex=i;
+    }
+  }
+
+  if(print) {
+    if(worstVtxIndex)
+      std::cout<<"   max TrkIso is given by Vtx #"<<*worstVtxIndex<<" with an amount of tIso = "<<maxIso<<std::endl;
+    else
+      std::cout<<"   max TrkIso is given by Vtx #0 with an amount of tIso = "<<maxIso<<std::endl;
+  } 
+  return maxIso;
+}

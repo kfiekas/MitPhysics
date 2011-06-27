@@ -1,7 +1,8 @@
-// $Id: PhotonTools.cc,v 1.3 2011/04/21 15:07:40 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.4 2011/06/01 18:11:52 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
+#include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include <TFile.h>
 
@@ -54,13 +55,18 @@ Double_t PhotonTools::ElectronVetoCiC(const Photon *p, const ElectronCol *els) {
   
   for (UInt_t i=0; i<els->GetEntries(); ++i) {
     const Electron *e = els->At(i);
-    if (e->SCluster()==p->SCluster() && e->GsfTrk()->NExpectedHitsInner()==0)
-      return sqrt(pow(e->DeltaEtaSuperClusterTrackAtVtx(),2)+pow(e->DeltaPhiSuperClusterTrackAtVtx(),2));
-  }
-
-  return -100.;
+    if (e->SCluster()==p->SCluster() ) {
+      //if( e->GsfTrk()->NExpectedHitsInner()==0 && e->GsfTrk()->Pt() > 2.5 ) {
+      if( e->GsfTrk()->NExpectedHitsInner()==0 ) {
+	double dEta = e->DeltaEtaSuperClusterTrackAtVtx();
+	double dPhi = e->DeltaPhiSuperClusterTrackAtVtx();
+	double dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
+	return dR;
+      }
+    }
+  }  
+  return 99.;
 }
-
 
 //--------------------------------------------------------------------------------------------------
 Bool_t PhotonTools::PassElectronVetoConvRecovery(const Photon *p, const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v) {
@@ -186,4 +192,150 @@ PhotonTools::CiCBaseLineCats PhotonTools::CiCBaseLineCat(const Photon *p) {
     if ( p->R9() > 0.94 ) return kCiCCat3;
     else return kCiCCat4;
   }
+}
+
+//--------------------------------------------------------------------------------------------------
+const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const DecayParticleCol *conversions, 
+						       Double_t dPhiMin,
+						       Double_t dEtaMin) {
+  
+
+  
+  const DecayParticle *match = 0;
+  Double_t rhosmallest = 999.;
+  for (UInt_t i=0; i<conversions->GetEntries(); ++i) {
+    const DecayParticle *c = conversions->At(i);
+    ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
+    Double_t dphi = MathUtils::DeltaPhi(*c,dirconvsc);
+    Double_t deta = c->Eta()-dirconvsc.Eta();
+    Double_t rho = c->Position().Rho();
+    if (dphi<dPhiMin && TMath::Abs(deta)<dEtaMin && rho<rhosmallest) {
+      rhosmallest = rho;
+      match = c;
+    }
+    
+  }
+  
+  return match;
+  
+}
+
+bool PhotonTools::PassCiCSelection(Photon* ph, const Vertex* vtx, 
+				   const TrackCol* trackCol,
+				   const ElectronCol* eleCol,
+				   const VertexCol* vtxCol,
+				   double rho, double ptmin, 
+				   bool print, float* kin) {
+  
+  // these values are taken from the H2GGlobe code... (actually from Marco/s mail)
+  float cic4_allcuts_temp_sublead[] = { 
+    3.8,         2.2,         1.77,        1.29,
+    11.7,        3.4,         3.9,         1.84,
+    3.5,         2.2,         2.3,         1.45,
+    0.0106,      0.0097,      0.028,       0.027,
+    0.082,       0.062,       0.065,       0.048,
+    0.94,        0.36,        0.94,        0.32,
+    1.,          0.062,       0.97,        0.97,
+    1.5,         1.5,         1.5,         1.5 };  // the last line is PixelmatchVeto and un-used
+  
+  // cut on Et instead of Pt???    
+  Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
+    
+  // compute all relevant observables first
+  double ecalIso3 = ph->EcalRecHitIsoDr03();
+  double ecalIso4 = ph->EcalRecHitIsoDr04();
+  double hcalIso4 = ph->HcalTowerSumEtDr04();
+
+  unsigned int wVtxInd = 0;
+
+  double trackIso1 = IsolationTools::CiCTrackIsolation(ph, vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol);
+
+  // track iso only
+  double trackIso3 = IsolationTools::CiCTrackIsolation(ph, vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol);
+
+  // track iso worst vtx
+  double trackIso2 = IsolationTools::CiCTrackIsolation(ph, vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, &wVtxInd, vtxCol);
+  
+  double combIso1 = ecalIso3+hcalIso4+trackIso1 - 0.17*rho;
+  double combIso2 = ecalIso4+hcalIso4+trackIso2 - 0.52*rho;
+  
+  double tIso1 = (combIso1) *50./ph->Et();
+  double tIso2 = (combIso2) *50./(ph->MomVtx(vtxCol->At(wVtxInd)->Position()).Pt());
+  //double tIso2 = (combIso2) *50./ph->Et();
+  double tIso3 = (trackIso3)*50./ph->Et();
+  
+  double covIEtaIEta  =ph->CoviEtaiEta();
+  double HoE = ph->HadOverEm();
+  
+  double R9 = ph->R9();
+  
+  double dRTrack = PhotonTools::ElectronVetoCiC(ph, eleCol);
+
+  // check which category it is ...
+  int _tCat = 1;
+  if ( !isbarrel ) _tCat = 3;
+  if ( R9 < 0.94 ) _tCat++;
+  
+  if(print) {
+    std::cout<<" -------------------------- "<<std::endl;
+    std::cout<<" photon Et  = "<<ph->Et()<<std::endl;
+    std::cout<<"        Eta = "<<ph->SCluster()->Eta()<<std::endl;
+    std::cout<<"        HoE = "<<HoE<<std::endl;
+    std::cout<<"         R9 = "<<R9<<std::endl;
+    std::cout<<"         dR = "<<dRTrack<<std::endl;
+    std::cout<<"       iso1 = "<<tIso1<<std::endl; 
+    std::cout<<"       iso2 = "<<tIso2<<std::endl; 
+    std::cout<<"       iso3 = "<<tIso3<<std::endl; 
+  }
+
+  if(kin) {
+    kin[0] = tIso1;
+    kin[1] = tIso2;
+    kin[2] = tIso3;
+    kin[3] = covIEtaIEta;
+    kin[4] = HoE;
+    kin[5] = R9;
+    kin[6] = dRTrack;
+    kin[7] = (float) ph->Pt();
+    kin[8] = (float) ph->Eta();
+    kin[9] = (float) ph->Phi();
+
+    // iso quantities separate
+    kin[10] = ecalIso3;
+    kin[11] = ecalIso4;
+    kin[12] = hcalIso4;
+    kin[13] = trackIso1;
+    kin[14] = trackIso2;
+    kin[15] = trackIso3;
+
+    kin[16] = (float) ph->Et();
+    kin[17] = (float) ph->E();
+
+  }
+
+  float passCuts = 1.;
+
+  if ( ph->Pt()     <= ptmin      ) passCuts = -1.;
+
+  // not needed anymore, do in pre-selection...
+  //if (  ph->SCluster()->AbsEta()>=2.5 || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566)) passCuts = -1.;
+  
+  if(   ! (    tIso1                          < cic4_allcuts_temp_sublead[_tCat-1+0*4]
+	       && tIso2                       < cic4_allcuts_temp_sublead[_tCat-1+1*4]
+	       && tIso3                       < cic4_allcuts_temp_sublead[_tCat-1+2*4]
+	       && covIEtaIEta                 < cic4_allcuts_temp_sublead[_tCat-1+3*4]
+	       && HoE                         < cic4_allcuts_temp_sublead[_tCat-1+4*4]
+	       && R9                          > cic4_allcuts_temp_sublead[_tCat-1+5*4]
+	       && dRTrack                     > cic4_allcuts_temp_sublead[_tCat-1+6*4]  )
+	) {
+    passCuts = -1.;
+  }
+  
+  if(kin) {    
+    kin[18] = passCuts;
+    kin[19] = (float) _tCat;
+  }    
+
+  if(passCuts > 0.) return true;
+  return false;
 }

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonCiCMod.h,v 1.18 2011/05/18 14:01:18 bendavid Exp $
+// $Id: PhotonCiCMod.h,v 1.1 2011/06/01 18:11:52 fabstoec Exp $
 //
 // PhotonCiCMod
 //
@@ -20,6 +20,9 @@
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/DecayParticleCol.h"
+
+class TNtuple;
 
 namespace mithep 
 {
@@ -45,11 +48,12 @@ namespace mithep
       void                SetPtMin(Double_t pt)             { fPhotonPtMin     = pt;       }
       void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax       = x;	   }
 
-      void                     SetPVName  (TString s) {fPVName   = s; fPVFromBranch   = false;};
+      void                SetPVName  (TString s) {fPVName   = s; fPVFromBranch   = false;};
 
     protected:
       void                Process();
       void                SlaveBegin();
+      unsigned int        findBestVertex(Photon* ph1, Photon* ph2, const BaseVertex* bsp, bool print=false);
 
       TString             fPhotonBranchName;     //name of photon collection (input)
       TString             fGoodPhotonsName;      //name of exported "good photon" collection
@@ -67,6 +71,14 @@ namespace mithep
       TString fPVName;
       const VertexCol *fPV;
       Bool_t fPVFromBranch;
+
+      const DecayParticleCol *fConversions;
+      TString fConversionName;
+
+      const BeamSpotCol *fBeamspot;
+
+
+      TNtuple* hCiCTuple;
 
     ClassDef(PhotonCiCMod, 1) // Photon identification module
   };

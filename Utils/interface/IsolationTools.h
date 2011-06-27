@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.16 2011/05/20 13:25:40 mzanetti Exp $
+// $Id: IsolationTools.h,v 1.17 2011/06/01 18:11:52 fabstoec Exp $
 //
 // IsolationTools
 //
@@ -13,6 +13,7 @@
 
 #include <TMath.h>
 #include "MitAna/DataTree/interface/Track.h"
+#include "MitAna/DataTree/interface/Photon.h"
 #include "MitAna/DataTree/interface/BasicCluster.h"
 #include "MitAna/DataTree/interface/SuperCluster.h"
 #include "MitAna/DataTree/interface/CaloTower.h"
@@ -73,7 +74,7 @@ namespace mithep
                                          const mithep::DecayParticleCol *conversions = 0);
 
       // methods for Hgg BaseLien Selection. These isoaltion are stupid, but what can we do.... ;(
-      static Double_t CiCTrackIsolation(const mithep::Particle*, 
+      static Double_t CiCTrackIsolation(const mithep::Photon*, 
 					const BaseVertex*, 
 					Double_t extRadius, 
 					Double_t intRadius, 
@@ -82,7 +83,9 @@ namespace mithep
 					Double_t maxD0,
 					Double_t maxDZ,
 					const mithep::Collection<mithep::Track> *tracks,
-					const mithep::Collection<mithep::Vertex> *vtxs = NULL);
+					unsigned int* worstVtxIdx = NULL,
+					const mithep::Collection<mithep::Vertex> *vtxs = NULL,
+					bool print=false);
 
 
     ClassDef(IsolationTools, 0) // Isolation tools
