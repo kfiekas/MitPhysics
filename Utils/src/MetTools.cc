@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.6 2011/04/25 21:24:53 ceballos Exp $
+// $Id: MetTools.cc,v 1.7 2011/05/13 08:27:16 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -207,7 +207,7 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
     if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()){
       bool isElectronTrack = false;
       for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
-	if ( (fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
+	if ( (fElectrons->At(m)->HasTrackerTrk() and fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
 	     (fElectrons->At(m)->HasGsfTrk() and fElectrons->At(m)->GsfTrk() == fPFCandidates->At(i)->GsfTrk()) ) {
 	  isElectronTrack = true;
 	  break;
@@ -270,7 +270,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       
       bool isElectronTrack = false;
       for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
-	if ( (fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
+	if ( (fElectrons->At(m)->HasTrackerTrk() and fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
 	     (fElectrons->At(m)->HasGsfTrk() and fElectrons->At(m)->GsfTrk() == fPFCandidates->At(i)->GsfTrk()) ) {
 	  isElectronTrack = true;
 	  break;
@@ -353,7 +353,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       
       bool isElectronTrack = false;
       for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
-	if ( (fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
+	if ( (fElectrons->At(m)->HasTrackerTrk() and fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
 	     (fElectrons->At(m)->HasGsfTrk() and fElectrons->At(m)->GsfTrk() == fPFCandidates->At(i)->GsfTrk()) ) {
 	  isElectronTrack = true;
 	  break;
