@@ -1,4 +1,4 @@
-// $Id: GoodPVFilterMod.cc,v 1.7 2011/04/26 19:01:33 bendavid Exp $
+// $Id: GoodPVFilterMod.cc,v 1.8 2011/06/13 20:15:19 sixie Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
@@ -122,7 +122,19 @@ void GoodPVFilterMod::Process()
   //fill histograms
   hNVtx->Fill(fVertexes->GetEntries());
   hNGoodVtx->Fill(GoodVertexes->GetEntries());
-  if (fIsMC) hNGenVtx->Fill(1 + fPileupInfo->At(0)->GetPU_NumInteractions());
+  if (fIsMC) {
+    Int_t npu = -99;
+    for (UInt_t i=0; i<fPileupInfo->GetEntries(); ++i) {
+      const PileupInfo *puinfo = fPileupInfo->At(i);
+      if (puinfo->GetBunchCrossing()==0) {
+        npu = puinfo->GetPU_NumInteractions();
+        break;
+      }
+    }
+    
+    hNGenVtx->Fill(1 + npu);
+    hNPU->Fill(npu);
+  }
 
   // add objects for other modules to use
   AddObjThisEvt(GoodVertexes);  
@@ -168,8 +180,12 @@ void GoodPVFilterMod::SlaveBegin()
   hNGoodVtx = new TH1F("hNGoodVtx", "hNGoodVtx", 51, -0.5, 50.5);
   AddOutput(hNGoodVtx);   
   
-  hNGenVtx = new TH1F("hNGenVtx", "hNGenVtx", 51, -0.5, 50.5);
+  hNGenVtx = new TH1D("hNGenVtx", "hNGenVtx", 51, -0.5, 50.5);
   AddOutput(hNGenVtx);      
+
+  hNPU = new TH1D("hNPU", "hNPU", 51, -0.5, 50.5);
+  AddOutput(hNPU);      
+  
   
 }
 

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GoodPVFilterMod.h,v 1.5 2011/04/26 19:01:32 bendavid Exp $
+// $Id: GoodPVFilterMod.h,v 1.6 2011/05/27 14:16:59 bendavid Exp $
 //
 // GoodPVFilterMod
 //
@@ -80,7 +80,8 @@ namespace mithep
       TH1F                       *hVertexZ;
       TH1F                       *hNVtx;
       TH1F                       *hNGoodVtx;
-      TH1F                       *hNGenVtx;
+      TH1D                       *hNGenVtx;
+      TH1D                       *hNPU;
 
     ClassDef(GoodPVFilterMod, 1) // L1 TAM module
   };
