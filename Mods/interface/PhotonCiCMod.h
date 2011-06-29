@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonCiCMod.h,v 1.1 2011/06/01 18:11:52 fabstoec Exp $
+// $Id: PhotonCiCMod.h,v 1.2 2011/06/27 12:32:53 fabstoec Exp $
 //
 // PhotonCiCMod
 //
@@ -76,7 +76,11 @@ namespace mithep
       TString fConversionName;
 
       const BeamSpotCol *fBeamspot;
-
+     
+      Double_t fDataEnCorr_EB_hR9;
+      Double_t fDataEnCorr_EB_lR9;
+      Double_t fDataEnCorr_EE_hR9;
+      Double_t fDataEnCorr_EE_lR9;
 
       TNtuple* hCiCTuple;
 

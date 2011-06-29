@@ -32,7 +32,12 @@ PhotonCiCMod::PhotonCiCMod(const char *name, const char *title) :
   fConversions(0),
   fConversionName(Names::gkMvfConversionBrn),
 
-  fBeamspot(0)
+  fBeamspot(0),
+
+  fDataEnCorr_EB_hR9(0.0049),
+  fDataEnCorr_EB_lR9(0.0011),
+  fDataEnCorr_EE_hR9(0.0057),
+  fDataEnCorr_EE_lR9(0.0039)
 
 {
   // Constructor.
@@ -58,9 +63,9 @@ void PhotonCiCMod::Process()
   LoadBranch("BeamSpot");
   
   if(fPileUpDen->GetEntries() > 0)
-    _tRho = (Double_t) fPileUpDen->At(0)->Rho();    
-  
-  _tRho = 0.;
+    _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
+
+  //_tRho = 0.;
 
   bool doVtxSelection = true;
 
@@ -74,7 +79,6 @@ void PhotonCiCMod::Process()
 
   Float_t _runNum  = (Float_t) evtHead->RunNum();
   Float_t _lumiSec = (Float_t) evtHead->LumiSec();
-
 
   unsigned int numVertices = fPV->GetEntries();
 
@@ -170,6 +174,8 @@ void PhotonCiCMod::Process()
     fixPhFst[iPair] = new Photon(*preselPh->At(idxFst[iPair]));
     fixPhSec[iPair] = new Photon(*preselPh->At(idxSec[iPair]));
 
+    // if this is Data, scale the energy...
+
     // store the vertex for this pair (TODO: conversion Vtx)
     if(doVtxSelection) {
       unsigned int iVtx = findBestVertex(fixPhFst[iPair],fixPhSec[iPair],bsp, print);
@@ -237,7 +243,8 @@ void PhotonCiCMod::Process()
   Float_t _ptgg = ( doFill ? (phHard->Mom()+phSoft->Mom()).Pt() : -100.);
 
 
-  Float_t fillEvent[] = { _mass,
+  Float_t fillEvent[] = { _tRho,
+			  _mass,
 			  _ptgg,
 			  _evtNum1,
 			  _evtNum2,
@@ -310,7 +317,7 @@ void PhotonCiCMod::SlaveBegin()
   ReqBranch("BeamSpot",fBeamspot);
 
 
-  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ivtx:npairs:ph1Iso1:ph1Iso2:ph1Iso3:ph1Cov:ph1HoE:ph1R9:ph1DR:ph1Pt:ph1Eta:ph1Phi:ph1Eiso3:ph1Eiso4:ph1Hiso4:ph1TisoA:ph1TisoW:ph1Tiso:ph1Et:ph1E:ph1Pass:ph1Cat:ph2Iso1:ph2Iso2:ph2Iso3:ph2Cov:ph2HoE:ph2R9:ph2DR:ph2Pt:ph2Eta:ph2Phi:ph2Eiso3:ph2Eiso4:ph2Hiso4:ph2TisoA:ph2TisoW:ph2Tiso:ph2Et:ph2E:ph2Pass:ph2Cat:ph1UPt:ph2UPt");
+  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","rho:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ivtx:npairs:ph1Iso1:ph1Iso2:ph1Iso3:ph1Cov:ph1HoE:ph1R9:ph1DR:ph1Pt:ph1Eta:ph1Phi:ph1Eiso3:ph1Eiso4:ph1Hiso4:ph1TisoA:ph1TisoW:ph1Tiso:ph1Et:ph1E:ph1Pass:ph1Cat:ph2Iso1:ph2Iso2:ph2Iso3:ph2Cov:ph2HoE:ph2R9:ph2DR:ph2Pt:ph2Eta:ph2Phi:ph2Eiso3:ph2Eiso4:ph2Hiso4:ph2TisoA:ph2TisoW:ph2Tiso:ph2Et:ph2E:ph2Pass:ph2Cat:ph1UPt:ph2UPt");
   
   AddOutput(hCiCTuple);
 
@@ -487,14 +494,17 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
   // check if there's a conversion among the pre-selected photons
   const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, fConversions);
   const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, fConversions);
-    
+  if( conv1 && conv1->Prob() < 0.0005) conv1 = NULL;
+  if( conv2 && conv2->Prob() < 0.0005) conv2 = NULL;
+
   double zconv  = 0.;
   double dzconv = 0.;
   if(conv1 || conv2) {
     if( conv1 ){
-      const mithep::ThreeVector caloPos1(ph1->SCluster()->Point());
+      //const mithep::ThreeVector caloPos1(ph1->SCluster()->Point());
+      const mithep::ThreeVector caloPos1(ph1->CaloPos());
       zconv  = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
-      if( ph1->SCluster()->AbsEta() < 1.5 ) {
+      if( ph1->IsEB() ) {
 	double rho = conv1->Position().Rho();
 	if     ( rho < 15. ) dzconv = 0.06;
 	else if( rho < 60. ) dzconv = 0.67;
@@ -506,9 +516,10 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 	else                 dzconv = 0.99;
       }
     } else if( !conv1 ) {
-      const mithep::ThreeVector caloPos2(ph2->SCluster()->Point());
+      //const mithep::ThreeVector caloPos2(ph2->SCluster()->Point());
+      const mithep::ThreeVector caloPos2(ph2->CaloPos());
       zconv  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
-      if( ph2->SCluster()->AbsEta() < 1.5 ) {
+      if( ph2->IsEB() ) {
 	double rho = conv2->Position().Rho();
 	if     ( rho < 15. ) dzconv = 0.06;
 	else if( rho < 60. ) dzconv = 0.67;
@@ -520,10 +531,11 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 	else                 dzconv = 0.99;
       }
     } else {
-      const mithep::ThreeVector caloPos1(ph1->SCluster()->Point());
+      //const mithep::ThreeVector caloPos1(ph1->SCluster()->Point());
+      const mithep::ThreeVector caloPos1(ph1->CaloPos());
       double z1  = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
       double dz1 = 0.;
-      if( ph1->SCluster()->AbsEta() < 1.5 ) {
+      if( ph1->IsEB() ) {
 	double rho = conv1->Position().Rho();
 	if     ( rho < 15. ) dz1 = 0.06;
 	else if( rho < 60. ) dz1 = 0.67;
@@ -534,10 +546,11 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 	else if( z < 100.)   dz1 = 0.61;
 	else                 dz1 = 0.99;
       }
-      const mithep::ThreeVector caloPos2(ph2->SCluster()->Point());
+      //const mithep::ThreeVector caloPos2(ph2->SCluster()->Point());
+      const mithep::ThreeVector caloPos2(ph2->CaloPos());
       double z2  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
       double dz2 = 0.;
-      if( ph2->SCluster()->AbsEta() < 1.5 ) {
+      if( ph2->IsEB() ) {
 	double rho = conv2->Position().Rho();
 	if     ( rho < 15. ) dz2 = 0.06;
 	else if( rho < 60. ) dz2 = 0.67;
@@ -551,23 +564,21 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
       zconv  = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
       dzconv = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
     }
-  }
-
-      
-  // loop over all ranked Vertices and choose the closest to the Conversion one
-  int maxVertices = ( ptgg > 30 ? 3 : 5);
-  double minDz = -1;    
-  for(unsigned int iVtx =0; iVtx < numVertices && (int) iVtx < maxVertices; ++iVtx) {
-    if(total_rank[iVtx] < maxVertices) {
-      const Vertex* tVtx = fPV->At(iVtx);
-      double tDz = TMath::Abs(zconv - tVtx->Z());
-      if( (minDz < 0. || tDz < minDz) && tDz < dzconv ) {
-	minDz = tDz;
-	bestIdx = iVtx;
+    
+    // loop over all ranked Vertices and choose the closest to the Conversion one
+    int maxVertices = ( ptgg > 30 ? 3 : 5);
+    double minDz = -1;    
+    for(unsigned int iVtx =0; iVtx < numVertices && (int) iVtx < maxVertices; ++iVtx) {
+      if(total_rank[iVtx] < maxVertices) {
+	const Vertex* tVtx = fPV->At(iVtx);
+	double tDz = TMath::Abs(zconv - tVtx->Z());
+	if( (minDz < 0. || tDz < minDz) && tDz < dzconv ) {
+	  minDz = tDz;
+	  bestIdx = iVtx;
+	}
       }
     }
   }
-
 
 
   return bestIdx;

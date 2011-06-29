@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.4 2011/06/01 18:11:52 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.5 2011/06/27 12:32:21 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -200,24 +200,67 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
 						       Double_t dEtaMin) {
   
 
+  const DecayParticle *match = NULL;
+
+  double minDeta = 999.;
+  double minDphi = 999.;
+
+  double phPhi = p->SCluster()->Phi();
+  double phEta = p->SCluster()->Eta();
   
-  const DecayParticle *match = 0;
-  Double_t rhosmallest = 999.;
   for (UInt_t i=0; i<conversions->GetEntries(); ++i) {
     const DecayParticle *c = conversions->At(i);
-    ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
-    Double_t dphi = MathUtils::DeltaPhi(*c,dirconvsc);
-    Double_t deta = c->Eta()-dirconvsc.Eta();
-    Double_t rho = c->Position().Rho();
-    if (dphi<dPhiMin && TMath::Abs(deta)<dEtaMin && rho<rhosmallest) {
-      rhosmallest = rho;
-      match = c;
-    }
+
+    if(c->Pt()   < 1. )    continue; // is this refittedPirMomentum?
+
+    //ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
+    //ThreeVector dirconvsc = p->CaloPos() - c->Position();
+
+    double convPhi = c->Phi();
+    double convEta = c->Eta();
+
+    const ThreeVector wrong(0,0,0);
+    double Zvertex = c->DzCorrected(wrong);
+    // ------------------ FROM GLOBE ----------------------
+    //---Definitions for ECAL
+    const float R_ECAL           = 136.5;
+    const float Z_Endcap         = 328.0;
+    const float etaBarrelEndcap  = 1.479; 
+   
+    //---ETA correction
+    float Theta = 0.0  ; 
+    float ZEcal = R_ECAL*sinh(convEta)+Zvertex;
+
+    if(ZEcal != 0.0) Theta = TMath::ATan(R_ECAL/ZEcal);
+    if(Theta<0.0) Theta = Theta+M_PI;
+    double fEta = - TMath::Log(TMath::Tan(0.5*Theta));
     
+    if( fabs(fEta) > etaBarrelEndcap ) {
+      float Zend = Z_Endcap ;
+      if(convEta<0.0 )  Zend = -Zend ;
+      float Zlen = Zend - Zvertex ;
+      float RR = Zlen/TMath::SinH(convEta); 
+      Theta = TMath::ATan(RR/Zend);
+      if(Theta<0.0) Theta = Theta+M_PI;
+      fEta = -TMath::Log(TMath::Tan(0.5*Theta));	      
+    } 
+    convEta = fEta;
+    // ---------------------------------------------------
+
+    Double_t dphi = TMath::Abs(phPhi - convPhi);
+    if(dphi > M_PI) dphi = 2.*M_PI-dphi;
+    //Double_t deta = c->Eta()-dirconvsc.Eta();
+    Double_t deta = TMath::Abs(convEta-phEta);
+    if (dphi<dPhiMin && TMath::Abs(deta)<dEtaMin) {
+      if(dphi < minDphi && TMath::Abs(deta)<minDeta) {
+	minDphi = dphi;
+	minDeta = TMath::Abs(deta);
+	match = c;
+      }
+    } 
   }
   
-  return match;
-  
+  return match;  
 }
 
 bool PhotonTools::PassCiCSelection(Photon* ph, const Vertex* vtx, 
