@@ -27,6 +27,7 @@
 
 namespace mithep {
   typedef std::vector<double> VertexZarray; 
+  typedef std::vector<const Track*> TrackArray;
 
   class VertexTools {
   public:
@@ -45,6 +46,9 @@ namespace mithep {
 		       const BaseVertex  *fBeamSpot, FourVector diboso);
     
     static double VertexWidth(const Vertex*,  const BaseVertex* );
+
+    static void BanThisTrack(const Track*);
+    static void Reset();
     
     static VertexTools* instance(const char* str){
       if(meobject == NULL){
@@ -62,6 +66,8 @@ namespace mithep {
     VertexTools();
     VertexTools(const char* str);
     TString relname;
+    TrackArray excluded;
+    
 
     ClassDef(VertexTools, 0) // Muon tools
       };

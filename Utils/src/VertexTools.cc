@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.1 2011/05/16 13:26:48 bendavid Exp $
+// $Id: VertexTools.cc,v 1.2 2011/06/16 02:53:02 maxi Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -33,9 +33,10 @@ VertexTools::VertexTools(const char* str)
 
 double VertexTools::NewMass(const Photon* ph1, const Photon* ph2, const BaseVertex* vert)
 {
-  ThreeVector drv1 = (ThreeVector(ph1->SCluster()->Point()) - vert->Position()).Unit();
+  ThreeVector drv1 = (ThreeVector(ph1->CaloPos()) - vert->Position()).Unit();
+  //ThreeVector drv1 = (ThreeVector(ph1->SCluster()->Point()) - vert->Position()).Unit();
   FourVector pho1c(drv1.X()*ph1->E(),drv1.Y()*ph1->E(),drv1.Z()*ph1->E(),ph1->E());
-  ThreeVector drv2 = (ThreeVector(ph2->SCluster()->Point()) - vert->Position()).Unit();
+  ThreeVector drv2 = (ThreeVector(ph2->CaloPos()) - vert->Position()).Unit();
   FourVector pho2c(drv2.X()*ph2->E(),drv2.Y()*ph2->E(),drv2.Z()*ph2->E(),ph2->E());
 
   FourVector diboso = pho1c+pho2c;
@@ -113,6 +114,7 @@ double VertexTools::Prob(const PFCandidateCol *fPFJets, double zpos,
   
   Vertex* vert = new Vertex(0,0,zpos);
   double ZVC = vert->Z()-fBeamSpot->Z();
+  VertexTools* vtool = VertexTools::instance("");
   
   Double_t sinsum = 0.;
   Double_t cossum = 0.;
@@ -138,6 +140,10 @@ double VertexTools::Prob(const PFCandidateCol *fPFJets, double zpos,
     if(fabs(t->DzCorrected(*fBeamSpot) - ZVC ) > 0.2) continue;
     
     if(pfca->Pt()<0.3 || pfca->Pt()>200) continue;
+
+    std::vector<const Track*>::iterator itt;
+    itt = find ((vtool->excluded).begin(), (vtool->excluded).end(), t);
+    if(itt != (vtool->excluded).end()) continue;
     
     zmean = zmean + pfca->Pt()* t->DzCorrected(*fBeamSpot);
     zmeansq = zmeansq + pfca->Pt()*t->DzCorrected(*fBeamSpot)*t->DzCorrected(*fBeamSpot);
@@ -170,6 +176,10 @@ double VertexTools::Prob(const PFCandidateCol *fPFJets, double zpos,
     if(fabs(t->DzCorrected(*fBeamSpot) - ZVC ) > 0.2) continue;
     //if(fabs(t->DzCorrected(*fBeamSpot) - ZVC ) > 3*zwidth) continue;
     if(pfca->Pt()<0.3 || pfca->Pt()>200) continue;
+
+    std::vector<const Track*>::iterator itt;
+    itt = find ((vtool->excluded).begin(), (vtool->excluded).end(), t);
+    if(itt != (vtool->excluded).end()) continue;
     
     //Float_t phid = phim - t->Phi();
     Float_t phid = bosophi+3.14 - t->Phi();
@@ -189,7 +199,6 @@ double VertexTools::Prob(const PFCandidateCol *fPFJets, double zpos,
   Double_t A3n = ntplus > 0 ? bdplus/ntplus : 0.;
   //-------------------
   Double_t angle = 180/3.14*TVector2::Phi_0_2pi(bosophi-phim);
-  VertexTools* vtool = VertexTools::instance("");
   
   vtool->tmvar1 = ntrks;
   vtool->tmvar2 = sumpt;
@@ -228,4 +237,13 @@ double VertexTools::VertexWidth(const Vertex* vert,  const BaseVertex  *fBeamSpo
   width = sqrt(zmeansq/ww - zmean*zmean);
   return width;
   
+}
+
+void VertexTools::BanThisTrack(const Track* track){
+  VertexTools* vtool = VertexTools::instance("");
+  (vtool->excluded).push_back(track);
+}
+void VertexTools::Reset(){
+  VertexTools* vtool = VertexTools::instance("");
+  (vtool->excluded).clear();
 }
