@@ -408,9 +408,9 @@ Int_t GeneratorTools::CategorizeFakeElectron(const mithep::MCParticle *matchedSi
           FakeCategory = 6; //prompt photon -> conversion
         } else if ((Ancestor->AbsPdgId() >= 400 && 
                     Ancestor->AbsPdgId() < 600) ||
-                   (Ancestor->AbsPdgId() >= 4000 && 
+                   ((Ancestor->AbsPdgId() >= 4000 && 
                     Ancestor->AbsPdgId() < 6000) &&
-                   Ancestor->HasDaughter(11)) {
+                   Ancestor->HasDaughter(11))) {
           FakeCategory = 4; //heavy flavor 
         } else if (Ancestor->AbsPdgId() == 24 || Ancestor->AbsPdgId() == 23) {
           FakeCategory = 5;
@@ -625,9 +625,9 @@ Int_t GeneratorTools::CategorizeFakeMuon(const mithep::MCParticle *matchedSimCha
           FakeCategory = 2; //K+ decay in flight
         } else if ((Ancestor->AbsPdgId() >= 400 && 
                     Ancestor->AbsPdgId() < 600) ||
-                   (Ancestor->AbsPdgId() >= 4000 && 
+                  ((Ancestor->AbsPdgId() >= 4000 && 
                     Ancestor->AbsPdgId() < 6000) &&
-                   Ancestor->HasDaughter(13)) {
+                    Ancestor->HasDaughter(13))) {
           FakeCategory = 4; //heavy flavor semileptonic decay
         } else if ( Ancestor->AbsPdgId() == 24 || Ancestor->AbsPdgId() == 23 ) {
           FakeCategory = 7; //comes from real muon. bad global fit direction
