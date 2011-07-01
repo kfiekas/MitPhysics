@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.38 2010/09/27 15:49:23 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.39 2010/11/08 14:20:24 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -48,6 +48,8 @@ namespace mithep
       void                 SetIsData(Bool_t b)	               { fIsData           = b; }	 
       void                 SetApplyISRFilter(Bool_t b)	       { fApplyISRFilter   = b; }	 
       void                 SetApplyWWFilter(Bool_t b)	       { fApplyWWFilter    = b; }	 
+      void                 SetApplyWZFilter(Bool_t b)	       { fApplyWZFilter    = b; }	 
+      void                 SetApplyZZFilter(Bool_t b)	       { fApplyZZFilter    = b; }	 
       void                 SetCopyArrays(Bool_t b)	       { fCopyArrays       = b; }	 
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
@@ -102,6 +104,8 @@ namespace mithep
       Double_t             fMassMaxCut;	        //mass max for given PdgId particle
       Bool_t               fApplyISRFilter;     //=true then apply ISR filter (def=0)
       Bool_t               fApplyWWFilter;      //=true then apply WW filter (def=0)
+      Bool_t               fApplyWZFilter;      //=true then apply WZ filter (def=0)
+      Bool_t               fApplyZZFilter;      //=true then apply ZZ filter (def=0)
       const MCParticleCol *fParticles;	        //!MCParticle branch
       TH1D                *hDGenPtMin;          //!histo for Pt min for leptons from W/Z
       TH1D                *hDGenMet[10];        //!histos for gen MET

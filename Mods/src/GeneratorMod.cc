@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.63 2010/11/08 14:20:24 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.64 2011/02/05 05:48:09 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -42,6 +42,8 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fMassMaxCut(FLT_MAX),
   fApplyISRFilter(kFALSE),
   fApplyWWFilter(kFALSE),
+  fApplyWZFilter(kFALSE),
+  fApplyZZFilter(kFALSE),
   fParticles(0)
 {
   // Constructor
@@ -1098,7 +1100,14 @@ void GeneratorMod::Process()
   }
 
   // Apply WW filter (without filling all histograms)
-  if (fApplyWWFilter == kTRUE && sumV[0] + 4*sumV[1] != 2) {
+  Bool_t passVVFilter = kFALSE;
+  if ( (fApplyWWFilter == kTRUE && sumV[0] + 4*sumV[1] == 2 )
+       ||
+       (fApplyWZFilter == kTRUE && sumV[0] + 4*sumV[1] == 6 )
+       ||
+       (fApplyZZFilter == kTRUE && sumV[0] + 4*sumV[1] == 8 )
+    ) passVVFilter = kTRUE;
+  if (!passVVFilter) {
     SkipEvent();
     return;
   }
