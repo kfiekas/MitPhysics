@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonCiCMod.h,v 1.2 2011/06/27 12:32:53 fabstoec Exp $
+// $Id: PhotonCiCMod.h,v 1.3 2011/06/29 18:28:05 fabstoec Exp $
 //
 // PhotonCiCMod
 //
@@ -21,8 +21,11 @@
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
+#include "MitAna/DataTree/interface/PileupInfoCol.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
 
 class TNtuple;
+class TRandom3;
 
 namespace mithep 
 {
@@ -31,6 +34,8 @@ namespace mithep
     public:
       PhotonCiCMod(const char *name="PhotonCiCMod", 
                   const char *title="Photon identification module");
+
+      ~PhotonCiCMod();
 
       Bool_t              GetApplySpikeRemoval()      const { return fApplySpikeRemoval;   }
       const char         *GetGoodName()               const { return GetGoodPhotonsName(); }   
@@ -49,6 +54,10 @@ namespace mithep
       void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax       = x;	   }
 
       void                SetPVName  (TString s) {fPVName   = s; fPVFromBranch   = false;};
+
+      void                SetIsData (Bool_t b) { fIsData = b;};
+
+      double findHiggsPt();
 
     protected:
       void                Process();
@@ -82,7 +91,22 @@ namespace mithep
       Double_t fDataEnCorr_EE_hR9;
       Double_t fDataEnCorr_EE_lR9;
 
+      Double_t fMCSmear_EB_hR9;
+      Double_t fMCSmear_EB_lR9;
+      Double_t fMCSmear_EE_hR9;
+      Double_t fMCSmear_EE_lR9;
+
+      Bool_t fIsData;
+
       TNtuple* hCiCTuple;
+
+      TRandom3* rng;
+
+      TString fMCParticleName;
+      const MCParticleCol* fMCParticles;
+
+      TString                  fPileUpName;
+      const PileupInfoCol     *fPileUp;
 
     ClassDef(PhotonCiCMod, 1) // Photon identification module
   };

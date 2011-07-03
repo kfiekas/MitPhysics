@@ -4,6 +4,7 @@
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include <TNtuple.h>
+#include <TRandom3.h>
 
 using namespace mithep;
 
@@ -34,13 +35,39 @@ PhotonCiCMod::PhotonCiCMod(const char *name, const char *title) :
 
   fBeamspot(0),
 
-  fDataEnCorr_EB_hR9(0.0049),
-  fDataEnCorr_EB_lR9(0.0011),
-  fDataEnCorr_EE_hR9(0.0057),
-  fDataEnCorr_EE_lR9(0.0039)
+  // May10 ReReco
+//   fDataEnCorr_EB_hR9(-0.0047),
+//   fDataEnCorr_EB_lR9(0.0014),
+//   fDataEnCorr_EE_hR9(0.0076),
+//   fDataEnCorr_EE_lR9(0.0008),
+
+  // prompt Reload
+  fDataEnCorr_EB_hR9(0.0001),
+  fDataEnCorr_EB_lR9(0.0052),
+  fDataEnCorr_EE_hR9(0.0428),
+  fDataEnCorr_EE_lR9(0.0180),
+
+
+  fMCSmear_EB_hR9(0.0089),
+  fMCSmear_EB_lR9(0.0199),
+  fMCSmear_EE_hR9(0.0409),
+  fMCSmear_EE_lR9(0.0246),
+
+  fIsData(false),
+
+  rng(new TRandom3()),
+
+  fMCParticleName(Names::gkMCPartBrn),
+  fMCParticles(0),
+  fPileUpName         ("PileupInfo"),
+  fPileUp             (0)
 
 {
   // Constructor.
+}
+
+PhotonCiCMod::~PhotonCiCMod(){
+  if(rng) delete rng;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -61,24 +88,33 @@ void PhotonCiCMod::Process()
   LoadEventObject(fPVName,             fPV);    
   LoadEventObject(fConversionName,     fConversions);
   LoadBranch("BeamSpot");
-  
-  if(fPileUpDen->GetEntries() > 0)
-    _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
 
-  //_tRho = 0.;
+  if( !fIsData ) {
+    LoadBranch(fMCParticleName);
+    LoadBranch(fPileUpName);
+  }
+
+  Float_t numPU = -1.;
+  if( !fIsData )
+    numPU = (Float_t) fPileUp->At(0)->GetPU_NumInteractions();  
+
+  if(fPileUpDen->GetEntries() > 0)
+      _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
 
   bool doVtxSelection = true;
+  bool doMCSmear      = false;
 
   const EventHeader* evtHead = this->GetEventHeader();
 
   unsigned int evtNum = evtHead->EvtNum();
   Float_t _evtNum1 = (Float_t) ( (int) (evtNum/10000.) );
   Float_t _evtNum2 = (Float_t) ( (int) (evtNum % 10000)  );
-
+  
   double evtNumTest = (int) ( ( (double) _evtNum1 )*10000. + (double) _evtNum2 );
 
   Float_t _runNum  = (Float_t) evtHead->RunNum();
   Float_t _lumiSec = (Float_t) evtHead->LumiSec();
+
 
   unsigned int numVertices = fPV->GetEntries();
 
@@ -161,8 +197,7 @@ void PhotonCiCMod::Process()
   float ptBefore2 = -99.;
 
   bool print = false;
-  //if(evtNum == 1677 || evtNum == 1943 || evtNum == 1694) {
-  if(evtNum == 1943 && false) {
+  if(evtNum == 17031) {
     std::cout<<" ------------------------------------------- "<<std::endl;
     std::cout<<"   printing info for event #"<<evtNum<<std::endl;
     print = true;
@@ -173,27 +208,140 @@ void PhotonCiCMod::Process()
     // copy the photons for manipulation
     fixPhFst[iPair] = new Photon(*preselPh->At(idxFst[iPair]));
     fixPhSec[iPair] = new Photon(*preselPh->At(idxSec[iPair]));
-
-    // if this is Data, scale the energy...
-
-    // store the vertex for this pair (TODO: conversion Vtx)
-    if(doVtxSelection) {
-      unsigned int iVtx = findBestVertex(fixPhFst[iPair],fixPhSec[iPair],bsp, print);
-      theVtx[iPair] =  fPV->At(iVtx);
-      if(iPair == 0) theChosenVtx = iVtx;
-    } else
-      theVtx[iPair] =  fPV->At(0);
+    
+    // if this is Data, scale the energy, if MC smear...
+    FourVectorM scMomFst = fixPhFst[iPair]->Mom();
+    FourVectorM scMomSec = fixPhSec[iPair]->Mom();
+    double scaleFac1 = 1.;
+    double scaleFac2 = 1.;
+    if (fIsData) {
+      if(fixPhFst[iPair]->IsEB())
+	if(fixPhFst[iPair]->R9() > 0.94)
+	  scaleFac1 += fDataEnCorr_EB_hR9;
+	else
+	  scaleFac1 += fDataEnCorr_EB_lR9;
+      else
+	if(fixPhFst[iPair]->R9() > 0.94)
+	  scaleFac1 += fDataEnCorr_EE_hR9;
+	else
+	  scaleFac1 += fDataEnCorr_EE_lR9;
+      if(fixPhSec[iPair]->IsEB())
+	if(fixPhSec[iPair]->R9() > 0.94)
+	  scaleFac2 += fDataEnCorr_EB_hR9;
+	else
+	  scaleFac2 += fDataEnCorr_EB_lR9;
+      else
+	if(fixPhSec[iPair]->R9() > 0.94)
+	  scaleFac2 += fDataEnCorr_EE_hR9;
+	else
+	  scaleFac2 += fDataEnCorr_EE_lR9;
+    } else {
+      // get the smearing for MC photons..
+      UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
+      UInt_t seed1    = seedBase + (UInt_t) fixPhFst[iPair]->E() + (UInt_t) (TMath::Abs(10.*fixPhFst[iPair]->SCluster()->Eta()));
+      UInt_t seed2    = seedBase + (UInt_t) fixPhSec[iPair]->E() + (UInt_t) (TMath::Abs(10.*fixPhSec[iPair]->SCluster()->Eta()));
+      
+      double width1 = 0.;
+      double width2 = 0.;
+      if(fixPhFst[iPair]->IsEB())
+	if(fixPhFst[iPair]->R9() > 0.94)
+	  width1 = fMCSmear_EB_hR9;
+	else
+	  width1 = fMCSmear_EB_lR9;
+      else
+	if(fixPhFst[iPair]->R9() > 0.94)
+	  width1 = fMCSmear_EE_hR9;
+	else
+	  width1 = fMCSmear_EE_lR9;
+      if(fixPhSec[iPair]->IsEB())
+	if(fixPhSec[iPair]->R9() > 0.94)
+	  width2 = fMCSmear_EB_hR9;
+	else
+	  width2 = fMCSmear_EB_lR9;
+      else
+	if(fixPhSec[iPair]->R9() > 0.94)
+	  width2 = fMCSmear_EE_hR9;
+	else
+	  width2 = fMCSmear_EE_lR9;
+      
+      if(doMCSmear) {
+	rng->SetSeed(seed1);
+	scaleFac1 = rng->Gaus(1.,width1);
+	rng->SetSeed(seed2);
+	scaleFac2 = rng->Gaus(1.,width2);
+      }
+    }
 
     if(iPair==0) {
       ptBefore1 = fixPhFst[iPair]->Pt();
       ptBefore2 = fixPhSec[iPair]->Pt();
     }
 
+    if(print && false) {
+      std::cout<<" Photon Pair #"<<iPair+1<<std::endl;
+      std::cout<<"      Ph1 px = "<<fixPhFst[iPair]->Mom().X()<<std::endl;
+      std::cout<<"          py = "<<fixPhFst[iPair]->Mom().Y()<<std::endl;
+      std::cout<<"          pz = "<<fixPhFst[iPair]->Mom().Z()<<std::endl;
+      std::cout<<"           E = "<<fixPhFst[iPair]->Mom().E()<<std::endl;
+      std::cout<<"           M = "<<fixPhFst[iPair]->Mom().M()<<std::endl;
+      std::cout<<"      Ph2 px = "<<fixPhSec[iPair]->Mom().X()<<std::endl;
+      std::cout<<"          py = "<<fixPhSec[iPair]->Mom().Y()<<std::endl;
+      std::cout<<"          pz = "<<fixPhSec[iPair]->Mom().Z()<<std::endl;
+      std::cout<<"           E = "<<fixPhSec[iPair]->Mom().E()<<std::endl;
+      std::cout<<"           M = "<<fixPhSec[iPair]->Mom().M()<<std::endl;
+    }
+
+    fixPhFst[iPair]->SetMom(scaleFac1*scMomFst.X(), scaleFac1*scMomFst.Y(), scaleFac1*scMomFst.Z(), scaleFac1*scMomFst.E());
+    fixPhSec[iPair]->SetMom(scaleFac2*scMomSec.X(), scaleFac2*scMomSec.Y(), scaleFac2*scMomSec.Z(), scaleFac2*scMomSec.E());      
+
+    if(print && false) {
+      std::cout<<"      SF 1 = "<<scaleFac1<<std::endl;
+      std::cout<<"      SF 2 = "<<scaleFac2<<std::endl;
+
+      std::cout<<" Photon Pair #"<<iPair+1<<std::endl;
+      std::cout<<"      Ph1 px = "<<fixPhFst[iPair]->Mom().X()<<std::endl;
+      std::cout<<"          py = "<<fixPhFst[iPair]->Mom().Y()<<std::endl;
+      std::cout<<"          pz = "<<fixPhFst[iPair]->Mom().Z()<<std::endl;
+      std::cout<<"           E = "<<fixPhFst[iPair]->Mom().E()<<std::endl;
+      std::cout<<"           M = "<<fixPhFst[iPair]->Mom().M()<<std::endl;
+      std::cout<<"      Ph2 px = "<<fixPhSec[iPair]->Mom().X()<<std::endl;
+      std::cout<<"          py = "<<fixPhSec[iPair]->Mom().Y()<<std::endl;
+      std::cout<<"          pz = "<<fixPhSec[iPair]->Mom().Z()<<std::endl;
+      std::cout<<"           E = "<<fixPhSec[iPair]->Mom().E()<<std::endl;
+      std::cout<<"           M = "<<fixPhSec[iPair]->Mom().M()<<std::endl;
+    }
+
+    // store the vertex for this pair
+    if(doVtxSelection) {
+      unsigned int iVtx = findBestVertex(fixPhFst[iPair],fixPhSec[iPair],bsp, print);
+      theVtx[iPair] =  fPV->At(iVtx);
+      if(iPair == 0) theChosenVtx = iVtx;
+    } else
+      theVtx[iPair] =  fPV->At(0);
+    
     // fix the kinematics for both events
     FourVectorM newMomFst = fixPhFst[iPair]->MomVtx(theVtx[iPair]->Position());
     FourVectorM newMomSec = fixPhSec[iPair]->MomVtx(theVtx[iPair]->Position());
     fixPhFst[iPair]->SetMom(newMomFst.X(), newMomFst.Y(), newMomFst.Z(), newMomFst.E());
     fixPhSec[iPair]->SetMom(newMomSec.X(), newMomSec.Y(), newMomSec.Z(), newMomSec.E());
+
+
+    if(print && false) {
+      std::cout<<"         Vtx = "<<theChosenVtx<<std::endl; 
+      std::cout<<" Photon Pair #"<<iPair+1<<std::endl;
+      std::cout<<"      Ph1 px = "<<fixPhFst[iPair]->Mom().X()<<std::endl;
+      std::cout<<"          py = "<<fixPhFst[iPair]->Mom().Y()<<std::endl;
+      std::cout<<"          pz = "<<fixPhFst[iPair]->Mom().Z()<<std::endl;
+      std::cout<<"           E = "<<fixPhFst[iPair]->Mom().E()<<std::endl;
+      std::cout<<"           M = "<<fixPhFst[iPair]->Mom().M()<<std::endl;
+      std::cout<<"      Ph2 px = "<<fixPhSec[iPair]->Mom().X()<<std::endl;
+      std::cout<<"          py = "<<fixPhSec[iPair]->Mom().Y()<<std::endl;
+      std::cout<<"          pz = "<<fixPhSec[iPair]->Mom().Z()<<std::endl;
+      std::cout<<"           E = "<<fixPhSec[iPair]->Mom().E()<<std::endl;
+      std::cout<<"           M = "<<fixPhSec[iPair]->Mom().M()<<std::endl;
+    }
+
+
     
     if(iPair != 0) {
       // check if both photons pass the CiC selection
@@ -208,7 +356,6 @@ void PhotonCiCMod::Process()
 	passPairs.push_back(iPair);
     }
   }
-   
 
   // loop over all passing pairs and find the one with the highest sum Et
   Photon* phHard = NULL;
@@ -242,8 +389,12 @@ void PhotonCiCMod::Process()
   Float_t _mass = ( doFill ? (phHard->Mom()+phSoft->Mom()).M() : -100.);
   Float_t _ptgg = ( doFill ? (phHard->Mom()+phSoft->Mom()).Pt() : -100.);
 
+  Float_t _pth = -100.;
+  if( !fIsData ) _pth = findHiggsPt();
 
   Float_t fillEvent[] = { _tRho,
+			  _pth,
+			  numPU,
 			  _mass,
 			  _ptgg,
 			  _evtNum1,
@@ -315,9 +466,13 @@ void PhotonCiCMod::SlaveBegin()
   ReqEventObject(fPVName,             fPV,        fPVFromBranch);
   ReqEventObject(fConversionName,     fConversions,kTRUE);
   ReqBranch("BeamSpot",fBeamspot);
+  
+  if (!fIsData) {
+    ReqBranch(fPileUpName, fPileUp);
+    ReqBranch(Names::gkMCPartBrn,fMCParticles);
+  }
 
-
-  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","rho:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ivtx:npairs:ph1Iso1:ph1Iso2:ph1Iso3:ph1Cov:ph1HoE:ph1R9:ph1DR:ph1Pt:ph1Eta:ph1Phi:ph1Eiso3:ph1Eiso4:ph1Hiso4:ph1TisoA:ph1TisoW:ph1Tiso:ph1Et:ph1E:ph1Pass:ph1Cat:ph2Iso1:ph2Iso2:ph2Iso3:ph2Cov:ph2HoE:ph2R9:ph2DR:ph2Pt:ph2Eta:ph2Phi:ph2Eiso3:ph2Eiso4:ph2Hiso4:ph2TisoA:ph2TisoW:ph2Tiso:ph2Et:ph2E:ph2Pass:ph2Cat:ph1UPt:ph2UPt");
+  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","rho:higgspt:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ivtx:npairs:ph1Iso1:ph1Iso2:ph1Iso3:ph1Cov:ph1HoE:ph1R9:ph1DR:ph1Pt:ph1Eta:ph1Phi:ph1Eiso3:ph1Eiso4:ph1Hiso4:ph1TisoA:ph1TisoW:ph1Tiso:ph1Et:ph1E:ph1Pass:ph1Cat:ph2Iso1:ph2Iso2:ph2Iso3:ph2Cov:ph2HoE:ph2R9:ph2DR:ph2Pt:ph2Eta:ph2Phi:ph2Eiso3:ph2Eiso4:ph2Hiso4:ph2TisoA:ph2TisoW:ph2Tiso:ph2Et:ph2E:ph2Pass:ph2Cat:ph1UPt:ph2UPt");
   
   AddOutput(hCiCTuple);
 
@@ -397,7 +552,7 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
       double dR1 = TMath::Sqrt(dEta1*dEta1+dPhi1*dPhi1);
       double dR2 = TMath::Sqrt(dEta2*dEta2+dPhi2*dPhi2);
       
-      if( ( iVtx == 0 || iVtx == 1 ) && print) {
+      if( ( iVtx == 0 || iVtx == 1 ) && print && false) {
 	std::cout<<"  Track #"<<iTrk<<std::endl;
 	std::cout<<"      pt = "<<tTrk->Pt()<<std::endl;
 	std::cout<<"     eta = "<<tTrk->Eta()<<std::endl;
@@ -454,7 +609,7 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
   // compute the total rank
   for(unsigned int iVtx = 0; iVtx < numVertices; ++iVtx) {
     if(print) {
-      std::cout<<"     Vertex #"<<iVtx<<"  has rank PTBAL "<<ptbal_rank[iVtx]<<"   ("<<ptbal[iVtx]<<")"<<std::endl;
+      std::cout<<"     Vertex #"<<iVtx<<"  has rank PTB "<<ptbal_rank[iVtx]<<"   ("<<ptbal[iVtx]<<")"<<std::endl;
       std::cout<<"     Vertex #"<<iVtx<<"  has rank PTSYM "<<ptasym_rank[iVtx]<<"   ("<<ptasym[iVtx]<<")"<<std::endl;
     }
     ptasym_rank [iVtx] = ptbal_rank [iVtx]*ptasym_rank [iVtx]*(iVtx+1);
@@ -483,24 +638,38 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
     }
   }
   
-  delete ptbal_rank  ;
-  delete ptasym_rank ;
-  delete total_rank  ;
-  delete ptbal       ;
-  delete ptasym      ;
+  delete[] ptbal_rank  ;
+  delete[] ptasym_rank ;
+  delete[] ptbal       ;
+  delete[] ptasym      ;
 
   //return bestIdx;
 
   // check if there's a conversion among the pre-selected photons
-  const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, fConversions);
-  const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, fConversions);
-  if( conv1 && conv1->Prob() < 0.0005) conv1 = NULL;
-  if( conv2 && conv2->Prob() < 0.0005) conv2 = NULL;
+  const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, fConversions, 0.1, 0.1, 0.1, print);
+  const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, fConversions, 0.1, 0.1, 0.1, print);
 
+  if(print) {
+    if (conv1) {
+      std::cout<<" Photon 1 has has conversion with P = "<<conv1->Prob()<<std::endl;
+      std::cout<<"                                Rho = "<<conv1->Position().Rho()<<std::endl;
+      std::cout<<"                                  Z = "<<conv1->Position().Z()<<std::endl;
+    }
+    if (conv2) {
+      std::cout<<" Photon 2 has has conversion with P = "<<conv2->Prob()<<std::endl;
+      std::cout<<"                                Rho = "<<conv2->Position().Rho()<<std::endl;
+      std::cout<<"                                  Z = "<<conv2->Position().Z()<<std::endl;
+    }
+  }
+
+  if( conv1 && ( conv1->Prob() < 0.0005) ) conv1 = NULL;
+  if( conv2 && ( conv2->Prob() < 0.0005) ) conv2 = NULL;
+  
   double zconv  = 0.;
   double dzconv = 0.;
+  
   if(conv1 || conv2) {
-    if( conv1 ){
+    if( !conv2 ){
       //const mithep::ThreeVector caloPos1(ph1->SCluster()->Point());
       const mithep::ThreeVector caloPos1(ph1->CaloPos());
       zconv  = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
@@ -511,8 +680,8 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 	else                 dzconv = 2.04;
       } else {
 	double z = conv1->Position().Z();
-	if     ( z < 50. )   dzconv = 0.18;
-	else if( z < 100.)   dzconv = 0.61;
+	if     ( TMath::Abs(z) < 50. )   dzconv = 0.18;
+	else if( TMath::Abs(z) < 100.)   dzconv = 0.61;
 	else                 dzconv = 0.99;
       }
     } else if( !conv1 ) {
@@ -526,8 +695,8 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 	else                 dzconv = 2.04;
       } else {
 	double z = conv2->Position().Z();
-	if     ( z < 50. )   dzconv = 0.18;
-	else if( z < 100.)   dzconv = 0.61;
+	if     ( TMath::Abs(z) < 50. )   dzconv = 0.18;
+	else if( TMath::Abs(z) < 100.)   dzconv = 0.61;
 	else                 dzconv = 0.99;
       }
     } else {
@@ -542,8 +711,8 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 	else                 dz1 = 2.04;
       } else {
 	double z = conv1->Position().Z();
-	if     ( z < 50. )   dz1 = 0.18;
-	else if( z < 100.)   dz1 = 0.61;
+	if     ( TMath::Abs(z) < 50. )   dz1 = 0.18;
+	else if( TMath::Abs(z) < 100.)   dz1 = 0.61;
 	else                 dz1 = 0.99;
       }
       //const mithep::ThreeVector caloPos2(ph2->SCluster()->Point());
@@ -557,30 +726,92 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 	else                 dz2 = 2.04;
       } else {
 	double z = conv2->Position().Z();
-	if     ( z < 50. )   dz2 = 0.18;
-	else if( z < 100.)   dz2 = 0.61;
+	if     ( TMath::Abs(z) < 50. )   dz2 = 0.18;
+	else if( TMath::Abs(z) < 100.)   dz2 = 0.61;
 	else                 dz2 = 0.99;
       }
-      zconv  = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
+
+      if(print) {
+	std::cout<<"  z1 = "<<z1<<std::endl;
+	std::cout<<" dz1 = "<<dz1<<std::endl;
+	std::cout<<"  z2 = "<<z2<<std::endl;
+	std::cout<<" dz2 = "<<dz2<<std::endl;
+      }
+
+      zconv  = ( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
       dzconv = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
     }
     
-    // loop over all ranked Vertices and choose the closest to the Conversion one
-    int maxVertices = ( ptgg > 30 ? 3 : 5);
-    double minDz = -1;    
-    for(unsigned int iVtx =0; iVtx < numVertices && (int) iVtx < maxVertices; ++iVtx) {
-      if(total_rank[iVtx] < maxVertices) {
-	const Vertex* tVtx = fPV->At(iVtx);
-	double tDz = TMath::Abs(zconv - tVtx->Z());
-	if( (minDz < 0. || tDz < minDz) && tDz < dzconv ) {
-	  minDz = tDz;
-	  bestIdx = iVtx;
+    if(print) {
+      std::cout<<"  Conversion Z = "<<zconv<<std::endl;
+      std::cout<<"            dZ = "<<dzconv<<std::endl;
+    }
+
+
+    if(false) {
+      
+      // loop over all ranked Vertices and choose the closest to the Conversion one
+      int maxVertices = ( ptgg > 30 ? 3 : 5);
+      double minDz = -1.;    
+      
+      if(print) std::cout<<std::endl<<"  looping over vertices... "<<ptgg<<"  "<<maxVertices<<std::endl;
+      
+      for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {
+	
+	if(print) std::cout<<"     "<<iVtx<<"   has rank  "<<total_rank[iVtx]<<std::endl;	
+	
+	if(total_rank[iVtx] < maxVertices) {
+	  const Vertex* tVtx = fPV->At(iVtx);
+	  double tDz = TMath::Abs(zconv - tVtx->Z());
+	  if(print) std::cout<<"     is considered with tDz = "<<tDz<<std::endl;
+	  if( (minDz < 0. || tDz < minDz) && ( tDz < dzconv ) ) {	  
+	    minDz = tDz;
+	    bestIdx = iVtx;
+	    if(print) std::cout<<"      and is the best now."<<std::endl;
+	  }
 	}
       }
-    }
+    } else {   
+      unsigned int bestIdxTmp = bestIdx;
+
+      // loop over all ranked Vertices and choose the closest to the Conversion one
+      double minDz = -1.;    
+      int maxVertices = ( ptgg > 30 ? 3 : 5);
+      
+      if(print) std::cout<<std::endl<<"  looping over vertices... "<<ptgg<<"  "<<maxVertices<<std::endl;
+      
+      for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {
+	
+	if(print) std::cout<<"     "<<iVtx<<"   has rank  "<<total_rank[iVtx]<<std::endl;	
+	
+	const Vertex* tVtx = fPV->At(iVtx);
+	double tDz = TMath::Abs(zconv - tVtx->Z());
+	if(print) std::cout<<"     is considered with tDz = "<<tDz<<std::endl;
+	if( (minDz < 0. || tDz < minDz) && ( tDz < dzconv ) ) {	  
+	  minDz = tDz;
+	  bestIdxTmp = iVtx;
+	  if(print) std::cout<<"      and is the best now."<<std::endl;
+	}
+      }
+      
+      // check if best Vtx is among higest ranked ones
+      if(total_rank[bestIdxTmp] < maxVertices)
+	bestIdx = bestIdxTmp;
+    }    
   }
 
-
+  delete[] total_rank  ;
   return bestIdx;
 }
 
+double PhotonCiCMod::findHiggsPt() {
+
+  // loop over all GEN particles and look for status 1 photons
+  for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
+    const MCParticle* p = fMCParticles->At(i);
+    if( !(p->Is(MCParticle::kH)) ) continue;
+    return p->Pt();
+  }
+
+  return -1.0;
+ }
