@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.2 2011/06/16 02:53:02 maxi Exp $
+// $Id: VertexTools.cc,v 1.3 2011/07/01 13:49:01 maxi Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -194,7 +194,8 @@ double VertexTools::Prob(const PFCandidateCol *fPFJets, double zpos,
   }
   
   Float_t phimsq = sqrt(ymsq/ntrks - pow(ymean/ntrks,2))*180/3.14;
-  Double_t A2n = (ortplus+ortminus) > 0.01 ? (bdplus+bdminus)/(ortplus+ortminus) : (bdplus+bdminus)/0.01;
+  // not used... commented out by Fabian
+  //Double_t A2n = (ortplus+ortminus) > 0.01 ? (bdplus+bdminus)/(ortplus+ortminus) : (bdplus+bdminus)/0.01;
   Double_t A1n = bdplus/bosopt;
   Double_t A3n = ntplus > 0 ? bdplus/ntplus : 0.;
   //-------------------

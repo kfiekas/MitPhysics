@@ -110,13 +110,13 @@ void PhotonCiCMod::Process()
   Float_t _evtNum1 = (Float_t) ( (int) (evtNum/10000.) );
   Float_t _evtNum2 = (Float_t) ( (int) (evtNum % 10000)  );
   
-  double evtNumTest = (int) ( ( (double) _evtNum1 )*10000. + (double) _evtNum2 );
+  //double evtNumTest = (int) ( ( (double) _evtNum1 )*10000. + (double) _evtNum2 );
 
   Float_t _runNum  = (Float_t) evtHead->RunNum();
   Float_t _lumiSec = (Float_t) evtHead->LumiSec();
 
 
-  unsigned int numVertices = fPV->GetEntries();
+  //unsigned int numVertices = fPV->GetEntries();
 
   const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));
   
