@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.39 2010/11/08 14:20:24 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.40 2011/07/01 22:06:29 phedex Exp $
 //
 // GeneratorMod
 //
@@ -30,7 +30,6 @@ namespace mithep
 
       Bool_t               GetIsData()           const { return fIsData;           }
       Bool_t               GetApplyISRFilter()   const { return fApplyISRFilter;   }
-      Bool_t               GetApplyWWFilter()    const { return fApplyWWFilter;    }
       Bool_t               GetCopyArrays()	 const { return fCopyArrays;       }	
       const char          *GetMCAllLeptonsName() const { return fMCAllLeptonsName; }	
       const char          *GetMCBosonsName()     const { return fMCBosonsName;     }
@@ -47,9 +46,10 @@ namespace mithep
       Bool_t               GetPrintDebug()	 const { return fPrintDebug;       }	
       void                 SetIsData(Bool_t b)	               { fIsData           = b; }	 
       void                 SetApplyISRFilter(Bool_t b)	       { fApplyISRFilter   = b; }	 
-      void                 SetApplyWWFilter(Bool_t b)	       { fApplyWWFilter    = b; }	 
-      void                 SetApplyWZFilter(Bool_t b)	       { fApplyWZFilter    = b; }	 
-      void                 SetApplyZZFilter(Bool_t b)	       { fApplyZZFilter    = b; }	 
+      void                 SetApplyVVFilter(Bool_t b)	       { fApplyVVFilter    = b; }	 
+      void                 SetAllowWWEvents(Bool_t b)	       { fAllowWWEvents    = b; }	 
+      void                 SetAllowWZEvents(Bool_t b)	       { fAllowWZEvents    = b; }	 
+      void                 SetAllowZZEvents(Bool_t b)	       { fAllowZZEvents    = b; }	       
       void                 SetCopyArrays(Bool_t b)	       { fCopyArrays       = b; }	 
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
@@ -103,9 +103,10 @@ namespace mithep
       Double_t             fMassMinCut;	        //mass min for given PdgId particle 
       Double_t             fMassMaxCut;	        //mass max for given PdgId particle
       Bool_t               fApplyISRFilter;     //=true then apply ISR filter (def=0)
-      Bool_t               fApplyWWFilter;      //=true then apply WW filter (def=0)
-      Bool_t               fApplyWZFilter;      //=true then apply WZ filter (def=0)
-      Bool_t               fApplyZZFilter;      //=true then apply ZZ filter (def=0)
+      Bool_t               fApplyVVFilter;      //=true then apply VV filters (def=0)
+      Bool_t               fAllowWWEvents;            //=true then allow WW events  (def=0)
+      Bool_t               fAllowWZEvents;            //=true then allow WZ events  (def=0)
+      Bool_t               fAllowZZEvents;            //=true then allow ZZ events  (def=0)
       const MCParticleCol *fParticles;	        //!MCParticle branch
       TH1D                *hDGenPtMin;          //!histo for Pt min for leptons from W/Z
       TH1D                *hDGenMet[10];        //!histos for gen MET

@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.64 2011/02/05 05:48:09 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.65 2011/07/01 22:06:28 phedex Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -41,9 +41,10 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fMassMinCut(-FLT_MAX),
   fMassMaxCut(FLT_MAX),
   fApplyISRFilter(kFALSE),
-  fApplyWWFilter(kFALSE),
-  fApplyWZFilter(kFALSE),
-  fApplyZZFilter(kFALSE),
+  fApplyVVFilter(kFALSE),
+  fAllowWWEvents(kTRUE),
+  fAllowWZEvents(kTRUE),
+  fAllowZZEvents(kTRUE),
   fParticles(0)
 {
   // Constructor
@@ -1101,13 +1102,13 @@ void GeneratorMod::Process()
 
   // Apply WW filter (without filling all histograms)
   Bool_t passVVFilter = kFALSE;
-  if ( (fApplyWWFilter == kTRUE && sumV[0] + 4*sumV[1] == 2 )
+  if ( (fAllowWWEvents == kTRUE && sumV[0] + 4*sumV[1] == 2 )
        ||
-       (fApplyWZFilter == kTRUE && sumV[0] + 4*sumV[1] == 6 )
+       (fAllowWZEvents == kTRUE && sumV[0] + 4*sumV[1] == 6 )
        ||
-       (fApplyZZFilter == kTRUE && sumV[0] + 4*sumV[1] == 8 )
+       (fAllowZZEvents == kTRUE && sumV[0] + 4*sumV[1] == 8 )
     ) passVVFilter = kTRUE;
-  if (!passVVFilter) {
+  if (fApplyVVFilter && !passVVFilter) {
     SkipEvent();
     return;
   }
