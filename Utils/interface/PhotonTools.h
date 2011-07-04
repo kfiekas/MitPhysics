@@ -66,7 +66,8 @@ namespace mithep {
       static CiCBaseLineCats CiCBaseLineCat(const Photon *p);
 
       static const DecayParticle *MatchedCiCConversion(const Photon *p, const DecayParticleCol *conversions, 
-						       Double_t dPhiMin=0.1, Double_t dEtaMin=0.1);
+						       Double_t dPhiMin=0.1, Double_t dEtaMin=0.1,Double_t dRMin=0.1, 
+						       bool print = false);
 
       static bool PassCiCSelection(Photon* ph, 
 				   const Vertex* vtx, 

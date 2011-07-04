@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.5 2011/06/27 12:32:21 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.6 2011/06/29 18:28:05 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -197,19 +197,28 @@ PhotonTools::CiCBaseLineCats PhotonTools::CiCBaseLineCat(const Photon *p) {
 //--------------------------------------------------------------------------------------------------
 const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const DecayParticleCol *conversions, 
 						       Double_t dPhiMin,
-						       Double_t dEtaMin) {
+						       Double_t dEtaMin,
+						       Double_t dRMin,
+						       bool print) {
   
-
   const DecayParticle *match = NULL;
 
   double minDeta = 999.;
   double minDphi = 999.;
+  double minDR   = 999.;
 
   double phPhi = p->SCluster()->Phi();
   double phEta = p->SCluster()->Eta();
-  
+
+  if(print)
+    std::cout<<"  --- conv match photon eta = "<<phEta<<"  phi = "<<phPhi<<std::endl;  
+
+
   for (UInt_t i=0; i<conversions->GetEntries(); ++i) {
     const DecayParticle *c = conversions->At(i);
+
+    if(print)
+      std::cout<< "   c "<<i+1<<"  pt = "<<c->Pt()<<std::endl;
 
     if(c->Pt()   < 1. )    continue; // is this refittedPirMomentum?
 
@@ -218,7 +227,7 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
 
     double convPhi = c->Phi();
     double convEta = c->Eta();
-
+    
     const ThreeVector wrong(0,0,0);
     double Zvertex = c->DzCorrected(wrong);
     // ------------------ FROM GLOBE ----------------------
@@ -226,11 +235,11 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
     const float R_ECAL           = 136.5;
     const float Z_Endcap         = 328.0;
     const float etaBarrelEndcap  = 1.479; 
-   
+    
     //---ETA correction
     float Theta = 0.0  ; 
     float ZEcal = R_ECAL*sinh(convEta)+Zvertex;
-
+    
     if(ZEcal != 0.0) Theta = TMath::ATan(R_ECAL/ZEcal);
     if(Theta<0.0) Theta = Theta+M_PI;
     double fEta = - TMath::Log(TMath::Tan(0.5*Theta));
@@ -244,23 +253,39 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
       if(Theta<0.0) Theta = Theta+M_PI;
       fEta = -TMath::Log(TMath::Tan(0.5*Theta));	      
     } 
-    convEta = fEta;
     // ---------------------------------------------------
 
+    if(print) {
+      std::cout<<"          eta bare = "<<convEta<<std::endl;
+      std::cout<<"          eta new  = "<<fEta<<std::endl;
+      std::cout<<"          phi      = "<<convPhi<<std::endl;
+    }
+
+    convEta = fEta;
+    
     Double_t dphi = TMath::Abs(phPhi - convPhi);
     if(dphi > M_PI) dphi = 2.*M_PI-dphi;
     //Double_t deta = c->Eta()-dirconvsc.Eta();
     Double_t deta = TMath::Abs(convEta-phEta);
-    if (dphi<dPhiMin && TMath::Abs(deta)<dEtaMin) {
-      if(dphi < minDphi && TMath::Abs(deta)<minDeta) {
-	minDphi = dphi;
-	minDeta = TMath::Abs(deta);
-	match = c;
-      }
+    Double_t dR = TMath::Sqrt(dphi*dphi+deta*deta);
+    //if(dphi < minDphi && TMath::Abs(deta)<minDeta) {
+    if(dR < minDR) {
+      minDR = dR;
+      minDphi = dphi;
+      minDeta = TMath::Abs(deta);
+      match = c;
+
+      if(print)
+	std::cout<<" conv "<<i+1<<" matches with dPhi = "<<minDphi<<"   dEta = "<<minDeta<<std::endl;
+
     } 
   }
   
-  return match;  
+  //if(minDphi < dPhiMin && minDeta < dEtaMin)
+  if(minDR < dRMin)
+    return match;
+  else 
+    return NULL;
 }
 
 bool PhotonTools::PassCiCSelection(Photon* ph, const Vertex* vtx, 
