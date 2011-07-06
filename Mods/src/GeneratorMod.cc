@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.65 2011/07/01 22:06:28 phedex Exp $
+// $Id: GeneratorMod.cc,v 1.66 2011/07/04 20:36:22 sixie Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -43,8 +43,8 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fApplyISRFilter(kFALSE),
   fApplyVVFilter(kFALSE),
   fAllowWWEvents(kTRUE),
-  fAllowWZEvents(kTRUE),
-  fAllowZZEvents(kTRUE),
+  fAllowWZEvents(kFALSE),
+  fAllowZZEvents(kFALSE),
   fParticles(0)
 {
   // Constructor
