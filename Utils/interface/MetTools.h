@@ -9,6 +9,7 @@
 #ifndef MITPHYSICS_UTILS_METTOOLS_H
 #define MITPHYSICS_UTILS_METTOOLS_H
 
+#include "MitAna/DataTree/interface/ParticleCol.h"
 #include "MitAna/DataTree/interface/MetCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
@@ -42,6 +43,8 @@ namespace mithep {
 
     ~MetTools() {}
     
+    void AddToCorrectedTrackMet ( const Particle *p);
+    void AddToCorrectedMet ( const Particle *p);
     Met GetCorrectedMet() { return fCorrectedMet; }
     Met GetMinimumMet(const Met *UncorrectedMet);
     Met GetCorrectedTrackMet() { return fCorrectedTrackMet; }

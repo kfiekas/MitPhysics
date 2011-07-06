@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.7 2011/05/13 08:27:16 ceballos Exp $
+// $Id: MetTools.cc,v 1.8 2011/06/29 21:56:34 sixie Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -233,6 +233,33 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
 
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
   fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
+}
+
+
+void MetTools::AddToCorrectedTrackMet( const Particle *p) {
+  float MetX = fCorrectedTrackMet.Mex();
+  float MetY = fCorrectedTrackMet.Mey();
+  
+  MetX -= p->Px();
+  MetY -= p->Py();
+
+  fCorrectedTrackMet.SetMex(MetX);
+  fCorrectedTrackMet.SetMey(MetY);
+
+  return;
+}
+
+void MetTools::AddToCorrectedMet( const Particle *p) {
+  float MetX=fCorrectedMet.Mex();
+  float MetY=fCorrectedMet.Mey();
+  
+  MetX -= p->Px();
+  MetY -= p->Py();
+
+  fCorrectedMet.SetMex(MetX);
+  fCorrectedMet.SetMey(MetY);
+
+  return;
 }
 
 
