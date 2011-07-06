@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonCiCMod.h,v 1.3 2011/06/29 18:28:05 fabstoec Exp $
+// $Id: PhotonCiCMod.h,v 1.4 2011/07/03 11:04:50 fabstoec Exp $
 //
 // PhotonCiCMod
 //
@@ -57,7 +57,28 @@ namespace mithep
 
       void                SetIsData (Bool_t b) { fIsData = b;};
 
-      double findHiggsPt();
+      void                AddEnCorrPerRun( UInt_t sRun, UInt_t eRun,
+					   Double_t corr_EB_hR9,
+					   Double_t corr_EB_lR9,
+					   Double_t corr_EE_hR9,
+					   Double_t corr_EE_lR9) {
+	fDataEnCorr_EB_hR9.push_back(corr_EB_hR9);
+	fDataEnCorr_EB_lR9.push_back(corr_EB_lR9);
+	fDataEnCorr_EE_hR9.push_back(corr_EE_hR9);
+	fDataEnCorr_EE_lR9.push_back(corr_EE_lR9);
+
+	fRunStart.push_back(sRun);
+	fRunEnd.push_back(eRun);
+      };
+
+      void                SetMCSmearFactors(Double_t _EB_hR9, Double_t _EB_lR9, Double_t _EE_hR9, Double_t _EE_lR9) {
+	fMCSmear_EB_hR9 = _EB_hR9;
+	fMCSmear_EB_lR9 = _EB_lR9;
+	fMCSmear_EE_hR9 = _EE_hR9;
+	fMCSmear_EE_lR9 = _EE_lR9;
+      };
+
+      void findHiggsPtAndZ(Float_t&, Float_t&);
 
     protected:
       void                Process();
@@ -86,10 +107,13 @@ namespace mithep
 
       const BeamSpotCol *fBeamspot;
      
-      Double_t fDataEnCorr_EB_hR9;
-      Double_t fDataEnCorr_EB_lR9;
-      Double_t fDataEnCorr_EE_hR9;
-      Double_t fDataEnCorr_EE_lR9;
+      std::vector<Double_t> fDataEnCorr_EB_hR9;
+      std::vector<Double_t> fDataEnCorr_EB_lR9;
+      std::vector<Double_t> fDataEnCorr_EE_hR9;
+      std::vector<Double_t> fDataEnCorr_EE_lR9;
+
+      std::vector<UInt_t> fRunStart;
+      std::vector<UInt_t> fRunEnd;
 
       Double_t fMCSmear_EB_hR9;
       Double_t fMCSmear_EB_lR9;

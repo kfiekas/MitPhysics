@@ -36,17 +36,13 @@ PhotonCiCMod::PhotonCiCMod(const char *name, const char *title) :
   fBeamspot(0),
 
   // May10 ReReco
-//   fDataEnCorr_EB_hR9(-0.0047),
-//   fDataEnCorr_EB_lR9(0.0014),
-//   fDataEnCorr_EE_hR9(0.0076),
-//   fDataEnCorr_EE_lR9(0.0008),
+  fDataEnCorr_EB_hR9(0),
+  fDataEnCorr_EB_lR9(0),
+  fDataEnCorr_EE_hR9(0),
+  fDataEnCorr_EE_lR9(0),
 
-  // prompt Reload
-  fDataEnCorr_EB_hR9(0.0001),
-  fDataEnCorr_EB_lR9(0.0052),
-  fDataEnCorr_EE_hR9(0.0428),
-  fDataEnCorr_EE_lR9(0.0180),
-
+  fRunStart(0),
+  fRunEnd(0),
 
   fMCSmear_EB_hR9(0.0089),
   fMCSmear_EB_lR9(0.0199),
@@ -102,7 +98,7 @@ void PhotonCiCMod::Process()
       _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
 
   bool doVtxSelection = true;
-  bool doMCSmear      = false;
+  bool doMCSmear      = true;
 
   const EventHeader* evtHead = this->GetEventHeader();
 
@@ -112,7 +108,8 @@ void PhotonCiCMod::Process()
   
   //double evtNumTest = (int) ( ( (double) _evtNum1 )*10000. + (double) _evtNum2 );
 
-  Float_t _runNum  = (Float_t) evtHead->RunNum();
+  UInt_t runNumber = evtHead->RunNum();
+  Float_t _runNum  = (Float_t) runNumber;
   Float_t _lumiSec = (Float_t) evtHead->LumiSec();
 
 
@@ -131,10 +128,8 @@ void PhotonCiCMod::Process()
     if(ph->HadOverEm() > 0.15) continue;
     if(ph->AbsEta() < 1.5) {
       if(ph->CoviEtaiEta() > 0.013) continue;
-      //if(ph->EcalRecHitIsoDr03() > 10.) continue;
     } else {
       if(ph->CoviEtaiEta() > 0.03) continue;
-      //if(ph->EcalRecHitIsoDr03() > 10.) continue;
     }
 
     Bool_t passSpikeRemovalFilter = kTRUE;
@@ -174,7 +169,8 @@ void PhotonCiCMod::Process()
   
   // array to store the index of 'chosen Vtx' for each pair
   const Vertex** theVtx = new const Vertex*[numPairs];
-  
+  UInt_t* theVtxIdx     = new UInt_t[numPairs];
+
   // arays to store the Vtx 'fixed' photons
   Photon** fixPhFst = new Photon*[numPairs];
   Photon** fixPhSec = new Photon*[numPairs];
@@ -197,7 +193,7 @@ void PhotonCiCMod::Process()
   float ptBefore2 = -99.;
 
   bool print = false;
-  if(evtNum == 17031) {
+  if(evtNum == 17031 && false) {
     std::cout<<" ------------------------------------------- "<<std::endl;
     std::cout<<"   printing info for event #"<<evtNum<<std::endl;
     print = true;
@@ -215,26 +211,38 @@ void PhotonCiCMod::Process()
     double scaleFac1 = 1.;
     double scaleFac2 = 1.;
     if (fIsData) {
-      if(fixPhFst[iPair]->IsEB())
-	if(fixPhFst[iPair]->R9() > 0.94)
-	  scaleFac1 += fDataEnCorr_EB_hR9;
-	else
-	  scaleFac1 += fDataEnCorr_EB_lR9;
-      else
-	if(fixPhFst[iPair]->R9() > 0.94)
-	  scaleFac1 += fDataEnCorr_EE_hR9;
-	else
-	  scaleFac1 += fDataEnCorr_EE_lR9;
-      if(fixPhSec[iPair]->IsEB())
-	if(fixPhSec[iPair]->R9() > 0.94)
-	  scaleFac2 += fDataEnCorr_EB_hR9;
-	else
-	  scaleFac2 += fDataEnCorr_EB_lR9;
-      else
-	if(fixPhSec[iPair]->R9() > 0.94)
-	  scaleFac2 += fDataEnCorr_EE_hR9;
-	else
-	  scaleFac2 += fDataEnCorr_EE_lR9;
+      if( fRunStart.size() > 0) {
+	// find run in rnage
+	Int_t runRange=-1;
+	for(UInt_t iRun = 0; iRun<fRunStart.size(); ++iRun) {
+	  if( runNumber >= fRunStart[iRun] && runNumber <= fRunEnd[iRun]) {
+	    runRange = (Int_t) iRun;
+	    break;
+	  }
+	}
+	if(runRange > -1) {
+	  if(fixPhFst[iPair]->IsEB())
+	    if(fixPhFst[iPair]->R9() > 0.94)
+	      scaleFac1 += fDataEnCorr_EB_hR9[runRange];
+	    else
+	      scaleFac1 += fDataEnCorr_EB_lR9[runRange];
+	  else
+	    if(fixPhFst[iPair]->R9() > 0.94)
+	      scaleFac1 += fDataEnCorr_EE_hR9[runRange];
+	    else
+	      scaleFac1 += fDataEnCorr_EE_lR9[runRange];
+	  if(fixPhSec[iPair]->IsEB())
+	    if(fixPhSec[iPair]->R9() > 0.94)
+	      scaleFac2 += fDataEnCorr_EB_hR9[runRange];
+	    else
+	      scaleFac2 += fDataEnCorr_EB_lR9[runRange];
+	  else
+	    if(fixPhSec[iPair]->R9() > 0.94)
+	      scaleFac2 += fDataEnCorr_EE_hR9[runRange];
+	    else
+	      scaleFac2 += fDataEnCorr_EE_lR9[runRange];
+	}
+      }
     } else {
       // get the smearing for MC photons..
       UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
@@ -314,7 +322,8 @@ void PhotonCiCMod::Process()
     // store the vertex for this pair
     if(doVtxSelection) {
       unsigned int iVtx = findBestVertex(fixPhFst[iPair],fixPhSec[iPair],bsp, print);
-      theVtx[iPair] =  fPV->At(iVtx);
+      theVtx[iPair]    =  fPV->At(iVtx);
+      theVtxIdx[iPair] =  iVtx;
       if(iPair == 0) theChosenVtx = iVtx;
     } else
       theVtx[iPair] =  fPV->At(0);
@@ -360,6 +369,9 @@ void PhotonCiCMod::Process()
   // loop over all passing pairs and find the one with the highest sum Et
   Photon* phHard = NULL;
   Photon* phSoft = NULL;
+  
+  const Vertex* _theVtx = NULL;
+
   double maxSumEt = 0.;
   for(unsigned int iPair=0; iPair<passPairs.size(); ++iPair){
     double sumEt = fixPhFst[passPairs[iPair]]->Et();
@@ -368,12 +380,17 @@ void PhotonCiCMod::Process()
       maxSumEt = sumEt;
       phHard = fixPhFst[passPairs[iPair]];
       phSoft = fixPhSec[passPairs[iPair]];
+      _theVtx = theVtx[iPair];
+      theChosenVtx = theVtxIdx[iPair];
     }
   }
 
+  Float_t _theVtxZ = -999.;
   if(phHard && phSoft) {
     GoodPhotons->AddOwned(phHard);
     GoodPhotons->AddOwned(phSoft);
+    if(_theVtx)
+      _theVtxZ=_theVtx->Position().Z();
   }
 
   // sort according to pt
@@ -384,16 +401,18 @@ void PhotonCiCMod::Process()
 
   delete preselPh;
 
-
   bool doFill = (phHard && phSoft);
   Float_t _mass = ( doFill ? (phHard->Mom()+phSoft->Mom()).M() : -100.);
   Float_t _ptgg = ( doFill ? (phHard->Mom()+phSoft->Mom()).Pt() : -100.);
 
-  Float_t _pth = -100.;
-  if( !fIsData ) _pth = findHiggsPt();
+  Float_t _pth    = -100.;
+  Float_t _decayZ = -100.;
+  if( !fIsData ) findHiggsPtAndZ(_pth, _decayZ);
 
   Float_t fillEvent[] = { _tRho,
 			  _pth,
+			  _decayZ,
+			  _theVtxZ,
 			  numPU,
 			  _mass,
 			  _ptgg,
@@ -449,6 +468,9 @@ void PhotonCiCMod::Process()
 
   hCiCTuple->Fill(fillEvent);
 
+  delete[] theVtx;
+  delete[] theVtxIdx;
+
   return;
 
 }
@@ -472,7 +494,7 @@ void PhotonCiCMod::SlaveBegin()
     ReqBranch(Names::gkMCPartBrn,fMCParticles);
   }
 
-  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","rho:higgspt:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ivtx:npairs:ph1Iso1:ph1Iso2:ph1Iso3:ph1Cov:ph1HoE:ph1R9:ph1DR:ph1Pt:ph1Eta:ph1Phi:ph1Eiso3:ph1Eiso4:ph1Hiso4:ph1TisoA:ph1TisoW:ph1Tiso:ph1Et:ph1E:ph1Pass:ph1Cat:ph2Iso1:ph2Iso2:ph2Iso3:ph2Cov:ph2HoE:ph2R9:ph2DR:ph2Pt:ph2Eta:ph2Phi:ph2Eiso3:ph2Eiso4:ph2Hiso4:ph2TisoA:ph2TisoW:ph2Tiso:ph2Et:ph2E:ph2Pass:ph2Cat:ph1UPt:ph2UPt");
+  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","rho:higgspt:higgsZ:vtxZ:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ivtx:npairs:ph1Iso1:ph1Iso2:ph1Iso3:ph1Cov:ph1HoE:ph1R9:ph1DR:ph1Pt:ph1Eta:ph1Phi:ph1Eiso3:ph1Eiso4:ph1Hiso4:ph1TisoA:ph1TisoW:ph1Tiso:ph1Et:ph1E:ph1Pass:ph1Cat:ph2Iso1:ph2Iso2:ph2Iso3:ph2Cov:ph2HoE:ph2R9:ph2DR:ph2Pt:ph2Eta:ph2Phi:ph2Eiso3:ph2Eiso4:ph2Hiso4:ph2TisoA:ph2TisoW:ph2Tiso:ph2Et:ph2E:ph2Pass:ph2Cat:ph1UPt:ph2UPt");
   
   AddOutput(hCiCTuple);
 
@@ -748,7 +770,7 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
     }
 
 
-    if(false) {
+    if(true) {
       
       // loop over all ranked Vertices and choose the closest to the Conversion one
       int maxVertices = ( ptgg > 30 ? 3 : 5);
@@ -804,14 +826,19 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
   return bestIdx;
 }
 
-double PhotonCiCMod::findHiggsPt() {
+void PhotonCiCMod::findHiggsPtAndZ(Float_t& pt, Float_t& decayZ) {
+
+  pt = -999.;
+  decayZ = -999.;
 
   // loop over all GEN particles and look for status 1 photons
   for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
     const MCParticle* p = fMCParticles->At(i);
     if( !(p->Is(MCParticle::kH)) ) continue;
-    return p->Pt();
+    pt=p->Pt();
+    decayZ = p->DecayVertex().Z();
+    break;
   }
-
-  return -1.0;
+  
+  return;
  }
