@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.8 2011/06/29 21:56:34 sixie Exp $
+// $Id: MetTools.cc,v 1.9 2011/07/06 18:49:35 phedex Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -38,6 +38,8 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
       if (fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
+        fChargedRecoil += fPFCandidates->At(i)->Mom();
       }
     }
 
@@ -46,6 +48,7 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
       if (fPFCandidates->At(i)->Pt() > ptCut and fabs(fPFCandidates->At(i)->Eta()) < etaCut ) {
 	neutralNumeratorX -= fPFCandidates->At(i)->Px();
 	neutralNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
       }
     }
   }
@@ -85,6 +88,8 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
           (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
+        fChargedRecoil += fPFCandidates->At(i)->Mom();
       }
     }
 
@@ -93,6 +98,7 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
       if (fPFCandidates->At(i)->Pt() > ptCut and fabs(fPFCandidates->At(i)->Eta()) < etaCut ) {
 	neutralNumeratorX -= fPFCandidates->At(i)->Px();
 	neutralNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
       }
     }
   }
@@ -152,6 +158,8 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
       if (fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
+        fChargedRecoil += fPFCandidates->At(i)->Mom();
       }
     }
 
@@ -160,6 +168,7 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
       if (fPFCandidates->At(i)->Pt() > ptCut and fabs(fPFCandidates->At(i)->Eta()) < etaCut ) {
 	neutralNumeratorX -= fPFCandidates->At(i)->Px();
 	neutralNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
       }
     }
   }
@@ -219,6 +228,8 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
           (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
+        fChargedRecoil += fPFCandidates->At(i)->Mom();
       }
     }
 
@@ -227,6 +238,7 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
       if (fPFCandidates->At(i)->Pt() > ptCut and fabs(fPFCandidates->At(i)->Eta()) < etaCut ) {
 	neutralNumeratorX -= fPFCandidates->At(i)->Px();
 	neutralNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
       }
     }
   }
@@ -236,12 +248,18 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
 }
 
 
-void MetTools::AddToCorrectedTrackMet( const Particle *p) {
+void MetTools::AddToCorrectedTrackMet( const Particle *p, bool debug ) {
   float MetX = fCorrectedTrackMet.Mex();
   float MetY = fCorrectedTrackMet.Mey();
-  
+
+  if (debug) std::cout << "AddToCorrectedTrackMet:\n";
+  if (debug) std::cout << "Before: " << MetX << " " << MetY << std::endl;
+
   MetX -= p->Px();
   MetY -= p->Py();
+
+  if (debug) std::cout << "Add : " << p->Px() << " " << p->Py() << std::endl;
+  if (debug) std::cout << "After : " << MetX << " " << MetY << std::endl;
 
   fCorrectedTrackMet.SetMex(MetX);
   fCorrectedTrackMet.SetMey(MetY);
@@ -258,6 +276,116 @@ void MetTools::AddToCorrectedMet( const Particle *p) {
 
   fCorrectedMet.SetMex(MetX);
   fCorrectedMet.SetMey(MetY);
+
+  return;
+}
+
+void MetTools::AddToRecoil( const Particle *p) {
+
+  if (p->Charge() != 0) {
+    fChargedRecoil += p->Mom();
+  }
+  fRecoil += p->Mom();
+
+  return;
+}
+
+
+
+void MetTools::RemoveParticleInIsoConeFromTrackMet( const Particle *p, const PFCandidateCol *fPFCandidates, const Vertex *fVertex, float deltaZCut , float deltaR, bool debug ) {
+  float MetX = fCorrectedTrackMet.Mex();
+  float MetY = fCorrectedTrackMet.Mey();
+  
+  if (debug) std::cout << "RemoveParticleInIsoConeFromTrackMet:\n";
+  if (debug) std::cout << "Before: " << MetX << " " << MetY << std::endl;
+
+  for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
+    //charged
+    if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()) {
+      //passes dZ cut
+      if ((fPFCandidates->At(i)->HasTrackerTrk() && fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) ||
+          (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {        
+        //inside cone
+        if (MathUtils::DeltaR(fPFCandidates->At(i)->Mom(), p->Mom()) < deltaR ) {
+          MetX += fPFCandidates->At(i)->Px();
+          MetY += fPFCandidates->At(i)->Py();
+          if (debug) std::cout << "Subtract : " << fPFCandidates->At(i)->Px() << " " << fPFCandidates->At(i)->Py() << " : " << std::endl;
+        }
+      }
+    }
+  }
+
+  if (debug) std::cout << "After : " << MetX << " " << MetY << std::endl;
+
+  fCorrectedTrackMet.SetMex(MetX);
+  fCorrectedTrackMet.SetMey(MetY);
+
+  return;
+}
+
+
+void MetTools::RemoveParticleInIsoConeFromCorrectedMet( const Particle *p, const PFCandidateCol *fPFCandidates, const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut , float deltaR) {
+  float MetX = fCorrectedMet.Mex();
+  float MetY = fCorrectedMet.Mey();
+  
+  for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
+
+    //inside cone
+    if (MathUtils::DeltaR(fPFCandidates->At(i)->Mom(), p->Mom()) < deltaR ) {
+
+      //charged
+      if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()) {
+        //passes dZ cut
+        if ((fPFCandidates->At(i)->HasTrackerTrk() && fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) ||
+            (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {                  
+          MetX += p->Px();
+          MetY += p->Py();
+        }
+      }
+
+      //neutrals
+      if (fPFCandidates->At(i)->PFType()== PFCandidate::eNeutralHadron || fPFCandidates->At(i)->PFType()== PFCandidate::eGamma) {
+        if (fPFCandidates->At(i)->Pt() > ptCut and fabs(fPFCandidates->At(i)->Eta()) < etaCut ) {
+          MetX += fPFCandidates->At(i)->Px();
+          MetY += fPFCandidates->At(i)->Py();
+        }
+      }
+    }
+
+  }
+
+  fCorrectedMet.SetMex(MetX);
+  fCorrectedMet.SetMey(MetY);
+
+  return;
+}
+
+
+void MetTools::RemoveParticleInIsoConeFromRecoil( const Particle *p, const PFCandidateCol *fPFCandidates, const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut , float deltaR) {
+  
+  for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
+
+    //inside cone
+    if (MathUtils::DeltaR(fPFCandidates->At(i)->Mom(), p->Mom()) < deltaR ) {
+
+      //charged
+      if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()) {
+        //passes dZ cut
+        if ((fPFCandidates->At(i)->HasTrackerTrk() && fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) ||
+            (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {                  
+          fChargedRecoil -= fPFCandidates->At(i)->Mom();
+          fRecoil -= fPFCandidates->At(i)->Mom();
+        }
+      }
+
+      //neutrals
+      if (fPFCandidates->At(i)->PFType()== PFCandidate::eNeutralHadron || fPFCandidates->At(i)->PFType()== PFCandidate::eGamma) {
+        if (fPFCandidates->At(i)->Pt() > ptCut and fabs(fPFCandidates->At(i)->Eta()) < etaCut ) {          
+          fRecoil -= fPFCandidates->At(i)->Mom();
+        }
+      }
+    }
+  }
 
   return;
 }
@@ -309,6 +437,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
           (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
+        fChargedRecoil += fPFCandidates->At(i)->Mom();
       }
     }
 
@@ -317,6 +447,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       if (fPFCandidates->At(i)->Pt() > ptCut and fabs(fPFCandidates->At(i)->Eta()) < etaCut ) {
 	neutralNumeratorX -= fPFCandidates->At(i)->Px();
 	neutralNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
       }
     }
   }
@@ -392,6 +523,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
           (fPFCandidates->At(i)->HasGsfTrk()     && fabs(fPFCandidates->At(i)->GsfTrk()->DzCorrected(*fVertex)    ) < deltaZCut)) {
 	trackNumeratorX -= fPFCandidates->At(i)->Px();
 	trackNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
+        fChargedRecoil += fPFCandidates->At(i)->Mom();
       }
     }
 
@@ -400,6 +533,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       if (fPFCandidates->At(i)->Pt() > ptCut and fabs(fPFCandidates->At(i)->Eta()) < etaCut ) {
 	neutralNumeratorX -= fPFCandidates->At(i)->Px();
 	neutralNumeratorY -= fPFCandidates->At(i)->Py();
+        fRecoil += fPFCandidates->At(i)->Mom();
       }
     }
   }

@@ -43,12 +43,29 @@ namespace mithep {
 
     ~MetTools() {}
     
-    void AddToCorrectedTrackMet ( const Particle *p);
-    void AddToCorrectedMet ( const Particle *p);
-    Met GetCorrectedMet() { return fCorrectedMet; }
-    Met GetMinimumMet(const Met *UncorrectedMet);
-    Met GetCorrectedTrackMet() { return fCorrectedTrackMet; }
-    Met GetMinimumTrackMet(const Met *UncorrectedMet);
+    void AddToCorrectedTrackMet                   ( const Particle *p, bool debug = false);
+    void AddToCorrectedMet                        ( const Particle *p );
+    void AddToRecoil                              ( const Particle *p );
+    void RemoveParticleInIsoConeFromTrackMet      ( const Particle *p, 
+                                                    const PFCandidateCol *fPFCandidates, 
+                                                    const Vertex *fVertex, float deltaZCut, 
+                                                    float deltaR, bool debug = false );
+    void RemoveParticleInIsoConeFromCorrectedMet  ( const Particle *p, 
+                                                    const PFCandidateCol *fPFCandidates, 
+                                                    const Vertex *fVertex, 
+                                                    float deltaZCut, float ptCut, float etaCut, 
+                                                    float deltaR);
+    void RemoveParticleInIsoConeFromRecoil        ( const Particle *p, 
+                                                    const PFCandidateCol *fPFCandidates, 
+                                                    const Vertex *fVertex, 
+                                                    float deltaZCut, float ptCut, float etaCut, 
+                                                    float deltaR);
+    Met  GetMinimumMet                            (const Met *UncorrectedMet);
+    Met  GetMinimumTrackMet                       (const Met *UncorrectedMet);
+    Met  GetCorrectedMet()         { return fCorrectedMet; }
+    Met  GetCorrectedTrackMet()    { return fCorrectedTrackMet; }
+    FourVectorM  Recoil()          { return fRecoil; }
+    FourVectorM  ChargedRecoil()   { return fChargedRecoil; }
 
     template<class V>
     double GetProjectedMet(const V *fV, const Met *UncorrectedMet);
@@ -60,6 +77,8 @@ namespace mithep {
   private:
     Met fCorrectedMet;
     Met fCorrectedTrackMet;
+    FourVectorM fRecoil;
+    FourVectorM fChargedRecoil;
     
     ClassDef(MetTools, 0) // Met tools
       };
