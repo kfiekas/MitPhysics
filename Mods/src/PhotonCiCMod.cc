@@ -17,10 +17,12 @@ PhotonCiCMod::PhotonCiCMod(const char *name, const char *title) :
   fGoodPhotonsName   (ModNames::gkGoodPhotonsName),
   fTrackBranchName   (Names::gkTrackBrn),
   fPileUpDenName     (Names::gkPileupEnergyDensityBrn),
+
   fElectronName      ("Electrons"),
-  fPhotonPtMin(20.0),
-  fApplySpikeRemoval(kFALSE),
-  fAbsEtaMax(999.99),
+  fPhotonPtMin       (20.0),
+  fAbsEtaMax         (999.99),
+  fApplySpikeRemoval (kFALSE),
+
   fPhotons(0),
   fTracks(0),
   fPileUpDen(0),
@@ -52,7 +54,7 @@ PhotonCiCMod::PhotonCiCMod(const char *name, const char *title) :
   fIsData(false),
 
   rng(new TRandom3()),
-
+  
   fMCParticleName(Names::gkMCPartBrn),
   fMCParticles(0),
   fPileUpName         ("PileupInfo"),
@@ -77,7 +79,7 @@ void PhotonCiCMod::Process()
   GoodPhotons->SetName(fGoodPhotonsName);
   GoodPhotons->SetOwner(kTRUE);
 
-  Double_t _tRho = -1.;
+  Double_t _tRho = 0.;
   LoadEventObject(fTrackBranchName,    fTracks);
   LoadEventObject(fPileUpDenName,      fPileUpDen);
   LoadEventObject(fElectronName,       fElectrons);
@@ -95,7 +97,7 @@ void PhotonCiCMod::Process()
     numPU = (Float_t) fPileUp->At(0)->GetPU_NumInteractions();  
 
   if(fPileUpDen->GetEntries() > 0)
-      _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
+    _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
 
   bool doVtxSelection = true;
   bool doMCSmear      = true;
@@ -143,10 +145,10 @@ void PhotonCiCMod::Process()
 
     preselPh->Add(ph);
   }
-
+  
   // sort both by pt... again ;)
   preselPh->Sort();
-
+  
   unsigned int numPairs = 0;
   if( preselPh->GetEntries() > 0)
     numPairs = (preselPh->GetEntries()-1)*preselPh->GetEntries()/2;
@@ -261,6 +263,8 @@ void PhotonCiCMod::Process()
 	  width1 = fMCSmear_EE_hR9;
 	else
 	  width1 = fMCSmear_EE_lR9;
+
+
       if(fixPhSec[iPair]->IsEB())
 	if(fixPhSec[iPair]->R9() > 0.94)
 	  width2 = fMCSmear_EB_hR9;
@@ -279,12 +283,12 @@ void PhotonCiCMod::Process()
 	scaleFac2 = rng->Gaus(1.,width2);
       }
     }
-
+    
     if(iPair==0) {
       ptBefore1 = fixPhFst[iPair]->Pt();
       ptBefore2 = fixPhSec[iPair]->Pt();
     }
-
+    
     if(print && false) {
       std::cout<<" Photon Pair #"<<iPair+1<<std::endl;
       std::cout<<"      Ph1 px = "<<fixPhFst[iPair]->Mom().X()<<std::endl;
@@ -318,7 +322,7 @@ void PhotonCiCMod::Process()
       std::cout<<"           E = "<<fixPhSec[iPair]->Mom().E()<<std::endl;
       std::cout<<"           M = "<<fixPhSec[iPair]->Mom().M()<<std::endl;
     }
-
+    
     // store the vertex for this pair
     if(doVtxSelection) {
       unsigned int iVtx = findBestVertex(fixPhFst[iPair],fixPhSec[iPair],bsp, print);
@@ -386,13 +390,44 @@ void PhotonCiCMod::Process()
   }
 
   Float_t _theVtxZ = -999.;
+  Float_t catPh1 = 0.;
+  Float_t catPh2 = 0.;
+  Float_t catEvt = -1.;
+  
+  bool ph1IsLowR9 = false;
+  bool ph2IsLowR9 = false;
+
   if(phHard && phSoft) {
     GoodPhotons->AddOwned(phHard);
     GoodPhotons->AddOwned(phSoft);
     if(_theVtx)
       _theVtxZ=_theVtx->Position().Z();
-  }
 
+    catPh1=1.;
+    catPh2=1.;
+    catEvt=0.;
+
+    if(phHard->SCluster()->AbsEta()>1.5)
+      catPh1=3;
+    if(phHard->R9() < 0.94) {
+      catPh1=catPh1+1;
+      ph1IsLowR9 = true;
+    }
+
+    if(phSoft->SCluster()->AbsEta()>1.5)
+      catPh2=3;
+
+    if(phSoft->R9() < 0.94) {
+      catPh2=catPh2+1;    
+      ph2IsLowR9 = true;
+    }
+
+    if(catPh1 > 2.5 || catPh2 > 2.5)
+      catEvt=2.;
+    if(ph1IsLowR9 || ph2IsLowR9)
+      catEvt=catEvt+1.;    
+  }
+  
   // sort according to pt
   GoodPhotons->Sort();
   
@@ -404,7 +439,8 @@ void PhotonCiCMod::Process()
   bool doFill = (phHard && phSoft);
   Float_t _mass = ( doFill ? (phHard->Mom()+phSoft->Mom()).M() : -100.);
   Float_t _ptgg = ( doFill ? (phHard->Mom()+phSoft->Mom()).Pt() : -100.);
-
+  if(_ptgg < 40. && doFill) catEvt = catEvt+4.;
+  
   Float_t _pth    = -100.;
   Float_t _decayZ = -100.;
   if( !fIsData ) findHiggsPtAndZ(_pth, _decayZ);
@@ -422,6 +458,9 @@ void PhotonCiCMod::Process()
 			  _lumiSec,
 			  (float) theChosenVtx,
 			  (float) numPairs,
+			  catPh1,
+			  catPh2,
+			  catEvt,
 			  kinPh1[0],
 			  kinPh1[1],
 			  kinPh1[2],
@@ -466,8 +505,13 @@ void PhotonCiCMod::Process()
 			  ptBefore2
   };
 
-  hCiCTuple->Fill(fillEvent);
 
+
+  if(_mass > 0.) {
+    //std::cout<<catPh1<<"  "<<catPh2<<"  "<<catEvt<<"  "<<_mass<<std::endl;
+    hCiCTuple->Fill(fillEvent);
+  }
+  
   delete[] theVtx;
   delete[] theVtxIdx;
 
@@ -494,7 +538,7 @@ void PhotonCiCMod::SlaveBegin()
     ReqBranch(Names::gkMCPartBrn,fMCParticles);
   }
 
-  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","rho:higgspt:higgsZ:vtxZ:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ivtx:npairs:ph1Iso1:ph1Iso2:ph1Iso3:ph1Cov:ph1HoE:ph1R9:ph1DR:ph1Pt:ph1Eta:ph1Phi:ph1Eiso3:ph1Eiso4:ph1Hiso4:ph1TisoA:ph1TisoW:ph1Tiso:ph1Et:ph1E:ph1Pass:ph1Cat:ph2Iso1:ph2Iso2:ph2Iso3:ph2Cov:ph2HoE:ph2R9:ph2DR:ph2Pt:ph2Eta:ph2Phi:ph2Eiso3:ph2Eiso4:ph2Hiso4:ph2TisoA:ph2TisoW:ph2Tiso:ph2Et:ph2E:ph2Pass:ph2Cat:ph1UPt:ph2UPt");
+  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","rho:higgspt:higgsZ:vtxZ:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ivtx:npairs:ph1Cat:ph2Cat:evtCat:ph1Iso1:ph1Iso2:ph1Iso3:ph1Cov:ph1HoE:ph1R9:ph1DR:ph1Pt:ph1Eta:ph1Phi:ph1Eiso3:ph1Eiso4:ph1Hiso4:ph1TisoA:ph1TisoW:ph1Tiso:ph1Et:ph1E:ph1Pass:ph1CatDebug:ph2Iso1:ph2Iso2:ph2Iso3:ph2Cov:ph2HoE:ph2R9:ph2DR:ph2Pt:ph2Eta:ph2Phi:ph2Eiso3:ph2Eiso4:ph2Hiso4:ph2TisoA:ph2TisoW:ph2Tiso:ph2Et:ph2E:ph2Pass:ph2CatDebug:ph1UPt:ph2UPt");
   
   AddOutput(hCiCTuple);
 
