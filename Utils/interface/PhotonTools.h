@@ -22,6 +22,8 @@
 #include "MitAna/DataTree/interface/TriggerObjectCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
+class TRandom3;
+
 namespace mithep {
   class PhotonTools {
     public:
@@ -44,41 +46,46 @@ namespace mithep {
       };      
       
      enum CiCBaseLineCats {
-       kCiCCat1 = 0,
+       kCiCNoCat = 0,
+       kCiCCat1,
        kCiCCat2,
        kCiCCat3,
        kCiCCat4
      };     
 
-      static Bool_t       PassConversionId(const Photon *p, const DecayParticle *c);
-      static Bool_t       PassElectronVeto(const Photon *p, const ElectronCol *els);
-      static Double_t       ElectronVetoCiC(const Photon *p, const ElectronCol *els);
-      static Bool_t       PassElectronVetoConvRecovery(const Photon *p, const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v);
-      static Bool_t       PassTriggerMatching(const Photon *p, const TriggerObjectCol *trigobjs);
-      static const DecayParticle *MatchedConversion(const Photon *p, const DecayParticleCol *conversions, 
-                                               const BaseVertex *vtx, Int_t nWrongHitsMax=1, Double_t probMin=1e-6,
-                                               Double_t lxyMin = 2.0, Double_t dRMin = 0.1); 
-      static const DecayParticle *MatchedConversion(const Track *t, const DecayParticleCol *conversions, 
-                                               const BaseVertex *vtx, Int_t nWrongHitsMax=1, Double_t probMin=1e-6,
-                                               Double_t lxyMin = 2.0);                                               
-      static DiphotonR9EtaCats DiphotonR9EtaCat(const Photon *p1, const Photon *p2);
-      static DiphotonR9EtaConversionCats DiphotonR9EtaConversionCat(const Photon *p1, const Photon *p2, const DecayParticleCol *conversions, const BaseVertex *v);
-      static CiCBaseLineCats CiCBaseLineCat(const Photon *p);
+    // Methods for scaling/smearing Photons
+    static void ScalePhoton(Photon* p, Double_t scale);
+    static void SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t iSeed=0);
 
-      static const DecayParticle *MatchedCiCConversion(const Photon *p, const DecayParticleCol *conversions, 
-						       Double_t dPhiMin=0.1, Double_t dEtaMin=0.1,Double_t dRMin=0.1, 
-						       bool print = false);
-
-      static bool PassCiCSelection(Photon* ph, 
-				   const Vertex* vtx, 
-				   const TrackCol*    trackCol,
-				   const ElectronCol* eleCol,
-				   const VertexCol*   vtxCol,
-				   double rho, double ptmin,
-				   bool print = false, float* kin=NULL);
-
+    static Bool_t       PassConversionId(const Photon *p, const DecayParticle *c);
+    static Bool_t       PassElectronVeto(const Photon *p, const ElectronCol *els);
+    static Double_t     ElectronVetoCiC(const Photon *p, const ElectronCol *els);
+    static Bool_t       PassElectronVetoConvRecovery(const Photon *p, const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v);
+    static Bool_t       PassTriggerMatching(const Photon *p, const TriggerObjectCol *trigobjs);
+    static const DecayParticle *MatchedConversion(const Photon *p, const DecayParticleCol *conversions, 
+						  const BaseVertex *vtx, Int_t nWrongHitsMax=1, Double_t probMin=1e-6,
+						  Double_t lxyMin = 2.0, Double_t dRMin = 0.1); 
+    static const DecayParticle *MatchedConversion(const Track *t, const DecayParticleCol *conversions, 
+						  const BaseVertex *vtx, Int_t nWrongHitsMax=1, Double_t probMin=1e-6,
+						  Double_t lxyMin = 2.0);                                               
+    static DiphotonR9EtaCats DiphotonR9EtaCat(const Photon *p1, const Photon *p2);
+    static DiphotonR9EtaConversionCats DiphotonR9EtaConversionCat(const Photon *p1, const Photon *p2, const DecayParticleCol *conversions, const BaseVertex *v);
+    static CiCBaseLineCats CiCBaseLineCat(const Photon *p);
+    
+    static const DecayParticle *MatchedCiCConversion(const Photon *p, const DecayParticleCol *conversions, 
+						     Double_t dPhiMin=0.1, Double_t dEtaMin=0.1,Double_t dRMin=0.1, 
+						     bool print = false);
+    
+    static bool PassCiCSelection(Photon* ph, 
+				 const Vertex* vtx, 
+				 const TrackCol*    trackCol,
+				 const ElectronCol* eleCol,
+				 const VertexCol*   vtxCol,
+				 double rho, double ptmin,
+				 bool print = false, float* kin=NULL);
+    
     ClassDef(PhotonTools, 0) // Muon tools
-  };
+      };
 }
 
 #endif

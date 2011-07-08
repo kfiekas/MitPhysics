@@ -452,8 +452,9 @@ const MCParticle* GeneratorTools::MatchMuonToSimParticle(
   
   if (printDebugLevel >= 5) cout << "\nSimulated particles near Electron\n";
   for(UInt_t j=0;j<particles->GetEntries();j++) {
-    Bool_t isStable = false;
-    Bool_t isTrackable = false;
+    // removed byb Fabian... they are NOT used
+    //     Bool_t isStable = false;
+    //     Bool_t isTrackable = false;
 
     if (particles->At(j)->IsSimulated()) {
       Double_t DR = MathUtils::DeltaR(muonTrack->Phi(), muonTrack->Eta(), particles->At(j)->Phi(),

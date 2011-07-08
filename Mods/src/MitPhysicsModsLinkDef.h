@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.24 2011/01/21 09:24:08 dkralph Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.25 2011/06/01 18:11:52 fabstoec Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -21,6 +21,7 @@
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/PhotonCiCMod.h"
+#include "MitPhysics/Mods/interface/PhotonPairSelector.h"
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
 #include "MitPhysics/Mods/interface/PFTauCleaningMod.h"
 #include "MitPhysics/Mods/interface/TauIDMod.h"
@@ -58,6 +59,7 @@
 #pragma link C++ class mithep::PhotonCleaningMod+;
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::PhotonCiCMod+;
+#pragma link C++ class mithep::PhotonPairSelector+;
 #pragma link C++ class mithep::TauCleaningMod+;
 #pragma link C++ class mithep::PFTauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;

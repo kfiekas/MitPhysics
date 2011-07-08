@@ -1,7 +1,8 @@
-// $Id: VertexTools.cc,v 1.3 2011/07/01 13:49:01 maxi Exp $
+// $Id: VertexTools.cc,v 1.4 2011/07/04 13:48:50 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
+#include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include <TFile.h>
 #include <TVector3.h>
@@ -247,4 +248,216 @@ void VertexTools::BanThisTrack(const Track* track){
 void VertexTools::Reset(){
   VertexTools* vtool = VertexTools::instance("");
   (vtool->excluded).clear();
+}
+
+
+//------------------------------------------------------------------------------------
+// The below tools are from the H->2photons EPS2011 BaseLine (common) Selection
+const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1, 
+					       const Photon*           ph2, 
+					       const BaseVertex*       bsp,
+					       const VertexCol*        vtcs,
+					       const DecayParticleCol* conv) {
+  
+  // check if all input is valid
+  if( !ph1 || !ph2 || !bsp || !vtcs ) return NULL;
+  // CAUTION: We allow for passing NULL for the Conversions, in that case only the simple Ranking is used.
+
+  // here we will store the idx of the best Vtx
+  unsigned int bestIdx = 0;
+
+  // using asd much as possible 'Globe' naming schemes...
+  int*    ptbal_rank  = new int   [vtcs->GetEntries()];
+  int*    ptasym_rank = new int   [vtcs->GetEntries()];
+  int*    total_rank  = new int   [vtcs->GetEntries()];
+  double* ptbal       = new double[vtcs->GetEntries()];
+  double* ptasym      = new double[vtcs->GetEntries()];
+  
+  unsigned int numVertices = vtcs->GetEntries();
+  double       ptgg        = 0.;                     // stored for later in the conversion
+
+  // loop over all the vertices...
+  for(unsigned int iVtx = 0; iVtx < numVertices; ++iVtx) {
+    
+    const Vertex* tVtx = vtcs->At(iVtx);
+    ptbal      [iVtx] = 0.0;
+    ptasym     [iVtx] = 0.0;
+    ptbal_rank [iVtx] = 1;
+    ptasym_rank[iVtx] = 1;
+    
+    // compute the photon momenta with respect to this Vtx
+    FourVectorM newMomFst = ph1->MomVtx(tVtx->Position());
+    FourVectorM newMomSec = ph2->MomVtx(tVtx->Position());
+    
+    FourVectorM higgsMom = newMomFst+newMomSec; 
+
+    double ph1Eta = newMomFst.Eta();
+    double ph2Eta = newMomSec.Eta();
+
+    double ph1Phi = newMomFst.Phi();
+    double ph2Phi = newMomSec.Phi();
+    
+    // loop over all tracks and computew variables for ranking...
+    FourVectorM totTrkMom(0,0,0,0);
+    for(unsigned int iTrk = 0; iTrk < tVtx->NTracks(); ++iTrk) {
+      const Track* tTrk = tVtx->Trk(iTrk);
+      
+      // compute distance between Trk and the Photons
+      double tEta = tTrk->Eta();
+      double tPhi = tTrk->Phi();
+      double dEta1 = TMath::Abs(tEta-ph1Eta);
+      double dEta2 = TMath::Abs(tEta-ph2Eta);
+      double dPhi1 = TMath::Abs(tPhi-ph1Phi);
+      double dPhi2 = TMath::Abs(tPhi-ph2Phi);
+      if(dPhi1 > M_PI) dPhi1 = 2*M_PI - dPhi1;
+      if(dPhi2 > M_PI) dPhi2 = 2*M_PI - dPhi2;
+
+      double dR1 = TMath::Sqrt(dEta1*dEta1+dPhi1*dPhi1);
+      double dR2 = TMath::Sqrt(dEta2*dEta2+dPhi2*dPhi2);
+            
+      if(dR1 < 0.05 || dR2 < 0.05) continue;
+      totTrkMom = totTrkMom + tTrk->Mom4(0);
+    }
+
+    // compute the ranking variables for this Vtx
+    double ptvtx   = totTrkMom.Pt();
+    double pthiggs = higgsMom.Pt();
+    ptbal [iVtx]  = (totTrkMom.Px()*(newMomFst.Px()+newMomSec.Px()));
+    ptbal [iVtx] += (totTrkMom.Py()*(newMomFst.Py()+newMomSec.Py()));
+    ptbal [iVtx]  = -ptbal[iVtx]/pthiggs;
+    ptasym[iVtx]  = (ptvtx - pthiggs)/(ptvtx + pthiggs);
+    
+    // do the little ranking acrobatics...
+    for(unsigned int cVtx =0; cVtx < iVtx; ++cVtx) {
+      if(ptbal [iVtx] > ptbal [cVtx])
+	ptbal_rank[cVtx]++;
+      else
+	ptbal_rank[iVtx]++;
+      if(ptasym [iVtx] > ptasym [cVtx])
+	ptasym_rank[cVtx]++;
+      else
+	ptasym_rank[iVtx]++;
+    }
+  }
+  
+  // loop again over all Vertcices (*sigh*), compute total score and final rank
+  // CAUTION: Total rank starts at '0', so the best ranked Vtx has RANK 0
+  for(unsigned int iVtx = 0; iVtx < numVertices; ++iVtx) {
+    ptasym_rank [iVtx] = ptbal_rank [iVtx]*ptasym_rank [iVtx]*(iVtx+1);
+    total_rank  [iVtx] = 0;
+    for(unsigned int cVtx =0; cVtx < iVtx; ++cVtx) {
+      if(ptasym_rank [iVtx] > ptasym_rank [cVtx]) total_rank[iVtx]++;
+      else if(ptasym_rank [iVtx] == ptasym_rank [cVtx]) {                   // use 'ptbal' as the tie-breaker
+	if(ptbal_rank [iVtx] > ptbal_rank [cVtx]) total_rank[iVtx]++;
+	else total_rank[cVtx]++;
+      }
+      else total_rank[cVtx]++;
+    }
+  }
+  
+  // delete the auxiliary dynamic arrays
+  delete[] ptbal_rank  ;
+  delete[] ptasym_rank ;
+  delete[] ptbal       ;
+  delete[] ptasym      ;
+  
+  // find the best ranked Vertex so far....
+  for(unsigned int iVtx = 0; iVtx < numVertices; ++iVtx) {
+    if(total_rank[iVtx] == 0) bestIdx = iVtx;
+  }
+  
+  // check if there's a conversion among the pre-selected photons
+  // ...this will return NULL in case conv==NULL
+  const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, conv, 0.1, 0.1, 0.1);
+  const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, conv, 0.1, 0.1, 0.1);
+
+  if( conv1 && ( conv1->Prob() < 0.0005) ) conv1 = NULL;
+  if( conv2 && ( conv2->Prob() < 0.0005) ) conv2 = NULL;
+  
+  double zconv  = 0.;
+  double dzconv = 0.;
+  
+  //--------------------------------------------------------------------
+  // start doing the Conversion acrobatics... 'copied' from the Globe...
+  if(conv1 || conv2) {
+    if( !conv2 ){
+      const mithep::ThreeVector caloPos1(ph1->CaloPos());
+      zconv  = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
+      if( ph1->IsEB() ) {
+	double rho = conv1->Position().Rho();
+	if     ( rho < 15. ) dzconv = 0.06;
+	else if( rho < 60. ) dzconv = 0.67;
+	else                 dzconv = 2.04;
+      } else {
+	double z = conv1->Position().Z();
+	if     ( TMath::Abs(z) < 50. )   dzconv = 0.18;
+	else if( TMath::Abs(z) < 100.)   dzconv = 0.61;
+	else                 dzconv = 0.99;
+      }
+    } else if( !conv1 ) {
+      const mithep::ThreeVector caloPos2(ph2->CaloPos());
+      zconv  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
+      if( ph2->IsEB() ) {
+	double rho = conv2->Position().Rho();
+	if     ( rho < 15. ) dzconv = 0.06;
+	else if( rho < 60. ) dzconv = 0.67;
+	else                 dzconv = 2.04;
+      } else {
+	double z = conv2->Position().Z();
+	if     ( TMath::Abs(z) < 50. )   dzconv = 0.18;
+	else if( TMath::Abs(z) < 100.)   dzconv = 0.61;
+	else                 dzconv = 0.99;
+      }
+    } else {
+      const mithep::ThreeVector caloPos1(ph1->CaloPos());
+      double z1  = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
+      double dz1 = 0.;
+      if( ph1->IsEB() ) {
+	double rho = conv1->Position().Rho();
+	if     ( rho < 15. ) dz1 = 0.06;
+	else if( rho < 60. ) dz1 = 0.67;
+	else                 dz1 = 2.04;
+      } else {
+	double z = conv1->Position().Z();
+	if     ( TMath::Abs(z) < 50. )   dz1 = 0.18;
+	else if( TMath::Abs(z) < 100.)   dz1 = 0.61;
+	else                 dz1 = 0.99;
+      }
+      const mithep::ThreeVector caloPos2(ph2->CaloPos());
+      double z2  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
+      double dz2 = 0.;
+      if( ph2->IsEB() ) {
+	double rho = conv2->Position().Rho();
+	if     ( rho < 15. ) dz2 = 0.06;
+	else if( rho < 60. ) dz2 = 0.67;
+	else                 dz2 = 2.04;
+      } else {
+	double z = conv2->Position().Z();
+	if     ( TMath::Abs(z) < 50. )   dz2 = 0.18;
+	else if( TMath::Abs(z) < 100.)   dz2 = 0.61;
+	else                 dz2 = 0.99;
+      }
+      zconv  = ( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
+      dzconv = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
+    }
+
+    // loop over all ranked Vertices and choose the closest to the Conversion one
+    int maxVertices = ( ptgg > 30 ? 3 : 5);
+    double minDz = -1.;    
+    for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {
+      if(total_rank[iVtx] < maxVertices) {
+	const Vertex* tVtx = vtcs->At(iVtx);
+	double tDz = TMath::Abs(zconv - tVtx->Z());
+	if( (minDz < 0. || tDz < minDz) && ( tDz < dzconv ) ) {	  
+	  minDz = tDz;
+	  bestIdx = iVtx;
+	}
+      }    
+    }
+  }
+  // END of Conversion Acrobatics
+  //--------------------------------------------------------------------
+
+  delete[] total_rank  ;
+  return vtcs->At(bestIdx);
 }

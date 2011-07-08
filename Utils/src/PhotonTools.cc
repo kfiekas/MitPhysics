@@ -1,10 +1,11 @@
-// $Id: PhotonTools.cc,v 1.6 2011/06/29 18:28:05 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.7 2011/07/04 13:40:46 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include <TFile.h>
+#include <TRandom3.h>
 
 ClassImp(mithep::PhotonTools)
 
@@ -14,6 +15,29 @@ using namespace mithep;
 PhotonTools::PhotonTools()  
 {
   // Constructor.
+}
+
+
+void PhotonTools::ScalePhoton(Photon* p, Double_t scale) {
+  if( !p ) return;
+  FourVectorM mom = p->Mom();
+  p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
+  
+}
+
+void PhotonTools::SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t iSeed) {
+  
+  if( !p  )       return;
+  if( !rng)       return;
+  if( width < 0.) return;
+
+  if( iSeed ) rng->SetSeed(iSeed);
+  FourVectorM mom = p->Mom();
+  Double_t scale = rng->Gaus(1.,width);
+  if( scale > 0)
+    p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
+
+  return;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -192,6 +216,9 @@ PhotonTools::CiCBaseLineCats PhotonTools::CiCBaseLineCat(const Photon *p) {
     if ( p->R9() > 0.94 ) return kCiCCat3;
     else return kCiCCat4;
   }
+
+  // shoud NEVER happen, but you never know...
+  return kCiCNoCat;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -201,6 +228,9 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
 						       Double_t dRMin,
 						       bool print) {
   
+  // if there are no conversons, return
+  if ( !p || !conversions)  return NULL;
+
   const DecayParticle *match = NULL;
 
   double minDeta = 999.;

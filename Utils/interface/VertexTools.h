@@ -60,6 +60,15 @@ namespace mithep {
       return meobject;
     }        
 
+    // ----------------------------------------------------------
+    // Methods (added by Fabian) on the EPS BaseLine Analysis
+    static const Vertex* findVtxBasicRanking(const Photon*           ph1, 
+					     const Photon*           ph2, 
+					     const BaseVertex*       bsp,
+					     const VertexCol*        vtcs,
+					     const DecayParticleCol* conv = NULL);
+    // ----------------------------------------------------------
+
     Float_t tmvar1, tmvar2, tmvar3, tmvar4, tmvar5, tmvar6;
     TMVA::Reader* reader;
     
