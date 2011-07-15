@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.4 2011/07/04 13:48:50 fabstoec Exp $
+// $Id: VertexTools.cc,v 1.5 2011/07/08 17:54:27 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -257,7 +257,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
 					       const Photon*           ph2, 
 					       const BaseVertex*       bsp,
 					       const VertexCol*        vtcs,
-					       const DecayParticleCol* conv) {
+					       const DecayParticleCol* conv ) {
   
   // check if all input is valid
   if( !ph1 || !ph2 || !bsp || !vtcs ) return NULL;
@@ -265,7 +265,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
 
   // here we will store the idx of the best Vtx
   unsigned int bestIdx = 0;
-
+  
   // using asd much as possible 'Globe' naming schemes...
   int*    ptbal_rank  = new int   [vtcs->GetEntries()];
   int*    ptasym_rank = new int   [vtcs->GetEntries()];
@@ -322,6 +322,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
     // compute the ranking variables for this Vtx
     double ptvtx   = totTrkMom.Pt();
     double pthiggs = higgsMom.Pt();
+    if(iVtx == 0) ptgg = pthiggs;
     ptbal [iVtx]  = (totTrkMom.Px()*(newMomFst.Px()+newMomSec.Px()));
     ptbal [iVtx] += (totTrkMom.Py()*(newMomFst.Py()+newMomSec.Py()));
     ptbal [iVtx]  = -ptbal[iVtx]/pthiggs;
@@ -437,17 +438,23 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
 	else if( TMath::Abs(z) < 100.)   dz2 = 0.61;
 	else                 dz2 = 0.99;
       }
+
       zconv  = ( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
       dzconv = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
     }
 
+
     // loop over all ranked Vertices and choose the closest to the Conversion one
     int maxVertices = ( ptgg > 30 ? 3 : 5);
-    double minDz = -1.;    
+    double minDz = -1.; 
+
+   
     for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {
+
       if(total_rank[iVtx] < maxVertices) {
 	const Vertex* tVtx = vtcs->At(iVtx);
 	double tDz = TMath::Abs(zconv - tVtx->Z());
+
 	if( (minDz < 0. || tDz < minDz) && ( tDz < dzconv ) ) {	  
 	  minDz = tDz;
 	  bestIdx = iVtx;

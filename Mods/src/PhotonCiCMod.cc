@@ -281,7 +281,7 @@ void PhotonCiCMod::Process()
 	rng->SetSeed(seed1);
 	scaleFac1 = rng->Gaus(1.,width1);
 	rng->SetSeed(seed2);
-	scaleFac2 = rng->Gaus(1.,width2);
+	scaleFac2 = rng->Gaus(1.,width2);       
       }
     }
     
@@ -289,7 +289,7 @@ void PhotonCiCMod::Process()
       ptBefore1 = fixPhFst[iPair]->Pt();
       ptBefore2 = fixPhSec[iPair]->Pt();
     }
-    
+
     if(print && false) {
       std::cout<<" Photon Pair #"<<iPair+1<<std::endl;
       std::cout<<"      Ph1 px = "<<fixPhFst[iPair]->Mom().X()<<std::endl;
@@ -333,6 +333,7 @@ void PhotonCiCMod::Process()
     } else
       theVtx[iPair] =  fPV->At(0);
     
+
     // fix the kinematics for both events
     FourVectorM newMomFst = fixPhFst[iPair]->MomVtx(theVtx[iPair]->Position());
     FourVectorM newMomSec = fixPhSec[iPair]->MomVtx(theVtx[iPair]->Position());
@@ -366,7 +367,7 @@ void PhotonCiCMod::Process()
     } else {
       bool pass1 = PhotonTools::PassCiCSelection(fixPhFst[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 40., true, false, kinPh1);
       bool pass2 = PhotonTools::PassCiCSelection(fixPhSec[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 30., true, false, kinPh2);
-
+      
       if( pass1 && pass2 )
 	passPairs.push_back(iPair);
     }
@@ -560,7 +561,7 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 
   double ptgg = 0.;    // stored for later in the conversion
 
-  if(print) {
+  if(print && false) {
     std::cout<<" --------------------------------- "<<std::endl;
     std::cout<<"   looking for Vtx for photon pair "<<std::endl;
     std::cout<<"                            pt 1 = "<<ph1->Et()<<std::endl;
@@ -676,7 +677,7 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
 
   // compute the total rank
   for(unsigned int iVtx = 0; iVtx < numVertices; ++iVtx) {
-    if(print) {
+    if(print && false) {
       std::cout<<"     Vertex #"<<iVtx<<"  has rank PTB "<<ptbal_rank[iVtx]<<"   ("<<ptbal[iVtx]<<")"<<std::endl;
       std::cout<<"     Vertex #"<<iVtx<<"  has rank PTSYM "<<ptasym_rank[iVtx]<<"   ("<<ptasym[iVtx]<<")"<<std::endl;
     }
@@ -696,12 +697,12 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
     }
   }
 
-  if(print) std::cout<<std::endl;
+  if(print && false) std::cout<<std::endl;
 
   unsigned int bestIdx = 0;
   for(unsigned int iVtx = 0; iVtx < numVertices; ++iVtx) {
     if(total_rank[iVtx] == 0) bestIdx = iVtx;
-    if(print) {
+    if(print && false) {
       std::cout<<"     Vertex #"<<iVtx<<"  has rank "<<total_rank[iVtx]<<std::endl;
     }
   }
@@ -717,7 +718,7 @@ unsigned int PhotonCiCMod::findBestVertex(Photon* ph1, Photon* ph2, const BaseVe
   const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, fConversions, 0.1, 0.1, 0.1, print);
   const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, fConversions, 0.1, 0.1, 0.1, print);
 
-  if(print) {
+  if(print && false) {
     if (conv1) {
       std::cout<<" Photon 1 has has conversion with P = "<<conv1->Prob()<<std::endl;
       std::cout<<"                                Rho = "<<conv1->Position().Rho()<<std::endl;

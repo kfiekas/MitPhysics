@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.8 2011/07/08 17:54:27 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.9 2011/07/15 17:24:36 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -31,9 +31,10 @@ void PhotonTools::SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t i
   if( !rng)       return;
   if( width < 0.) return;
 
-  if( iSeed ) rng->SetSeed(iSeed);
+  rng->SetSeed(iSeed);
   FourVectorM mom = p->Mom();
   Double_t scale = rng->Gaus(1.,width);
+
   if( scale > 0)
     p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
 

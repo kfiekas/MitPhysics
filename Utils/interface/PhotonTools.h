@@ -55,7 +55,7 @@ namespace mithep {
 
     // Methods for scaling/smearing Photons
     static void ScalePhoton(Photon* p, Double_t scale);
-    static void SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t iSeed=0);
+    static void SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t iSeed);
 
     static Bool_t       PassConversionId(const Photon *p, const DecayParticle *c);
     static Bool_t       PassElectronVeto(const Photon *p, const ElectronCol *els);

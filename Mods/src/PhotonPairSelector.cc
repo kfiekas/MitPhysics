@@ -245,10 +245,13 @@ void PhotonPairSelector::Process()
 	UInt_t seed1    = seedBase + (UInt_t) fixPh1st[iPair]->E() + (UInt_t) (TMath::Abs(10.*fixPh1st[iPair]->SCluster()->Eta()));
 	UInt_t seed2    = seedBase + (UInt_t) fixPh2nd[iPair]->E() + (UInt_t) (TMath::Abs(10.*fixPh2nd[iPair]->SCluster()->Eta()));
 	// get the smearing for MC photons..
+
 	double width1 = GetMCSmearFac(cat1st[iPair]);
 	double width2 = GetMCSmearFac(cat2nd[iPair]);
+	
 	PhotonTools::SmearPhoton(fixPh1st[iPair], rng, width1, seed1);
 	PhotonTools::SmearPhoton(fixPh2nd[iPair], rng, width2, seed2);
+
       }
     }
 
@@ -269,7 +272,6 @@ void PhotonPairSelector::Process()
 
     }
 
-
     // fix the kinematics for both events
     FourVectorM newMom1st = fixPh1st[iPair]->MomVtx(theVtx[iPair]->Position());
     FourVectorM newMom2nd = fixPh2nd[iPair]->MomVtx(theVtx[iPair]->Position());
@@ -286,11 +288,14 @@ void PhotonPairSelector::Process()
       pass2 = ( fixPh2nd[iPair]->Pt() > fTrailingPtMin );
       break;
     case kCiCPhSelection:
+
+
       pass1 = PhotonTools::PassCiCSelection(fixPh1st[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, fLeadingPtMin, fApplyEleVeto);
       if(pass1) pass2 = PhotonTools::PassCiCSelection(fixPh2nd[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, fTrailingPtMin, fApplyEleVeto);
+
       break;
     case kMITPhSelection:
-      // FIX-ME: This is a place-holder.. MIT guys: Please worj hard... ;)
+      // FIX-ME: This is a place-holder.. MIT guys: Please work hard... ;)
       pass1 = ( fixPh1st[iPair]->Pt() > fLeadingPtMin  );
       pass2 = ( fixPh2nd[iPair]->Pt() > fTrailingPtMin );
       break;
