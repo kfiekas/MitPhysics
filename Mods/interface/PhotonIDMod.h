@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.18 2011/05/18 14:01:18 bendavid Exp $
+// $Id: PhotonIDMod.h,v 1.19 2011/06/01 18:11:52 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -19,6 +19,7 @@
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/VertexCol.h"
 
 namespace mithep 
 {
@@ -75,12 +76,15 @@ namespace mithep
       }
       void                SetTriggerObjectsName(const char *n)   { fTrigObjectsName = n;       }
     
+    void                SetPVName(const char *n)          { fPVName = n;                 }
+    void                SetPVFromBranch(bool b)           { fPVFromBranch = b;           }
+
       enum EPhIdType {
         kIdUndef = 0,       //not defined
         kTight,             //"Tight"
         kLoose,             //"Loose"
         kLooseEM,           //"LooseEM"
-	kBaseLineId,        //"2011" Hgg BaseLine CiC
+	kBaseLineCiC,        //"2011" Hgg BaseLine CiC
         kCustomId           //"Custom"
       };
 
@@ -89,7 +93,6 @@ namespace mithep
         kNoIso,             //"NoIso"
         kCombinedIso,       //"CombinedIso"
         kCustomIso,         //"Custom"
-	kBaseLineIso,       //"2011" Hgg BaseLine CiC
 	kMITPUCorrected     //PileUp Corrected Hgg Isolation
       };
 
@@ -104,7 +107,8 @@ namespace mithep
       TString             fPileUpDenName;        //name of the PU density collection      
       TString             fConversionName;       //name of conversion branch
       TString             fElectronName;
-      TString             fTrigObjectsName;        //name of trigger object collection      
+      TString             fTrigObjectsName;        //name of trigger object collection
+      TString             fPVName;
       TString             fPhotonIDType;         //type of photon identification we impose
       TString             fPhotonIsoType;        //type of photon isolation we impose
       Double_t            fPhotonPtMin;          //min pt cut
@@ -135,7 +139,8 @@ namespace mithep
       const PileupEnergyDensityCol *fPileUpDen;  //!rho branch
       const DecayParticleCol *fConversions;      //!conversion branch
       const ElectronCol  *fElectrons;            //!electron branch
-
+      const VertexCol*    fPV;
+      bool                fPVFromBranch;
 
     ClassDef(PhotonIDMod, 1) // Photon identification module
   };

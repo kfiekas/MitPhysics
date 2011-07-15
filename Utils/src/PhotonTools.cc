@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.7 2011/07/04 13:40:46 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.8 2011/07/08 17:54:27 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -322,8 +322,22 @@ bool PhotonTools::PassCiCSelection(Photon* ph, const Vertex* vtx,
 				   const TrackCol* trackCol,
 				   const ElectronCol* eleCol,
 				   const VertexCol* vtxCol,
-				   double rho, double ptmin, 
+				   double rho, double ptmin,
+				   bool applyEleVeto, 
 				   bool print, float* kin) {
+
+  const Photon* phpass = ph;
+  return PhotonTools::PassCiCSelection(phpass, vtx, trackCol, eleCol, vtxCol, rho, ptmin, applyEleVeto, print, kin);
+}
+
+bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx, 
+				   const TrackCol* trackCol,
+				   const ElectronCol* eleCol,
+				   const VertexCol* vtxCol,
+				   double rho, double ptmin, 
+				   bool applyEleVeto,
+				   bool print, float* kin) {
+
   
   // these values are taken from the H2GGlobe code... (actually from Marco/s mail)
   float cic4_allcuts_temp_sublead[] = { 
@@ -424,10 +438,7 @@ bool PhotonTools::PassCiCSelection(Photon* ph, const Vertex* vtx,
 	       && covIEtaIEta                 < cic4_allcuts_temp_sublead[_tCat-1+3*4]
 	       && HoE                         < cic4_allcuts_temp_sublead[_tCat-1+4*4]
 	       && R9                          > cic4_allcuts_temp_sublead[_tCat-1+5*4]
-	       && dRTrack                     > cic4_allcuts_temp_sublead[_tCat-1+6*4]  )
-	) {
-    passCuts = -1.;
-  }
+	       && ( dRTrack > cic4_allcuts_temp_sublead[_tCat-1+6*4] || !applyEleVeto ) ) )   passCuts = -1.;
   
   if(kin) {    
     kin[18] = passCuts;

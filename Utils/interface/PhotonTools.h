@@ -76,12 +76,23 @@ namespace mithep {
 						     Double_t dPhiMin=0.1, Double_t dEtaMin=0.1,Double_t dRMin=0.1, 
 						     bool print = false);
     
+    static bool PassCiCSelection(const Photon* ph, 
+				 const Vertex* vtx, 
+				 const TrackCol*    trackCol,
+				 const ElectronCol* eleCol,
+				 const VertexCol*   vtxCol,
+				 double rho, double ptmin,
+				 bool applyEleVeto = true,
+				 bool print = false, float* kin=NULL);
+
+
     static bool PassCiCSelection(Photon* ph, 
 				 const Vertex* vtx, 
 				 const TrackCol*    trackCol,
 				 const ElectronCol* eleCol,
 				 const VertexCol*   vtxCol,
 				 double rho, double ptmin,
+				 bool applyEleVeto = true,
 				 bool print = false, float* kin=NULL);
     
     ClassDef(PhotonTools, 0) // Muon tools

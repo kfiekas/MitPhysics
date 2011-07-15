@@ -83,7 +83,10 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // ---------------------------------------
   fDoDataEneCorr     (true),
   fDoMCSmear         (true),
-  fDoVtxSelection    (true)
+  fDoVtxSelection    (true),
+  fApplyEleVeto      (true),
+
+  fTupleName         ("hCiCtuple")
   
 {
   // Constructor.
@@ -123,9 +126,19 @@ void PhotonPairSelector::Process()
   // load event based information
   Float_t _numPU = -1.;        // some sensible default values....
   Float_t _tRho  = -99.;
-  if( fPileUpDen->GetEntries() > 0 ) _tRho  = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
-  if( !fIsData )                     _numPU = (Float_t)  fPileUp   ->At(0)->GetPU_NumInteractions();  
-
+  if( fPileUpDen->GetEntries() > 0 )
+    _tRho  = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
+  
+  if( !fIsData ) {
+    for (UInt_t i=0; i<fPileUp->GetEntries(); ++i) {
+      const PileupInfo *puinfo = fPileUp->At(i);
+      if (puinfo->GetBunchCrossing()==0) {
+        _numPU = (Float_t) puinfo->GetPU_NumInteractions();
+        break;
+      }
+    }
+  }
+  
   const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));
 
   // ------------------------------------------------------------  
@@ -157,6 +170,12 @@ void PhotonPairSelector::Process()
       if(ph->CoviEtaiEta() > 0.03) continue;
     }    
     preselPh->Add(ph);
+  }
+
+  // Sorry... need the second loop here in order to sort & assign the right Categories..
+  preselPh->Sort();
+  for(unsigned int iPh = 0; iPh <preselPh->GetEntries(); ++iPh) {
+    const Photon* ph = preselPh->At(iPh);
     preselCat.push_back(PhotonTools::CiCBaseLineCat(ph));
   }
   
@@ -247,8 +266,10 @@ void PhotonPairSelector::Process()
       break;
     default:
       theVtx[iPair] = fPV->At(0);
+
     }
-    
+
+
     // fix the kinematics for both events
     FourVectorM newMom1st = fixPh1st[iPair]->MomVtx(theVtx[iPair]->Position());
     FourVectorM newMom2nd = fixPh2nd[iPair]->MomVtx(theVtx[iPair]->Position());
@@ -265,8 +286,8 @@ void PhotonPairSelector::Process()
       pass2 = ( fixPh2nd[iPair]->Pt() > fTrailingPtMin );
       break;
     case kCiCPhSelection:
-      pass1 = PhotonTools::PassCiCSelection(fixPh1st[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 40.);
-      if(pass1) pass2 = PhotonTools::PassCiCSelection(fixPh2nd[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 30.);
+      pass1 = PhotonTools::PassCiCSelection(fixPh1st[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, fLeadingPtMin, fApplyEleVeto);
+      if(pass1) pass2 = PhotonTools::PassCiCSelection(fixPh2nd[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, fTrailingPtMin, fApplyEleVeto);
       break;
     case kMITPhSelection:
       // FIX-ME: This is a place-holder.. MIT guys: Please worj hard... ;)
@@ -402,7 +423,7 @@ void PhotonPairSelector::SlaveBegin()
   else 
     fVtxSelType =       kStdVtxSelection;  
 
-  hCiCTuple = new TNtuple("hCiCTuple","hCiCTuple","rho:higgspt:higgsZ:vtxZ:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ph1Cat:ph2Cat:evtCat");
+  hCiCTuple = new TNtuple(fTupleName.Data(),fTupleName.Data(),"rho:higgspt:higgsZ:vtxZ:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ph1Cat:ph2Cat:evtCat");
   
   AddOutput(hCiCTuple);
 

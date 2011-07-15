@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.20 2011/04/19 09:13:36 fabstoec Exp $
+// $Id: PhotonIDMod.cc,v 1.21 2011/05/18 14:01:19 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -20,36 +20,44 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPileUpDenName     (Names::gkPileupEnergyDensityBrn),
   fConversionName    ("MergedConversions"),
   fElectronName      ("Electrons"),
-  fPhotonIDType("Custom"),
-  fPhotonIsoType("Custom"),
-  fPhotonPtMin(15.0),
-  fHadOverEmMax(0.02),
-  fApplySpikeRemoval(kFALSE),
-  fApplyPixelSeed(kTRUE),
-  fApplyElectronVeto(kFALSE),
+  fPVName            (Names::gkPVBeamSpotBrn),
+
+  fPhotonIDType      ("Custom"),
+  fPhotonIsoType     ("Custom"),
+  fPhotonPtMin       (15.0),
+  fHadOverEmMax      (0.02),
+  fApplySpikeRemoval (kFALSE),
+  fApplyPixelSeed    (kTRUE),
+  fApplyElectronVeto (kFALSE),
   fApplyElectronVetoConvRecovery(kFALSE),
-  fApplyConversionId(kFALSE),
+  fApplyConversionId (kFALSE),
   fApplyTriggerMatching(kFALSE),
-  fPhotonR9Min(0.5),
-  fPhIdType(kIdUndef),
-  fPhIsoType(kIsoUndef),
-  fFiduciality(kTRUE),
-  fEtaWidthEB(0.01),
-  fEtaWidthEE(0.028),
-  fAbsEtaMax(999.99),
-  fApplyR9Min(kFALSE),
-  fEffAreaEcalEE(0.071),
-  fEffAreaHcalEE(0.095),
-  fEffAreaTrackEE(0.269),
-  fEffAreaEcalEB(0.162),
-  fEffAreaHcalEB(0.042),
-  fEffAreaTrackEB(0.317),
+  fPhotonR9Min       (0.5),
+  fPhIdType          (kIdUndef),
+  fPhIsoType         (kIsoUndef),
+  fFiduciality       (kTRUE),
+  fEtaWidthEB        (0.01),
+  fEtaWidthEE        (0.028),
+  fAbsEtaMax         (999.99),
+  fApplyR9Min        (kFALSE),
+
+  fEffAreaEcalEE     (0.089),
+  fEffAreaHcalEE     (0.156),
+  fEffAreaTrackEE    (0.261),
+
+  fEffAreaEcalEB     (0.183),
+  fEffAreaHcalEB     (0.062),
+  fEffAreaTrackEB    (0.306),
+
   fPhotons(0),
   fTracks(0),
   fBeamspots(0),
   fPileUpDen(0),
   fConversions(0),
-  fElectrons(0)
+  fElectrons(0),
+  fPV(0),
+
+  fPVFromBranch      (true)
   
 {
   // Constructor.
@@ -71,7 +79,7 @@ void PhotonIDMod::Process()
     if (fPhIsoType == kMITPUCorrected) LoadEventObject(fPileUpDenName,      fPileUpDen);
     LoadEventObject(fConversionName,     fConversions);
     LoadEventObject(fElectronName,       fElectrons);
-
+    if (fPhIdType == kBaseLineCiC)       LoadEventObject(fPVName,             fPV);
     
     if(fBeamspots->GetEntries() > 0)
       bsp = fBeamspots->At(0);
@@ -92,9 +100,17 @@ void PhotonIDMod::Process()
   for (UInt_t i=0; i<fPhotons->GetEntries(); ++i) {    
     const Photon *ph = fPhotons->At(i);        
 
-    if (ph->Pt() <= fPhotonPtMin) 
-      continue;
+    // ---------------------------------------------------------------------
+    // check if we use the CiC Selection. If yes, bypass all the below...
+    if(fPhIdType == kBaseLineCiC) {
+      if( PhotonTools::PassCiCSelection(ph, fPV->At(0), fTracks, fElectrons, fPV, _tRho, fPhotonPtMin, fApplyElectronVeto) )
+	GoodPhotons->Add(fPhotons->At(i));
+      continue; // go to next Photons
+    }
+    // ---------------------------------------------------------------------
 
+    if (ph->Pt() <= fPhotonPtMin) 
+      continue;    // add good electron
 
     Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
     
@@ -116,8 +132,6 @@ void PhotonIDMod::Process()
     //}
     if (fApplySpikeRemoval && !passSpikeRemovalFilter) continue;
     
-
-
     if (ph->HadOverEm() >= fHadOverEmMax) 
       continue;
 
@@ -243,22 +257,23 @@ void PhotonIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the photon collection branch.
 
-  ReqEventObject(fPhotonBranchName,   fPhotons,   kTRUE);
-  ReqEventObject(fTrackBranchName,    fTracks,    kTRUE);
-  ReqEventObject(fBeamspotBranchName, fBeamspots, kTRUE);
+  ReqEventObject(fPhotonBranchName,   fPhotons,     kTRUE);
+  ReqEventObject(fTrackBranchName,    fTracks,      kTRUE);
+  ReqEventObject(fBeamspotBranchName, fBeamspots,   kTRUE);
   ReqEventObject(fConversionName,     fConversions, kTRUE);
-  ReqEventObject(fElectronName,       fElectrons, kTRUE);
-  
-
-
+  ReqEventObject(fElectronName,       fElectrons,   kTRUE);
+    
   if (fPhotonIDType.CompareTo("Tight") == 0) 
     fPhIdType = kTight;
   else if (fPhotonIDType.CompareTo("Loose") == 0) 
     fPhIdType = kLoose;
   else if (fPhotonIDType.CompareTo("LooseEM") == 0) 
     fPhIdType = kLooseEM;
-  else if (fPhotonIDType.CompareTo("Custom") == 0) {
+  else if (fPhotonIDType.CompareTo("Custom") == 0)
     fPhIdType = kCustomId;
+  else if (fPhotonIDType.CompareTo("BaseLineCiC") == 0) {
+    fPhIdType = kBaseLineCiC;
+    fPhotonIsoType = "NoIso";
   } else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified photon identification %s is not defined.",
@@ -282,6 +297,7 @@ void PhotonIDMod::SlaveBegin()
   }
   
 
-  if (    fPhIsoType == kMITPUCorrected) ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
+  if ( fPhIsoType == kMITPUCorrected || fPhIdType == kBaseLineCiC ) ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
+  if ( fPhIdType == kBaseLineCiC ) ReqEventObject(fPVName, fPV, fPVFromBranch);
 
 }

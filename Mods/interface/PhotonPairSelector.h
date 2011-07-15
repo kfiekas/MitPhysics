@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonPairSelector.h,v 1.5 2011/07/06 13:59:40 fabstoec Exp $
+// $Id: PhotonPairSelector.h,v 1.1 2011/07/08 17:54:28 fabstoec Exp $
 //
 // PhotonPairSelector
 //
@@ -104,8 +104,13 @@ namespace mithep
       fMCSmear_EE_hR9 = _EE_hR9;
       fMCSmear_EE_lR9 = _EE_lR9;
     };
-    
-    
+
+    void                ApplyEleVeto(bool a)            { fApplyEleVeto  = a; }
+    void                DoDataEneCorr(bool a)           { fDoDataEneCorr = a; }
+    void                DoMCSmear(bool a)               { fDoMCSmear     = a; }
+
+    void                SetTupleName(const char* c)     { fTupleName     = c; }
+
   protected:
     void                Process();
     void                SlaveBegin();
@@ -184,9 +189,11 @@ namespace mithep
     bool fDoDataEneCorr;
     bool fDoMCSmear;
     bool fDoVtxSelection;
+    bool fApplyEleVeto;
 
     // --------------------------------
     // validation Tuple
+    TString fTupleName;
     TNtuple* hCiCTuple;
 
     ClassDef(PhotonPairSelector, 1) // Photon identification module

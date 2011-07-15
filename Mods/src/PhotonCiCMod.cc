@@ -20,8 +20,9 @@ PhotonCiCMod::PhotonCiCMod(const char *name, const char *title) :
 
   fElectronName      ("Electrons"),
   fPhotonPtMin       (20.0),
-  fAbsEtaMax         (999.99),
   fApplySpikeRemoval (kFALSE),
+
+  fAbsEtaMax         (999.99),
 
   fPhotons(0),
   fTracks(0),
@@ -358,13 +359,14 @@ void PhotonCiCMod::Process()
     
     if(iPair != 0) {
       // check if both photons pass the CiC selection
-      bool pass1 = PhotonTools::PassCiCSelection(fixPhFst[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 40., false);
-      bool pass2 = PhotonTools::PassCiCSelection(fixPhSec[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 30., false);
+      bool pass1 = PhotonTools::PassCiCSelection(fixPhFst[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 40., true, false);
+      bool pass2 = PhotonTools::PassCiCSelection(fixPhSec[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 30., true, false);
       if( pass1 && pass2 )
 	passPairs.push_back(iPair);
     } else {
-      bool pass1 = PhotonTools::PassCiCSelection(fixPhFst[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 40., false, kinPh1);
-      bool pass2 = PhotonTools::PassCiCSelection(fixPhSec[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 30., false, kinPh2);
+      bool pass1 = PhotonTools::PassCiCSelection(fixPhFst[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 40., true, false, kinPh1);
+      bool pass2 = PhotonTools::PassCiCSelection(fixPhSec[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, 30., true, false, kinPh2);
+
       if( pass1 && pass2 )
 	passPairs.push_back(iPair);
     }
