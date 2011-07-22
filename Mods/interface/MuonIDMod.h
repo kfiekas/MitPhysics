@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.33 2011/03/23 11:39:57 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.34 2011/06/10 10:42:36 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -48,10 +48,12 @@ namespace mithep
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
       void               SetClassType(const char *type)       { fMuonClassType     = type;  }
       void               SetCleanMuonsName(const char *name)  { fCleanMuonsName    = name;  }   
-      void               SetOldMuonsName(const char *n)       { fNonIsolatedMuonsName  = n;	    }  
-      void               SetOldElectronsName(const char *n)   { fNonIsolatedElectronsName  = n;     }  
+      void               SetOldMuonsName(const char *n)       { fNonIsolatedMuonsName  = n; }  
+      void               SetOldElectronsName(const char *n)   { fNonIsolatedElectronsName  = n; }  
       void               SetCleanName(const char *name)       { SetCleanMuonsName(name);    }   
       void               SetCombIsoCut(Double_t cut)          { fCombIsolationCut  = cut;   }
+      void               SetCombRelativeIsoCut(Double_t cut)  { fCombRelativeIsolationCut  = cut; }
+      void               SetPFIsoCut(Double_t cut)            { fPFIsolationCut  = cut;     }
       void               SetD0Cut(Double_t cut)               { fD0Cut             = cut;   }
       void               SetDZCut(Double_t cut)               { fDZCut             = cut;   }
       void               SetWhichVertex(Int_t d)              { fWhichVertex = d;           }
@@ -75,15 +77,16 @@ namespace mithep
         kCustomId           //"Custom"
       };
       enum EMuIsoType {
-        kIsoUndef = 0,      	       //"not defined"
-        kTrackCalo,         	       //"TrackCalo"
-        kTrackCaloCombined, 	       //"TrackCaloCombined"
-        kTrackCaloSliding,  	       //"TrackCaloSliding"
-        kTrackCaloSlidingNoCorrection, //"TrackCaloSlidingNoCorrection"
-        kCustomIso,         	       //"Custom"
-        kPFIso,             	       //"PFIso"
-        kPFIsoNoL,          	       //"PFIsoNoL"
-        kNoIso              	       //"NoIso"
+        kIsoUndef = 0,      	            //"not defined"
+        kTrackCalo,         	            //"TrackCalo"
+        kTrackCaloCombined, 	            //"TrackCaloCombined"
+        kTrackCaloSliding,  	            //"TrackCaloSliding"
+        kTrackCaloSlidingNoCorrection,      //"TrackCaloSlidingNoCorrection"
+        kCombinedRelativeConeAreaCorrected, //"CombinedRelativeConeAreaCorrected"
+        kCustomIso,         	            //"Custom"
+        kPFIso,             	            //"PFIso"
+        kPFIsoNoL,          	            //"PFIsoNoL"
+        kNoIso              	            //"NoIso"
       };
       enum EMuClassType {
         kClassUndef = 0,    //not defined
@@ -114,6 +117,8 @@ namespace mithep
       Double_t           fTrackIsolationCut;   //cut value for track isolation
       Double_t           fCaloIsolationCut;    //cut value for calo isolation
       Double_t           fCombIsolationCut;    //cut value for combined isolation
+      Double_t           fCombRelativeIsolationCut; //cut value for combined relative isolation
+      Double_t           fPFIsolationCut;      //cut value for combined isolation
       Double_t           fMuonPtMin;           //min muon pt
       Bool_t             fApplyD0Cut;          //=true then apply d0 cut (def=1)
       Bool_t             fApplyDZCut;          //=true then apply dz cut (def=1)

@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.52 2011/05/21 17:05:58 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.53 2011/06/10 10:42:29 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -27,7 +27,9 @@ ClassImp(mithep::MuonIDMod)
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
-  fCombIsolationCut(-1.0),
+  fCombIsolationCut(0.15),
+  fCombRelativeIsolationCut(0.15),
+  fPFIsolationCut(-1.0),
   fMuonPtMin(10),
   fApplyD0Cut(kTRUE),
   fApplyDZCut(kTRUE),
@@ -234,7 +236,7 @@ void MuonIDMod::Process()
       case kTrackCaloSliding:
         { 
           const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
-          Double_t totalIso =  mu->IsoR03SumPt() + TMath::Max(mu->IsoR03EmEt() + mu->IsoR03HadEt() - rho->Rho() * TMath::Pi() * 0.3 * 0.3, 0.0);
+          Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - rho->Rho() * TMath::Pi() * 0.3 * 0.3 ;
           // trick to change the signal region cut
           double theIsoCut = fCombIsolationCut;
 	  if(theIsoCut < 0.20){
@@ -258,11 +260,19 @@ void MuonIDMod::Process()
 	  if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
 	}
         break;
+      case kCombinedRelativeConeAreaCorrected:
+        { 
+          const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
+          Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - rho->Rho() * TMath::Pi() * 0.3 * 0.3 ;
+          double theIsoCut = fCombRelativeIsolationCut;
+          if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
+        }
+        break;           
       case kPFIso:
-        {
+      {
           Double_t pfIsoCutValue = 9999;
-          if(fCombIsolationCut > 0){
-            pfIsoCutValue = fCombIsolationCut;
+          if(fPFIsolationCut > 0){
+            pfIsoCutValue = fPFIsolationCut;
           } else {
             if (mu->AbsEta() < 1.479) {
               if (mu->Pt() > 20) {
@@ -291,7 +301,7 @@ void MuonIDMod::Process()
           Double_t beta = IsolationTools::BetaM(fTracks, mu, fVertices->At(0), 0.0, 0.2, 0.3, 0.02); 
           if(beta == 0) beta = 1.0;
           Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), fNonIsolatedMuons, fNonIsolatedElectrons, 0.2, 1.0, 0.4, 0.0, 3);
-          if (totalIso < (mu->Pt()*fCombIsolationCut) )
+          if (totalIso < (mu->Pt()*fPFIsolationCut) )
             isocut = kTRUE;
 	}
         break;
@@ -387,6 +397,8 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kTrackCaloSliding;
   else if (fMuonIsoType.CompareTo("TrackCaloSlidingNoCorrection") == 0)
     fMuIsoType = kTrackCaloSlidingNoCorrection;
+  else if (fMuonIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0)
+    fMuIsoType = kCombinedRelativeConeAreaCorrected;
   else if (fMuonIsoType.CompareTo("PFIso") == 0)
     fMuIsoType = kPFIso;
   else if (fMuonIsoType.CompareTo("PFIsoNoL") == 0)

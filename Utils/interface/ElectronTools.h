@@ -48,6 +48,7 @@ namespace mithep {
         kTrackJuraCombined, 	       //"TrackJuraCombined"
         kTrackJuraSliding,  	       //"TrackJuraSliding"
         kTrackJuraSlidingNoCorrection, //"TrackJuraSlidingNoCorrection"
+        kCombinedRelativeConeAreaCorrected, //"CombinedRelativeConeAreaCorrected"
         kNoIso,             	       //"NoIso"
         kPFIso,             	       //"PFIso"
         kPFIsoNoL,          	       //"PFIsoNoL"

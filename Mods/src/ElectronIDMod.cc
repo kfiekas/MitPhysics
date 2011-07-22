@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.97 2011/06/14 11:08:36 fabstoec Exp $
+// $Id: ElectronIDMod.cc,v 1.98 2011/06/21 06:15:57 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -37,6 +37,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fEcalJuraIsoCut(5.0),
   fHcalIsolationCut(5.0),
   fCombIsolationCut(0.1),
+  fCombRelativeIsolationCut(0.10),
   fPFIsolationCut(-1.0),
   fApplyConvFilterType1(kTRUE),
   fApplyConvFilterType2(kFALSE),
@@ -225,12 +226,17 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
         isocut = kTRUE;
     }
     break;
+    case ElectronTools::kCombinedRelativeConeAreaCorrected:
+    {
+      Double_t totalIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03() - rho * TMath::Pi() * 0.3 * 0.3;
+      if (totalIso < (ele->Pt()*fCombRelativeIsolationCut) )
+        isocut = kTRUE;
+    }
+    break;
     case ElectronTools::kPFIso:
     {
       Double_t pfIsoCutValue = 9999;
-      //if(fCombIsolationCut > 0){
       if(fPFIsolationCut > 0){
-        //pfIsoCutValue = fCombIsolationCut;
         pfIsoCutValue = fPFIsolationCut;
       } else {
         if (ele->SCluster()->AbsEta() < 1.479) {
@@ -522,6 +528,8 @@ void ElectronIDMod::Setup()
     fElIsoType = ElectronTools::kTrackJuraSliding;
   else if(fElectronIsoType.CompareTo("TrackJuraSlidingNoCorrection") == 0)
     fElIsoType = ElectronTools::kTrackJuraSlidingNoCorrection;
+  else if(fElectronIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0)
+    fElIsoType = ElectronTools::kCombinedRelativeConeAreaCorrected;
   else if (fElectronIsoType.CompareTo("PFIso") == 0 )
     fElIsoType = ElectronTools::kPFIso;
   else if (fElectronIsoType.CompareTo("PFIsoNoL") == 0 )

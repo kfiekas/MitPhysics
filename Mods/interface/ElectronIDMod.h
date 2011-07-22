@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.49 2011/06/14 11:08:36 fabstoec Exp $
+// $Id: ElectronIDMod.h,v 1.50 2011/06/21 06:15:57 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -74,6 +74,7 @@ namespace mithep
       void                SetApplyDZCut(Bool_t b)                { fApplyDZCut         = b;    }
       void                SetCaloIsoCut(Double_t cut)            { fCaloIsolationCut   = cut;  }
       void                SetCombIsoCut(Double_t cut)            { fCombIsolationCut   = cut;  }
+      void                SetCombRelativeIsoCut(Double_t cut)    { fCombRelativeIsolationCut = cut; }
       void                SetPFIsoCut(Double_t cut)              { fPFIsolationCut     = cut;  }
       void                SetD0Cut(Double_t cut)                 { fD0Cut = cut;	       }
       void                SetDZCut(Double_t cut)                 { fDZCut = cut;	       }
@@ -132,6 +133,7 @@ namespace mithep
       Double_t                  fEcalJuraIsoCut;         //cut value for ecal jurassic isolation
       Double_t                  fHcalIsolationCut;       //cut value for hcal isolation
       Double_t                  fCombIsolationCut;       //cut value for combined isolation
+      Double_t                  fCombRelativeIsolationCut; //cut value for combined relative isolation
       Double_t                  fPFIsolationCut;         //cut value for PF isolation, default -1.0
       Bool_t                    fApplyConvFilterType1;   //whether remove conversions using fit method
       Bool_t                    fApplyConvFilterType2;   //whether remove conversions using DCotTheta method
