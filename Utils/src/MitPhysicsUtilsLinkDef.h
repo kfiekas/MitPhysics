@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.8 2011/06/01 12:26:28 bendavid Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.9 2011/06/01 12:36:59 mzanetti Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -15,6 +15,7 @@
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/VertexMVA.h"
 #include "MitPhysics/Utils/interface/PUReweighting.h"
+#include "MitPhysics/Utils/interface/PUReweightingMulti.h"
 
 #endif
 
@@ -40,5 +41,6 @@
 #pragma link C++ class mithep::VertexTools;
 #pragma link C++ class mithep::VertexMVA;
 #pragma link C++ class mithep::PUReweighting;
+#pragma link C++ class mithep::PUReweightingMulti;
 
 #endif
