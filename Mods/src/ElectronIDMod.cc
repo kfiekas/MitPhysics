@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.98 2011/06/21 06:15:57 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.99 2011/07/22 14:36:29 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -310,7 +310,8 @@ void ElectronIDMod::Process()
   LoadEventObject(fBeamSpotName, fBeamSpot);
   LoadEventObject(fTrackName, fTracks);
   LoadEventObject(fPFCandidatesName, fPFCandidates);
-  if(fElIsoType == ElectronTools::kTrackJuraSliding) {
+  if(fElIsoType == ElectronTools::kTrackJuraSliding || 
+     fElIsoType == ElectronTools::kCombinedRelativeConeAreaCorrected) {
     LoadEventObject(fPileupEnergyDensityName, fPileupEnergyDensity);
   }
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
@@ -364,8 +365,9 @@ void ElectronIDMod::Process()
 
     //apply Isolation Cut
     Double_t Rho = 0.0;
-    if(fElIsoType == ElectronTools::kTrackJuraSliding) {
-     Rho = fPileupEnergyDensity->At(0)->Rho();
+    if( fElIsoType == ElectronTools::kTrackJuraSliding
+        || fElIsoType == ElectronTools::kCombinedRelativeConeAreaCorrected ) {
+      Rho = fPileupEnergyDensity->At(0)->Rho();
     }
     Bool_t isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0), Rho);
     if (!isocut)
@@ -457,7 +459,8 @@ void ElectronIDMod::SlaveBegin()
   ReqEventObject(fBeamSpotName, fBeamSpot, kTRUE);
   ReqEventObject(fTrackName, fTracks, kTRUE);
   ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
-  if (fElectronIsoType.CompareTo("TrackJuraSliding") == 0 ) {
+  if (fElectronIsoType.CompareTo("TrackJuraSliding") == 0 
+    || fElectronIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0 ) {
     ReqEventObject(fPileupEnergyDensityName, fPileupEnergyDensity, kTRUE);
   }
 

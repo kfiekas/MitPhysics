@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.53 2011/06/10 10:42:29 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.54 2011/07/22 14:36:29 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -67,7 +67,7 @@ void MuonIDMod::Process()
   LoadEventObject(fBeamSpotName, fBeamSpot);
   LoadEventObject(fTrackName, fTracks);
   LoadEventObject(fPFCandidatesName, fPFCandidates);
-  if(fMuIsoType == kTrackCaloSliding) {
+  if(fMuIsoType == kTrackCaloSliding || fMuIsoType == kCombinedRelativeConeAreaCorrected) {
     LoadEventObject(fPileupEnergyDensityName, fPileupEnergyDensity);
   }
   MuonOArr *CleanMuons = new MuonOArr;
@@ -360,7 +360,8 @@ void MuonIDMod::SlaveBegin()
   ReqEventObject(fBeamSpotName, fBeamSpot, kTRUE);
   ReqEventObject(fTrackName, fTracks, kTRUE);
   ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
-  if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0) {
+  if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0 
+      || fMuonIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0) {
     ReqEventObject(fPileupEnergyDensityName, fPileupEnergyDensity, kTRUE);
   }
 
