@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.21 2011/05/18 14:01:19 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.22 2011/07/15 17:24:37 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
@@ -85,7 +85,7 @@ void PhotonIDMod::Process()
       bsp = fBeamspots->At(0);
 
     if(fPhIsoType == kMITPUCorrected && fPileUpDen->GetEntries() > 0)
-      _tRho = (Double_t) fPileUpDen->At(0)->Rho();
+      _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
     
     //get trigger object collection if trigger matching is enabled
     if (fApplyTriggerMatching) {
