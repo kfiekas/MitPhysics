@@ -11,6 +11,9 @@
 using namespace mithep;
 
 ClassImp(mithep::PhotonPairSelector)
+ClassImp(mithep::PhotonPairSelectorPhoton)
+ClassImp(mithep::PhotonPairSelectorDiphotonEvent)
+
 
 //--------------------------------------------------------------------------------------------------
 PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) : 
@@ -124,7 +127,10 @@ void PhotonPairSelector::Process()
 
   // ------------------------------------------------------------  
   // load event based information
-  Float_t _numPU = -1.;        // some sensible default values....
+  Int_t _numPU = -1.;        // some sensible default values....
+  Int_t _numPUminus = -1.;        // some sensible default values....
+  Int_t _numPUplus = -1.;        // some sensible default values....
+
   Float_t _tRho  = -99.;
   if( fPileUpDen->GetEntries() > 0 )
     _tRho  = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
@@ -132,10 +138,9 @@ void PhotonPairSelector::Process()
   if( !fIsData ) {
     for (UInt_t i=0; i<fPileUp->GetEntries(); ++i) {
       const PileupInfo *puinfo = fPileUp->At(i);
-      if (puinfo->GetBunchCrossing()==0) {
-        _numPU = (Float_t) puinfo->GetPU_NumInteractions();
-        break;
-      }
+      if (puinfo->GetBunchCrossing()==0) _numPU = puinfo->GetPU_NumInteractions();
+      else if (puinfo->GetBunchCrossing() == -1) _numPUminus = puinfo->GetPU_NumInteractions();
+      else if (puinfo->GetBunchCrossing() ==  1) _numPUplus  = puinfo->GetPU_NumInteractions();
     }
   }
   
@@ -356,9 +361,11 @@ void PhotonPairSelector::Process()
   
   // Fill the useful information (mass and di-photon pt)
   bool doFill   = ( phHard && phSoft );
+  if (!doFill) return;
+  
   Float_t _mass = ( doFill ? (phHard->Mom()+phSoft->Mom()).M()  : -100.);
   Float_t _ptgg = ( doFill ? (phHard->Mom()+phSoft->Mom()).Pt() : -100.);
-
+  
   // in case of a MC event, try to find Higgs and Higgs decay Z poisition
   Float_t _pth    = -100.;
   Float_t _decayZ = -100.;
@@ -369,27 +376,64 @@ void PhotonPairSelector::Process()
     evtCat = GetEventCat(catPh1, catPh2);
     if(_ptgg < 40.) evtCat += 4.;
   }
+  
+  const MCParticle *phgen1 = MatchMC(phHard);
+  const MCParticle *phgen2 = MatchMC(phSoft);
 
-  Float_t fillEvent[] = { _tRho,
-			  _pth,
-			  _decayZ,
-			  _theVtxZ,
-			  _numPU,
-			  _mass,
-			  _ptgg,
-			  _evtNum1,
-			  _evtNum2,
-			  _runNum,
-			  _lumiSec,
-			  (Float_t) catPh1,
-			  (Float_t) catPh2,
-			  evtCat
-  };
+  Float_t _gencostheta = -99.;
+  if (phgen1 && phgen2) {
+    _gencostheta = ThreeVector(phgen1->Mom()).Unit().Dot(ThreeVector(phgen2->Mom()).Unit());
+  }
+  
+   if(_mass > 0.) {
+    fDiphotonEvent->rho = _tRho;
+    fDiphotonEvent->genHiggspt = _pth;
+    fDiphotonEvent->genHiggsZ = _decayZ;
+    fDiphotonEvent->gencostheta = _gencostheta;
+    fDiphotonEvent->vtxZ = _theVtxZ;
+    fDiphotonEvent->numPU = _numPU;
+    fDiphotonEvent->numPUminus = _numPUminus;
+    fDiphotonEvent->numPUplus = _numPUplus;
+    fDiphotonEvent->mass = _mass;
+    fDiphotonEvent->ptgg = _ptgg;
+    fDiphotonEvent->costheta =  ThreeVector(phHard->Mom()).Unit().Dot(ThreeVector(phSoft->Mom()).Unit());
+    fDiphotonEvent->evt = GetEventHeader()->EvtNum();
+    fDiphotonEvent->run = GetEventHeader()->RunNum();
+    fDiphotonEvent->lumi = GetEventHeader()->LumiSec();
+    fDiphotonEvent->evtcat = evtCat;
+    
+    PhotonPairSelectorPhoton *ph1 = static_cast<PhotonPairSelectorPhoton*>(fDiphotonEvent->photons[0]);
+    ph1->SetVars(phHard,phgen1);
+    
+    PhotonPairSelectorPhoton *ph2 = static_cast<PhotonPairSelectorPhoton*>(fDiphotonEvent->photons[1]);
+    ph2->SetVars(phSoft,phgen2);
+    
+    hCiCTuple->Fill();    
+   }
+
+//   Float_t fillEvent[] = { _tRho,
+// 			  _pth,
+// 			  _decayZ,
+// 			  _theVtxZ,
+// 			  _numPU,
+// 			  _mass,
+// 			  _ptgg,
+// 			  _evtNum1,
+// 			  _evtNum2,
+// 			  _runNum,
+// 			  _lumiSec,
+// 			  (Float_t) catPh1,
+// 			  (Float_t) catPh2,
+// 			  evtCat
+//   };
   
   // to keep the Tree slim, only add in case we haqve found a passing pair...
-  if(_mass > 0.)
-    hCiCTuple->Fill(fillEvent);
+//  if(_mass > 0.) {
+//    hCiCTuple->Fill(fillEvent);
   
+
+    
+    
   return;
 
 }
@@ -428,7 +472,15 @@ void PhotonPairSelector::SlaveBegin()
   else 
     fVtxSelType =       kStdVtxSelection;  
 
-  hCiCTuple = new TNtuple(fTupleName.Data(),fTupleName.Data(),"rho:higgspt:higgsZ:vtxZ:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ph1Cat:ph2Cat:evtCat");
+  PhotonPairSelectorDiphotonEvent::Class()->IgnoreTObjectStreamer();
+  PhotonPairSelectorPhoton::Class()->IgnoreTObjectStreamer();
+
+  fDiphotonEvent = new PhotonPairSelectorDiphotonEvent;
+  hCiCTuple = new TTree(fTupleName.Data(),fTupleName.Data());
+  hCiCTuple->Branch("dphevent",fDiphotonEvent);
+  
+  
+  //hCiCTuple = new TNtuple(fTupleName.Data(),fTupleName.Data(),"rho:higgspt:higgsZ:vtxZ:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ph1Cat:ph2Cat:evtCat");
   
   AddOutput(hCiCTuple);
 
@@ -509,4 +561,60 @@ Float_t PhotonPairSelector::GetEventCat(PhotonTools::CiCBaseLineCats cat1, Photo
     return ( ph1IsHR9 && ph2IsHR9 ? 0. : 1.);
   
   return ( ph1IsHR9 && ph2IsHR9 ? 2. : 3.);
+}
+
+const MCParticle *PhotonPairSelector::MatchMC(const Photon *ph) const
+{
+
+  for (UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
+    const MCParticle *p = fMCParticles->At(i);
+    if ( p->AbsPdgId()==22 && p->IsGenerated() && MathUtils::DeltaR(*ph,*p) < 0.3 && p->Mother() && (p->Mother()->AbsPdgId()==25 || p->Mother()->AbsPdgId()<=21) ) {
+      return p;
+    }
+  }
+  return 0;
+  
+}
+
+void PhotonPairSelectorPhoton::SetVars(const Photon *p, const MCParticle *m) {
+      e = p->E();
+      pt = p->Pt();
+      eta = p->Eta();
+      phi = p->Phi();
+      r9 = p->R9();
+      e5x5 = p->E55();
+      const SuperCluster *s = p->SCluster();
+      sce = s->Energy();
+      scrawe = s->RawEnergy();
+      scpse = s->PreshowerEnergy();
+      sceta = s->Eta();
+      scphi = s->Phi();
+      isbarrel = (s->AbsEta()<1.5);
+      isr9reco = (isbarrel && r9>0.94) || (!isbarrel && r9>0.95);
+      isr9cat = (r9>0.94);
+      
+      if (isbarrel) {
+        if (isr9cat) phcat = 1;
+        else phcat = 2;
+      }
+      else {
+        if (isr9cat) phcat = 3;
+        else phcat = 4;
+      }
+      
+      if (m) {
+        ispromptgen = kTRUE;
+        gene = m->E();
+        genpt = m->Pt();
+        geneta = m->Eta();
+        genphi = m->Phi();
+      }
+      else {
+        ispromptgen = kFALSE;
+        gene = -99.;
+        genpt = -99.;
+        geneta = -99.;
+        genphi = -99.;
+      }
+      
 }

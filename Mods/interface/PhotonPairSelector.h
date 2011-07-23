@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonPairSelector.h,v 1.1 2011/07/08 17:54:28 fabstoec Exp $
+// $Id: PhotonPairSelector.h,v 1.2 2011/07/15 17:24:37 fabstoec Exp $
 //
 // PhotonPairSelector
 //
@@ -29,6 +29,71 @@ class TRandom3;
 
 namespace mithep 
 {
+  class PhotonPairSelectorPhoton : public TObject
+  {
+    public:  
+      void SetVars(const Photon *p, const MCParticle *m = 0);
+
+    private:  
+      Float_t e;
+      Float_t pt;
+      Float_t eta;
+      Float_t phi;
+      Float_t r9;
+      Float_t e5x5;
+      Float_t sce;
+      Float_t scrawe;
+      Float_t scpse;
+      Float_t sceta;
+      Float_t scphi;
+      Bool_t isbarrel;
+      Bool_t isr9reco;
+      Bool_t isr9cat;
+      UChar_t phcat;
+      Bool_t ispromptgen;
+      Float_t gene;
+      Float_t genpt;
+      Float_t geneta;
+      Float_t genphi;
+      
+      ClassDef(PhotonPairSelectorPhoton, 1)
+
+      
+  };
+  
+  class PhotonPairSelectorDiphotonEvent : public TObject
+  {
+    public:
+      
+      PhotonPairSelectorDiphotonEvent() : photons(PhotonPairSelectorPhoton::Class(),2)
+      {
+        new (photons[0]) PhotonPairSelectorPhoton;
+        new (photons[1]) PhotonPairSelectorPhoton;
+      }
+      ~PhotonPairSelectorDiphotonEvent() { photons.Clear(); }
+    
+      Float_t rho;
+      Float_t genHiggspt;
+      Float_t genHiggsZ;
+      Float_t gencostheta;
+      Float_t vtxZ;
+      Int_t   numPU;
+      Int_t   numPUminus;
+      Int_t   numPUplus;
+      Float_t mass;
+      Float_t ptgg;
+      Float_t costheta;
+      UInt_t  evt;
+      UInt_t  run;
+      UInt_t  lumi;
+      UChar_t evtcat;
+      
+      TClonesArray photons;
+      
+      ClassDef(PhotonPairSelectorDiphotonEvent, 1)
+    
+  };
+  
   class PhotonPairSelector : public BaseMod
   {
   public:
@@ -121,6 +186,7 @@ namespace mithep
     Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::CiCBaseLineCats cat);
     Double_t            GetMCSmearFac(PhotonTools::CiCBaseLineCats cat);
     Float_t             GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonTools::CiCBaseLineCats cat2);
+    const MCParticle   *MatchMC(const Photon *ph) const;
 
     // Names for the input Collections
     TString             fPhotonBranchName;
@@ -194,7 +260,8 @@ namespace mithep
     // --------------------------------
     // validation Tuple
     TString fTupleName;
-    TNtuple* hCiCTuple;
+    PhotonPairSelectorDiphotonEvent* fDiphotonEvent;
+    TTree* hCiCTuple;
 
     ClassDef(PhotonPairSelector, 1) // Photon identification module
   };

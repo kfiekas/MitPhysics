@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.25 2011/06/01 18:11:52 fabstoec Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.26 2011/07/08 17:54:38 fabstoec Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -60,6 +60,8 @@
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::PhotonCiCMod+;
 #pragma link C++ class mithep::PhotonPairSelector+;
+#pragma link C++ class mithep::PhotonPairSelectorPhoton+;
+#pragma link C++ class mithep::PhotonPairSelectorDiphotonEvent+;
 #pragma link C++ class mithep::TauCleaningMod+;
 #pragma link C++ class mithep::PFTauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;
