@@ -29,7 +29,8 @@ class TRandom3;
 
 namespace mithep 
 {
-  class PhotonPairSelectorPhoton : public TObject
+  
+  class PhotonPairSelectorPhoton
   {
     public:  
       void SetVars(const Photon *p, const MCParticle *m = 0);
@@ -56,22 +57,13 @@ namespace mithep
       Float_t geneta;
       Float_t genphi;
       
-      ClassDef(PhotonPairSelectorPhoton, 1)
 
       
   };
   
-  class PhotonPairSelectorDiphotonEvent : public TObject
+  class PhotonPairSelectorDiphotonEvent
   {
     public:
-      
-      PhotonPairSelectorDiphotonEvent() : photons(PhotonPairSelectorPhoton::Class(),2)
-      {
-        new (photons[0]) PhotonPairSelectorPhoton;
-        new (photons[1]) PhotonPairSelectorPhoton;
-      }
-      ~PhotonPairSelectorDiphotonEvent() { photons.Clear(); }
-    
       Float_t rho;
       Float_t genHiggspt;
       Float_t genHiggsZ;
@@ -87,10 +79,8 @@ namespace mithep
       UInt_t  run;
       UInt_t  lumi;
       UChar_t evtcat;
-      
-      TClonesArray photons;
-      
-      ClassDef(PhotonPairSelectorDiphotonEvent, 1)
+      PhotonPairSelectorPhoton photons[2];
+
     
   };
   
@@ -261,7 +251,9 @@ namespace mithep
     // validation Tuple
     TString fTupleName;
     PhotonPairSelectorDiphotonEvent* fDiphotonEvent;
+    PhotonPairSelectorPhoton* fSinglePhoton;    
     TTree* hCiCTuple;
+    TTree* hCiCTupleSingle;
 
     ClassDef(PhotonPairSelector, 1) // Photon identification module
   };

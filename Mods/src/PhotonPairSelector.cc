@@ -5,6 +5,7 @@
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/VertexTools.h"
+#include "TDataMember.h"
 #include <TNtuple.h>
 #include <TRandom3.h>
 
@@ -401,38 +402,19 @@ void PhotonPairSelector::Process()
     fDiphotonEvent->run = GetEventHeader()->RunNum();
     fDiphotonEvent->lumi = GetEventHeader()->LumiSec();
     fDiphotonEvent->evtcat = evtCat;
-    
-    PhotonPairSelectorPhoton *ph1 = static_cast<PhotonPairSelectorPhoton*>(fDiphotonEvent->photons[0]);
-    ph1->SetVars(phHard,phgen1);
-    
-    PhotonPairSelectorPhoton *ph2 = static_cast<PhotonPairSelectorPhoton*>(fDiphotonEvent->photons[1]);
-    ph2->SetVars(phSoft,phgen2);
-    
-    hCiCTuple->Fill();    
-   }
 
-//   Float_t fillEvent[] = { _tRho,
-// 			  _pth,
-// 			  _decayZ,
-// 			  _theVtxZ,
-// 			  _numPU,
-// 			  _mass,
-// 			  _ptgg,
-// 			  _evtNum1,
-// 			  _evtNum2,
-// 			  _runNum,
-// 			  _lumiSec,
-// 			  (Float_t) catPh1,
-// 			  (Float_t) catPh2,
-// 			  evtCat
-//   };
-  
-  // to keep the Tree slim, only add in case we haqve found a passing pair...
-//  if(_mass > 0.) {
-//    hCiCTuple->Fill(fillEvent);
-  
-
+    fDiphotonEvent->photons[0].SetVars(phHard,phgen1);
+    fDiphotonEvent->photons[1].SetVars(phSoft,phgen2);
     
+    
+    hCiCTuple->Fill();  
+    
+    fSinglePhoton->SetVars(phHard,phgen1);
+    hCiCTupleSingle->Fill();  
+    fSinglePhoton->SetVars(phSoft,phgen2);
+    hCiCTupleSingle->Fill();  
+    
+   }    
     
   return;
 
@@ -472,17 +454,82 @@ void PhotonPairSelector::SlaveBegin()
   else 
     fVtxSelType =       kStdVtxSelection;  
 
-  PhotonPairSelectorDiphotonEvent::Class()->IgnoreTObjectStreamer();
-  PhotonPairSelectorPhoton::Class()->IgnoreTObjectStreamer();
+  //PhotonPairSelectorDiphotonEvent::Class()->IgnoreTObjectStreamer();
+  //PhotonPairSelectorPhoton::Class()->IgnoreTObjectStreamer();
 
   fDiphotonEvent = new PhotonPairSelectorDiphotonEvent;
+  fSinglePhoton = new PhotonPairSelectorPhoton;
+
+  
   hCiCTuple = new TTree(fTupleName.Data(),fTupleName.Data());
-  hCiCTuple->Branch("dphevent",fDiphotonEvent);
+  TString singlename = fTupleName + TString("Single");
+  hCiCTupleSingle = new TTree(singlename,singlename);
   
-  
-  //hCiCTuple = new TNtuple(fTupleName.Data(),fTupleName.Data(),"rho:higgspt:higgsZ:vtxZ:numPU:mass:ptgg:evtnum1:evtnum2:runnum:lumisec:ph1Cat:ph2Cat:evtCat");
-  
+  //make flattish tree from classes so we don't have to rely on dictionaries for reading later
+  TClass *eclass = TClass::GetClass("mithep::PhotonPairSelectorDiphotonEvent");
+  TClass *pclass = TClass::GetClass("mithep::PhotonPairSelectorPhoton");
+  TList *elist = eclass->GetListOfDataMembers();
+  TList *plist = pclass->GetListOfDataMembers();
+    
+  for (int i=0; i<elist->GetEntries(); ++i) {
+    const TDataMember *tdm = static_cast<const TDataMember*>(elist->At(i));
+    if (!(tdm->IsBasic() && tdm->IsPersistent())) continue;
+    TString typestring;
+    if (TString(tdm->GetTypeName())=="Char_t") typestring = "B";
+    else if (TString(tdm->GetTypeName())=="UChar_t") typestring = "b";
+    else if (TString(tdm->GetTypeName())=="Short_t") typestring = "S";
+    else if (TString(tdm->GetTypeName())=="UShort_t") typestring = "s";
+    else if (TString(tdm->GetTypeName())=="Int_t") typestring = "I";
+    else if (TString(tdm->GetTypeName())=="UInt_t") typestring = "i";
+    else if (TString(tdm->GetTypeName())=="Float_t") typestring = "F";
+    else if (TString(tdm->GetTypeName())=="Double_t") typestring = "D";
+    else if (TString(tdm->GetTypeName())=="Long64_t") typestring = "L";
+    else if (TString(tdm->GetTypeName())=="ULong64_t") typestring = "l";
+    else if (TString(tdm->GetTypeName())=="Bool_t") typestring = "O";
+    else continue;
+    //printf("%s %s: %i\n",tdm->GetTypeName(),tdm->GetName(),int(tdm->GetOffset()));
+    Char_t *addr = (Char_t*)fDiphotonEvent;
+    assert(sizeof(Char_t)==1);
+    hCiCTuple->Branch(tdm->GetName(),addr + tdm->GetOffset(),TString::Format("%s/%s",tdm->GetName(),typestring.Data()));
+    hCiCTupleSingle->Branch(tdm->GetName(),addr + tdm->GetOffset(),TString::Format("%s/%s",tdm->GetName(),typestring.Data()));
+  }
+
+  for (int iph=0; iph<2; ++iph) {
+    for (int i=0; i<plist->GetEntries(); ++i) {
+      const TDataMember *tdm = static_cast<const TDataMember*>(plist->At(i));
+      if (!(tdm->IsBasic() && tdm->IsPersistent())) continue;
+      TString typestring;
+      if (TString(tdm->GetTypeName())=="Char_t") typestring = "B";
+      else if (TString(tdm->GetTypeName())=="UChar_t") typestring = "b";
+      else if (TString(tdm->GetTypeName())=="Short_t") typestring = "S";
+      else if (TString(tdm->GetTypeName())=="UShort_t") typestring = "s";
+      else if (TString(tdm->GetTypeName())=="Int_t") typestring = "I";
+      else if (TString(tdm->GetTypeName())=="UInt_t") typestring = "i";
+      else if (TString(tdm->GetTypeName())=="Float_t") typestring = "F";
+      else if (TString(tdm->GetTypeName())=="Double_t") typestring = "D";
+      else if (TString(tdm->GetTypeName())=="Long64_t") typestring = "L";
+      else if (TString(tdm->GetTypeName())=="ULong64_t") typestring = "l";
+      else if (TString(tdm->GetTypeName())=="Bool_t") typestring = "O";
+      else continue;
+      //printf("%s\n",tdm->GetTypeName());
+      TString varname = TString::Format("ph%d.%s",iph+1,tdm->GetName());
+      
+      Char_t *addr = (Char_t*)&fDiphotonEvent->photons[iph];
+      assert(sizeof(Char_t)==1);
+      hCiCTuple->Branch(varname,addr+tdm->GetOffset(),TString::Format("%s/%s",varname.Data(),typestring.Data()));
+      
+      if (iph==0) {
+        TString singlename = TString::Format("ph.%s",tdm->GetName());
+        Char_t *addrsingle = (Char_t*)fSinglePhoton;
+        hCiCTupleSingle->Branch(singlename,addrsingle+tdm->GetOffset(),TString::Format("%s/%s",singlename.Data(),typestring.Data()));
+      }
+    }
+  }
+
+
   AddOutput(hCiCTuple);
+  AddOutput(hCiCTupleSingle);
+
 
 }
 
