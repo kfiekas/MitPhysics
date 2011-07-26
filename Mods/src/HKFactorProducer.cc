@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.12 2011/06/13 15:29:13 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.13 2011/07/26 13:43:06 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -23,6 +23,7 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
   fMCEvInfoName(Names::gkMCEvtInfoBrn),
   fIsData(kFALSE),
   fMakePDFNtuple(kFALSE),
+  fDoHiggsPtReweighting(kFALSE),
   fPt_histo(0),
   fMCEventInfo(0),
   fOutputFile(0),
@@ -130,9 +131,11 @@ void HKFactorProducer::SlaveBegin()
     ReqBranch(fMCEvInfoName, fMCEventInfo);
   }
 
-  if (!fPt_histo) {
-    Info("SlaveBegin", "Using %s as input data file", fInputFileName.Data());
-    fPt_histo = new  HWWKfactorList("KFactorList", fInputFileName);
+  if (fDoHiggsPtReweighting) {
+    if (!fPt_histo) {
+      Info("SlaveBegin", "Using %s as input data file", fInputFileName.Data());
+      fPt_histo = new  HWWKfactorList("KFactorList", fInputFileName);
+    }
   }
 
   if (GetFillHist()) {
