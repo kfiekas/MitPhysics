@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.11 2011/06/10 10:42:29 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.12 2011/06/13 15:29:13 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -86,10 +86,16 @@ void HKFactorProducer::Process()
           hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
 	}
       }
-    } else if (fProcessID == 999){
+    } 
+    else if (fProcessID == 999){ // for MCatNLO we care about positive or negative weights
       theWeight = fMCEventInfo->Weight();
       if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
       theWeight = theWeight/fabs(theWeight);
+      if (GetFillHist()) hDHKFactor[0]->Fill(0.5,theWeight);
+    }
+    else if (fProcessID == 998){ // for other samples we care about the actual weights
+      theWeight = fMCEventInfo->Weight();
+      if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
       if (GetFillHist()) hDHKFactor[0]->Fill(0.5,theWeight);
     }
     else {
