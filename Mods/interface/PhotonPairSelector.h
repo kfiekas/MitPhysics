@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonPairSelector.h,v 1.2 2011/07/15 17:24:37 fabstoec Exp $
+// $Id: PhotonPairSelector.h,v 1.5 2011/07/27 15:17:36 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -184,7 +184,7 @@ namespace mithep
     void                SetAbsEtaMax(Double_t eta)        { fPhotonEtaMax    = eta;	 }
     
     void                SetLeadingPtMin(Double_t pt)      { fLeadingPtMin = pt;          }
-    void                SetTrainingPtMin(Double_t pt)     { fTrailingPtMin = pt;         }
+    void                SetTrailingPtMin(Double_t pt)     { fTrailingPtMin = pt;         }
 
     // is Data Or Not?
     void                SetIsData (Bool_t b) { fIsData = b;};

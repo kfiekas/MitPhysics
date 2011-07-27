@@ -143,8 +143,8 @@ void PhotonPairSelector::Process()
   // Get Event header for Run info etc.
   const EventHeader* evtHead = this->GetEventHeader();
   unsigned int evtNum = evtHead->EvtNum();
-  Float_t _evtNum1   = (Float_t) ( (int) (evtNum/10000.) );
-  Float_t _evtNum2   = (Float_t) ( (int) (evtNum % 10000)  );
+  //Float_t _evtNum1   = (Float_t) ( (int) (evtNum/10000.) );
+  //Float_t _evtNum2   = (Float_t) ( (int) (evtNum % 10000)  );
   UInt_t   runNumber = evtHead->RunNum();
   Float_t _runNum    = (Float_t) runNumber;
   Float_t _lumiSec   = (Float_t) evtHead->LumiSec();
@@ -384,8 +384,13 @@ void PhotonPairSelector::Process()
     if(_ptgg < 40.) evtCat += 4.;
   }
   
-  const MCParticle *phgen1 = PhotonTools::MatchMC(phHard,fMCParticles);
-  const MCParticle *phgen2 = PhotonTools::MatchMC(phSoft,fMCParticles);
+  const MCParticle *phgen1 = NULL;
+  const MCParticle *phgen2 = NULL;
+
+  if(!fIsData) {
+    phgen1 = PhotonTools::MatchMC(phHard,fMCParticles);
+    phgen2 = PhotonTools::MatchMC(phSoft,fMCParticles);
+  }
 
   Float_t _gencostheta = -99.;
   if (phgen1 && phgen2) {
