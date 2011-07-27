@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.19 2011/06/01 18:11:52 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.20 2011/07/15 17:24:37 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -20,6 +20,7 @@
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
+#include "MitPhysics/Mods/interface/PhotonPairSelector.h"
 
 namespace mithep 
 {
@@ -78,6 +79,8 @@ namespace mithep
     
     void                SetPVName(const char *n)          { fPVName = n;                 }
     void                SetPVFromBranch(bool b)           { fPVFromBranch = b;           }
+    void                SetIsData (Bool_t b) { fIsData = b;};
+    void                SetWriteTree(Bool_t b) { fWriteTree = b;}
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -109,6 +112,8 @@ namespace mithep
       TString             fElectronName;
       TString             fTrigObjectsName;        //name of trigger object collection
       TString             fPVName;
+      TString             fMCParticleName;
+      TString             fPileUpName;
       TString             fPhotonIDType;         //type of photon identification we impose
       TString             fPhotonIsoType;        //type of photon isolation we impose
       Double_t            fPhotonPtMin;          //min pt cut
@@ -139,8 +144,17 @@ namespace mithep
       const PileupEnergyDensityCol *fPileUpDen;  //!rho branch
       const DecayParticleCol *fConversions;      //!conversion branch
       const ElectronCol  *fElectrons;            //!electron branch
-      const VertexCol*    fPV;
+      const VertexCol*    fPV;                   //!
+      const MCParticleCol          *fMCParticles;//!
+      const PileupInfoCol          *fPileUp;     //!  
       bool                fPVFromBranch;
+      PhotonPairSelectorDiphotonEvent* fDiphotonEvent;
+      PhotonPairSelectorPhoton* fSinglePhoton;    
+      TTree              *hPhotonTree; //!
+      Bool_t              fIsData;
+      Bool_t              fWriteTree;
+
+
 
     ClassDef(PhotonIDMod, 1) // Photon identification module
   };

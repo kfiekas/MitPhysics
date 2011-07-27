@@ -34,28 +34,76 @@ namespace mithep
   {
     public:  
       void SetVars(const Photon *p, const MCParticle *m = 0);
-
+      Float_t Ecor()    const { return ecor;    };
+      Float_t Ecorerr() const { return ecorerr; };
+      
     private:  
       Float_t e;
       Float_t pt;
       Float_t eta;
       Float_t phi;
       Float_t r9;
+      Float_t e3x3;
       Float_t e5x5;
       Float_t sce;
       Float_t scrawe;
       Float_t scpse;
       Float_t sceta;
       Float_t scphi;
+      UInt_t scnclusters;
+      UInt_t scnhits;
+      Float_t hovere;
+      Float_t sigietaieta;
       Bool_t isbarrel;
       Bool_t isr9reco;
       Bool_t isr9cat;
       UChar_t phcat;
+      
+      //quantities from seed basic cluster
+      Float_t sigiphiphi;
+      Float_t covietaiphi;
+      Float_t emax;
+      Float_t e2nd;
+      Float_t etop;
+      Float_t ebottom;
+      Float_t eleft;
+      Float_t eright;
+      Float_t e1x3;
+      Float_t e3x1;
+      Float_t e1x5;
+      Float_t e2x2;
+      Float_t e4x4;
+      Float_t e2x5max;
+      Float_t e2x5top;
+      Float_t e2x5bottom;
+      Float_t e2x5left;
+      Float_t e2x5right;      
+      
+      //energy correction quantities from PhotonFix
+      Float_t ecor;
+      Float_t ecorerr;
+      Float_t etac;
+      Float_t etas;
+      Float_t etam;
+      Float_t phic;
+      Float_t phis;
+      Float_t phim;  
+      Float_t xz;
+      Float_t xc;
+      Float_t xs;
+      Float_t xm;
+      Float_t yz;
+      Float_t yc;
+      Float_t ys;
+      Float_t ym;        
+      
+      //generator level quantities
       Bool_t ispromptgen;
       Float_t gene;
       Float_t genpt;
       Float_t geneta;
       Float_t genphi;
+      Float_t genz;
       
 
       
@@ -69,6 +117,7 @@ namespace mithep
       Float_t genHiggsZ;
       Float_t gencostheta;
       Float_t vtxZ;
+      Int_t   nVtx;
       Int_t   numPU;
       Int_t   numPUminus;
       Int_t   numPUplus;
@@ -79,6 +128,11 @@ namespace mithep
       UInt_t  run;
       UInt_t  lumi;
       UChar_t evtcat;
+      
+      //corrected quantities from PhotonFix corrections
+      Float_t masscor;
+      Float_t masscorerr;
+      
       PhotonPairSelectorPhoton photons[2];
 
     
@@ -176,7 +230,6 @@ namespace mithep
     Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::CiCBaseLineCats cat);
     Double_t            GetMCSmearFac(PhotonTools::CiCBaseLineCats cat);
     Float_t             GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonTools::CiCBaseLineCats cat2);
-    const MCParticle   *MatchMC(const Photon *ph) const;
 
     // Names for the input Collections
     TString             fPhotonBranchName;

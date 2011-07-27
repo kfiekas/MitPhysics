@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.9 2011/07/15 17:24:36 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.10 2011/07/15 19:42:36 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -424,6 +424,8 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
     kin[16] = (float) ph->Et();
     kin[17] = (float) ph->E();
 
+    kin[18] = (float) ph->SCluster()->Eta();
+    kin[19] = (float) ph->SCluster()->Phi();
   }
 
   float passCuts = 1.;
@@ -442,10 +444,21 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
 	       && ( dRTrack > cic4_allcuts_temp_sublead[_tCat-1+6*4] || !applyEleVeto ) ) )   passCuts = -1.;
   
   if(kin) {    
-    kin[18] = passCuts;
-    kin[19] = (float) _tCat;
+    kin[20] = passCuts;
+    kin[21] = (float) _tCat;
   }    
 
   if(passCuts > 0.) return true;
   return false;
+}
+
+const MCParticle *PhotonTools::MatchMC(const Photon *ph, const MCParticleCol *c) {
+  
+  for (UInt_t i=0; i<c->GetEntries(); ++i) {
+    const MCParticle *p = c->At(i);
+    if ( p->AbsPdgId()==22 && p->IsGenerated() && MathUtils::DeltaR(*ph,*p) < 0.3 && p->Mother() && (p->Mother()->AbsPdgId()==25 || p->Mother()->AbsPdgId()<=21) ) {
+      return p;
+    }
+  }
+  return 0;
 }

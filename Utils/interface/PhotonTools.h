@@ -20,6 +20,7 @@
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitAna/DataTree/interface/BeamSpotCol.h"
 #include "MitAna/DataTree/interface/TriggerObjectCol.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 class TRandom3;
@@ -94,6 +95,8 @@ namespace mithep {
 				 double rho, double ptmin,
 				 bool applyEleVeto = true,
 				 bool print = false, float* kin=NULL);
+                                 
+    static const MCParticle *MatchMC(const Photon *ph, const MCParticleCol *c);
     
     ClassDef(PhotonTools, 0) // Muon tools
       };

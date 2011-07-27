@@ -16,6 +16,8 @@
 #include "MitPhysics/Utils/interface/VertexMVA.h"
 #include "MitPhysics/Utils/interface/PUReweighting.h"
 #include "MitPhysics/Utils/interface/PUReweightingMulti.h"
+#include "MitPhysics/Utils/interface/PhotonFix.h"
+
 
 #endif
 
@@ -42,5 +44,5 @@
 #pragma link C++ class mithep::VertexMVA;
 #pragma link C++ class mithep::PUReweighting;
 #pragma link C++ class mithep::PUReweightingMulti;
-
+#pragma link C++ class PhotonFix;
 #endif
