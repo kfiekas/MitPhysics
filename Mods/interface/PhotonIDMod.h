@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.20 2011/07/15 17:24:37 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.21 2011/07/27 15:17:36 bendavid Exp $
 //
 // PhotonIDMod
 //
@@ -20,7 +20,9 @@
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
-#include "MitPhysics/Mods/interface/PhotonPairSelector.h"
+#include "MitAna/DataTree/interface/DecayParticleCol.h"
+#include "MitAna/DataTree/interface/PileupInfoCol.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
 
 namespace mithep 
 {
@@ -47,6 +49,7 @@ namespace mithep
       void                SetApplySpikeRemoval(Bool_t b)    { fApplySpikeRemoval  = b;     }
       void                SetApplyPixelSeed(Bool_t b)       { fApplyPixelSeed  = b;        }
       void                SetApplyElectronVeto(Bool_t b)    { fApplyElectronVeto = b;      }
+      void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b;     }      
       void                SetApplyElectronVetoConvRecovery(Bool_t b) { fApplyElectronVetoConvRecovery = b; }
       void                SetApplyConversionId(Bool_t b)    { fApplyConversionId = b;      }
       void                SetApplyTriggerMatching(Bool_t b)      { fApplyTriggerMatching = b;  }      
@@ -80,7 +83,8 @@ namespace mithep
     void                SetPVName(const char *n)          { fPVName = n;                 }
     void                SetPVFromBranch(bool b)           { fPVFromBranch = b;           }
     void                SetIsData (Bool_t b) { fIsData = b;};
-    void                SetWriteTree(Bool_t b) { fWriteTree = b;}
+    void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
+    void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -110,6 +114,7 @@ namespace mithep
       TString             fPileUpDenName;        //name of the PU density collection      
       TString             fConversionName;       //name of conversion branch
       TString             fElectronName;
+      TString             fGoodElectronName;
       TString             fTrigObjectsName;        //name of trigger object collection
       TString             fPVName;
       TString             fMCParticleName;
@@ -121,6 +126,7 @@ namespace mithep
       Bool_t              fApplySpikeRemoval;    //whether apply spike removal      
       Bool_t              fApplyPixelSeed;       //=true then apply pixel seed constraint
       Bool_t              fApplyElectronVeto;    //=true then apply electron veto (with no conversion recovery)
+      Bool_t              fInvertElectronVeto;    //=true then invert electron veto (for cic selection only atm)      
       Bool_t              fApplyElectronVetoConvRecovery; //=true then apply electron veto with conversion recovery
       Bool_t              fApplyConversionId;    //=true then apply conversion id cuts
       Bool_t              fApplyTriggerMatching;   //match to hlt photon (default=0)      
@@ -144,15 +150,13 @@ namespace mithep
       const PileupEnergyDensityCol *fPileUpDen;  //!rho branch
       const DecayParticleCol *fConversions;      //!conversion branch
       const ElectronCol  *fElectrons;            //!electron branch
+      const ElectronCol  *fGoodElectrons;        //!electron branch
       const VertexCol*    fPV;                   //!
       const MCParticleCol          *fMCParticles;//!
       const PileupInfoCol          *fPileUp;     //!  
       bool                fPVFromBranch;
-      PhotonPairSelectorDiphotonEvent* fDiphotonEvent;
-      PhotonPairSelectorPhoton* fSinglePhoton;    
-      TTree              *hPhotonTree; //!
+      Bool_t              fGoodElectronsFromBranch;
       Bool_t              fIsData;
-      Bool_t              fWriteTree;
 
 
 

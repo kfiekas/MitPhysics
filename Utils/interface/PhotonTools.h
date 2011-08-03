@@ -37,6 +37,17 @@ namespace mithep {
         kCat4        //barrel-endcap+endcap-endcap highr9/lowr9 + lowr9-lowr9
       };
       
+     enum DiphotonR9EtaPtCats {
+       kOctCat0,
+       kOctCat1,
+       kOctCat2,
+       kOctCat3,
+       kOctCat4,
+       kOctCat5,
+       kOctCat6,
+       kOctCat7
+     };
+      
      enum DiphotonR9EtaConversionCats {
         kNewCat1 = 0,       //barrel-barrel highr9/highr9
         kNewCat2,             //barrel-barrel highr9/lowr9+lowr9/lowr9 one/two conversion
@@ -70,6 +81,7 @@ namespace mithep {
 						  const BaseVertex *vtx, Int_t nWrongHitsMax=1, Double_t probMin=1e-6,
 						  Double_t lxyMin = 2.0);                                               
     static DiphotonR9EtaCats DiphotonR9EtaCat(const Photon *p1, const Photon *p2);
+    static DiphotonR9EtaPtCats DiphotonR9EtaPtCat(const Photon *p1, const Photon *p2);
     static DiphotonR9EtaConversionCats DiphotonR9EtaConversionCat(const Photon *p1, const Photon *p2, const DecayParticleCol *conversions, const BaseVertex *v);
     static CiCBaseLineCats CiCBaseLineCat(const Photon *p);
     
@@ -86,17 +98,8 @@ namespace mithep {
 				 bool applyEleVeto = true,
 				 bool print = false, float* kin=NULL);
 
-
-    static bool PassCiCSelection(Photon* ph, 
-				 const Vertex* vtx, 
-				 const TrackCol*    trackCol,
-				 const ElectronCol* eleCol,
-				 const VertexCol*   vtxCol,
-				 double rho, double ptmin,
-				 bool applyEleVeto = true,
-				 bool print = false, float* kin=NULL);
                                  
-    static const MCParticle *MatchMC(const Photon *ph, const MCParticleCol *c);
+    static const MCParticle *MatchMC(const Photon *ph, const MCParticleCol *c, Bool_t matchElectrons = kFALSE);
     
     ClassDef(PhotonTools, 0) // Muon tools
       };

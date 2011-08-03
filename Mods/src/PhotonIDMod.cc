@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.23 2011/07/22 10:58:08 fabstoec Exp $
+// $Id: PhotonIDMod.cc,v 1.24 2011/07/27 15:17:37 bendavid Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -22,6 +22,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPileUpDenName     (Names::gkPileupEnergyDensityBrn),
   fConversionName    ("MergedConversions"),
   fElectronName      ("Electrons"),
+  fGoodElectronName  ("Electrons"),
   fPVName            (Names::gkPVBeamSpotBrn),
   // MC specific stuff...
   fMCParticleName    (Names::gkMCPartBrn),
@@ -34,6 +35,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fApplySpikeRemoval (kFALSE),
   fApplyPixelSeed    (kTRUE),
   fApplyElectronVeto (kFALSE),
+  fInvertElectronVeto(kFALSE),
   fApplyElectronVetoConvRecovery(kFALSE),
   fApplyConversionId (kFALSE),
   fApplyTriggerMatching(kFALSE),
@@ -60,13 +62,14 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPileUpDen(0),
   fConversions(0),
   fElectrons(0),
+  fGoodElectrons(0),
   fPV(0),
   fMCParticles       (0),
   fPileUp            (0),
 
   fPVFromBranch      (true),
-  fIsData(false),
-  fWriteTree(false)
+  fGoodElectronsFromBranch (kTRUE),
+  fIsData(false)
   
 {
   // Constructor.
@@ -88,6 +91,7 @@ void PhotonIDMod::Process()
     LoadEventObject(fPileUpDenName,      fPileUpDen);
     LoadEventObject(fConversionName,     fConversions);
     LoadEventObject(fElectronName,       fElectrons);
+    LoadEventObject(fGoodElectronName,       fGoodElectrons);
     LoadEventObject(fPVName,             fPV);
     
     if(fBeamspots->GetEntries() > 0)
@@ -113,6 +117,10 @@ void PhotonIDMod::Process()
     if (fFiduciality == kTRUE &&
         (ph->SCluster()->AbsEta()>=2.5 || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566) ) ) 
       continue;
+    
+    if (fInvertElectronVeto && PhotonTools::PassElectronVeto(ph,fGoodElectrons)) {
+      continue;
+    }
     
     // ---------------------------------------------------------------------
     // check if we use the CiC Selection. If yes, bypass all the below...
@@ -249,7 +257,8 @@ void PhotonIDMod::Process()
 
     if (ph->AbsEta() >= fAbsEtaMax) 
       continue;
-
+      
+    
     // add good electron
     GoodPhotons->Add(fPhotons->At(i));
   }
@@ -260,50 +269,7 @@ void PhotonIDMod::Process()
   // add to event for other modules to use
   AddObjThisEvt(GoodPhotons);  
   
-  if (!fWriteTree || !GoodPhotons->GetEntries()) return;
-    
-  Int_t _numPU = -1.;        // some sensible default values....
-  Int_t _numPUminus = -1.;        // some sensible default values....
-  Int_t _numPUplus = -1.;        // some sensible default values....
-
-  if( !fIsData ) {
-    LoadBranch(fMCParticleName);
-    LoadBranch(fPileUpName);
-    for (UInt_t i=0; i<fPileUp->GetEntries(); ++i) {
-      const PileupInfo *puinfo = fPileUp->At(i);
-      if (puinfo->GetBunchCrossing()==0) _numPU = puinfo->GetPU_NumInteractions();
-      else if (puinfo->GetBunchCrossing() == -1) _numPUminus = puinfo->GetPU_NumInteractions();
-      else if (puinfo->GetBunchCrossing() ==  1) _numPUplus  = puinfo->GetPU_NumInteractions();
-    }
-  }
-
-
-  fDiphotonEvent->rho = _tRho;
-  fDiphotonEvent->genHiggspt = -99.;
-  fDiphotonEvent->genHiggsZ = -99.;
-  fDiphotonEvent->gencostheta = -99.;
-  fDiphotonEvent->nVtx = fPV->GetEntries();
-  fDiphotonEvent->vtxZ = (fDiphotonEvent->nVtx>0) ? fPV->At(0)->Z() : -99.;
-  fDiphotonEvent->numPU = _numPU;
-  fDiphotonEvent->numPUminus = _numPUminus;
-  fDiphotonEvent->numPUplus = _numPUplus;
-  fDiphotonEvent->mass = -99.;
-  fDiphotonEvent->ptgg = -99.;
-  fDiphotonEvent->costheta = -99.;
-  fDiphotonEvent->evt = GetEventHeader()->EvtNum();
-  fDiphotonEvent->run = GetEventHeader()->RunNum();
-  fDiphotonEvent->lumi = GetEventHeader()->LumiSec();
-  fDiphotonEvent->evtcat = -99;
-  fDiphotonEvent->masscor = -99.;
-  fDiphotonEvent->masscorerr = -99.;
-
-  for (UInt_t i=0; i<GoodPhotons->GetEntries(); ++i) {
-    const Photon *ph = GoodPhotons->At(i);
-    const MCParticle *phgen = PhotonTools::MatchMC(ph,fMCParticles);
-    fSinglePhoton->SetVars(ph,phgen);
-    hPhotonTree->Fill();  
-  }
- 
+  return; 
   
 }
 
@@ -318,6 +284,7 @@ void PhotonIDMod::SlaveBegin()
   ReqEventObject(fBeamspotBranchName, fBeamspots,   kTRUE);
   ReqEventObject(fConversionName,     fConversions, kTRUE);
   ReqEventObject(fElectronName,       fElectrons,   kTRUE);
+  ReqEventObject(fGoodElectronName,       fGoodElectrons,   fGoodElectronsFromBranch);  
   ReqEventObject(fPVName, fPV, fPVFromBranch);
   ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
   if (!fIsData) {
@@ -357,69 +324,6 @@ void PhotonIDMod::SlaveBegin()
               fPhotonIsoType.Data());
     return;
   }
-  
-  if (fWriteTree) {
-    fDiphotonEvent = new PhotonPairSelectorDiphotonEvent;
-    fSinglePhoton = new PhotonPairSelectorPhoton;
-
-    TString singlename = "hPhotonTree";
-    hPhotonTree = new TTree(singlename,singlename);
     
-    //make flattish tree from classes so we don't have to rely on dictionaries for reading later
-    TClass *eclass = TClass::GetClass("mithep::PhotonPairSelectorDiphotonEvent");
-    TClass *pclass = TClass::GetClass("mithep::PhotonPairSelectorPhoton");
-    TList *elist = eclass->GetListOfDataMembers();
-    TList *plist = pclass->GetListOfDataMembers();
-      
-    for (int i=0; i<elist->GetEntries(); ++i) {
-      const TDataMember *tdm = static_cast<const TDataMember*>(elist->At(i));
-      if (!(tdm->IsBasic() && tdm->IsPersistent())) continue;
-      TString typestring;
-      if (TString(tdm->GetTypeName())=="Char_t") typestring = "B";
-      else if (TString(tdm->GetTypeName())=="UChar_t") typestring = "b";
-      else if (TString(tdm->GetTypeName())=="Short_t") typestring = "S";
-      else if (TString(tdm->GetTypeName())=="UShort_t") typestring = "s";
-      else if (TString(tdm->GetTypeName())=="Int_t") typestring = "I";
-      else if (TString(tdm->GetTypeName())=="UInt_t") typestring = "i";
-      else if (TString(tdm->GetTypeName())=="Float_t") typestring = "F";
-      else if (TString(tdm->GetTypeName())=="Double_t") typestring = "D";
-      else if (TString(tdm->GetTypeName())=="Long64_t") typestring = "L";
-      else if (TString(tdm->GetTypeName())=="ULong64_t") typestring = "l";
-      else if (TString(tdm->GetTypeName())=="Bool_t") typestring = "O";
-      else continue;
-      //printf("%s %s: %i\n",tdm->GetTypeName(),tdm->GetName(),int(tdm->GetOffset()));
-      Char_t *addr = (Char_t*)fDiphotonEvent;
-      assert(sizeof(Char_t)==1);
-      hPhotonTree->Branch(tdm->GetName(),addr + tdm->GetOffset(),TString::Format("%s/%s",tdm->GetName(),typestring.Data()));
-    }
-
-
-    for (int i=0; i<plist->GetEntries(); ++i) {
-      const TDataMember *tdm = static_cast<const TDataMember*>(plist->At(i));
-      if (!(tdm->IsBasic() && tdm->IsPersistent())) continue;
-      TString typestring;
-      if (TString(tdm->GetTypeName())=="Char_t") typestring = "B";
-      else if (TString(tdm->GetTypeName())=="UChar_t") typestring = "b";
-      else if (TString(tdm->GetTypeName())=="Short_t") typestring = "S";
-      else if (TString(tdm->GetTypeName())=="UShort_t") typestring = "s";
-      else if (TString(tdm->GetTypeName())=="Int_t") typestring = "I";
-      else if (TString(tdm->GetTypeName())=="UInt_t") typestring = "i";
-      else if (TString(tdm->GetTypeName())=="Float_t") typestring = "F";
-      else if (TString(tdm->GetTypeName())=="Double_t") typestring = "D";
-      else if (TString(tdm->GetTypeName())=="Long64_t") typestring = "L";
-      else if (TString(tdm->GetTypeName())=="ULong64_t") typestring = "l";
-      else if (TString(tdm->GetTypeName())=="Bool_t") typestring = "O";
-      else continue;
-      //printf("%s\n",tdm->GetTypeName());
-
-      assert(sizeof(Char_t)==1);    
-      TString singlename = TString::Format("ph.%s",tdm->GetName());
-      Char_t *addrsingle = (Char_t*)fSinglePhoton;
-      hPhotonTree->Branch(singlename,addrsingle+tdm->GetOffset(),TString::Format("%s/%s",singlename.Data(),typestring.Data()));
-    }
-
-    AddOutput(hPhotonTree);
-  }
-  
   
 }

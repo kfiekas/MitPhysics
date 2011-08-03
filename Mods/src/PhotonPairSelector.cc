@@ -1,6 +1,8 @@
 #include "MitPhysics/Mods/interface/PhotonPairSelector.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
+#include "MitAna/DataTree/interface/StableData.h"
+#include "MitAna/DataTree/interface/StableParticle.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -14,9 +16,6 @@
 using namespace mithep;
 
 ClassImp(mithep::PhotonPairSelector)
-ClassImp(mithep::PhotonPairSelectorPhoton)
-ClassImp(mithep::PhotonPairSelectorDiphotonEvent)
-
 
 //--------------------------------------------------------------------------------------------------
 PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) : 
@@ -26,6 +25,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // define all the Branches to load
   fPhotonBranchName  (Names::gkPhotonBrn),
   fElectronName      (Names::gkElectronBrn),
+  fGoodElectronName  (Names::gkElectronBrn),  
   fConversionName    (Names::gkMvfConversionBrn),  
   fTrackBranchName   (Names::gkTrackBrn),
   fPileUpDenName     (Names::gkPileupEnergyDensityBrn),
@@ -55,7 +55,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fIsData            (false),
   fPhotonsFromBranch (true),  
   fPVFromBranch      (true),
-  
+  fGoodElectronsFromBranch (kTRUE),
+
   // ----------------------------------------
   // collections....
   fPhotons           (0),
@@ -91,9 +92,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fDoMCSmear         (true),
   fDoVtxSelection    (true),
   fApplyEleVeto      (true),
-
-  fTupleName         ("hCiCtuple")
-  
+  fInvertElectronVeto(kFALSE)    
 {
   // Constructor.
 }
@@ -108,7 +107,19 @@ void PhotonPairSelector::Process()
   // ------------------------------------------------------------  
   // Process entries of the tree. 
   LoadEventObject(fPhotonBranchName,   fPhotons);
+  
+  // -----------------------------------------------------------
+  // OUtput Photon Collection. It will ALWAYS conatrin either 0 or 2 Photons
+  PhotonOArr *GoodPhotons = new PhotonOArr;
+  GoodPhotons->SetName(fGoodPhotonsName);
+  GoodPhotons->SetOwner(kTRUE);
+  // add to event for other modules to use
+  AddObjThisEvt(GoodPhotons);  
+  
+  if (fPhotons->GetEntries()<2) return;
+  
   LoadEventObject(fElectronName,       fElectrons);
+  LoadEventObject(fGoodElectronName,       fGoodElectrons);
   LoadEventObject(fConversionName,     fConversions);
   LoadEventObject(fTrackBranchName,    fTracks);
   LoadEventObject(fPileUpDenName,      fPileUpDen);
@@ -118,11 +129,7 @@ void PhotonPairSelector::Process()
 
 
 
-  // -----------------------------------------------------------
-  // OUtput Photon Collection. It will ALWAYS conatrin either 0 or 2 Photons
-  PhotonOArr *GoodPhotons = new PhotonOArr;
-  GoodPhotons->SetName(fGoodPhotonsName);
-  GoodPhotons->SetOwner(kTRUE);
+
   
 
   // ------------------------------------------------------------  
@@ -169,6 +176,8 @@ void PhotonPairSelector::Process()
     }    
     preselPh->Add(ph);
   }
+
+  if (preselPh->GetEntries()<2) return;
 
   // Sorry... need the second loop here in order to sort & assign the right Categories..
   preselPh->Sort();
@@ -269,6 +278,10 @@ void PhotonPairSelector::Process()
       theVtx[iPair] = fPV->At(0);
 
     }
+    
+    //set PV ref in photons
+    fixPh1st[iPair]->SetPV(theVtx[iPair]);
+    fixPh2nd[iPair]->SetPV(theVtx[iPair]);
 
     // fix the kinematics for both events
     FourVectorM newMom1st = fixPh1st[iPair]->MomVtx(theVtx[iPair]->Position());
@@ -280,7 +293,7 @@ void PhotonPairSelector::Process()
     // FIX-ME: Add other possibilities....
     bool pass1 = false;
     bool pass2 = false;
-    switch( fVtxSelType ){
+    switch( fPhSelType ){
     case kNoPhSelection:
       pass1 = ( fixPh1st[iPair]->Pt() > fLeadingPtMin  );
       pass2 = ( fixPh2nd[iPair]->Pt() > fTrailingPtMin );
@@ -300,6 +313,12 @@ void PhotonPairSelector::Process()
     default:
       pass1 = true;
       pass2 = true;
+    }
+    
+    //match to good electrons if requested
+    if (fInvertElectronVeto) {
+      pass1 &= !PhotonTools::PassElectronVeto(fixPh1st[iPair],fGoodElectrons);
+      pass2 &= !PhotonTools::PassElectronVeto(fixPh2nd[iPair],fGoodElectrons);
     }
     // finally, if both Photons pass the selections, add the pair to the 'passing Pairs)
     if( pass1 && pass2 ) passPairs.push_back(iPair);
@@ -333,109 +352,20 @@ void PhotonPairSelector::Process()
   // ---------------------------------------------------------------
   // we have the Photons (*PARTY*)... compute some useful qunatities
 
-  Float_t _theVtxZ = -999.;
+  
 
   if(phHard && phSoft) {
     GoodPhotons->AddOwned(phHard);
     GoodPhotons->AddOwned(phSoft);
   }
 
-  if(_theVtx) _theVtxZ=_theVtx->Position().Z();
   
   // sort according to pt
   GoodPhotons->Sort();
   
-  // add to event for other modules to use
-  AddObjThisEvt(GoodPhotons);
-
   // delete auxiliary photon collection...
   delete preselPh;
   delete[] theVtx;
-  
-  // Fill the useful information (mass and di-photon pt)
-  bool doFill   = ( phHard && phSoft );
-  if (!doFill) return;
-
-  if( !fIsData ) {
-    LoadBranch(fMCParticleName);
-    LoadBranch(fPileUpName);
-  }  
-  
-  if( !fIsData ) {
-    for (UInt_t i=0; i<fPileUp->GetEntries(); ++i) {
-      const PileupInfo *puinfo = fPileUp->At(i);
-      if (puinfo->GetBunchCrossing()==0) _numPU = puinfo->GetPU_NumInteractions();
-      else if (puinfo->GetBunchCrossing() == -1) _numPUminus = puinfo->GetPU_NumInteractions();
-      else if (puinfo->GetBunchCrossing() ==  1) _numPUplus  = puinfo->GetPU_NumInteractions();
-    }
-  }
-
-  Float_t _mass = ( doFill ? (phHard->Mom()+phSoft->Mom()).M()  : -100.);
-  Float_t _ptgg = ( doFill ? (phHard->Mom()+phSoft->Mom()).Pt() : -100.);
-  
-  // in case of a MC event, try to find Higgs and Higgs decay Z poisition
-  Float_t _pth    = -100.;
-  Float_t _decayZ = -100.;
-  if( !fIsData ) FindHiggsPtAndZ(_pth, _decayZ);
-  
-  Float_t evtCat = -1.;
-  if( doFill ) {
-    evtCat = GetEventCat(catPh1, catPh2);
-    if(_ptgg < 40.) evtCat += 4.;
-  }
-  
-  const MCParticle *phgen1 = NULL;
-  const MCParticle *phgen2 = NULL;
-
-  if(!fIsData) {
-    phgen1 = PhotonTools::MatchMC(phHard,fMCParticles);
-    phgen2 = PhotonTools::MatchMC(phSoft,fMCParticles);
-  }
-
-  Float_t _gencostheta = -99.;
-  if (phgen1 && phgen2) {
-    _gencostheta = ThreeVector(phgen1->Mom()).Unit().Dot(ThreeVector(phgen2->Mom()).Unit());
-  }
-  
-   if(_mass > 0.) {
-    fDiphotonEvent->rho = _tRho;
-    fDiphotonEvent->genHiggspt = _pth;
-    fDiphotonEvent->genHiggsZ = _decayZ;
-    fDiphotonEvent->gencostheta = _gencostheta;
-    fDiphotonEvent->vtxZ = _theVtxZ;
-    fDiphotonEvent->nVtx = fPV->GetEntries();
-    fDiphotonEvent->numPU = _numPU;
-    fDiphotonEvent->numPUminus = _numPUminus;
-    fDiphotonEvent->numPUplus = _numPUplus;
-    fDiphotonEvent->mass = _mass;
-    fDiphotonEvent->ptgg = _ptgg;
-    fDiphotonEvent->costheta =  ThreeVector(phHard->Mom()).Unit().Dot(ThreeVector(phSoft->Mom()).Unit());
-    fDiphotonEvent->evt = GetEventHeader()->EvtNum();
-    fDiphotonEvent->run = GetEventHeader()->RunNum();
-    fDiphotonEvent->lumi = GetEventHeader()->LumiSec();
-    fDiphotonEvent->evtcat = evtCat;
-
-    fDiphotonEvent->photons[0].SetVars(phHard,phgen1);
-    fDiphotonEvent->photons[1].SetVars(phSoft,phgen2);
-    
-    Float_t ph1ecor    = fDiphotonEvent->photons[0].Ecor();
-    Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
-    Float_t ph2ecor    = fDiphotonEvent->photons[1].Ecor();
-    Float_t ph2ecorerr = fDiphotonEvent->photons[1].Ecorerr();
-    
-    fDiphotonEvent->masscor = TMath::Sqrt(2.0*ph1ecor*ph2ecor*(1.0-fDiphotonEvent->costheta));
-    fDiphotonEvent->masscorerr = 0.5*fDiphotonEvent->masscor*TMath::Sqrt(ph1ecorerr*ph1ecorerr/ph1ecor/ph1ecor + ph2ecorerr*ph2ecorerr/ph2ecor/ph2ecor);
-    
-    //printf("r9 = %5f, photon sigieie = %5f, seed sigieie = %5f\n",phHard->R9(),phHard->CoviEtaiEta(),sqrt(phHard->SCluster()->Seed()->CoviEtaiEta()));
-    
-    hCiCTuple->Fill();  
-    
-    fSinglePhoton->SetVars(phHard,phgen1);
-    hCiCTupleSingle->Fill();  
-    fSinglePhoton->SetVars(phSoft,phgen2);
-    hCiCTupleSingle->Fill();  
-    
-   }    
     
   return;
 
@@ -450,6 +380,7 @@ void PhotonPairSelector::SlaveBegin()
   ReqEventObject(fPhotonBranchName,   fPhotons,    fPhotonsFromBranch);
   ReqEventObject(fTrackBranchName,    fTracks,     true);
   ReqEventObject(fElectronName,       fElectrons,  true);  
+  ReqEventObject(fGoodElectronName,       fGoodElectrons,   fGoodElectronsFromBranch);  
   ReqEventObject(fPileUpDenName,      fPileUpDen,  true);
   ReqEventObject(fPVName,             fPV,         fPVFromBranch);
   ReqEventObject(fConversionName,     fConversions,true);
@@ -475,100 +406,25 @@ void PhotonPairSelector::SlaveBegin()
   else 
     fVtxSelType =       kStdVtxSelection;  
 
-  
-  //initialize photon energy corrections
-  //PhotonFix::initialise("4_2",std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFix.dat")).Data()));  
-
-  fDiphotonEvent = new PhotonPairSelectorDiphotonEvent;
-  fSinglePhoton = new PhotonPairSelectorPhoton;
-
-  
-  hCiCTuple = new TTree(fTupleName.Data(),fTupleName.Data());
-  TString singlename = fTupleName + TString("Single");
-  hCiCTupleSingle = new TTree(singlename,singlename);
-  
-  //make flattish tree from classes so we don't have to rely on dictionaries for reading later
-  TClass *eclass = TClass::GetClass("mithep::PhotonPairSelectorDiphotonEvent");
-  TClass *pclass = TClass::GetClass("mithep::PhotonPairSelectorPhoton");
-  TList *elist = eclass->GetListOfDataMembers();
-  TList *plist = pclass->GetListOfDataMembers();
-    
-  for (int i=0; i<elist->GetEntries(); ++i) {
-    const TDataMember *tdm = static_cast<const TDataMember*>(elist->At(i));
-    if (!(tdm->IsBasic() && tdm->IsPersistent())) continue;
-    TString typestring;
-    if (TString(tdm->GetTypeName())=="Char_t") typestring = "B";
-    else if (TString(tdm->GetTypeName())=="UChar_t") typestring = "b";
-    else if (TString(tdm->GetTypeName())=="Short_t") typestring = "S";
-    else if (TString(tdm->GetTypeName())=="UShort_t") typestring = "s";
-    else if (TString(tdm->GetTypeName())=="Int_t") typestring = "I";
-    else if (TString(tdm->GetTypeName())=="UInt_t") typestring = "i";
-    else if (TString(tdm->GetTypeName())=="Float_t") typestring = "F";
-    else if (TString(tdm->GetTypeName())=="Double_t") typestring = "D";
-    else if (TString(tdm->GetTypeName())=="Long64_t") typestring = "L";
-    else if (TString(tdm->GetTypeName())=="ULong64_t") typestring = "l";
-    else if (TString(tdm->GetTypeName())=="Bool_t") typestring = "O";
-    else continue;
-    //printf("%s %s: %i\n",tdm->GetTypeName(),tdm->GetName(),int(tdm->GetOffset()));
-    Char_t *addr = (Char_t*)fDiphotonEvent;
-    assert(sizeof(Char_t)==1);
-    hCiCTuple->Branch(tdm->GetName(),addr + tdm->GetOffset(),TString::Format("%s/%s",tdm->GetName(),typestring.Data()));
-    hCiCTupleSingle->Branch(tdm->GetName(),addr + tdm->GetOffset(),TString::Format("%s/%s",tdm->GetName(),typestring.Data()));
-  }
-
-  for (int iph=0; iph<2; ++iph) {
-    for (int i=0; i<plist->GetEntries(); ++i) {
-      const TDataMember *tdm = static_cast<const TDataMember*>(plist->At(i));
-      if (!(tdm->IsBasic() && tdm->IsPersistent())) continue;
-      TString typestring;
-      if (TString(tdm->GetTypeName())=="Char_t") typestring = "B";
-      else if (TString(tdm->GetTypeName())=="UChar_t") typestring = "b";
-      else if (TString(tdm->GetTypeName())=="Short_t") typestring = "S";
-      else if (TString(tdm->GetTypeName())=="UShort_t") typestring = "s";
-      else if (TString(tdm->GetTypeName())=="Int_t") typestring = "I";
-      else if (TString(tdm->GetTypeName())=="UInt_t") typestring = "i";
-      else if (TString(tdm->GetTypeName())=="Float_t") typestring = "F";
-      else if (TString(tdm->GetTypeName())=="Double_t") typestring = "D";
-      else if (TString(tdm->GetTypeName())=="Long64_t") typestring = "L";
-      else if (TString(tdm->GetTypeName())=="ULong64_t") typestring = "l";
-      else if (TString(tdm->GetTypeName())=="Bool_t") typestring = "O";
-      else continue;
-      //printf("%s\n",tdm->GetTypeName());
-      TString varname = TString::Format("ph%d.%s",iph+1,tdm->GetName());
-      
-      Char_t *addr = (Char_t*)&fDiphotonEvent->photons[iph];
-      assert(sizeof(Char_t)==1);
-      hCiCTuple->Branch(varname,addr+tdm->GetOffset(),TString::Format("%s/%s",varname.Data(),typestring.Data()));
-      
-      if (iph==0) {
-        TString singlename = TString::Format("ph.%s",tdm->GetName());
-        Char_t *addrsingle = (Char_t*)fSinglePhoton;
-        hCiCTupleSingle->Branch(singlename,addrsingle+tdm->GetOffset(),TString::Format("%s/%s",singlename.Data(),typestring.Data()));
-      }
-    }
-  }
-
-
-  AddOutput(hCiCTuple);
-  AddOutput(hCiCTupleSingle);
-
-
 }
 
 // ----------------------------------------------------------------------------------------
 // some helpfer functions....
-void PhotonPairSelector::FindHiggsPtAndZ(Float_t& pt, Float_t& decayZ) {
+void PhotonPairSelector::FindHiggsPtAndZ(Float_t& pt, Float_t& decayZ, Float_t& mass) {
 
   pt = -999.;
   decayZ = -999.;
+  mass = -999.;
 
   // loop over all GEN particles and look for status 1 photons
   for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
     const MCParticle* p = fMCParticles->At(i);
-    if( !(p->Is(MCParticle::kH)) ) continue;
-    pt=p->Pt();
-    decayZ = p->DecayVertex().Z();
-    break;
+    if( p->Is(MCParticle::kH) || (!fApplyEleVeto && p->AbsPdgId()==23) ) {
+      pt=p->Pt();
+      decayZ = p->DecayVertex().Z();
+      mass = p->Mass();
+      break;
+    }
   }
   
   return;
@@ -632,117 +488,3 @@ Float_t PhotonPairSelector::GetEventCat(PhotonTools::CiCBaseLineCats cat1, Photo
   return ( ph1IsHR9 && ph2IsHR9 ? 2. : 3.);
 }
 
-void PhotonPairSelectorPhoton::SetVars(const Photon *p, const MCParticle *m) {
-      e = p->E();
-      pt = p->Pt();
-      eta = p->Eta();
-      phi = p->Phi();
-      r9 = p->R9();
-      e3x3 = p->E33();
-      e5x5 = p->E55();
-      const SuperCluster *s = p->SCluster();
-      sce = s->Energy();
-      scrawe = s->RawEnergy();
-      scpse = s->PreshowerEnergy();
-      sceta = s->Eta();
-      scphi = s->Phi();
-      scnclusters = s->ClusterSize();
-      scnhits = s->NHits();
-      hovere = p->HadOverEm();
-      sigietaieta = p->CoviEtaiEta();
-      isbarrel = (s->AbsEta()<1.5);
-      isr9reco = (isbarrel && r9>0.94) || (!isbarrel && r9>0.95);
-      isr9cat = (r9>0.94);
-      
-      if (isbarrel) {
-        if (isr9cat) phcat = 1;
-        else phcat = 2;
-      }
-      else {
-        if (isr9cat) phcat = 3;
-        else phcat = 4;
-      }
-      
-      const BasicCluster *b = s->Seed();
-      sigiphiphi = TMath::Sqrt(b->CoviPhiiPhi());
-      if (isnan(sigiphiphi)) sigiphiphi = -99.;
-      covietaiphi = b->CoviEtaiPhi();
-      if (isnan(covietaiphi)) covietaiphi = -99.;
-      emax = b->EMax();
-      e2nd = b->E2nd();
-      etop = b->ETop();
-      ebottom = b->EBottom();
-      eleft = b->ELeft();
-      eright = b->ERight();
-      e1x3 = b->E1x3();
-      e3x1 = b->E3x1();
-      e1x5 = b->E1x5();
-      e2x2 = b->E2x2();
-      e4x4 = b->E4x4();
-      e2x5max = b->E2x5Max();
-      e2x5top = b->E2x5Top();
-      e2x5bottom = b->E2x5Bottom();
-      e2x5left = b->E2x5Left();
-      e2x5right = b->E2x5Right();
-
-      //initialize photon energy corrections if needed
-      if (!PhotonFix::initialised()) {
-        PhotonFix::initialise("4_2",std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFix.dat")).Data()));  
-      }
-      
-      PhotonFix fix(e,sceta,scphi,r9);
-      const Float_t dval = -99.;
-      ecor = fix.fixedEnergy();
-      ecorerr = fix.sigmaEnergy();
-      if (isbarrel) {
-       etac = fix.etaC();
-       etas = fix.etaS();
-       etam = fix.etaM();
-       phic = fix.phiC();
-       phis = fix.phiS();
-       phim = fix.phiM();
-       xz = dval;
-       xc = dval;
-       xs = dval;
-       xm = dval;
-       yz = dval;
-       yc = dval;
-       ys = dval;
-       ym = dval;
-      }
-      else {
-       etac = dval;
-       etas = dval;
-       etam = dval;
-       phic = dval;
-       phis = dval;
-       phim = dval;
-       xz = fix.xZ();
-       xc = fix.xC();
-       xs = fix.xS();
-       xm = fix.xM();
-       yz = fix.yZ();
-       yc = fix.yC();
-       ys = fix.yS();
-       ym = fix.yM();
-      }   
-      
-      genz = -99.;
-      if (m) {
-        ispromptgen = kTRUE;
-        gene = m->E();
-        genpt = m->Pt();
-        geneta = m->Eta();
-        genphi = m->Phi();
-        const MCParticle *mm = m->DistinctMother();
-        if (mm) genz = mm->DecayVertex().Z();
-      }
-      else {
-        ispromptgen = kFALSE;
-        gene = -99.;
-        genpt = -99.;
-        geneta = -99.;
-        genphi = -99.;
-      }
-      
-}

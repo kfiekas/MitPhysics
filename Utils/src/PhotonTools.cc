@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.10 2011/07/15 19:42:36 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.11 2011/07/27 15:17:37 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -210,7 +210,7 @@ PhotonTools::DiphotonR9EtaConversionCats PhotonTools::DiphotonR9EtaConversionCat
 }
 
 PhotonTools::CiCBaseLineCats PhotonTools::CiCBaseLineCat(const Photon *p) {
-  if( p->IsEB() ) {
+  if( p->SCluster()->AbsEta()<1.5 ) {
     if ( p->R9() > 0.94 ) return kCiCCat1;
     else return kCiCCat2;
   } else {
@@ -317,18 +317,6 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
     return match;
   else 
     return NULL;
-}
-
-bool PhotonTools::PassCiCSelection(Photon* ph, const Vertex* vtx, 
-				   const TrackCol* trackCol,
-				   const ElectronCol* eleCol,
-				   const VertexCol* vtxCol,
-				   double rho, double ptmin,
-				   bool applyEleVeto, 
-				   bool print, float* kin) {
-
-  const Photon* phpass = ph;
-  return PhotonTools::PassCiCSelection(phpass, vtx, trackCol, eleCol, vtxCol, rho, ptmin, applyEleVeto, print, kin);
 }
 
 bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx, 
@@ -452,13 +440,44 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
   return false;
 }
 
-const MCParticle *PhotonTools::MatchMC(const Photon *ph, const MCParticleCol *c) {
+const MCParticle *PhotonTools::MatchMC(const Photon *ph, const MCParticleCol *c, Bool_t matchElectrons) {
   
   for (UInt_t i=0; i<c->GetEntries(); ++i) {
     const MCParticle *p = c->At(i);
+//     if (p->IsGenerated() && p->AbsPdgId()==11 && p->Mother()->AbsPdgId()==23) {
+//       printf("pdgid = %i, status = %i, pt = %5f\n",p->PdgId(),p->Status(),p->Pt());
+//     }
+    if (matchElectrons && p->AbsPdgId()==11 && p->IsGenerated() && p->Status()==3 && MathUtils::DeltaR(*ph,*p) < 0.3 && p->Mother() && (p->Mother()->AbsPdgId()==23 || p->Mother()->AbsPdgId()==24 || p->Mother()->AbsPdgId()==22)) {
+      return p;
+    }
     if ( p->AbsPdgId()==22 && p->IsGenerated() && MathUtils::DeltaR(*ph,*p) < 0.3 && p->Mother() && (p->Mother()->AbsPdgId()==25 || p->Mother()->AbsPdgId()<=21) ) {
       return p;
     }
   }
   return 0;
+}
+
+PhotonTools::DiphotonR9EtaPtCats PhotonTools::DiphotonR9EtaPtCat(const Photon *p1, const Photon *p2) {
+
+  PhotonTools::CiCBaseLineCats cat1 = CiCBaseLineCat(p1);
+  PhotonTools::CiCBaseLineCats cat2 = CiCBaseLineCat(p2);
+  
+  PhotonTools::DiphotonR9EtaPtCats evtcat = PhotonTools::kOctCat0;
+  
+  bool ph1IsEB = (cat1 ==  PhotonTools::kCiCCat1 || cat1 == PhotonTools::kCiCCat2);
+  bool ph2IsEB = (cat2 ==  PhotonTools::kCiCCat1 || cat2 == PhotonTools::kCiCCat2);
+
+  bool ph1IsHR9 = (cat1 ==  PhotonTools::kCiCCat1 || cat1 == PhotonTools::kCiCCat3);
+  bool ph2IsHR9 = (cat2 ==  PhotonTools::kCiCCat1 || cat2 == PhotonTools::kCiCCat3);
+  
+  if( ph1IsEB && ph2IsEB )
+    evtcat = ( ph1IsHR9 && ph2IsHR9 ? PhotonTools::kOctCat0 : PhotonTools::kOctCat1);
+  else
+    evtcat = ( ph1IsHR9 && ph2IsHR9 ? PhotonTools::kOctCat2 : PhotonTools::kOctCat3);
+  
+  float ptgg = (p1->Mom()+p2->Mom()).Pt();
+  if (ptgg<40.0) evtcat = PhotonTools::DiphotonR9EtaPtCats(evtcat + 4);
+  
+  
+  return evtcat;
 }
