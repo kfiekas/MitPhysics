@@ -18,6 +18,7 @@ void GeneratorTools::PrintHepMCTable(const mithep::Collection<mithep::MCParticle
     if (suppressEntriesAfterThisIndex == -1 || int(d) <= suppressEntriesAfterThisIndex) {
       cout << "Particle " << d << " : " << particles->At(d)->PdgId() << "    " 
            << particles->At(d)->Status() << " " 
+           << particles->At(d)->Mass() << " " 
            << particles->At(d)->Pt() << " " 
            << particles->At(d)->Eta() << " " << particles->At(d)->Phi() 
            << " IsParton:" << particles->At(d)->IsParton() 
