@@ -12,7 +12,7 @@
 /*
   Does post-reco fixes to ECAL photon energy and estimates resolution.
   This can run outside of the usual CMS software framework but requires 
-  access to a file 'PhotonFix.dat' which must be in the same directory as 
+  access to a file 'EcalGaps.dat' which must be in the same directory as 
   that used to run.
 
   To run within CMSSW use PhotonFixCMS.h (which can access the geometry 
@@ -25,7 +25,9 @@
   
   The string gives the reco version used. Valid strings are 
   "3_8", "3_11", "4_2" and "Nominal", where the latter gives no correction 
-  to the energy and a nominal resolution value.
+  to the energy and a nominal resolution value. There is also "4_2e" which 
+  provides corrections for electrons which are reconstructed as photons (to
+  aid with testing the performance of these corrections in data).
 
   Make objects using
     PhotonFix a(energy,eta,phi,r9);
@@ -46,17 +48,16 @@
 
 class PhotonFix {
  public:
-  PhotonFix(double e, double eta, double phi, double r9);
+  //PhotonFix(double e, double eta, double phi, double r9);
 
+  PhotonFix() : _onePi(acos(-1.0)), _twoPi(2.0*acos(-1.0)), _initialised(false) {}
   // Must be called before instantiating any PhotonFix objects
-  static bool initialise(const std::string &s="Nominal", const std::string &infile = "PhotonFix.dat");
-  static bool initialised() ;
-
-  // Used by above; do not call directly
-  static bool initialiseParameters(const std::string &s);
-  static bool initialiseGeometry(const std::string &s, const std::string &infile);
-
-  void setup();
+  bool initialise(const std::string &s="Nominal", const std::string &infile="PhotonFix.dat");
+  bool initialised() ;
+  
+  void setup(double e, double eta, double phi, double r9);
+  
+  bool isbarrel() const { return !_be; }
   
   // Corrected energy and sigma
   double fixedEnergy() const;
@@ -89,36 +90,44 @@ class PhotonFix {
   double yM() const;
 
   // Return arrays containing positions of ecal gaps
-  static void barrelCGap(unsigned i, unsigned j, unsigned k, double c);
-  static void barrelSGap(unsigned i, unsigned j, unsigned k, double c);
-  static void barrelMGap(unsigned i, unsigned j, unsigned k, double c);
-  static void endcapCrystal(unsigned i, unsigned j, bool c); 
-  static void endcapCGap(unsigned i, unsigned j, unsigned k, double c);
-  static void endcapSGap(unsigned i, unsigned j, unsigned k, double c);
-  static void endcapMGap(unsigned i, unsigned j, unsigned k, double c);
+  void barrelCGap(unsigned i, unsigned j, unsigned k, double c);
+  void barrelSGap(unsigned i, unsigned j, unsigned k, double c);
+  void barrelMGap(unsigned i, unsigned j, unsigned k, double c);
+  void endcapCrystal(unsigned i, unsigned j, bool c); 
+  void endcapCGap(unsigned i, unsigned j, unsigned k, double c);
+  void endcapSGap(unsigned i, unsigned j, unsigned k, double c);
+  void endcapMGap(unsigned i, unsigned j, unsigned k, double c);
   
   void print() const;
 
   // Input and output the fit parameters
-  static void setParameters(unsigned be, unsigned hl, const double *p);
-  static void getParameters(unsigned be, unsigned hl, double *p);
+  void setParameters(unsigned be, unsigned hl, const double *p);
+  void getParameters(unsigned be, unsigned hl, double *p);
 
-  static void dumpParameters(std::ostream &o);
-  static void printParameters(std::ostream &o);
+  void dumpParameters(std::ostream &o);
+  void printParameters(std::ostream &o);
 
   // Utility functions
-  static double GetaPhi(double f0, double f1);
-  static double asinh(double s);  
-  static void dumpGaps(std::ostream &o);
+  double GetaPhi(double f0, double f1) const;
+  double asinh(double s) const;  
+  void dumpGaps(std::ostream &o);
   
  private:
 
-  // Utility functions
-  static double dPhi(double f0, double f1);
-  static double aPhi(double f0, double f1);
 
-  static double expCorrection(double a, const double *p);
-  static double gausCorrection(double a, const double *p);
+  // Used by above; do not call directly
+  bool initialiseParameters(const std::string &s);
+  bool initialiseGeometry(const std::string &s, const std::string &infile);
+
+  
+   
+   
+  // Utility functions
+  double dPhi(double f0, double f1) const;
+  double aPhi(double f0, double f1) const;
+
+  double expCorrection(double a, const double *p) const;
+  double gausCorrection(double a, const double *p) const;
 
   // Actual data for each instantiated object
   unsigned _be,_hl;
@@ -126,44 +135,46 @@ class PhotonFix {
   double _aC,_aS,_aM,_bC,_bS,_bM;
   
   // Constants
-  static const double _onePi;
-  static const double _twoPi;
+  const double _onePi;
+  const double _twoPi;
   
   // Initialisation flag
-  static bool _initialised;
+  bool _initialised;
   
   // Parameters for fixes
-  static double _meanScale[2][2][4];
-  static double _meanAC[2][2][4];
-  static double _meanAS[2][2][4];
-  static double _meanAM[2][2][4];
-  static double _meanBC[2][2][4];
-  static double _meanBS[2][2][4];
-  static double _meanBM[2][2][4];
-  static double _meanR9[2][2][4];
+  double _meanScale[2][2][4];
+  double _meanAT[2][2][4];
+  double _meanAC[2][2][4];
+  double _meanAS[2][2][4];
+  double _meanAM[2][2][4];
+  double _meanBT[2][2][4];
+  double _meanBC[2][2][4];
+  double _meanBS[2][2][4];
+  double _meanBM[2][2][4];
+  double _meanR9[2][2][4];
   
   // Parameters for resolution
-  static double _sigmaScale[2][2][4];
-  static double _sigmaAT[2][2][4];
-  static double _sigmaAC[2][2][4];
-  static double _sigmaAS[2][2][4];
-  static double _sigmaAM[2][2][4];
-  static double _sigmaBT[2][2][4];
-  static double _sigmaBC[2][2][4];
-  static double _sigmaBS[2][2][4];
-  static double _sigmaBM[2][2][4];
-  static double _sigmaR9[2][2][4];
+  double _sigmaScale[2][2][4];
+  double _sigmaAT[2][2][4];
+  double _sigmaAC[2][2][4];
+  double _sigmaAS[2][2][4];
+  double _sigmaAM[2][2][4];
+  double _sigmaBT[2][2][4];
+  double _sigmaBC[2][2][4];
+  double _sigmaBS[2][2][4];
+  double _sigmaBM[2][2][4];
+  double _sigmaR9[2][2][4];
   
   // EB gap positions
-  static double _barrelCGap[169][360][2];
-  static double _barrelSGap[33][180][2];
-  static double _barrelMGap[7][18][2];
+  double _barrelCGap[169][360][2];
+  double _barrelSGap[33][180][2];
+  double _barrelMGap[7][18][2];
   
   // EE crystal existence and gap positions
-  static bool   _endcapCrystal[100][100];
-  static double _endcapCGap[2][7080][2];
-  static double _endcapSGap[2][264][2];
-  static double _endcapMGap[2][1][2];
+  bool   _endcapCrystal[100][100];
+  double _endcapCGap[2][7080][2];
+  double _endcapSGap[2][264][2];
+  double _endcapMGap[2][1][2];
 
 };
 

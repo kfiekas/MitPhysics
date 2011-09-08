@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonPairSelector.h,v 1.6 2011/07/27 17:50:52 fabstoec Exp $
+// $Id: PhotonPairSelector.h,v 1.7 2011/08/03 17:15:43 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -23,9 +23,11 @@
 #include "MitAna/DataTree/interface/MCParticleCol.h"
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
+#include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 
 class TNtuple;
 class TRandom3;
+class TH1D;
 
 namespace mithep 
 {  
@@ -112,6 +114,8 @@ namespace mithep
 
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
     void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
+    void                SetDoRegression(Bool_t b)         { fDoRegression = b; }
+    void                SetEtaCorrections(const TH1D *h)  { fEtaCorrections = h; }
 
   protected:
     void                Process();
@@ -188,7 +192,17 @@ namespace mithep
 
     // pointer to RNG ionstance for smearing
     TRandom3* rng;
-        
+    EGEnergyCorrector egcor;
+    Bool_t fDoRegression;
+    TString fPhFixString;
+    TString fPhFixFile;
+    TString fEBWeights;
+    TString fEBVarWeights;
+    TString fEEWeights;
+    TString fEEVarWeights;    
+    
+    const TH1D *fEtaCorrections;
+    
     // --------------------------------
     // some streagin flags, not adjustable yet (FIX-ME)
     bool fDoDataEneCorr;

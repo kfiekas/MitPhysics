@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.9 2011/06/01 12:36:59 mzanetti Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.11 2011/07/27 15:17:37 bendavid Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -17,6 +17,7 @@
 #include "MitPhysics/Utils/interface/PUReweighting.h"
 #include "MitPhysics/Utils/interface/PUReweightingMulti.h"
 #include "MitPhysics/Utils/interface/PhotonFix.h"
+#include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 
 
 #endif
@@ -45,4 +46,5 @@
 #pragma link C++ class mithep::PUReweighting;
 #pragma link C++ class mithep::PUReweightingMulti;
 #pragma link C++ class PhotonFix;
+#pragma link C++ class mithep::EGEnergyCorrector; 
 #endif

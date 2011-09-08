@@ -3,11 +3,11 @@
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include "MitAna/DataTree/interface/StableParticle.h"
+#include "MitAna/DataTree/interface/PFMet.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/VertexTools.h"
-#include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "TDataMember.h"
 #include <TNtuple.h>
 #include <TRandom3.h>
@@ -35,9 +35,10 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPVName            (Names::gkPVBeamSpotBrn),
   fBeamspotName      (Names::gkBeamSpotBrn),
   fPFCandName        (Names::gkPFCandidatesBrn),
-  // MC specific stuff...
   fMCParticleName    (Names::gkMCPartBrn),
-  fPileUpName        (Names::gkPileupInfoBrn),
+  fPileUpName        (Names::gkPileupInfoBrn),  
+  fSuperClusterName  ("PFSuperClusters"),
+  fPFMetName         ("PFMet"),
 
   
   fIsData            (false),
@@ -57,11 +58,16 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPFCands           (0),
   fMCParticles       (0),
   fPileUp            (0),
+  fSuperClusters     (0),
 
+  fLoopOnGoodElectrons(kFALSE),
   fInvertElectronVeto(kFALSE),  
 
   fWriteDiphotonTree(kTRUE),
   fWriteSingleTree(kTRUE),
+  fExcludeSinglePrompt(kFALSE),
+  fExcludeDoublePrompt(kFALSE),
+  fPhFixDataFile(gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fTupleName         ("hPhotonTree")
 
 
@@ -78,18 +84,29 @@ void PhotonTreeWriter::Process()
 {
   // ------------------------------------------------------------  
   // Process entries of the tree. 
-  LoadEventObject(fPhotonBranchName,   fPhotons);
   
-  if (fPhotons->GetEntries()<1) return;
+  LoadEventObject(fPhotonBranchName,   fPhotons);
+  LoadEventObject(fGoodElectronName,       fGoodElectrons);
+  
+  const BaseCollection *egcol = 0;
+  if (fLoopOnGoodElectrons) {
+    egcol = fGoodElectrons;
+  }
+  else {
+    egcol = fPhotons;
+  }
+  
+  if (egcol->GetEntries()<1) return;
   
   LoadEventObject(fElectronName,       fElectrons);
-  LoadEventObject(fGoodElectronName,       fGoodElectrons);
   LoadEventObject(fConversionName,     fConversions);
   LoadEventObject(fTrackBranchName,    fTracks);
   LoadEventObject(fPileUpDenName,      fPileUpDen);
   LoadEventObject(fPVName,             fPV);    
   LoadEventObject(fBeamspotName,       fBeamspot);
   LoadEventObject(fPFCandName,         fPFCands);
+  LoadEventObject(fSuperClusterName,   fSuperClusters);
+  LoadEventObject(fPFMetName,   fPFMet);  
 
   // ------------------------------------------------------------  
   // load event based information
@@ -129,6 +146,11 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->genmass = _genmass;  
   fDiphotonEvent->gencostheta = -99.;
   fDiphotonEvent->nVtx = fPV->GetEntries();
+  fDiphotonEvent->bsX = fBeamspot->At(0)->X();
+  fDiphotonEvent->bsY = fBeamspot->At(0)->Y();
+  fDiphotonEvent->bsZ = fBeamspot->At(0)->Z();
+  fDiphotonEvent->vtxX = (fDiphotonEvent->nVtx>0) ? fPV->At(0)->X() : -99.;
+  fDiphotonEvent->vtxY = (fDiphotonEvent->nVtx>0) ? fPV->At(0)->Y() : -99.;  
   fDiphotonEvent->vtxZ = (fDiphotonEvent->nVtx>0) ? fPV->At(0)->Z() : -99.;
   fDiphotonEvent->numPU = _numPU;
   fDiphotonEvent->numPUminus = _numPUminus;
@@ -136,38 +158,105 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->mass = -99.;
   fDiphotonEvent->ptgg = -99.;
   fDiphotonEvent->costheta = -99.;
+  fDiphotonEvent->mt = -99.;
+  fDiphotonEvent->cosphimet = -99.;
+  fDiphotonEvent->mtele = -99.;
+  fDiphotonEvent->cosphimetele = -99.;
   fDiphotonEvent->evt = GetEventHeader()->EvtNum();
   fDiphotonEvent->run = GetEventHeader()->RunNum();
   fDiphotonEvent->lumi = GetEventHeader()->LumiSec();
   fDiphotonEvent->evtcat = -99;
+  fDiphotonEvent->nobj = fPhotons->GetEntries();
+  fDiphotonEvent->pfmet = fPFMet->At(0)->Pt();
+  fDiphotonEvent->pfmetphi = fPFMet->At(0)->Phi();
+  fDiphotonEvent->pfmetx = fPFMet->At(0)->Px();
+  fDiphotonEvent->pfmety = fPFMet->At(0)->Py();
   fDiphotonEvent->masscor = -99.;
   fDiphotonEvent->masscorerr = -99.;
-
+  fDiphotonEvent->masscorele = -99.;
+  fDiphotonEvent->masscoreleerr = -99.;
+  fDiphotonEvent->ismc = GetEventHeader()->IsMC();
+  
   Int_t nhitsbeforevtxmax = 1;
   if (fInvertElectronVeto) nhitsbeforevtxmax = 999;  
   
-  if (fPhotons->GetEntries()>=2) {
-    Bool_t doFill = kTRUE;
+  if (egcol->GetEntries()>=2) {
     
-    const Photon *phHard = fPhotons->At(0);
-    const Photon *phSoft = fPhotons->At(1);
-
-    if (phHard->HasPV()) {
-      fDiphotonEvent->vtxZ = phHard->PV()->Z();
+    const Particle *p1 = 0;
+    const Particle *p2 = 0;
+    const Photon *phHard = 0;
+    const Photon *phSoft = 0;
+    const Electron *ele1 = 0;
+    const Electron *ele2 = 0;
+    const SuperCluster *sc1 = 0;
+    const SuperCluster *sc2 = 0;
+    
+    if (fLoopOnGoodElectrons) {
+      ele1 = fGoodElectrons->At(0);
+      ele2 = fGoodElectrons->At(1);
+      p1 = ele1;
+      p2 = ele2;
+      sc1 = ele1->SCluster();
+      sc2 = ele2->SCluster();
+      phHard = PhotonTools::MatchedPhoton(ele1,fPhotons);
+      phSoft = PhotonTools::MatchedPhoton(ele2,fPhotons);
+    }
+    else {
+      phHard = fPhotons->At(0);
+      phSoft = fPhotons->At(1);
+      p1 = phHard;
+      p2 = phSoft;
+      sc1 = phHard->SCluster();
+      sc2 = phSoft->SCluster();      
+      ele1 = PhotonTools::MatchedElectron(phHard,fGoodElectrons);
+      ele2 = PhotonTools::MatchedElectron(phSoft,fGoodElectrons);
     }
     
-    Float_t _mass = ( doFill ? (phHard->Mom()+phSoft->Mom()).M()  : -100.);
-    Float_t _ptgg = ( doFill ? (phHard->Mom()+phSoft->Mom()).Pt() : -100.);
+    const DecayParticle *conv1 = PhotonTools::MatchedConversion(sc1,fConversions,bsp,nhitsbeforevtxmax);
+    const DecayParticle *conv2 = PhotonTools::MatchedConversion(sc2,fConversions,bsp,nhitsbeforevtxmax);
     
-
-    const DecayParticle *conv1 = PhotonTools::MatchedConversion(phHard,fConversions,bsp,nhitsbeforevtxmax);
-    const DecayParticle *conv2 = PhotonTools::MatchedConversion(phSoft,fConversions,bsp,nhitsbeforevtxmax);
-
+    const SuperCluster *pfsc1 = PhotonTools::MatchedSC(sc1,fSuperClusters);
+    const SuperCluster *pfsc2 = PhotonTools::MatchedSC(sc2,fSuperClusters);
+    
     const MCParticle *phgen1 = 0;
     const MCParticle *phgen2 = 0;
     if( !fIsData ) {
-      phgen1 = PhotonTools::MatchMC(phHard,fMCParticles,!fInvertElectronVeto);
-      phgen2 = PhotonTools::MatchMC(phSoft,fMCParticles,!fInvertElectronVeto);
+      phgen1 = PhotonTools::MatchMC(p1,fMCParticles,fInvertElectronVeto);
+      phgen2 = PhotonTools::MatchMC(p2,fMCParticles,fInvertElectronVeto);
+    }
+    
+    if (fExcludeSinglePrompt && (phgen1 || phgen2) ) return;
+    if (fExcludeDoublePrompt && (phgen1 && phgen2) ) return;
+    
+    if (!fLoopOnGoodElectrons && phHard->HasPV()) {
+      fDiphotonEvent->vtxX = phHard->PV()->X();
+      fDiphotonEvent->vtxY = phHard->PV()->Y();
+      fDiphotonEvent->vtxZ = phHard->PV()->Z();
+    }
+    
+    Float_t _mass = -99.;
+    Float_t _masserr = -99.;
+    Float_t _masserrsmeared = -99.;
+    Float_t _ptgg = -99.;
+    Float_t _costheta = -99.;
+    PhotonTools::DiphotonR9EtaPtCats _evtcat = PhotonTools::kOctCat0;
+    if (phHard && phSoft) {
+      _mass = (phHard->Mom()+phSoft->Mom()).M();
+      _masserr = 0.5*_mass*TMath::Sqrt(phHard->EnergyErr()*phHard->EnergyErr()/phHard->E()/phHard->E() + phSoft->EnergyErr()*phSoft->EnergyErr()/phSoft->E()/phSoft->E());
+      _masserrsmeared = 0.5*_mass*TMath::Sqrt(phHard->EnergyErrSmeared()*phHard->EnergyErrSmeared()/phHard->E()/phHard->E() + phSoft->EnergyErrSmeared()*phSoft->EnergyErrSmeared()/phSoft->E()/phSoft->E());
+      _ptgg = (phHard->Mom()+phSoft->Mom()).Pt();
+      _costheta = ThreeVector(phHard->Mom()).Unit().Dot(ThreeVector(phSoft->Mom()).Unit());
+      _evtcat = PhotonTools::DiphotonR9EtaPtCat(phHard,phSoft);
+    }
+      
+    
+    Float_t _massele = -99.;
+    Float_t _ptee = -99.;
+    Float_t _costhetaele = -99.;
+    if (ele1 && ele2) {
+      _massele = (ele1->Mom()+ele2->Mom()).M();
+      _ptee = (ele1->Mom()+ele2->Mom()).Pt();
+      _costhetaele = ThreeVector(ele1->Mom()).Unit().Dot(ThreeVector(ele2->Mom()).Unit());      
     }
     
     Float_t _gencostheta = -99.;
@@ -177,20 +266,34 @@ void PhotonTreeWriter::Process()
   
     fDiphotonEvent->gencostheta = _gencostheta;
     fDiphotonEvent->mass = _mass;
+    fDiphotonEvent->masserr = _masserr;
+    fDiphotonEvent->masserrsmeared = _masserrsmeared;
     fDiphotonEvent->ptgg = _ptgg;
-    fDiphotonEvent->costheta =  ThreeVector(phHard->Mom()).Unit().Dot(ThreeVector(phSoft->Mom()).Unit());
-    fDiphotonEvent->evtcat = PhotonTools::DiphotonR9EtaPtCat(phHard,phSoft);
+    fDiphotonEvent->costheta =  _costheta;;
+    fDiphotonEvent->massele = _massele;
+    fDiphotonEvent->ptee = _ptee;
+    fDiphotonEvent->costhetaele =  _costhetaele;    
+    fDiphotonEvent->evtcat = _evtcat;
 
-    fDiphotonEvent->photons[0].SetVars(phHard,conv1,phgen1);
-    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,phgen2);
+    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele);
+    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele);
     
     Float_t ph1ecor    = fDiphotonEvent->photons[0].Ecor();
     Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
     Float_t ph2ecor    = fDiphotonEvent->photons[1].Ecor();
     Float_t ph2ecorerr = fDiphotonEvent->photons[1].Ecorerr();
+
+    Float_t ph1ecorele    = fDiphotonEvent->photons[0].Ecorele();
+    Float_t ph1ecoreleerr = fDiphotonEvent->photons[0].Ecoreleerr();
+    Float_t ph2ecorele    = fDiphotonEvent->photons[1].Ecorele();
+    Float_t ph2ecoreleerr = fDiphotonEvent->photons[1].Ecoreleerr();
+    
     
     fDiphotonEvent->masscor = TMath::Sqrt(2.0*ph1ecor*ph2ecor*(1.0-fDiphotonEvent->costheta));
     fDiphotonEvent->masscorerr = 0.5*fDiphotonEvent->masscor*TMath::Sqrt(ph1ecorerr*ph1ecorerr/ph1ecor/ph1ecor + ph2ecorerr*ph2ecorerr/ph2ecor/ph2ecor);
+    
+    fDiphotonEvent->masscorele = TMath::Sqrt(2.0*ph1ecorele*ph2ecorele*(1.0-fDiphotonEvent->costheta));
+    fDiphotonEvent->masscoreleerr = 0.5*fDiphotonEvent->masscorele*TMath::Sqrt(ph1ecoreleerr*ph1ecoreleerr/ph1ecorele/ph1ecorele + ph2ecoreleerr*ph2ecoreleerr/ph2ecorele/ph2ecorele);    
     
     //printf("r9 = %5f, photon sigieie = %5f, seed sigieie = %5f\n",phHard->R9(),phHard->CoviEtaiEta(),sqrt(phHard->SCluster()->Seed()->CoviEtaiEta()));
     
@@ -201,21 +304,57 @@ void PhotonTreeWriter::Process()
   if (!fWriteSingleTree) return;
 
 
-  for (UInt_t iph = 0; iph<fPhotons->GetEntries(); ++iph) {
-    const Photon *ph = fPhotons->At(iph);
+  for (UInt_t iph = 0; iph<egcol->GetEntries(); ++iph) {
     
-    if (ph->HasPV()) {
+    const Particle *p = 0;
+    const Photon *ph = 0;
+    const Electron *ele = 0;
+    const SuperCluster *sc = 0;
+    if (fLoopOnGoodElectrons) {
+      ele = fGoodElectrons->At(iph);
+      p = ele;
+      sc = ele->SCluster();
+      ph = PhotonTools::MatchedPhoton(ele,fPhotons);
+    }
+    else {
+      ph = fPhotons->At(iph);
+      p = ph;
+      sc = ph->SCluster();
+      ele = PhotonTools::MatchedElectron(ph,fGoodElectrons);    
+    }
+    
+    const DecayParticle *conv = PhotonTools::MatchedConversion(sc,fConversions,bsp,nhitsbeforevtxmax);
+    const SuperCluster *pfsc = PhotonTools::MatchedSC(sc,fSuperClusters);
+
+    
+    
+    if (!fLoopOnGoodElectrons && ph->HasPV()) {
       fDiphotonEvent->vtxZ = ph->PV()->Z();
     }
 
     const MCParticle *phgen = 0;
     if( !fIsData ) {
-      phgen = PhotonTools::MatchMC(ph,fMCParticles,!fInvertElectronVeto);
+      phgen = PhotonTools::MatchMC(p,fMCParticles,fInvertElectronVeto);
     }
 
-    const DecayParticle *conv = PhotonTools::MatchedConversion(ph,fConversions,bsp,nhitsbeforevtxmax);
+    if (fExcludeSinglePrompt && phgen) return;
+
+    fDiphotonEvent->mt = -99.;
+    fDiphotonEvent->cosphimet = -99.;
+    fDiphotonEvent->mtele = -99.;
+    fDiphotonEvent->cosphimetele = -99.;
+
+    if (ph) {
+      fDiphotonEvent->cosphimet = TMath::Cos(ph->Phi()-fPFMet->At(0)->Phi());
+      fDiphotonEvent->mt = TMath::Sqrt(2.0*fPFMet->At(0)->Pt()*ph->Pt()*(1.0-fDiphotonEvent->cosphimet));
+    }
     
-    fSinglePhoton->SetVars(ph,conv,phgen);
+    if (ele) {
+      fDiphotonEvent->cosphimetele = TMath::Cos(ele->Phi()-fPFMet->At(0)->Phi());
+      fDiphotonEvent->mtele = TMath::Sqrt(2.0*fPFMet->At(0)->Pt()*ele->Pt()*(1.0-fDiphotonEvent->cosphimetele));      
+    }
+    
+    fSinglePhoton->SetVars(ph,conv,ele,pfsc,phgen,fPhfixph,fPhfixele);
     hCiCTupleSingle->Fill();
     
   }
@@ -240,6 +379,8 @@ void PhotonTreeWriter::SlaveBegin()
   ReqEventObject(fConversionName,     fConversions,true);
   ReqEventObject(fBeamspotName,       fBeamspot,   true);
   ReqEventObject(fPFCandName,         fPFCands,    true);
+  ReqEventObject(fSuperClusterName,   fSuperClusters, true);
+  ReqEventObject(fPFMetName,   fPFMet, true);
   
   if (!fIsData) {
     ReqBranch(fPileUpName,            fPileUp);
@@ -251,6 +392,9 @@ void PhotonTreeWriter::SlaveBegin()
   //initialize photon energy corrections
   //PhotonFix::initialise("4_2",std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFix.dat")).Data()));  
 
+  fPhfixph.initialise("4_2",std::string(fPhFixDataFile));
+  fPhfixele.initialise("4_2e",std::string(fPhFixDataFile));
+  
   fDiphotonEvent = new PhotonTreeWriterDiphotonEvent;
   fSinglePhoton = new PhotonTreeWriterPhoton;
 
@@ -338,7 +482,7 @@ void PhotonTreeWriter::FindHiggsPtAndZ(Float_t& pt, Float_t& decayZ, Float_t& ma
   // loop over all GEN particles and look for status 1 photons
   for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
     const MCParticle* p = fMCParticles->At(i);
-    if( p->Is(MCParticle::kH) || (!fInvertElectronVeto && p->AbsPdgId()==23) ) {
+    if( p->Is(MCParticle::kH) || (fInvertElectronVeto && (p->AbsPdgId()==23||p->AbsPdgId()==24) ) ) {
       pt=p->Pt();
       decayZ = p->DecayVertex().Z();
       mass = p->Mass();
@@ -364,15 +508,54 @@ Float_t PhotonTreeWriter::GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonT
   return ( ph1IsHR9 && ph2IsHR9 ? 2. : 3.);
 }
 
-void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, const MCParticle *m) {
-      e = p->E();
-      pt = p->Pt();
-      eta = p->Eta();
-      phi = p->Phi();
-      r9 = p->R9();
-      e3x3 = p->E33();
-      e5x5 = p->E55();
-      const SuperCluster *s = p->SCluster();
+void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele) {
+  
+      const SuperCluster *s = 0;
+      if (p) {
+        s = p->SCluster();
+      }
+      else {
+        s = ele->SCluster();
+      }
+      const BasicCluster *b = s->Seed();
+  
+//       if (p && ele) {
+//         printf("p    : r9 = %5f, e33 = %5f, e55 = %5f, hovere = %5f, sigieie = %5f\n",p->R9(),p->E33(),p->E55(),p->HadOverEm(),p->CoviEtaiEta());
+//         printf("ele/b: r9 = %5f, e33 = %5f, e55 = %5f, hovere = %5f, sigieie = %5f\n",b->E3x3()/s->RawEnergy(),b->E3x3(),b->E5x5(),ele->HadronicOverEm(),ele->CoviEtaiEta());
+//       }
+      
+      if (p) {
+        hasphoton = kTRUE;
+        e = p->E();
+        pt = p->Pt();
+        eta = p->Eta();
+        phi = p->Phi();
+        r9 = p->R9();
+        e3x3 = p->E33();
+        e5x5 = p->E55();
+        hovere = p->HadOverEm();
+        sigietaieta = p->CoviEtaiEta();      
+        phcat = PhotonTools::CiCBaseLineCat(p);
+        eerr = p->EnergyErr();
+        eerrsmeared = p->EnergyErrSmeared();
+      }
+      else {
+        hasphoton = kFALSE;
+        e = -99.;
+        pt = -99.;
+        eta = -99.;
+        phi = -99.;
+        r9 = b->E3x3()/s->RawEnergy();
+        e3x3 = b->E3x3();
+        e5x5 = b->E5x5();
+        hovere = ele->HadronicOverEm();
+        sigietaieta = ele->CoviEtaiEta();      
+        phcat = -99;    
+        eerr = -99.;
+        eerrsmeared = -99.;
+      }
+       
+      
       sce = s->Energy();
       scrawe = s->RawEnergy();
       scpse = s->PreshowerEnergy();
@@ -380,24 +563,15 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
       scphi = s->Phi();
       scnclusters = s->ClusterSize();
       scnhits = s->NHits();
-      hovere = p->HadOverEm();
-      sigietaieta = p->CoviEtaiEta();
+      scetawidth = s->EtaWidth();
+      scphiwidth = s->PhiWidth();
       isbarrel = (s->AbsEta()<1.5);
       isr9reco = (isbarrel && r9>0.94) || (!isbarrel && r9>0.95);
       isr9cat = (r9>0.94);
       
-      phcat = PhotonTools::CiCBaseLineCat(p);
       
-/*      if (isbarrel) {
-        if (isr9cat) phcat = 1;
-        else phcat = 2;
-      }
-      else {
-        if (isr9cat) phcat = 3;
-        else phcat = 4;
-      }*/
       
-      const BasicCluster *b = s->Seed();
+      
       sigiphiphi = TMath::Sqrt(b->CoviPhiiPhi());
       if (isnan(sigiphiphi)) sigiphiphi = -99.;
       covietaiphi = b->CoviEtaiPhi();
@@ -418,23 +592,29 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
       e2x5bottom = b->E2x5Bottom();
       e2x5left = b->E2x5Left();
       e2x5right = b->E2x5Right();
-
-      //initialize photon energy corrections if needed
-      if (!PhotonFix::initialised()) {
-        PhotonFix::initialise("4_2",std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFix.dat")).Data()));  
-      }
+      eseed = b->Energy();
       
-      PhotonFix fix(e,sceta,scphi,r9);
+      //initialize photon energy corrections if needed
+      /*if (!PhotonFix::initialised()) {
+        PhotonFix::initialise("4_2",std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFix.dat")).Data()));  
+      }*/ 
+      
+
+      phfixph.setup(e,sceta,scphi,r9);
+      phfixele.setup(e,sceta,scphi,r9);      
+      
       const Float_t dval = -99.;
-      ecor = fix.fixedEnergy();
-      ecorerr = fix.sigmaEnergy();
-      if (isbarrel) {
-       etac = fix.etaC();
-       etas = fix.etaS();
-       etam = fix.etaM();
-       phic = fix.phiC();
-       phis = fix.phiS();
-       phim = fix.phiM();
+      ecor = phfixph.fixedEnergy();
+      ecorerr = phfixph.sigmaEnergy();
+      ecorele = phfixele.fixedEnergy();
+      ecoreleerr = phfixele.sigmaEnergy();
+      if (phfixph.isbarrel()) {
+       etac = phfixph.etaC();
+       etas = phfixph.etaS();
+       etam = phfixph.etaM();
+       phic = phfixph.phiC();
+       phis = phfixph.phiS();
+       phim = phfixph.phiM();
        xz = dval;
        xc = dval;
        xs = dval;
@@ -451,14 +631,14 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
        phic = dval;
        phis = dval;
        phim = dval;
-       xz = fix.xZ();
-       xc = fix.xC();
-       xs = fix.xS();
-       xm = fix.xM();
-       yz = fix.yZ();
-       yc = fix.yC();
-       ys = fix.yS();
-       ym = fix.yM();
+       xz = phfixph.xZ();
+       xc = phfixph.xC();
+       xs = phfixph.xS();
+       xm = phfixph.xM();
+       yz = phfixph.yZ();
+       yc = phfixph.yC();
+       ys = phfixph.yS();
+       ym = phfixph.yM();
       }   
       
       if (c) {
@@ -467,7 +647,7 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         convpt = c->Pt();
         conveta = c->Eta();
         convphi = c->Phi();
-        ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
+        ThreeVector dirconvsc = ThreeVector(s->Point()) - c->Position();
         convdeta = c->Eta() - dirconvsc.Eta();
         convdphi = MathUtils::DeltaPhi(c->Phi(),dirconvsc.Phi());
         convvtxrho = c->Position().Rho();
@@ -523,6 +703,56 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         trailtrackcharge = 0;      
       }
       
+      //electron quantities
+      if (ele) {
+        haselectron = kTRUE;
+        eleisecaldriven = ele->IsEcalDriven();
+        eleistrackerdriven = ele->IsTrackerDriven();
+        elee = ele->E();
+        elept = ele->Pt();
+        eleeta = ele->Eta();
+        elephi = ele->Phi();
+        elecharge = ele->Charge();
+        elefbrem = ele->FBrem();
+        eledeta = ele->DeltaEtaSuperClusterTrackAtVtx();
+        eledphi = ele->DeltaPhiSuperClusterTrackAtVtx();
+        elep = s->Energy()/ele->ESuperClusterOverP();
+        elepin = ele->PIn();
+        elepout = ele->POut();        
+      }
+      else {
+        haselectron = kFALSE;
+        eleisecaldriven = kFALSE;
+        eleistrackerdriven = kFALSE;
+        elee = -99.;
+        elept = -99.;
+        eleeta = -99.;
+        elephi = -99.;
+        elecharge = -99;
+        elefbrem = -99.;
+        eledeta = -99.;
+        eledphi = -99.;
+        elep = -99.;
+        elepin = -99.;
+        elepout = -99.;
+      }
+      
+      //pf supercluster quantities
+      if (pfsc) {
+        haspfsc = kTRUE;
+        pfsce = pfsc->Energy();
+        pfscrawe = pfsc->RawEnergy();
+        pfsceta = pfsc->Eta();
+        pfscphi = pfsc->Phi();        
+      }
+      else {
+        haspfsc = kFALSE;
+        pfsce = -99.;
+        pfscrawe = -99.;
+        pfsceta = -99.;
+        pfscphi = -99.;
+      }
+      
       genz = -99.;
       if (m) {
         ispromptgen = kTRUE;
@@ -540,5 +770,6 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         geneta = -99.;
         genphi = -99.;
       }
-      
+            
 }
+

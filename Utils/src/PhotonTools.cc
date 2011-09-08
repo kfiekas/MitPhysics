@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.11 2011/07/27 15:17:37 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.12 2011/08/03 17:15:44 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -37,8 +37,20 @@ void PhotonTools::SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t i
 
   if( scale > 0)
     p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
-
+  
   return;
+}
+
+void PhotonTools::SmearPhotonError(Photon* p, Double_t width) {
+  
+  if( !p  )       return;
+  if( width < 0.) return;  
+  
+  Double_t err = p->EnergyErrSmeared();
+  if (err>=0.0) {
+    p->SetEnergyErrSmeared(TMath::Sqrt(err*err + width*width*p->E()*p->E()));
+  }
+  
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -73,6 +85,49 @@ Bool_t PhotonTools::PassElectronVeto(const Photon *p, const ElectronCol *els) {
   }
   
   return pass;
+}
+
+//--------------------------------------------------------------------------------------------------
+const Electron *PhotonTools::MatchedElectron(const Photon *p, const ElectronCol *els) {
+
+  for (UInt_t i=0; i<els->GetEntries(); ++i) {
+    const Electron *e = els->At(i);
+    if ( e->SCluster()==p->SCluster() ) {
+      return e;
+    }
+  }
+  
+  return 0;
+}
+
+//--------------------------------------------------------------------------------------------------
+const Photon *PhotonTools::MatchedPhoton(const Electron *e, const PhotonCol *phs) {
+
+  for (UInt_t i=0; i<phs->GetEntries(); ++i) {
+    const Photon *p = phs->At(i);
+    if ( p->SCluster()==e->SCluster() ) {
+      return p;
+    }
+  }
+  
+  return 0;
+}
+
+//--------------------------------------------------------------------------------------------------
+const SuperCluster *PhotonTools::MatchedSC(const SuperCluster *psc, const SuperClusterCol *scs, Double_t drMin) {
+
+  Double_t drsmallest = 999.;
+  const SuperCluster *match = 0;
+  for (UInt_t i=0; i<scs->GetEntries(); ++i) {
+    const SuperCluster *sc = scs->At(i);
+    Double_t dr = MathUtils::DeltaR(*sc,*psc);
+    if ( dr<drsmallest && dr<drMin ) {
+      drsmallest = dr;
+      match = sc;
+    }
+  }
+  
+  return match;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -131,11 +186,20 @@ const DecayParticle *PhotonTools::MatchedConversion(const Photon *p, const Decay
                                                const BaseVertex *vtx, Int_t nWrongHitsMax, Double_t probMin,
                                                Double_t lxyMin, Double_t dRMin) {
   
+  return MatchedConversion(p->SCluster(), conversions, vtx, nWrongHitsMax, probMin, lxyMin, dRMin);
+  
+}
+
+//--------------------------------------------------------------------------------------------------
+const DecayParticle *PhotonTools::MatchedConversion(const SuperCluster *sc, const DecayParticleCol *conversions, 
+                                               const BaseVertex *vtx, Int_t nWrongHitsMax, Double_t probMin,
+                                               Double_t lxyMin, Double_t dRMin) {
+  
   const DecayParticle *match = 0;
   Double_t rhosmallest = 999.;
   for (UInt_t i=0; i<conversions->GetEntries(); ++i) {
     const DecayParticle *c = conversions->At(i);
-    ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
+    ThreeVector dirconvsc = ThreeVector(sc->Point()) - c->Position();
     Double_t dr = MathUtils::DeltaR(*c,dirconvsc);
     Double_t rho = c->Position().Rho();
     if (dr<dRMin && rho<rhosmallest && c->Prob()>probMin && c->LxyCorrected(vtx)>lxyMin) {
@@ -440,12 +504,13 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
   return false;
 }
 
-const MCParticle *PhotonTools::MatchMC(const Photon *ph, const MCParticleCol *c, Bool_t matchElectrons) {
-  
+const MCParticle *PhotonTools::MatchMC(const Particle *ph, const MCParticleCol *c, Bool_t matchElectrons) {
+
+//  printf("Start loop\n");
   for (UInt_t i=0; i<c->GetEntries(); ++i) {
     const MCParticle *p = c->At(i);
-//     if (p->IsGenerated() && p->AbsPdgId()==11 && p->Mother()->AbsPdgId()==23) {
-//       printf("pdgid = %i, status = %i, pt = %5f\n",p->PdgId(),p->Status(),p->Pt());
+//     if (p->IsGenerated() && p->AbsPdgId()==11 && (p->DistinctMother()->AbsPdgId()==23|| p->DistinctMother()->AbsPdgId()==24)) {
+//       printf("pdgid = %i, status = %i, pt = %5f, mother pdgid = %i\n",p->PdgId(),p->Status(),p->Pt(),p->Mother()->PdgId());
 //     }
     if (matchElectrons && p->AbsPdgId()==11 && p->IsGenerated() && p->Status()==3 && MathUtils::DeltaR(*ph,*p) < 0.3 && p->Mother() && (p->Mother()->AbsPdgId()==23 || p->Mother()->AbsPdgId()==24 || p->Mother()->AbsPdgId()==22)) {
       return p;

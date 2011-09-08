@@ -12,6 +12,7 @@
 #include <TNtuple.h>
 #include <TRandom3.h>
 #include <TSystem.h>
+#include <TH1D.h>
 
 using namespace mithep;
 
@@ -86,7 +87,13 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
 
   // ---------------------------------------
   rng                (new TRandom3()),  
-
+  fDoRegression      (kFALSE),
+  fPhFixString       ("4_2"),
+  fEBWeights         ("/mnt/hadoop/bendavid/weights-Base/TMVARegressionebph_BDTG.weights.xml"),
+  fEBVarWeights      ("/mnt/hadoop/bendavid/weights-Base/TMVARegressionVarianceebph_BDTG.weights.xml"),
+  fEEWeights         ("/mnt/hadoop/bendavid/weights-Base/TMVARegressioneeph_BDTG.weights.xml"),
+  fEEVarWeights      ("/mnt/hadoop/bendavid/weights-Base/TMVARegressionVarianceeeph_BDTG.weights.xml"),
+  fEtaCorrections    (0),
   // ---------------------------------------
   fDoDataEneCorr     (true),
   fDoMCSmear         (true),
@@ -229,6 +236,24 @@ void PhotonPairSelector::Process()
     // we also store the category, so we don't have to ask all the time...
     cat1st.push_back(preselCat[idx1st[iPair]]);
     cat2nd.push_back(preselCat[idx2nd[iPair]]);
+
+    if (fDoRegression) {
+      if (!egcor.IsInitialized()) {
+        //egcor.Initialize(!fIsData,"4_2",gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat"),"/scratch/bendavid/root/weights-Base/TMVARegressionebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressioneeph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceeeph_BDTG.weights.xml");
+        egcor.Initialize(!fIsData,fPhFixString,fPhFixFile,fEBWeights,fEBVarWeights,fEEWeights,fEEVarWeights);
+      }
+    
+      egcor.CorrectEnergyWithError(fixPh1st[iPair]);
+      egcor.CorrectEnergyWithError(fixPh2nd[iPair]);
+      
+      ThreeVectorC scpos1 = fixPh1st[iPair]->SCluster()->Point();
+      ThreeVectorC scpos2 = fixPh2nd[iPair]->SCluster()->Point();
+      
+      fixPh1st[iPair]->SetCaloPosXYZ(scpos1.X(),scpos1.Y(),scpos1.Z());
+      fixPh2nd[iPair]->SetCaloPosXYZ(scpos2.X(),scpos2.Y(),scpos2.Z());
+      
+      
+    }
     
     // now we dicide if we either scale (Data) or Smear (MC) the Photons
     if (fIsData) {
@@ -236,31 +261,49 @@ void PhotonPairSelector::Process()
 	// statring with scale = 1.
 	double scaleFac1 = 1.;
 	double scaleFac2 = 1.;
+        
+        //eta-dependent corrections
+        if (fEtaCorrections) {
+          double etacor1 = fEtaCorrections->GetBinContent(fEtaCorrections->GetXaxis()->FindFixBin(fixPh1st[iPair]->SCluster()->Eta()));
+          double etacor2 = fEtaCorrections->GetBinContent(fEtaCorrections->GetXaxis()->FindFixBin(fixPh2nd[iPair]->SCluster()->Eta()));
+          
+          scaleFac1 *= (etacor1*etacor1);
+          scaleFac2 *= (etacor2*etacor2);
+        }
+        
 	// checking the run Rangees ...
 	Int_t runRange = FindRunRangeIdx(runNumber);
 	if(runRange > -1) { 
-	  scaleFac1 += GetDataEnCorr(runRange, cat1st[iPair]);
-	  scaleFac2 += GetDataEnCorr(runRange, cat2nd[iPair]);
+	  scaleFac1 /= (1.0+GetDataEnCorr(runRange, cat1st[iPair]));
+	  scaleFac2 /= (1.0+GetDataEnCorr(runRange, cat2nd[iPair]));
 	}      
 	PhotonTools::ScalePhoton(fixPh1st[iPair], scaleFac1);
 	PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
       }
-    } else {
-      if(fDoMCSmear) {      
-	// get the seed to do deterministic smearing...
-	UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
-	UInt_t seed1    = seedBase + (UInt_t) fixPh1st[iPair]->E() + (UInt_t) (TMath::Abs(10.*fixPh1st[iPair]->SCluster()->Eta()));
-	UInt_t seed2    = seedBase + (UInt_t) fixPh2nd[iPair]->E() + (UInt_t) (TMath::Abs(10.*fixPh2nd[iPair]->SCluster()->Eta()));
-	// get the smearing for MC photons..
+    } 
+    
+    if(fDoMCSmear) {      
+      
+      double width1 = GetMCSmearFac(cat1st[iPair]);
+      double width2 = GetMCSmearFac(cat2nd[iPair]);
 
-	double width1 = GetMCSmearFac(cat1st[iPair]);
-	double width2 = GetMCSmearFac(cat2nd[iPair]);
-	
-	PhotonTools::SmearPhoton(fixPh1st[iPair], rng, width1, seed1);
-	PhotonTools::SmearPhoton(fixPh2nd[iPair], rng, width2, seed2);
+      if (!fIsData) {
+        // get the seed to do deterministic smearing...
+        UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
+        UInt_t seed1    = seedBase + (UInt_t) fixPh1st[iPair]->E() + (UInt_t) (TMath::Abs(10.*fixPh1st[iPair]->SCluster()->Eta()));
+        UInt_t seed2    = seedBase + (UInt_t) fixPh2nd[iPair]->E() + (UInt_t) (TMath::Abs(10.*fixPh2nd[iPair]->SCluster()->Eta()));
+        // get the smearing for MC photons..
 
+        PhotonTools::SmearPhoton(fixPh1st[iPair], rng, width1, seed1);
+        PhotonTools::SmearPhoton(fixPh2nd[iPair], rng, width2, seed2);
       }
+
+    
+      PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
+      PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
+    
     }
+    
 
     // store the vertex for this pair
     switch( fVtxSelType ){
@@ -406,6 +449,13 @@ void PhotonPairSelector::SlaveBegin()
   else 
     fVtxSelType =       kStdVtxSelection;  
 
+  if (fIsData) {
+    fPhFixFile = gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat");
+  }
+  else {
+    fPhFixFile = gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat");
+  }
+  
 }
 
 // ----------------------------------------------------------------------------------------
