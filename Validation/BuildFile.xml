@@ -1,4 +1,5 @@
 <use   name="MitPhysics/Mods"/>
+<lib   name="EG"/>
 <export>
   <lib   name="1"/>
 </export>
