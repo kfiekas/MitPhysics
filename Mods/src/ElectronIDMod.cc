@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.99 2011/07/22 14:36:29 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.100 2011/07/22 15:45:37 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -65,6 +65,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fBeamSpot(0),
   fTracks(0),
   fPFCandidates(0),
+  fIntRadius(0.0),
   fNonIsolatedMuons(0),
   fNonIsolatedElectrons(0),
   fLH(0),
@@ -114,22 +115,22 @@ Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
   if(likCut > -900){
     if(ele->Pt() > 20){
       if(ele->SCluster()->AbsEta() < 1.479){
-        if(ele->NumberOfClusters() - 1 == 0) likCut = -1.497;
-	else                                 likCut = -1.521;
+        if(ele->NumberOfClusters() - 1 == 0) likCut = 3.5;
+	else                                 likCut = 4.0;
       }
       else  {                                
-        if(ele->NumberOfClusters() - 1 == 0) likCut = -2.571;
-	else                                 likCut = -0.657;
+        if(ele->NumberOfClusters() - 1 == 0) likCut = 4.0;
+	else                                 likCut = 4.0;
       }
     }
     else {
       if(ele->SCluster()->AbsEta() < 1.479){
-        if(ele->NumberOfClusters() - 1 == 0) likCut =  1.193;
-	else                                 likCut =  1.345;
+        if(ele->NumberOfClusters() - 1 == 0) likCut =  4.0;
+	else                                 likCut =  4.5;
       }
       else  {                                
-        if(ele->NumberOfClusters() - 1 == 0) likCut =  0.810;
-	else                                 likCut =  3.021;
+        if(ele->NumberOfClusters() - 1 == 0) likCut =  4.0;
+	else                                 likCut =  4.0;
       }
     }
   }
@@ -150,7 +151,8 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       idcut = ele->PassLooseID();
       break;
     case ElectronTools::kLikelihood:
-      idcut = Likelihood(ele);
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId) &&
+              Likelihood(ele);
       break;
     case ElectronTools::kNoId:
       idcut = kTRUE;
@@ -253,7 +255,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
           }
 	}
       }
-      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.1, 1.0, 0.4, 0.0);
+      Double_t totalIso = IsolationTools::PFElectronIsolation(ele, fPFCandidates, vertex, 0.1, 1.0, 0.4, fIntRadius);
       if (totalIso < (ele->Pt()*pfIsoCutValue) )
         isocut = kTRUE;
     }

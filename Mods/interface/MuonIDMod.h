@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.34 2011/06/10 10:42:36 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.35 2011/07/22 14:36:29 sixie Exp $
 //
 // MuonIDMod
 //
@@ -64,6 +64,7 @@ namespace mithep
       void               SetOutputName(const char *name)      { SetCleanMuonsName(name);    }   
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
       void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
+      void               SetIntRadius(Double_t dr)            { fIntRadius = dr;            }
 
       enum EMuIdType {
         kIdUndef = 0,       //not defined
@@ -134,6 +135,7 @@ namespace mithep
       const BeamSpotCol *fBeamSpot;            //!beamspot branch
       const TrackCol    *fTracks;              //!track branch     
       const PFCandidateCol *fPFCandidates;     //!pfcandidate branch
+      Double_t           fIntRadius;           //!min IntRadius cut in pf isolation
       MuonCol	         *fNonIsolatedMuons;	//!pointer to old muon collection 
       ElectronCol        *fNonIsolatedElectrons;//!pointer to old electron collection
       TString             fPileupEnergyDensityName;

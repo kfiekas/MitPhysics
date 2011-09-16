@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.50 2011/06/21 06:15:57 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.51 2011/07/22 14:36:29 sixie Exp $
 //
 // ElectronIDMod
 //
@@ -105,6 +105,7 @@ namespace mithep
       void                SetElectronsFromBranch(Bool_t b)       { fElectronsFromBranch = b;   }      
       void                SetLH(ElectronLikelihood *l)	         { fLH = l;  	               }
       void                SetVertexName(TString name)            { fVertexName = name;         }
+      void                SetIntRadius(Double_t dr)              { fIntRadius = dr;            }
       void                Setup();
 
     protected:
@@ -162,7 +163,7 @@ namespace mithep
       const BeamSpotCol        *fBeamSpot;               //!beamspot branch
       const TrackCol           *fTracks;                 //!Track branch     
       const PFCandidateCol     *fPFCandidates;           //!pfcandidate branch
-
+      Double_t                  fIntRadius;	         //!min IntRadius cut in pf isolation
       MuonCol  	               *fNonIsolatedMuons;	 //!pointer to old muon collection 
       ElectronCol	       *fNonIsolatedElectrons;	 //!pointer to old electron collection
       ElectronLikelihood       *fLH;                     //LH

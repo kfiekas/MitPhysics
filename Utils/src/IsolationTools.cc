@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.19 2011/06/01 18:11:52 fabstoec Exp $
+// $Id: IsolationTools.cc,v 1.20 2011/06/27 12:32:21 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -121,7 +121,7 @@ Double_t IsolationTools::CaloTowerEmIsolation(const ThreeVector *p, Double_t ext
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandidate> *PFCands, 
                                       	 const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
-				     	 Double_t extRadius, Double_t intRadius)
+				     	 Double_t extRadius, Double_t intRadiusGamma, Double_t intRadius)
 {
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
   //annulus around the particle seed track.  
@@ -150,10 +150,13 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
     if (deltaZ >= delta_z) continue;
       
     // inner cone veto for gammas
-    if (pf->PFType() == PFCandidate::eGamma && dr < intRadius) continue;
+    if (pf->PFType() == PFCandidate::eGamma && dr < intRadiusGamma) continue;
     
+    // inner cone veto for tracks
+    if (dr < intRadius) continue;
+
     // add the pf pt if it is inside the extRadius 
-    if ( dr < extRadius ) ptSum += pf->Pt();
+    if (dr < extRadius) ptSum += pf->Pt();
   
   }
   return ptSum;

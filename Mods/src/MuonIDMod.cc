@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.54 2011/07/22 14:36:29 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.55 2011/07/22 15:45:38 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -45,6 +45,7 @@ ClassImp(mithep::MuonIDMod)
   fBeamSpot(0),
   fTracks(0),
   fPFCandidates(0),
+  fIntRadius(0.0),
   fNonIsolatedMuons(0),
   fNonIsolatedElectrons(0),
   fPileupEnergyDensityName(Names::gkPileupEnergyDensityBrn),
@@ -288,7 +289,7 @@ void MuonIDMod::Process()
               }
 	    }
           }
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0);
+          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius);
           if (totalIso < (mu->Pt()*pfIsoCutValue) )
             isocut = kTRUE;
 	}
