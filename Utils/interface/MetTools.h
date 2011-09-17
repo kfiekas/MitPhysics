@@ -25,20 +25,20 @@ namespace mithep {
   public:
 
     MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, 
-             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut=4.0, float etaCut = 3.0);
+             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut = 8.0, float etaCut = 5.0);
     MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, 
-             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut=4.0, float etaCut = 3.0);
+             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut = 8.0, float etaCut = 5.0);
 
     MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, const PFJetCol *fPFJets,
-             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut=4.0, float etaCut = 3.0);
+             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut = 8.0, float etaCut = 5.0);
     MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, const PFJetCol *fPFJets, 
-             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut=4.0, float etaCut = 3.0);
+             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut = 8.0, float etaCut = 5.0);
 
     MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, 
-             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut=4.0, float etaCut = 3.0);
+             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut = 8.0, float etaCut = 5.0, float intRadius = 0.0);
 
     MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, const PFJetCol *fPFJets, 
-             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut=4.0, float etaCut = 3.0);
+             const Vertex *fVertex, float deltaZCut = 0.1, float ptCut = 8.0, float etaCut = 5.0, float intRadius = 0.0);
 
 
     ~MetTools() {}

@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.9 2011/07/06 18:49:35 phedex Exp $
+// $Id: MetTools.cc,v 1.10 2011/07/07 20:22:19 sixie Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -392,7 +392,7 @@ void MetTools::RemoveParticleInIsoConeFromRecoil( const Particle *p, const PFCan
 
 
 MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, 
-                   const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut) {
+                   const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut, float intRadius) {
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
@@ -420,7 +420,11 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 	  isMuonTrack = true;
 	  break;
 	}
-      }      
+	if (intRadius > 0.0 && MathUtils::DeltaR(fPFCandidates->At(i)->Mom(), fMuons->At(m)->Mom()) < intRadius) {
+	  isMuonTrack = true;
+	  break;
+	}
+      }    
       if (isMuonTrack) continue;
       
       bool isElectronTrack = false;
@@ -430,7 +434,11 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 	  isElectronTrack = true;
 	  break;
 	}
-      }      
+	if (intRadius > 0.0 && MathUtils::DeltaR(fPFCandidates->At(i)->Mom(), fElectrons->At(m)->Mom()) < intRadius) {
+	  isElectronTrack = true;
+	  break;
+	}
+      }
       if (isElectronTrack) continue;
 
       if ((fPFCandidates->At(i)->HasTrackerTrk() && fabs(fPFCandidates->At(i)->TrackerTrk()->DzCorrected(*fVertex)) < deltaZCut) ||
@@ -458,7 +466,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 
 MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, 
 		   const PFJetCol *pfJets,
-                   const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut) {
+                   const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut, float intRadius) {
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
@@ -506,6 +514,10 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 	  isMuonTrack = true;
 	  break;
 	}
+	if (intRadius > 0.0 && MathUtils::DeltaR(fPFCandidates->At(i)->Mom(), fMuons->At(m)->Mom()) < intRadius) {
+	  isMuonTrack = true;
+	  break;
+	}
       }      
       if (isMuonTrack) continue;
       
@@ -513,6 +525,10 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
 	if ( (fElectrons->At(m)->HasTrackerTrk() and fElectrons->At(m)->TrackerTrk() == fPFCandidates->At(i)->TrackerTrk()) or
 	     (fElectrons->At(m)->HasGsfTrk() and fElectrons->At(m)->GsfTrk() == fPFCandidates->At(i)->GsfTrk()) ) {
+	  isElectronTrack = true;
+	  break;
+	}
+	if (intRadius > 0.0 && MathUtils::DeltaR(fPFCandidates->At(i)->Mom(), fElectrons->At(m)->Mom()) < intRadius) {
 	  isElectronTrack = true;
 	  break;
 	}
