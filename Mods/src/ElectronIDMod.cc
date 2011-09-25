@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.103 2011/09/25 15:00:18 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.104 2011/09/25 15:03:41 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -139,12 +139,12 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
   if (subdet == 2 && ptBin == 1) MVABin = 5;
 
   Double_t MVACut = -9999;
-  if (MVABin == 0) MVACut = 0.352;
-  if (MVABin == 1) MVACut = 0.450;
-  if (MVABin == 2) MVACut = 0.339; 
-  if (MVABin == 3) MVACut = 0.967;
+  if (MVABin == 0) MVACut = 0.362;
+  if (MVABin == 1) MVACut = 0.467;
+  if (MVABin == 2) MVACut = 0.320; 
+  if (MVABin == 3) MVACut = 0.968;
   if (MVABin == 4) MVACut = 0.961;
-  if (MVABin == 5) MVACut = 0.934;
+  if (MVABin == 5) MVACut = 0.929;
  
   if (MVAValue > MVACut) return kTRUE;
   return kFALSE;
