@@ -137,30 +137,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex) {
   assert(MVABin >= 0 && MVABin <= 5);
   reader = fTMVAReader[MVABin];
                                                 
-//   std::cout << ele->Pt() << " " << ele->Eta() << " " << ele->Phi() << std::endl;
-//   std::cout <<   fMVAVar_EleSigmaIEtaIEta << " " 
-//        <<   fMVAVar_EleDEtaIn << " " 
-//        <<   fMVAVar_EleDPhiIn << " " 
-//        <<   fMVAVar_EleHoverE  << " " 
-//        <<   fMVAVar_EleD0 << " " 
-//        <<   fMVAVar_EleDZ << " " 
-//        <<   fMVAVar_EleFBrem  << " " 
-//        <<   fMVAVar_EleEOverP  << " " 
-//        <<   fMVAVar_EleESeedClusterOverPout  << " " 
-//        <<   fMVAVar_EleSigmaIPhiIPhi  << " " 
-//        <<   fMVAVar_EleNBrem  << " " 
-//        <<   fMVAVar_EleOneOverEMinusOneOverP  << " " 
-//        <<   fMVAVar_EleESeedClusterOverPIn  << " " 
-//        <<   fMVAVar_EleIP3d  << " " 
-//        <<   fMVAVar_EleIP3dSig  << " " 
-//        <<   fMVAVar_EleStandardLikelihood  << " " 
-//        << std::endl;
-
-//   std::cout << subdet << " : " << ptBin << std::endl;
-//   if (reader) std::cout << MVABin << " : reader is good\n";
-
   mva = reader->EvaluateMVA( fMethodname );
-  //   std::cout << "Electron: " << el->Pt() << " " << el->Eta() << " " << el->Phi() << " : " << MVAValue << std::endl;
 
   return mva;
 }
