@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.51 2011/07/22 14:36:29 sixie Exp $
+// $Id: ElectronIDMod.h,v 1.52 2011/09/16 14:09:17 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -25,9 +25,11 @@
 #include "MitPhysics/ElectronLikelihood/interface/ElectronLikelihood.h"
 #include "MitPhysics/ElectronLikelihood/interface/LikelihoodSwitches.h"
 #include "MitPhysics/ElectronLikelihood/interface/LikelihoodMeasurements.h"
+#include "MitPhysics/Utils/interface/ElectronIDMVA.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include <TFile.h>
 #include <TDirectory.h>
+#include "TMVA/Reader.h"
 
 namespace mithep 
 {
@@ -59,8 +61,11 @@ namespace mithep
       Bool_t              GetApplyTriggerMatching()       const { return fApplyTriggerMatching;   }
       Double_t            GetTrackIsoCut()            	  const { return fTrackIsolationCut;	  }
       Bool_t              GetChargeFilter()           	  const { return fChargeFilter; 	  }
-      Bool_t              Likelihood(const Electron *ele) const;
-      Bool_t              PassIDCut(const Electron *el, ElectronTools::EElIdType idType) const;
+      Bool_t              PassLikelihoodID(const Electron *ele) const;
+      Bool_t              PassMVAID(const Electron *el, ElectronTools::EElIdType idType, 
+                                    const Vertex *vertex) const;
+      Bool_t              PassIDCut(const Electron *el, ElectronTools::EElIdType idType, 
+                                    const Vertex *vertex) const;
       Bool_t              PassIsolationCut(const Electron *el, ElectronTools::EElIsoType isoType,
                                            const TrackCol *tracks, const Vertex *vertex, 
 					   const Double_t rho) const;
@@ -107,6 +112,19 @@ namespace mithep
       void                SetVertexName(TString name)            { fVertexName = name;         }
       void                SetIntRadius(Double_t dr)              { fIntRadius = dr;            }
       void                Setup();
+ 
+      void                SetElectronMVAWeightsSubdet0Pt10To20(TString s)  
+                          { fElectronMVAWeights_Subdet0Pt10To20  = s; }
+      void                SetElectronMVAWeightsSubdet1Pt10To20(TString s)  
+                          { fElectronMVAWeights_Subdet1Pt10To20  = s; }
+      void                SetElectronMVAWeightsSubdet2Pt10To20(TString s)  
+                          { fElectronMVAWeights_Subdet2Pt10To20  = s; }
+      void                SetElectronMVAWeightsSubdet0Pt20ToInf(TString s) 
+                          { fElectronMVAWeights_Subdet0Pt20ToInf = s; }
+      void                SetElectronMVAWeightsSubdet1Pt20ToInf(TString s) 
+                          { fElectronMVAWeights_Subdet1Pt20ToInf = s; }
+      void                SetElectronMVAWeightsSubdet2Pt20ToInf(TString s) 
+                          { fElectronMVAWeights_Subdet2Pt20ToInf = s; }
 
     protected:
       void                Process();
@@ -169,6 +187,13 @@ namespace mithep
       ElectronLikelihood       *fLH;                     //LH
       TString                   fPileupEnergyDensityName;
       const PileupEnergyDensityCol *fPileupEnergyDensity;
+      ElectronIDMVA            *fElectronIDMVA;
+      TString                   fElectronMVAWeights_Subdet0Pt10To20;
+      TString                   fElectronMVAWeights_Subdet1Pt10To20;
+      TString                   fElectronMVAWeights_Subdet2Pt10To20;
+      TString                   fElectronMVAWeights_Subdet0Pt20ToInf;
+      TString                   fElectronMVAWeights_Subdet1Pt20ToInf;
+      TString                   fElectronMVAWeights_Subdet2Pt20ToInf;
 
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };

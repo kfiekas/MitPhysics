@@ -1,7 +1,6 @@
 <use   name="MitCommon/MathTools"/>
 <use   name="MitAna/TreeMod"/>
 <use   name="MitPhysics/Init"/>
-<use   name="MitPhysics/Utils"/>
 <use   name="CondFormats/JetMETObjects"/>
 <use   name="FWCore/ParameterSet"/>
 <use   name="lhapdf"/>

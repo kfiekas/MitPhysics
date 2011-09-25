@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.100 2011/07/22 15:45:37 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.101 2011/09/16 14:09:17 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -8,6 +8,8 @@
 #include "MitAna/DataTree/interface/TriggerObjectCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "TMVA/Tools.h"
+#include "TMVA/Reader.h"
 
 using namespace mithep;
 
@@ -70,46 +72,24 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fNonIsolatedElectrons(0),
   fLH(0),
   fPileupEnergyDensityName(Names::gkPileupEnergyDensityBrn),
-  fPileupEnergyDensity(0)
+  fPileupEnergyDensity(0),
+  fElectronIDMVA(0),
+  fElectronMVAWeights_Subdet0Pt10To20(""),
+  fElectronMVAWeights_Subdet1Pt10To20(""),
+  fElectronMVAWeights_Subdet2Pt10To20(""),
+  fElectronMVAWeights_Subdet0Pt20ToInf(""),
+  fElectronMVAWeights_Subdet1Pt20ToInf(""),
+  fElectronMVAWeights_Subdet2Pt20ToInf("")
+  
 {
   // Constructor.
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
+Bool_t ElectronIDMod::PassLikelihoodID(const Electron *ele) const
 {
-  LikelihoodMeasurements measurements;
-  measurements.pt = ele->Pt();
-  if (ele->IsEB() && ele->AbsEta()<1.0) measurements.subdet = 0;
-  else if (ele->IsEB())                 measurements.subdet = 1;
-  else                                  measurements.subdet = 2;
-  measurements.deltaPhi = TMath::Abs(ele->DeltaPhiSuperClusterTrackAtVtx());
-  measurements.deltaEta = TMath::Abs(ele->DeltaEtaSuperClusterTrackAtVtx());
-  measurements.eSeedClusterOverPout = ele->ESeedClusterOverPout();
-  measurements.eSuperClusterOverP = ele->ESuperClusterOverP();
-  measurements.hadronicOverEm = ele->HadronicOverEm();
-  measurements.sigmaIEtaIEta = ele->CoviEtaiEta();
-  measurements.sigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi());
-  measurements.fBrem = ele->FBrem();
-  measurements.nBremClusters = ele->NumberOfClusters() - 1;
-  //measurements.OneOverEMinusOneOverP = (1.0 / ele->SCluster()->Energy()) - (1.0 / ele->BestTrk()->P());
-  measurements.OneOverEMinusOneOverP = (1.0 / ele->ESuperClusterOverP() / ele->BestTrk()->P()) - (1.0 / ele->BestTrk()->P());
-  double likelihood = fLH->result(measurements);
 
-  double newLik = 0.0;
-  if     (likelihood<=0) newLik = -20.0;
-  else if(likelihood>=1) newLik =  20.0;
-  else                   newLik = log(likelihood/(1.0-likelihood));
-
-  Bool_t isDebug = kFALSE;
-  if(isDebug == kTRUE){
-    printf("LIKELIHOOD: %f %d %f %f %f %f %f %f %f %f %d %f %f %f - %f %f\n",measurements.pt,measurements.subdet,
-    measurements.deltaPhi          ,measurements.deltaEta      ,measurements.eSeedClusterOverPout,
-    measurements.eSuperClusterOverP,measurements.hadronicOverEm,measurements.sigmaIEtaIEta,
-    measurements.sigmaIPhiIPhi     ,measurements.fBrem         ,measurements.nBremClusters,
-    measurements.OneOverEMinusOneOverP,ele->SCluster()->Energy(),ele->BestTrk()->P(),
-    likelihood,newLik);
-  }
+  Double_t LikelihoodValue = ElectronTools::Likelihood(fLH, ele);
 
   double likCut = fIDLikelihoodCut;
   if(likCut > -900){
@@ -134,12 +114,49 @@ Bool_t ElectronIDMod::Likelihood(const Electron *ele) const
       }
     }
   }
-  if (newLik > likCut) return kTRUE;
+  if (LikelihoodValue > likCut) return kTRUE;
   return kFALSE;
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType idType) const
+Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idType, 
+                                const Vertex *vertex) const
+{
+  Double_t MVAValue = fElectronIDMVA->MVAValue(el, vertex);
+ 
+  Int_t subdet = 0;
+  if (el->SCluster()->AbsEta() < 1.0) subdet = 0;
+  else if (el->SCluster()->AbsEta() < 1.479) subdet = 1;
+  else subdet = 2;
+  Int_t ptBin = 0;
+  if (el->Pt() > 20.0) ptBin = 1;
+  Int_t MVABin = -1;
+  if (subdet == 0 && ptBin == 0) MVABin = 0;
+  if (subdet == 1 && ptBin == 0) MVABin = 1;
+  if (subdet == 2 && ptBin == 0) MVABin = 2;
+  if (subdet == 0 && ptBin == 1) MVABin = 3;
+  if (subdet == 1 && ptBin == 1) MVABin = 4;
+  if (subdet == 2 && ptBin == 1) MVABin = 5;
+
+  Double_t MVACut = -9999;
+  if (MVABin == 0) MVACut = 0.366;
+  if (MVABin == 1) MVACut = 0.466;
+  if (MVABin == 2) MVACut = 0.342; 
+  if (MVABin == 3) MVACut = 0.970;
+  if (MVABin == 4) MVACut = 0.966;
+  if (MVABin == 5) MVACut = 0.934;
+ 
+  cout << "Electron: " << el->Pt() << " " << el->Eta() << " " << el->Phi() << " : " << MVAValue << endl;
+
+  if (MVAValue > MVACut) return kTRUE;
+  return kFALSE;
+}
+
+
+
+//--------------------------------------------------------------------------------------------------
+Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType idType, 
+                                const Vertex *vertex) const
 {
 
   Bool_t idcut = kFALSE;
@@ -152,7 +169,7 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       break;
     case ElectronTools::kLikelihood:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId) &&
-              Likelihood(ele);
+              PassLikelihoodID(ele);
       break;
     case ElectronTools::kNoId:
       idcut = kTRUE;
@@ -183,6 +200,10 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       break;
     case ElectronTools::kVBTFWorkingPoint70Id:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint70Id);
+      break;
+    case ElectronTools::kMVA_BDTG_V3:
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId) &&
+        PassMVAID(ele, ElectronTools::kMVA_BDTG_V3, vertex);
       break;
     default:
       break;
@@ -360,11 +381,6 @@ void ElectronIDMod::Process()
     if (fApplySpikeRemoval && !spikecut)
       continue;
 
-    //apply id cut
-    Bool_t idcut = PassIDCut(e, fElIdType);
-    if (!idcut) 
-      continue;
-
     //apply Isolation Cut
     Double_t Rho = 0.0;
     if( fElIsoType == ElectronTools::kTrackJuraSliding
@@ -423,6 +439,11 @@ void ElectronIDMod::Process()
         continue;
     }
 
+    //apply id cut
+    Bool_t idcut = PassIDCut(e, fElIdType, fVertices->At(0));
+    if (!idcut) 
+      continue;
+
     // apply charge filter
     if(fChargeFilter == kTRUE) {
       Bool_t passChargeFilter = ElectronTools::PassChargeFilter(e);
@@ -479,6 +500,7 @@ void ElectronIDMod::SlaveBegin()
     ReqEventObject(fConversionBranchName, fConversions, kTRUE);
 
   Setup();
+
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -515,8 +537,10 @@ void ElectronIDMod::Setup()
     fElIdType = ElectronTools::kVBTFWorkingPoint85Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint70Id") == 0) 
     fElIdType = ElectronTools::kVBTFWorkingPoint70Id;
-  
-   else {
+  else if (fElectronIDType.CompareTo("MVA_BDTG_V3") == 0) {
+    fElIdType = ElectronTools::kMVA_BDTG_V3; 
+    if (!fLH) { cout << "Error: Likelihood not initialized.\n"; assert(0);}
+  } else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified electron identification %s is not defined.",
               fElectronIDType.Data());
@@ -564,6 +588,19 @@ void ElectronIDMod::Setup()
     return;
   }
 
+
+  //If we use MVA ID, need to load MVA weights
+  if (fElIdType == ElectronTools::kMVA_BDTG_V3) {
+    fElectronIDMVA = new ElectronIDMVA();
+    fElectronIDMVA->Initialize("BDTG method",
+                               fElectronMVAWeights_Subdet0Pt10To20,
+                               fElectronMVAWeights_Subdet1Pt10To20,
+                               fElectronMVAWeights_Subdet2Pt10To20,
+                               fElectronMVAWeights_Subdet0Pt20ToInf,
+                               fElectronMVAWeights_Subdet1Pt20ToInf,
+                               fElectronMVAWeights_Subdet2Pt20ToInf,
+                               fLH);
+  }
 
 }
 

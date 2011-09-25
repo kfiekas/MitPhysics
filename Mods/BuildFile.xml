@@ -6,6 +6,8 @@
 <use   name="CondFormats/JetMETObjects"/>
 <use   name="FWCore/ParameterSet"/>
 <use   name="lhapdf"/>
+<use   name="root"/>
+<use   name="roottmva"/>
 <use   root=""/>
 <lib   name="EG"/>
 <export>

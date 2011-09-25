@@ -1,6 +1,7 @@
 <use   name="MitAna/DataTree"/>
 <use   name="MitAna/DataUtil"/>
 <use   name="MitCommon/MathTools"/>
+<use   name="MitPhysics/ElectronLikelihood"/>
 <use   name="root"/>
 <use   name="roottmva"/>
 <lib   name="EG"/>

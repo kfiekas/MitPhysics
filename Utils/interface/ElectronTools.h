@@ -17,6 +17,7 @@
 #include "MitAna/DataTree/interface/BeamSpotCol.h"
 #include "MitAna/DataTree/interface/TriggerObjectCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/ElectronLikelihood/interface/ElectronLikelihood.h"
 
 namespace mithep {
   class ElectronTools {
@@ -38,7 +39,8 @@ namespace mithep {
         kVBTFWorkingPoint85Id,
         kVBTFWorkingPoint80Id,
         kVBTFWorkingPointLowPtId,
-        kVBTFWorkingPoint70Id
+        kVBTFWorkingPoint70Id,
+        kMVA_BDTG_V3
       };
 
       enum EElIsoType {
@@ -78,6 +80,7 @@ namespace mithep {
                                       const DecayParticleCol *conversions, const Int_t typeCuts,
                                       Double_t beta = 1.0);
       static bool         compute_cut(double x, double et, double cut_min, double cut_max, bool gtn=false);
+      static Double_t     Likelihood(ElectronLikelihood *LH, const Electron *ele);
 
     ClassDef(ElectronTools, 0) // Muon tools
   };

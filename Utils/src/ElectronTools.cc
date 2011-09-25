@@ -1,8 +1,11 @@
-// $Id: ElectronTools.cc,v 1.30 2011/07/22 14:36:29 sixie Exp $
+// $Id: ElectronTools.cc,v 1.31 2011/08/11 22:22:29 sixie Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include <TFile.h>
+#include "MitPhysics/ElectronLikelihood/interface/ElectronLikelihood.h"
+#include "MitPhysics/ElectronLikelihood/interface/LikelihoodSwitches.h"
+#include "MitPhysics/ElectronLikelihood/interface/LikelihoodMeasurements.h"
 
 ClassImp(mithep::ElectronTools)
 
@@ -1009,4 +1012,49 @@ bool ElectronTools::compute_cut(double x, double et, double cut_min, double cut_
   }
 
   return accept;
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t ElectronTools::Likelihood(ElectronLikelihood *LH, const Electron *ele) 
+{
+  if (!LH) {
+    std::cout << "Error: Likelihood not properly initialized\n"; 
+    return -9999;
+  }
+
+  LikelihoodMeasurements measurements;
+  measurements.pt = ele->Pt();
+  if (ele->IsEB() && ele->AbsEta()<1.0) measurements.subdet = 0;
+  else if (ele->IsEB())                 measurements.subdet = 1;
+  else                                  measurements.subdet = 2;
+  measurements.deltaPhi = TMath::Abs(ele->DeltaPhiSuperClusterTrackAtVtx());
+  measurements.deltaEta = TMath::Abs(ele->DeltaEtaSuperClusterTrackAtVtx());
+  measurements.eSeedClusterOverPout = ele->ESeedClusterOverPout();
+  measurements.eSuperClusterOverP = ele->ESuperClusterOverP();
+  measurements.hadronicOverEm = ele->HadronicOverEm();
+  measurements.sigmaIEtaIEta = ele->CoviEtaiEta();
+  measurements.sigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi());
+  measurements.fBrem = ele->FBrem();
+  measurements.nBremClusters = ele->NumberOfClusters() - 1;
+  //measurements.OneOverEMinusOneOverP = (1.0 / ele->SCluster()->Energy()) - (1.0 / ele->BestTrk()->P());
+  measurements.OneOverEMinusOneOverP = (1.0 / ele->ESuperClusterOverP() / ele->BestTrk()->P()) - (1.0 / ele->BestTrk()->P());
+  double likelihood = LH->result(measurements);
+
+  double newLik = 0.0;
+  if     (likelihood<=0) newLik = -20.0;
+  else if(likelihood>=1) newLik =  20.0;
+  else                   newLik = log(likelihood/(1.0-likelihood));
+
+  Bool_t isDebug = kFALSE;
+  if(isDebug == kTRUE){
+    printf("LIKELIHOOD: %f %d %f %f %f %f %f %f %f %f %d %f %f %f - %f %f\n",measurements.pt,measurements.subdet,
+    measurements.deltaPhi          ,measurements.deltaEta      ,measurements.eSeedClusterOverPout,
+    measurements.eSuperClusterOverP,measurements.hadronicOverEm,measurements.sigmaIEtaIEta,
+    measurements.sigmaIPhiIPhi     ,measurements.fBrem         ,measurements.nBremClusters,
+    measurements.OneOverEMinusOneOverP,ele->SCluster()->Energy(),ele->BestTrk()->P(),
+    likelihood,newLik);
+  }
+
+  return newLik;
+
 }
