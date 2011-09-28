@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.12 2011/09/08 15:51:24 bendavid Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.13 2011/09/25 10:08:11 sixie Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -17,8 +17,11 @@
 #include "MitPhysics/Utils/interface/PUReweighting.h"
 #include "MitPhysics/Utils/interface/PUReweightingMulti.h"
 #include "MitPhysics/Utils/interface/PhotonFix.h"
+#include "MitPhysics/Utils/interface/GBRTree.h"
+#include "MitPhysics/Utils/interface/GBRForest.h"
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronIDMVA.h"
+
 
 
 #endif
@@ -30,6 +33,10 @@
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
 #pragma link C++ namespace mithep;
+
+#pragma link C++ class GBRTree+; 
+#pragma link C++ class GBRForest+; 
+
 
 #pragma link C++ class mithep::DiTauSystem;
 #pragma link C++ class mithep::GeneratorTools;

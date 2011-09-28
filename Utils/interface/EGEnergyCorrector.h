@@ -30,9 +30,11 @@
 
 
 class TRandom3;
-namespace TMVA {
-  class Reader;
-}
+class GBRForest;
+// namespace TMVA {
+//   class Reader;
+// }
+
 
 namespace mithep {
   class EGEnergyCorrector {
@@ -48,15 +50,17 @@ namespace mithep {
       
     protected:
       PhotonFix fPhFix;
-      TMVA::Reader *fReadereb;
-      TMVA::Reader *fReaderebvariance;
-      TMVA::Reader *fReaderee;
-      TMVA::Reader *fReadereevariance;      
+      GBRForest *fReadereb;
+      GBRForest *fReaderebvariance;
+      GBRForest *fReaderee;
+      GBRForest *fReadereevariance;      
 
       TString fMethodname;
       
       Bool_t fIsInitialized;
       Bool_t fIsMC;
+
+      Float_t *fVals;
       
       Float_t r9;
       Float_t e5x5norm;
