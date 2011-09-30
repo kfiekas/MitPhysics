@@ -89,10 +89,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   rng                (new TRandom3()),  
   fDoRegression      (kFALSE),
   fPhFixString       ("4_2"),
-  fEBWeights         (gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/ogbrebph.root")),
-  fEBVarWeights      (gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/ogbrvarebph.root")),
-  fEEWeights         (gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/ogbreeph.root")),
-  fEEVarWeights      (gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/ogbrvareeph.root")),
+  fRegWeights         (gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/gbrph.root")),
   fEtaCorrections    (0),
   // ---------------------------------------
   fDoDataEneCorr     (true),
@@ -239,8 +236,7 @@ void PhotonPairSelector::Process()
 
     if (fDoRegression) {
       if (!egcor.IsInitialized()) {
-        //egcor.Initialize(!fIsData,"4_2",gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat"),"/scratch/bendavid/root/weights-Base/TMVARegressionebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressioneeph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceeeph_BDTG.weights.xml");
-        egcor.Initialize(!fIsData,fPhFixString,fPhFixFile,fEBWeights,fEBVarWeights,fEEWeights,fEEVarWeights);
+        egcor.Initialize(!fIsData,fPhFixString,fPhFixFile,fRegWeights);
       }
     
       egcor.CorrectEnergyWithError(fixPh1st[iPair]);

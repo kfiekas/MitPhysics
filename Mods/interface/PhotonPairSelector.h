@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonPairSelector.h,v 1.7 2011/08/03 17:15:43 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.8 2011/09/08 15:51:23 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -196,10 +196,7 @@ namespace mithep
     Bool_t fDoRegression;
     TString fPhFixString;
     TString fPhFixFile;
-    TString fEBWeights;
-    TString fEBVarWeights;
-    TString fEEWeights;
-    TString fEEVarWeights;    
+    TString fRegWeights; 
     
     const TH1D *fEtaCorrections;
     

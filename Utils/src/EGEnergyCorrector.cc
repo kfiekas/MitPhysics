@@ -42,7 +42,7 @@ EGEnergyCorrector::~EGEnergyCorrector()
 }
 
 //--------------------------------------------------------------------------------------------------
-void EGEnergyCorrector::Initialize(Bool_t ismc, TString phfixstring, TString phfixfile, TString ebweights, TString ebvarweights, TString eeweights, TString eevarweights) {
+void EGEnergyCorrector::Initialize(Bool_t ismc, TString phfixstring, TString phfixfile, TString regweights) {
     fIsInitialized = kTRUE;
     fIsMC = ismc;
     fPhFix.initialise(std::string(phfixstring),std::string(phfixfile));
@@ -55,25 +55,13 @@ void EGEnergyCorrector::Initialize(Bool_t ismc, TString phfixstring, TString phf
     
     fVals = new Float_t[18];
     
-    TFile *fgbreb = new TFile(ebweights,"READ");
-    fReadereb = (GBRForest*)fgbreb->Get("GBRForest");
-    //fReadereb->SetDirectory(0);
-    fgbreb->Close();
+    TFile *fgbr = new TFile(regweights,"READ");
+    fReadereb = (GBRForest*)fgbr->Get("EBCorrection");
+    fReaderebvariance = (GBRForest*)fgbr->Get("EBUncertainty");  
+    fReaderee = (GBRForest*)fgbr->Get("EECorrection");
+    fReadereevariance = (GBRForest*)fgbr->Get("EEUncertainty");      
+    fgbr->Close();
 
-    TFile *fgbrvareb = new TFile(ebvarweights,"READ");
-    fReaderebvariance = (GBRForest*)fgbrvareb->Get("GBRForest");  
-    //fReaderebvariance->SetDirectory(0);
-    fgbrvareb->Close();
-    
-    TFile *fgbree = new TFile(eeweights,"READ");
-    fReaderee = (GBRForest*)fgbree->Get("GBRForest");
-    //fReaderee->SetDirectory(0);
-    fgbree->Close();
-    
-    TFile *fgbrvaree = new TFile(eevarweights,"READ");
-    fReadereevariance = (GBRForest*)fgbrvaree->Get("GBRForest");    
-    //fReadereevariance->SetDirectory(0);
-    fgbrvaree->Close();    
 }
 
 //--------------------------------------------------------------------------------------------------

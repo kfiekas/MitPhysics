@@ -42,7 +42,7 @@ namespace mithep {
       EGEnergyCorrector();
       ~EGEnergyCorrector(); 
 
-      void Initialize(Bool_t ismc, TString phfixstring, TString phfixfile, TString ebweights, TString ebvarweights, TString eeweights, TString eevarweights);
+      void Initialize(Bool_t ismc, TString phfixstring, TString phfixfile, TString regweights);
       Bool_t IsInitialized() const { return fIsInitialized; }
       
       void CorrectEnergyWithError(Photon *p);
