@@ -1,4 +1,4 @@
-// $Id: doubleLepton.C,v 1.5 2010/10/12 07:07:14 ceballos Exp $
+// $Id: doubleLepton.C,v 1.6 2010/10/12 08:06:26 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -10,6 +10,7 @@
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
+#include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include "MitPhysics/SelMods/interface/DilepSelMod.h"
 #endif
 
@@ -28,16 +29,27 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
   //------------------------------------------------------------------------------------------------
   // organize selection
   //------------------------------------------------------------------------------------------------
+  GoodPVFilterMod *goodPVFilterMod = new GoodPVFilterMod;
+  goodPVFilterMod->SetMinVertexNTracks(0);
+  goodPVFilterMod->SetMinNDof(4);
+  goodPVFilterMod->SetMaxAbsZ(24.0);
+  goodPVFilterMod->SetMaxRho(2.0);
+  goodPVFilterMod->SetVertexesName("PrimaryVertexes");
+
   const char     *muInput  = Names::gkMuonBrn;
   const char     *elInput  = Names::gkElectronBrn;
 
   MuonIDMod *muId = new MuonIDMod;  
-  muId->SetInputName (muInput);
-  muId->SetPtMin     (10.0);
-  muId->SetApplyD0Cut(kFALSE);
-  muId->SetClassType ("All");
-  muId->SetIDType    ("NoId");
-  muId->SetIsoType   ("NoIso");
+  muId->SetInputName  (muInput);
+  muId->SetPtMin      (10.0);
+  muId->SetApplyD0Cut (kTRUE);
+  muId->SetD0Cut      (0.20);
+  muId->SetApplyDZCut (kTRUE);
+  muId->SetDZCut      (0.50);
+  muId->SetWhichVertex(0);
+  muId->SetClassType  ("All");
+  muId->SetIDType     ("NoId");
+  muId->SetIsoType    ("NoIso");
 
   ElectronIDMod *elId = new ElectronIDMod;
   elId->SetInputName                 (elInput);
@@ -46,9 +58,13 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
   elId->SetApplyConversionFilterType2(kFALSE);
   elId->SetChargeFilter              (kFALSE);
   elId->SetApplySpikeRemoval         (kFALSE);
-  elId->SetApplyD0Cut                (kFALSE);
+  elId->SetApplyD0Cut                (kTRUE);
+  elId->SetD0Cut                     (0.20);
+  elId->SetApplyDZCut                (kTRUE);
+  elId->SetDZCut                     (0.50);
+  elId->SetWhichVertex               (0);
   elId->SetNExpectedHitsInnerCut     (999);
-  elId->SetIDType                    ("NoId");
+  elId->SetIDType                    ("VBTFWorkingPointFakeableId");
   elId->SetIsoType                   ("NoIso");
 
   ElectronCleaningMod *elCl = new ElectronCleaningMod;
@@ -62,8 +78,8 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
 
   DilepSelMod *selMod = new DilepSelMod;
   selMod->SetCleanLeptonsName(merger->GetOutputName());
-  selMod->SetMinPt(10.0);
-  selMod->SetMinDilMass(2.0);
+  selMod->SetMinPt(0.0);
+  selMod->SetMinDilMass(5.0);
   selMod->SetFillHist(kFALSE);
   merger->Add(selMod);
 
@@ -74,7 +90,7 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
   outMod->Keep("*");
   selMod->Add(outMod);
   TString rootFile = "";
-  //rootFile += TString("skims/") + dataset + TString("/");
+  rootFile += TString("skims/") + dataset + TString("/");
   rootFile += skimName;
   if (TString(fileset) != TString(""))
     rootFile += TString("_") + TString(fileset);
@@ -86,7 +102,8 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
   // set up analysis
   //------------------------------------------------------------------------------------------------
   Analysis *ana = new Analysis;
-  ana->AddSuperModule(muId);
+  ana->AddSuperModule(goodPVFilterMod);
+  goodPVFilterMod->Add(muId);
   muId->Add(elId);
   elId->Add(merger);
   if (NEvents>0)
