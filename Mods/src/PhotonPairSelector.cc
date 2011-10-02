@@ -131,22 +131,11 @@ void PhotonPairSelector::Process()
   LoadEventObject(fBeamspotName,       fBeamspot);
   LoadEventObject(fPFCandName,         fPFCands);
 
-
-
-
-  
-
   // ------------------------------------------------------------  
   // load event based information
-  Int_t _numPU = -1.;        // some sensible default values....
-  Int_t _numPUminus = -1.;        // some sensible default values....
-  Int_t _numPUplus = -1.;        // some sensible default values....
-
   Float_t _tRho  = -99.;
   if( fPileUpDen->GetEntries() > 0 )
     _tRho  = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
-
-
   
   const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));
 
