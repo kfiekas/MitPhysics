@@ -148,7 +148,7 @@ void PhotonPairSelector::Process()
   UInt_t   runNumber = evtHead->RunNum();
   Float_t _runNum    = (Float_t) runNumber;
   Float_t _lumiSec   = (Float_t) evtHead->LumiSec();
-  
+
   // ------------------------------------------------------------
   // here we'll store the preselected Photons (and which CiCCategory they are...)
   PhotonOArr* preselPh  = new PhotonOArr;
