@@ -40,7 +40,8 @@ namespace mithep {
         kVBTFWorkingPoint80Id,
         kVBTFWorkingPointLowPtId,
         kVBTFWorkingPoint70Id,
-        kMVA_BDTG_V3
+        kMVA_BDTG_V1,
+        kMVA_BDTG_V2
       };
 
       enum EElIsoType {
