@@ -17,10 +17,6 @@
 #include "MitAna/DataTree/interface/Electron.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
-#include "MitPhysics/ElectronLikelihood/interface/ElectronLikelihood.h"
-#include "MitPhysics/ElectronLikelihood/interface/LikelihoodSwitches.h"
-#include "MitPhysics/ElectronLikelihood/interface/LikelihoodMeasurements.h"
-
 
 class TRandom3;
 namespace TMVA {
@@ -33,6 +29,13 @@ namespace mithep {
       ElectronIDMVA();
       ~ElectronIDMVA(); 
 
+      enum MVAType {
+        kBaseline = 0,      // SigmaIEtaIEta, DEtaIn, DPhiIn, FBrem, SigmaIPhiIPhi, NBrem, OneOverEMinusOneOverP
+        kV1,                // kBaseline + EOverP, HoverE, ESeedClusterOverPout, ESeedClusterOverPIn
+        kV2                 // kV2 + d0 , IP3d, IP3dSig
+      };
+
+
       void     Initialize(TString methodName,
                           TString Subdet0Pt10To20Weights , 
                           TString Subdet1Pt10To20Weights , 
@@ -40,7 +43,7 @@ namespace mithep {
                           TString Subdet0Pt20ToInfWeights, 
                           TString Subdet1Pt20ToInfWeights, 
                           TString Subdet2Pt20ToInfWeights,
-                          ElectronLikelihood *LH );
+                          ElectronIDMVA::MVAType type );
       
       Bool_t   IsInitialized() const { return fIsInitialized; }
       Double_t MVAValue(const Electron *ele, const Vertex *vertex);
@@ -59,15 +62,13 @@ namespace mithep {
                         Double_t EleOneOverEMinusOneOverP,
                         Double_t EleESeedClusterOverPIn,
                         Double_t EleIP3d,
-                        Double_t EleIP3dSig,
-                        Double_t EleStandardLikelihood );
+                        Double_t EleIP3dSig );
 
 
     protected:      
       TMVA::Reader            *fTMVAReader[6];
       TString                  fMethodname;
       
-      ElectronLikelihood       *fLH;                     //Likelihood
       Bool_t                    fIsInitialized;
       
       Float_t                   fMVAVar_EleSigmaIEtaIEta; 
@@ -85,7 +86,6 @@ namespace mithep {
       Float_t                   fMVAVar_EleESeedClusterOverPIn; 
       Float_t                   fMVAVar_EleIP3d; 
       Float_t                   fMVAVar_EleIP3dSig; 
-      Float_t                   fMVAVar_EleStandardLikelihood; 
       
       
     ClassDef(ElectronIDMVA, 0) // Muon tools

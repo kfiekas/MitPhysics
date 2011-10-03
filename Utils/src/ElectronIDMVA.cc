@@ -15,7 +15,6 @@ using namespace mithep;
 //--------------------------------------------------------------------------------------------------
 ElectronIDMVA::ElectronIDMVA() :
 fMethodname("BDTG method"),
-fLH(0),
 fIsInitialized(kFALSE)
 {
   // Constructor.
@@ -41,34 +40,57 @@ void ElectronIDMVA::Initialize( TString methodName,
                                 TString Subdet0Pt20ToInfWeights,
                                 TString Subdet1Pt20ToInfWeights, 
                                 TString Subdet2Pt20ToInfWeights,
-                                ElectronLikelihood *LH) {
+                                ElectronIDMVA::MVAType type) {
 
   fIsInitialized = kTRUE;
   
   fMethodname = methodName;
-  fLH = LH;    
-  if (!fLH) { std::cout << "Error: Likelihood is not properly initialized.\n"; assert(fLH); }
     
   for(UInt_t i=0; i<6; ++i) {
     if (fTMVAReader[i]) delete fTMVAReader[i];
 
     fTMVAReader[i] = new TMVA::Reader( "!Color:!Silent:Error" );  
     fTMVAReader[i]->SetVerbose(kTRUE);
-    fTMVAReader[i]->AddVariable( "SigmaIEtaIEta",         &fMVAVar_EleSigmaIEtaIEta         );
-    fTMVAReader[i]->AddVariable( "DEtaIn",                &fMVAVar_EleDEtaIn                );
-    fTMVAReader[i]->AddVariable( "DPhiIn",                &fMVAVar_EleDPhiIn                );
-    fTMVAReader[i]->AddVariable( "HoverE",                &fMVAVar_EleHoverE                );
-    fTMVAReader[i]->AddVariable( "D0",                    &fMVAVar_EleD0                    );
-    fTMVAReader[i]->AddVariable( "FBrem",                 &fMVAVar_EleFBrem                 );
-    fTMVAReader[i]->AddVariable( "EOverP",                &fMVAVar_EleEOverP                );
-    fTMVAReader[i]->AddVariable( "ESeedClusterOverPout",  &fMVAVar_EleESeedClusterOverPout  );
-    fTMVAReader[i]->AddVariable( "SigmaIPhiIPhi",         &fMVAVar_EleSigmaIPhiIPhi         );
-    fTMVAReader[i]->AddVariable( "NBrem",                 &fMVAVar_EleNBrem                 );
-    fTMVAReader[i]->AddVariable( "OneOverEMinusOneOverP", &fMVAVar_EleOneOverEMinusOneOverP );
-    fTMVAReader[i]->AddVariable( "ESeedClusterOverPIn",   &fMVAVar_EleESeedClusterOverPIn   );
-    fTMVAReader[i]->AddVariable( "IP3d",                  &fMVAVar_EleIP3d                  );
-    fTMVAReader[i]->AddVariable( "IP3dSig",               &fMVAVar_EleIP3dSig               );
-    fTMVAReader[i]->AddVariable( "StandardLikelihood",    &fMVAVar_EleStandardLikelihood    );
+
+    if (type == kBaseline) {
+      fTMVAReader[i]->AddVariable( "SigmaIEtaIEta",         &fMVAVar_EleSigmaIEtaIEta         );
+      fTMVAReader[i]->AddVariable( "DEtaIn",                &fMVAVar_EleDEtaIn                );
+      fTMVAReader[i]->AddVariable( "DPhiIn",                &fMVAVar_EleDPhiIn                );
+      fTMVAReader[i]->AddVariable( "FBrem",                 &fMVAVar_EleFBrem                 );
+      fTMVAReader[i]->AddVariable( "SigmaIPhiIPhi",         &fMVAVar_EleSigmaIPhiIPhi         );
+      fTMVAReader[i]->AddVariable( "NBrem",                 &fMVAVar_EleNBrem                 );
+      fTMVAReader[i]->AddVariable( "OneOverEMinusOneOverP", &fMVAVar_EleOneOverEMinusOneOverP );      
+    }
+    
+    if (type == kV1) {
+      fTMVAReader[i]->AddVariable( "SigmaIEtaIEta",         &fMVAVar_EleSigmaIEtaIEta         );
+      fTMVAReader[i]->AddVariable( "DEtaIn",                &fMVAVar_EleDEtaIn                );
+      fTMVAReader[i]->AddVariable( "DPhiIn",                &fMVAVar_EleDPhiIn                );
+      fTMVAReader[i]->AddVariable( "HoverE",                &fMVAVar_EleHoverE                );
+      fTMVAReader[i]->AddVariable( "FBrem",                 &fMVAVar_EleFBrem                 );
+      fTMVAReader[i]->AddVariable( "EOverP",                &fMVAVar_EleEOverP                );
+      fTMVAReader[i]->AddVariable( "ESeedClusterOverPout",  &fMVAVar_EleESeedClusterOverPout  );
+      fTMVAReader[i]->AddVariable( "SigmaIPhiIPhi",         &fMVAVar_EleSigmaIPhiIPhi         );
+      fTMVAReader[i]->AddVariable( "NBrem",                 &fMVAVar_EleNBrem                 );
+      fTMVAReader[i]->AddVariable( "OneOverEMinusOneOverP", &fMVAVar_EleOneOverEMinusOneOverP );      
+      fTMVAReader[i]->AddVariable( "ESeedClusterOverPIn",   &fMVAVar_EleESeedClusterOverPIn   );
+    }
+    if (type == kV2) {
+      fTMVAReader[i]->AddVariable( "SigmaIEtaIEta",         &fMVAVar_EleSigmaIEtaIEta         );
+      fTMVAReader[i]->AddVariable( "DEtaIn",                &fMVAVar_EleDEtaIn                );
+      fTMVAReader[i]->AddVariable( "DPhiIn",                &fMVAVar_EleDPhiIn                );
+      fTMVAReader[i]->AddVariable( "HoverE",                &fMVAVar_EleHoverE                );
+      fTMVAReader[i]->AddVariable( "D0",                    &fMVAVar_EleD0                    );
+      fTMVAReader[i]->AddVariable( "FBrem",                 &fMVAVar_EleFBrem                 );
+      fTMVAReader[i]->AddVariable( "EOverP",                &fMVAVar_EleEOverP                );
+      fTMVAReader[i]->AddVariable( "ESeedClusterOverPout",  &fMVAVar_EleESeedClusterOverPout  );
+      fTMVAReader[i]->AddVariable( "SigmaIPhiIPhi",         &fMVAVar_EleSigmaIPhiIPhi         );
+      fTMVAReader[i]->AddVariable( "NBrem",                 &fMVAVar_EleNBrem                 );
+      fTMVAReader[i]->AddVariable( "OneOverEMinusOneOverP", &fMVAVar_EleOneOverEMinusOneOverP );      
+      fTMVAReader[i]->AddVariable( "ESeedClusterOverPIn",   &fMVAVar_EleESeedClusterOverPIn   );
+      fTMVAReader[i]->AddVariable( "IP3d",                  &fMVAVar_EleIP3d                  );
+      fTMVAReader[i]->AddVariable( "IP3dSig",               &fMVAVar_EleIP3dSig               );
+    }
 
     if (i==0) fTMVAReader[i]->BookMVA(fMethodname , Subdet0Pt10To20Weights );
     if (i==1) fTMVAReader[i]->BookMVA(fMethodname , Subdet1Pt10To20Weights );
@@ -80,7 +102,7 @@ void ElectronIDMVA::Initialize( TString methodName,
   }
 
   std::cout << "Electron ID MVA Initialization\n";
-  std::cout << "MethodName : " << fMethodname << std::endl;
+  std::cout << "MethodName : " << fMethodname << " , type == " << type << std::endl;
   std::cout << "Load weights file : " << Subdet0Pt10To20Weights << std::endl;
   std::cout << "Load weights file : " << Subdet1Pt10To20Weights << std::endl;
   std::cout << "Load weights file : " << Subdet2Pt10To20Weights << std::endl;
@@ -106,8 +128,7 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleSCEta,
                                  Double_t EleOneOverEMinusOneOverP,
                                  Double_t EleESeedClusterOverPIn,
                                  Double_t EleIP3d,
-                                 Double_t EleIP3dSig,
-                                 Double_t EleStandardLikelihood
+                                 Double_t EleIP3dSig
   ) {
   
   if (!fIsInitialized) { 
@@ -138,7 +159,6 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleSCEta,
   fMVAVar_EleESeedClusterOverPIn = EleESeedClusterOverPIn;
   fMVAVar_EleIP3d = EleIP3d;
   fMVAVar_EleIP3dSig = EleIP3dSig;
-  fMVAVar_EleStandardLikelihood = EleStandardLikelihood;
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
@@ -191,7 +211,6 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex) {
   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
   fMVAVar_EleIP3d = ele->Ip3dPV(); 
   fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
-  fMVAVar_EleStandardLikelihood = ElectronTools::Likelihood(fLH, ele); 
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
