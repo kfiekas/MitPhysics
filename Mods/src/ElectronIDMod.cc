@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.105 2011/09/25 18:14:03 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.106 2011/10/02 10:03:21 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -139,13 +139,22 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
   if (subdet == 2 && ptBin == 1) MVABin = 5;
 
   Double_t MVACut = -9999;
-  if (MVABin == 0) MVACut = 0.362;
-  if (MVABin == 1) MVACut = 0.467;
-  if (MVABin == 2) MVACut = 0.320; 
-  if (MVABin == 3) MVACut = 0.968;
-  if (MVABin == 4) MVACut = 0.961;
-  if (MVABin == 5) MVACut = 0.929;
- 
+  if (idType == ElectronTools::kMVA_BDTG_V1) {
+    if (MVABin == 0) MVACut = 0.115;
+    if (MVABin == 1) MVACut = 0.463;
+    if (MVABin == 2) MVACut = 0.497; 
+    if (MVABin == 3) MVACut = 0.945;
+    if (MVABin == 4) MVACut = 0.949;
+    if (MVABin == 5) MVACut = 0.890;
+  } else if (idType == ElectronTools::kMVA_BDTG_V2) {
+    if (MVABin == 0) MVACut = 0.125;
+    if (MVABin == 1) MVACut = 0.516;
+    if (MVABin == 2) MVACut = 0.535; 
+    if (MVABin == 3) MVACut = 0.949;
+    if (MVABin == 4) MVACut = 0.952;
+    if (MVABin == 5) MVACut = 0.892;
+  }
+
   if (MVAValue > MVACut) return kTRUE;
   return kFALSE;
 }
@@ -197,9 +206,13 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
     case ElectronTools::kVBTFWorkingPoint70Id:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint70Id);
       break;
-    case ElectronTools::kMVA_BDTG_V3:
+    case ElectronTools::kMVA_BDTG_V1:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId) &&
-        PassMVAID(ele, ElectronTools::kMVA_BDTG_V3, vertex);
+        PassMVAID(ele, ElectronTools::kMVA_BDTG_V1, vertex);
+      break;
+    case ElectronTools::kMVA_BDTG_V2:
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId) &&
+        PassMVAID(ele, ElectronTools::kMVA_BDTG_V2, vertex);
       break;
     default:
       break;
@@ -533,10 +546,11 @@ void ElectronIDMod::Setup()
     fElIdType = ElectronTools::kVBTFWorkingPoint85Id;
   else if (fElectronIDType.CompareTo("VBTFWorkingPoint70Id") == 0) 
     fElIdType = ElectronTools::kVBTFWorkingPoint70Id;
-  else if (fElectronIDType.CompareTo("MVA_BDTG_V3") == 0) {
-    fElIdType = ElectronTools::kMVA_BDTG_V3; 
-    if (!fLH) { cout << "Error: Likelihood not initialized.\n"; assert(0);}
-  } else {
+  else if (fElectronIDType.CompareTo("MVA_BDTG_V1") == 0)
+    fElIdType = ElectronTools::kMVA_BDTG_V1; 
+  else if (fElectronIDType.CompareTo("MVA_BDTG_V2") == 0)
+    fElIdType = ElectronTools::kMVA_BDTG_V2; 
+  else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified electron identification %s is not defined.",
               fElectronIDType.Data());
@@ -586,7 +600,7 @@ void ElectronIDMod::Setup()
 
 
   //If we use MVA ID, need to load MVA weights
-  if (fElIdType == ElectronTools::kMVA_BDTG_V3) {
+  if (fElIdType == ElectronTools::kMVA_BDTG_V1) {
     fElectronIDMVA = new ElectronIDMVA();
     fElectronIDMVA->Initialize("BDTG method",
                                fElectronMVAWeights_Subdet0Pt10To20,
@@ -595,7 +609,18 @@ void ElectronIDMod::Setup()
                                fElectronMVAWeights_Subdet0Pt20ToInf,
                                fElectronMVAWeights_Subdet1Pt20ToInf,
                                fElectronMVAWeights_Subdet2Pt20ToInf,
-                               fLH);
+                               ElectronIDMVA::kV1);
+  }
+  if (fElIdType == ElectronTools::kMVA_BDTG_V2) {
+    fElectronIDMVA = new ElectronIDMVA();
+    fElectronIDMVA->Initialize("BDTG method",
+                               fElectronMVAWeights_Subdet0Pt10To20,
+                               fElectronMVAWeights_Subdet1Pt10To20,
+                               fElectronMVAWeights_Subdet2Pt10To20,
+                               fElectronMVAWeights_Subdet0Pt20ToInf,
+                               fElectronMVAWeights_Subdet1Pt20ToInf,
+                               fElectronMVAWeights_Subdet2Pt20ToInf,
+                               ElectronIDMVA::kV2);
   }
 
 }
