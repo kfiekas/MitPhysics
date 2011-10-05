@@ -9,6 +9,7 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Utils/interface/JetTools.h"
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include "MitAna/DataTree/interface/ParticleCol.h"
 #include "TFile.h"
@@ -58,10 +59,10 @@ void HwwExampleAnalysisMod::SlaveBegin()
   //*************************************************************************************************
   // Selection Histograms
   //*************************************************************************************************
-  AddTH1(fHWWSelection,"hHWWSelection", ";Cut Number;Number of Events", 11, -1.5, 9.5);
-  AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events", 11, -1.5, 9.5);
-  AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 11, -1.5, 9.5);
-  AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events", 11, -1.5, 9.5);
+  AddTH1(fHWWSelection,"hHWWSelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
+  AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
+  AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
+  AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
 
   //***********************************************************************************************
   // Histograms after preselection
@@ -168,7 +169,7 @@ void HwwExampleAnalysisMod::Process()
   ObjArray<Muon> *SoftMuons = new ObjArray<Muon>;
   for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
     const Muon *mu = fMuons->At(i);
-    if(!MuonTools::PassSoftMuonCut(mu, fVertices)) continue;
+    if(!MuonTools::PassSoftMuonCut(mu, fVertices, 0.1)) continue;
     
     bool isCleanMuon = kFALSE;
     for (UInt_t j=0; j<CleanMuons->GetEntries(); j++) {
@@ -315,12 +316,18 @@ void HwwExampleAnalysisMod::Process()
     cerr << "Error: finalstate lepton type not supported\n";
   }
                         
+  double deltaPhiLLJet = 0.0;
+  if(sortedJetsAll.size() > 0 && sortedJetsAll[0]->Pt() > 15.0 && (finalstateType == 10 || finalstateType == 11)){
+    deltaPhiLLJet = MathUtils::DeltaPhi(dilepton->Phi(), sortedJetsAll[0]->Phi())*180.0/TMath::Pi();
+  }
+
   //*********************************************************************************************
   //Define Cuts
   //*********************************************************************************************
-  const int nCuts = 10;
+  const int nCuts = 15;
   bool passCut[nCuts] = {false, false, false, false, false,
-                         false, false, false, false, false};
+                         false, false, false, false, false,
+			 false, false, false, false, false};
   
   Bool_t PreselPtCut = kTRUE;
   if(CleanLeptons->At(0)->Pt() <= 20) PreselPtCut = kFALSE;
@@ -328,13 +335,13 @@ void HwwExampleAnalysisMod::Process()
   //if(CleanLeptons->At(1)->ObjType() == kElectron && CleanLeptons->At(1)->Pt() <= 15) PreselPtCut = kFALSE;
   if(PreselPtCut == kTRUE)              passCut[0] = true;
   
-  if(zDiffMax < 100000.0)               passCut[1] = true;
+  if(stdMet->Pt()    > 20.0)            passCut[1] = true;
   
-  if(stdMet->Pt()    > 20.0)            passCut[2] = true;
+  if(dilepton->Mass() > 12.0)           passCut[2] = true;
   
-  if(dilepton->Mass() > 12.0)           passCut[3] = true;
-  
-  if(sortedJets.size() < 1)             passCut[6] = true;
+  if(sortedJets.size() < 1)             passCut[5] = true;
+
+  if(deltaPhiLLJet < 165.0)		passCut[6] = true;
 
   if(SoftMuons->GetEntries() == 0)      passCut[7] = true;
 
@@ -343,13 +350,23 @@ void HwwExampleAnalysisMod::Process()
   if(maxBtag < 2.1)                     passCut[9] = true;
 
   if (finalstateType == 10 || finalstateType == 11){ // mumu/ee
-    if(fabs(dilepton->Mass()-91.1876)   > 15.0)   passCut[4] = true;
-    if(METdeltaPhilEt > 35) passCut[5] = true;
+    if(fabs(dilepton->Mass()-91.1876)   > 15.0)   passCut[3] = true;
+    if(METdeltaPhilEt > 40) passCut[4] = true;
   }
   else if(finalstateType == 12) { // emu
-    passCut[4] = true;
-    if(METdeltaPhilEt > 20) passCut[5] = true;
+    passCut[3] = true;
+    if(METdeltaPhilEt > 20) passCut[4] = true;
   }
+
+  if(CleanLeptons->At(0)->Pt() > 30)    passCut[10] = true;
+
+  if(CleanLeptons->At(1)->Pt() > 25)    passCut[11] = true;
+
+  if(dilepton->Mass() < 50)             passCut[12] = true;
+
+  if(mtHiggs > 90.0 && mtHiggs < 160.0) passCut[13] = true;
+
+  if(deltaPhiLeptons < 60.0)            passCut[14] = true;
 
   //*********************************************************************************************
   //Make Selection Histograms. Number of events passing each level of cut
@@ -408,9 +425,7 @@ void HwwExampleAnalysisMod::Process()
   //N Jet Veto  
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    if (k != 6) {
-      pass = (pass && passCut[k]);      
-    }
+    if (k != 5) pass = (pass && passCut[k]);      
   }
   if (pass) {
     fNCentralJets_NMinusOne->Fill(sortedJets.size(),NNLOWeight->GetVal());
@@ -419,9 +434,7 @@ void HwwExampleAnalysisMod::Process()
   // Final Met Cut
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    if (k != 5) {
-      pass = (pass && passCut[k]);      
-    }
+    if (k != 4) pass = (pass && passCut[k]);      
   }
   if (pass) {
     fMetPtHist_NMinusOne->Fill(stdMet->Pt(),NNLOWeight->GetVal());  
@@ -430,8 +443,7 @@ void HwwExampleAnalysisMod::Process()
   // dilepton mass
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    if (k != 3 && k !=  4)
-      pass = (pass && passCut[k]);    
+    if (k != 2 && k !=  3) pass = (pass && passCut[k]);    
   }
   if (pass) {
     fDileptonMass_NMinusOne->Fill(dilepton->Mass(),NNLOWeight->GetVal());
@@ -452,8 +464,7 @@ void HwwExampleAnalysisMod::Process()
   // NSoftMuons
   pass = true;
   for (int k=0;k<nCuts;k++) {
-    if (k != 7)
-      pass = (pass && passCut[k]);    
+    if (k != 7) pass = (pass && passCut[k]);    
   }
   if (pass) {
     fNSoftMuonsHist_NMinusOne->Fill(SoftMuons->GetEntries(),NNLOWeight->GetVal());

@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.20 2011/09/29 09:26:18 ceballos Exp $
+// $Id: MuonTools.cc,v 1.21 2011/10/02 10:05:42 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -496,7 +496,8 @@ Bool_t MuonTools::PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t 
 }
 
 //--------------------------------------------------------------------------------------------------
-Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices, const Double_t fDZCut) 
+Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices, const Double_t fDZCut,
+                                  const Bool_t applyIso) 
 {
   if(mu->Pt() <= 3.0) return kFALSE;
 
@@ -510,10 +511,12 @@ Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices, con
 
   if(!PassDZCut(mu, vertices, fDZCut, 0)) return kFALSE;
 
-  Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
-                      1.0 * mu->IsoR03EmEt() + 
-                      1.0 * mu->IsoR03HadEt();
-  if (totalIso < (mu->Pt()*0.10) && mu->Pt() > 20.0) return kFALSE;
+  if(applyIso == kTRUE){
+    Double_t totalIso = 1.0 * mu->IsoR03SumPt() + 
+                        1.0 * mu->IsoR03EmEt() + 
+                        1.0 * mu->IsoR03HadEt();
+    if (totalIso < (mu->Pt()*0.10) && mu->Pt() > 20.0) return kFALSE;
+  }
 
   return kTRUE;
 }
