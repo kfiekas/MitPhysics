@@ -68,6 +68,8 @@ void EGEnergyCorrector::Initialize(Bool_t ismc, TString phfixstring, TString phf
 void EGEnergyCorrector::CorrectEnergyWithError(Photon *p) {
   
   std::pair<double,double> correction = CorrectedEnergyWithError(p);
+  //printf("photon: e = %5f, eerr = %5f, sceta = %5f\n",p->E(),p->EnergyErr(),p->SCluster()->Eta());
+  //printf("gbr   : e = %5f, eerr = %5f\n",correction.first,correction.second);
   FourVectorM mom = p->Mom();
   double scale = correction.first/mom.E();
   p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
@@ -88,9 +90,6 @@ std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithError(const Photo
   fPhFix.setup(p->E(),s->Eta(),s->Phi(),p->R9()); 
   
   double scpse = s->PreshowerEnergy();
-  if (!fIsMC) {
-    scpse *= (1.0-0.072);
-  }
   
   Bool_t isbarrel = (s->AbsEta()<1.5);
 

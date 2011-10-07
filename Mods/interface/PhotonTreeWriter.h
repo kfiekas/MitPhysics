@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.1 2011/08/03 17:15:43 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.2 2011/09/08 15:51:23 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -67,6 +67,7 @@ namespace mithep
       Char_t phcat;
       Float_t eerr;
       Float_t eerrsmeared;
+      Float_t esmearing;
       
       //quantities from seed basic cluster
       Float_t sigiphiphi;

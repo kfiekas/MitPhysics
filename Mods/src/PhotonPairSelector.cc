@@ -252,8 +252,8 @@ void PhotonPairSelector::Process()
           double etacor1 = fEtaCorrections->GetBinContent(fEtaCorrections->GetXaxis()->FindFixBin(fixPh1st[iPair]->SCluster()->Eta()));
           double etacor2 = fEtaCorrections->GetBinContent(fEtaCorrections->GetXaxis()->FindFixBin(fixPh2nd[iPair]->SCluster()->Eta()));
           
-          scaleFac1 *= (etacor1*etacor1);
-          scaleFac2 *= (etacor2*etacor2);
+          if (fixPh1st[iPair]->SCluster()->AbsEta()>1.5) scaleFac1 *= (etacor1*etacor1);
+          if (fixPh2nd[iPair]->SCluster()->AbsEta()>1.5) scaleFac2 *= (etacor2*etacor2);
         }
         
 	// checking the run Rangees ...

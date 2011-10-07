@@ -538,6 +538,7 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         phcat = PhotonTools::CiCBaseLineCat(p);
         eerr = p->EnergyErr();
         eerrsmeared = p->EnergyErrSmeared();
+        esmearing = p->EnergySmearing();
       }
       else {
         hasphoton = kFALSE;
@@ -553,6 +554,7 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         phcat = -99;    
         eerr = -99.;
         eerrsmeared = -99.;
+        esmearing = 0.;
       }
        
       
