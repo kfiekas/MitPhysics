@@ -31,8 +31,8 @@ namespace mithep {
 
       enum MVAType {
         kBaseline = 0,      // SigmaIEtaIEta, DEtaIn, DPhiIn, FBrem, SigmaIPhiIPhi, NBrem, OneOverEMinusOneOverP
-        kV1,                // kBaseline + EOverP, HoverE, ESeedClusterOverPout, ESeedClusterOverPIn
-        kV2                 // kV2 + d0 , IP3d, IP3dSig
+        kNoIPInfo,          // kBaseline + EOverP, ESeedClusterOverPout, ESeedClusterOverPIn
+        kWithIPInfo         // kV2 + d0 , IP3d, IP3dSig
       };
 
 

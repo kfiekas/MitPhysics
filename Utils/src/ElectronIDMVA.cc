@@ -62,11 +62,10 @@ void ElectronIDMVA::Initialize( TString methodName,
       fTMVAReader[i]->AddVariable( "OneOverEMinusOneOverP", &fMVAVar_EleOneOverEMinusOneOverP );      
     }
     
-    if (type == kV1) {
+    if (type == kNoIPInfo) {
       fTMVAReader[i]->AddVariable( "SigmaIEtaIEta",         &fMVAVar_EleSigmaIEtaIEta         );
       fTMVAReader[i]->AddVariable( "DEtaIn",                &fMVAVar_EleDEtaIn                );
       fTMVAReader[i]->AddVariable( "DPhiIn",                &fMVAVar_EleDPhiIn                );
-      fTMVAReader[i]->AddVariable( "HoverE",                &fMVAVar_EleHoverE                );
       fTMVAReader[i]->AddVariable( "FBrem",                 &fMVAVar_EleFBrem                 );
       fTMVAReader[i]->AddVariable( "EOverP",                &fMVAVar_EleEOverP                );
       fTMVAReader[i]->AddVariable( "ESeedClusterOverPout",  &fMVAVar_EleESeedClusterOverPout  );
@@ -75,11 +74,10 @@ void ElectronIDMVA::Initialize( TString methodName,
       fTMVAReader[i]->AddVariable( "OneOverEMinusOneOverP", &fMVAVar_EleOneOverEMinusOneOverP );      
       fTMVAReader[i]->AddVariable( "ESeedClusterOverPIn",   &fMVAVar_EleESeedClusterOverPIn   );
     }
-    if (type == kV2) {
+    if (type == kWithIPInfo) {
       fTMVAReader[i]->AddVariable( "SigmaIEtaIEta",         &fMVAVar_EleSigmaIEtaIEta         );
       fTMVAReader[i]->AddVariable( "DEtaIn",                &fMVAVar_EleDEtaIn                );
       fTMVAReader[i]->AddVariable( "DPhiIn",                &fMVAVar_EleDPhiIn                );
-      fTMVAReader[i]->AddVariable( "HoverE",                &fMVAVar_EleHoverE                );
       fTMVAReader[i]->AddVariable( "D0",                    &fMVAVar_EleD0                    );
       fTMVAReader[i]->AddVariable( "FBrem",                 &fMVAVar_EleFBrem                 );
       fTMVAReader[i]->AddVariable( "EOverP",                &fMVAVar_EleEOverP                );
@@ -207,7 +205,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex) {
   if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
   else fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
   fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
-  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->ESuperClusterOverP()*ele->BestTrk()->P())) - 1.0 / ele->BestTrk()->P(); 
+  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->SCluster()->Energy())) - 1.0 / ele->BestTrk()->P(); 
   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
   fMVAVar_EleIP3d = ele->Ip3dPV(); 
   fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
