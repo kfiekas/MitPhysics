@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.35 2011/07/22 14:36:29 sixie Exp $
+// $Id: MuonIDMod.h,v 1.36 2011/09/16 14:09:17 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -74,6 +74,7 @@ namespace mithep
         kLoose,             //"Loose"
         kWWMuIdV1,          //"WWMuIdV1"
         kWWMuIdV2,          //"WWMuIdV2"
+        kWWMuIdV3,          //"WWMuIdV3"
         kNoId,              //"NoId"
         kCustomId           //"Custom"
       };

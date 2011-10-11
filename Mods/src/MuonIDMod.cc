@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.55 2011/07/22 15:45:38 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.56 2011/09/16 14:09:18 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -22,7 +22,7 @@ ClassImp(mithep::MuonIDMod)
   fBeamSpotName(Names::gkBeamSpotBrn),
   fTrackName(Names::gkTrackBrn),
   fPFCandidatesName(Names::gkPFCandidatesBrn),
-  fMuonIDType("WWMuIdV1"),
+  fMuonIDType("WWMuIdV3"),
   fMuonIsoType("PFIso"),
   fMuonClassType("Global"),  
   fTrackIsolationCut(3.0),
@@ -212,7 +212,13 @@ void MuonIDMod::Process()
 		 mu->BestTrk()->NPixelHits() > 0 &&
 		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1;
         break;
-
+      case kWWMuIdV3:
+        idpass = mu->BestTrk() != 0 &&
+	         mu->BestTrk()->NHits() > 10 &&
+		 mu->BestTrk()->NPixelHits() > 0 &&
+		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1 &&
+		 mu->TrkKink() < 20.0;
+        break;
       case kNoId:
         idpass = kTRUE;
         break;
@@ -378,6 +384,8 @@ void MuonIDMod::SlaveBegin()
     fMuIDType = kWWMuIdV1;
   else if (fMuonIDType.CompareTo("WWMuIdV2") == 0) 
     fMuIDType = kWWMuIdV2;
+  else if (fMuonIDType.CompareTo("WWMuIdV3") == 0) 
+    fMuIDType = kWWMuIdV3;
   else if (fMuonIDType.CompareTo("NoId") == 0) 
     fMuIDType = kNoId;
   else if (fMuonIDType.CompareTo("Custom") == 0) {
