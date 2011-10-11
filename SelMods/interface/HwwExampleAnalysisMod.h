@@ -64,6 +64,7 @@ namespace mithep
       TH1D                    *fHWWToEESelection;
       TH1D                    *fHWWToMuMuSelection;
       TH1D                    *fHWWToEMuSelection;
+      TH1D                    *fHWWToMuESelection;
 
       TH1D                    *fLeptonEta;
       TH1D                    *fLeptonPtMax;

@@ -63,6 +63,7 @@ void HwwExampleAnalysisMod::SlaveBegin()
   AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
   AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
   AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
+  AddTH1(fHWWToMuESelection,"hHWWToMuESelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
 
   //***********************************************************************************************
   // Histograms after preselection
@@ -309,9 +310,10 @@ void HwwExampleAnalysisMod::Process()
     finalstateType = 10;
   } else if(CleanLeptons->At(0)->ObjType() == kElectron && CleanLeptons->At(1)->ObjType() == kElectron ){ // ee
     finalstateType = 11;
-  } else if((CleanLeptons->At(0)->ObjType() == kElectron && CleanLeptons->At(1)->ObjType() == kMuon) ||
-            (CleanLeptons->At(1)->ObjType() == kElectron && CleanLeptons->At(0)->ObjType() == kMuon)) {
+  } else if(CleanLeptons->At(0)->ObjType() == kElectron && CleanLeptons->At(1)->ObjType() == kMuon) {
     finalstateType = 12;
+  } else if(CleanLeptons->At(1)->ObjType() == kElectron && CleanLeptons->At(0)->ObjType() == kMuon) {
+    finalstateType = 13;
   } else {
     cerr << "Error: finalstate lepton type not supported\n";
   }
@@ -353,7 +355,7 @@ void HwwExampleAnalysisMod::Process()
     if(fabs(dilepton->Mass()-91.1876)   > 15.0)   passCut[3] = true;
     if(METdeltaPhilEt > 40) passCut[4] = true;
   }
-  else if(finalstateType == 12) { // emu
+  else { // mue/emu
     passCut[3] = true;
     if(METdeltaPhilEt > 20) passCut[4] = true;
   }
@@ -383,6 +385,8 @@ void HwwExampleAnalysisMod::Process()
     fHWWToEESelection->Fill(-1,NNLOWeight->GetVal());
   else if(finalstateType == 12 )
     fHWWToEMuSelection->Fill(-1,NNLOWeight->GetVal());
+  else if(finalstateType == 13 )
+    fHWWToMuESelection->Fill(-1,NNLOWeight->GetVal());
 
   for (int k=0;k<nCuts;k++) {
     bool pass = true;
@@ -401,6 +405,8 @@ void HwwExampleAnalysisMod::Process()
         fHWWToEESelection->Fill(k,NNLOWeight->GetVal());
       else if(finalstateType == 12)
         fHWWToEMuSelection->Fill(k,NNLOWeight->GetVal());
+      else if(finalstateType == 13)
+        fHWWToMuESelection->Fill(k,NNLOWeight->GetVal());
     }
   }
   
