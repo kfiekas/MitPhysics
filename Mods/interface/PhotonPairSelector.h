@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.10 2011/10/13 17:26:45 mingyang Exp $
+// $Id: PhotonPairSelector.h,v 1.11 2011/10/13 18:33:20 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -120,6 +120,8 @@ namespace mithep
     void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
     void                SetDoRegression(Bool_t b)         { fDoRegression = b; }
     void                SetEtaCorrections(const TH1D *h)  { fEtaCorrections = h; }
+    void                SetBdtCutBarrel(Float_t x)        { fbdtCutBarrel = x; }
+    void                SetBdtCutEndcap(Float_t x)        { fbdtCutEndcap = x; }
 
   protected:
     void                Process();
