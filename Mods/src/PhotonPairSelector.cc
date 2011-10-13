@@ -8,6 +8,7 @@
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/PhotonFix.h"
+#include "MitPhysics/Utils/interface/MVATools.h"
 #include "TDataMember.h"
 #include <TNtuple.h>
 #include <TRandom3.h>
@@ -96,7 +97,11 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fDoMCSmear         (true),
   fDoVtxSelection    (true),
   fApplyEleVeto      (true),
-  fInvertElectronVeto(kFALSE)    
+  fInvertElectronVeto(kFALSE),
+  //MVA
+  fVariableType      (2),
+  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Endcap_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
+  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Barrel_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml"))      
 {
   // Constructor.
 }
@@ -225,6 +230,7 @@ void PhotonPairSelector::Process()
 
     if (fDoRegression) {
       if (!egcor.IsInitialized()) {
+        //egcor.Initialize(!fIsData,"4_2",gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat"),"/scratch/bendavid/root/weights-Base/TMVARegressionebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressioneeph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceeeph_BDTG.weights.xml");
         egcor.Initialize(!fIsData,fPhFixString,fPhFixFile,fRegWeights);
       }
     
@@ -317,10 +323,26 @@ void PhotonPairSelector::Process()
     fixPh1st[iPair]->SetMom(newMom1st.X(), newMom1st.Y(), newMom1st.Z(), newMom1st.E());
     fixPh2nd[iPair]->SetMom(newMom2nd.X(), newMom2nd.Y(), newMom2nd.Z(), newMom2nd.E());
 
+    /* Float_t bdt1=-99;
+    Float_t bdt2=-99;
+
+    if(fixPh1st[iPair]->HasPV() && fixPh2nd[iPair]->HasPV()){
+      bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],fixPh1st[iPair]->PV(),fTracks,fPV,_tRho,fElectrons);
+      bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],fixPh2nd[iPair]->PV(),fTracks,fPV,_tRho,fElectrons);
+    }
+    else{
+      bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],fPV->At(0),fTracks,fPV,_tRho,fElectrons);
+      bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],fPV->At(0),fTracks,fPV,_tRho,fElectrons);
+    }
+ 
+    fixPh1st[iPair]->SetBDT(bdt1);
+    fixPh2nd[iPair]->SetBDT(bdt2); */
+
     // check if both photons pass the CiC selection
     // FIX-ME: Add other possibilities....
     bool pass1 = false;
     bool pass2 = false;
+ 
     switch( fPhSelType ){
     case kNoPhSelection:
       pass1 = ( fixPh1st[iPair]->Pt() > fLeadingPtMin  );
@@ -332,6 +354,11 @@ void PhotonPairSelector::Process()
       pass1 = PhotonTools::PassCiCSelection(fixPh1st[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, fLeadingPtMin, fApplyEleVeto);
       if(pass1) pass2 = PhotonTools::PassCiCSelection(fixPh2nd[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, fTrailingPtMin, fApplyEleVeto);
 
+      break;
+    case kMVAPhSelection://MVA
+      pass1 = fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fLeadingPtMin);
+      if(pass1) pass2 = fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fTrailingPtMin);
+      
       break;
     case kMITPhSelection:
       // FIX-ME: This is a place-holder.. MIT guys: Please work hard... ;)
@@ -422,6 +449,8 @@ void PhotonPairSelector::SlaveBegin()
   
   if      (fPhotonSelType.CompareTo("CiCSelection") == 0) 
     fPhSelType =       kCiCPhSelection;
+  else if (fPhotonSelType.CompareTo("MVASelection") == 0) //MVA
+    fPhSelType =       kMVAPhSelection;
   else if (fPhotonSelType.CompareTo("MITSelection") == 0) 
     fPhSelType =       kMITPhSelection;
   else 
@@ -440,7 +469,11 @@ void PhotonPairSelector::SlaveBegin()
   else {
     fPhFixFile = gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat");
   }
-  
+
+  printf("initialize pairselc\n");
+
+  fTool.InitializeMVA(fVariableType,fEndcapWeights,fBarrelWeights);
+
 }
 
 // ----------------------------------------------------------------------------------------

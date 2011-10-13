@@ -1,5 +1,6 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonPairSelector.h,v 1.8 2011/09/08 15:51:23 bendavid Exp $
+// M.Yang 2011/10/12
+// $Id: PhotonPairSelector.h,v 1.7 2011/08/03 17:15:43 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -25,6 +26,8 @@
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 
+#include "MitPhysics/Utils/interface/MVATools.h"
+
 class TNtuple;
 class TRandom3;
 class TH1D;
@@ -42,6 +45,7 @@ namespace mithep
     enum PhotonSelection {
       kNoPhSelection = 0,
       kCiCPhSelection,
+      kMVAPhSelection, //MVA
       kMITPhSelection
     };
     enum VertexSelection {
@@ -197,7 +201,7 @@ namespace mithep
     TString fPhFixString;
     TString fPhFixFile;
     TString fRegWeights; 
-    
+  
     const TH1D *fEtaCorrections;
     
     // --------------------------------
@@ -206,8 +210,14 @@ namespace mithep
     bool fDoMCSmear;
     bool fDoVtxSelection;
     bool fApplyEleVeto;
-    Bool_t              fInvertElectronVeto;    //=true then invert electron veto (for cic selection only atm)      
-
+    Bool_t              fInvertElectronVeto;    //=true then invert electron veto (for cic selection only atm)   
+   
+    //MVA
+    int                         fVariableType;
+    TString                     fEndcapWeights;
+    TString                     fBarrelWeights;
+    MVATools                    fTool;
+     
     ClassDef(PhotonPairSelector, 1) // Photon identification module
   };
 }
