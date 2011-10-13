@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.13 2011/09/25 10:08:11 sixie Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.14 2011/09/28 00:08:48 bendavid Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -21,7 +21,7 @@
 #include "MitPhysics/Utils/interface/GBRForest.h"
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronIDMVA.h"
-
+#include "MitPhysics/Utils/interface/MVATools.h"
 
 
 #endif
@@ -56,4 +56,5 @@
 #pragma link C++ class PhotonFix;
 #pragma link C++ class mithep::EGEnergyCorrector; 
 #pragma link C++ class mithep::ElectronIDMVA; 
+#pragma link C++ class mithep::MVATools; 
 #endif
