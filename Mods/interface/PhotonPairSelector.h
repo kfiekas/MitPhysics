@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.7 2011/08/03 17:15:43 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.10 2011/10/13 17:26:45 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -217,7 +217,9 @@ namespace mithep
     TString                     fEndcapWeights;
     TString                     fBarrelWeights;
     MVATools                    fTool;
-     
+    Float_t                     fbdtCutBarrel;
+    Float_t                     fbdtCutEndcap;
+      
     ClassDef(PhotonPairSelector, 1) // Photon identification module
   };
 }

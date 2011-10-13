@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.12 2011/08/03 17:15:44 bendavid Exp $
+// $Id: MVATools.cc,v 1.1 2011/10/13 17:28:29 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -116,7 +116,7 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
 
 //--------------------------------------------------------------------------------------------------
 
-Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,double MVAPtMin) {
+Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,double MVAPtMin, Float_t bdtCutBarrel, Float_t bdtCutEndcap) {
   
   // these values are taken from the H2GGlobe code... (actually from Marco/s mail)
   float cic4_allcuts_temp_sublead[] = { 
@@ -217,12 +217,12 @@ Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackC
     bdt = reader->EvaluateMVA( "BDT method" );
     
     if (isbarrel) {
-      if(bdt>0.0031324){
+      if(bdt>bdtCutBarrel){
 	PassMVA=kTRUE;	
       }
     }
     else {
-      if(bdt>0.0086){
+      if(bdt>bdtCutEndcap){
 	PassMVA=kTRUE;	
       }
     } 

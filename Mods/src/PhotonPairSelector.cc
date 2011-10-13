@@ -99,9 +99,11 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fApplyEleVeto      (true),
   fInvertElectronVeto(kFALSE),
   //MVA
-  fVariableType      (2),
+  fVariableType      (2), 
   fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Endcap_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
-  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Barrel_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml"))      
+  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Barrel_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
+  fbdtCutBarrel      (0.0031324),
+  fbdtCutEndcap      (0.0086)
 {
   // Constructor.
 }
@@ -356,8 +358,8 @@ void PhotonPairSelector::Process()
 
       break;
     case kMVAPhSelection://MVA
-      pass1 = fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fLeadingPtMin);
-      if(pass1) pass2 = fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fTrailingPtMin);
+      pass1 = fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fLeadingPtMin,fbdtCutBarrel,fbdtCutEndcap);
+      if(pass1) pass2 = fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fTrailingPtMin,fbdtCutBarrel,fbdtCutEndcap);
       
       break;
     case kMITPhSelection:

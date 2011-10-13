@@ -36,23 +36,23 @@ namespace mithep {
   class MVATools {
     public:
       MVATools();
-  
-   
-    //--------------------------
-    //MVA
-    //--------------------------
-    //void InitializeMVA(int VariableType, TString EndcapWeights,TString BarrelWeights);
-    //Bool_t PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol *els);
-    
-    void InitializeMVA(int VariableType, TString EndcapWeights,TString BarrelWeights);
-    Bool_t PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,double MVAPtMin);
-    Int_t PassElectronVetoInt(const Photon* p, const ElectronCol* els);
-    Float_t GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els);
-    
-    TMVA::Reader *fReaderEndcap;
-    TMVA::Reader *fReaderBarrel;    
-    
-    //MVA variables 0
+      
+      
+      //--------------------------
+      //MVA
+      //--------------------------
+      //void InitializeMVA(int VariableType, TString EndcapWeights,TString BarrelWeights);
+      //Bool_t PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol *els);
+      
+      void InitializeMVA(int VariableType, TString EndcapWeights,TString BarrelWeights);
+      Bool_t PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,double MVAPtMin, Float_t bdtCutBarrel, Float_t bdtCutEndcap);
+      Int_t PassElectronVetoInt(const Photon* p, const ElectronCol* els);
+      Float_t GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els);
+      
+      TMVA::Reader *fReaderEndcap;
+      TMVA::Reader *fReaderBarrel;    
+      
+      //MVA variables 0
     Float_t HoE;
     Float_t covIEtaIEta;
     Float_t tIso1;
