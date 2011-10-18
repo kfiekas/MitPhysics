@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.13 2011/09/08 15:51:24 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.14 2011/10/07 09:56:37 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -447,14 +447,22 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
   
   if(print) {
     std::cout<<" -------------------------- "<<std::endl;
+
+    std::cout<<" trackIso1  = "<<trackIso1<<std::endl;
+    std::cout<<" trackIso2  = "<<trackIso2<<std::endl;
+    std::cout<<" trackIso3  = "<<trackIso3<<std::endl;
+    std::cout<<" ecalIso3   = "<<ecalIso3<<std::endl;
+    std::cout<<" ecalIso4   = "<<ecalIso4<<std::endl;
+    std::cout<<" hcalIso4   = "<<hcalIso4<<std::endl;
+
     std::cout<<" photon Et  = "<<ph->Et()<<std::endl;
     std::cout<<"        Eta = "<<ph->SCluster()->Eta()<<std::endl;
-    std::cout<<"        HoE = "<<HoE<<std::endl;
-    std::cout<<"         R9 = "<<R9<<std::endl;
-    std::cout<<"         dR = "<<dRTrack<<std::endl;
-    std::cout<<"       iso1 = "<<tIso1<<std::endl; 
-    std::cout<<"       iso2 = "<<tIso2<<std::endl; 
-    std::cout<<"       iso3 = "<<tIso3<<std::endl; 
+    std::cout<<"        HoE = "<<HoE<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+4*4]<<")"<<std::endl;
+    std::cout<<"         R9 = "<<R9<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+5*4]<<")"<<std::endl;
+    std::cout<<"         dR = "<<dRTrack<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+6*4]<<")"<<std::endl;
+    std::cout<<"       iso1 = "<<tIso1<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+0*4]<<")"<<std::endl; 
+    std::cout<<"       iso2 = "<<tIso2<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+1*4]<<")"<<std::endl; 
+    std::cout<<"       iso3 = "<<tIso3<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+2*4]<<")"<<std::endl; 
   }
 
   if(kin) {
@@ -499,6 +507,8 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
 	       && R9                          > cic4_allcuts_temp_sublead[_tCat-1+5*4]
 	       && ( dRTrack > cic4_allcuts_temp_sublead[_tCat-1+6*4] || !applyEleVeto ) ) )   passCuts = -1.;
   
+  if(print) std::cout<<"   ---> "<<passCuts<<std::endl;
+
   if(kin) {    
     kin[20] = passCuts;
     kin[21] = (float) _tCat;

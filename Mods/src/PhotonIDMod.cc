@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.24 2011/07/27 15:17:37 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.25 2011/08/03 17:15:43 bendavid Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -7,6 +7,8 @@
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
+
+#include <TSystem.h>
 
 using namespace mithep;
 
@@ -67,6 +69,14 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fMCParticles       (0),
   fPileUp            (0),
 
+  // MVA ID Stuff
+  fbdtCutBarrel      (-0.01),
+  fbdtCutEndcap      (-0.02),
+  fVariableType      (2), 
+  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Endcap_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
+  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Barrel_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
+
+
   fPVFromBranch      (true),
   fGoodElectronsFromBranch (kTRUE),
   fIsData(false)
@@ -91,7 +101,7 @@ void PhotonIDMod::Process()
     LoadEventObject(fPileUpDenName,      fPileUpDen);
     LoadEventObject(fConversionName,     fConversions);
     LoadEventObject(fElectronName,       fElectrons);
-    LoadEventObject(fGoodElectronName,       fGoodElectrons);
+    LoadEventObject(fGoodElectronName,   fGoodElectrons);
     LoadEventObject(fPVName,             fPV);
     
     if(fBeamspots->GetEntries() > 0)
@@ -99,6 +109,7 @@ void PhotonIDMod::Process()
 
     if(fPileUpDen->GetEntries() > 0)
       _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
+
     
     //get trigger object collection if trigger matching is enabled
     if (fApplyTriggerMatching) {
@@ -130,6 +141,14 @@ void PhotonIDMod::Process()
       continue; // go to next Photons
     }
     // ---------------------------------------------------------------------
+
+    // add MingMings MVA ID on single Photon level
+    if(fPhIdType == kMITMVAId ) {
+      if( fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _tRho, fElectrons, fPhotonPtMin ,fbdtCutBarrel,fbdtCutEndcap, fApplyElectronVeto) ) {
+	GoodPhotons->Add(fPhotons->At(i));
+      }
+      continue;
+    }  // go to next Photon
 
     if (ph->Pt() <= fPhotonPtMin) 
       continue;    // add good electron
@@ -224,20 +243,29 @@ void PhotonIDMod::Process()
 	  fEffAreaHcal = fEffAreaHcalEE;
 	  fEffAreaTrack = fEffAreaTrackEE;
 	}	  
-	  
+
+	//std::cout<<"-----------------------------------"<<std::endl;
+	//std::cout<<" MIT phooton Et = "<<ph->Et()<<std::endl;		  
 	Double_t EcalCorrISO =   ph->EcalRecHitIsoDr04();
+	//std::cout<<" ecaliso4    = "<<EcalCorrISO<<std::endl;
 	if(_tRho > -0.5 ) EcalCorrISO -= _tRho * fEffAreaEcal;
+	//std::cout<<" ecaliso4Corr = "<<EcalCorrISO<<"  ("<<2.0+0.006*ph->Pt()<<")"<<std::endl;
 	if ( EcalCorrISO > (2.0+0.006*ph->Pt()) ) isocut = kFALSE; 
-	if ( isocut ) {
+	if ( isocut || true ) {
 	  Double_t HcalCorrISO = ph->HcalTowerSumEtDr04(); 
+	  //std::cout<<" hcaliso4     = "<<HcalCorrISO<<std::endl;
 	  if(_tRho > -0.5 ) HcalCorrISO -= _tRho * fEffAreaHcal;
+	  //std::cout<<" hcaliso4Corr = "<<HcalCorrISO<<"  ("<<2.0+0.0025*ph->Pt()<<")"<<std::endl;
 	  if ( HcalCorrISO > (2.0+0.0025*ph->Pt()) ) isocut = kFALSE;
 	}
-	if ( isocut ) {
+	if ( isocut || true ) {
 	  Double_t TrackCorrISO = IsolationTools::TrackIsolationNoPV(ph, bsp, 0.4, 0.04, 0.0, 0.015, 0.1, TrackQuality::highPurity, fTracks);
+	  //std::cout<<" TrackIso       = "<<TrackCorrISO<<std::endl;	  
 	  if(_tRho > -0.5 )
 	    TrackCorrISO -= _tRho * fEffAreaTrack;
+	  //std::cout<<" TrackIsoCorr   = "<<TrackCorrISO<<"  ("<<1.5 + 0.001*ph->Pt()<<")"<<std::endl;	  
 	  if ( TrackCorrISO > (1.5 + 0.001*ph->Pt()) ) isocut = kFALSE;
+	  //std::cout<<"      passes ? "<<isocut<<std::endl;
 	}
 	break;
       }
@@ -303,6 +331,11 @@ void PhotonIDMod::SlaveBegin()
   else if (fPhotonIDType.CompareTo("BaseLineCiC") == 0) {
     fPhIdType = kBaseLineCiC;
     fPhotonIsoType = "NoIso";
+  }
+  else if (fPhotonIDType.CompareTo("MITMVAId") == 0) {
+    fPhIdType = kMITMVAId;
+    fPhotonIsoType = "NoIso";
+    fTool.InitializeMVA(fVariableType,fEndcapWeights,fBarrelWeights);
   } else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified photon identification %s is not defined.",

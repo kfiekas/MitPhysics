@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.21 2011/07/27 15:17:36 bendavid Exp $
+// $Id: PhotonIDMod.h,v 1.22 2011/08/03 17:15:43 bendavid Exp $
 //
 // PhotonIDMod
 //
@@ -23,6 +23,8 @@
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/PileupInfoCol.h"
 #include "MitAna/DataTree/interface/MCParticleCol.h"
+
+#include "MitPhysics/Utils/interface/MVATools.h"
 
 namespace mithep 
 {
@@ -86,12 +88,17 @@ namespace mithep
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
     void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
 
+    void                SetBdtCutBarrel(double a) {fbdtCutBarrel = a; }
+    void                SetBdtCutEndcap(double a) {fbdtCutEndcap = a; }
+
+
       enum EPhIdType {
         kIdUndef = 0,       //not defined
         kTight,             //"Tight"
         kLoose,             //"Loose"
         kLooseEM,           //"LooseEM"
 	kBaseLineCiC,        //"2011" Hgg BaseLine CiC
+	kMITMVAId,          // MingMing MVA ID
         kCustomId           //"Custom"
       };
 
@@ -154,6 +161,14 @@ namespace mithep
       const VertexCol*    fPV;                   //!
       const MCParticleCol          *fMCParticles;//!
       const PileupInfoCol          *fPileUp;     //!  
+
+      Double_t fbdtCutBarrel;
+      Double_t fbdtCutEndcap;
+      int                         fVariableType;
+      TString                     fEndcapWeights;
+      TString                     fBarrelWeights;
+      MVATools                    fTool;
+
       bool                fPVFromBranch;
       Bool_t              fGoodElectronsFromBranch;
       Bool_t              fIsData;

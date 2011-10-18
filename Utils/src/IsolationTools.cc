@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.20 2011/06/27 12:32:21 fabstoec Exp $
+// $Id: IsolationTools.cc,v 1.21 2011/09/16 14:09:34 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -496,8 +496,16 @@ Double_t IsolationTools::TrackIsolationNoPV(const mithep::Particle* p, const Bas
   
   // loop over all tracks
   Double_t tPt = 0.;
+  //std::cout<<"      *** TrackIso:"<<std::endl;
   for(UInt_t i=0; i<tracks->GetEntries(); ++i) {
     const Track* t = tracks->At(i);
+    if(t->Pt()>1. && false) {
+      std::cout<<"     "<<i<<"    pt = "<<t->Pt()<<"  ("<<ptLow<<")"<<std::endl;
+      std::cout<<"                d0 = "<<fabs(t->D0Corrected( *bsp) )<<"  ("<<maxD0<<")"<<std::endl;
+      //std::cout<<"              conv ? "<<PhotonTools::MatchedConversion(t,conversions,bsp)<<std::endl;
+      std::cout<<"                dR = "<<MathUtils::DeltaR(t->Mom(),p->Mom())<<"  ("<<extRadius<<","<<intRadius<<")"<<std::endl;
+      std::cout<<"             dEta  = "<<fabs(t->Eta()-p->Eta())<<"   ("<<etaStrip<<")"<<std::endl;
+    }
     if ( t->Pt() < ptLow ) continue;
     if ( ! t->Quality().Quality(quality) ) continue;
     // only check for beamspot if available, otherwise ignore cut
@@ -523,7 +531,9 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
 					   const mithep::Collection<mithep::Track> *tracks,
 					   unsigned int* worstVtxIndex,
 					   const mithep::Collection<mithep::Vertex> *vtxs,
-					   bool print) {
+					   const mithep::Collection<mithep::Electron> *eles,
+					   bool print,
+					   double* ptmax, double* dRmax) {
   
   UInt_t numVtx = 1;
   const BaseVertex* iVtx = theVtx;
@@ -535,6 +545,18 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
       return 0.;
   }
   
+  // NEW for Electron T&P: need to remove the electron Gsf Track (applied if eles != NULL)
+  const Track* theGsfTrack = NULL;
+  if ( eles ) {
+    // find the electron that matches the Photon SC
+    for(UInt_t j=0; j<eles->GetEntries(); ++j) {
+      if ( eles->At(j)->SCluster() == p->SCluster() ) {
+	if( eles->At(j)->HasTrackerTrk() )
+	  theGsfTrack = eles->At(j)->TrackerTrk();
+	break;
+      }
+    }
+  }
 
   if(print) {
     std::cout<<" Testing photon with"<<std::endl;
@@ -549,6 +571,9 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
   if(worstVtxIndex)
     *worstVtxIndex=0;
 
+  double t_ptmax = 0.;
+  double t_dRmax = 0.;
+
   for(UInt_t i=0; i<numVtx; ++i) {
 
     if(i>0) iVtx = vtxs->At(i);
@@ -561,8 +586,16 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
       std::cout<<"       with Z = "<<iVtx->Z()<<std::endl;
     }
 
+    Photon* phTemp = new Photon(*p);
+
+    // RESET CALO_POS!
+    phTemp->SetCaloPosXYZ(p->SCluster()->Point().X(),p->SCluster()->Point().Y(),p->SCluster()->Point().Z());
+
     // compute the ph momentum with respect to this Vtx
-    FourVectorM phMom = p->MomVtx(iVtx->Position());
+    //FourVectorM phMom = p->MomVtx(iVtx->Position());
+    FourVectorM phMom = phTemp->MomVtx(iVtx->Position());
+
+    delete phTemp;
 
     if(print) {
       std::cout<<"         photon has changed to:"<<std::endl;
@@ -574,6 +607,7 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
     iIso = 0.;
     for(UInt_t j=0; j<tracks->GetEntries(); ++j) {
       const Track* t = tracks->At(j);
+      if( theGsfTrack && t == theGsfTrack ) continue;
 
       //Double_t dR   = MathUtils::DeltaR(t->Mom(),p->Mom());
       //Double_t dEta = TMath::Abs(t->Eta()-p->Eta());
@@ -581,7 +615,7 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
       Double_t dR   = MathUtils::DeltaR(t->Mom(),phMom);
       Double_t dEta = TMath::Abs(t->Eta()-phMom.Eta());
 
-      if(print) {
+      if(print && t->Pt()>1. && false) {
 	  std::cout<<"              passing track #"<<j<<std::endl;
 	  std::cout<<"                          pt = "<<t->Pt()<<std::endl;
 	  std::cout<<"                         eta = "<<t->Eta()<<std::endl;
@@ -604,7 +638,12 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
       if(dR < extRadius && dR > intRadius && dEta > etaStrip) {
 	iIso += t->Pt();
 
-	if(print) {
+	if(t->Pt() > t_ptmax) {
+	  t_ptmax=t->Pt();
+	  t_dRmax=dR;
+	}
+
+	if(print && t->Pt()>1.) {
 	  std::cout<<"              passing track #"<<j<<std::endl;
 	  std::cout<<"                          pt = "<<t->Pt()<<std::endl;
 	  std::cout<<"                         eta = "<<t->Eta()<<std::endl;
@@ -626,6 +665,9 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
 	*worstVtxIndex=i;
     }
   }
+
+  if(ptmax) (*ptmax)=t_ptmax;
+  if(dRmax) (*dRmax)=t_dRmax;
 
   if(print) {
     if(worstVtxIndex)

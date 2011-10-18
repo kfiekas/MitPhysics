@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.18 2011/06/27 12:32:21 fabstoec Exp $
+// $Id: IsolationTools.h,v 1.19 2011/09/16 14:09:34 ceballos Exp $
 //
 // IsolationTools
 //
@@ -85,7 +85,10 @@ namespace mithep
 					const mithep::Collection<mithep::Track> *tracks,
 					unsigned int* worstVtxIdx = NULL,
 					const mithep::Collection<mithep::Vertex> *vtxs = NULL,
-					bool print=false);
+					const mithep::Collection<mithep::Electron> *eles = NULL,
+					bool print=false,
+					double* ptmax=NULL, 
+					double* dRmax=NULL);
 
 
     ClassDef(IsolationTools, 0) // Isolation tools

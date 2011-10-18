@@ -358,8 +358,8 @@ void PhotonPairSelector::Process()
 
       break;
     case kMVAPhSelection://MVA
-      pass1 = fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fLeadingPtMin,fbdtCutBarrel,fbdtCutEndcap);
-      if(pass1) pass2 = fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fTrailingPtMin,fbdtCutBarrel,fbdtCutEndcap);
+      pass1 = fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fLeadingPtMin,fbdtCutBarrel,fbdtCutEndcap, fApplyEleVeto);
+      if(pass1) pass2 = fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fTrailingPtMin,fbdtCutBarrel,fbdtCutEndcap, fApplyEleVeto);
       
       break;
     case kMITPhSelection:

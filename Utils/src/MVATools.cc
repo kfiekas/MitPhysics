@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.1 2011/10/13 17:28:29 mingyang Exp $
+// $Id: MVATools.cc,v 1.2 2011/10/13 18:34:50 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -116,7 +116,7 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
 
 //--------------------------------------------------------------------------------------------------
 
-Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,double MVAPtMin, Float_t bdtCutBarrel, Float_t bdtCutEndcap) {
+Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,double MVAPtMin, Float_t bdtCutBarrel, Float_t bdtCutEndcap, Bool_t applyEleVeto) {
   
   // these values are taken from the H2GGlobe code... (actually from Marco/s mail)
   float cic4_allcuts_temp_sublead[] = { 
@@ -143,13 +143,13 @@ Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackC
   
   wVtxInd = 0;
   
-  trackIso1 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol);//Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
+  trackIso1 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, NULL, NULL, (!applyEleVeto ? els : NULL) );//Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
   
   // track iso only
-  trackIso3 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol);
+  trackIso3 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, NULL, NULL, (!applyEleVeto ? els : NULL));
   
   // track iso worst vtx
-  trackIso2 = IsolationTools::CiCTrackIsolation(p,vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, &wVtxInd,vtxCol);
+  trackIso2 = IsolationTools::CiCTrackIsolation(p,vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, &wVtxInd,vtxCol, (!applyEleVeto ? els : NULL));
   
   combIso1 = ecalIso3+hcalIso4+trackIso1 - 0.17*_tRho;
   combIso2 = ecalIso4+hcalIso4+trackIso2 - 0.52*_tRho;
@@ -200,8 +200,8 @@ Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackC
   if ( !isbarrel ) _tCat = 3;
   if ( R9 < 0.94 ) _tCat++;
   
-  //Electron Veto
-  if(dRTrack > cic4_allcuts_temp_sublead[_tCat-1+6*4]){
+  //Electron Veto (made electron Veto optinal (Fabian) )
+  if(dRTrack > cic4_allcuts_temp_sublead[_tCat-1+6*4] || !applyEleVeto ){
     PassElecVeto=kTRUE;
   }
   
