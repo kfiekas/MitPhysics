@@ -31,6 +31,8 @@ HwwExampleAnalysisMod::HwwExampleAnalysisMod(const char *name, const char *title
   fMet(0),
   fVertices(0),
   fPFCandidates(0),
+  fPFJetName0("AKt5PFJets"),
+  fPFJet0(0),
   fNEventsSelected(0)
 {
   // Constructor.
@@ -53,6 +55,7 @@ void HwwExampleAnalysisMod::SlaveBegin()
   // Load Branches
   ReqBranch(fMuonBranchName,   fMuons);
   ReqBranch(fPFCandidatesName, fPFCandidates);
+  ReqBranch(fPFJetName0,       fPFJet0);
 
   //Create your histograms here
 
@@ -128,6 +131,7 @@ void HwwExampleAnalysisMod::Process()
   // Process entries of the tree. For this module, we just load the branches and  
   LoadBranch(fMuonBranchName);
   LoadBranch(fPFCandidatesName);
+  LoadBranch(fPFJetName0);
 
   //Obtain all the good objects from the event cleaning module
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
@@ -170,7 +174,7 @@ void HwwExampleAnalysisMod::Process()
   ObjArray<Muon> *SoftMuons = new ObjArray<Muon>;
   for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
     const Muon *mu = fMuons->At(i);
-    if(!MuonTools::PassSoftMuonCut(mu, fVertices, 0.1)) continue;
+    if(!MuonTools::PassSoftMuonCut(mu, fVertices, 0.2)) continue;
     
     bool isCleanMuon = kFALSE;
     for (UInt_t j=0; j<CleanMuons->GetEntries(); j++) {
@@ -296,11 +300,29 @@ void HwwExampleAnalysisMod::Process()
     }
   }
   double maxBtag = -99999.;
-  double imaxBtag = -1;
   for(UInt_t i=0; i<sortedJetsLowPt.size(); i++){
     if(sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc() > maxBtag){
-      maxBtag  = sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc();
-      imaxBtag = i;
+      double dZAverageJetPt = 0.0;
+      double sumJetPt = 0.0;
+      double jetPt = 0.0;
+      for(UInt_t iPF=0; iPF<fPFJet0->GetEntries(); iPF++){						  	      
+        const PFJet *jet = fPFJet0->At(iPF);									
+        if(MathUtils::DeltaR(jet->Mom(),sortedJetsLowPt[i]->Mom()) < 0.01){
+          jetPt = jet->Pt();
+          for (UInt_t npf=0; npf<jet->NPFCands();npf++) {
+            const PFCandidate *pf = jet->PFCand(npf);
+            if(pf->BestTrk()) {
+              dZAverageJetPt = dZAverageJetPt + pf->Pt()*pf->Pt()*pf->BestTrk()->DzCorrected(*fVertices->At(0));
+              sumJetPt = sumJetPt + pf->Pt()*pf->Pt();
+            }
+          }
+          if(sumJetPt > 0) dZAverageJetPt = TMath::Abs(dZAverageJetPt)/sumJetPt;
+          break;
+        }
+      } // loop over PF jets
+      if(dZAverageJetPt < 2.0 && jetPt > 10){
+        maxBtag  = sortedJetsLowPt[i]->TrackCountingHighEffBJetTagsDisc();
+      }
     }
   }
 

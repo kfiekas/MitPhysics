@@ -19,6 +19,7 @@
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/CaloJetCol.h"
+#include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/SuperClusterCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
@@ -46,6 +47,7 @@ namespace mithep
       void  SetMetName(const char *name)                   { fMetName                      = name; }
       void  SetCleanJetsName(const char *name)             { fCleanJetsName                = name; }
       void  SetCleanJetsNoPtCutName(const char *name)      { fCleanJetsNoPtCutName         = name; }
+      void   SetPFJetBranchName(const char *name)          { fPFJetName0                   = name; }
 
     protected:
       TString                  fMuonBranchName;	         //name of muon branch
@@ -58,6 +60,8 @@ namespace mithep
       const MetCol            *fMet;                     //!Missing Et branch
       const VertexCol         *fVertices;                //!Vertex branch
       const PFCandidateCol    *fPFCandidates;            //!PFCandidates branch
+      TString                  fPFJetName0;              //!PFJet branch name
+      const PFJetCol          *fPFJet0;                  //!PFJet branch
       Int_t                    fNEventsSelected;         //selected events
 
       TH1D                    *fHWWSelection;
