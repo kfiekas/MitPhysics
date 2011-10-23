@@ -1,4 +1,4 @@
-// $Id: GenFakeableObjsMod.cc,v 1.14 2011/01/23 19:00:09 sixie Exp $
+// $Id: GenFakeableObjsMod.cc,v 1.15 2011/02/17 13:44:54 bendavid Exp $
 
 #include "MitPhysics/FakeMods/interface/GenFakeableObjsMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -193,7 +193,8 @@ void GenFakeableObjsMod::Process()
     Bool_t isElectronOverlap = kFALSE;
 
     for (UInt_t j=0; j<tmpDuplicateRemovedElectrons.size(); ++j) {
-      Double_t deltaR = MathUtils::DeltaR(tmpDuplicateRemovedElectrons[j]->Mom(), e->Mom());
+      // why does someone calculate it if it is not used?
+      //Double_t deltaR = MathUtils::DeltaR(tmpDuplicateRemovedElectrons[j]->Mom(), e->Mom());
       if (e->SCluster() == tmpDuplicateRemovedElectrons[j]->SCluster() ||
           e->GsfTrk() == tmpDuplicateRemovedElectrons[j]->GsfTrk()) {
         isElectronOverlap = kTRUE;

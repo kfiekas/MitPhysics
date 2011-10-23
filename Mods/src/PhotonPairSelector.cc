@@ -383,7 +383,7 @@ void PhotonPairSelector::Process()
   
   
   // ---------------------------------------------------------------
-  // ... we're almost done, stau focused...
+  // ... we're almost done, stay focused...
   // loop over all passing pairs and find the one with the highest sum Et
   const Vertex* _theVtx  = NULL;
   Photon*        phHard  = NULL;
@@ -408,8 +408,6 @@ void PhotonPairSelector::Process()
   
   // ---------------------------------------------------------------
   // we have the Photons (*PARTY*)... compute some useful qunatities
-
-  
 
   if(phHard && phSoft) {
     GoodPhotons->AddOwned(phHard);
