@@ -62,11 +62,11 @@ void HwwExampleAnalysisMod::SlaveBegin()
   //*************************************************************************************************
   // Selection Histograms
   //*************************************************************************************************
-  AddTH1(fHWWSelection,"hHWWSelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
-  AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
-  AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
-  AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
-  AddTH1(fHWWToMuESelection,"hHWWToMuESelection", ";Cut Number;Number of Events", 16, -1.5, 14.5);
+  AddTH1(fHWWSelection,"hHWWSelection", ";Cut Number;Number of Events",             17, -1.5, 15.5);
+  AddTH1(fHWWToEESelection,"hHWWToEESelection", ";Cut Number;Number of Events",     17, -1.5, 15.5);
+  AddTH1(fHWWToMuMuSelection,"hHWWToMuMuSelection", ";Cut Number;Number of Events", 17, -1.5, 15.5);
+  AddTH1(fHWWToEMuSelection,"hHWWToEMuSelection", ";Cut Number;Number of Events",   17, -1.5, 15.5);
+  AddTH1(fHWWToMuESelection,"hHWWToMuESelection", ";Cut Number;Number of Events",   17, -1.5, 15.5);
 
   //***********************************************************************************************
   // Histograms after preselection
@@ -348,10 +348,11 @@ void HwwExampleAnalysisMod::Process()
   //*********************************************************************************************
   //Define Cuts
   //*********************************************************************************************
-  const int nCuts = 15;
+  const int nCuts = 16;
   bool passCut[nCuts] = {false, false, false, false, false,
                          false, false, false, false, false,
-			 false, false, false, false, false};
+			 false, false, false, false, false,
+			 false};
   
   Bool_t PreselPtCut = kTRUE;
   if(CleanLeptons->At(0)->Pt() <= 20) PreselPtCut = kFALSE;
@@ -375,7 +376,7 @@ void HwwExampleAnalysisMod::Process()
 
   if (finalstateType == 10 || finalstateType == 11){ // mumu/ee
     if(fabs(dilepton->Mass()-91.1876)   > 15.0)   passCut[3] = true;
-    if(METdeltaPhilEt > 40) passCut[4] = true;
+    if(METdeltaPhilEt > 37.0 + fVertices->GetEntries()/2.0) passCut[4] = true;
   }
   else { // mue/emu
     passCut[3] = true;
@@ -391,6 +392,8 @@ void HwwExampleAnalysisMod::Process()
   if(mtHiggs > 90.0 && mtHiggs < 160.0) passCut[13] = true;
 
   if(deltaPhiLeptons < 60.0)            passCut[14] = true;
+
+  if(dilepton->Pt() > 45.0)             passCut[15] = true;
 
   //*********************************************************************************************
   //Make Selection Histograms. Number of events passing each level of cut
