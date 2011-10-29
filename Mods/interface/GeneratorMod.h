@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.40 2011/07/01 22:06:29 phedex Exp $
+// $Id: GeneratorMod.h,v 1.41 2011/07/04 20:36:21 sixie Exp $
 //
 // GeneratorMod
 //
@@ -47,6 +47,7 @@ namespace mithep
       void                 SetIsData(Bool_t b)	               { fIsData           = b; }	 
       void                 SetApplyISRFilter(Bool_t b)	       { fApplyISRFilter   = b; }	 
       void                 SetApplyVVFilter(Bool_t b)	       { fApplyVVFilter    = b; }	 
+      void                 SetApplyVGFilter(Bool_t b)	       { fApplyVGFilter    = b; }	 
       void                 SetAllowWWEvents(Bool_t b)	       { fAllowWWEvents    = b; }	 
       void                 SetAllowWZEvents(Bool_t b)	       { fAllowWZEvents    = b; }	 
       void                 SetAllowZZEvents(Bool_t b)	       { fAllowZZEvents    = b; }	       
@@ -104,6 +105,7 @@ namespace mithep
       Double_t             fMassMaxCut;	        //mass max for given PdgId particle
       Bool_t               fApplyISRFilter;     //=true then apply ISR filter (def=0)
       Bool_t               fApplyVVFilter;      //=true then apply VV filters (def=0)
+      Bool_t               fApplyVGFilter;      //=true then apply VG filters (def=0)
       Bool_t               fAllowWWEvents;            //=true then allow WW events  (def=0)
       Bool_t               fAllowWZEvents;            //=true then allow WZ events  (def=0)
       Bool_t               fAllowZZEvents;            //=true then allow ZZ events  (def=0)

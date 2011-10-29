@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.66 2011/07/04 20:36:22 sixie Exp $
+// $Id: GeneratorMod.cc,v 1.67 2011/07/06 21:11:33 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -42,6 +42,7 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fMassMaxCut(FLT_MAX),
   fApplyISRFilter(kFALSE),
   fApplyVVFilter(kFALSE),
+  fApplyVGFilter(kFALSE),
   fAllowWWEvents(kTRUE),
   fAllowWZEvents(kFALSE),
   fAllowZZEvents(kFALSE),
@@ -1111,6 +1112,27 @@ void GeneratorMod::Process()
   if (fApplyVVFilter && !passVVFilter) {
     SkipEvent();
     return;
+  }
+
+  if(fApplyVGFilter == kTRUE){
+    Bool_t isHighMass = kFALSE;
+    Bool_t isLowMass  = kFALSE;
+    if(GenLeptons->GetEntries() < 2) {SkipEvent(); return;}
+    for(unsigned int i=0; i<GenLeptons->GetEntries(); i++){
+      const MCParticle *geni = GenLeptons->At(i);
+      for(unsigned int j=i+1; j<GenLeptons->GetEntries(); j++){
+  	const MCParticle *genj = GenLeptons->At(j);
+        if(geni->AbsPdgId() == genj->AbsPdgId() && geni->PdgId() != genj->PdgId()){
+  	  CompositeParticle dilepton;
+  	  dilepton.AddDaughter(geni);
+  	  dilepton.AddDaughter(genj);
+  	  if(dilepton.Mass() >  12) {isHighMass = kTRUE;}
+  	  if(dilepton.Mass() <= 12) {isLowMass  = kTRUE;}
+        } // same-flavor, opposite-charge
+      } // loop j
+    } // loop i
+    if(isHighMass == kTRUE &&
+       isLowMass  == kFALSE) {SkipEvent(); return;}
   }
 
   // fill histograms if requested
