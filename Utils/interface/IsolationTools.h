@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.19 2011/09/16 14:09:34 ceballos Exp $
+// $Id: IsolationTools.h,v 1.20 2011/10/18 11:27:19 fabstoec Exp $
 //
 // IsolationTools
 //
@@ -43,18 +43,18 @@ namespace mithep
       static Double_t PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands, const Vertex *vertex, 
                       	   	      Double_t  delta_z = 0.1, Double_t ptMin = 1.0,
 			   	      Double_t extRadius = 0.4, Double_t intRadiusGamma = 0.07, Double_t intRadius = 0.0);
-      static Double_t PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands, const Vertex *vertex, 
-				      const MuonCol *goodMuons, const ElectronCol *goodElectrons,
-				      Double_t  delta_z = 0.1, Double_t ptMin = 1.0, Double_t extRadius = 0.4,
-				      Double_t intRadius = 0.07, int isoType = 0, Double_t beta = 1.0);
+      static Double_t PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands,
+                                      const MuonCol *goodMuons, const ElectronCol *goodElectrons, 
+                                      const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
+				      Double_t extRadius, Double_t intRadiusGamma, Double_t intRadius);
       static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                       	     		  const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
 			     		  Double_t extRadius, Double_t intRadius);
-      static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, const Vertex *vertex, 
-                                          const MuonCol *goodMuons, const ElectronCol *goodElectrons, 
-                                          Double_t  delta_z = 0.1 , Double_t ptMin = 1.0,Double_t extRadius = 0.4,			     		  
-                                          Double_t intRadius = 0.0, int isoType = 0, Double_t beta = 1.0);
-      static Double_t BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
+      static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
+                      	     		  const MuonCol *goodMuons, const ElectronCol *goodElectrons,
+					  const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
+			     		  Double_t extRadius, Double_t intRadius);
+       static Double_t BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
                             Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			    Double_t intRadius);
       static Double_t BetaE(const TrackCol *tracks, const Electron *p, const Vertex *vertex, 

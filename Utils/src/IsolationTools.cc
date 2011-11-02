@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.21 2011/09/16 14:09:34 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.22 2011/10/18 11:27:19 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -119,7 +119,7 @@ Double_t IsolationTools::CaloTowerEmIsolation(const ThreeVector *p, Double_t ext
 }
 
 //--------------------------------------------------------------------------------------------------
-Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandidate> *PFCands, 
+Double_t IsolationTools::PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands, 
                                       	 const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
 				     	 Double_t extRadius, Double_t intRadiusGamma, Double_t intRadius)
 {
@@ -163,10 +163,10 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 }
 
 //--------------------------------------------------------------------------------------------------
-Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandidate> *PFCands, const Vertex *vertex, 
-					 const MuonCol *goodMuons, const ElectronCol *goodElectrons,
-					 Double_t  delta_z, Double_t ptMin, Double_t extRadius,
-					 Double_t intRadius, int isoType, Double_t beta)
+Double_t IsolationTools::PFMuonIsolation(const Muon *p, const PFCandidateCol *PFCands,
+                                      	 const MuonCol *goodMuons, const ElectronCol *goodElectrons, 
+                                      	 const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
+				      	 Double_t extRadius, Double_t intRadiusGamma, Double_t intRadius)
 {
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
   //annulus around the particle seed track.  
@@ -177,44 +177,33 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
   Double_t ptSum =0.;  
   for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
     const PFCandidate *pf = PFCands->At(i);
-    
-    Bool_t isGoodType = kFALSE;
-    // all particles
-    if     (isoType == 0)                       		   isGoodType = kTRUE;
-    // charged particles only
-    else if(isoType == 1 && pf->BestTrk())                         isGoodType = kTRUE;
-    // charged particles and gammas only
-    else if(isoType == 2 && 
-           (pf->BestTrk() || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
-     // all particles, rejecting good leptons
-    else if(isoType == 3)                       		   isGoodType = kTRUE;
 
-    if(isGoodType == kFALSE) continue;
-
-    // pt cut applied to neutrals
-    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
-
+    // exclude muon
     if(pf->TrackerTrk() && p->TrackerTrk() &&
        pf->TrackerTrk() == p->TrackerTrk()) continue;
 
-    Double_t deltaZ = 0.0;
-    if(pf->BestTrk()) {
-      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
-    }
+    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    
+    // pt cut applied to neutrals
+    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
     // ignore the pf candidate if it is too far away in Z
-    if (deltaZ >= delta_z) 
-      continue;
-           
-    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
-
+    Double_t deltaZ = 0.0;
+    if(pf->HasTrk()) {
+      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+    }
+    if (deltaZ >= delta_z) continue;
+      
     // inner cone veto for gammas
-    if (pf->PFType() == PFCandidate::eGamma && dr < intRadius) continue;
+    if (pf->PFType() == PFCandidate::eGamma && dr < intRadiusGamma) continue;
+    
+    // inner cone veto for tracks
+    if (dr < intRadius) continue;
 
     // add the pf pt if it is inside the extRadius and outside the intRadius
     if (dr < extRadius ) {
       Bool_t isLepton = kFALSE;
-      if(goodMuons && isoType == 3){
+      if(goodMuons){
         for (UInt_t nl=0; nl<goodMuons->GetEntries();nl++) {
 	  const Muon *m = goodMuons->At(nl);
           if(pf->TrackerTrk() && m->TrackerTrk() &&
@@ -224,7 +213,7 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 	  }
 	}
       }
-      if(goodElectrons && isLepton == kFALSE && isoType == 3){
+      if(goodElectrons && isLepton == kFALSE){
         for (UInt_t nl=0; nl<goodElectrons->GetEntries();nl++) {
 	  const Electron *e = goodElectrons->At(nl);
           if(pf->TrackerTrk() && e->TrackerTrk() &&
@@ -239,11 +228,9 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const Collection<PFCandi
 	  }
 	}
       }
-      if(isLepton == kFALSE){
-        if(pf->BestTrk()) ptSum += pf->Pt();
-        else              ptSum += pf->Pt()*beta;
-      }
-    }
+      if (isLepton == kTRUE) continue;
+      ptSum += pf->Pt();            
+    }  
   }
   return ptSum;
 }
@@ -304,12 +291,11 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
 
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
-                                      	     const Vertex *vertex, const MuonCol *goodMuons, 
-					     const ElectronCol *goodElectrons, 
-                                             Double_t delta_z, Double_t ptMin,
-				     	     Double_t extRadius, Double_t intRadius, int isoType,
-					     Double_t beta)
+                      	     		     const MuonCol *goodMuons, const ElectronCol *goodElectrons,
+					     const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
+			     		     Double_t extRadius, Double_t intRadius)
 {
+
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
   //annulus around the particle seed track.  
 
@@ -320,19 +306,6 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
   for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
     const PFCandidate *pf = PFCands->At(i);
     
-    Bool_t isGoodType = kFALSE;
-    // all particles
-    if     (isoType == 0)                       		   isGoodType = kTRUE;
-    // charged particles only
-    else if(isoType == 1 && pf->BestTrk())                         isGoodType = kTRUE;
-    // charged particles and gammas only
-    else if(isoType == 2 && 
-           (pf->BestTrk() || pf->PFType() == PFCandidate::eGamma)) isGoodType = kTRUE;
-    // all particles, rejecting good leptons
-    else if(isoType == 3)                       		   isGoodType = kTRUE;
-
-    if(isGoodType == kFALSE) continue;
-
     // pt cut applied to neutrals
     if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
@@ -355,8 +328,16 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     // add the pf pt if it is inside the extRadius and outside the intRadius
     if ( dr < extRadius && 
 	 dr >= intRadius ) {
+
+      //EtaStrip Veto for Gamma 
+      if (pf->PFType() == PFCandidate::eGamma && fabs(p->Eta() - pf->Eta()) < 0.025) continue;
+
+      //InnerCone (One Tower = dR < 0.07) Veto for non-gamma neutrals
+      if (!pf->HasTrk() && pf->PFType() == PFCandidate::eNeutralHadron
+          && MathUtils::DeltaR(p->Mom(), pf->Mom()) < 0.07 ) continue; 
+
       Bool_t isLepton = kFALSE;
-      if(goodMuons && isoType == 3){
+      if(goodMuons){
         for (UInt_t nl=0; nl<goodMuons->GetEntries();nl++) {
 	  const Muon *m = goodMuons->At(nl);
           if(pf->TrackerTrk() && m->TrackerTrk() &&
@@ -366,7 +347,7 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
 	  }
 	}
       }
-      if(goodElectrons && isLepton == kFALSE && isoType == 3){
+      if(goodElectrons && isLepton == kFALSE){
         for (UInt_t nl=0; nl<goodElectrons->GetEntries();nl++) {
 	  const Electron *e = goodElectrons->At(nl);
           if(pf->TrackerTrk() && e->TrackerTrk() &&
@@ -383,18 +364,7 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
       }
 
       if (isLepton == kTRUE) continue;
-
-      //EtaStrip Veto for Gamma 
-      if (pf->PFType() == PFCandidate::eGamma && fabs(p->Eta() - pf->Eta()) < 0.025) continue;
-
-      //InnerCone (One Tower = dR < 0.07) Veto for non-gamma neutrals
-      if (!pf->HasTrk() && pf->PFType() == PFCandidate::eNeutralHadron
-          && MathUtils::DeltaR(p->Mom(), pf->Mom()) < 0.07 ) continue; 
-
-
-      if(pf->BestTrk()) ptSum += pf->Pt();
-      else              ptSum += pf->Pt()*beta;
-      
+      ptSum += pf->Pt();            
 
     }
   }
