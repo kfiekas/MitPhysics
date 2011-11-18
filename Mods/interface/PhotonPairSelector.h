@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.11 2011/10/13 18:33:20 mingyang Exp $
+// $Id: PhotonPairSelector.h,v 1.12 2011/10/13 18:57:02 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -27,6 +27,7 @@
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 
 #include "MitPhysics/Utils/interface/MVATools.h"
+#include "MitPhysics/Utils/interface/VertexTools.h"
 
 class TNtuple;
 class TRandom3;
@@ -51,7 +52,8 @@ namespace mithep
     enum VertexSelection {
       kStdVtxSelection = 0,
       kCiCVtxSelection,
-      kMITVtxSelection
+      kMITVtxSelection,
+      kCiCMVAVtxSelection
     };
 
     // setting all the input Names
@@ -88,27 +90,43 @@ namespace mithep
     
     // methods to set the MC smearing/energy correction values
     void                AddEnCorrPerRun( UInt_t sRun, UInt_t eRun,
-					 Double_t corr_EB_hR9,
-					 Double_t corr_EB_lR9,
-					 Double_t corr_EE_hR9,
-					 Double_t corr_EE_lR9) {
+					 Double_t corr_EBlowEta_hR9,
+					 Double_t corr_EBlowEta_lR9,
+                                         Double_t corr_EBhighEta_hR9,
+                                         Double_t corr_EBhighEta_lR9,                                         
+					 Double_t corr_EElowEta_hR9,
+					 Double_t corr_EElowEta_lR9,
+                                         Double_t corr_EEhighEta_hR9,
+                                         Double_t corr_EEhighEta_lR9) {
 
-      fDataEnCorr_EB_hR9.push_back(corr_EB_hR9);
-      fDataEnCorr_EB_lR9.push_back(corr_EB_lR9);
-      fDataEnCorr_EE_hR9.push_back(corr_EE_hR9);
-      fDataEnCorr_EE_lR9.push_back(corr_EE_lR9);      
+      fDataEnCorr_EBlowEta_hR9.push_back(corr_EBlowEta_hR9);
+      fDataEnCorr_EBlowEta_lR9.push_back(corr_EBlowEta_lR9);
+      fDataEnCorr_EBhighEta_hR9.push_back(corr_EBhighEta_hR9);
+      fDataEnCorr_EBhighEta_lR9.push_back(corr_EBhighEta_lR9);      
+      fDataEnCorr_EElowEta_hR9.push_back(corr_EElowEta_hR9);
+      fDataEnCorr_EElowEta_lR9.push_back(corr_EElowEta_lR9);      
+      fDataEnCorr_EEhighEta_hR9.push_back(corr_EEhighEta_hR9);
+      fDataEnCorr_EEhighEta_lR9.push_back(corr_EEhighEta_lR9);       
       fRunStart.push_back         (sRun);
       fRunEnd.push_back           (eRun);
     };
 
-    void                SetMCSmearFactors(Double_t _EB_hR9, 
-					  Double_t _EB_lR9, 
-					  Double_t _EE_hR9, 
-					  Double_t _EE_lR9) {
-      fMCSmear_EB_hR9 = _EB_hR9;
-      fMCSmear_EB_lR9 = _EB_lR9;
-      fMCSmear_EE_hR9 = _EE_hR9;
-      fMCSmear_EE_lR9 = _EE_lR9;
+    void                SetMCSmearFactors(Double_t _EBlowEta_hR9, 
+					  Double_t _EBlowEta_lR9,
+                                          Double_t _EBhighEta_hR9, 
+                                          Double_t _EBhighEta_lR9,
+					  Double_t _EElowEta_hR9, 
+					  Double_t _EElowEta_lR9,
+                                          Double_t _EEhighEta_hR9,
+                                          Double_t _EEhighEta_lR9) {
+      fMCSmear_EBlowEta_hR9 = _EBlowEta_hR9;
+      fMCSmear_EBlowEta_lR9 = _EBlowEta_lR9;
+      fMCSmear_EBhighEta_hR9 = _EBhighEta_hR9;
+      fMCSmear_EBhighEta_lR9 = _EBhighEta_lR9;      
+      fMCSmear_EElowEta_hR9 = _EElowEta_hR9;
+      fMCSmear_EElowEta_lR9 = _EElowEta_lR9;
+      fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
+      fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
     };
 
     void                ApplyEleVeto(bool a)            { fApplyEleVeto  = a; }
@@ -122,7 +140,12 @@ namespace mithep
     void                SetEtaCorrections(const TH1D *h)  { fEtaCorrections = h; }
     void                SetBdtCutBarrel(Float_t x)        { fbdtCutBarrel = x; }
     void                SetBdtCutEndcap(Float_t x)        { fbdtCutEndcap = x; }
-
+    
+    void                SetDoMCR9Scaling(Bool_t b)        { fDoMCR9Scaling = b; }
+    void                SetMCR9Scale(Double_t ebscale, Double_t eescale) { fMCR9ScaleEB = ebscale; fMCR9ScaleEE = eescale; }
+    void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
+    void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
+    
   protected:
     void                Process();
     void                SlaveBegin();
@@ -130,8 +153,8 @@ namespace mithep
     // private auxiliary methods...
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);
     Int_t               FindRunRangeIdx(UInt_t run);
-    Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::CiCBaseLineCats cat);
-    Double_t            GetMCSmearFac(PhotonTools::CiCBaseLineCats cat);
+    Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat);
+    Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat);
     Float_t             GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonTools::CiCBaseLineCats cat2);
 
     // Names for the input Collections
@@ -183,18 +206,26 @@ namespace mithep
     const PileupInfoCol          *fPileUp;    
 
     // Vectroes to hols smeraring/correction factors
-    std::vector<Double_t> fDataEnCorr_EB_hR9;
-    std::vector<Double_t> fDataEnCorr_EB_lR9;
-    std::vector<Double_t> fDataEnCorr_EE_hR9;
-    std::vector<Double_t> fDataEnCorr_EE_lR9;
+    std::vector<Double_t> fDataEnCorr_EBlowEta_hR9;
+    std::vector<Double_t> fDataEnCorr_EBlowEta_lR9;
+    std::vector<Double_t> fDataEnCorr_EBhighEta_hR9;
+    std::vector<Double_t> fDataEnCorr_EBhighEta_lR9;    
+    std::vector<Double_t> fDataEnCorr_EElowEta_hR9;
+    std::vector<Double_t> fDataEnCorr_EElowEta_lR9;
+    std::vector<Double_t> fDataEnCorr_EEhighEta_hR9;
+    std::vector<Double_t> fDataEnCorr_EEhighEta_lR9;
     
     std::vector<UInt_t> fRunStart;
     std::vector<UInt_t> fRunEnd;
     
-    Double_t fMCSmear_EB_hR9;
-    Double_t fMCSmear_EB_lR9;
-    Double_t fMCSmear_EE_hR9;
-    Double_t fMCSmear_EE_lR9;
+    Double_t fMCSmear_EBlowEta_hR9;
+    Double_t fMCSmear_EBlowEta_lR9;
+    Double_t fMCSmear_EBhighEta_hR9;
+    Double_t fMCSmear_EBhighEta_lR9;    
+    Double_t fMCSmear_EElowEta_hR9;
+    Double_t fMCSmear_EElowEta_lR9;
+    Double_t fMCSmear_EEhighEta_hR9;
+    Double_t fMCSmear_EEhighEta_lR9;    
 
     // pointer to RNG ionstance for smearing
     TRandom3* rng;
@@ -221,7 +252,17 @@ namespace mithep
     MVATools                    fTool;
     Float_t                     fbdtCutBarrel;
     Float_t                     fbdtCutEndcap;
-      
+
+    VertexTools                 fVtxTools;
+    
+    Bool_t fDoMCR9Scaling;
+    Double_t fMCR9ScaleEB;
+    Double_t fMCR9ScaleEE;
+
+    Bool_t fDoMCErrScaling;
+    Double_t fMCErrScaleEB;
+    Double_t fMCErrScaleEE;    
+    
     ClassDef(PhotonPairSelector, 1) // Photon identification module
   };
 }

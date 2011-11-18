@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.14 2011/10/07 09:56:37 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.15 2011/10/18 11:27:19 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -17,6 +17,27 @@ PhotonTools::PhotonTools()
   // Constructor.
 }
 
+//--------------------------------------------------------------------------------------------------
+PhotonTools::eScaleCats PhotonTools::EScaleCat(const Photon *p)
+{
+  if (p->SCluster()->AbsEta()<1.0) {
+    if (p->R9()>0.94) return kEBlowEtaGold;
+    else return kEBlowEtaBad;
+  }
+  else if (p->SCluster()->AbsEta()<1.5) {
+    if (p->R9()>0.94) return kEBhighEtaGold;
+    else return kEBhighEtaBad;    
+  }
+  else if (p->SCluster()->AbsEta()<2.0) {
+    if (p->R9()>0.94) return kEElowEtaGold;
+    else return kEElowEtaBad;    
+  }
+  else {
+    if (p->R9()>0.94) return kEEhighEtaGold;
+    else return kEEhighEtaBad;    
+  }  
+  
+}
 
 void PhotonTools::ScalePhoton(Photon* p, Double_t scale) {
   if( !p ) return;
@@ -55,6 +76,14 @@ void PhotonTools::SmearPhotonError(Photon* p, Double_t width) {
     p->SetEnergyErrSmeared(TMath::Sqrt(err*err + width*width*p->E()*p->E()));
   }
   
+}
+
+void PhotonTools::ScalePhotonR9(Photon* p, Double_t scale) {
+ p->SetR9(scale*p->R9()); 
+}
+
+void PhotonTools::ScalePhotonError(Photon* p, Double_t scale) {
+ p->SetEnergyErrSmeared(scale*p->EnergyErrSmeared()); 
 }
 
 //--------------------------------------------------------------------------------------------------

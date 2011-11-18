@@ -51,8 +51,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fPhotonPtMin       (20.0),
   fPhotonEtaMax      (2.5),
 
-  fLeadingPtMin      (40.0),
-  fTrailingPtMin     (30.0),
+  fLeadingPtMin      (1.0/3.0),
+  fTrailingPtMin     (1.0/4.0),
 
   fIsData            (false),
   fPhotonsFromBranch (true),  
@@ -73,18 +73,26 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fPileUp            (0),
 
   // ---------------------------------------
-  fDataEnCorr_EB_hR9 (0.),
-  fDataEnCorr_EB_lR9 (0.),
-  fDataEnCorr_EE_hR9 (0.),
-  fDataEnCorr_EE_lR9 (0.),
-
+  fDataEnCorr_EBlowEta_hR9 (0.),
+  fDataEnCorr_EBlowEta_lR9 (0.),
+  fDataEnCorr_EBhighEta_hR9 (0.),
+  fDataEnCorr_EBhighEta_lR9 (0.),  
+  fDataEnCorr_EElowEta_hR9 (0.),
+  fDataEnCorr_EElowEta_lR9 (0.),
+  fDataEnCorr_EEhighEta_hR9 (0.),
+  fDataEnCorr_EEhighEta_lR9 (0.),
+  
   fRunStart          (0),
   fRunEnd            (0),
 
-  fMCSmear_EB_hR9    (0.),
-  fMCSmear_EB_lR9    (0.),
-  fMCSmear_EE_hR9    (0.),
-  fMCSmear_EE_lR9    (0.),
+  fMCSmear_EBlowEta_hR9    (0.),
+  fMCSmear_EBlowEta_lR9    (0.),
+  fMCSmear_EBhighEta_hR9    (0.),
+  fMCSmear_EBhighEta_lR9    (0.),
+  fMCSmear_EElowEta_hR9    (0.),
+  fMCSmear_EElowEta_lR9    (0.),
+  fMCSmear_EEhighEta_hR9    (0.),
+  fMCSmear_EEhighEta_lR9    (0.),
 
   // ---------------------------------------
   rng                (new TRandom3()),  
@@ -103,7 +111,13 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Endcap_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
   fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Barrel_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
   fbdtCutBarrel      (0.0031324),
-  fbdtCutEndcap      (0.0086)
+  fbdtCutEndcap      (0.0086),
+  fDoMCR9Scaling     (kFALSE),
+  fMCR9ScaleEB       (1.0),
+  fMCR9ScaleEE       (1.0),
+  fDoMCErrScaling     (kFALSE),
+  fMCErrScaleEB       (1.0),
+  fMCErrScaleEE       (1.0)  
 {
   // Constructor.
 }
@@ -248,6 +262,28 @@ void PhotonPairSelector::Process()
       
     }
     
+    //scale regression sigmaE in MC if activated
+    if (fDoMCErrScaling && !fIsData) {
+      if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonError(fixPh1st[iPair],fMCErrScaleEB);
+      else PhotonTools::ScalePhotonError(fixPh1st[iPair],fMCErrScaleEE);
+      
+      if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonError(fixPh2nd[iPair],fMCErrScaleEB);
+      else PhotonTools::ScalePhotonError(fixPh2nd[iPair],fMCErrScaleEE);      
+    }    
+
+    //scale R9 in Monte Carlo if activated
+    if (fDoMCR9Scaling && !fIsData) {
+      if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonR9(fixPh1st[iPair],fMCR9ScaleEB);
+      else PhotonTools::ScalePhotonR9(fixPh1st[iPair],fMCR9ScaleEE);
+      
+      if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonR9(fixPh2nd[iPair],fMCR9ScaleEB);
+      else PhotonTools::ScalePhotonR9(fixPh2nd[iPair],fMCR9ScaleEE);      
+    }
+
+
+    PhotonTools::eScaleCats escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
+    PhotonTools::eScaleCats escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);
+    
     // now we dicide if we either scale (Data) or Smear (MC) the Photons
     if (fIsData) {
       if(fDoDataEneCorr) {
@@ -267,8 +303,8 @@ void PhotonPairSelector::Process()
 	// checking the run Rangees ...
 	Int_t runRange = FindRunRangeIdx(runNumber);
 	if(runRange > -1) { 
-	  scaleFac1 /= (1.0+GetDataEnCorr(runRange, cat1st[iPair]));
-	  scaleFac2 /= (1.0+GetDataEnCorr(runRange, cat2nd[iPair]));
+	  scaleFac1 /= (1.0+GetDataEnCorr(runRange, escalecat1));
+	  scaleFac2 /= (1.0+GetDataEnCorr(runRange, escalecat2));
 	}      
 	PhotonTools::ScalePhoton(fixPh1st[iPair], scaleFac1);
 	PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
@@ -277,8 +313,8 @@ void PhotonPairSelector::Process()
     
     if(fDoMCSmear) {      
       
-      double width1 = GetMCSmearFac(cat1st[iPair]);
-      double width2 = GetMCSmearFac(cat2nd[iPair]);
+      double width1 = GetMCSmearFac(escalecat1);
+      double width2 = GetMCSmearFac(escalecat2);
 
       if (!fIsData) {
         // get the seed to do deterministic smearing...
@@ -298,14 +334,21 @@ void PhotonPairSelector::Process()
     }
     
 
+    
+    //probability that selected vertex is the correct one
+    Double_t vtxProb = 1.0;
+
     // store the vertex for this pair
     switch( fVtxSelType ){
     case kStdVtxSelection:
       theVtx[iPair] = fPV->At(0);
       break;
     case kCiCVtxSelection:
-      theVtx[iPair] = VertexTools::findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV, fConversions);
+      theVtx[iPair] = fVtxTools.findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV, fConversions,kFALSE,vtxProb);
       break;
+    case kCiCMVAVtxSelection:
+      theVtx[iPair] = fVtxTools.findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV, fConversions,kTRUE,vtxProb);
+      break;      
     case kMITVtxSelection:
       // need PFCandidate Collection
       theVtx[iPair] = VertexTools::BestVtx(fPFCands, fPV, bsp, mithep::FourVector((fixPh1st[iPair]->Mom()+fixPh2nd[iPair]->Mom()))); 
@@ -318,13 +361,20 @@ void PhotonPairSelector::Process()
     //set PV ref in photons
     fixPh1st[iPair]->SetPV(theVtx[iPair]);
     fixPh2nd[iPair]->SetPV(theVtx[iPair]);
-
+    fixPh1st[iPair]->SetVtxProb(vtxProb);
+    fixPh2nd[iPair]->SetVtxProb(vtxProb);
+    
     // fix the kinematics for both events
     FourVectorM newMom1st = fixPh1st[iPair]->MomVtx(theVtx[iPair]->Position());
     FourVectorM newMom2nd = fixPh2nd[iPair]->MomVtx(theVtx[iPair]->Position());
     fixPh1st[iPair]->SetMom(newMom1st.X(), newMom1st.Y(), newMom1st.Z(), newMom1st.E());
     fixPh2nd[iPair]->SetMom(newMom2nd.X(), newMom2nd.Y(), newMom2nd.Z(), newMom2nd.E());
 
+    
+    double pairmass = (fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M();
+    double leadptcut = fLeadingPtMin*pairmass;
+    double trailptcut = fTrailingPtMin*pairmass;
+    
     /* Float_t bdt1=-99;
     Float_t bdt2=-99;
 
@@ -347,25 +397,25 @@ void PhotonPairSelector::Process()
  
     switch( fPhSelType ){
     case kNoPhSelection:
-      pass1 = ( fixPh1st[iPair]->Pt() > fLeadingPtMin  );
-      pass2 = ( fixPh2nd[iPair]->Pt() > fTrailingPtMin );
+      pass1 = ( fixPh1st[iPair]->Pt() > leadptcut  );
+      pass2 = ( fixPh2nd[iPair]->Pt() > trailptcut );
       break;
     case kCiCPhSelection:
 
 
-      pass1 = PhotonTools::PassCiCSelection(fixPh1st[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, fLeadingPtMin, fApplyEleVeto);
-      if(pass1) pass2 = PhotonTools::PassCiCSelection(fixPh2nd[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, fTrailingPtMin, fApplyEleVeto);
+      pass1 = PhotonTools::PassCiCSelection(fixPh1st[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, leadptcut, fApplyEleVeto);
+      if(pass1) pass2 = PhotonTools::PassCiCSelection(fixPh2nd[iPair], theVtx[iPair], fTracks, fElectrons, fPV, _tRho, trailptcut, fApplyEleVeto);
 
       break;
     case kMVAPhSelection://MVA
-      pass1 = fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fLeadingPtMin,fbdtCutBarrel,fbdtCutEndcap, fApplyEleVeto);
-      if(pass1) pass2 = fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,fTrailingPtMin,fbdtCutBarrel,fbdtCutEndcap, fApplyEleVeto);
+      pass1 = fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,leadptcut,fbdtCutBarrel,fbdtCutEndcap, fApplyEleVeto);
+      if(pass1) pass2 = fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,trailptcut,fbdtCutBarrel,fbdtCutEndcap, fApplyEleVeto);
       
       break;
     case kMITPhSelection:
       // FIX-ME: This is a place-holder.. MIT guys: Please work hard... ;)
-      pass1 = ( fixPh1st[iPair]->Pt() > fLeadingPtMin  );
-      pass2 = ( fixPh2nd[iPair]->Pt() > fTrailingPtMin );
+      pass1 = ( fixPh1st[iPair]->Pt() > leadptcut  );
+      pass2 = ( fixPh2nd[iPair]->Pt() > trailptcut );
       break;
     default:
       pass1 = true;
@@ -460,6 +510,8 @@ void PhotonPairSelector::SlaveBegin()
     fVtxSelType =       kCiCVtxSelection;
   else if (fVertexSelType.CompareTo("MITSelection") == 0) 
     fVtxSelType =       kMITVtxSelection;
+  else if (fVertexSelType.CompareTo("CiCMVASelection") == 0) 
+    fVtxSelType =       kCiCMVAVtxSelection;  
   else 
     fVtxSelType =       kStdVtxSelection;  
 
@@ -474,6 +526,8 @@ void PhotonPairSelector::SlaveBegin()
 
   fTool.InitializeMVA(fVariableType,fEndcapWeights,fBarrelWeights);
 
+  fVtxTools.InitP();
+  
 }
 
 // ----------------------------------------------------------------------------------------
@@ -511,32 +565,48 @@ Int_t PhotonPairSelector::FindRunRangeIdx(UInt_t run) {
 }
 
 
-Double_t PhotonPairSelector::GetDataEnCorr(Int_t runRange, PhotonTools::CiCBaseLineCats cat) {
+Double_t PhotonPairSelector::GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat) {
   switch( cat ) {
-  case PhotonTools::kCiCCat1:
-    return fDataEnCorr_EB_hR9[runRange];
-  case PhotonTools::kCiCCat2:
-    return fDataEnCorr_EB_lR9[runRange];
-  case PhotonTools::kCiCCat3:
-    return fDataEnCorr_EE_hR9[runRange];
-  case PhotonTools::kCiCCat4:
-    return fDataEnCorr_EE_lR9[runRange];
+  case PhotonTools::kEBhighEtaGold:
+    return fDataEnCorr_EBhighEta_hR9[runRange];
+  case PhotonTools::kEBhighEtaBad:
+    return fDataEnCorr_EBhighEta_lR9[runRange];
+  case PhotonTools::kEBlowEtaGold:
+    return fDataEnCorr_EBlowEta_hR9[runRange];
+  case PhotonTools::kEBlowEtaBad:
+    return fDataEnCorr_EBlowEta_lR9[runRange];    
+  case PhotonTools::kEEhighEtaGold:
+    return fDataEnCorr_EEhighEta_hR9[runRange];
+  case PhotonTools::kEEhighEtaBad:
+    return fDataEnCorr_EEhighEta_lR9[runRange];
+  case PhotonTools::kEElowEtaGold:
+    return fDataEnCorr_EElowEta_hR9[runRange];
+  case PhotonTools::kEElowEtaBad:
+    return fDataEnCorr_EElowEta_lR9[runRange];    
   default:
     return 1.;
   }
 }
 
 
-Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::CiCBaseLineCats cat) {
+Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat) {
   switch( cat ) {
-  case PhotonTools::kCiCCat1:
-    return fMCSmear_EB_hR9;
-  case PhotonTools::kCiCCat2:
-    return fMCSmear_EB_lR9;
-  case PhotonTools::kCiCCat3:
-    return fMCSmear_EE_hR9;
-  case PhotonTools::kCiCCat4:
-    return fMCSmear_EE_lR9;
+  case PhotonTools::kEBhighEtaGold:
+    return fMCSmear_EBhighEta_hR9;
+  case PhotonTools::kEBhighEtaBad:
+    return fMCSmear_EBhighEta_lR9;
+  case PhotonTools::kEBlowEtaGold:
+    return fMCSmear_EBlowEta_hR9;
+  case PhotonTools::kEBlowEtaBad:
+    return fMCSmear_EBlowEta_lR9;    
+  case PhotonTools::kEEhighEtaGold:
+    return fMCSmear_EEhighEta_hR9;
+  case PhotonTools::kEEhighEtaBad:
+    return fMCSmear_EEhighEta_lR9;
+  case PhotonTools::kEElowEtaGold:
+    return fMCSmear_EElowEta_hR9;
+  case PhotonTools::kEElowEtaBad:
+    return fMCSmear_EElowEta_lR9; 
   default:
     return 1.;
   }

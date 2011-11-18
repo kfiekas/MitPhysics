@@ -67,11 +67,27 @@ namespace mithep {
        kCiCCat3,
        kCiCCat4
      };     
+     
+     enum eScaleCats {
+       kEBlowEtaGold = 0,
+       kEBlowEtaBad,
+       kEBhighEtaGold,
+       kEBhighEtaBad,
+       kEElowEtaGold,
+       kEElowEtaBad,
+       kEEhighEtaGold,
+       kEEhighEtaBad
+     };
+     
+
+    static eScaleCats EScaleCat(const Photon *p);
 
     // Methods for scaling/smearing Photons
     static void ScalePhoton(Photon* p, Double_t scale);
     static void SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t iSeed);
     static void SmearPhotonError(Photon* p, Double_t width);
+    static void ScalePhotonR9(Photon *p, Double_t scale);
+    static void ScalePhotonError(Photon *p, Double_t scale);
 
     
     static Bool_t       PassConversionId(const Photon *p, const DecayParticle *c);

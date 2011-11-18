@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.2 2011/09/08 15:51:23 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.3 2011/10/07 09:56:36 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -88,7 +88,38 @@ namespace mithep
       Float_t e2x5bottom;
       Float_t e2x5left;
       Float_t e2x5right;      
+      Float_t xseed;
+      Float_t yseed;
+      Float_t zseed;
+      
       Float_t eseed;
+      Float_t etaseed;
+      Float_t phiseed;
+      Int_t ietaseed;
+      Int_t iphiseed;
+      Int_t ixseed;
+      Int_t iyseed;
+      Float_t etacryseed;
+      Float_t phicryseed;
+      Float_t xcryseed;
+      Float_t ycryseed;
+      Float_t thetaaxisseed;
+      Float_t phiaxisseed;
+      
+      //quantities from second basic cluster, if present
+      Float_t ebc2;
+      Float_t etabc2;
+      Float_t phibc2;
+      Int_t ietabc2;
+      Int_t iphibc2;
+      Int_t ixbc2;
+      Int_t iybc2;
+      Float_t etacrybc2;
+      Float_t phicrybc2;
+      Float_t xcrybc2;
+      Float_t ycrybc2;
+      Float_t thetaaxisbc2;
+      Float_t phiaxisbc2;      
       
       //energy correction quantities from PhotonFix
       Float_t ecor;
@@ -188,6 +219,9 @@ namespace mithep
       Float_t mass;
       Float_t masserr;
       Float_t masserrsmeared;
+      Float_t masserrwrongvtx;
+      Float_t masserrsmearedwrongvtx;
+      Float_t vtxprob;
       Float_t ptgg;
       Float_t costheta;
       Float_t massele;

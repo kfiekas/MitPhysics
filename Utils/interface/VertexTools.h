@@ -25,13 +25,19 @@
 
 #include "TMVA/Reader.h"
 
+namespace TMVA {//MVA
+  class Reader;
+}
+
 namespace mithep {
   typedef std::vector<double> VertexZarray; 
   typedef std::vector<const Track*> TrackArray;
 
   class VertexTools {
   public:
-   
+
+    VertexTools();
+    
     static double NewMass(const Photon* ph1, const Photon* ph2, const BaseVertex* vert);
 
     static VertexZarray ExtractZarray(const VertexCol* vcol, float zmin=-30, float zmax = 30,
@@ -55,31 +61,54 @@ namespace mithep {
     
     static VertexTools* instance(const char* str){
       if(meobject == NULL){
-	meobject = new VertexTools(str);
+	meobject = new VertexTools();
+        meobject->InitM(str);
       }
       return meobject;
     }        
 
     // ----------------------------------------------------------
     // Methods (added by Fabian) on the EPS BaseLine Analysis
-    static const Vertex* findVtxBasicRanking(const Photon*           ph1, 
+    const Vertex* findVtxBasicRanking(const Photon*           ph1, 
 					     const Photon*           ph2, 
 					     const BaseVertex*       bsp,
 					     const VertexCol*        vtcs,
-					     const DecayParticleCol* conv = NULL);
+					     const DecayParticleCol* conv, Bool_t useMva, Double_t &vtxProb);
     // ----------------------------------------------------------
+
+
+    void InitM(const char* str);
+    void InitP();
+    
+    Bool_t IsInitMvaM() const { return fIsInitMvaM; }
+    Bool_t IsInitMvaP() const { return fIsInitMvaP; }
+    
+    static Double_t DeltaMassVtx(Double_t x1, Double_t y1, Double_t z1,
+            Double_t x2, Double_t y2, Double_t z2,
+            Double_t dz);
+    
+  private:
+    
+    double VtxMvaP(float ptbal, float ptasym, float logsumpt2, float limPullToConv, float nConv) const;
+    
+    static VertexTools *meobject;
+    
+
+    TString relname;
+
+    TrackArray excluded;
+    
+    Bool_t fIsInitMvaM;
+    Bool_t fIsInitMvaP;
 
     Float_t tmvar1, tmvar2, tmvar3, tmvar4, tmvar5, tmvar6;
     TMVA::Reader* reader;
     
-  private:
-    static VertexTools *meobject;
     
-    VertexTools();
-    VertexTools(const char* str);
-    TString relname;
-
-    TrackArray excluded;
+    TMVA::Reader *readervtx;
+    TMVA::Reader *readerevt;
+    mutable Float_t fMvaPVars[5];
+    mutable Float_t fMvaPEvtVars[8];
     
     ClassDef(VertexTools, 0) // Muon tools
       };

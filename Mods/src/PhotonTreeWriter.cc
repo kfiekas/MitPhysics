@@ -232,13 +232,16 @@ void PhotonTreeWriter::Process()
       fDiphotonEvent->vtxX = phHard->PV()->X();
       fDiphotonEvent->vtxY = phHard->PV()->Y();
       fDiphotonEvent->vtxZ = phHard->PV()->Z();
+      fDiphotonEvent->vtxprob = phHard->VtxProb();
     }
     
-    Float_t _mass = -99.;
-    Float_t _masserr = -99.;
-    Float_t _masserrsmeared = -99.;
-    Float_t _ptgg = -99.;
-    Float_t _costheta = -99.;
+    Double_t _mass = -99.;
+    Double_t _masserr = -99.;
+    Double_t _masserrsmeared = -99.;
+    Double_t _masserrwrongvtx = -99.;
+    Double_t _masserrsmearedwrongvtx = -99.;
+    Double_t _ptgg = -99.;
+    Double_t _costheta = -99.;
     PhotonTools::DiphotonR9EtaPtCats _evtcat = PhotonTools::kOctCat0;
     if (phHard && phSoft) {
       _mass = (phHard->Mom()+phSoft->Mom()).M();
@@ -247,6 +250,16 @@ void PhotonTreeWriter::Process()
       _ptgg = (phHard->Mom()+phSoft->Mom()).Pt();
       _costheta = ThreeVector(phHard->Mom()).Unit().Dot(ThreeVector(phSoft->Mom()).Unit());
       _evtcat = PhotonTools::DiphotonR9EtaPtCat(phHard,phSoft);
+      
+      const Double_t dz = 5.8;
+      Double_t deltamvtx = _mass*VertexTools::DeltaMassVtx(phHard->CaloPos().X(), phHard->CaloPos().Y(), phHard->CaloPos().Z(),
+            phSoft->CaloPos().X(), phSoft->CaloPos().Y(), phSoft->CaloPos().Z(),
+            dz);
+            
+      _masserrwrongvtx = TMath::Sqrt(_masserr*_masserr + deltamvtx*deltamvtx);
+      _masserrsmearedwrongvtx = TMath::Sqrt(_masserrsmeared*_masserrsmeared + deltamvtx*deltamvtx);
+            
+      
     }
       
     
@@ -268,6 +281,8 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->mass = _mass;
     fDiphotonEvent->masserr = _masserr;
     fDiphotonEvent->masserrsmeared = _masserrsmeared;
+    fDiphotonEvent->masserrwrongvtx = _masserrwrongvtx;
+    fDiphotonEvent->masserrsmearedwrongvtx = _masserrsmearedwrongvtx;    
     fDiphotonEvent->ptgg = _ptgg;
     fDiphotonEvent->costheta =  _costheta;;
     fDiphotonEvent->massele = _massele;
@@ -518,6 +533,15 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         s = ele->SCluster();
       }
       const BasicCluster *b = s->Seed();
+      const BasicCluster *b2 = 0;
+      Double_t ebcmax = -99.;
+      for (UInt_t i=0; i<s->ClusterSize(); ++i) {
+        const BasicCluster *bc = s->Cluster(i);
+        if (bc->Energy() > ebcmax && bc !=b) {
+          b2 = bc;
+          ebcmax = bc->Energy();
+        }
+      }
   
 //       if (p && ele) {
 //         printf("p    : r9 = %5f, e33 = %5f, e55 = %5f, hovere = %5f, sigieie = %5f\n",p->R9(),p->E33(),p->E55(),p->HadOverEm(),p->CoviEtaiEta());
@@ -594,7 +618,54 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
       e2x5bottom = b->E2x5Bottom();
       e2x5left = b->E2x5Left();
       e2x5right = b->E2x5Right();
-      eseed = b->Energy();
+      xseed = b->Pos().X();
+      yseed = b->Pos().Y();
+      zseed = b->Pos().Z();
+      
+      eseed = b->Energy();      
+      etaseed = b->Eta();
+      phiseed = b->Phi();
+      ietaseed = b->IEta();
+      iphiseed = b->IPhi();
+      ixseed = b->IX();
+      iyseed = b->IY();
+      etacryseed = b->EtaCry();
+      phicryseed = b->PhiCry();
+      xcryseed = b->XCry();
+      ycryseed = b->YCry();
+      thetaaxisseed = b->ThetaAxis();
+      phiaxisseed = b->PhiAxis();
+      
+      if (b2) {
+        ebc2 = b2->Energy();      
+        etabc2 = b2->Eta();
+        phibc2 = b2->Phi();
+        ietabc2 = b2->IEta();
+        iphibc2 = b2->IPhi();
+        ixbc2 = b2->IX();
+        iybc2 = b2->IY();
+        etacrybc2 = b2->EtaCry();
+        phicrybc2 = b2->PhiCry();
+        xcrybc2 = b2->XCry();
+        ycrybc2 = b2->YCry();
+        thetaaxisbc2 = b2->ThetaAxis();
+        phiaxisbc2 = b2->PhiAxis();        
+      }
+      else {
+        ebc2 = 0.;
+        etabc2 = 0.;
+        phibc2 = 0.;
+        ietabc2 = 0.;
+        iphibc2 = 0.;
+        ixbc2 = 0.;
+        iybc2 = 0.;
+        etacrybc2 = 0.;
+        phicrybc2 = 0.;
+        xcrybc2 = 0.;
+        ycrybc2 = 0.;
+        thetaaxisbc2 = 0.;
+        phiaxisbc2 = 0.;
+      }
       
       //initialize photon energy corrections if needed
       /*if (!PhotonFix::initialised()) {

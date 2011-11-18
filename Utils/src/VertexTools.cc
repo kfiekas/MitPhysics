@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.5 2011/07/08 17:54:27 fabstoec Exp $
+// $Id: VertexTools.cc,v 1.6 2011/07/15 19:42:36 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -6,6 +6,7 @@
 #include "MitAna/DataTree/interface/StableData.h"
 #include <TFile.h>
 #include <TVector3.h>
+#include <TSystem.h>
 
 ClassImp(mithep::VertexTools)
 
@@ -14,9 +15,20 @@ using namespace mithep;
 VertexTools* VertexTools::meobject = NULL;
 
 //--------------------------------------------------------------------------------------------------
-VertexTools::VertexTools(const char* str)  
+VertexTools::VertexTools() :
+  fIsInitMvaM(kFALSE),
+  fIsInitMvaP(kFALSE),
+  reader(0),
+  readervtx(0),
+  readerevt(0)
 {
-  // Constructor.
+  
+}
+
+//--------------------------------------------------------------------------------------------------
+void VertexTools::InitM(const char* str)  
+{
+ 
   relname = str;
   reader = new TMVA::Reader( "!Color:!Silent" );    
   reader->AddVariable( "var1", &tmvar1 );
@@ -30,7 +42,38 @@ VertexTools::VertexTools(const char* str)
   //reader->BookMVA( "CFMlpANN method", "/home/maxi/cms/root/TMVAClassification_CFMlpANN.weights.xml" );
   reader->BookMVA( "MLP method", relname + TString("/src/MitPhysics/data/TMVAClassification_MLP.weights.xml").Data());
   reader->BookMVA( "MLPBFGS method",relname + TString("/src/MitPhysics/data/TMVAClassification_MLPBFGS.weights.xml" ).Data());
+  
+  fIsInitMvaM = kTRUE;
+  
 }
+
+//--------------------------------------------------------------------------------------------------
+void VertexTools::InitP()
+{
+
+  readervtx = new TMVA::Reader( "!Color:!Silent" );
+  readerevt = new TMVA::Reader( "!Color:!Silent" );
+  
+  readervtx->AddVariable( "ptbal", &fMvaPVars[0] );
+  readervtx->AddVariable( "ptasym", &fMvaPVars[1] );
+  readervtx->AddVariable( "logsumpt2", &fMvaPVars[2] );
+  readervtx->AddVariable( "limPullToConv", &fMvaPVars[3] );
+  readervtx->AddVariable( "nConv", &fMvaPVars[4] );
+  readervtx->BookMVA( "BDTCat", gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/TMVAClassification_BDTCat_conversions_tmva_407.weights.xml") );
+
+  readerevt->AddVariable( "diphoPt0", &fMvaPEvtVars[0] );
+  readerevt->AddVariable( "nVert", &fMvaPEvtVars[1] );
+  readerevt->AddVariable( "MVA0", &fMvaPEvtVars[2] );
+  readerevt->AddVariable( "MVA1", &fMvaPEvtVars[3] );
+  readerevt->AddVariable( "dZ1", &fMvaPEvtVars[4] );
+  readerevt->AddVariable( "MVA2", &fMvaPEvtVars[5] );
+  readerevt->AddVariable( "dZ2", &fMvaPEvtVars[6] );
+  readerevt->AddVariable( "nConv", &fMvaPEvtVars[7] );
+  readerevt->BookMVA( "BDTEvt", gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/TMVAClassification_evtBDTG_conversions_tmva_407.weights.xml") );  
+  
+  fIsInitMvaP = kTRUE;
+}
+
 
 double VertexTools::NewMass(const Photon* ph1, const Photon* ph2, const BaseVertex* vert)
 {
@@ -257,7 +300,9 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
 					       const Photon*           ph2, 
 					       const BaseVertex*       bsp,
 					       const VertexCol*        vtcs,
-					       const DecayParticleCol* conv ) {
+					       const DecayParticleCol* conv, Bool_t useMva, Double_t &vtxProb) {
+  
+  //if (useMva) printf("using mva vertex selection\n");
   
   // check if all input is valid
   if( !ph1 || !ph2 || !bsp || !vtcs ) return NULL;
@@ -265,6 +310,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
 
   // here we will store the idx of the best Vtx
   unsigned int bestIdx = 0;
+  UInt_t bestidxmva = 0;
   
   // using asd much as possible 'Globe' naming schemes...
   int*    ptbal_rank  = new int   [vtcs->GetEntries()];
@@ -272,6 +318,10 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   int*    total_rank  = new int   [vtcs->GetEntries()];
   double* ptbal       = new double[vtcs->GetEntries()];
   double* ptasym      = new double[vtcs->GetEntries()];
+  double* sumpt2      = new double[vtcs->GetEntries()];  
+  double* limPullToConv = new double[vtcs->GetEntries()];  
+  double* mvaval        = new double[vtcs->GetEntries()];  
+
   
   unsigned int numVertices = vtcs->GetEntries();
   double       ptgg        = 0.;                     // stored for later in the conversion
@@ -282,6 +332,8 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
     const Vertex* tVtx = vtcs->At(iVtx);
     ptbal      [iVtx] = 0.0;
     ptasym     [iVtx] = 0.0;
+    sumpt2     [iVtx] = 0.0; 
+    limPullToConv [iVtx] = -1.0;
     ptbal_rank [iVtx] = 1;
     ptasym_rank[iVtx] = 1;
     
@@ -301,6 +353,8 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
     FourVectorM totTrkMom(0,0,0,0);
     for(unsigned int iTrk = 0; iTrk < tVtx->NTracks(); ++iTrk) {
       const Track* tTrk = tVtx->Trk(iTrk);
+      
+      sumpt2[iVtx] += tTrk->Pt()*tTrk->Pt();
       
       // compute distance between Trk and the Photons
       double tEta = tTrk->Eta();
@@ -356,11 +410,6 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
     }
   }
   
-  // delete the auxiliary dynamic arrays
-  delete[] ptbal_rank  ;
-  delete[] ptasym_rank ;
-  delete[] ptbal       ;
-  delete[] ptasym      ;
   
   // find the best ranked Vertex so far....
   for(unsigned int iVtx = 0; iVtx < numVertices; ++iVtx) {
@@ -377,66 +426,84 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   
   double zconv  = 0.;
   double dzconv = 0.;
+  int nConv = 0;
+  
+  if (conv1) nConv += 1;
+  if (conv2) nConv += 1;
+
+
+  const double dzpxb = 0.016;
+  const double dztib = 0.331;
+  const double dztob = 1.564;
+  const double dzpxf = 0.082;
+  const double dztid = 0.321;
+  const double dztec = 0.815;
   
   //--------------------------------------------------------------------
   // start doing the Conversion acrobatics... 'copied' from the Globe...
   if(conv1 || conv2) {
     if( !conv2 ){
       const mithep::ThreeVector caloPos1(ph1->CaloPos());
-      zconv  = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
+      double zconvsc   = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
+      double zconvtrk  = conv1->DzCorrected(bsp->Position()) + bsp->Z();
       if( ph1->IsEB() ) {
 	double rho = conv1->Position().Rho();
-	if     ( rho < 15. ) dzconv = 0.06;
-	else if( rho < 60. ) dzconv = 0.67;
-	else                 dzconv = 2.04;
+	if     ( rho < 15. ) { dzconv = dzpxb; zconv = zconvtrk; }
+	else if( rho < 60. ) { dzconv = dztib; zconv = zconvsc; }
+	else                 { dzconv = dztob; zconv = zconvsc; }
       } else {
 	double z = conv1->Position().Z();
-	if     ( TMath::Abs(z) < 50. )   dzconv = 0.18;
-	else if( TMath::Abs(z) < 100.)   dzconv = 0.61;
-	else                 dzconv = 0.99;
+	if     ( TMath::Abs(z) < 50. )   { dzconv = dzpxf; zconv = zconvtrk; }
+	else if( TMath::Abs(z) < 100.)   { dzconv = dztid; zconv = zconvtrk; }
+	else                             { dzconv = dztec; zconv = zconvsc;  }
       }
     } else if( !conv1 ) {
       const mithep::ThreeVector caloPos2(ph2->CaloPos());
-      zconv  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
+      double zconvsc  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
+      double zconvtrk  = conv2->DzCorrected(bsp->Position()) + bsp->Z();
       if( ph2->IsEB() ) {
 	double rho = conv2->Position().Rho();
-	if     ( rho < 15. ) dzconv = 0.06;
-	else if( rho < 60. ) dzconv = 0.67;
-	else                 dzconv = 2.04;
+        if     ( rho < 15. ) { dzconv = dzpxb; zconv = zconvtrk; }
+        else if( rho < 60. ) { dzconv = dztib; zconv = zconvsc; }
+        else                 { dzconv = dztob; zconv = zconvsc; }
       } else {
 	double z = conv2->Position().Z();
-	if     ( TMath::Abs(z) < 50. )   dzconv = 0.18;
-	else if( TMath::Abs(z) < 100.)   dzconv = 0.61;
-	else                 dzconv = 0.99;
+        if     ( TMath::Abs(z) < 50. )   { dzconv = dzpxf; zconv = zconvtrk; }
+        else if( TMath::Abs(z) < 100.)   { dzconv = dztid; zconv = zconvtrk; }
+        else                             { dzconv = dztec; zconv = zconvsc;  }
       }
     } else {
       const mithep::ThreeVector caloPos1(ph1->CaloPos());
-      double z1  = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
+      double z1=0.;
+      double z1sc   = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
+      double z1trk  = conv1->DzCorrected(bsp->Position()) + bsp->Z();
       double dz1 = 0.;
       if( ph1->IsEB() ) {
 	double rho = conv1->Position().Rho();
-	if     ( rho < 15. ) dz1 = 0.06;
-	else if( rho < 60. ) dz1 = 0.67;
-	else                 dz1 = 2.04;
+        if     ( rho < 15. ) { dz1 = dzpxb; z1 = z1trk; }
+        else if( rho < 60. ) { dz1 = dztib; z1 = z1sc; }
+        else                 { dz1 = dztob; z1 = z1sc; }
       } else {
 	double z = conv1->Position().Z();
-	if     ( TMath::Abs(z) < 50. )   dz1 = 0.18;
-	else if( TMath::Abs(z) < 100.)   dz1 = 0.61;
-	else                 dz1 = 0.99;
+        if     ( TMath::Abs(z) < 50. )   { dz1 = dzpxf; z1 = z1trk; }
+        else if( TMath::Abs(z) < 100.)   { dz1 = dztid; z1 = z1trk; }
+        else                             { dz1 = dztec; z1 = z1sc;  }
       }
       const mithep::ThreeVector caloPos2(ph2->CaloPos());
-      double z2  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
+      double z2 = 0.;
+      double z2sc  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
+      double z2trk  = conv2->DzCorrected(bsp->Position()) + bsp->Z();
       double dz2 = 0.;
       if( ph2->IsEB() ) {
 	double rho = conv2->Position().Rho();
-	if     ( rho < 15. ) dz2 = 0.06;
-	else if( rho < 60. ) dz2 = 0.67;
-	else                 dz2 = 2.04;
+        if     ( rho < 15. ) { dz2 = dzpxb; z2 = z2trk; }
+        else if( rho < 60. ) { dz2 = dztib; z2 = z2sc; }
+        else                 { dz2 = dztob; z2 = z2sc; }
       } else {
 	double z = conv2->Position().Z();
-	if     ( TMath::Abs(z) < 50. )   dz2 = 0.18;
-	else if( TMath::Abs(z) < 100.)   dz2 = 0.61;
-	else                 dz2 = 0.99;
+        if     ( TMath::Abs(z) < 50. )   { dz2 = dzpxf; z2 = z1trk; }
+        else if( TMath::Abs(z) < 100.)   { dz2 = dztid; z2 = z1trk; }
+        else                             { dz2 = dztec; z2 = z1sc;  }
       }
 
       zconv  = ( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
@@ -448,8 +515,11 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
     int maxVertices = ( ptgg > 30 ? 3 : 5);
     double minDz = -1.; 
 
-   
+    
+    
     for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {
+
+      limPullToConv[iVtx] = TMath::Abs(vtcs->At(iVtx)->Z()-zconv)/dzconv;
 
       if(total_rank[iVtx] < maxVertices) {
 	const Vertex* tVtx = vtcs->At(iVtx);
@@ -465,6 +535,107 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   // END of Conversion Acrobatics
   //--------------------------------------------------------------------
 
+  //final loop to compute mva values
+  double mvamax = -1e6;
+  for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {    
+    double mva = VtxMvaP(ptbal[iVtx],ptasym[iVtx],log(sumpt2[iVtx]),limPullToConv[iVtx],nConv);
+    mvaval[iVtx] = mva;
+    if (mva>mvamax) {
+      mvamax = mva;
+      bestidxmva = iVtx;
+    }
+  }
+
+  //find second and third ranked vertices for event mva;
+  UInt_t mvaidx1 = 0;
+  mvamax = -1e6;
+  for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {    
+    if (iVtx!=bestidxmva && mvaval[iVtx]>mvamax) {
+      mvamax = mvaval[iVtx];
+      mvaidx1 = iVtx;
+    }
+  }
+  
+  UInt_t mvaidx2 = 0;
+  mvamax = -1e6;
+  for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {    
+    if (iVtx!=bestidxmva && iVtx!=mvaidx1 && mvaval[iVtx]>mvamax) {
+      mvamax = mvaval[iVtx];
+      mvaidx2 = iVtx;
+    }
+  }  
+  
+  //compute per event mva output
+  FourVectorM newMomFst = ph1->MomVtx(vtcs->At(bestidxmva)->Position());
+  FourVectorM newMomSec = ph2->MomVtx(vtcs->At(bestidxmva)->Position());
+  FourVectorM higgsMom = newMomFst+newMomSec;   
+
+  fMvaPEvtVars[0] = higgsMom.Pt();
+  fMvaPEvtVars[1] = numVertices;
+  fMvaPEvtVars[2] = mvaval[bestidxmva];
+  fMvaPEvtVars[3] = mvaval[mvaidx1];
+  fMvaPEvtVars[4] = vtcs->At(mvaidx1)->Z() - vtcs->At(bestidxmva)->Z();
+  fMvaPEvtVars[5] = mvaval[mvaidx2];
+  fMvaPEvtVars[6] = vtcs->At(mvaidx2)->Z() - vtcs->At(bestidxmva)->Z();
+  fMvaPEvtVars[7] = nConv;
+  
+  Double_t evtmva = readerevt->EvaluateMVA("BDTEvt");
+  vtxProb = 1.-0.49*(evtmva+1.0);
+  
+  // delete the auxiliary dynamic arrays
+  delete[] ptbal_rank  ;
+  delete[] ptasym_rank ;
+  delete[] ptbal       ;
+  delete[] ptasym      ;
+  delete[] sumpt2      ;
+  delete[] limPullToConv;
+  delete[] mvaval;
+
   delete[] total_rank  ;
-  return vtcs->At(bestIdx);
+  
+  
+  if (useMva) return vtcs->At(bestidxmva);
+  else return vtcs->At(bestIdx);
+}
+
+//------------------------------------------------------------------------------------
+double VertexTools::VtxMvaP(float ptbal, float ptasym, float logsumpt2, float limPullToConv, float nConv) const
+{
+  fMvaPVars[0] = ptbal;
+  fMvaPVars[1] = ptasym;
+  fMvaPVars[2] = logsumpt2;
+  fMvaPVars[3] = limPullToConv;
+  fMvaPVars[4] = nConv;
+  
+  return readervtx->EvaluateMVA("BDTCat");
+  
+}
+
+//------------------------------------------------------------------------------------
+//Compute contribution to relative uncertainty sigma_m/m from primary vertex location
+//given ecal shower positions of two photons, plus the beasmpot z width dz
+//code from Y. Gershtein
+Double_t VertexTools::DeltaMassVtx(Double_t x1, Double_t y1, Double_t z1,
+            Double_t x2, Double_t y2, Double_t z2,
+            Double_t dz)
+{
+
+      Double_t r1 = sqrt(x1*x1+y1*y1+z1*z1);
+      Double_t r2 = sqrt(x2*x2+y2*y2+z2*z2);
+      Double_t phi1 = atan2(y1,x1);
+      Double_t theta1 = atan2(sqrt(x1*x1+y1*y1),z1);
+      Double_t phi2 = atan2(y2,x2);
+      Double_t theta2 = atan2(sqrt(x2*x2+y2*y2),z2);
+
+      Double_t sech1 = sin(theta1);
+      Double_t tanh1 = cos(theta1);
+      Double_t sech2 = sin(theta2);
+      Double_t tanh2 = cos(theta2);
+      Double_t cos12 = cos(phi1-phi2);
+
+      Double_t rad1 = sech1*(sech1*tanh2-tanh1*sech2*cos12)/(1-tanh1*tanh2-sech1*sech2*cos12);
+      Double_t rad2 = sech2*(sech2*tanh1-tanh2*sech1*cos12)/(1-tanh2*tanh1-sech2*sech1*cos12);
+
+      return dz * fabs(rad1/r1 + rad2/r2);
+      
 }
