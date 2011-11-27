@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: HKFactorProducer.h,v 1.6 2011/06/10 10:42:36 ceballos Exp $
+// $Id: HKFactorProducer.h,v 1.7 2011/07/26 15:01:20 sixie Exp $
 //
 // HKFactorProducer
 //
@@ -13,6 +13,7 @@
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/MCEventInfo.h"
+#include "MitAna/DataTree/interface/EmbedWeightCol.h"
 #include "MitPhysics/Mods/interface/HWWKFactorList.h"
 
 class TH1D;
@@ -31,6 +32,7 @@ namespace mithep
       void               SetInputFilename(const char *s)   { fInputFileName        = s; }
       void               SetMCBosonsName(const char *s)    { fMCBosonsName         = s; }
       void               SetMCEventInfoName(const char *s) { fMCEvInfoName         = s; }
+      void               SetEmbedWeightName(const char *s) { fEmbedWeightName      = s; }
       void               SetIsData(Bool_t b)               { fIsData               = b; }	 
       void               SetMakePDFNtuple(Bool_t b)        { fMakePDFNtuple        = b; }	 
       void               SetDoHiggsPtReweighting(Bool_t b) { fDoHiggsPtReweighting = b; }	 
@@ -45,11 +47,13 @@ namespace mithep
       TString            fInputFileName;        //input file name
       TString            fMCBosonsName;         //boson collection input name
       TString            fMCEvInfoName;         //event info branch name
+      TString            fEmbedWeightName;      //tau embedding weight branch name
       Bool_t             fIsData;               //=true then it does nothing (def=0)
       Bool_t             fMakePDFNtuple;        //=true then it does nothing (def=0)
       Bool_t             fDoHiggsPtReweighting; //=true then it does reweighting
       HWWKfactorList    *fPt_histo;             //!histogram with weights read from input file
       const MCEventInfo *fMCEventInfo;          //!event info branch pointer
+      const EmbedWeightCol *fEmbedWeight;       //!tau embedding weight branch pointer
       TH1D              *hDHKFactor[10];        //!output histograms
       TFile             *fOutputFile; 	        //output file handle
       TString            fOutputName; 	        //output file name

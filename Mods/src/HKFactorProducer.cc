@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.13 2011/07/26 13:43:06 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.14 2011/07/26 15:01:21 sixie Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -21,11 +21,13 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
   fInputFileName("setme"),
   fMCBosonsName(ModNames::gkMCBosonsName),
   fMCEvInfoName(Names::gkMCEvtInfoBrn),
+  fEmbedWeightName(Names::gkEmbedWeightBrn),
   fIsData(kFALSE),
   fMakePDFNtuple(kFALSE),
   fDoHiggsPtReweighting(kFALSE),
   fPt_histo(0),
   fMCEventInfo(0),
+  fEmbedWeight(0),
   fOutputFile(0),
   fOutputName("ntuple.root")
 {
@@ -117,6 +119,12 @@ void HKFactorProducer::Process()
       fTree->Fill();
     }
   }
+  else if (fProcessID == 997){ // for tau embedding samples
+    LoadBranch(fEmbedWeightName);
+    theWeight = fEmbedWeight->At(fEmbedWeight->GetEntries()-1)->Weight();
+    if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
+    if (GetFillHist()) hDHKFactor[0]->Fill(0.5,theWeight);
+  }
 
   TParameter<Double_t> *NNLOWeight = new TParameter<Double_t>("NNLOWeight", theWeight);
   AddObjThisEvt(NNLOWeight);
@@ -129,6 +137,9 @@ void HKFactorProducer::SlaveBegin()
 
   if(fIsData == kFALSE){
     ReqBranch(fMCEvInfoName, fMCEventInfo);
+  }
+  if(fProcessID == 997){
+    ReqBranch(fEmbedWeightName, fEmbedWeight);
   }
 
   if (fDoHiggsPtReweighting) {
