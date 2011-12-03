@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.15 2011/10/18 11:27:19 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.16 2011/11/18 00:07:17 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -485,7 +485,7 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
     std::cout<<" hcalIso4   = "<<hcalIso4<<std::endl;
 
     std::cout<<" photon Et  = "<<ph->Et()<<std::endl;
-    std::cout<<"        Eta = "<<ph->SCluster()->Eta()<<std::endl;
+   std::cout<<"        Eta = "<<ph->SCluster()->Eta()<<std::endl;
     std::cout<<"        HoE = "<<HoE<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+4*4]<<")"<<std::endl;
     std::cout<<"         R9 = "<<R9<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+5*4]<<")"<<std::endl;
     std::cout<<"         dR = "<<dRTrack<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+6*4]<<")"<<std::endl;
@@ -588,4 +588,40 @@ PhotonTools::DiphotonR9EtaPtCats PhotonTools::DiphotonR9EtaPtCat(const Photon *p
   
   
   return evtcat;
+}
+
+Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v){
+  float ScEta=p->SCluster()->Eta();
+  float Et=p->Et();
+  float R9=p->R9();
+  float HoE=p->HadOverEm();
+  float CovIEtaIEta=p->CoviEtaiEta();
+  float EcalIsoDr03=p->EcalRecHitIsoDr03();
+  float HcalIsoDr03=p->HcalTowerSumEtDr03();
+  float TrkIsoHollowDr03=p->HollowConeTrkIsoDr03();
+  float NewEcalIso=EcalIsoDr03-0.012*Et;
+  float NewHcalIso=HcalIsoDr03-0.005*Et;
+  float NewTrkIsoHollowDr03=TrkIsoHollowDr03-0.002*Et;
+  Bool_t IsBarrel=kFALSE;
+  Bool_t IsEndcap=kFALSE;
+  Bool_t PassEleVeto=PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, v);
+  if(fabs(ScEta)<1.4442){IsBarrel=kTRUE;}
+  if(fabs(ScEta)>1.566 && fabs(ScEta)<2.5){IsEndcap=kTRUE;}
+  if((!IsBarrel) && (!IsEndcap)){
+    return kFALSE;
+  }
+  if(!PassEleVeto){
+    return kFALSE;
+  }
+  if(R9<=0.9){
+    if(HoE<0.075 && ((IsBarrel && CovIEtaIEta<0.014) || (IsEndcap && CovIEtaIEta<0.034)) && NewEcalIso<4 && NewHcalIso<4 && NewTrkIsoHollowDr03<3){
+      return kTRUE;
+    }
+  }
+  if(R9>0.9){
+    if(((IsBarrel && HoE<0.082 && CovIEtaIEta<0.014) || (IsEndcap && HoE <0.075 && CovIEtaIEta<0.034)) && NewEcalIso<50 && NewHcalIso<50 && NewTrkIsoHollowDr03<50){
+      return kTRUE;  
+    }
+  }
+  return kFALSE;
 }
