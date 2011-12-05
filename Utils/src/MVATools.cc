@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.3 2011/10/18 11:27:19 fabstoec Exp $
+// $Id: MVATools.cc,v 1.4 2011/12/05 00:47:46 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -147,12 +147,12 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
   
 }
 
-Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,Float_t bdtCutBarrel, Float_t bdtCutEndcap) {
+Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,Float_t bdtCutBarrel, Float_t bdtCutEndcap) {
   
   //initilize the bool value
   PassMVA=kFALSE;
   
-  Float_t photon_bdt =  MVATools::GetMVAbdtValue(p,vtx,trackCol,vtxCol, _tRho,els);
+  Float_t photon_bdt =  MVATools::GetMVAbdtValue(p,vtx,trackCol,vtxCol, _tRho);
   
   if (isbarrel) {
     if(bdt>bdtCutBarrel){
@@ -208,7 +208,7 @@ Int_t MVATools::PassElectronVetoInt(const Photon* p, const ElectronCol* els) {
 
 //--------------------------------------------------------------------------------------------------
 
-Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els) {
+Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho) {
   
   //get the variables used to compute MVA variables
   ecalIso3 = p->EcalRecHitIsoDr03();
@@ -230,8 +230,6 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   
   RawEnergy = p->SCluster()->RawEnergy();
   
-  dRTrack = PhotonTools::ElectronVetoCiC(p, els);
-
   //mva varialbes v1 and v2
   tIso1 = (combIso1) *50./p->Et();
   tIso3 = (trackIso3)*50./p->Et();
@@ -286,7 +284,7 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
 
   bdt = reader->EvaluateMVA("BDT method");
 
-  printf("HoE: %f\n",HoE);
+  /* printf("HoE: %f\n",HoE);
   printf("covIEtaIEta: %f\n",covIEtaIEta);
   printf("tIso1abs: %f\n",tIso1abs);
   printf("tIso3abs: %f\n",tIso3abs);
@@ -313,7 +311,7 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   
   if (!isbarrel) {
     printf("RelPreshowerEnergy: %f\n",RelPreshowerEnergy);
-  }
+    }*/
   
   return bdt;
 }

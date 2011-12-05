@@ -43,9 +43,9 @@ namespace mithep {
     //--------------------------
     
     void InitializeMVA(int VariableType, TString EndcapWeights,TString BarrelWeights);
-    Bool_t PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,Float_t bdtCutBarrel, Float_t bdtCutEndcap);
+    Bool_t PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,Float_t bdtCutBarrel, Float_t bdtCutEndcap);
     Int_t PassElectronVetoInt(const Photon* p, const ElectronCol* els);
-      Float_t GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els);
+      Float_t GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho);
       
       TMVA::Reader *fReaderEndcap;
       TMVA::Reader *fReaderBarrel;    
