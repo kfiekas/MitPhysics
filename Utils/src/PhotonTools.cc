@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.16 2011/11/18 00:07:17 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.17 2011/12/03 22:31:48 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -590,7 +590,7 @@ PhotonTools::DiphotonR9EtaPtCats PhotonTools::DiphotonR9EtaPtCat(const Photon *p
   return evtcat;
 }
 
-Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v){
+Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v, const TrackCol* trackCol,double rho){
   float ScEta=p->SCluster()->Eta();
   float Et=p->Et();
   float R9=p->R9();
@@ -605,6 +605,10 @@ Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *e
   Bool_t IsBarrel=kFALSE;
   Bool_t IsEndcap=kFALSE;
   Bool_t PassEleVeto=PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, v);
+
+  float AbsTrackIsoCIC=IsolationTools::CiCTrackIsolation(p,v, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0,trackCol);
+  float HcalEcalPUCorr=EcalIsoDr03+HcalIsoDr03-0.17*rho;
+
   if(fabs(ScEta)<1.4442){IsBarrel=kTRUE;}
   if(fabs(ScEta)>1.566 && fabs(ScEta)<2.5){IsEndcap=kTRUE;}
   if((!IsBarrel) && (!IsEndcap)){
@@ -614,12 +618,12 @@ Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *e
     return kFALSE;
   }
   if(R9<=0.9){
-    if(HoE<0.075 && ((IsBarrel && CovIEtaIEta<0.014) || (IsEndcap && CovIEtaIEta<0.034)) && NewEcalIso<4 && NewHcalIso<4 && NewTrkIsoHollowDr03<3){
+    if(HoE<0.075 && ((IsBarrel && CovIEtaIEta<0.014) || (IsEndcap && CovIEtaIEta<0.034)) && NewEcalIso<4 && NewHcalIso<4 && NewTrkIsoHollowDr03<4 && HcalEcalPUCorr<3 && AbsTrackIsoCIC<2.8){
       return kTRUE;
     }
   }
   if(R9>0.9){
-    if(((IsBarrel && HoE<0.082 && CovIEtaIEta<0.014) || (IsEndcap && HoE <0.075 && CovIEtaIEta<0.034)) && NewEcalIso<50 && NewHcalIso<50 && NewTrkIsoHollowDr03<50){
+    if(((IsBarrel && HoE<0.082 && CovIEtaIEta<0.014) || (IsEndcap && HoE <0.075 && CovIEtaIEta<0.034)) && NewEcalIso<50 && NewHcalIso<50 && NewTrkIsoHollowDr03<50 && HcalEcalPUCorr<3 && AbsTrackIsoCIC<2.8){
       return kTRUE;  
     }
   }

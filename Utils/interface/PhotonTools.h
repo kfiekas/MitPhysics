@@ -89,7 +89,7 @@ namespace mithep {
     static void ScalePhotonR9(Photon *p, Double_t scale);
     static void ScalePhotonError(Photon *p, Double_t scale);
 
-    static Bool_t       PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v);
+    static Bool_t       PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v, const TrackCol* trackCol,double rho);
     static Bool_t       PassConversionId(const Photon *p, const DecayParticle *c);
     static Bool_t       PassElectronVeto(const Photon *p, const ElectronCol *els);
     static Double_t     ElectronVetoCiC(const Photon *p, const ElectronCol *els);
