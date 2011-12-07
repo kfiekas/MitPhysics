@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.4 2011/12/05 00:47:46 mingyang Exp $
+// $Id: MVATools.cc,v 1.5 2011/12/05 01:39:48 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -137,6 +137,27 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
 	readers[i]->AddVariable( "RelPreshowerEnergy", &RelPreshowerEnergy );
       }
     }
+
+    if(VariableType==6){
+      readers[i]->AddVariable( "HoE", &HoE );
+      readers[i]->AddVariable( "covIEtaIEta", &covIEtaIEta );
+      readers[i]->AddVariable( "tIso1abs", &tIso1abs );
+      readers[i]->AddVariable( "tIso3abs", &tIso3abs );
+      readers[i]->AddVariable( "tIso2abs", &tIso2abs );
+      readers[i]->AddVariable( "R9", &R9 );
+      readers[i]->AddVariable( "absIsoEcal", &absIsoEcal );
+      readers[i]->AddVariable( "absIsoHcal", &absIsoHcal );
+      readers[i]->AddVariable( "RelE5x5", &RelE5x5 );
+      readers[i]->AddVariable( "EtaWidth", &EtaWidth );
+      readers[i]->AddVariable( "PhiWidth", &PhiWidth );
+      readers[i]->AddVariable( "CoviEtaiPhi", &CoviEtaiPhi );
+      readers[i]->AddVariable( "CoviPhiiPhi", &CoviPhiiPhi );
+      readers[i]->AddVariable( "NVertexes", &NVertexes );
+      if(i==0){
+      readers[i]->AddVariable( "RelPreshowerEnergy", &RelPreshowerEnergy );
+      }
+    }
+
   }
   
   fReaderEndcap->BookMVA("BDT method",EndcapWeights);
