@@ -51,8 +51,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fPhotonPtMin       (20.0),
   fPhotonEtaMax      (2.5),
 
-  fLeadingPtMin      (1.0/3.0),
-  fTrailingPtMin     (1.0/4.0),
+  fLeadingPtMin      (100.0/3.0),
+  fTrailingPtMin     (100.0/4.0),
 
   fIsData            (false),
   fPhotonsFromBranch (true),  
@@ -73,7 +73,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fPileUp            (0),
 
   // ---------------------------------------
-  fDataEnCorr_EBlowEta_hR9 (0.),
+  fDataEnCorr_EBlowEta_hR9central (0.),
+  fDataEnCorr_EBlowEta_hR9gap (0.),
   fDataEnCorr_EBlowEta_lR9 (0.),
   fDataEnCorr_EBhighEta_hR9 (0.),
   fDataEnCorr_EBhighEta_lR9 (0.),  
@@ -85,7 +86,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fRunStart          (0),
   fRunEnd            (0),
 
-  fMCSmear_EBlowEta_hR9    (0.),
+  fMCSmear_EBlowEta_hR9central    (0.),
+  fMCSmear_EBlowEta_hR9gap    (0.),  
   fMCSmear_EBlowEta_lR9    (0.),
   fMCSmear_EBhighEta_hR9    (0.),
   fMCSmear_EBhighEta_lR9    (0.),
@@ -107,17 +109,19 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fApplyEleVeto      (true),
   fInvertElectronVeto(kFALSE),
   //MVA
-  fVariableType      (2), 
-  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Endcap_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
-  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Barrel_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
-  fbdtCutBarrel      (0.0031324),
-  fbdtCutEndcap      (0.0086),
+  fVariableType      (6), //please use 4 which is the correct type
+  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_6_BDTnCuts2000_BDT.weights.xml")),
+  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_6_BDTnCuts2000_BDT.weights.xml")),
+  fbdtCutBarrel      (0.0744), //cuts give the same effiiciency (relative to preselection) with cic
+  fbdtCutEndcap      (0.0959),//cuts give the same effiiciency (relative to preselection) with cic
   fDoMCR9Scaling     (kFALSE),
   fMCR9ScaleEB       (1.0),
   fMCR9ScaleEE       (1.0),
   fDoMCErrScaling     (kFALSE),
   fMCErrScaleEB       (1.0),
-  fMCErrScaleEE       (1.0)  
+  fMCErrScaleEE       (1.0),
+  fRegressionVersion(1),
+  fRelativePtCuts(kFALSE)
 {
   // Constructor.
 }
@@ -184,9 +188,9 @@ void PhotonPairSelector::Process()
     if(ph->Et()                <  fPhotonPtMin)     continue;
     if(ph->HadOverEm()         >  0.15)     continue;
     if(ph->IsEB()) {
-      if(ph->CoviEtaiEta() > 0.013) continue;      
+      if(ph->CoviEtaiEta() > 0.014) continue;      
     } else {
-      if(ph->CoviEtaiEta() > 0.03) continue;
+      if(ph->CoviEtaiEta() > 0.034) continue;
     }    
     preselPh->Add(ph);
   }
@@ -221,13 +225,22 @@ void PhotonPairSelector::Process()
       }
     }
   }
+  
+  
 
   // ------------------------------------------------------------  
   // array to store the index of 'chosen Vtx' for each pair
-  const Vertex** theVtx        = new const Vertex*[numPairs];    // holds the 'chosen' Vtx for each Pair
-  Photon**       fixPh1st      = new       Photon*[numPairs];    // holds the 1st Photon for each Pair       
-  Photon**       fixPh2nd      = new       Photon*[numPairs];    // holds the 2nd photon for each Pair
+//   const Vertex** theVtx        = new const Vertex*[numPairs];    // holds the 'chosen' Vtx for each Pair
+//   Photon**       fixPh1st      = new       Photon*[numPairs];    // holds the 1st Photon for each Pair       
+//   Photon**       fixPh2nd      = new       Photon*[numPairs];    // holds the 2nd photon for each Pair
   
+  std::vector<const Vertex*> theVtx; // holds the 'chosen' Vtx for each Pair
+  std::vector<Photon*> fixPh1st;     // holds the 1st Photon for each Pair       
+  std::vector<Photon*> fixPh2nd;     // holds the 2nd photon for each Pair
+
+  theVtx.reserve(numPairs);
+  fixPh1st.reserve(numPairs);
+  fixPh2nd.reserve(numPairs);
 
   // store pair-indices for pairs passing the selection
   std::vector<unsigned int> passPairs;
@@ -238,20 +251,25 @@ void PhotonPairSelector::Process()
   for(unsigned int iPair = 0; iPair < numPairs; ++iPair) {    
 
     // first we need a hard copy of the incoming photons
-    fixPh1st[iPair] = new Photon(*preselPh->At(idx1st[iPair]));
-    fixPh2nd[iPair] = new Photon(*preselPh->At(idx2nd[iPair]));
+    fixPh1st.push_back(new Photon(*preselPh->At(idx1st[iPair])));
+    fixPh2nd.push_back(new Photon(*preselPh->At(idx2nd[iPair])));
     // we also store the category, so we don't have to ask all the time...
     cat1st.push_back(preselCat[idx1st[iPair]]);
-    cat2nd.push_back(preselCat[idx2nd[iPair]]);
-
+    cat2nd.push_back(preselCat[idx2nd[iPair]]);    
+    
     if (fDoRegression) {
       if (!egcor.IsInitialized()) {
         //egcor.Initialize(!fIsData,"4_2",gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat"),"/scratch/bendavid/root/weights-Base/TMVARegressionebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressioneeph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceeeph_BDTG.weights.xml");
         egcor.Initialize(!fIsData,fPhFixString,fPhFixFile,fRegWeights);
       }
     
-      egcor.CorrectEnergyWithError(fixPh1st[iPair]);
-      egcor.CorrectEnergyWithError(fixPh2nd[iPair]);
+      egcor.CorrectEnergyWithError(fixPh1st[iPair],fPV,fRegressionVersion);
+      egcor.CorrectEnergyWithError(fixPh2nd[iPair],fPV,fRegressionVersion);
+      
+//       if (fRegressionVersion==2) {
+//         printf("ph1 sceta = %5f edm: e = %5f +- %5f, bambu = %5f +- %5f\n",fixPh1st[iPair]->SCluster()->Eta(),fixPh1st[iPair]->EnergyRegr(),fixPh1st[iPair]->EnergyErrRegr(),fixPh1st[iPair]->E(),fixPh1st[iPair]->EnergyErr());
+//         printf("ph2 sceta = %5f edm: e = %5f +- %5f, bambu = %5f +- %5f\n",fixPh2nd[iPair]->SCluster()->Eta(),fixPh2nd[iPair]->EnergyRegr(),fixPh2nd[iPair]->EnergyErrRegr(),fixPh2nd[iPair]->E(),fixPh2nd[iPair]->EnergyErr());        
+//       }
       
       ThreeVectorC scpos1 = fixPh1st[iPair]->SCluster()->Point();
       ThreeVectorC scpos2 = fixPh2nd[iPair]->SCluster()->Point();
@@ -292,19 +310,21 @@ void PhotonPairSelector::Process()
 	double scaleFac2 = 1.;
         
         //eta-dependent corrections
-        if (fEtaCorrections) {
-          double etacor1 = fEtaCorrections->GetBinContent(fEtaCorrections->GetXaxis()->FindFixBin(fixPh1st[iPair]->SCluster()->Eta()));
-          double etacor2 = fEtaCorrections->GetBinContent(fEtaCorrections->GetXaxis()->FindFixBin(fixPh2nd[iPair]->SCluster()->Eta()));
-          
-          if (fixPh1st[iPair]->SCluster()->AbsEta()>1.5) scaleFac1 *= (etacor1*etacor1);
-          if (fixPh2nd[iPair]->SCluster()->AbsEta()>1.5) scaleFac2 *= (etacor2*etacor2);
-        }
+//         if (fEtaCorrections) {
+//           double etacor1 = fEtaCorrections->GetBinContent(fEtaCorrections->GetXaxis()->FindFixBin(fixPh1st[iPair]->SCluster()->Eta()));
+//           double etacor2 = fEtaCorrections->GetBinContent(fEtaCorrections->GetXaxis()->FindFixBin(fixPh2nd[iPair]->SCluster()->Eta()));
+//           
+//           if (fixPh1st[iPair]->SCluster()->AbsEta()>1.5) scaleFac1 *= (etacor1*etacor1);
+//           if (fixPh2nd[iPair]->SCluster()->AbsEta()>1.5) scaleFac2 *= (etacor2*etacor2);
+//         }
         
 	// checking the run Rangees ...
 	Int_t runRange = FindRunRangeIdx(runNumber);
 	if(runRange > -1) { 
-	  scaleFac1 /= (1.0+GetDataEnCorr(runRange, escalecat1));
-	  scaleFac2 /= (1.0+GetDataEnCorr(runRange, escalecat2));
+// 	  scaleFac1 /= (1.0+GetDataEnCorr(runRange, escalecat1));
+// 	  scaleFac2 /= (1.0+GetDataEnCorr(runRange, escalecat2));
+          scaleFac1 *= GetDataEnCorr(runRange, escalecat1);
+          scaleFac2 *= GetDataEnCorr(runRange, escalecat2);
 	}      
 	PhotonTools::ScalePhoton(fixPh1st[iPair], scaleFac1);
 	PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
@@ -372,8 +392,20 @@ void PhotonPairSelector::Process()
 
     
     double pairmass = (fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M();
-    double leadptcut = fLeadingPtMin*pairmass;
-    double trailptcut = fTrailingPtMin*pairmass;
+    
+    double leadptcut = fLeadingPtMin;
+    double trailptcut = fTrailingPtMin;
+    
+    if (fixPh2nd[iPair]->Pt() > fixPh1st[iPair]->Pt()) {
+      leadptcut = fTrailingPtMin;
+      trailptcut = fLeadingPtMin;
+    }
+    
+    
+    if (fRelativePtCuts) {
+      leadptcut = leadptcut*pairmass;
+      trailptcut = trailptcut*pairmass;
+    }
     
     /* Float_t bdt1=-99;
     Float_t bdt2=-99;
@@ -390,6 +422,9 @@ void PhotonPairSelector::Process()
     fixPh1st[iPair]->SetBDT(bdt1);
     fixPh2nd[iPair]->SetBDT(bdt2); */
 
+    
+    //printf("applying id\n");
+    
     // check if both photons pass the CiC selection
     // FIX-ME: Add other possibilities....
     bool pass1 = false;
@@ -408,14 +443,24 @@ void PhotonPairSelector::Process()
 
       break;
     case kMVAPhSelection://MVA
-      pass1 = fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,leadptcut,fbdtCutBarrel,fbdtCutEndcap, fApplyEleVeto);
-      if(pass1) pass2 = fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fElectrons,trailptcut,fbdtCutBarrel,fbdtCutEndcap, fApplyEleVeto);
+      pass1 = fixPh1st[iPair]->Pt()>leadptcut && PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto) && fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
+      if (pass1) pass2 = fixPh2nd[iPair]->Pt() > trailptcut && PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto) && fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
       
       break;
     case kMITPhSelection:
-      // FIX-ME: This is a place-holder.. MIT guys: Please work hard... ;)
-      pass1 = ( fixPh1st[iPair]->Pt() > leadptcut  );
-      pass2 = ( fixPh2nd[iPair]->Pt() > trailptcut );
+      // loose preselection for mva
+      pass1 = ( fixPh1st[iPair]->Pt() > leadptcut  && PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto) );
+      if (pass1) pass2 = ( fixPh2nd[iPair]->Pt() > trailptcut && PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto) );
+      
+      if (pass1 && pass2) {
+        //compute id bdt values
+        Double_t bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho, fElectrons, fApplyEleVeto);
+        Double_t bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho, fElectrons, fApplyEleVeto);
+
+        fixPh1st[iPair]->SetIdMva(bdt1);
+        fixPh2nd[iPair]->SetIdMva(bdt2);
+      }
+      
       break;
     default:
       pass1 = true;
@@ -442,6 +487,11 @@ void PhotonPairSelector::Process()
   PhotonTools::CiCBaseLineCats catPh1 = PhotonTools::kCiCNoCat;
   PhotonTools::CiCBaseLineCats catPh2 = PhotonTools::kCiCNoCat;
   
+  
+  //printf("selecting pair");
+  
+  //use highest sum pt photons
+  
   double maxSumEt = 0.;
   for(unsigned int iPair=0; iPair<passPairs.size(); ++iPair){
     double sumEt = fixPh1st[passPairs[iPair]]->Et();
@@ -455,7 +505,12 @@ void PhotonPairSelector::Process()
       _theVtx = theVtx[iPair];
     }
   }
-  
+
+  for(unsigned int iPair = 0; iPair < numPairs; ++iPair) {    
+    if (fixPh1st[iPair]!=phHard) delete fixPh1st[iPair];
+    if (fixPh2nd[iPair]!=phSoft) delete fixPh2nd[iPair];
+  }
+    
   // ---------------------------------------------------------------
   // we have the Photons (*PARTY*)... compute some useful qunatities
 
@@ -470,7 +525,7 @@ void PhotonPairSelector::Process()
   
   // delete auxiliary photon collection...
   delete preselPh;
-  delete[] theVtx;
+  //delete[] theVtx;
     
   return;
 
@@ -571,8 +626,10 @@ Double_t PhotonPairSelector::GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCa
     return fDataEnCorr_EBhighEta_hR9[runRange];
   case PhotonTools::kEBhighEtaBad:
     return fDataEnCorr_EBhighEta_lR9[runRange];
-  case PhotonTools::kEBlowEtaGold:
-    return fDataEnCorr_EBlowEta_hR9[runRange];
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fDataEnCorr_EBlowEta_hR9central[runRange];
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fDataEnCorr_EBlowEta_hR9gap[runRange];    
   case PhotonTools::kEBlowEtaBad:
     return fDataEnCorr_EBlowEta_lR9[runRange];    
   case PhotonTools::kEEhighEtaGold:
@@ -595,8 +652,10 @@ Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat) {
     return fMCSmear_EBhighEta_hR9;
   case PhotonTools::kEBhighEtaBad:
     return fMCSmear_EBhighEta_lR9;
-  case PhotonTools::kEBlowEtaGold:
-    return fMCSmear_EBlowEta_hR9;
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fMCSmear_EBlowEta_hR9central;
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fMCSmear_EBlowEta_hR9gap;    
   case PhotonTools::kEBlowEtaBad:
     return fMCSmear_EBlowEta_lR9;    
   case PhotonTools::kEEhighEtaGold:

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.22 2011/08/03 17:15:43 bendavid Exp $
+// $Id: PhotonIDMod.h,v 1.23 2011/10/18 11:27:19 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -99,6 +99,7 @@ namespace mithep
         kLooseEM,           //"LooseEM"
 	kBaseLineCiC,        //"2011" Hgg BaseLine CiC
 	kMITMVAId,          // MingMing MVA ID
+	kMITPhSelection,    //MIT loose preselection (for mva)
         kCustomId           //"Custom"
       };
 

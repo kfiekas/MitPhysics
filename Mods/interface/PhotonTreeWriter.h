@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.3 2011/10/07 09:56:36 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.4 2011/11/18 00:07:16 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -23,6 +23,7 @@
 #include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitAna/DataTree/interface/SuperClusterCol.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"
+#include "MitAna/DataTree/interface/JetCol.h"
 #include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 
@@ -42,7 +43,7 @@ namespace mithep
       Float_t Ecoreleerr() const { return ecoreleerr; };      
       
     private:  
-      Bool_t hasphoton;
+      UChar_t hasphoton;
       Float_t e;
       Float_t pt;
       Float_t eta;
@@ -68,30 +69,13 @@ namespace mithep
       Float_t eerr;
       Float_t eerrsmeared;
       Float_t esmearing;
+      Float_t idmva;
+      Float_t ecalisodr03;
+      Float_t hcalisodr03;
+      Float_t trkisohollowdr03;
       
-      //quantities from seed basic cluster
-      Float_t sigiphiphi;
-      Float_t covietaiphi;
-      Float_t emax;
-      Float_t e2nd;
-      Float_t etop;
-      Float_t ebottom;
-      Float_t eleft;
-      Float_t eright;
-      Float_t e1x3;
-      Float_t e3x1;
-      Float_t e1x5;
-      Float_t e2x2;
-      Float_t e4x4;
-      Float_t e2x5max;
-      Float_t e2x5top;
-      Float_t e2x5bottom;
-      Float_t e2x5left;
-      Float_t e2x5right;      
-      Float_t xseed;
-      Float_t yseed;
-      Float_t zseed;
-      
+
+      //quantities from seed basic cluster      
       Float_t eseed;
       Float_t etaseed;
       Float_t phiseed;
@@ -105,6 +89,32 @@ namespace mithep
       Float_t ycryseed;
       Float_t thetaaxisseed;
       Float_t phiaxisseed;
+      Float_t sigietaietaseed;
+      Float_t sigiphiphiseed;
+      Float_t covietaiphiseed;
+      Float_t e3x3seed;
+      Float_t e5x5seed;      
+      Float_t emaxseed;
+      Float_t e2ndseed;
+      Float_t etopseed;
+      Float_t ebottomseed;
+      Float_t eleftseed;
+      Float_t erightseed;      
+      Float_t e1x3seed;
+      Float_t e3x1seed;
+      Float_t e1x5seed;
+      Float_t e2x2seed;
+      Float_t e4x4seed;
+      Float_t e2x5maxseed;
+      Float_t e2x5topseed;
+      Float_t e2x5bottomseed;
+      Float_t e2x5leftseed;
+      Float_t e2x5rightseed;      
+      Float_t xseedseed;
+      Float_t yseedseed;
+      Float_t zseedseed;
+      UInt_t  nhitsseed;
+      
       
       //quantities from second basic cluster, if present
       Float_t ebc2;
@@ -119,7 +129,74 @@ namespace mithep
       Float_t xcrybc2;
       Float_t ycrybc2;
       Float_t thetaaxisbc2;
-      Float_t phiaxisbc2;      
+      Float_t phiaxisbc2;
+      Float_t sigietaietabc2;
+      Float_t sigiphiphibc2;
+      Float_t covietaiphibc2;
+      Float_t e3x3bc2;
+      Float_t e5x5bc2;            
+      Float_t emaxbc2;
+      Float_t e2ndbc2;
+      Float_t etopbc2;
+      Float_t ebottombc2;
+      Float_t eleftbc2;
+      Float_t erightbc2;
+      Float_t e1x3bc2;
+      Float_t e3x1bc2;
+      Float_t e1x5bc2;
+      Float_t e2x2bc2;
+      Float_t e4x4bc2;
+      Float_t e2x5maxbc2;
+      Float_t e2x5topbc2;
+      Float_t e2x5bottombc2;
+      Float_t e2x5leftbc2;
+      Float_t e2x5rightbc2;      
+      Float_t xbc2bc2;
+      Float_t ybc2bc2;
+      Float_t zbc2bc2;      
+      UInt_t  nhitsbc2;
+      
+      //quantities from lowest energy basic cluster if present
+      Float_t ebclast;
+      Float_t etabclast;
+      Float_t phibclast;
+      Int_t ietabclast;
+      Int_t iphibclast;
+      Int_t ixbclast;
+      Int_t iybclast;
+      Float_t etacrybclast;
+      Float_t phicrybclast;
+      Float_t xcrybclast;
+      Float_t ycrybclast;
+      Float_t thetaaxisbclast;
+      Float_t phiaxisbclast;
+      Float_t sigietaietabclast;
+      Float_t sigiphiphibclast;
+      Float_t covietaiphibclast;
+      Float_t e3x3bclast;
+      Float_t e5x5bclast;             
+      UInt_t  nhitsbclast;
+      
+      //quantities from second lowest energy basic cluster if present
+      Float_t ebclast2;
+      Float_t etabclast2;
+      Float_t phibclast2;
+      Int_t ietabclast2;
+      Int_t iphibclast2;
+      Int_t ixbclast2;
+      Int_t iybclast2;
+      Float_t etacrybclast2;
+      Float_t phicrybclast2;
+      Float_t xcrybclast2;
+      Float_t ycrybclast2;
+      Float_t thetaaxisbclast2;
+      Float_t phiaxisbclast2;
+      Float_t sigietaietabclast2;
+      Float_t sigiphiphibclast2;
+      Float_t covietaiphibclast2;
+      Float_t e3x3bclast2;
+      Float_t e5x5bclast2;
+      UInt_t  nhitsbclast2;             
       
       //energy correction quantities from PhotonFix
       Float_t ecor;
@@ -142,7 +219,7 @@ namespace mithep
       Float_t ym;        
       
       //conversion quantities
-      Bool_t hasconversion;
+      UChar_t hasconversion;
       Float_t convp;
       Float_t convpt;
       Float_t conveta;
@@ -164,9 +241,9 @@ namespace mithep
       Char_t trailtrackcharge;
       
       //electron quantities
-      Bool_t haselectron;
-      Bool_t eleisecaldriven;      
-      Bool_t eleistrackerdriven;     
+      UChar_t haselectron;
+      UChar_t eleisecaldriven;      
+      UChar_t eleistrackerdriven;     
       Float_t elee;
       Float_t elept;
       Float_t eleeta;
@@ -180,19 +257,21 @@ namespace mithep
       Float_t elepout;
       
       //pf supercluster quantities
-      Bool_t haspfsc;
+      UChar_t haspfsc;
       Float_t pfsce;
       Float_t pfscrawe;
       Float_t pfsceta;
       Float_t pfscphi;
       
       //generator level quantities
-      Bool_t ispromptgen;
+      UChar_t ispromptgen;
       Float_t gene;
       Float_t genpt;
       Float_t geneta;
       Float_t genphi;
       Float_t genz;
+      Int_t   pdgid;
+      Int_t   motherpdgid;
       
 
       
@@ -222,7 +301,10 @@ namespace mithep
       Float_t masserrwrongvtx;
       Float_t masserrsmearedwrongvtx;
       Float_t vtxprob;
+      Float_t deltamvtx;
       Float_t ptgg;
+      Float_t etagg;
+      Float_t phigg;
       Float_t costheta;
       Float_t massele;
       Float_t ptee;
@@ -240,13 +322,36 @@ namespace mithep
       Float_t pfmetphi;
       Float_t pfmetx;
       Float_t pfmety;
-      Bool_t  ismc;
+      UChar_t  ismc;
       
       //corrected quantities from PhotonFix corrections
       Float_t masscor;
       Float_t masscorerr;
       Float_t masscorele;
       Float_t masscoreleerr;
+      
+      //jet quantities
+      Float_t jet1pt;
+      Float_t jet1eta;
+      Float_t jet1phi;
+      Float_t jet1mass;
+      Float_t jet2pt;
+      Float_t jet2eta;
+      Float_t jet2phi;
+      Float_t jet2mass;
+      Float_t jetcentralpt;
+      Float_t jetcentraleta;
+      Float_t jetcentralphi;
+      Float_t jetcentralmass;
+      Float_t dijetpt;
+      Float_t dijeteta;
+      Float_t dijetphi;
+      Float_t dijetmass;
+      Float_t jetetaplus;
+      Float_t jetetaminus;
+      
+      Float_t zeppenfeld;
+      Float_t dphidijetgg;
       
       PhotonTreeWriterPhoton photons[2];
 
@@ -275,6 +380,9 @@ namespace mithep
     void                SetBeamspotName(const char *n)    { fBeamspotName = n;           }
     void                SetPFCandName(const char *n)      { fPFCandName = n;             }
     void                SetSuperClusterName(const char *n) { fSuperClusterName = n;      }
+    void                SetPFJetName(const char *n)       { fPFJetName = n;              }
+    void                SetPFJetsFromBranch(Bool_t b)     { fPFJetsFromBranch = b;       }
+    void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
 
 
@@ -317,6 +425,7 @@ namespace mithep
     TString             fPileUpName;
     TString             fSuperClusterName;
     TString             fPFMetName;
+    TString             fPFJetName;
     
     // is it Data or MC?
     Bool_t              fIsData;
@@ -325,6 +434,7 @@ namespace mithep
     Bool_t              fPhotonsFromBranch;
     Bool_t              fPVFromBranch;
     Bool_t              fGoodElectronsFromBranch;
+    Bool_t              fPFJetsFromBranch;
 
     const PhotonCol              *fPhotons;
     const ElectronCol            *fElectrons;
@@ -339,6 +449,7 @@ namespace mithep
     const PileupInfoCol          *fPileUp;    
     const SuperClusterCol        *fSuperClusters;   
     const PFMetCol               *fPFMet;
+    const JetCol                 *fPFJets;
     
     // --------------------------------
     Bool_t fLoopOnGoodElectrons; //primary loop over good electrons collection instead of photons
@@ -348,6 +459,8 @@ namespace mithep
 
     Bool_t fExcludeSinglePrompt;
     Bool_t fExcludeDoublePrompt;
+    
+    Bool_t fEnableJets;
     
     TString fPhFixDataFile;
     PhotonFix fPhfixph;

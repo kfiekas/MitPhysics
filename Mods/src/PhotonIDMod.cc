@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.25 2011/08/03 17:15:43 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.26 2011/10/18 11:27:19 fabstoec Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -70,11 +70,14 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPileUp            (0),
 
   // MVA ID Stuff
-  fbdtCutBarrel      (-0.01),
-  fbdtCutEndcap      (-0.02),
-  fVariableType      (2), 
-  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Endcap_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
-  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_NewMotherId_Barrel_PtMin30_IsoCut250_VariableType2_BDTnCuts2000_ApplyElecVeto1_PuWeight_BDT.weights.xml")),
+  fbdtCutBarrel      (0.0744), //cuts give the same effiiciency (relative to preselection) with cic
+  fbdtCutEndcap      (0.0959), //cuts give the same effiiciency (relative to preselection) with cic  
+  fVariableType      (6), //please use 4 which is the correct type
+  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_6_BDTnCuts2000_BDT.weights.xml")),
+  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_6_BDTnCuts2000_BDT.weights.xml")),
+
+
+
 
 
   fPVFromBranch      (true),
@@ -142,9 +145,17 @@ void PhotonIDMod::Process()
     }
     // ---------------------------------------------------------------------
 
+    //loose photon preselection for subsequent mva
+    if(fPhIdType == kMITPhSelection ) {
+      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,_tRho,fApplyElectronVeto) ) {
+        GoodPhotons->Add(fPhotons->At(i));
+      }
+      continue;
+    }
+
     // add MingMings MVA ID on single Photon level
     if(fPhIdType == kMITMVAId ) {
-      if( fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _tRho, fElectrons, fPhotonPtMin ,fbdtCutBarrel,fbdtCutEndcap, fApplyElectronVeto) ) {
+      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _tRho ,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto) ) {
 	GoodPhotons->Add(fPhotons->At(i));
       }
       continue;
@@ -336,7 +347,12 @@ void PhotonIDMod::SlaveBegin()
     fPhIdType = kMITMVAId;
     fPhotonIsoType = "NoIso";
     fTool.InitializeMVA(fVariableType,fEndcapWeights,fBarrelWeights);
-  } else {
+  }
+  else if (fPhotonIDType.CompareTo("MITSelection") == 0)  {
+    fPhIdType = kMITPhSelection;
+    fPhotonIsoType = "NoIso";    
+  }
+  else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified photon identification %s is not defined.",
               fPhotonIDType.Data());

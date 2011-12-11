@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.6 2011/07/15 19:42:36 fabstoec Exp $
+// $Id: VertexTools.cc,v 1.7 2011/11/18 00:07:17 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -613,8 +613,8 @@ double VertexTools::VtxMvaP(float ptbal, float ptasym, float logsumpt2, float li
 
 //------------------------------------------------------------------------------------
 //Compute contribution to relative uncertainty sigma_m/m from primary vertex location
-//given ecal shower positions of two photons, plus the beasmpot z width dz
-//code from Y. Gershtein
+//given ecal shower positions of two photons, plus the vtx z uncertainty (typically sqrt(2)*beamspot width)
+//code originally from Y. Gershtein
 Double_t VertexTools::DeltaMassVtx(Double_t x1, Double_t y1, Double_t z1,
             Double_t x2, Double_t y2, Double_t z2,
             Double_t dz)
@@ -636,6 +636,6 @@ Double_t VertexTools::DeltaMassVtx(Double_t x1, Double_t y1, Double_t z1,
       Double_t rad1 = sech1*(sech1*tanh2-tanh1*sech2*cos12)/(1-tanh1*tanh2-sech1*sech2*cos12);
       Double_t rad2 = sech2*(sech2*tanh1-tanh2*sech1*cos12)/(1-tanh2*tanh1-sech2*sech1*cos12);
 
-      return dz * fabs(rad1/r1 + rad2/r2);
+      return dz * 0.5*fabs(rad1/r1 + rad2/r2);
       
 }

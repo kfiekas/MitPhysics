@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.28 2011/07/27 15:17:37 bendavid Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.29 2011/08/03 17:15:43 bendavid Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -21,6 +21,7 @@
 #include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitPhysics/Mods/interface/PhotonCiCMod.h"
+#include "MitPhysics/Mods/interface/PhotonMvaMod.h"
 #include "MitPhysics/Mods/interface/PhotonPairSelector.h"
 #include "MitPhysics/Mods/interface/PhotonTreeWriter.h"
 #include "MitPhysics/Mods/interface/TauCleaningMod.h"
@@ -61,6 +62,7 @@
 #pragma link C++ class mithep::PhotonIDMod+;
 #pragma link C++ class mithep::PhotonCiCMod+;
 #pragma link C++ class mithep::PhotonPairSelector+;
+#pragma link C++ class mithep::PhotonMvaMod+;
 #pragma link C++ class mithep::PhotonTreeWriter+;
 #pragma link C++ class mithep::PhotonTreeWriterPhoton+;
 #pragma link C++ class mithep::PhotonTreeWriterDiphotonEvent+;

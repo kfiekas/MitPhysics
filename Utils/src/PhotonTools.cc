@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.17 2011/12/03 22:31:48 mingyang Exp $
+// $Id: PhotonTools.cc,v 1.18 2011/12/06 23:27:31 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -21,7 +21,14 @@ PhotonTools::PhotonTools()
 PhotonTools::eScaleCats PhotonTools::EScaleCat(const Photon *p)
 {
   if (p->SCluster()->AbsEta()<1.0) {
-    if (p->R9()>0.94) return kEBlowEtaGold;
+    if (p->R9()>0.94) {
+      Int_t ieta = p->SCluster()->Seed()->IEta();
+      Int_t iphi = p->SCluster()->Seed()->IPhi();      
+      Bool_t central = ( ((std::abs(ieta)-1)/5+1 >= 2 && (std::abs(ieta)-1)/5+1 < 5) || ((std::abs(ieta)-1)/5+1 >= 7 && (std::abs(ieta)-1)/5+1 < 9  ) || ((std::abs(ieta)-1)/5+1 >= 11 && (std::abs(ieta)-1)/5+1 < 13) || ((std::abs(ieta)-1)/5+1 >= 15 && (std::abs(ieta)-1)/5+1 < 17) ) && (iphi %20) > 5 && (iphi%20) <16;
+      
+      if (central) return kEBlowEtaGoldCenter;
+      else return kEBlowEtaGoldGap;
+    }
     else return kEBlowEtaBad;
   }
   else if (p->SCluster()->AbsEta()<1.5) {
@@ -590,7 +597,7 @@ PhotonTools::DiphotonR9EtaPtCats PhotonTools::DiphotonR9EtaPtCat(const Photon *p
   return evtcat;
 }
 
-Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v, const TrackCol* trackCol,double rho){
+Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v, const TrackCol* trackCol,double rho, Bool_t applyElectronVeto){
   float ScEta=p->SCluster()->Eta();
   float Et=p->Et();
   float R9=p->R9();
@@ -604,8 +611,7 @@ Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *e
   float NewTrkIsoHollowDr03=TrkIsoHollowDr03-0.002*Et;
   Bool_t IsBarrel=kFALSE;
   Bool_t IsEndcap=kFALSE;
-  Bool_t PassEleVeto=PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, v);
-
+  Bool_t PassEleVeto = (!applyElectronVeto) || PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, v);
   float AbsTrackIsoCIC=IsolationTools::CiCTrackIsolation(p,v, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0,trackCol);
   float HcalEcalPUCorr=EcalIsoDr03+HcalIsoDr03-0.17*rho;
 

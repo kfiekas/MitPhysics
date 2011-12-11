@@ -39,12 +39,14 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPileUpName        (Names::gkPileupInfoBrn),  
   fSuperClusterName  ("PFSuperClusters"),
   fPFMetName         ("PFMet"),
+  fPFJetName         (Names::gkPFJetBrn),
 
   
   fIsData            (false),
   fPhotonsFromBranch (true),  
   fPVFromBranch      (true),
   fGoodElectronsFromBranch (kTRUE),
+  fPFJetsFromBranch  (kTRUE),
 
   // ----------------------------------------
   // collections....
@@ -59,6 +61,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fMCParticles       (0),
   fPileUp            (0),
   fSuperClusters     (0),
+  fPFJets            (0),
 
   fLoopOnGoodElectrons(kFALSE),
   fInvertElectronVeto(kFALSE),  
@@ -67,6 +70,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fWriteSingleTree(kTRUE),
   fExcludeSinglePrompt(kFALSE),
   fExcludeDoublePrompt(kFALSE),
+  fEnableJets(kFALSE),
   fPhFixDataFile(gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fTupleName         ("hPhotonTree")
 
@@ -107,6 +111,7 @@ void PhotonTreeWriter::Process()
   LoadEventObject(fPFCandName,         fPFCands);
   LoadEventObject(fSuperClusterName,   fSuperClusters);
   LoadEventObject(fPFMetName,   fPFMet);  
+  if (fEnableJets) LoadEventObject(fPFJetName,   fPFJets);  
 
   // ------------------------------------------------------------  
   // load event based information
@@ -177,6 +182,32 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->masscoreleerr = -99.;
   fDiphotonEvent->ismc = GetEventHeader()->IsMC();
   
+  //jets
+  const Jet *jet1 = 0;
+  const Jet *jet2 = 0;
+  const Jet *jetcentral = 0;
+
+  fDiphotonEvent->jet1pt   = -99.;
+  fDiphotonEvent->jet1eta  = -99.;
+  fDiphotonEvent->jet1phi  = -99.;
+  fDiphotonEvent->jet1mass = -99.;
+  fDiphotonEvent->jet2pt   = -99.;
+  fDiphotonEvent->jet2eta  = -99.;
+  fDiphotonEvent->jet2phi  = -99.;
+  fDiphotonEvent->jet2mass = -99.;
+  fDiphotonEvent->jetcentralpt   = -99.;
+  fDiphotonEvent->jetcentraleta  = -99.;
+  fDiphotonEvent->jetcentralphi  = -99.;
+  fDiphotonEvent->jetcentralmass = -99.;
+  fDiphotonEvent->dijetpt = -99.;
+  fDiphotonEvent->dijeteta = -99.;
+  fDiphotonEvent->dijetphi = -99.;
+  fDiphotonEvent->dijetmass = -99.;   
+  fDiphotonEvent->jetetaplus = -99.;
+  fDiphotonEvent->jetetaminus = -99.;
+  fDiphotonEvent->zeppenfeld = -99.;
+  fDiphotonEvent->dphidijetgg = -99.;
+  
   Int_t nhitsbeforevtxmax = 1;
   if (fInvertElectronVeto) nhitsbeforevtxmax = 999;  
   
@@ -225,6 +256,14 @@ void PhotonTreeWriter::Process()
       phgen2 = PhotonTools::MatchMC(p2,fMCParticles,fInvertElectronVeto);
     }
     
+/*    if (phgen1 && phgen2) {
+      printf("p1     pt = %5f, eta = %5f, phi = %5f\n",p1->Pt(),p1->Eta(),p1->Phi());
+      printf("p2     pt = %5f, eta = %5f, phi = %5f\n",p2->Pt(),p2->Eta(),p2->Phi());
+      printf("phgen1 pt = %5f, eta = %5f, phi = %5f, pdg = %i, motherpdg = %i, distinctmotherpdg = %i, distinctmotherstatus = %i\n",phgen1->Pt(),phgen1->Eta(),phgen1->Phi(),phgen1->PdgId(),phgen1->Mother()->PdgId(),phgen1->DistinctMother()->PdgId(),phgen1->DistinctMother()->Status());
+      printf("phgen2 pt = %5f, eta = %5f, phi = %5f, pdg = %i, motherpdg = %i, distinctmotherpdg = %i, distinctmotherstatus = %i\n",phgen2->Pt(),phgen2->Eta(),phgen2->Phi(),phgen2->PdgId(),phgen2->Mother()->PdgId(),phgen2->DistinctMother()->PdgId(),phgen2->DistinctMother()->Status());
+    }  */  
+    
+    
     if (fExcludeSinglePrompt && (phgen1 || phgen2) ) return;
     if (fExcludeDoublePrompt && (phgen1 && phgen2) ) return;
     
@@ -235,12 +274,69 @@ void PhotonTreeWriter::Process()
       fDiphotonEvent->vtxprob = phHard->VtxProb();
     }
     
+    //fill jet variables
+    if (fEnableJets) {
+      for (UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet) {
+        const Jet *jet = fPFJets->At(ijet);
+        if (jet->AbsEta()<4.7 && MathUtils::DeltaR(jet,p1)>0.3 && MathUtils::DeltaR(jet,p2)>0.3) {
+          if (!jet1) jet1 = jet;
+          else if (!jet2) jet2 = jet;
+          else if (!jetcentral && 0) jetcentral = jet;
+        }
+        if (jet1&&jet2&&jetcentral) break;
+      }
+    }
+    
+    if (jet1) {
+      fDiphotonEvent->jet1pt   = jet1->Pt();
+      fDiphotonEvent->jet1eta  = jet1->Eta();
+      fDiphotonEvent->jet1phi  = jet1->Phi();
+      fDiphotonEvent->jet1mass = jet1->Mass();
+    }
+    
+    if (jet2) {
+      fDiphotonEvent->jet2pt   = jet2->Pt();
+      fDiphotonEvent->jet2eta  = jet2->Eta();
+      fDiphotonEvent->jet2phi  = jet2->Phi();
+      fDiphotonEvent->jet2mass = jet2->Mass();
+    }
+  
+    if (jetcentral) {
+      fDiphotonEvent->jetcentralpt   = jetcentral->Pt();
+      fDiphotonEvent->jetcentraleta  = jetcentral->Eta();
+      fDiphotonEvent->jetcentralphi  = jetcentral->Phi();
+      fDiphotonEvent->jetcentralmass = jetcentral->Mass();
+    }
+    
+    if (jet1&&jet2){
+      FourVectorM momjj = (jet1->Mom() + jet2->Mom());
+      
+      fDiphotonEvent->dijetpt =  momjj.Pt();
+      fDiphotonEvent->dijeteta = momjj.Eta();
+      fDiphotonEvent->dijetphi = momjj.Phi();
+      fDiphotonEvent->dijetmass = momjj.M();    
+      
+      if (jet1->Eta()>jet2->Eta()) {
+        fDiphotonEvent->jetetaplus = jet1->Eta();
+        fDiphotonEvent->jetetaminus = jet2->Eta();
+      }
+      else {
+        fDiphotonEvent->jetetaplus = jet2->Eta();
+        fDiphotonEvent->jetetaminus = jet1->Eta();      
+      }
+      
+    }
+    
+    
+    
     Double_t _mass = -99.;
     Double_t _masserr = -99.;
     Double_t _masserrsmeared = -99.;
     Double_t _masserrwrongvtx = -99.;
     Double_t _masserrsmearedwrongvtx = -99.;
     Double_t _ptgg = -99.;
+    Double_t _etagg = -99.;
+    Double_t _phigg = -99.;    
     Double_t _costheta = -99.;
     PhotonTools::DiphotonR9EtaPtCats _evtcat = PhotonTools::kOctCat0;
     if (phHard && phSoft) {
@@ -248,17 +344,25 @@ void PhotonTreeWriter::Process()
       _masserr = 0.5*_mass*TMath::Sqrt(phHard->EnergyErr()*phHard->EnergyErr()/phHard->E()/phHard->E() + phSoft->EnergyErr()*phSoft->EnergyErr()/phSoft->E()/phSoft->E());
       _masserrsmeared = 0.5*_mass*TMath::Sqrt(phHard->EnergyErrSmeared()*phHard->EnergyErrSmeared()/phHard->E()/phHard->E() + phSoft->EnergyErrSmeared()*phSoft->EnergyErrSmeared()/phSoft->E()/phSoft->E());
       _ptgg = (phHard->Mom()+phSoft->Mom()).Pt();
+      _etagg = (phHard->Mom()+phSoft->Mom()).Eta();
+      _phigg = (phHard->Mom()+phSoft->Mom()).Phi();
       _costheta = ThreeVector(phHard->Mom()).Unit().Dot(ThreeVector(phSoft->Mom()).Unit());
       _evtcat = PhotonTools::DiphotonR9EtaPtCat(phHard,phSoft);
       
-      const Double_t dz = 5.8;
+      const Double_t dz = sqrt(2.0)*5.8;
       Double_t deltamvtx = _mass*VertexTools::DeltaMassVtx(phHard->CaloPos().X(), phHard->CaloPos().Y(), phHard->CaloPos().Z(),
             phSoft->CaloPos().X(), phSoft->CaloPos().Y(), phSoft->CaloPos().Z(),
             dz);
             
+      fDiphotonEvent->deltamvtx = deltamvtx;
+            
       _masserrwrongvtx = TMath::Sqrt(_masserr*_masserr + deltamvtx*deltamvtx);
       _masserrsmearedwrongvtx = TMath::Sqrt(_masserrsmeared*_masserrsmeared + deltamvtx*deltamvtx);
             
+      if (jet1 && jet2) {
+        fDiphotonEvent->zeppenfeld = TMath::Abs(_etagg - 0.5*(jet1->Eta()+jet2->Eta()));
+        fDiphotonEvent->dphidijetgg = MathUtils::DeltaPhi( (jet1->Mom()+jet2->Mom()).Phi(), _phigg );
+      }
       
     }
       
@@ -284,6 +388,8 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->masserrwrongvtx = _masserrwrongvtx;
     fDiphotonEvent->masserrsmearedwrongvtx = _masserrsmearedwrongvtx;    
     fDiphotonEvent->ptgg = _ptgg;
+    fDiphotonEvent->etagg = _etagg;
+    fDiphotonEvent->phigg = _phigg;
     fDiphotonEvent->costheta =  _costheta;;
     fDiphotonEvent->massele = _massele;
     fDiphotonEvent->ptee = _ptee;
@@ -396,6 +502,7 @@ void PhotonTreeWriter::SlaveBegin()
   ReqEventObject(fPFCandName,         fPFCands,    true);
   ReqEventObject(fSuperClusterName,   fSuperClusters, true);
   ReqEventObject(fPFMetName,   fPFMet, true);
+  if (fEnableJets) ReqEventObject(fPFJetName,   fPFJets, fPFJetsFromBranch);
   
   if (!fIsData) {
     ReqBranch(fPileUpName,            fPileUp);
@@ -543,10 +650,26 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         }
       }
   
-//       if (p && ele) {
-//         printf("p    : r9 = %5f, e33 = %5f, e55 = %5f, hovere = %5f, sigieie = %5f\n",p->R9(),p->E33(),p->E55(),p->HadOverEm(),p->CoviEtaiEta());
-//         printf("ele/b: r9 = %5f, e33 = %5f, e55 = %5f, hovere = %5f, sigieie = %5f\n",b->E3x3()/s->RawEnergy(),b->E3x3(),b->E5x5(),ele->HadronicOverEm(),ele->CoviEtaiEta());
-//       }
+      const BasicCluster *bclast = 0;
+      Double_t ebcmin = 1e6;
+      for (UInt_t i=0; i<s->ClusterSize(); ++i) {
+        const BasicCluster *bc = s->Cluster(i);
+        if (bc->Energy() < ebcmin && bc !=b) {
+          bclast = bc;
+          ebcmin = bc->Energy();
+        }
+      }
+
+      const BasicCluster *bclast2 = 0;
+      ebcmin = 1e6;
+      for (UInt_t i=0; i<s->ClusterSize(); ++i) {
+        const BasicCluster *bc = s->Cluster(i);
+        if (bc->Energy() < ebcmin && bc !=b && bc!=bclast) {
+          bclast2 = bc;
+          ebcmin = bc->Energy();
+        }
+      }
+  
       
       if (p) {
         hasphoton = kTRUE;
@@ -563,6 +686,10 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         eerr = p->EnergyErr();
         eerrsmeared = p->EnergyErrSmeared();
         esmearing = p->EnergySmearing();
+        idmva = p->IdMva();
+        hcalisodr03 = p->HcalTowerSumEtDr03();
+        ecalisodr03 = p->EcalRecHitIsoDr03();
+        trkisohollowdr03 = p->HollowConeTrkIsoDr03();
       }
       else {
         hasphoton = kFALSE;
@@ -579,6 +706,7 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         eerr = -99.;
         eerrsmeared = -99.;
         esmearing = 0.;
+        idmva = -99.;
       }
        
       
@@ -595,33 +723,6 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
       isr9reco = (isbarrel && r9>0.94) || (!isbarrel && r9>0.95);
       isr9cat = (r9>0.94);
       
-      
-      
-      
-      sigiphiphi = TMath::Sqrt(b->CoviPhiiPhi());
-      if (isnan(sigiphiphi)) sigiphiphi = -99.;
-      covietaiphi = b->CoviEtaiPhi();
-      if (isnan(covietaiphi)) covietaiphi = -99.;
-      emax = b->EMax();
-      e2nd = b->E2nd();
-      etop = b->ETop();
-      ebottom = b->EBottom();
-      eleft = b->ELeft();
-      eright = b->ERight();
-      e1x3 = b->E1x3();
-      e3x1 = b->E3x1();
-      e1x5 = b->E1x5();
-      e2x2 = b->E2x2();
-      e4x4 = b->E4x4();
-      e2x5max = b->E2x5Max();
-      e2x5top = b->E2x5Top();
-      e2x5bottom = b->E2x5Bottom();
-      e2x5left = b->E2x5Left();
-      e2x5right = b->E2x5Right();
-      xseed = b->Pos().X();
-      yseed = b->Pos().Y();
-      zseed = b->Pos().Z();
-      
       eseed = b->Energy();      
       etaseed = b->Eta();
       phiseed = b->Phi();
@@ -635,6 +736,34 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
       ycryseed = b->YCry();
       thetaaxisseed = b->ThetaAxis();
       phiaxisseed = b->PhiAxis();
+      sigietaietaseed = TMath::Sqrt(b->CoviEtaiEta());
+      sigiphiphiseed = TMath::Sqrt(b->CoviPhiiPhi());
+      if (isnan(sigiphiphiseed)) sigiphiphiseed = -99.;
+      covietaiphiseed = b->CoviEtaiPhi();
+      if (isnan(covietaiphiseed)) covietaiphiseed = -99.;
+      e3x3seed = b->E3x3();
+      e5x5seed = b->E5x5();
+      emaxseed = b->EMax();
+      e2ndseed = b->E2nd();
+      etopseed = b->ETop();
+      ebottomseed = b->EBottom();
+      eleftseed = b->ELeft();
+      erightseed = b->ERight();
+      e1x3seed = b->E1x3();
+      e3x1seed = b->E3x1();
+      e1x5seed = b->E1x5();
+      e2x2seed = b->E2x2();
+      e4x4seed = b->E4x4();
+      e2x5maxseed = b->E2x5Max();
+      e2x5topseed = b->E2x5Top();
+      e2x5bottomseed = b->E2x5Bottom();
+      e2x5leftseed = b->E2x5Left();
+      e2x5rightseed = b->E2x5Right();
+      xseedseed = b->Pos().X();
+      yseedseed = b->Pos().Y();
+      zseedseed = b->Pos().Z();
+      nhitsseed = b->NHits();
+      
       
       if (b2) {
         ebc2 = b2->Energy();      
@@ -649,24 +778,163 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         xcrybc2 = b2->XCry();
         ycrybc2 = b2->YCry();
         thetaaxisbc2 = b2->ThetaAxis();
-        phiaxisbc2 = b2->PhiAxis();        
+        phiaxisbc2 = b2->PhiAxis();
+        sigietaietabc2 = TMath::Sqrt(b2->CoviEtaiEta());
+        sigiphiphibc2 = TMath::Sqrt(b2->CoviPhiiPhi());
+        if (isnan(sigiphiphibc2)) sigiphiphibc2 = -99.;
+        covietaiphibc2 = b2->CoviEtaiPhi();
+        if (isnan(covietaiphibc2)) covietaiphibc2 = -99.;
+        e3x3bc2 = b2->E3x3();
+        e5x5bc2 = b2->E5x5();
+        emaxbc2 = b2->EMax();
+        e2ndbc2 = b2->E2nd();
+        etopbc2 = b2->ETop();
+        ebottombc2 = b2->EBottom();
+        eleftbc2 = b2->ELeft();
+        erightbc2 = b2->ERight();
+        e1x3bc2 = b2->E1x3();
+        e3x1bc2 = b2->E3x1();
+        e1x5bc2 = b2->E1x5();
+        e2x2bc2 = b2->E2x2();
+        e4x4bc2 = b2->E4x4();
+        e2x5maxbc2 = b2->E2x5Max();
+        e2x5topbc2 = b2->E2x5Top();
+        e2x5bottombc2 = b2->E2x5Bottom();
+        e2x5leftbc2 = b2->E2x5Left();
+        e2x5rightbc2 = b2->E2x5Right();
+        xbc2bc2 = b2->Pos().X();
+        ybc2bc2 = b2->Pos().Y();
+        zbc2bc2 = b2->Pos().Z();      
+        nhitsbc2= b2->NHits();
       }
       else {
-        ebc2 = 0.;
-        etabc2 = 0.;
-        phibc2 = 0.;
-        ietabc2 = 0.;
-        iphibc2 = 0.;
-        ixbc2 = 0.;
-        iybc2 = 0.;
-        etacrybc2 = 0.;
-        phicrybc2 = 0.;
-        xcrybc2 = 0.;
-        ycrybc2 = 0.;
-        thetaaxisbc2 = 0.;
-        phiaxisbc2 = 0.;
+        ebc2 = 0;
+        etabc2 = 0;
+        phibc2 = 0;
+        ietabc2 = 0;
+        iphibc2 = 0;
+        ixbc2 = 0;
+        iybc2 = 0;
+        etacrybc2 = 0;
+        phicrybc2 = 0;
+        xcrybc2 = 0;
+        ycrybc2 = 0;
+        thetaaxisbc2 = 0;
+        phiaxisbc2 = 0;
+        sigietaietabc2 = 0;
+        sigiphiphibc2 = 0;
+        covietaiphibc2 = 0;
+        e3x3bc2 = 0;
+        e5x5bc2 = 0;
+        emaxbc2 = 0;
+        e2ndbc2 = 0;
+        etopbc2 = 0;
+        ebottombc2 = 0;
+        eleftbc2 = 0;
+        erightbc2 = 0;
+        e1x3bc2 = 0;
+        e3x1bc2 = 0;
+        e1x5bc2 = 0;
+        e2x2bc2 = 0;
+        e4x4bc2 = 0;
+        e2x5maxbc2 = 0;
+        e2x5topbc2 = 0;
+        e2x5bottombc2 = 0;
+        e2x5leftbc2 = 0;
+        e2x5rightbc2 = 0;
+        xbc2bc2 = 0;
+        ybc2bc2 = 0;
+        zbc2bc2 = 0;
+        nhitsbc2 = 0;
       }
-      
+
+      if (bclast) {
+        ebclast = bclast->Energy();      
+        etabclast = bclast->Eta();
+        phibclast = bclast->Phi();
+        ietabclast = bclast->IEta();
+        iphibclast = bclast->IPhi();
+        ixbclast = bclast->IX();
+        iybclast = bclast->IY();
+        etacrybclast = bclast->EtaCry();
+        phicrybclast = bclast->PhiCry();
+        xcrybclast = bclast->XCry();
+        ycrybclast = bclast->YCry();
+        thetaaxisbclast = bclast->ThetaAxis();
+        phiaxisbclast = bclast->PhiAxis();
+        sigietaietabclast = TMath::Sqrt(bclast->CoviEtaiEta());
+        sigiphiphibclast = TMath::Sqrt(bclast->CoviPhiiPhi());
+        if (isnan(sigiphiphibclast)) sigiphiphibclast = -99.;
+        covietaiphibclast = bclast->CoviEtaiPhi();
+        if (isnan(covietaiphibclast)) covietaiphibclast = -99.;
+        e3x3bclast = bclast->E3x3();
+        nhitsbclast = bclast->NHits();
+      }
+      else {
+        ebclast = 0;
+        etabclast = 0;
+        phibclast = 0;
+        ietabclast = 0;
+        iphibclast = 0;
+        ixbclast = 0;
+        iybclast = 0;
+        etacrybclast = 0;
+        phicrybclast = 0;
+        xcrybclast = 0;
+        ycrybclast = 0;
+        thetaaxisbclast = 0;
+        phiaxisbclast = 0;
+        sigietaietabclast = 0;
+        sigiphiphibclast = 0;
+        covietaiphibclast = 0;
+        e3x3bclast = 0;
+        nhitsbclast = 0;
+      }
+
+      if (bclast2) {
+        ebclast2 = bclast2->Energy();      
+        etabclast2 = bclast2->Eta();
+        phibclast2 = bclast2->Phi();
+        ietabclast2 = bclast2->IEta();
+        iphibclast2 = bclast2->IPhi();
+        ixbclast2 = bclast2->IX();
+        iybclast2 = bclast2->IY();
+        etacrybclast2 = bclast2->EtaCry();
+        phicrybclast2 = bclast2->PhiCry();
+        xcrybclast2 = bclast2->XCry();
+        ycrybclast2 = bclast2->YCry();
+        thetaaxisbclast2 = bclast2->ThetaAxis();
+        phiaxisbclast2 = bclast2->PhiAxis();
+        sigietaietabclast2 = TMath::Sqrt(bclast2->CoviEtaiEta());
+        sigiphiphibclast2 = TMath::Sqrt(bclast2->CoviPhiiPhi());
+        if (isnan(sigiphiphibclast2)) sigiphiphibclast2 = -99.;
+        covietaiphibclast2 = bclast2->CoviEtaiPhi();
+        if (isnan(covietaiphibclast2)) covietaiphibclast2 = -99.;
+        e3x3bclast2 = bclast2->E3x3();
+        nhitsbclast2 = bclast2->NHits();
+      }
+      else {
+        ebclast2 = 0;
+        etabclast2 = 0;
+        phibclast2 = 0;
+        ietabclast2 = 0;
+        iphibclast2 = 0;
+        ixbclast2 = 0;
+        iybclast2 = 0;
+        etacrybclast2 = 0;
+        phicrybclast2 = 0;
+        xcrybclast2 = 0;
+        ycrybclast2 = 0;
+        thetaaxisbclast2 = 0;
+        phiaxisbclast2 = 0;
+        sigietaietabclast2 = 0;
+        sigiphiphibclast2 = 0;
+        covietaiphibclast2 = 0;
+        e3x3bclast2 = 0;
+        nhitsbclast2 = 0;
+      }
+
+
       //initialize photon energy corrections if needed
       /*if (!PhotonFix::initialised()) {
         PhotonFix::initialise("4_2",std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFix.dat")).Data()));  
@@ -835,6 +1103,9 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         genphi = m->Phi();
         const MCParticle *mm = m->DistinctMother();
         if (mm) genz = mm->DecayVertex().Z();
+        pdgid = m->PdgId();
+        if (mm) motherpdgid = mm->PdgId();
+        else motherpdgid = -99;
       }
       else {
         ispromptgen = kFALSE;
@@ -842,6 +1113,8 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         genpt = -99.;
         geneta = -99.;
         genphi = -99.;
+        pdgid = -99;
+        motherpdgid = -99;
       }
             
 }

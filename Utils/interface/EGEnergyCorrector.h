@@ -45,8 +45,10 @@ namespace mithep {
       void Initialize(Bool_t ismc, TString phfixstring, TString phfixfile, TString regweights);
       Bool_t IsInitialized() const { return fIsInitialized; }
       
-      void CorrectEnergyWithError(Photon *p);
+      void CorrectEnergyWithError(Photon *p, const VertexCol *vtxs = 0, UInt_t version=1);
       std::pair<double,double> CorrectedEnergyWithError(const Photon *p);
+      std::pair<double,double> CorrectedEnergyWithErrorV2(const Photon *p, const VertexCol *vtxs);
+
       
     protected:
       PhotonFix fPhFix;

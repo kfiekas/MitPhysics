@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.5 2011/12/05 01:39:48 mingyang Exp $
+// $Id: MVATools.cc,v 1.6 2011/12/07 00:45:17 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -168,12 +168,12 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
   
 }
 
-Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,Float_t bdtCutBarrel, Float_t bdtCutEndcap) {
+Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,Float_t bdtCutBarrel, Float_t bdtCutEndcap, const ElectronCol* els, Bool_t applyElectronVeto) {
   
   //initilize the bool value
   PassMVA=kFALSE;
   
-  Float_t photon_bdt =  MVATools::GetMVAbdtValue(p,vtx,trackCol,vtxCol, _tRho);
+  Float_t photon_bdt =  MVATools::GetMVAbdtValue(p,vtx,trackCol,vtxCol, _tRho, els, applyElectronVeto);
   
   if (isbarrel) {
     if(bdt>bdtCutBarrel){
@@ -211,7 +211,8 @@ Int_t MVATools::PassElectronVetoInt(const Photon* p, const ElectronCol* els) {
   
   isbarrel = (fabs(ScEta_MVA)<1.4442);
 
-  R9 = p->R9();
+  //R9 = p->R9();
+  R9 = p->E33()/p->SCluster()->RawEnergy();
   
   // check which category it is ...
   _tCat = 1;
@@ -229,7 +230,7 @@ Int_t MVATools::PassElectronVetoInt(const Photon* p, const ElectronCol* els) {
 
 //--------------------------------------------------------------------------------------------------
 
-Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho) {
+Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const ElectronCol* els, Bool_t applyElectronVeto) {
   
   //get the variables used to compute MVA variables
   ecalIso3 = p->EcalRecHitIsoDr03();
@@ -238,13 +239,13 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   
   wVtxInd = 0;
   
-  trackIso1 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol);//Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
+  trackIso1 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, NULL, NULL, (!applyElectronVeto ? els : NULL) );//Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
   
   // track iso only
-  trackIso3 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol);
+  trackIso3 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, NULL, NULL, (!applyElectronVeto ? els : NULL) );
   
   // track iso worst vtx
-  trackIso2 = IsolationTools::CiCTrackIsolation(p,vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, &wVtxInd,vtxCol);
+  trackIso2 = IsolationTools::CiCTrackIsolation(p,vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, &wVtxInd,vtxCol, (!applyElectronVeto ? els : NULL) );
   
   combIso1 = ecalIso3+hcalIso4+trackIso1 - 0.17*_tRho;
   combIso2 = ecalIso4+hcalIso4+trackIso2 - 0.52*_tRho;
