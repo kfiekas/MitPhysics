@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.4 2011/11/18 00:07:16 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.5 2011/12/11 00:03:04 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -392,7 +392,7 @@ namespace mithep
     void                SetIsData (Bool_t b) { fIsData = b;};
     
 
-    void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b;     }          
+    void                SetApplyElectronVeto(Bool_t b)   { fApplyElectronVeto = b;     }          
 
     void                SetTupleName(const char* c)     { fTupleName     = c; }
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
@@ -453,7 +453,7 @@ namespace mithep
     
     // --------------------------------
     Bool_t fLoopOnGoodElectrons; //primary loop over good electrons collection instead of photons
-    Bool_t              fInvertElectronVeto;    //=true then invert electron veto (for cic selection only atm)     
+    Bool_t              fApplyElectronVeto;    //=true then invert electron veto (for cic selection only atm)     
     Bool_t fWriteDiphotonTree;
     Bool_t fWriteSingleTree;
 

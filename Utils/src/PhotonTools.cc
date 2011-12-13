@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.18 2011/12/06 23:27:31 mingyang Exp $
+// $Id: PhotonTools.cc,v 1.19 2011/12/11 00:03:05 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -597,7 +597,7 @@ PhotonTools::DiphotonR9EtaPtCats PhotonTools::DiphotonR9EtaPtCat(const Photon *p
   return evtcat;
 }
 
-Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v, const TrackCol* trackCol,double rho, Bool_t applyElectronVeto){
+Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *v, const TrackCol* trackCol,double rho, Bool_t applyElectronVeto, Bool_t invertElectronVeto) {
   float ScEta=p->SCluster()->Eta();
   float Et=p->Et();
   float R9=p->R9();
@@ -611,8 +611,9 @@ Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *e
   float NewTrkIsoHollowDr03=TrkIsoHollowDr03-0.002*Et;
   Bool_t IsBarrel=kFALSE;
   Bool_t IsEndcap=kFALSE;
-  Bool_t PassEleVeto = (!applyElectronVeto) || PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, v);
-  float AbsTrackIsoCIC=IsolationTools::CiCTrackIsolation(p,v, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0,trackCol);
+  Bool_t PassEleVetoRaw = PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, v);  
+  Bool_t PassEleVeto = (!applyElectronVeto && !invertElectronVeto) || (applyElectronVeto && !invertElectronVeto && PassEleVetoRaw) || (!applyElectronVeto && invertElectronVeto && !PassEleVetoRaw);
+  float AbsTrackIsoCIC=IsolationTools::CiCTrackIsolation(p,v, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0,trackCol, NULL, NULL, (!applyElectronVeto ? els : NULL) );
   float HcalEcalPUCorr=EcalIsoDr03+HcalIsoDr03-0.17*rho;
 
   if(fabs(ScEta)<1.4442){IsBarrel=kTRUE;}

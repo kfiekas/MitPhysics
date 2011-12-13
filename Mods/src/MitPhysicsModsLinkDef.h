@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.29 2011/08/03 17:15:43 bendavid Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.30 2011/12/11 00:03:04 bendavid Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -29,6 +29,7 @@
 #include "MitPhysics/Mods/interface/TauIDMod.h"
 #include "MitPhysics/Mods/interface/PFTauIDMod.h"
 #include "MitPhysics/Mods/interface/TrackingPurityFilterMod.h"
+#include "MitPhysics/Mods/interface/MVASystematicsMod.h"
 #endif
 
 #ifdef __CINT__
@@ -71,4 +72,5 @@
 #pragma link C++ class mithep::TauIDMod+;
 #pragma link C++ class mithep::PFTauIDMod+;
 #pragma link C++ class mithep::TrackingPurityFilterMod+;
+#pragma link C++ class mithep::MVASystematicsMod+;
 #endif

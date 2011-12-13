@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.6 2011/12/07 00:45:17 mingyang Exp $
+// $Id: MVATools.cc,v 1.7 2011/12/11 00:03:05 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -240,10 +240,7 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   wVtxInd = 0;
   
   trackIso1 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, NULL, NULL, (!applyElectronVeto ? els : NULL) );//Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
-  
-  // track iso only
-  trackIso3 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, NULL, NULL, (!applyElectronVeto ? els : NULL) );
-  
+    
   // track iso worst vtx
   trackIso2 = IsolationTools::CiCTrackIsolation(p,vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, &wVtxInd,vtxCol, (!applyElectronVeto ? els : NULL) );
   
@@ -254,7 +251,7 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   
   //mva varialbes v1 and v2
   tIso1 = (combIso1) *50./p->Et();
-  tIso3 = (trackIso3)*50./p->Et();
+  tIso3 = (trackIso1)*50./p->Et();
   tIso2 = (combIso2) *50./(p->MomVtx(vtxCol->At(wVtxInd)->Position()).Pt());
   RelIsoEcal=(ecalIso3-0.17*_tRho)/p->Et();
   RelIsoHcal=(hcalIso4-0.17*_tRho)/p->Et();
@@ -263,7 +260,7 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   HoE = p->HadOverEm();
   covIEtaIEta = p->CoviEtaiEta();
   tIso1abs = combIso1;
-  tIso3abs = trackIso3;
+  tIso3abs = trackIso1;
   tIso2abs = combIso2;
   R9 = p->R9();
 

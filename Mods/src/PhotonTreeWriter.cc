@@ -64,7 +64,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPFJets            (0),
 
   fLoopOnGoodElectrons(kFALSE),
-  fInvertElectronVeto(kFALSE),  
+  fApplyElectronVeto(kTRUE),  
 
   fWriteDiphotonTree(kTRUE),
   fWriteSingleTree(kTRUE),
@@ -209,7 +209,7 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->dphidijetgg = -99.;
   
   Int_t nhitsbeforevtxmax = 1;
-  if (fInvertElectronVeto) nhitsbeforevtxmax = 999;  
+  if (!fApplyElectronVeto) nhitsbeforevtxmax = 999;  
   
   if (egcol->GetEntries()>=2) {
     
@@ -252,8 +252,8 @@ void PhotonTreeWriter::Process()
     const MCParticle *phgen1 = 0;
     const MCParticle *phgen2 = 0;
     if( !fIsData ) {
-      phgen1 = PhotonTools::MatchMC(p1,fMCParticles,fInvertElectronVeto);
-      phgen2 = PhotonTools::MatchMC(p2,fMCParticles,fInvertElectronVeto);
+      phgen1 = PhotonTools::MatchMC(p1,fMCParticles,!fApplyElectronVeto);
+      phgen2 = PhotonTools::MatchMC(p2,fMCParticles,!fApplyElectronVeto);
     }
     
 /*    if (phgen1 && phgen2) {
@@ -455,7 +455,7 @@ void PhotonTreeWriter::Process()
 
     const MCParticle *phgen = 0;
     if( !fIsData ) {
-      phgen = PhotonTools::MatchMC(p,fMCParticles,fInvertElectronVeto);
+      phgen = PhotonTools::MatchMC(p,fMCParticles,!fApplyElectronVeto);
     }
 
     if (fExcludeSinglePrompt && phgen) return;
@@ -510,6 +510,12 @@ void PhotonTreeWriter::SlaveBegin()
   }
   
 
+  if (fIsData) {
+    fPhFixDataFile = gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat");
+  }
+  else {
+    fPhFixDataFile = gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat");
+  }
   
   //initialize photon energy corrections
   //PhotonFix::initialise("4_2",std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFix.dat")).Data()));  
@@ -604,7 +610,7 @@ void PhotonTreeWriter::FindHiggsPtAndZ(Float_t& pt, Float_t& decayZ, Float_t& ma
   // loop over all GEN particles and look for status 1 photons
   for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
     const MCParticle* p = fMCParticles->At(i);
-    if( p->Is(MCParticle::kH) || (fInvertElectronVeto && (p->AbsPdgId()==23||p->AbsPdgId()==24) ) ) {
+    if( p->Is(MCParticle::kH) || (!fApplyElectronVeto && (p->AbsPdgId()==23||p->AbsPdgId()==24) ) ) {
       pt=p->Pt();
       decayZ = p->DecayVertex().Z();
       mass = p->Mass();

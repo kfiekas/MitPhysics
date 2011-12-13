@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.13 2011/11/18 00:07:16 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.14 2011/12/11 00:03:04 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -133,7 +133,7 @@ namespace mithep
       fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
     };
 
-    void                ApplyEleVeto(bool a)            { fApplyEleVeto  = a; }
+    void                SetApplyEleVeto(bool a)            { fApplyEleVeto  = a; }
     void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b;     }          
     void                DoDataEneCorr(bool a)           { fDoDataEneCorr = a; }
     void                DoMCSmear(bool a)               { fDoMCSmear     = a; }
@@ -149,8 +149,6 @@ namespace mithep
     void                SetMCR9Scale(Double_t ebscale, Double_t eescale) { fMCR9ScaleEB = ebscale; fMCR9ScaleEE = eescale; }
     void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
     void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
-    void                SetRegressionVersion(UInt_t v)     { fRegressionVersion = v; }
-    void                SetRegressionWeights(TString f)    { fRegWeights = f; }
     
   protected:
     void                Process();

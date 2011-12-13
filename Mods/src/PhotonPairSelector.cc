@@ -98,9 +98,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
 
   // ---------------------------------------
   rng                (new TRandom3()),  
-  fDoRegression      (kFALSE),
   fPhFixString       ("4_2"),
-  fRegWeights         (gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/gbrph.root")),
   fEtaCorrections    (0),
   // ---------------------------------------
   fDoDataEneCorr     (true),
@@ -120,7 +118,6 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fDoMCErrScaling     (kFALSE),
   fMCErrScaleEB       (1.0),
   fMCErrScaleEE       (1.0),
-  fRegressionVersion(1),
   fRelativePtCuts(kFALSE)
 {
   // Constructor.
@@ -257,29 +254,6 @@ void PhotonPairSelector::Process()
     cat1st.push_back(preselCat[idx1st[iPair]]);
     cat2nd.push_back(preselCat[idx2nd[iPair]]);    
     
-    if (fDoRegression) {
-      if (!egcor.IsInitialized()) {
-        //egcor.Initialize(!fIsData,"4_2",gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat"),"/scratch/bendavid/root/weights-Base/TMVARegressionebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceebph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressioneeph_BDTG.weights.xml","/scratch/bendavid/root/weights-Base/TMVARegressionVarianceeeph_BDTG.weights.xml");
-        egcor.Initialize(!fIsData,fPhFixString,fPhFixFile,fRegWeights);
-      }
-    
-      egcor.CorrectEnergyWithError(fixPh1st[iPair],fPV,fRegressionVersion);
-      egcor.CorrectEnergyWithError(fixPh2nd[iPair],fPV,fRegressionVersion);
-      
-//       if (fRegressionVersion==2) {
-//         printf("ph1 sceta = %5f edm: e = %5f +- %5f, bambu = %5f +- %5f\n",fixPh1st[iPair]->SCluster()->Eta(),fixPh1st[iPair]->EnergyRegr(),fixPh1st[iPair]->EnergyErrRegr(),fixPh1st[iPair]->E(),fixPh1st[iPair]->EnergyErr());
-//         printf("ph2 sceta = %5f edm: e = %5f +- %5f, bambu = %5f +- %5f\n",fixPh2nd[iPair]->SCluster()->Eta(),fixPh2nd[iPair]->EnergyRegr(),fixPh2nd[iPair]->EnergyErrRegr(),fixPh2nd[iPair]->E(),fixPh2nd[iPair]->EnergyErr());        
-//       }
-      
-      ThreeVectorC scpos1 = fixPh1st[iPair]->SCluster()->Point();
-      ThreeVectorC scpos2 = fixPh2nd[iPair]->SCluster()->Point();
-      
-      fixPh1st[iPair]->SetCaloPosXYZ(scpos1.X(),scpos1.Y(),scpos1.Z());
-      fixPh2nd[iPair]->SetCaloPosXYZ(scpos2.X(),scpos2.Y(),scpos2.Z());
-      
-      
-    }
-    
     //scale regression sigmaE in MC if activated
     if (fDoMCErrScaling && !fIsData) {
       if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonError(fixPh1st[iPair],fMCErrScaleEB);
@@ -407,20 +381,13 @@ void PhotonPairSelector::Process()
       trailptcut = trailptcut*pairmass;
     }
     
-    /* Float_t bdt1=-99;
-    Float_t bdt2=-99;
 
-    if(fixPh1st[iPair]->HasPV() && fixPh2nd[iPair]->HasPV()){
-      bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],fixPh1st[iPair]->PV(),fTracks,fPV,_tRho,fElectrons);
-      bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],fixPh2nd[iPair]->PV(),fTracks,fPV,_tRho,fElectrons);
-    }
-    else{
-      bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],fPV->At(0),fTracks,fPV,_tRho,fElectrons);
-      bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],fPV->At(0),fTracks,fPV,_tRho,fElectrons);
-    }
- 
-    fixPh1st[iPair]->SetBDT(bdt1);
-    fixPh2nd[iPair]->SetBDT(bdt2); */
+    //compute id bdt values
+    Double_t bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho, fElectrons, fApplyEleVeto);
+    Double_t bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho, fElectrons, fApplyEleVeto);
+
+    fixPh1st[iPair]->SetIdMva(bdt1);
+    fixPh2nd[iPair]->SetIdMva(bdt2);
 
     
     //printf("applying id\n");
@@ -449,18 +416,9 @@ void PhotonPairSelector::Process()
       break;
     case kMITPhSelection:
       // loose preselection for mva
-      pass1 = ( fixPh1st[iPair]->Pt() > leadptcut  && PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto) );
-      if (pass1) pass2 = ( fixPh2nd[iPair]->Pt() > trailptcut && PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto) );
-      
-      if (pass1 && pass2) {
-        //compute id bdt values
-        Double_t bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho, fElectrons, fApplyEleVeto);
-        Double_t bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho, fElectrons, fApplyEleVeto);
-
-        fixPh1st[iPair]->SetIdMva(bdt1);
-        fixPh2nd[iPair]->SetIdMva(bdt2);
-      }
-      
+      pass1 = ( fixPh1st[iPair]->Pt() > leadptcut  && PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto, fInvertElectronVeto) );
+      if (pass1) pass2 = ( fixPh2nd[iPair]->Pt() > trailptcut && PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto, fInvertElectronVeto) );
+            
       break;
     default:
       pass1 = true;
