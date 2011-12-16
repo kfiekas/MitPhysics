@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.19 2011/12/11 00:03:05 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.20 2011/12/13 21:13:23 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -625,12 +625,12 @@ Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *e
     return kFALSE;
   }
   if(R9<=0.9){
-    if(HoE<0.075 && ((IsBarrel && CovIEtaIEta<0.014) || (IsEndcap && CovIEtaIEta<0.034)) && NewEcalIso<4 && NewHcalIso<4 && NewTrkIsoHollowDr03<4 && HcalEcalPUCorr<3 && AbsTrackIsoCIC<2.8){
+    if(HoE<0.075 && ((IsBarrel && CovIEtaIEta<0.014) || (IsEndcap && CovIEtaIEta<0.034)) && NewEcalIso<4 && NewHcalIso<4 && NewTrkIsoHollowDr03<4 && HcalEcalPUCorr<3 && AbsTrackIsoCIC<2.8 && TrkIsoHollowDr03<4.0) {
       return kTRUE;
     }
   }
   if(R9>0.9){
-    if(((IsBarrel && HoE<0.082 && CovIEtaIEta<0.014) || (IsEndcap && HoE <0.075 && CovIEtaIEta<0.034)) && NewEcalIso<50 && NewHcalIso<50 && NewTrkIsoHollowDr03<50 && HcalEcalPUCorr<3 && AbsTrackIsoCIC<2.8){
+    if(((IsBarrel && HoE<0.082 && CovIEtaIEta<0.014) || (IsEndcap && HoE <0.075 && CovIEtaIEta<0.034)) && NewEcalIso<50 && NewHcalIso<50 && NewTrkIsoHollowDr03<50 && HcalEcalPUCorr<3 && AbsTrackIsoCIC<2.8 && TrkIsoHollowDr03<4.0) {
       return kTRUE;  
     }
   }
