@@ -1,4 +1,4 @@
-// $Id: runHgg.C,v 1.3 2011/02/01 16:45:50 bendavid Exp $
+// $Id: runHgg.C,v 1.2 2011/12/13 21:32:00 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -39,9 +39,9 @@ void runHgg(const char *fileset    = "",
             //const char *dataset      = "s11-h130gg-gf-v11-pu",
             //const char *dataset    = "f11-pj-2em20-v14b-pu",
             //const char *dataset    = "f11--qcd-2em40-v14b-pu",
-            //const char *dataset    = "f11--h120gg-gf-v14b-pu",
+            const char *dataset    = "f11--h120gg-gf-v14b-pu",
             //const char *dataset = "f11--h120gg-vbf-v14b-pu",
-            const char *dataset    = "f11-zjets-v14b-pu",
+            //const char *dataset    = "f11-zjets-v14b-pu",
             //const char *dataset = "s11-zeem20-powheg-v11-pu",
             //const char *dataset = "s11-wjets-v11-pu",
             //const char *dataset = "p11-zll50-v1g1-pu",
@@ -317,7 +317,7 @@ void runHgg(const char *fileset    = "",
   photcic->SetDoMCR9Scaling(kTRUE);
   photcic->SetMCR9Scale(1.0048, 1.00492);
   photcic->SetDoMCErrScaling(kTRUE);
-  photcic->SetMCErrScale(1.07, 1.0);  
+  photcic->SetMCErrScale(1.09, 1.06);    
   photcic->SetIsData(isData);
 
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCNoEleVeto");
@@ -338,7 +338,7 @@ void runHgg(const char *fileset    = "",
   photcicnoeleveto->SetDoMCR9Scaling(kTRUE);
   photcicnoeleveto->SetMCR9Scale(1.0048, 1.00492);
   photcicnoeleveto->SetDoMCErrScaling(kTRUE);
-  photcicnoeleveto->SetMCErrScale(1.07, 1.0);  
+  photcicnoeleveto->SetMCErrScale(1.09, 1.06);    
   photcicnoeleveto->SetApplyEleVeto(kFALSE);
   photcicnoeleveto->SetIsData(isData);
   
@@ -359,9 +359,10 @@ void runHgg(const char *fileset    = "",
   photpresel->AddEnCorrPerRun(177140,178421,0.9901,0.9921,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   photpresel->AddEnCorrPerRun(178424,999999,0.9894,0.9914,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);   
   photpresel->SetDoMCR9Scaling(kTRUE);
-  photpresel->SetMCR9Scale(1.0048, 1.00492);  
+  photpresel->SetMCR9Scale(1.0035, 1.0035);  
+  photpresel->SetDoMCSigIEtaIEtaScaling(kTRUE);
   photpresel->SetDoMCErrScaling(kTRUE);
-  photpresel->SetMCErrScale(1.07, 1.0);    
+  photpresel->SetMCErrScale(1.09, 1.06);    
   photpresel->SetIsData(isData);
 
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
@@ -380,12 +381,22 @@ void runHgg(const char *fileset    = "",
   photpreselinverteleveto->AddEnCorrPerRun(177140,178421,0.9901,0.9921,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   photpreselinverteleveto->AddEnCorrPerRun(178424,999999,0.9894,0.9914,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);   
   photpreselinverteleveto->SetDoMCR9Scaling(kTRUE);
-  photpreselinverteleveto->SetMCR9Scale(1.0048, 1.00492);  
+  photpreselinverteleveto->SetMCR9Scale(1.0035, 1.0035);
+  photpreselinverteleveto->SetDoMCSigIEtaIEtaScaling(kTRUE);
   photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
-  photpreselinverteleveto->SetMCErrScale(1.07, 1.0);    
+  photpreselinverteleveto->SetMCErrScale(1.09, 1.06);    
   photpreselinverteleveto->SetApplyEleVeto(kFALSE);
   photpreselinverteleveto->SetInvertElectronVeto(kTRUE);
   photpreselinverteleveto->SetIsData(isData);  
+  
+  PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
+  photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
+  photpreselnosmear->SetPhotonSelType("MITSelection");
+  photpreselnosmear->SetVertexSelType("CiCMVASelection");
+  photpreselnosmear->SetPhotonsFromBranch(kFALSE);
+  photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
+  photpreselnosmear->SetIsData(isData);  
+  
   
   PhotonTreeWriter *phottreecic = new PhotonTreeWriter("PhotonTreeWriterCiC");
   phottreecic->SetPhotonsFromBranch(kFALSE);
@@ -423,7 +434,16 @@ void runHgg(const char *fileset    = "",
   phottreepreselinverteleveto->SetPFJetName(jetCorr->GetOutputName());  
   phottreepreselinverteleveto->SetApplyElectronVeto(kFALSE);  
   phottreepreselinverteleveto->SetExcludeDoublePrompt(excludedoubleprompt);    
-  phottreepreselinverteleveto->SetIsData(isData);  
+  phottreepreselinverteleveto->SetIsData(isData); 
+  
+  PhotonTreeWriter *phottreepreselnosmear = new PhotonTreeWriter("PhotonTreeWriterPreselNoSmear");
+  phottreepreselnosmear->SetPhotonsFromBranch(kFALSE);
+  phottreepreselnosmear->SetInputPhotonsName(photpreselnosmear->GetOutputName());
+  phottreepreselnosmear->SetEnableJets(kTRUE);
+  phottreepreselnosmear->SetPFJetsFromBranch(kFALSE);
+  phottreepreselnosmear->SetPFJetName(jetCorr->GetOutputName());  
+  phottreepreselnosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
+  phottreepreselnosmear->SetIsData(isData);    
   
   
   PhotonIDMod         *photidcic = new PhotonIDMod("PhotonIDModPresel");
@@ -488,11 +508,14 @@ void runHgg(const char *fileset    = "",
   jetCorr          ->Add(photcicnoeleveto);  
   jetCorr          ->Add(photpresel);  
   jetCorr          ->Add(photpreselinverteleveto);  
+  jetCorr          ->Add(photpreselnosmear);  
 
   photcic         ->Add(phottreecic);
   photcicnoeleveto         ->Add(phottreecicnoeleveto);
   photpresel    ->Add(phottreepresel);
   photpreselinverteleveto    ->Add(phottreepreselinverteleveto);
+  photpreselnosmear    ->Add(phottreepreselnosmear);
+
 
   jetCorr          ->Add(photidcic);
   photidcic       ->Add(phottreesingle);

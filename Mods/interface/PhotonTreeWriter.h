@@ -36,7 +36,7 @@ namespace mithep
   class PhotonTreeWriterPhoton
   {
     public:  
-      void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele);
+      void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
       Float_t Ecor()    const { return ecor;    };
       Float_t Ecorerr() const { return ecorerr; };
       Float_t Ecorele()    const { return ecorele;    };
@@ -73,7 +73,13 @@ namespace mithep
       Float_t ecalisodr03;
       Float_t hcalisodr03;
       Float_t trkisohollowdr03;
-      
+      Float_t ecalisodr04;
+      Float_t hcalisodr04;
+      Float_t trkisohollowdr04;      
+      Float_t trackiso1;
+      Float_t trackiso2;
+      Float_t combiso1;
+      Float_t combiso2;
 
       //quantities from seed basic cluster      
       Float_t eseed;

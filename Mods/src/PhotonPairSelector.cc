@@ -115,6 +115,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fDoMCR9Scaling     (kFALSE),
   fMCR9ScaleEB       (1.0),
   fMCR9ScaleEE       (1.0),
+  fDoMCSigIEtaIEtaScaling(kFALSE),
   fDoMCErrScaling     (kFALSE),
   fMCErrScaleEB       (1.0),
   fMCErrScaleEE       (1.0),
@@ -270,6 +271,14 @@ void PhotonPairSelector::Process()
       
       if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonR9(fixPh2nd[iPair],fMCR9ScaleEB);
       else PhotonTools::ScalePhotonR9(fixPh2nd[iPair],fMCR9ScaleEE);      
+    }
+    
+    if (fDoMCSigIEtaIEtaScaling && !fIsData) {
+      if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetCoviEtaiEta(0.87*fixPh1st[iPair]->CoviEtaiEta() + 0.0011);
+      else fixPh1st[iPair]->SetCoviEtaiEta(0.99*fixPh1st[iPair]->CoviEtaiEta());
+      
+      if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetCoviEtaiEta(0.87*fixPh2nd[iPair]->CoviEtaiEta() + 0.0011);
+      else fixPh2nd[iPair]->SetCoviEtaiEta(0.99*fixPh2nd[iPair]->CoviEtaiEta());    
     }
 
 

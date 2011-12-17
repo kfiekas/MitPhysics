@@ -279,7 +279,7 @@ void PhotonTreeWriter::Process()
     if (fEnableJets) {
       for (UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet) {
         const Jet *jet = fPFJets->At(ijet);
-        if (jet->AbsEta()<4.7 && MathUtils::DeltaR(jet,p1)>0.3 && MathUtils::DeltaR(jet,p2)>0.3) {
+        if (jet->AbsEta()<4.7 && MathUtils::DeltaR(jet,p1)>0.5 && MathUtils::DeltaR(jet,p2)>0.5) {
           if (!jet1) jet1 = jet;
           else if (!jet2) jet2 = jet;
           else if (!jetcentral && 0) jetcentral = jet;
@@ -397,8 +397,8 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->costhetaele =  _costhetaele;    
     fDiphotonEvent->evtcat = _evtcat;
 
-    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele);
-    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele);
+    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,_tRho,fElectrons,fApplyElectronVeto);
+    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,_tRho,fElectrons,fApplyElectronVeto);
     
     Float_t ph1ecor    = fDiphotonEvent->photons[0].Ecor();
     Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
@@ -476,7 +476,7 @@ void PhotonTreeWriter::Process()
       fDiphotonEvent->mtele = TMath::Sqrt(2.0*fPFMet->At(0)->Pt()*ele->Pt()*(1.0-fDiphotonEvent->cosphimetele));      
     }
     
-    fSinglePhoton->SetVars(ph,conv,ele,pfsc,phgen,fPhfixph,fPhfixele);
+    fSinglePhoton->SetVars(ph,conv,ele,pfsc,phgen,fPhfixph,fPhfixele,fTracks,fPV,_tRho,fElectrons,fApplyElectronVeto);
     hCiCTupleSingle->Fill();
     
   }
@@ -637,7 +637,7 @@ Float_t PhotonTreeWriter::GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonT
   return ( ph1IsHR9 && ph2IsHR9 ? 2. : 3.);
 }
 
-void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele) {
+void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const ElectronCol* els, Bool_t applyElectronVeto) {
   
       const SuperCluster *s = 0;
       if (p) {
@@ -695,8 +695,26 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         esmearing = p->EnergySmearing();
         idmva = p->IdMva();
         hcalisodr03 = p->HcalTowerSumEtDr03();
-        ecalisodr03 = p->EcalRecHitIsoDr03();
+        ecalisodr03 = p->EcalRecHitIsoDr03();        
         trkisohollowdr03 = p->HollowConeTrkIsoDr03();
+        hcalisodr04 = p->HcalTowerSumEtDr04();
+        ecalisodr04 = p->EcalRecHitIsoDr04();        
+        trkisohollowdr04 = p->HollowConeTrkIsoDr04();
+        
+        
+        const Vertex *vtx = vtxCol->At(0);
+        if (p->HasPV()) vtx = p->PV();
+        
+        UInt_t wVtxInd = 0;
+        
+        trackiso1 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, NULL, NULL, (!applyElectronVeto ? els : NULL) );//Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
+          
+        // track iso worst vtx
+        trackiso2 = IsolationTools::CiCTrackIsolation(p,vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, &wVtxInd,vtxCol, (!applyElectronVeto ? els : NULL) );
+        
+        combiso1 = ecalisodr03+hcalisodr04+trackiso1 - 0.17*_tRho;
+        combiso2 = ecalisodr04+hcalisodr04+trackiso2 - 0.52*_tRho;        
+        
       }
       else {
         hasphoton = kFALSE;
@@ -714,6 +732,19 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
         eerrsmeared = -99.;
         esmearing = 0.;
         idmva = -99.;
+        hcalisodr03 = -99;
+        ecalisodr03 = -99;
+        trkisohollowdr03 = -99;
+        hcalisodr04 = -99;
+        ecalisodr04 = -99;
+        trkisohollowdr04 = -99;        
+        trackiso1 = -99.;
+        trackiso2 = -99.;
+        combiso1 = -99.;
+        combiso2 = -99.;
+        
+        
+        
       }
        
       

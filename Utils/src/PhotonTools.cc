@@ -89,6 +89,7 @@ void PhotonTools::ScalePhotonR9(Photon* p, Double_t scale) {
  p->SetR9(scale*p->R9()); 
 }
 
+
 void PhotonTools::ScalePhotonError(Photon* p, Double_t scale) {
  p->SetEnergyErrSmeared(scale*p->EnergyErrSmeared()); 
 }
