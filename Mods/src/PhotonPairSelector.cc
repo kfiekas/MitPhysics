@@ -107,9 +107,9 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fApplyEleVeto      (true),
   fInvertElectronVeto(kFALSE),
   //MVA
-  fVariableType      (6), //please use 4 which is the correct type
-  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_6_BDTnCuts2000_BDT.weights.xml")),
-  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_6_BDTnCuts2000_BDT.weights.xml")),
+  fVariableType      (7), //please use 4 which is the correct type
+  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_7_BDTnCuts2000_BDT.weights.xml")),
+  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_7_BDTnCuts2000_BDT.weights.xml")),
   fbdtCutBarrel      (0.0744), //cuts give the same effiiciency (relative to preselection) with cic
   fbdtCutEndcap      (0.0959),//cuts give the same effiiciency (relative to preselection) with cic
   fDoMCR9Scaling     (kFALSE),
@@ -410,14 +410,14 @@ void PhotonPairSelector::Process()
 
       break;
     case kMVAPhSelection://MVA
-      pass1 = fixPh1st[iPair]->Pt()>leadptcut && PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto) && fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
-      if (pass1) pass2 = fixPh2nd[iPair]->Pt() > trailptcut && PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto) && fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
+      pass1 = fixPh1st[iPair]->Pt()>leadptcut && PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,fTracks,theVtx[iPair],_tRho,fApplyEleVeto) && fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,_tRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
+      if (pass1) pass2 = fixPh2nd[iPair]->Pt() > trailptcut && PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,fTracks,theVtx[iPair],_tRho,fApplyEleVeto) && fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,_tRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
       
       break;
     case kMITPhSelection:
       // loose preselection for mva
-      pass1 = ( fixPh1st[iPair]->Pt() > leadptcut  && PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto, fInvertElectronVeto) );
-      if (pass1) pass2 = ( fixPh2nd[iPair]->Pt() > trailptcut && PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,fTracks,_tRho,fApplyEleVeto, fInvertElectronVeto) );
+      pass1 = ( fixPh1st[iPair]->Pt() > leadptcut  && PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,fTracks,theVtx[iPair],_tRho,fApplyEleVeto, fInvertElectronVeto) );
+      if (pass1) pass2 = ( fixPh2nd[iPair]->Pt() > trailptcut && PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,fTracks,theVtx[iPair],_tRho,fApplyEleVeto, fInvertElectronVeto) );
             
       break;
     default:

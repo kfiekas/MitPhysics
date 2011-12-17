@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.7 2011/12/11 00:03:05 bendavid Exp $
+// $Id: MVATools.cc,v 1.8 2011/12/13 21:13:23 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -55,7 +55,8 @@ MVATools::MVATools():
   RelIsoHcal(0),
   tIso1(0),
   tIso3(0),
-  tIso2(0)
+  tIso2(0),
+  ScEta(0.)
 {
   // Constructor.
 }
@@ -157,6 +158,19 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
       readers[i]->AddVariable( "RelPreshowerEnergy", &RelPreshowerEnergy );
       }
     }
+    
+    if(VariableType==7){
+      readers[i]->AddVariable( "HoE", &HoE );
+      readers[i]->AddVariable( "covIEtaIEta", &covIEtaIEta );
+      readers[i]->AddVariable( "tIso1abs", &tIso1abs );
+      readers[i]->AddVariable( "tIso3abs", &tIso3abs );
+      readers[i]->AddVariable( "tIso2abs", &tIso2abs );
+      readers[i]->AddVariable( "R9", &R9 );
+      readers[i]->AddVariable( "absIsoEcal", &absIsoEcal );
+      readers[i]->AddVariable( "absIsoHcal", &absIsoHcal );
+      readers[i]->AddVariable( "NVertexes", &NVertexes );
+      readers[i]->AddVariable( "ScEta", &ScEta );
+    }    
 
   }
   
@@ -211,8 +225,8 @@ Int_t MVATools::PassElectronVetoInt(const Photon* p, const ElectronCol* els) {
   
   isbarrel = (fabs(ScEta_MVA)<1.4442);
 
-  //R9 = p->R9();
-  R9 = p->E33()/p->SCluster()->RawEnergy();
+  R9 = p->R9();
+  //R9 = p->E33()/p->SCluster()->RawEnergy();
   
   // check which category it is ...
   _tCat = 1;
@@ -248,6 +262,8 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   combIso2 = ecalIso4+hcalIso4+trackIso2 - 0.52*_tRho;
   
   RawEnergy = p->SCluster()->RawEnergy();
+  
+  ScEta = p->SCluster()->Eta();
   
   //mva varialbes v1 and v2
   tIso1 = (combIso1) *50./p->Et();

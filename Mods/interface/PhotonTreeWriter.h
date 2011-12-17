@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.5 2011/12/11 00:03:04 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.6 2011/12/13 21:13:22 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -288,6 +288,7 @@ namespace mithep
       Float_t bsX;
       Float_t bsY;
       Float_t bsZ;
+      Float_t bsSigmaZ; 
       Float_t vtxX;
       Float_t vtxY;      
       Float_t vtxZ;

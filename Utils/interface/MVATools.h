@@ -87,6 +87,8 @@ namespace mithep {
       float tIso3;
       float tIso2;
       
+      float ScEta;
+      
       //variables used to compute mva variables
       
       Bool_t PassElecVeto;  

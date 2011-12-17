@@ -154,6 +154,7 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->bsX = fBeamspot->At(0)->X();
   fDiphotonEvent->bsY = fBeamspot->At(0)->Y();
   fDiphotonEvent->bsZ = fBeamspot->At(0)->Z();
+  fDiphotonEvent->bsSigmaZ = fBeamspot->At(0)->SigmaZ();
   fDiphotonEvent->vtxX = (fDiphotonEvent->nVtx>0) ? fPV->At(0)->X() : -99.;
   fDiphotonEvent->vtxY = (fDiphotonEvent->nVtx>0) ? fPV->At(0)->Y() : -99.;  
   fDiphotonEvent->vtxZ = (fDiphotonEvent->nVtx>0) ? fPV->At(0)->Z() : -99.;
