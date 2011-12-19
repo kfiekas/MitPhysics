@@ -39,13 +39,13 @@ void runHgg(const char *fileset    = "",
             //const char *dataset      = "s11-h130gg-gf-v11-pu",
             //const char *dataset    = "f11-pj-2em20-v14b-pu",
             //const char *dataset    = "f11--qcd-2em40-v14b-pu",
-            const char *dataset    = "f11--h120gg-gf-v14b-pu",
+            //const char *dataset    = "f11--h120gg-gf-v14b-pu",
             //const char *dataset = "f11--h120gg-vbf-v14b-pu",
-            //const char *dataset    = "f11-zjets-v14b-pu",
+            const char *dataset    = "f11--2pibx10_25-v14b-pu",
             //const char *dataset = "s11-zeem20-powheg-v11-pu",
             //const char *dataset = "s11-wjets-v11-pu",
             //const char *dataset = "p11-zll50-v1g1-pu",
-	    const char *book       = "local/filefi/025",
+	    const char *book       = "t2mit/filefi/025",
 	    const char *catalogDir = "/home/cmsprod/catalog",
 	    const char *outputName = "hgg",
 	    int         nEvents    = -1)
@@ -361,6 +361,7 @@ void runHgg(const char *fileset    = "",
   photpresel->SetDoMCR9Scaling(kTRUE);
   photpresel->SetMCR9Scale(1.0035, 1.0035);  
   photpresel->SetDoMCSigIEtaIEtaScaling(kTRUE);
+  photpresel->SetDoMCWidthScaling(kTRUE);  
   photpresel->SetDoMCErrScaling(kTRUE);
   photpresel->SetMCErrScale(1.09, 1.06);    
   photpresel->SetIsData(isData);
@@ -383,6 +384,7 @@ void runHgg(const char *fileset    = "",
   photpreselinverteleveto->SetDoMCR9Scaling(kTRUE);
   photpreselinverteleveto->SetMCR9Scale(1.0035, 1.0035);
   photpreselinverteleveto->SetDoMCSigIEtaIEtaScaling(kTRUE);
+  photpreselinverteleveto->SetDoMCWidthScaling(kTRUE);  
   photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
   photpreselinverteleveto->SetMCErrScale(1.09, 1.06);    
   photpreselinverteleveto->SetApplyEleVeto(kFALSE);
@@ -524,7 +526,8 @@ void runHgg(const char *fileset    = "",
   //elecIdS->Add(phottreeES);
   
 
-  //TFile::SetCacheFileDir("./rootfilecache",kTRUE,kTRUE);
+  TFile::SetOpenTimeout(0);
+  TFile::SetCacheFileDir("./rootfilecache",kTRUE,kTRUE);
   TFile::SetReadaheadSize(128*1024*1024);
   
   //------------------------------------------------------------------------------------------------
