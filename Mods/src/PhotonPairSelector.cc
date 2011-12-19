@@ -107,9 +107,9 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fApplyEleVeto      (true),
   fInvertElectronVeto(kFALSE),
   //MVA
-  fVariableType      (7), //please use 4 which is the correct type
-  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_7_BDTnCuts2000_BDT.weights.xml")),
-  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_7_BDTnCuts2000_BDT.weights.xml")),
+  fVariableType      (10), //please use 4 which is the correct type
+  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
+  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
   fbdtCutBarrel      (0.0744), //cuts give the same effiiciency (relative to preselection) with cic
   fbdtCutEndcap      (0.0959),//cuts give the same effiiciency (relative to preselection) with cic
   fDoMCR9Scaling     (kFALSE),

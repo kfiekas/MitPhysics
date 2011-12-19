@@ -1,4 +1,4 @@
-// $Id: PhotonIDMod.cc,v 1.27 2011/12/11 00:03:04 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.28 2011/12/17 20:00:40 bendavid Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -72,9 +72,9 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   // MVA ID Stuff
   fbdtCutBarrel      (0.0744), //cuts give the same effiiciency (relative to preselection) with cic
   fbdtCutEndcap      (0.0959), //cuts give the same effiiciency (relative to preselection) with cic  
-  fVariableType      (7), //please use 4 which is the correct type
-  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_7_BDTnCuts2000_BDT.weights.xml")),
-  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_7_BDTnCuts2000_BDT.weights.xml")),
+  fVariableType      (10), //please use 4 which is the correct type
+  fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
+  fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
 
 
 

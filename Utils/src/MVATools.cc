@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.8 2011/12/13 21:13:23 bendavid Exp $
+// $Id: MVATools.cc,v 1.9 2011/12/17 20:00:40 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -172,6 +172,21 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
       readers[i]->AddVariable( "ScEta", &ScEta );
     }    
 
+    if(VariableType==10){
+      readers[i]->AddVariable( "HoE", &HoE );
+      readers[i]->AddVariable( "covIEtaIEta", &covIEtaIEta );
+      readers[i]->AddVariable( "tIso1abs", &tIso1abs );
+      readers[i]->AddVariable( "tIso3abs", &tIso3abs );
+      readers[i]->AddVariable( "tIso2abs", &tIso2abs );
+      readers[i]->AddVariable( "R9", &R9 );
+      readers[i]->AddVariable( "absIsoEcal", &absIsoEcal );
+      readers[i]->AddVariable( "absIsoHcal", &absIsoHcal );
+      readers[i]->AddVariable( "NVertexes", &NVertexes );
+      readers[i]->AddVariable( "ScEta", &ScEta );
+      readers[i]->AddVariable( "EtaWidth", &EtaWidth );
+      readers[i]->AddVariable( "PhiWidth", &PhiWidth );      
+    }    
+
   }
   
   fReaderEndcap->BookMVA("BDT method",EndcapWeights);
@@ -294,8 +309,8 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   RelE2x5Right=p->SCluster()->Seed()->E2x5Right()/RawEnergy;
   RelE5x5=p->SCluster()->Seed()->E5x5()/RawEnergy;
   
-  EtaWidth=p->SCluster()->EtaWidth();
-  PhiWidth=p->SCluster()->PhiWidth();
+  EtaWidth=p->EtaWidth();
+  PhiWidth=p->PhiWidth();
   CoviEtaiPhi=p->SCluster()->Seed()->CoviEtaiPhi(); 
   CoviPhiiPhi=p->SCluster()->Seed()->CoviPhiiPhi();
 
