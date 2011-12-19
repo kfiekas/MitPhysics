@@ -186,9 +186,9 @@ void PhotonPairSelector::Process()
     if(ph->Et()                <  fPhotonPtMin)     continue;
     if(ph->HadOverEm()         >  0.15)     continue;
     if(ph->IsEB()) {
-      if(ph->CoviEtaiEta() > 0.014) continue;      
+      if(ph->CoviEtaiEta() > 0.015) continue;      
     } else {
-      if(ph->CoviEtaiEta() > 0.034) continue;
+      if(ph->CoviEtaiEta() > 0.035) continue;
     }    
     preselPh->Add(ph);
   }
