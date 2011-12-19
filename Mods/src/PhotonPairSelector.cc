@@ -116,6 +116,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCR9ScaleEB       (1.0),
   fMCR9ScaleEE       (1.0),
   fDoMCSigIEtaIEtaScaling(kFALSE),
+  fDoMCWidthScaling(kFALSE),
   fDoMCErrScaling     (kFALSE),
   fMCErrScaleEB       (1.0),
   fMCErrScaleEE       (1.0),
@@ -281,6 +282,14 @@ void PhotonPairSelector::Process()
       else fixPh2nd[iPair]->SetCoviEtaiEta(0.99*fixPh2nd[iPair]->CoviEtaiEta());    
     }
 
+
+    if (fDoMCWidthScaling && !fIsData) {
+      fixPh1st[iPair]->SetEtaWidth(0.99*fixPh1st[iPair]->EtaWidth());
+      fixPh1st[iPair]->SetPhiWidth(0.99*fixPh1st[iPair]->PhiWidth());
+      
+      fixPh2nd[iPair]->SetEtaWidth(0.99*fixPh2nd[iPair]->EtaWidth());
+      fixPh2nd[iPair]->SetPhiWidth(0.99*fixPh2nd[iPair]->PhiWidth());
+    }
 
     PhotonTools::eScaleCats escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
     PhotonTools::eScaleCats escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);

@@ -755,8 +755,8 @@ void PhotonTreeWriterPhoton::SetVars(const Photon *p, const DecayParticle *c, co
       scphi = s->Phi();
       scnclusters = s->ClusterSize();
       scnhits = s->NHits();
-      scetawidth = s->EtaWidth();
-      scphiwidth = s->PhiWidth();
+      scetawidth = p->EtaWidth();
+      scphiwidth = p->PhiWidth();
       isbarrel = (s->AbsEta()<1.5);
       isr9reco = (isbarrel && r9>0.94) || (!isbarrel && r9>0.95);
       isr9cat = (r9>0.94);

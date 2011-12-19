@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.15 2011/12/13 21:13:22 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.16 2011/12/17 22:29:30 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -148,6 +148,7 @@ namespace mithep
     void                SetDoMCR9Scaling(Bool_t b)        { fDoMCR9Scaling = b; }
     void                SetMCR9Scale(Double_t ebscale, Double_t eescale) { fMCR9ScaleEB = ebscale; fMCR9ScaleEE = eescale; }
     void                SetDoMCSigIEtaIEtaScaling(Bool_t b)        { fDoMCSigIEtaIEtaScaling = b; }
+    void                SetDoMCWidthScaling(Bool_t b)        { fDoMCWidthScaling = b; }
     void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
     void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
     
@@ -267,6 +268,7 @@ namespace mithep
     Double_t fMCR9ScaleEE;
 
     Bool_t fDoMCSigIEtaIEtaScaling;
+    Bool_t fDoMCWidthScaling;
     
     Bool_t fDoMCErrScaling;
     Double_t fMCErrScaleEB;
