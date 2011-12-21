@@ -52,6 +52,20 @@ void MuonIDMVA::Initialize( TString methodName,
     fTMVAReader[i] = new TMVA::Reader( "!Color:!Silent:Error" );  
     fTMVAReader[i]->SetVerbose(kTRUE);
 
+    if (type == kV2) {
+      fTMVAReader[i]->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
+      fTMVAReader[i]->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
+      fTMVAReader[i]->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
+      fTMVAReader[i]->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
+      fTMVAReader[i]->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
+      fTMVAReader[i]->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
+      fTMVAReader[i]->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
+      fTMVAReader[i]->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
+      fTMVAReader[i]->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
+      fTMVAReader[i]->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
+      fTMVAReader[i]->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  ); 
+    }
+
     if (type == kV3) {
       fTMVAReader[i]->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
       fTMVAReader[i]->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
@@ -76,6 +90,29 @@ void MuonIDMVA::Initialize( TString methodName,
       }
       fTMVAReader[i]->AddVariable( "EmS9EnergyOverPt",     &fMVAVar_MuEmS9EnergyOverPt      );      
     }
+
+    if (type == kV8) {
+      fTMVAReader[i]->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
+      fTMVAReader[i]->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
+      fTMVAReader[i]->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
+      fTMVAReader[i]->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
+      fTMVAReader[i]->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
+      fTMVAReader[i]->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
+      fTMVAReader[i]->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
+      fTMVAReader[i]->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
+      fTMVAReader[i]->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
+      fTMVAReader[i]->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
+      fTMVAReader[i]->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  );      
+      fTMVAReader[i]->AddVariable( "CaloCompatibility",    &fMVAVar_MuCaloCompatibility     );      
+      fTMVAReader[i]->AddVariable( "HadEnergyOverPt",      &fMVAVar_MuHadEnergyOverPt       );      
+      fTMVAReader[i]->AddVariable( "EmEnergyOverPt",       &fMVAVar_MuEmEnergyOverPt        );      
+      fTMVAReader[i]->AddVariable( "HadS9EnergyOverPt",    &fMVAVar_MuHadS9EnergyOverPt     );      
+      fTMVAReader[i]->AddVariable( "EmS9EnergyOverPt",     &fMVAVar_MuEmS9EnergyOverPt      );      
+      fTMVAReader[i]->AddVariable( "ChargedIso03OverPt",   &fMVAVar_MuChargedIso03OverPt    );
+      fTMVAReader[i]->AddVariable( "NeutralIso03OverPt",   &fMVAVar_MuNeutralIso03OverPt    );      
+      fTMVAReader[i]->AddVariable( "ChargedIso04OverPt",   &fMVAVar_MuChargedIso04OverPt    );
+      fTMVAReader[i]->AddVariable( "NeutralIso04OverPt",   &fMVAVar_MuNeutralIso04OverPt    );      
+    }
     
     if (i==0) fTMVAReader[i]->BookMVA(fMethodname , Subdet0Pt10To14p5Weights );
     if (i==1) fTMVAReader[i]->BookMVA(fMethodname , Subdet1Pt10To14p5Weights );
@@ -99,24 +136,28 @@ void MuonIDMVA::Initialize( TString methodName,
 
 //--------------------------------------------------------------------------------------------------
 Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
-                         Double_t                   MuTkNchi2, 
-                         Double_t                   MuGlobalNchi2, 
-                         Double_t                   MuNValidHits, 
-                         Double_t                   MuNTrackerHits, 
-                         Double_t                   MuNPixelHits, 
-                         Double_t                   MuNMatches, 
-                         Double_t                   MuD0, 
-                         Double_t                   MuIP3d, 
-                         Double_t                   MuIP3dSig, 
-                         Double_t                   MuTrkKink, 
-                         Double_t                   MuSegmentCompatibility, 
-                         Double_t                   MuCaloCompatibility, 
-                         Double_t                   MuHadEnergyOverPt, 
-                         Double_t                   MuHoEnergyOverPt, 
-                         Double_t                   MuEmEnergyOverPt, 
-                         Double_t                   MuHadS9EnergyOverPt, 
-                         Double_t                   MuHoS9EnergyOverPt, 
-                         Double_t                   MuEmS9EnergyOverPt 
+                             Double_t                   MuTkNchi2, 
+                             Double_t                   MuGlobalNchi2, 
+                             Double_t                   MuNValidHits, 
+                             Double_t                   MuNTrackerHits, 
+                             Double_t                   MuNPixelHits, 
+                             Double_t                   MuNMatches, 
+                             Double_t                   MuD0, 
+                             Double_t                   MuIP3d, 
+                             Double_t                   MuIP3dSig, 
+                             Double_t                   MuTrkKink, 
+                             Double_t                   MuSegmentCompatibility, 
+                             Double_t                   MuCaloCompatibility, 
+                             Double_t                   MuHadEnergyOverPt, 
+                             Double_t                   MuHoEnergyOverPt, 
+                             Double_t                   MuEmEnergyOverPt, 
+                             Double_t                   MuHadS9EnergyOverPt, 
+                             Double_t                   MuHoS9EnergyOverPt, 
+                             Double_t                   MuEmS9EnergyOverPt,
+                             Double_t                   MuChargedIso03OverPt,
+                             Double_t                   MuNeutralIso03OverPt,
+                             Double_t                   MuChargedIso04OverPt,
+                             Double_t                   MuNeutralIso04OverPt                             
   ) {
   
   if (!fIsInitialized) { 
@@ -151,7 +192,10 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
   fMVAVar_MuHadS9EnergyOverPt    = MuHadS9EnergyOverPt; 
   fMVAVar_MuHoS9EnergyOverPt     = MuHoS9EnergyOverPt; 
   fMVAVar_MuEmS9EnergyOverPt     = MuEmS9EnergyOverPt; 
-
+  fMVAVar_MuChargedIso03OverPt   = MuChargedIso03OverPt; 
+  fMVAVar_MuNeutralIso03OverPt   = MuNeutralIso03OverPt; 
+  fMVAVar_MuChargedIso04OverPt   = MuChargedIso04OverPt; 
+  fMVAVar_MuNeutralIso04OverPt   = MuNeutralIso04OverPt; 
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;

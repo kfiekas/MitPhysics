@@ -30,7 +30,9 @@ namespace mithep {
       ~MuonIDMVA(); 
 
       enum MVAType {
-        kV3                // 
+        kV2,
+        kV3,
+        kV8
       };
 
 
@@ -63,7 +65,11 @@ namespace mithep {
                          Double_t                   MuEmEnergyOverPt, 
                          Double_t                   MuHadS9EnergyOverPt, 
                          Double_t                   MuHoS9EnergyOverPt, 
-                         Double_t                   MuEmS9EnergyOverPt 
+                         Double_t                   MuEmS9EnergyOverPt, 
+                         Double_t                   MuChargedIso03OverPt,
+                         Double_t                   MuNeutralIso03OverPt,
+                         Double_t                   MuChargedIso04OverPt,
+                         Double_t                   MuNeutralIso04OverPt
         );
 
 
@@ -91,6 +97,10 @@ namespace mithep {
       Float_t                   fMVAVar_MuHadS9EnergyOverPt; 
       Float_t                   fMVAVar_MuHoS9EnergyOverPt; 
       Float_t                   fMVAVar_MuEmS9EnergyOverPt; 
+      Float_t                   fMVAVar_MuChargedIso03OverPt;
+      Float_t                   fMVAVar_MuNeutralIso03OverPt;
+      Float_t                   fMVAVar_MuChargedIso04OverPt;
+      Float_t                   fMVAVar_MuNeutralIso04OverPt;
 
       
     ClassDef(MuonIDMVA, 0) // Muon MVA
