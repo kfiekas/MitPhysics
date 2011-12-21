@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.22 2011/10/18 11:27:19 fabstoec Exp $
+// $Id: IsolationTools.cc,v 1.23 2011/11/02 20:12:03 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -143,11 +143,10 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const PFCandidateCol *PF
     if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
     // ignore the pf candidate if it is too far away in Z
-    Double_t deltaZ = 0.0;
     if(pf->HasTrk()) {
-      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+      Double_t deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+      if (deltaZ >= delta_z) continue;
     }
-    if (deltaZ >= delta_z) continue;
       
     // inner cone veto for gammas
     if (pf->PFType() == PFCandidate::eGamma && dr < intRadiusGamma) continue;
@@ -188,11 +187,10 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const PFCandidateCol *PF
     if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
     // ignore the pf candidate if it is too far away in Z
-    Double_t deltaZ = 0.0;
     if(pf->HasTrk()) {
-      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+      Double_t deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+      if (deltaZ >= delta_z) continue;
     }
-    if (deltaZ >= delta_z) continue;
       
     // inner cone veto for gammas
     if (pf->PFType() == PFCandidate::eGamma && dr < intRadiusGamma) continue;
