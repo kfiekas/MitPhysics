@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.23 2011/11/02 20:12:03 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.24 2011/12/21 13:03:23 sixie Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -258,14 +258,12 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     if(pf->GsfTrk() && p->GsfTrk() &&
        pf->GsfTrk() == p->GsfTrk()) continue;
 
-    Double_t deltaZ = 0.0;
+    // ignore the pf candidate if it is too far away in Z
     if(pf->BestTrk()) {
-      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+      Double_t deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+      if (deltaZ >= delta_z) continue;
     }
 
-    // ignore the pf candidate if it is too far away in Z
-    if (deltaZ >= delta_z) 
-      continue;
            
     Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
     // add the pf pt if it is inside the extRadius and outside the intRadius
@@ -313,14 +311,11 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
     if(pf->GsfTrk() && p->GsfTrk() &&
        pf->GsfTrk() == p->GsfTrk()) continue;
 
-    Double_t deltaZ = 0.0;
-    if(pf->BestTrk()) {
-      deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
-    }
-
     // ignore the pf candidate if it is too far away in Z
-    if (deltaZ >= delta_z) 
-      continue;
+    if(pf->BestTrk()) {
+      Double_t deltaZ = TMath::Abs(pf->BestTrk()->DzCorrected(*vertex) - zLepton);
+      if (deltaZ >= delta_z) continue;
+    }
            
     Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
     // add the pf pt if it is inside the extRadius and outside the intRadius
