@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.18 2011/10/02 10:03:21 ceballos Exp $
+// $Id: MuonTools.h,v 1.19 2011/10/05 16:11:18 ceballos Exp $
 //
 // MuonTools
 //
@@ -45,16 +45,30 @@ namespace mithep {
                                  //  ===> 1.2 Segment compatability + 0.8 calo compatability > 1.2
       };
 
-      Bool_t        Init(const char *mutemp, const char *pitemp);
-      Bool_t        IsGood(const mithep::Muon *iMuon, ESelType iSel) const;
-      Double_t      GetCaloCompatability(const mithep::Muon *iMuon,
+      enum EMuonEffectiveAreaType {
+        kMuChargedIso03, 
+        kMuNeutralIso03, 
+        kMuChargedIso04, 
+        kMuNeutralIso04, 
+        kMuHadEnergy, 
+        kMuHoEnergy, 
+        kMuEmEnergy, 
+        kMuHadS9Energy, 
+        kMuHoS9Energy, 
+        kMuEmS9Energy 
+      };
+
+      Bool_t          Init(const char *mutemp, const char *pitemp);
+      Bool_t          IsGood(const mithep::Muon *iMuon, ESelType iSel) const;
+      Double_t        GetCaloCompatability(const mithep::Muon *iMuon,
                                          Bool_t iEMSpecial, Bool_t iCorrectedHCAL) const; 
-      Double_t      GetSegmentCompatability(const mithep::Muon *iMuon)             const;
-      static Bool_t PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut, Int_t nVertex = 0); 
-      static Bool_t PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double_t fD0Cut);
-      static Bool_t PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t fDZCut, Int_t nVertex = 0);
-      static Bool_t PassSoftMuonCut(const Muon *mu, const VertexCol *vertices, const Double_t fDZCut = 0.2,
+      Double_t        GetSegmentCompatability(const mithep::Muon *iMuon)             const;
+      static Bool_t   PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t fD0Cut, Int_t nVertex = 0); 
+      static Bool_t   PassD0Cut(const Muon *mu, const BeamSpotCol *beamspots, Double_t fD0Cut);
+      static Bool_t   PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t fDZCut, Int_t nVertex = 0);
+      static Bool_t   PassSoftMuonCut(const Muon *mu, const VertexCol *vertices, const Double_t fDZCut = 0.2,
                                     const Bool_t applyIso = kTRUE);
+      static Double_t MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta);
 
     protected:
       void        DeleteHistos();
