@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.15 2011/10/13 23:45:56 bendavid Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.16 2011/12/16 13:03:06 sixie Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -44,12 +44,14 @@
 #pragma link C++ class mithep::IsolationTools;
 #pragma link C++ class mithep::MatchingTools;
 #pragma link C++ class mithep::MuonTools;
+#pragma link C++ enum mithep::MuonTools::EMuonEffectiveAreaType;
 #pragma link C++ class mithep::MetTools;
 #pragma link C++ class mithep::ElectronTools;
 #pragma link C++ class mithep::PhotonTools;
 #pragma link C++ class mithep::JetTools;
 #pragma link C++ enum mithep::ElectronTools::EElIdType;
 #pragma link C++ enum mithep::ElectronTools::EElIsoType;
+#pragma link C++ enum mithep::ElectronTools::EElectronEffectiveAreaType;
 #pragma link C++ class mithep::VertexTools;
 #pragma link C++ class mithep::VertexMVA;
 #pragma link C++ class mithep::PUReweighting;
