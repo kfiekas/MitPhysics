@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.20 2011/10/18 11:27:19 fabstoec Exp $
+// $Id: IsolationTools.h,v 1.21 2011/11/02 20:12:03 ceballos Exp $
 //
 // IsolationTools
 //
@@ -49,11 +49,11 @@ namespace mithep
 				      Double_t extRadius, Double_t intRadiusGamma, Double_t intRadius);
       static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                       	     		  const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
-			     		  Double_t extRadius, Double_t intRadius);
+			     		  Double_t extRadius, Double_t intRadius, Int_t PFCandidateType = -1);
       static Double_t PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                       	     		  const MuonCol *goodMuons, const ElectronCol *goodElectrons,
 					  const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
-			     		  Double_t extRadius, Double_t intRadius);
+			     		  Double_t extRadius, Double_t intRadius, Int_t PFCandidateType = -1);
        static Double_t BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
                             Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			    Double_t intRadius);
