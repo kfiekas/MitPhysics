@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.24 2011/12/21 13:03:23 sixie Exp $
+// $Id: IsolationTools.cc,v 1.25 2011/12/21 13:05:47 sixie Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -236,7 +236,7 @@ Double_t IsolationTools::PFMuonIsolation(const Muon *p, const PFCandidateCol *PF
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                                       	     const Vertex *vertex, Double_t delta_z, Double_t ptMin,
-				     	     Double_t extRadius, Double_t intRadius) 
+				     	     Double_t extRadius, Double_t intRadius, Int_t PFCandidateType) 
 {
 
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
@@ -249,6 +249,11 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
   for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
     const PFCandidate *pf = PFCands->At(i);
     
+    //select only specified PFCandidate types
+    if (PFCandidateType >= 0) {
+      if (pf->PFType() != PFCandidateType) continue;
+    }
+
     // pt cut applied to neutrals
     if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
@@ -289,7 +294,7 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
 Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidateCol *PFCands, 
                       	     		     const MuonCol *goodMuons, const ElectronCol *goodElectrons,
 					     const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
-			     		     Double_t extRadius, Double_t intRadius)
+			     		     Double_t extRadius, Double_t intRadius, Int_t PFCandidateType)
 {
 
   //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
@@ -302,6 +307,11 @@ Double_t IsolationTools::PFElectronIsolation(const Electron *p, const PFCandidat
   for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
     const PFCandidate *pf = PFCands->At(i);
     
+    //select only specified PFCandidate types
+    if (PFCandidateType >= 0) {
+      if (pf->PFType() != PFCandidateType) continue;
+    }
+
     // pt cut applied to neutrals
     if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
 
