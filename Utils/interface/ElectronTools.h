@@ -40,8 +40,9 @@ namespace mithep {
         kVBTFWorkingPoint80Id,
         kVBTFWorkingPointLowPtId,
         kVBTFWorkingPoint70Id,
-        kMVA_BDTG_NoIPInfo,
-        kMVA_BDTG_WithIPInfo
+        kMVAID_BDTG_NoIPInfo,
+        kMVAID_BDTG_WithIPInfo,
+        kMVAID_BDTG_IDIsoCombined
       };
 
       enum EElIsoType {
@@ -61,9 +62,25 @@ namespace mithep {
         kVBTFWorkingPoint90Iso,
         kVBTFWorkingPoint85Iso,
         kVBTFWorkingPoint80Iso,
-        kVBTFWorkingPoint70Iso
+        kVBTFWorkingPoint70Iso,
+        kMVAIso_BDTG_IDIsoCombined
       };
 
+      enum EElectronEffectiveAreaType {
+        kEleChargedIso03, 
+        kEleNeutralHadronIso03, 
+        kEleGammaIso03, 
+        kEleGammaIsoVetoEtaStrip03, 
+        kEleChargedIso04, 
+        kEleNeutralHadronIso04, 
+        kEleGammaIso04, 
+        kEleGammaIsoVetoEtaStrip04, 
+        kEleNeutralHadronIso007, 
+        kEleHoverE, 
+        kEleHcalDepth1OverEcal, 
+        kEleHcalDepth2OverEcal    
+      };
+      
       static Bool_t       PassChargeFilter(const Electron *el);
       static Bool_t       PassConversionFilter(const Electron *el, const DecayParticleCol *conversions, 
                                                const BaseVertex *vtx, UInt_t nWrongHitsMax=0, Double_t probMin=1e-6,
@@ -82,6 +99,7 @@ namespace mithep {
                                       Double_t beta = 1.0);
       static bool         compute_cut(double x, double et, double cut_min, double cut_max, bool gtn=false);
       static Double_t     Likelihood(ElectronLikelihood *LH, const Electron *ele);
+      static Double_t     ElectronEffectiveArea(EElectronEffectiveAreaType type, Double_t Eta);
 
     ClassDef(ElectronTools, 0) // Muon tools
   };

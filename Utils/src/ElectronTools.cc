@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.31 2011/08/11 22:22:29 sixie Exp $
+// $Id: ElectronTools.cc,v 1.32 2011/09/25 10:08:11 sixie Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1058,3 +1058,79 @@ Double_t ElectronTools::Likelihood(ElectronLikelihood *LH, const Electron *ele)
   return newLik;
 
 }
+
+Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, Double_t Eta) {
+
+  Double_t EffectiveArea = 0;
+
+  if (fabs(Eta) < 1.0) {
+    if (type == kEleChargedIso03) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso03) EffectiveArea = 0.017;
+    if (type == kEleGammaIso03) EffectiveArea = 0.045;
+    if (type == kEleGammaIsoVetoEtaStrip03) EffectiveArea = 0.014;
+    if (type == kEleChargedIso04) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso04) EffectiveArea = 0.034;
+    if (type == kEleGammaIso04) EffectiveArea = 0.079;
+    if (type == kEleGammaIsoVetoEtaStrip04) EffectiveArea = 0.014;
+    if (type == kEleNeutralHadronIso007) EffectiveArea = 0.000;
+    if (type == kEleHoverE) EffectiveArea = 0.00016;
+    if (type == kEleHcalDepth1OverEcal) EffectiveArea = 0.00016;
+    if (type == kEleHcalDepth2OverEcal) EffectiveArea = 0.00000;    
+  } else if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) {
+    if (type == kEleChargedIso03) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso03) EffectiveArea = 0.025;
+    if (type == kEleGammaIso03) EffectiveArea = 0.052;
+    if (type == kEleGammaIsoVetoEtaStrip03) EffectiveArea = 0.030;
+    if (type == kEleChargedIso04) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso04) EffectiveArea = 0.050;
+    if (type == kEleGammaIso04) EffectiveArea = 0.073;
+    if (type == kEleGammaIsoVetoEtaStrip04) EffectiveArea = 0.030;
+    if (type == kEleNeutralHadronIso007) EffectiveArea = 0.000;
+    if (type == kEleHoverE) EffectiveArea = 0.00022;
+    if (type == kEleHcalDepth1OverEcal) EffectiveArea = 0.00022;
+    if (type == kEleHcalDepth2OverEcal) EffectiveArea = 0.00000;    
+  } else if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) {
+    if (type == kEleChargedIso03) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso03) EffectiveArea = 0.030;
+    if (type == kEleGammaIso03) EffectiveArea = 0.170;
+    if (type == kEleGammaIsoVetoEtaStrip03) EffectiveArea = 0.134;
+    if (type == kEleChargedIso04) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso04) EffectiveArea = 0.060;
+    if (type == kEleGammaIso04) EffectiveArea = 0.187;
+    if (type == kEleGammaIsoVetoEtaStrip04) EffectiveArea = 0.134;
+    if (type == kEleNeutralHadronIso007) EffectiveArea = 0.000;
+    if (type == kEleHoverE) EffectiveArea = 0.00030;
+    if (type == kEleHcalDepth1OverEcal) EffectiveArea = 0.00026;
+    if (type == kEleHcalDepth2OverEcal) EffectiveArea = 0.00002;        
+  } else if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.25 ) {
+    if (type == kEleChargedIso03) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso03) EffectiveArea = 0.022;
+    if (type == kEleGammaIso03) EffectiveArea = 0.623;
+    if (type == kEleGammaIsoVetoEtaStrip03) EffectiveArea = 0.516;
+    if (type == kEleChargedIso04) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso04) EffectiveArea = 0.055;
+    if (type == kEleGammaIso04) EffectiveArea = 0.659;
+    if (type == kEleGammaIsoVetoEtaStrip04) EffectiveArea = 0.517;
+    if (type == kEleNeutralHadronIso007) EffectiveArea = 0.000;
+    if (type == kEleHoverE) EffectiveArea = 0.00054;
+    if (type == kEleHcalDepth1OverEcal) EffectiveArea = 0.00045;
+    if (type == kEleHcalDepth2OverEcal) EffectiveArea = 0.00003;
+  } else if (fabs(Eta) >= 2.25 && fabs(Eta) < 2.5 ) {
+    if (type == kEleChargedIso03) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso03) EffectiveArea = 0.018;
+    if (type == kEleGammaIso03) EffectiveArea = 1.198;
+    if (type == kEleGammaIsoVetoEtaStrip03) EffectiveArea = 1.049;
+    if (type == kEleChargedIso04) EffectiveArea = 0.000;
+    if (type == kEleNeutralHadronIso04) EffectiveArea = 0.073;
+    if (type == kEleGammaIso04) EffectiveArea = 1.258;
+    if (type == kEleGammaIsoVetoEtaStrip04) EffectiveArea = 1.051;
+    if (type == kEleNeutralHadronIso007) EffectiveArea = 0.000;
+    if (type == kEleHoverE) EffectiveArea = 0.00082;
+    if (type == kEleHcalDepth1OverEcal) EffectiveArea = 0.00066;
+    if (type == kEleHcalDepth2OverEcal) EffectiveArea = 0.00004;
+  }
+    
+  return EffectiveArea;  
+}
+
+
