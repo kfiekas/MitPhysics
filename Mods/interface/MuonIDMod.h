@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.36 2011/09/16 14:09:17 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.37 2011/10/11 17:00:24 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -21,6 +21,7 @@
 #include "MitAna/DataTree/interface/TrackFwd.h"
 #include "MitAna/DataTree/interface/PFCandidateFwd.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
+#include "MitPhysics/Utils/interface/MuonIDMVA.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 
@@ -43,6 +44,8 @@ namespace mithep
       const char        *GetOutputName()                const { return GetCleanMuonsName(); }   
       Double_t           GetPtMin()                     const { return fMuonPtMin;          }
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
+      Bool_t             PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex, 
+                                                Double_t Rho) const;
       void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
       void               SetApplyDZCut(Bool_t b)              { fApplyDZCut        = b;     }
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
@@ -65,6 +68,18 @@ namespace mithep
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
       void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
       void               SetIntRadius(Double_t dr)            { fIntRadius = dr;            }
+      void               SetMuonMVAWeightsSubdet0Pt10To14p5(TString s)  
+                         { fMuonMVAWeights_Subdet0Pt10To14p5  = s; }
+      void               SetMuonMVAWeightsSubdet1Pt10To14p5(TString s)  
+                         { fMuonMVAWeights_Subdet1Pt10To14p5  = s; }
+      void               SetMuonMVAWeightsSubdet0Pt14p5To20(TString s)  
+                         { fMuonMVAWeights_Subdet0Pt14p5To20  = s; }
+      void               SetMuonMVAWeightsSubdet1Pt14p5To20(TString s) 
+                         { fMuonMVAWeights_Subdet1Pt14p5To20 = s; }
+      void               SetMuonMVAWeightsSubdet0Pt20ToInf(TString s) 
+                         { fMuonMVAWeights_Subdet0Pt20ToInf = s; }
+      void               SetMuonMVAWeightsSubdet1Pt20ToInf(TString s) 
+                         { fMuonMVAWeights_Subdet1Pt20ToInf = s; }
 
       enum EMuIdType {
         kIdUndef = 0,       //not defined
@@ -75,8 +90,9 @@ namespace mithep
         kWWMuIdV1,          //"WWMuIdV1"
         kWWMuIdV2,          //"WWMuIdV2"
         kWWMuIdV3,          //"WWMuIdV3"
-        kNoId,              //"NoId"
-        kCustomId           //"Custom"
+        kNoId,              //"NoId"        
+        kCustomId,          //"Custom"
+        kMVAID_BDTG_IDIso   //"BDTG ID + Iso03, Iso04 Combined"
       };
       enum EMuIsoType {
         kIsoUndef = 0,      	            //"not defined"
@@ -87,8 +103,10 @@ namespace mithep
         kCombinedRelativeConeAreaCorrected, //"CombinedRelativeConeAreaCorrected"
         kCustomIso,         	            //"Custom"
         kPFIso,             	            //"PFIso"
+        kPFIsoEffectiveAreaCorrected,       //"PFIso with EffectiveArea Pileup Correction"
         kPFIsoNoL,          	            //"PFIsoNoL"
-        kNoIso              	            //"NoIso"
+        kNoIso,                             //"NoIso"
+        kMVAIso_BDTG_IDIso                  //"BDTG ID + Iso03, Iso04 Combined"
       };
       enum EMuClassType {
         kClassUndef = 0,    //not defined
@@ -99,6 +117,7 @@ namespace mithep
         kTrackerMuon,       //"TrackerMuon"
         kCaloMuon,          //"CaloMuon"
         kTrackerBased       //"TrackerMuon or CaloMuon"
+
       };
 
     protected:
@@ -141,6 +160,14 @@ namespace mithep
       ElectronCol        *fNonIsolatedElectrons;//!pointer to old electron collection
       TString             fPileupEnergyDensityName;
       const PileupEnergyDensityCol *fPileupEnergyDensity;
+      MuonTools          *fMuonTools;           // interface to tools for muon ID
+      MuonIDMVA          *fMuonIDMVA;           // helper class for MuonMVA
+      TString             fMuonMVAWeights_Subdet0Pt10To14p5;
+      TString             fMuonMVAWeights_Subdet1Pt10To14p5;
+      TString             fMuonMVAWeights_Subdet0Pt14p5To20;
+      TString             fMuonMVAWeights_Subdet1Pt14p5To20;
+      TString             fMuonMVAWeights_Subdet0Pt20ToInf;
+      TString             fMuonMVAWeights_Subdet1Pt20ToInf;
 
     ClassDef(MuonIDMod, 1) // Muon identification module
   };
