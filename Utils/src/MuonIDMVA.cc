@@ -212,6 +212,37 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
+  Bool_t printdebug = kFALSE;
+  if (printdebug == kTRUE) {
+    std::cout << "Debug Muon MVA: "
+	 << MuPt << " " << MuEta << " --> MVABin " << MVABin << " : "     
+	 << fMVAVar_MuTkNchi2              << " " 
+	 << fMVAVar_MuGlobalNchi2          << " " 
+	 << fMVAVar_MuNValidHits           << " " 
+	 << fMVAVar_MuNTrackerHits         << " " 
+	 << fMVAVar_MuNPixelHits           << " "  
+	 << fMVAVar_MuNMatches             << " " 
+	 << fMVAVar_MuD0                   << " " 
+	 << fMVAVar_MuIP3d                 << " " 
+	 << fMVAVar_MuIP3dSig              << " " 
+	 << fMVAVar_MuTrkKink              << " " 
+	 << fMVAVar_MuSegmentCompatibility << " " 
+	 << fMVAVar_MuCaloCompatibility    << " " 
+	 << fMVAVar_MuHadEnergyOverPt      << " " 
+	 << fMVAVar_MuHoEnergyOverPt       << " " 
+	 << fMVAVar_MuEmEnergyOverPt       << " " 
+	 << fMVAVar_MuHadS9EnergyOverPt    << " " 
+	 << fMVAVar_MuHoS9EnergyOverPt     << " " 
+	 << fMVAVar_MuEmS9EnergyOverPt     << " " 
+	 << fMVAVar_MuChargedIso03OverPt   << " " 
+	 << fMVAVar_MuNeutralIso03OverPt   << " " 
+	 << fMVAVar_MuChargedIso04OverPt   << " " 
+	 << fMVAVar_MuNeutralIso04OverPt   << " " 
+	 << " === : === "
+	 << mva 
+	 << std::endl;
+  }
+
   return mva;
 }
 
