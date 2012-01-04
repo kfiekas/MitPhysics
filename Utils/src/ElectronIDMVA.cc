@@ -237,7 +237,8 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta, Double_t Pile
                                  Double_t EleGammaIso03,
                                  Double_t EleChargedIso04,
                                  Double_t EleNeutralHadronIso04,
-                                 Double_t EleGammaIso04
+                                 Double_t EleGammaIso04,
+                                 Bool_t printDebug
   ) {
   
   if (!fIsInitialized) { 
@@ -316,8 +317,7 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta, Double_t Pile
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kFALSE;
-  if (printdebug == kTRUE) {
+  if (printDebug == kTRUE) {
     std::cout << "Debug Electron MVA: "
 	 << ElePt << " " << EleEta << " " << " --> MVABin " << MVABin << " : "     
 	 << fMVAVar_EleSigmaIEtaIEta << " " 
@@ -361,7 +361,8 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta, Double_t Pile
 //--------------------------------------------------------------------------------------------------
 Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex, 
                                  const PFCandidateCol *PFCands, 
-                                 const PileupEnergyDensityCol *PileupEnergyDensity) {
+                                 const PileupEnergyDensityCol *PileupEnergyDensity,
+                                 Bool_t printDebug) {
   
   if (!fIsInitialized) { 
     std::cout << "Error: ElectronIDMVA not properly initialized.\n"; 
@@ -440,8 +441,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kFALSE;
-  if (printdebug == kTRUE) {
+  if (printDebug == kTRUE) {
     std::cout << "Debug Electron MVA: "
               << ele->Pt() << " " << ele->Eta() << " " << ele->Phi() << " : "
               << ele->Pt() << " " << ele->SCluster()->AbsEta() << " --> MVABin " << MVABin << " : "     

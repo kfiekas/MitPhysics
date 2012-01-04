@@ -51,7 +51,9 @@ namespace mithep {
       Bool_t   IsInitialized() const { return fIsInitialized; }
       Double_t MVAValue(const Electron *ele, const Vertex *vertex);
       Double_t MVAValue(const Electron *ele, const Vertex *vertex, 
-                        const PFCandidateCol *PFCands, const PileupEnergyDensityCol *PileupEnergyDensity);
+                        const PFCandidateCol *PFCands, 
+                        const PileupEnergyDensityCol *PileupEnergyDensity,
+                        Bool_t printDebug = kFALSE);
       Double_t MVAValue(Double_t ElePt , Double_t EleEta,
                         Double_t EleSigmaIEtaIEta,
                         Double_t EleDEtaIn,
@@ -98,7 +100,8 @@ namespace mithep {
                         Double_t EleGammaIso03,
                         Double_t EleChargedIso04,
                         Double_t EleNeutralHadronIso04,
-                        Double_t EleGammaIso04 );
+                        Double_t EleGammaIso04,
+                        Bool_t printDebug = kFALSE );
 
 
     protected:      

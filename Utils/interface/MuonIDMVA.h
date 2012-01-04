@@ -51,7 +51,8 @@ namespace mithep {
       Bool_t   IsInitialized() const { return fIsInitialized; }
       Double_t MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fMuonTools,
                         const PFCandidateCol *PFCands, 
-                        const PileupEnergyDensityCol *PileupEnergyDensity);
+                        const PileupEnergyDensityCol *PileupEnergyDensity, 
+                        Bool_t printDebug = kFALSE);
       Double_t MVAValue( Double_t MuPt , Double_t MuEta,
                          Double_t                   MuTkNchi2, 
                          Double_t                   MuGlobalNchi2, 
@@ -74,7 +75,8 @@ namespace mithep {
                          Double_t                   MuChargedIso03OverPt,
                          Double_t                   MuNeutralIso03OverPt,
                          Double_t                   MuChargedIso04OverPt,
-                         Double_t                   MuNeutralIso04OverPt
+                         Double_t                   MuNeutralIso04OverPt, 
+                         Bool_t                     printDebug = kFALSE
         );
 
 

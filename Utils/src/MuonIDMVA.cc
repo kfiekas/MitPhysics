@@ -157,7 +157,8 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
                              Double_t                   MuChargedIso03OverPt,
                              Double_t                   MuNeutralIso03OverPt,
                              Double_t                   MuChargedIso04OverPt,
-                             Double_t                   MuNeutralIso04OverPt                             
+                             Double_t                   MuNeutralIso04OverPt, 
+                             Bool_t                     printDebug                            
   ) {
   
   if (!fIsInitialized) { 
@@ -212,8 +213,7 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kFALSE;
-  if (printdebug == kTRUE) {
+  if (printDebug) {
     std::cout << "Debug Muon MVA: "
 	 << MuPt << " " << MuEta << " --> MVABin " << MVABin << " : "     
 	 << fMVAVar_MuTkNchi2              << " " 
@@ -251,7 +251,8 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
 //--------------------------------------------------------------------------------------------------
 Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fMuonTools,
                              const PFCandidateCol *PFCands, 
-                             const PileupEnergyDensityCol *PileupEnergyDensity) {
+                             const PileupEnergyDensityCol *PileupEnergyDensity, 
+                             Bool_t printDebug) {
   
   if (!fIsInitialized) { 
     std::cout << "Error: MuonIDMVA not properly initialized.\n"; 
@@ -321,8 +322,7 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kFALSE;
-  if (printdebug == kTRUE) {
+  if (printDebug) {
     std::cout << "Debug Muon MVA: "
               << mu->Pt() << " " << mu->Eta() << " " << mu->Phi() << " : "
               << muTrk->Pt() << " " << muTrk->Eta() << " --> MVABin " << MVABin << " : "     
