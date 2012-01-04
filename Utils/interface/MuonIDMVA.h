@@ -16,7 +16,10 @@
 #include "MitAna/DataTree/interface/TrackFwd.h"
 #include "MitAna/DataTree/interface/Muon.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/PFCandidateCol.h"
+#include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Utils/interface/MuonTools.h"
 
 class TRandom3;
 namespace TMVA {
@@ -46,7 +49,9 @@ namespace mithep {
                           MuonIDMVA::MVAType type);
       
       Bool_t   IsInitialized() const { return fIsInitialized; }
-//       Double_t MVAValue(const Muon *mu, const Vertex *vertex);
+      Double_t MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fMuonTools,
+                        const PFCandidateCol *PFCands, 
+                        const PileupEnergyDensityCol *PileupEnergyDensity);
       Double_t MVAValue( Double_t MuPt , Double_t MuEta,
                          Double_t                   MuTkNchi2, 
                          Double_t                   MuGlobalNchi2, 

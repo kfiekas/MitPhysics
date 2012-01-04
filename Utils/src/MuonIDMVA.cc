@@ -212,7 +212,7 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kFALSE;
+  Bool_t printdebug = kTRUE;
   if (printdebug == kTRUE) {
     std::cout << "Debug Muon MVA: "
 	 << MuPt << " " << MuEta << " --> MVABin " << MVABin << " : "     
@@ -248,52 +248,110 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
 
 
 
-// //--------------------------------------------------------------------------------------------------
-// Double_t MuonIDMVA::MVAValue(const Muon *ele, const Vertex *vertex) {
+//--------------------------------------------------------------------------------------------------
+Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fMuonTools,
+                             const PFCandidateCol *PFCands, 
+                             const PileupEnergyDensityCol *PileupEnergyDensity) {
   
-//   if (!fIsInitialized) { 
-//     std::cout << "Error: MuonIDMVA not properly initialized.\n"; 
-//     return -9999;
-//   }
+  if (!fIsInitialized) { 
+    std::cout << "Error: MuonIDMVA not properly initialized.\n"; 
+    return -9999;
+  }
 
-//   Int_t subdet = 0;
-//   if (ele->SCluster()->AbsEta() < 1.0) subdet = 0;
-//   else if (ele->SCluster()->AbsEta() < 1.479) subdet = 1;
-//   else subdet = 2;
-//   Int_t ptBin = 0;
-//   if (ele->Pt() > 20.0) ptBin = 1;
+  const Track *muTrk=0;
+  if(mu->HasTrackerTrk())         { muTrk = mu->TrackerTrk();    }
+  else if(mu->HasStandaloneTrk()) { muTrk = mu->StandaloneTrk(); } 
   
-//   //set all input variables
-//   fMVAVar_EleSigmaIEtaIEta = ele->CoviEtaiEta() ; 
-//   fMVAVar_EleDEtaIn = ele->DeltaEtaSuperClusterTrackAtVtx(); 
-//   fMVAVar_EleDPhiIn = ele->DeltaPhiSuperClusterTrackAtVtx(); 
-//   fMVAVar_EleHoverE = ele->HadronicOverEm(); 
-//   fMVAVar_EleD0 = ele->BestTrk()->D0Corrected(*vertex); 
-//   fMVAVar_EleDZ = ele->BestTrk()->DzCorrected(*vertex); 
-//   fMVAVar_EleFBrem = ele->FBrem(); 
-//   fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
-//   fMVAVar_EleESeedClusterOverPout = ele->ESeedClusterOverPout(); 
-//   if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
-//   else fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
-//   fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
-//   fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->SCluster()->Energy())) - 1.0 / ele->BestTrk()->P(); 
-//   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
-//   fMVAVar_EleIP3d = ele->Ip3dPV(); 
-//   fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
+  Double_t muNchi2 = 0.0; 
+  if(mu->HasGlobalTrk())          { muNchi2 = mu->GlobalTrk()->RChi2();     }
+  else if(mu->HasStandaloneTrk()) { muNchi2 = mu->StandaloneTrk()->RChi2(); }
+  else if(mu->HasTrackerTrk())    { muNchi2 = mu->TrackerTrk()->RChi2();    }
 
-//   Double_t mva = -9999;  
-//   TMVA::Reader *reader = 0;
-//   Int_t MVABin = -1;
-//   if (subdet == 0 && ptBin == 0) MVABin = 0;
-//   if (subdet == 1 && ptBin == 0) MVABin = 1;
-//   if (subdet == 2 && ptBin == 0) MVABin = 2;
-//   if (subdet == 0 && ptBin == 1) MVABin = 3;
-//   if (subdet == 1 && ptBin == 1) MVABin = 4;
-//   if (subdet == 2 && ptBin == 1) MVABin = 5;
-//   assert(MVABin >= 0 && MVABin <= 5);
-//   reader = fTMVAReader[MVABin];
+  Double_t ChargedIso03 = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.1, 99999, 0.3, 0.0, 0.0);
+  Double_t NeutralIso03_05Threshold = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.0, 0.5, 0.3, 0.0, 0.0);
+  Double_t ChargedIso04 = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.1, 99999, 0.4, 0.0, 0.0);
+  Double_t NeutralIso04_05Threshold = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.0, 0.5, 0.4, 0.0, 0.0);
+
+  Double_t Rho = 0;
+  if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
+
+  Int_t subdet = 0;
+  if (fabs(muTrk->Eta()) < 1.479) subdet = 0;
+  else subdet = 1;
+  Int_t ptBin = 0;
+  if (muTrk->Pt() > 14.5) ptBin = 1;
+  if (muTrk->Pt() > 20.0) ptBin = 2;
+
+  //set all input variables
+  fMVAVar_MuTkNchi2              = muTrk->RChi2();
+  fMVAVar_MuGlobalNchi2          = muNchi2;
+  fMVAVar_MuNValidHits           = mu->NValidHits();
+  fMVAVar_MuNTrackerHits         = muTrk->NHits();
+  fMVAVar_MuNPixelHits           = muTrk->NPixelHits();
+  fMVAVar_MuNMatches             = mu->NMatches();
+  fMVAVar_MuD0                   = muTrk->D0Corrected(*vertex);
+  fMVAVar_MuIP3d                 = mu->Ip3dPV();
+  fMVAVar_MuIP3dSig              = mu->Ip3dPVSignificance();
+  fMVAVar_MuTrkKink              = mu->TrkKink();
+  fMVAVar_MuSegmentCompatibility = fMuonTools->GetSegmentCompatability(mu);
+  fMVAVar_MuCaloCompatibility    = fMuonTools->GetCaloCompatability(mu, kTRUE, kTRUE);
+  fMVAVar_MuHadEnergyOverPt      = (mu->HadEnergy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadEnergy,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuHoEnergyOverPt       = (mu->HoEnergy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHoEnergy,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuEmEnergyOverPt       = (mu->EmEnergy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuEmEnergy,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuHadS9EnergyOverPt    = (mu->HadS9Energy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadS9Energy,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuHoS9EnergyOverPt     = (mu->HoS9Energy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHoS9Energy,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuEmS9EnergyOverPt     = (mu->EmS9Energy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuEmS9Energy,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuChargedIso03OverPt   = (ChargedIso03 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuChargedIso03,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuNeutralIso03OverPt   = (NeutralIso03_05Threshold - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuChargedIso04OverPt   = (ChargedIso04 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuChargedIso04,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuNeutralIso04OverPt   = (NeutralIso04_05Threshold - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso04,muTrk->Eta()))/muTrk->Pt();
+
+  Double_t mva = -9999;  
+  TMVA::Reader *reader = 0;
+
+  Int_t MVABin = -1;
+  if (subdet == 0 && ptBin == 0) MVABin = 0;
+  if (subdet == 1 && ptBin == 0) MVABin = 1;
+  if (subdet == 0 && ptBin == 1) MVABin = 2;
+  if (subdet == 1 && ptBin == 1) MVABin = 3;
+  if (subdet == 0 && ptBin == 2) MVABin = 4;
+  if (subdet == 1 && ptBin == 2) MVABin = 5;
+  assert(MVABin >= 0 && MVABin <= 5);
+  reader = fTMVAReader[MVABin];
                                                 
-//   mva = reader->EvaluateMVA( fMethodname );
+  mva = reader->EvaluateMVA( fMethodname );
 
-//   return mva;
-// }
+  Bool_t printdebug = kTRUE;
+  if (printdebug == kTRUE) {
+    std::cout << "Debug Muon MVA: "
+              << mu->Pt() << " " << mu->Eta() << " " << mu->Phi() << " : "
+              << muTrk->Pt() << " " << muTrk->Eta() << " --> MVABin " << MVABin << " : "     
+              << fMVAVar_MuTkNchi2              << " " 
+              << fMVAVar_MuGlobalNchi2          << " " 
+              << fMVAVar_MuNValidHits           << " " 
+              << fMVAVar_MuNTrackerHits         << " " 
+              << fMVAVar_MuNPixelHits           << " "  
+              << fMVAVar_MuNMatches             << " " 
+              << fMVAVar_MuD0                   << " " 
+              << fMVAVar_MuIP3d                 << " " 
+              << fMVAVar_MuIP3dSig              << " " 
+              << fMVAVar_MuTrkKink              << " " 
+              << fMVAVar_MuSegmentCompatibility << " " 
+              << fMVAVar_MuCaloCompatibility    << " " 
+              << fMVAVar_MuHadEnergyOverPt      << " " 
+              << fMVAVar_MuHoEnergyOverPt       << " " 
+              << fMVAVar_MuEmEnergyOverPt       << " " 
+              << fMVAVar_MuHadS9EnergyOverPt    << " " 
+              << fMVAVar_MuHoS9EnergyOverPt     << " " 
+              << fMVAVar_MuEmS9EnergyOverPt     << " " 
+              << fMVAVar_MuChargedIso03OverPt   << " " 
+              << fMVAVar_MuNeutralIso03OverPt   << " " 
+              << fMVAVar_MuChargedIso04OverPt   << " " 
+              << fMVAVar_MuNeutralIso04OverPt   << " " 
+              << " === : === "
+              << mva 
+              << std::endl;
+  }
+
+  return mva;
+}
