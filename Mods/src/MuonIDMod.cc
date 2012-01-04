@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.59 2011/12/31 23:20:16 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.60 2012/01/04 10:33:27 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -243,7 +243,7 @@ void MuonIDMod::Process()
                                       mu->TrkKink() < 20.0
             );   
           idpass =  ( passDenominatorM2 && 
-                      PassMuonMVA_BDTG_IdIso(mu, fVertices->At(0), fPileupEnergyDensity->At(0)->Rho()) );
+                      PassMuonMVA_BDTG_IdIso(mu, fVertices->At(0), fPileupEnergyDensity) );
         }
         break;
       case kNoId:
@@ -537,46 +537,15 @@ void MuonIDMod::SlaveBegin()
 
 
 //--------------------------------------------------------------------------------------------------
-Bool_t MuonIDMod::PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex, Double_t Rho) const
+Bool_t MuonIDMod::PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex, 
+                                         const PileupEnergyDensityCol *PileupEnergyDensity) const
 {
 
   const Track *muTrk=0;
   if(mu->HasTrackerTrk())         { muTrk = mu->TrackerTrk();    }
   else if(mu->HasStandaloneTrk()) { muTrk = mu->StandaloneTrk(); } 
-  
-  Double_t muNchi2 = 0.0; 
-  if(mu->HasGlobalTrk())          { muNchi2 = mu->GlobalTrk()->RChi2();     }
-  else if(mu->HasStandaloneTrk()) { muNchi2 = mu->StandaloneTrk()->RChi2(); }
-  else if(mu->HasTrackerTrk())    { muNchi2 = mu->TrackerTrk()->RChi2();    }
 
-  Double_t ChargedIso03 = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 99999, 0.3, 0.0, 0.0);
-  Double_t NeutralIso03_05Threshold = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.0, 0.5, 0.3, 0.0, 0.0);
-  Double_t ChargedIso04 = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 99999, 0.4, 0.0, 0.0);
-  Double_t NeutralIso04_05Threshold = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.0, 0.5, 0.4, 0.0, 0.0);
-
-  Double_t MVAValue = fMuonIDMVA->MVAValue(
-    muTrk->Pt(), muTrk->Eta(), muTrk->RChi2(),muNchi2,
-    mu->NValidHits(),
-    muTrk->NHits(),
-    muTrk->NPixelHits(),
-    mu->NMatches(),
-    muTrk->D0Corrected(*vertex),
-    mu->Ip3dPV(),
-    mu->Ip3dPVSignificance(),
-    mu->TrkKink(),
-    fMuonTools->GetSegmentCompatability(mu), 
-    fMuonTools->GetCaloCompatability(mu, kTRUE, kTRUE),
-    (mu->HadEnergy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadEnergy,muTrk->Eta()))/muTrk->Pt(),
-    (mu->HoEnergy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHoEnergy,muTrk->Eta()))/muTrk->Pt(),
-    (mu->EmEnergy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuEmEnergy,muTrk->Eta()))/muTrk->Pt(),
-    (mu->HadS9Energy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadS9Energy,muTrk->Eta()))/muTrk->Pt(),
-    (mu->HoS9Energy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHoS9Energy,muTrk->Eta()))/muTrk->Pt(),
-    (mu->EmS9Energy() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuEmS9Energy,muTrk->Eta()))/muTrk->Pt(),
-    (ChargedIso03 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuChargedIso03,muTrk->Eta()))/muTrk->Pt(),
-    (NeutralIso03_05Threshold - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03,muTrk->Eta()))/muTrk->Pt(),
-    (ChargedIso04 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuChargedIso04,muTrk->Eta()))/muTrk->Pt(),
-    (NeutralIso04_05Threshold - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso04,muTrk->Eta()))/muTrk->Pt()
-    );
+  Double_t MVAValue = fMuonIDMVA->MVAValue(mu,vertex,fMuonTools,fPFCandidates,PileupEnergyDensity);
 
   Int_t subdet = 0;
   if (fabs(muTrk->Eta()) < 1.479) subdet = 0;

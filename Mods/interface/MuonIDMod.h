@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.37 2011/10/11 17:00:24 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.38 2011/12/31 23:20:16 sixie Exp $
 //
 // MuonIDMod
 //
@@ -45,7 +45,7 @@ namespace mithep
       Double_t           GetPtMin()                     const { return fMuonPtMin;          }
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
       Bool_t             PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex, 
-                                                Double_t Rho) const;
+                                                const PileupEnergyDensityCol *PileupEnergyDensity) const;
       void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
       void               SetApplyDZCut(Bool_t b)              { fApplyDZCut        = b;     }
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
