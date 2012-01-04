@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.58 2011/11/02 20:12:03 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.59 2011/12/31 23:20:16 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -550,8 +550,8 @@ Bool_t MuonIDMod::PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex, D
   else if(mu->HasTrackerTrk())    { muNchi2 = mu->TrackerTrk()->RChi2();    }
 
   Double_t ChargedIso03 = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 99999, 0.3, 0.0, 0.0);
-  Double_t NeutralIso03_05Threshold = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.0, 0.5, 0.4, 0.0, 0.0);
-  Double_t ChargedIso04 = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 99999, 0.3, 0.0, 0.0);
+  Double_t NeutralIso03_05Threshold = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.0, 0.5, 0.3, 0.0, 0.0);
+  Double_t ChargedIso04 = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 99999, 0.4, 0.0, 0.0);
   Double_t NeutralIso04_05Threshold = IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.0, 0.5, 0.4, 0.0, 0.0);
 
   Double_t MVAValue = fMuonIDMVA->MVAValue(
