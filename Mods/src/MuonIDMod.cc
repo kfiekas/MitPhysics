@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.60 2012/01/04 10:33:27 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.61 2012/01/04 13:36:24 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -240,10 +240,15 @@ void MuonIDMod::Process()
                                       mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1 &&
                                       MuonTools::PassD0Cut(mu, fVertices, 0.20, 0) &&
                                       MuonTools::PassDZCut(mu, fVertices, 0.10, 0) &&
-                                      mu->TrkKink() < 20.0
-            );   
-          idpass =  ( passDenominatorM2 && 
-                      PassMuonMVA_BDTG_IdIso(mu, fVertices->At(0), fPileupEnergyDensity) );
+                                      mu->TrkKink() < 20.0 &&
+                                      ( IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius) 
+                                        - fPileupEnergyDensity->At(0)->Rho() * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta())
+                                        ) < (mu->Pt()* 0.40)
+            );
+          
+          idpass = passDenominatorM2;
+          //only evaluate MVA if muon passes M2 denominator to save time
+          if (idpass) idpass = PassMuonMVA_BDTG_IdIso(mu, fVertices->At(0), fPileupEnergyDensity);
         }
         break;
       case kNoId:

@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.109 2011/11/02 20:12:02 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.110 2011/12/31 23:15:32 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -221,17 +221,26 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint70Id);
       break;
     case ElectronTools::kMVAID_BDTG_NoIPInfo:
-      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId) &&
-        PassMVAID(ele, ElectronTools::kMVAID_BDTG_NoIPInfo, vertex, fPFCandidates, fPileupEnergyDensity);
-      break;
+    {
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId);
+      if (idcut) idcut = PassMVAID(ele, ElectronTools::kMVAID_BDTG_NoIPInfo, 
+                                   vertex, fPFCandidates, fPileupEnergyDensity);
+    }
+    break;
     case ElectronTools::kMVAID_BDTG_WithIPInfo:
-      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId) &&
-        PassMVAID(ele, ElectronTools::kMVAID_BDTG_WithIPInfo, vertex, fPFCandidates, fPileupEnergyDensity);
-      break;
+    {
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId);
+      if (idcut) idcut = PassMVAID(ele, ElectronTools::kMVAID_BDTG_WithIPInfo, 
+                                   vertex, fPFCandidates, fPileupEnergyDensity);
+    }
+    break;
     case ElectronTools::kMVAID_BDTG_IDIsoCombined:
-      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId) &&
-        PassMVAID(ele, ElectronTools::kMVAID_BDTG_IDIsoCombined, vertex, fPFCandidates, fPileupEnergyDensity );
-      break;
+    {
+      idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId);
+      if (idcut) idcut = PassMVAID(ele, ElectronTools::kMVAID_BDTG_IDIsoCombined, 
+                                   vertex, fPFCandidates, fPileupEnergyDensity );
+    }
+    break;
     default:
       break;
   }
@@ -436,7 +445,7 @@ void ElectronIDMod::Process()
     if( fElIsoType == ElectronTools::kTrackJuraSliding
         || fElIsoType == ElectronTools::kCombinedRelativeConeAreaCorrected 
         || fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombined 
-      ) {
+      ) {      
       Rho = fPileupEnergyDensity->At(0)->Rho();
     }
     Bool_t isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0), Rho);
