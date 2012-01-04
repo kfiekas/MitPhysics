@@ -212,7 +212,7 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kTRUE;
+  Bool_t printdebug = kFALSE;
   if (printdebug == kTRUE) {
     std::cout << "Debug Muon MVA: "
 	 << MuPt << " " << MuEta << " --> MVABin " << MVABin << " : "     
@@ -321,7 +321,7 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kTRUE;
+  Bool_t printdebug = kFALSE;
   if (printdebug == kTRUE) {
     std::cout << "Debug Muon MVA: "
               << mu->Pt() << " " << mu->Eta() << " " << mu->Phi() << " : "

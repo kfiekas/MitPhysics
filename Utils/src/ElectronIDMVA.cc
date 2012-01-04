@@ -316,7 +316,7 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta, Double_t Pile
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kTRUE;
+  Bool_t printdebug = kFALSE;
   if (printdebug == kTRUE) {
     std::cout << "Debug Electron MVA: "
 	 << ElePt << " " << EleEta << " " << " --> MVABin " << MVABin << " : "     
@@ -440,7 +440,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
-  Bool_t printdebug = kTRUE;
+  Bool_t printdebug = kFALSE;
   if (printdebug == kTRUE) {
     std::cout << "Debug Electron MVA: "
               << ele->Pt() << " " << ele->Eta() << " " << ele->Phi() << " : "
