@@ -1,4 +1,5 @@
-// $Id: PhotonIDMod.cc,v 1.28 2011/12/17 20:00:40 bendavid Exp $
+
+// $Id: PhotonIDMod.cc,v 1.29 2011/12/19 23:45:00 bendavid Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -77,9 +78,16 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
 
 
+  fDoMCR9Scaling     (kFALSE),
+  fMCR9ScaleEB       (1.0),
+  fMCR9ScaleEE       (1.0),
+  fDoMCSigIEtaIEtaScaling(kFALSE),
+  fDoMCWidthScaling(kFALSE),
+  fDoMCErrScaling     (kFALSE),
+  fMCErrScaleEB       (1.0),
+  fMCErrScaleEE       (1.0),
 
-
-
+  fPhotonsFromBranch(true),
   fPVFromBranch      (true),
   fGoodElectronsFromBranch (kTRUE),
   fIsData(false)
@@ -123,32 +131,58 @@ void PhotonIDMod::Process()
   
   PhotonOArr *GoodPhotons = new PhotonOArr;
   GoodPhotons->SetName(fGoodPhotonsName);
+  GoodPhotons->SetOwner(kTRUE);
 
   for (UInt_t i=0; i<fPhotons->GetEntries(); ++i) {    
-    const Photon *ph = fPhotons->At(i);        
+    // need to cpoy the photon in order to be able to scale R9 etc.
+    Photon *ph = new Photon(*fPhotons->At(i));        
 
     
     if (fFiduciality == kTRUE &&
         (ph->SCluster()->AbsEta()>=2.5 || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566) ) ) 
       continue;
     
-    if (fInvertElectronVeto && PhotonTools::PassElectronVeto(ph,fGoodElectrons)) {
+    if (fInvertElectronVeto && PhotonTools::PassElectronVeto(ph,fGoodElectrons) && false) {
       continue;
     }
     
+    // -----------------------------------------------------------------------------------
+    // Do all the scaling ....
+    if (fDoMCErrScaling && !fIsData) {
+      if (ph->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonError(ph,fMCErrScaleEB);
+      else PhotonTools::ScalePhotonError(ph,fMCErrScaleEE);
+    }
+
+    if (fDoMCR9Scaling && !fIsData) {
+      if (ph->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonR9(ph,fMCR9ScaleEB);
+      else PhotonTools::ScalePhotonR9(ph,fMCR9ScaleEE);
+    }
+
+    if (fDoMCSigIEtaIEtaScaling && !fIsData) {
+      if (ph->SCluster()->AbsEta()<1.5) ph->SetCoviEtaiEta(0.87*ph->CoviEtaiEta() + 0.0011);
+      else ph->SetCoviEtaiEta(0.99*ph->CoviEtaiEta());
+    }
+
+    if (fDoMCWidthScaling && !fIsData) {
+      ph->SetEtaWidth(0.99*ph->EtaWidth());
+      ph->SetPhiWidth(0.99*ph->PhiWidth());
+    }
+
+    
+
     // ---------------------------------------------------------------------
     // check if we use the CiC Selection. If yes, bypass all the below...
     if(fPhIdType == kBaseLineCiC) {
       if( PhotonTools::PassCiCSelection(ph, fPV->At(0), fTracks, fElectrons, fPV, _tRho, fPhotonPtMin, fApplyElectronVeto) )
-	GoodPhotons->Add(fPhotons->At(i));
+	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }
     // ---------------------------------------------------------------------
 
     //loose photon preselection for subsequent mva
     if(fPhIdType == kMITPhSelection ) {
-      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) ) {
-        GoodPhotons->Add(fPhotons->At(i));
+      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto,fInvertElectronVeto) ) {
+        GoodPhotons->AddOwned(ph);
       }
       continue;
     }
@@ -156,7 +190,7 @@ void PhotonIDMod::Process()
     // add MingMings MVA ID on single Photon level
     if(fPhIdType == kMITMVAId ) {
       if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _tRho ,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto) ) {
-	GoodPhotons->Add(fPhotons->At(i));
+	GoodPhotons->AddOwned(ph);
       }
       continue;
     }  // go to next Photon
@@ -299,7 +333,7 @@ void PhotonIDMod::Process()
       
     
     // add good electron
-    GoodPhotons->Add(fPhotons->At(i));
+    GoodPhotons->AddOwned(ph);
   }
 
   // sort according to pt
@@ -318,7 +352,7 @@ void PhotonIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the photon collection branch.
 
-  ReqEventObject(fPhotonBranchName,   fPhotons,     kTRUE);
+  ReqEventObject(fPhotonBranchName,   fPhotons,     fPhotonsFromBranch);
   ReqEventObject(fTrackBranchName,    fTracks,      kTRUE);
   ReqEventObject(fBeamspotBranchName, fBeamspots,   kTRUE);
   ReqEventObject(fConversionName,     fConversions, kTRUE);
@@ -326,6 +360,7 @@ void PhotonIDMod::SlaveBegin()
   ReqEventObject(fGoodElectronName,       fGoodElectrons,   fGoodElectronsFromBranch);  
   ReqEventObject(fPVName, fPV, fPVFromBranch);
   ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
+
   if (!fIsData) {
     ReqBranch(fPileUpName,            fPileUp);
     ReqBranch(fMCParticleName,        fMCParticles);

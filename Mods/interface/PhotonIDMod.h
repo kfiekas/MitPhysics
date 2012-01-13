@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.23 2011/10/18 11:27:19 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.24 2011/12/11 00:03:04 bendavid Exp $
 //
 // PhotonIDMod
 //
@@ -82,6 +82,9 @@ namespace mithep
       }
       void                SetTriggerObjectsName(const char *n)   { fTrigObjectsName = n;       }
     
+
+    void                SetPhotonsFromBranch(bool b)           { fPhotonsFromBranch = b;           }
+
     void                SetPVName(const char *n)          { fPVName = n;                 }
     void                SetPVFromBranch(bool b)           { fPVFromBranch = b;           }
     void                SetIsData (Bool_t b) { fIsData = b;};
@@ -91,6 +94,12 @@ namespace mithep
     void                SetBdtCutBarrel(double a) {fbdtCutBarrel = a; }
     void                SetBdtCutEndcap(double a) {fbdtCutEndcap = a; }
 
+    void                SetDoMCR9Scaling(Bool_t b)        { fDoMCR9Scaling = b; }
+    void                SetMCR9Scale(Double_t ebscale, Double_t eescale) { fMCR9ScaleEB = ebscale; fMCR9ScaleEE = eescale; }
+    void                SetDoMCSigIEtaIEtaScaling(Bool_t b)        { fDoMCSigIEtaIEtaScaling = b; }
+    void                SetDoMCWidthScaling(Bool_t b)        { fDoMCWidthScaling = b; }
+    void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
+    void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -170,7 +179,19 @@ namespace mithep
       TString                     fBarrelWeights;
       MVATools                    fTool;
 
-      bool                fPVFromBranch;
+      Bool_t fDoMCR9Scaling;
+      Double_t fMCR9ScaleEB;
+      Double_t fMCR9ScaleEE;
+      
+      Bool_t fDoMCSigIEtaIEtaScaling;
+      Bool_t fDoMCWidthScaling;
+      
+      Bool_t fDoMCErrScaling;
+      Double_t fMCErrScaleEB;
+      Double_t fMCErrScaleEE;    
+
+      Bool_t              fPhotonsFromBranch;
+      Bool_t              fPVFromBranch;
       Bool_t              fGoodElectronsFromBranch;
       Bool_t              fIsData;
 
