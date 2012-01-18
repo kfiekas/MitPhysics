@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.61 2012/01/04 13:36:24 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.62 2012/01/04 16:31:00 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -568,12 +568,12 @@ Bool_t MuonIDMod::PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex,
   if (subdet == 1 && ptBin == 2) MVABin = 5;
 
   Double_t MVACut = -999;
-  if (MVABin == 0) MVACut = -0.377;
-  if (MVABin == 1) MVACut = -0.0902;
-  if (MVABin == 2) MVACut = -0.221;
-  if (MVABin == 3) MVACut = -0.0154;
-  if (MVABin == 4) MVACut = 0.459;
-  if (MVABin == 5) MVACut = 0.9158;
+  if (MVABin == 0) MVACut = -0.5514;
+  if (MVABin == 1) MVACut = -0.303;
+  if (MVABin == 2) MVACut = -0.4562;
+  if (MVABin == 3) MVACut = -0.269;
+  if (MVABin == 4) MVACut = 0.1726;
+  if (MVABin == 5) MVACut = 0.801;
 
   if (MVAValue > MVACut) return kTRUE;
   return kFALSE;
