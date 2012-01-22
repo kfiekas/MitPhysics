@@ -30,7 +30,7 @@ Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets
     for(int j=0;j<int(jets->GetEntries());j++){
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-particles->At(i)->Eta()))
-		- 2 * TMath::Cos(MathUtils::DeltaPhi(jets->At(j)->Phi(),particles->At(i)->Phi()))));
+                  - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),particles->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
@@ -52,7 +52,7 @@ Double_t JetTools::NJettiness(const PFCandidateOArr *pfCandidates, const JetOArr
     for(int j=0;j<int(jets->GetEntries());j++){
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-pfCandidates->At(i)->Eta()))
-		- 2 * TMath::Cos(MathUtils::DeltaPhi(jets->At(j)->Phi(),pfCandidates->At(i)->Phi()))));
+                  - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),pfCandidates->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
@@ -74,7 +74,7 @@ Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, doub
     for(int j=0;j<int(jets->GetEntries());j++){
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-tracks->At(i)->Eta()))
-		- 2 * TMath::Cos(MathUtils::DeltaPhi(jets->At(j)->Phi(),tracks->At(i)->Phi()))));
+                  - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),tracks->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
@@ -96,7 +96,7 @@ Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, double 
     for(int j=0;j<int(jets->GetEntries());j++){
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-jetsS->At(i)->Eta()))
-		- 2 * TMath::Cos(MathUtils::DeltaPhi(jets->At(j)->Phi(),jetsS->At(i)->Phi()))));
+                  - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),jetsS->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
@@ -118,7 +118,7 @@ Double_t JetTools::NJettiness(const CaloTowerOArr *calos, const JetOArr *jets, d
     for(int j=0;j<int(jets->GetEntries());j++){
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-calos->At(i)->Eta()))
-		- 2 * TMath::Cos(MathUtils::DeltaPhi(jets->At(j)->Phi(),calos->At(i)->Phi()))));
+                  - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),calos->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
@@ -292,8 +292,8 @@ Double_t JetTools::MtHiggs(const ParticleOArr * leptons,
       - leptons->At(0)->Px()*leptons->At(1)->Px() - leptons->At(0)->Py()*leptons->At(1)->Py());
   }
   else if(nsel == 7){ // Use of M mass and mnu == 0
-    double deltaPhiDileptonMet = MathUtils::DeltaPhi(dilepton->Phi(), 
-   						     met->Phi());
+    double deltaPhiDileptonMet = fabs(MathUtils::DeltaPhi(dilepton->Phi(), 
+                                                          met->Phi()));
     mtHiggs = 2.0*dilepton->Pt()*met->Pt()*(1.0 - cos(deltaPhiDileptonMet));
   }
 

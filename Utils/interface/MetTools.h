@@ -89,8 +89,8 @@ namespace mithep {
     double minDPhi = 999;
     int index = -1;
     for (UInt_t m = 0; m < fV->GetEntries(); ++m) {
-      if (MathUtils::DeltaPhi(UncorrectedMet->Phi(), fV->At(m)->Phi()) < minDPhi) {
-	minDPhi = MathUtils::DeltaPhi(UncorrectedMet->Phi(), fV->At(m)->Phi());
+      if (fabs(MathUtils::DeltaPhi(UncorrectedMet->Phi(), fV->At(m)->Phi())) < minDPhi) {
+	minDPhi = fabs(MathUtils::DeltaPhi(UncorrectedMet->Phi(), fV->At(m)->Phi()));
 	index = m;
       }
     }
@@ -104,8 +104,8 @@ namespace mithep {
     double minDPhi = 999;
     int index = -1;
     for (UInt_t m = 0; m < fV->GetEntries(); ++m) {
-      if (MathUtils::DeltaPhi(fCorrectedMet.Phi(), fV->At(m)->Phi()) < minDPhi) {
-	minDPhi = MathUtils::DeltaPhi(fCorrectedMet.Phi(), fV->At(m)->Phi());
+      if (fabs(MathUtils::DeltaPhi(fCorrectedMet.Phi(), fV->At(m)->Phi())) < minDPhi) {
+	minDPhi = fabs(MathUtils::DeltaPhi(fCorrectedMet.Phi(), fV->At(m)->Phi()));
 	index = m;
       }
     }
@@ -119,8 +119,8 @@ namespace mithep {
     double minDPhi = 999;
     int index = -1;
     for (UInt_t m = 0; m < fV->GetEntries(); ++m) {
-      if (MathUtils::DeltaPhi(fCorrectedTrackMet.Phi(), fV->At(m)->Phi()) < minDPhi) {
-	minDPhi = MathUtils::DeltaPhi(fCorrectedTrackMet.Phi(), fV->At(m)->Phi());
+      if (fabs(MathUtils::DeltaPhi(fCorrectedTrackMet.Phi(), fV->At(m)->Phi())) < minDPhi) {
+	minDPhi = fabs(MathUtils::DeltaPhi(fCorrectedTrackMet.Phi(), fV->At(m)->Phi()));
 	index = m;
       }
     }
