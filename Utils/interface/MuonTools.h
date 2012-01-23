@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.19 2011/10/05 16:11:18 ceballos Exp $
+// $Id: MuonTools.h,v 1.20 2011/12/31 23:18:39 sixie Exp $
 //
 // MuonTools
 //
@@ -55,7 +55,13 @@ namespace mithep {
         kMuEmEnergy, 
         kMuHadS9Energy, 
         kMuHoS9Energy, 
-        kMuEmS9Energy 
+        kMuEmS9Energy,
+        kMuTrkIso03, 
+        kMuEMIso03, 
+        kMuHadIso03, 
+        kMuTrkIso05, 
+        kMuEMIso05, 
+        kMuHadIso05 
       };
 
       Bool_t          Init(const char *mutemp, const char *pitemp);

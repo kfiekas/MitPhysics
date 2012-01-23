@@ -35,7 +35,8 @@ namespace mithep {
       enum MVAType {
         kV2,
         kV3,
-        kV8
+        kV8,
+        kIDIsoCombinedDetIso
       };
 
 
@@ -75,7 +76,34 @@ namespace mithep {
                          Double_t                   MuChargedIso03OverPt,
                          Double_t                   MuNeutralIso03OverPt,
                          Double_t                   MuChargedIso04OverPt,
-                         Double_t                   MuNeutralIso04OverPt, 
+                         Double_t                   MuNeutralIso04OverPt,
+                         Bool_t                     printDebug = kFALSE
+        );
+      Double_t MVAValue( Double_t MuPt , Double_t MuEta,
+                         Double_t                   MuTkNchi2, 
+                         Double_t                   MuGlobalNchi2, 
+                         Double_t                   MuNValidHits, 
+                         Double_t                   MuNTrackerHits, 
+                         Double_t                   MuNPixelHits, 
+                         Double_t                   MuNMatches, 
+                         Double_t                   MuD0, 
+                         Double_t                   MuIP3d, 
+                         Double_t                   MuIP3dSig, 
+                         Double_t                   MuTrkKink, 
+                         Double_t                   MuSegmentCompatibility, 
+                         Double_t                   MuCaloCompatibility, 
+                         Double_t                   MuHadEnergyOverPt, 
+                         Double_t                   MuHoEnergyOverPt, 
+                         Double_t                   MuEmEnergyOverPt, 
+                         Double_t                   MuHadS9EnergyOverPt, 
+                         Double_t                   MuHoS9EnergyOverPt, 
+                         Double_t                   MuEmS9EnergyOverPt, 
+                         Double_t                   MuTrkIso03OverPt,
+                         Double_t                   MuEMIso03OverPt,
+                         Double_t                   MuHadIso03OverPt,
+                         Double_t                   MuTrkIso05OverPt,
+                         Double_t                   MuEMIso05OverPt,
+                         Double_t                   MuHadIso05OverPt,
                          Bool_t                     printDebug = kFALSE
         );
 
@@ -108,6 +136,12 @@ namespace mithep {
       Float_t                   fMVAVar_MuNeutralIso03OverPt;
       Float_t                   fMVAVar_MuChargedIso04OverPt;
       Float_t                   fMVAVar_MuNeutralIso04OverPt;
+      Float_t                   fMVAVar_MuTrkIso03OverPt;
+      Float_t                   fMVAVar_MuEMIso03OverPt;
+      Float_t                   fMVAVar_MuHadIso03OverPt;
+      Float_t                   fMVAVar_MuTrkIso05OverPt;
+      Float_t                   fMVAVar_MuEMIso05OverPt;
+      Float_t                   fMVAVar_MuHadIso05OverPt;
 
       
     ClassDef(MuonIDMVA, 0) // Muon MVA

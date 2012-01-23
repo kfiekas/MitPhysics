@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.22 2011/10/05 16:11:10 ceballos Exp $
+// $Id: MuonTools.cc,v 1.23 2011/12/31 23:18:39 sixie Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -535,6 +535,12 @@ Double_t MuonTools::MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta)
     if (type == kMuHadS9Energy)  EffectiveArea = 0.016;
     if (type == kMuHoS9Energy)   EffectiveArea = 0.000;
     if (type == kMuEmS9Energy)   EffectiveArea = 0.000;
+    if (type == kMuTrkIso03)     EffectiveArea = 0.000;
+    if (type == kMuEMIso03)      EffectiveArea = 0.080;
+    if (type == kMuHadIso03)     EffectiveArea = 0.025;
+    if (type == kMuTrkIso05)     EffectiveArea = 0.000;
+    if (type == kMuEMIso05)      EffectiveArea = 0.290;
+    if (type == kMuHadIso05)     EffectiveArea = 0.091;
   } else if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) {
     if (type == kMuChargedIso03) EffectiveArea = 0.000;
     if (type == kMuNeutralIso03) EffectiveArea = 0.083;
@@ -546,6 +552,12 @@ Double_t MuonTools::MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta)
     if (type == kMuHadS9Energy)  EffectiveArea = 0.041;
     if (type == kMuHoS9Energy)   EffectiveArea = 0.000;
     if (type == kMuEmS9Energy)   EffectiveArea = 0.000;
+    if (type == kMuTrkIso03)     EffectiveArea = 0.000;
+    if (type == kMuEMIso03)      EffectiveArea = 0.043;
+    if (type == kMuHadIso03)     EffectiveArea = 0.028;
+    if (type == kMuTrkIso05)     EffectiveArea = 0.000;
+    if (type == kMuEMIso05)      EffectiveArea = 0.184;
+    if (type == kMuHadIso05)     EffectiveArea = 0.106;
   } else if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) {
     if (type == kMuChargedIso03) EffectiveArea = 0.000;
     if (type == kMuNeutralIso03) EffectiveArea = 0.060;
@@ -557,6 +569,12 @@ Double_t MuonTools::MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta)
     if (type == kMuHadS9Energy)  EffectiveArea = 0.072;
     if (type == kMuHoS9Energy)   EffectiveArea = 0.000;
     if (type == kMuEmS9Energy)   EffectiveArea = 0.000;
+    if (type == kMuTrkIso03)     EffectiveArea = 0.000;
+    if (type == kMuEMIso03)      EffectiveArea = 0.025;
+    if (type == kMuHadIso03)     EffectiveArea = 0.036;
+    if (type == kMuTrkIso05)     EffectiveArea = 0.000;
+    if (type == kMuEMIso05)      EffectiveArea = 0.124;
+    if (type == kMuHadIso05)     EffectiveArea = 0.140;
   } else if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.25 ) {
     if (type == kMuChargedIso03) EffectiveArea = 0.000;
     if (type == kMuNeutralIso03) EffectiveArea = 0.066;
@@ -568,6 +586,12 @@ Double_t MuonTools::MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta)
     if (type == kMuHadS9Energy)  EffectiveArea = 0.148;
     if (type == kMuHoS9Energy)   EffectiveArea = 0.000;
     if (type == kMuEmS9Energy)   EffectiveArea = 0.000;
+    if (type == kMuTrkIso03)     EffectiveArea = 0.000;
+    if (type == kMuEMIso03)      EffectiveArea = 0.025;
+    if (type == kMuHadIso03)     EffectiveArea = 0.050;
+    if (type == kMuTrkIso05)     EffectiveArea = 0.000;
+    if (type == kMuEMIso05)      EffectiveArea = 0.120;
+    if (type == kMuHadIso05)     EffectiveArea = 0.186;
   } else if (fabs(Eta) >= 2.25 && fabs(Eta) < 2.4 ) {
     if (type == kMuChargedIso03) EffectiveArea = 0.000;
     if (type == kMuNeutralIso03) EffectiveArea = 0.098;
@@ -579,6 +603,12 @@ Double_t MuonTools::MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta)
     if (type == kMuHadS9Energy)  EffectiveArea = 0.260;
     if (type == kMuHoS9Energy)   EffectiveArea = 0.000;
     if (type == kMuEmS9Energy)   EffectiveArea = 0.000;
+    if (type == kMuTrkIso03)     EffectiveArea = 0.000;
+    if (type == kMuEMIso03)      EffectiveArea = 0.027;
+    if (type == kMuHadIso03)     EffectiveArea = 0.060;
+    if (type == kMuTrkIso05)     EffectiveArea = 0.000;
+    if (type == kMuEMIso05)      EffectiveArea = 0.139;
+    if (type == kMuHadIso05)     EffectiveArea = 0.228;
   }
   return EffectiveArea;
 }
