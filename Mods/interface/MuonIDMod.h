@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.38 2011/12/31 23:20:16 sixie Exp $
+// $Id: MuonIDMod.h,v 1.39 2012/01/04 13:36:24 sixie Exp $
 //
 // MuonIDMod
 //
@@ -101,6 +101,7 @@ namespace mithep
         kTrackCaloSliding,  	            //"TrackCaloSliding"
         kTrackCaloSlidingNoCorrection,      //"TrackCaloSlidingNoCorrection"
         kCombinedRelativeConeAreaCorrected, //"CombinedRelativeConeAreaCorrected"
+        kCombinedRelativeEffectiveAreaCorrected,
         kCustomIso,         	            //"Custom"
         kPFIso,             	            //"PFIso"
         kPFIsoEffectiveAreaCorrected,       //"PFIso with EffectiveArea Pileup Correction"
