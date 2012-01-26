@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.58 2011/11/02 20:12:03 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.64 2012/01/23 20:27:14 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -383,14 +383,23 @@ void MuonIDMod::Process()
         break;
       case kMVAIso_BDTG_IDIso:
       {
-        Double_t tmpRho = 0;
-        if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || isinf(fPileupEnergyDensity->At(0)->Rho())))
-          tmpRho = fPileupEnergyDensity->At(0)->Rho();
 
-        isocut = ( mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() 
-                   -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuEMIso03, mu->Eta())
-                   -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadIso03, mu->Eta())
-          ) < (mu->Pt()* 0.40);
+	// **************************************************************************
+	// Don't use effective area correction denominator. Instead use the old one.
+	// **************************************************************************
+
+	//         Double_t tmpRho = 0;
+	//         if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || isinf(fPileupEnergyDensity->At(0)->Rho())))
+	//           tmpRho = fPileupEnergyDensity->At(0)->Rho();
+	
+	//         isocut = ( mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() 
+	//                    -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuEMIso03, mu->Eta())
+	//                    -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadIso03, mu->Eta())
+	//           ) < (mu->Pt()* 0.40);
+	
+	Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius);
+	isocut = (totalIso < (mu->Pt()*0.4));
+
       }
         break;
       case kNoIso:
