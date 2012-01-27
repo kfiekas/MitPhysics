@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.53 2011/09/25 10:08:10 sixie Exp $
+// $Id: ElectronIDMod.h,v 1.54 2011/12/31 23:15:32 sixie Exp $
 //
 // ElectronIDMod
 //
@@ -71,6 +71,7 @@ namespace mithep
                                            const TrackCol *tracks, const Vertex *vertex, 
 					   const Double_t rho) const;
       Bool_t              GetCombinedIdCut()               const { return fCombinedIdCut;      }
+      void                SetPrintMVADebugInfo(Bool_t b)         { fPrintMVADebugInfo = b;     }
       void                SetApplyConversionFilterType1(Bool_t b){ fApplyConvFilterType1 = b;  }
       void                SetApplyConversionFilterType2(Bool_t b){ fApplyConvFilterType2 = b;  }
       void                SetNExpectedHitsInnerCut(Int_t cut)    { fNExpectedHitsInnerCut = cut;}
@@ -132,6 +133,7 @@ namespace mithep
       void                SlaveBegin();
       void                Terminate();
 
+      Bool_t                    fPrintMVADebugInfo;      //print MVA debug information
       TString                   fElectronBranchName;     //name of electron collection (input)
       TString                   fConversionBranchName;   //name of electron collection (input)
       TString                   fGoodElectronsName;      //name of exported "good electrons" col

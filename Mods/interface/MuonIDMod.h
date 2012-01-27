@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.39 2012/01/04 13:36:24 sixie Exp $
+// $Id: MuonIDMod.h,v 1.40 2012/01/23 20:08:30 sixie Exp $
 //
 // MuonIDMod
 //
@@ -46,6 +46,7 @@ namespace mithep
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
       Bool_t             PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex, 
                                                 const PileupEnergyDensityCol *PileupEnergyDensity) const;
+      void               SetPrintMVADebugInfo(Bool_t b)       { fPrintMVADebugInfo = b;     }
       void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
       void               SetApplyDZCut(Bool_t b)              { fApplyDZCut        = b;     }
       void               SetCaloIsoCut(Double_t cut)          { fCaloIsolationCut  = cut;   }
@@ -125,6 +126,7 @@ namespace mithep
       void               Process();
       void               SlaveBegin();
 
+      Bool_t             fPrintMVADebugInfo;   //print MVA debug information
       TString            fMuonBranchName;      //name of muon collection (input)
       TString            fCleanMuonsName;      //name of exported "good muon" collection
       TString            fNonIsolatedMuonsName;    //name of imported "old muon" collection

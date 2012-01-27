@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.64 2012/01/23 20:27:14 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.65 2012/01/26 15:29:13 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -14,6 +14,7 @@ ClassImp(mithep::MuonIDMod)
 //--------------------------------------------------------------------------------------------------
   MuonIDMod::MuonIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
+  fPrintMVADebugInfo(kFALSE),
   fMuonBranchName(Names::gkMuonBrn),
   fCleanMuonsName(ModNames::gkCleanMuonsName),  
   fNonIsolatedMuonsName("random"),  
@@ -169,6 +170,22 @@ void MuonIDMod::Process()
 
     if (eta >= fEtaCut) 
       continue;
+
+
+    //***********************************************************************************************
+    //Debug Info For Lepton MVA
+    //***********************************************************************************************
+    if( fPrintMVADebugInfo && 
+        (fMuIsoType == kMVAIso_BDTG_IDIso || fMuIDType == kMVAID_BDTG_IDIso)
+      ) {
+      cout << "Event: " << GetEventHeader()->RunNum() << " " << GetEventHeader()->LumiSec() << " "
+           << GetEventHeader()->EvtNum() << " : Rho = " << fPileupEnergyDensity->At(0)->Rho() 
+           << " : Muon " << i << " "
+           << endl;
+      fMuonIDMVA->MVAValue(mu,fVertices->At(0),fMuonTools,fPFCandidates,fPileupEnergyDensity,kTRUE);
+    }
+    //***********************************************************************************************
+
 
     Double_t RChi2 = 0.0;
     if     (mu->HasGlobalTrk()) {

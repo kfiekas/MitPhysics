@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.110 2011/12/31 23:15:32 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.111 2012/01/04 16:31:00 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -18,6 +18,7 @@ ClassImp(mithep::ElectronIDMod)
 //--------------------------------------------------------------------------------------------------
 ElectronIDMod::ElectronIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
+  fPrintMVADebugInfo(kFALSE),
   fElectronBranchName(Names::gkElectronBrn),
   fConversionBranchName(Names::gkMvfConversionBrn),
   fGoodElectronsName(ModNames::gkGoodElectronsName),  
@@ -421,7 +422,22 @@ void ElectronIDMod::Process()
     
     if (e->AbsEta() > fElectronEtaMax) 
       continue;
-    
+
+    //***********************************************************************************************
+    //Debug Info For Lepton MVA
+    //***********************************************************************************************
+    if (fPrintMVADebugInfo && 
+        ( fElIdType == ElectronTools::kMVAID_BDTG_IDIsoCombined || 
+          fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombined )
+      ) {
+      cout << "Event: " << GetEventHeader()->RunNum() << " " << GetEventHeader()->LumiSec() << " "
+           << GetEventHeader()->EvtNum() << " : Rho = " << fPileupEnergyDensity->At(0)->Rho() 
+           << " : Electron " << i << " "
+           << endl;
+      fElectronIDMVA->MVAValue(e, fVertices->At(0), fPFCandidates, fPileupEnergyDensity, kTRUE);
+    }
+    //***********************************************************************************************
+
     if (fApplyEcalFiducial && ( (e->SCluster()->AbsEta()>1.4442 && e->SCluster()->AbsEta()<1.5666) || e->SCluster()->AbsEta()>2.5 )) {
       continue;
     }
