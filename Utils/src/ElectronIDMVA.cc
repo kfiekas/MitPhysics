@@ -362,6 +362,7 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta, Double_t Pile
 Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex, 
                                  const PFCandidateCol *PFCands, 
                                  const PileupEnergyDensityCol *PileupEnergyDensity,
+                                 Double_t intRadius,
                                  Bool_t printDebug) {
   
   if (!fIsInitialized) { 
@@ -405,25 +406,25 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   fMVAVar_EleCovIEtaIPhi = ele->SCluster()->Seed()->CoviEtaiPhi();
   fMVAVar_ElePreShowerOverRaw = ele->SCluster()->PreshowerEnergy() / ele->SCluster()->RawEnergy();
   fMVAVar_EleChargedIso03OverPt 
-    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 99999, 0.3, 0.0) 
+    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 99999, 0.3, intRadius) 
        - Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleChargedIso03, ele->SCluster()->Eta())) / ele->Pt();
   fMVAVar_EleNeutralHadronIso03OverPt 
-    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 0.5, 0.3, 0.0, PFCandidate::eNeutralHadron) 
+    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 0.5, 0.3, intRadius, PFCandidate::eNeutralHadron) 
        - Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso03, ele->SCluster()->Eta()) 
        + Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso007,ele->SCluster()->Eta())) / ele->Pt();
   fMVAVar_EleGammaIso03OverPt 
-    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 0.5, 0.3, 0.0, PFCandidate::eGamma) 
+    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 0.5, 0.3, intRadius, PFCandidate::eGamma) 
        - Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso03, ele->SCluster()->Eta()) 
        + Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIsoVetoEtaStrip03,ele->SCluster()->Eta())) / ele->Pt();
   fMVAVar_EleChargedIso04OverPt 
-    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 99999, 0.4, 0.0) 
+    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 99999, 0.4, intRadius) 
        - Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleChargedIso04, ele->SCluster()->Eta())) / ele->Pt();
   fMVAVar_EleNeutralHadronIso04OverPt 
-    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 0.5, 0.4, 0.0, PFCandidate::eNeutralHadron) 
+    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 0.5, 0.4, intRadius, PFCandidate::eNeutralHadron) 
        - Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso04, ele->SCluster()->Eta()) 
        + Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso007,ele->SCluster()->Eta())) / ele->Pt() ;
   fMVAVar_EleGammaIso04OverPt 
-    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 0.5, 0.4, 0.0, PFCandidate::eGamma) 
+    = (IsolationTools::PFElectronIsolation(ele, PFCands, vertex, 0.1, 0.5, 0.4, intRadius, PFCandidate::eGamma) 
        - Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso04, ele->SCluster()->Eta()) 
        + Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIsoVetoEtaStrip04,ele->SCluster()->Eta())) / ele->Pt();
   

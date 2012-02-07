@@ -53,6 +53,7 @@ namespace mithep {
       Double_t MVAValue(const Electron *ele, const Vertex *vertex, 
                         const PFCandidateCol *PFCands, 
                         const PileupEnergyDensityCol *PileupEnergyDensity,
+                        Double_t intRadius,
                         Bool_t printDebug = kFALSE);
       Double_t MVAValue(Double_t ElePt , Double_t EleEta,
                         Double_t EleSigmaIEtaIEta,
