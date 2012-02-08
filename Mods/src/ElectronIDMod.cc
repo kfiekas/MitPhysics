@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.111 2012/01/04 16:31:00 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.112 2012/01/27 11:48:26 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -127,7 +127,7 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
  
   Double_t MVAValue = 0;
   if (idType == ElectronTools::kMVAID_BDTG_IDIsoCombined) {
-    MVAValue = fElectronIDMVA->MVAValue(el, vertex, PFCands, PileupEnergyDensity);
+    MVAValue = fElectronIDMVA->MVAValue(el, vertex, PFCands, PileupEnergyDensity, fIntRadius);
   } else {
     MVAValue = fElectronIDMVA->MVAValue(el, vertex);
   }
