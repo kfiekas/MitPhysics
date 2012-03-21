@@ -37,8 +37,8 @@ namespace mithep {
     void    setVariables(TMVA::Reader *iReader,bool iScale);
     void    Initialize( TString iU1MethodName="U1MVA",
 			TString iPhiMethodName="PhiMVA",
-			TString iJetMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_data_clean2_njet.weights.xml",
-			TString iU1Weights="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilRegress_clean2_njet.weights.xml",
+			TString iJetMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
+			TString iU1Weights="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilRegress_baseline.weights.xml",
 			TString iPhiWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID.weights.xml", 
 			MVAType iType=kBaseline);
 
