@@ -475,3 +475,64 @@ Int_t JetTools::JetToPVAssociation(const PFJet *jet, const VertexCol *vertices, 
   }
   return vertexIndex;
 }
+const PFCandidate* JetTools::leadCand(const PFJet *iJet,int iPFType,bool i2nd) { 
+  int lCount = 0;
+  const PFCandidate *lCand = 0;
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) { 
+    lCand = iJet->PFCand(i0);
+    if(iPFType != -1 && lCand->PFType() != iPFType) continue;
+    if(lCount == 0 && !i2nd) break;
+    if(lCount >  0)          break;
+    lCount++;
+  }
+  return lCand; 
+}
+Double_t JetTools::impactParameter(const PFJet *iJet,const Vertex *iVertex,bool iDZ) { 
+  double lDZCorr = -1000;
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) { 
+    const PFCandidate *pCand = iJet->PFCand(i0);
+    if(pCand->BestTrk() == 0) continue;
+    if(pCand->Pt() < 1.) continue;
+    if(iDZ)  lDZCorr = pCand->BestTrk()->DzCorrected(*iVertex);
+    if(!iDZ) lDZCorr = pCand->BestTrk()->D0Corrected(*iVertex);
+    break;
+  }
+  return lDZCorr;
+}
+Double_t JetTools::dRMean(const PFJet *iJet,int iPFType) { 
+  double lDRMean = 0;
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) { 
+    const PFCandidate *pCand = iJet->PFCand(i0);
+    if(iPFType != -1 && pCand->PFType() != iPFType) continue;
+    double pDR = MathUtils::DeltaR(iJet->Mom(),pCand->Mom());
+    lDRMean    += pDR*(pCand->Pt())/iJet->Pt();
+  }
+  return lDRMean;
+}
+Bool_t  JetTools::passPFLooseId(const PFJet *iJet) { 
+  if(iJet->E()                              == 0)       return false;
+  if(iJet->NeutralHadronEnergy()/iJet->E()  >  0.99)    return false;
+  if(iJet->NeutralEmEnergy()/iJet->E()      >  0.99)    return false;
+  if(iJet->NConstituents()                  <  2)	return false;
+  if(iJet->ChargedHadronEnergy()/iJet->E()  <= 0     && fabs(iJet->Eta()) < 2.4 ) return false;
+  if(iJet->ChargedEmEnergy()/iJet->E()      >  0.99  && fabs(iJet->Eta()) < 2.4 ) return false;
+  if(iJet->ChargedMultiplicity()            < 1      && fabs(iJet->Eta()) < 2.4 ) return false;
+  return true;
+}
+
+/*
+double JetTools::genFrac(const PFJet *iJet) { 
+  double lTrueFrac = 0;
+  for(UInt_t i0 = 0; i0 < fParticles->GetEntries(); i0++) { 
+    const MCParticle *p = fParticles->At(i0);
+    if(p->Status() != 1) continue;
+    double pDEta = iJet->Eta() - p->Eta(); 
+    double pDPhi = fabs(iJet->Phi()-p->Phi()); if(pDPhi > 2.*TMath::Pi() - pDPhi) pDPhi =  2.*TMath::Pi() - pDPhi;
+    double pDR   = sqrt(pDEta*pDEta + pDPhi*pDPhi);
+    if(pDR > 0.5) continue;
+    lTrueFrac += p->Pt();
+  }
+  lTrueFrac/=iJet->Pt();
+  return lTrueFrac;
+}
+*/

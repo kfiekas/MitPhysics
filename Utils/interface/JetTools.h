@@ -44,6 +44,10 @@ namespace mithep {
     static Int_t    MaxBeta2VertexIndex(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);    
     static Int_t    JetToPVAssociation(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);    
 
+    static Double_t           impactParameter(const PFJet *iJet,const Vertex *iVertex,bool iDZ=false);
+    static const PFCandidate* leadCand       (const PFJet *iJet,int iPFType,bool i2nd=false);
+    static Double_t           dRMean         (const PFJet *iJet,int iPFType);
+    static Bool_t             passPFLooseId  (const PFJet *iJet);
     ClassDef(JetTools, 0)
   };
 

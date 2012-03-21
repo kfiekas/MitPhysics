@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.16 2011/12/16 13:03:06 sixie Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.17 2011/12/31 23:21:43 sixie Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -11,6 +11,7 @@
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
+#include "MitPhysics/Utils/interface/RecoilTools.h"
 #include "MitPhysics/Utils/interface/JetTools.h"
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/VertexMVA.h"
@@ -23,6 +24,8 @@
 #include "MitPhysics/Utils/interface/ElectronIDMVA.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
 #include "MitPhysics/Utils/interface/MuonIDMVA.h"
+#include "MitPhysics/Utils/interface/JetIDMVA.h"
+#include "MitPhysics/Utils/interface/MVAMet.h"
 
 
 #endif
@@ -49,6 +52,8 @@
 #pragma link C++ class mithep::ElectronTools;
 #pragma link C++ class mithep::PhotonTools;
 #pragma link C++ class mithep::JetTools;
+#pragma link C++ class mithep::MetTools;
+#pragma link C++ class mithep::RecoilTools;
 #pragma link C++ enum mithep::ElectronTools::EElIdType;
 #pragma link C++ enum mithep::ElectronTools::EElIsoType;
 #pragma link C++ enum mithep::ElectronTools::EElectronEffectiveAreaType;
@@ -61,4 +66,6 @@
 #pragma link C++ class mithep::ElectronIDMVA; 
 #pragma link C++ class mithep::MVATools; 
 #pragma link C++ class mithep::MuonIDMVA; 
+#pragma link C++ class mithep::JetIDMVA; 
+#pragma link C++ class mithep::MVAMet; 
 #endif
