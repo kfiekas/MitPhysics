@@ -1,4 +1,4 @@
-// $Id: MVASystematicsMod.cc,v 1.1 2011/11/18 19:10:43 fabstoec Exp $
+// $Id: MVASystematicsMod.cc,v 1.1 2011/12/13 21:13:23 bendavid Exp $
 
 #include <TMath.h>
 #include <TH1D.h>
@@ -31,11 +31,22 @@ MVASystematicsMod::MVASystematicsMod(const char *name, const char *title) :
 
   // define all the Branches to load
   fMCParticleName    (Names::gkMCPartBrn),
+  fPVName            (Names::gkPVBeamSpotBrn),
+  fEBSCName            (Names::gkBarrelSuperClusterBrn),
+  fEESCName            (Names::gkEndcapSuperClusterBrn),  
+
 
   // ----------------------------------------
   // collections....
   fMCParticles       (0),
+  fPV       (0),
+  fEBSC       (0),
+  fEESC       (0),
   // -------------------------------------------
+  
+  fMCR9ScaleEB(1.0),
+  fMCR9ScaleEE(1.0),
+  
   fIsData            (false),
 
   fTupleName("hMVAtuple")
@@ -57,12 +68,108 @@ void MVASystematicsMod::Process()
   if( !fIsData )
     LoadBranch(fMCParticleName);
 
+  LoadBranch(fPVName);
+  LoadBranch(fEBSCName);
+  LoadBranch(fEESCName);
+  
+  const Vertex *vtx = 0;
+  if (fPV->GetEntries()>0) vtx = fPV->At(0);
+  
+  const MCParticle *h = 0;
+  const MCParticle *p1 = 0;
+  const MCParticle *p2 = 0;
+  
+  const SuperCluster *sc1 = 0;
+  const SuperCluster *sc2 = 0;
+  
   Float_t _pth    = -100.;
   Float_t _y      = -100.;
   Float_t _genmass = -100.;
-  if( !fIsData ) FindHiggsPtAndY(_pth, _y, _genmass);  
+  if( !fIsData ) h = FindHiggsPtAndY(_pth, _y, _genmass);  
 
-  hMVAtuple->Fill(_pth, _y, _genmass);
+  if (h && h->NDaughters()>=2) {
+    p1 = h->Daughter(0);
+    p2 = h->Daughter(1);
+  }
+  
+  Float_t pt1 = -100;
+  Float_t eta1 = -100;
+  Float_t phi1 = -100;
+
+  Float_t pt2 = -100;
+  Float_t eta2 = -100;
+  Float_t phi2 = -100;  
+  
+  Float_t scet1 = -100;
+  Float_t sceta1 = -100;
+  Float_t scphi1 = -100;
+  Float_t scr91 = -100;
+  bool iseb1 = kFALSE;
+
+  Float_t scet2 = -100;
+  Float_t sceta2 = -100;
+  Float_t scphi2 = -100;  
+  Float_t scr92 = -100;  
+  bool iseb2 = kFALSE;
+  
+  if (p1) {
+    pt1 = p1->Pt();
+    eta1 = p1->Eta();
+    phi1 = p1->Phi();
+    sc1 = MatchSC(p1,iseb1);
+  }
+
+  if (p2) {
+    pt2 = p2->Pt();
+    eta2 = p2->Eta();
+    phi2 = p2->Phi();
+    sc2 = MatchSC(p2,iseb2);
+  }
+  
+  if (sc1) {
+    double r9scale;
+    if   (iseb1) r9scale = fMCR9ScaleEB;
+    else r9scale = fMCR9ScaleEE;
+      
+    // compute the probe momentum wr to the chosen Vtx
+    FourVectorM scmom;  
+    ThreeVectorC scp;
+    if (vtx) scp = sc1->Point() - vtx->Position();
+    else scp = sc1->Point();
+    scp = scp/scp.R();
+    scmom.SetXYZT(sc1->Energy()*scp.X(), sc1->Energy()*scp.Y(), sc1->Energy()*scp.Z(), sc1->Energy());
+      
+    scet1 = scmom.Pt();
+    sceta1 = sc1->Eta();
+    scphi1 = sc1->Phi();
+    scr91 = r9scale*sc1->R9();
+    
+  }
+
+
+  if (sc2) {
+    double r9scale;
+    if   (iseb2) r9scale = fMCR9ScaleEB;
+    else r9scale = fMCR9ScaleEE;
+      
+    // compute the probe momentum wr to the chosen Vtx
+    FourVectorM scmom;  
+    ThreeVectorC scp;
+    if (vtx) scp = sc2->Point() - vtx->Position();
+    else scp = sc2->Point();
+    scp = scp/scp.R();
+    scmom.SetXYZT(sc2->Energy()*scp.X(), sc2->Energy()*scp.Y(), sc2->Energy()*scp.Z(), sc2->Energy());
+      
+    scet2 = scmom.Pt();
+    sceta2 = sc2->Eta();
+    scphi2 = sc2->Phi();
+    scr92 = r9scale*sc2->R9();
+    
+  }
+
+  Float_t fill[] = {_pth, _y, _genmass,pt1,eta1,phi1,pt2,eta2,phi2,scet1,sceta1,scphi1,scr91,scet2,sceta2,scphi2,scr92};
+
+  hMVAtuple->Fill(fill);
 
 
   return;
@@ -78,8 +185,13 @@ void MVASystematicsMod::SlaveBegin()
   if (!fIsData) {
     ReqBranch(fMCParticleName,        fMCParticles);
   }
+  
+  ReqBranch(fPVName,        fPV);
+  ReqBranch(fEBSCName,      fEBSC);
+  ReqBranch(fEESCName,      fEESC);
+  
 
-  hMVAtuple = new TNtuple(fTupleName.Data(),fTupleName.Data(),"hpt:hy:hm");
+  hMVAtuple = new TNtuple(fTupleName.Data(),fTupleName.Data(),"hpt:hy:hm:pt1:eta1:phi1:pt2:eta2:phi2:scet1:sceta1:scphi1:scr91:scet2:sceta2:scphi2:scr92");
 
   AddOutput(hMVAtuple);
 }
@@ -100,8 +212,10 @@ void MVASystematicsMod::Terminate()
 
 // ----------------------------------------------------------------------------------------
 // some helpfer functions....
-void MVASystematicsMod::FindHiggsPtAndY(Float_t& pt, Float_t& Y, Float_t& mass) {
+const MCParticle *MVASystematicsMod::FindHiggsPtAndY(Float_t& pt, Float_t& Y, Float_t& mass) {
 
+  const MCParticle *h = 0;
+  
   pt = -999.;
   Y  = -999;
   mass = -999.;
@@ -113,9 +227,31 @@ void MVASystematicsMod::FindHiggsPtAndY(Float_t& pt, Float_t& Y, Float_t& mass) 
       pt=p->Pt();
       Y = p->Rapidity();
       mass = p->Mass();
+      h = p;
       break;
     }
   }
   
-  return;
- }
+  return h;
+}
+
+// ----------------------------------------------------------------------------------------
+// some helpfer functions....
+const SuperCluster *MVASystematicsMod::MatchSC(const MCParticle *p, bool &iseb) {
+
+  iseb = kFALSE;
+  
+  for(UInt_t i=0; i<fEBSC->GetEntries(); ++i) {
+    iseb = kTRUE;
+    const SuperCluster *sc = fEBSC->At(i);
+    if (MathUtils::DeltaR(sc,p)<0.2) return sc;
+  }
+
+  for(UInt_t i=0; i<fEESC->GetEntries(); ++i) {
+    iseb = kFALSE;
+    const SuperCluster *sc = fEESC->At(i);
+    if (MathUtils::DeltaR(sc,p)<0.2) return sc;
+  }
+
+  return 0;
+}

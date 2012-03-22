@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MVASystematicsMod.h,v 1.1 2011/11/18 19:10:43 fabstoec Exp $
+// $Id: MVASystematicsMod.h,v 1.1 2011/12/13 21:13:22 bendavid Exp $
 //
 // MVASystematicsMod
 //
@@ -42,7 +42,11 @@ namespace mithep
     // setting all the input Names
     void                SetIsData(bool b) { fIsData = b; }
     void                SetTupleName(const char* c)    { fTupleName = c; }
-    void                FindHiggsPtAndY(Float_t& pt, Float_t& Y, Float_t& mass);
+    const MCParticle   *FindHiggsPtAndY(Float_t& pt, Float_t& Y, Float_t& mass);
+    const SuperCluster *MatchSC(const MCParticle *p, bool &iseb);
+    
+    void                SetMCR9Scale(Double_t ebscale, Double_t eescale) { fMCR9ScaleEB = ebscale; fMCR9ScaleEE = eescale; }
+    
 
   protected:
 
@@ -54,9 +58,18 @@ namespace mithep
 
     // Names for the input Collections
     TString             fMCParticleName;
-
+    TString             fPVName;
+    TString             fEBSCName;
+    TString             fEESCName;
+    
     const MCParticleCol          *fMCParticles;
+    const VertexCol              *fPV;
+    const SuperClusterCol        *fEBSC;
+    const SuperClusterCol        *fEESC;
    // is it Data or MC?
+    Double_t fMCR9ScaleEB;
+    Double_t fMCR9ScaleEE;
+   
     Bool_t              fIsData;
     
     TString fTupleName;

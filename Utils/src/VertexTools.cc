@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.7 2011/11/18 00:07:17 bendavid Exp $
+// $Id: VertexTools.cc,v 1.8 2011/12/11 00:03:05 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -421,6 +421,9 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, conv, 0.1, 0.1, 0.1);
   const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, conv, 0.1, 0.1, 0.1);
 
+//   if (conv1) printf("conv1 prob = %5e\n",conv1->Prob());
+//   if (conv2) printf("conv2 prob = %5e\n",conv1->Prob());
+  
   if( conv1 && ( conv1->Prob() < 0.0005) ) conv1 = NULL;
   if( conv2 && ( conv2->Prob() < 0.0005) ) conv2 = NULL;
   
@@ -444,7 +447,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   if(conv1 || conv2) {
     if( !conv2 ){
       const mithep::ThreeVector caloPos1(ph1->CaloPos());
-      double zconvsc   = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
+      double zconvsc   = conv1->Z0EcalVtxCiC(bsp->Position(), caloPos1);
       double zconvtrk  = conv1->DzCorrected(bsp->Position()) + bsp->Z();
       if( ph1->IsEB() ) {
 	double rho = conv1->Position().Rho();
@@ -459,7 +462,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
       }
     } else if( !conv1 ) {
       const mithep::ThreeVector caloPos2(ph2->CaloPos());
-      double zconvsc  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
+      double zconvsc  = conv2->Z0EcalVtxCiC(bsp->Position(), caloPos2);
       double zconvtrk  = conv2->DzCorrected(bsp->Position()) + bsp->Z();
       if( ph2->IsEB() ) {
 	double rho = conv2->Position().Rho();
@@ -475,7 +478,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
     } else {
       const mithep::ThreeVector caloPos1(ph1->CaloPos());
       double z1=0.;
-      double z1sc   = conv1->Z0EcalVtx(bsp->Position(), caloPos1);
+      double z1sc   = conv1->Z0EcalVtxCiC(bsp->Position(), caloPos1);
       double z1trk  = conv1->DzCorrected(bsp->Position()) + bsp->Z();
       double dz1 = 0.;
       if( ph1->IsEB() ) {
@@ -491,7 +494,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
       }
       const mithep::ThreeVector caloPos2(ph2->CaloPos());
       double z2 = 0.;
-      double z2sc  = conv2->Z0EcalVtx(bsp->Position(), caloPos2);
+      double z2sc  = conv2->Z0EcalVtxCiC(bsp->Position(), caloPos2);
       double z2trk  = conv2->DzCorrected(bsp->Position()) + bsp->Z();
       double dz2 = 0.;
       if( ph2->IsEB() ) {
@@ -544,8 +547,12 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
       mvamax = mva;
       bestidxmva = iVtx;
     }
+    //printf("vtx %i: ptbal = %5f, ptasym = %5f, logsumpt2 = %5f, limpulltoconv = %5f, nconv = %i, mva = %5f\n",iVtx,ptbal[iVtx],ptasym[iVtx],log(sumpt2[iVtx]),limPullToConv[iVtx],nConv,mva);
   }
 
+//   double mvahack = VtxMvaP(4.13519,-0.156296,3.17947,-1.0,0);
+//   printf("mvahack = %5f\n",mvahack);
+  
   //find second and third ranked vertices for event mva;
   UInt_t mvaidx1 = 0;
   mvamax = -1e6;
@@ -581,6 +588,12 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   
   Double_t evtmva = readerevt->EvaluateMVA("BDTEvt");
   vtxProb = 1.-0.49*(evtmva+1.0);
+  
+//   printf("higgspt = %5f, numvert = %5f, mvabest = %5f, mva1 = %5f, dz1 = %5f, mva2 = %5f, dz2 = %5f, nconv = %5f",fMvaPEvtVars[0],fMvaPEvtVars[1],fMvaPEvtVars[2],fMvaPEvtVars[3],fMvaPEvtVars[4],fMvaPEvtVars[5],fMvaPEvtVars[6],fMvaPEvtVars[7]);
+//   printf("vtxmva = %5f, vtxprob = %5f\n",evtmva,vtxProb);
+//   
+//   printf("e1 = %5f, sige1 = %5f\n",ph1->E(),ph1->EnergyErr());
+//   printf("e2 = %5f, sige2 = %5f\n",ph2->E(),ph2->EnergyErr());
   
   // delete the auxiliary dynamic arrays
   delete[] ptbal_rank  ;

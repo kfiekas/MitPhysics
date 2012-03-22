@@ -1,4 +1,4 @@
-// $Id: runHgg.C,v 1.2 2011/12/13 21:32:00 bendavid Exp $
+// $Id: runHgg.C,v 1.4 2011/12/19 21:56:23 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -33,19 +33,19 @@ void runHgg(const char *fileset    = "",
 	    //const char *dataset    = "w10-h120gg-gf-v8-pu",
            // const char *dataset    = "w10-qcd2em40-v8-pu",
             //const char *dataset    = "s11-qcd2em40-v11-pu",
-            //const char *dataset    = "r11a-dph-j05-v1",          
+            //const char *dataset    = "r11b-pho-n30-v1",          
 	    //const char *dataset    = "s11-h120gg-gf-v11-pu",
 	    //const char *dataset    = "s11-pj-2em20-v11-pu",
             //const char *dataset      = "s11-h130gg-gf-v11-pu",
             //const char *dataset    = "f11-pj-2em20-v14b-pu",
             //const char *dataset    = "f11--qcd-2em40-v14b-pu",
             //const char *dataset    = "f11--h120gg-gf-v14b-pu",
-            //const char *dataset = "f11--h120gg-vbf-v14b-pu",
-            const char *dataset    = "f11--2pibx10_25-v14b-pu",
+            const char *dataset = "f11--h135gg-vh-v14b-pu",
+            //const char *dataset    = "f11--2pibx10_25-v14b-pu",
             //const char *dataset = "s11-zeem20-powheg-v11-pu",
             //const char *dataset = "s11-wjets-v11-pu",
             //const char *dataset = "p11-zll50-v1g1-pu",
-	    const char *book       = "t2mit/filefi/025",
+	    const char *book       = "local/filefi/025",
 	    const char *catalogDir = "/home/cmsprod/catalog",
 	    const char *outputName = "hgg",
 	    int         nEvents    = -1)
@@ -67,7 +67,7 @@ void runHgg(const char *fileset    = "",
   TString jsonFile = TString("/home/bendavid/json/") + TString(json);
   //TString jsonFile = TString("/home/bendavid/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
   Bool_t  isData   = ( (jsonFile.CompareTo("/home/bendavid/json/~") != 0) );
-
+  
   if (gSystem->Getenv("MIT_PROD_OVERLAP")) {
     sprintf(overlap,"%s",gSystem->Getenv("MIT_PROD_OVERLAP"));
     if (EOF == sscanf(overlap,"%f",&overlapCut)) {
@@ -99,6 +99,7 @@ void runHgg(const char *fileset    = "",
   MCProcessSelectionMod *mcselmod = new MCProcessSelectionMod;
   
   MVASystematicsMod *sysMod = new MVASystematicsMod;
+  sysMod->SetMCR9Scale(1.0035, 1.0035);  
   sysMod->SetIsData(isData);
   
   // only select on run- and lumisection numbers when valid json file present
@@ -317,7 +318,7 @@ void runHgg(const char *fileset    = "",
   photcic->SetDoMCR9Scaling(kTRUE);
   photcic->SetMCR9Scale(1.0048, 1.00492);
   photcic->SetDoMCErrScaling(kTRUE);
-  photcic->SetMCErrScale(1.09, 1.06);    
+  photcic->SetMCErrScale(1.07, 1.045);    
   photcic->SetIsData(isData);
 
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCNoEleVeto");
@@ -338,7 +339,7 @@ void runHgg(const char *fileset    = "",
   photcicnoeleveto->SetDoMCR9Scaling(kTRUE);
   photcicnoeleveto->SetMCR9Scale(1.0048, 1.00492);
   photcicnoeleveto->SetDoMCErrScaling(kTRUE);
-  photcicnoeleveto->SetMCErrScale(1.09, 1.06);    
+  photcicnoeleveto->SetMCErrScale(1.07, 1.045);    
   photcicnoeleveto->SetApplyEleVeto(kFALSE);
   photcicnoeleveto->SetIsData(isData);
   
@@ -352,18 +353,18 @@ void runHgg(const char *fileset    = "",
   photpresel->SetPhotonsFromBranch(kFALSE);
   photpresel->SetInputPhotonsName(photreg->GetOutputName());
   photpresel->SetMCSmearFactors(0.0045, 0.0084, 0.0109, 0.0156, 0.0203,0.0303,0.0326,0.0318,0.0331);
-  photpresel->AddEnCorrPerRun(160000,167913,0.9896,0.9916,0.9971,0.9976,1.0094,0.9994,1.0044,0.9968,1.0079);
-  photpresel->AddEnCorrPerRun(170249,172619,0.9900,0.9920,0.9975,0.9994,1.0112,0.9962,1.0012,0.9962,1.0072);
-  photpresel->AddEnCorrPerRun(172620,173692,0.9900,0.9920,0.9975,0.9977,1.0096,0.9963,1.0013,0.9947,1.0057);
-  photpresel->AddEnCorrPerRun(175860,177139,0.9902,0.9922,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
-  photpresel->AddEnCorrPerRun(177140,178421,0.9901,0.9921,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
-  photpresel->AddEnCorrPerRun(178424,999999,0.9894,0.9914,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);   
+  photpresel->AddEnCorrPerRun(160000,167913,0.9905,0.9905,0.9971,0.9976,1.0094,0.9994,1.0044,0.9968,1.0079);
+  photpresel->AddEnCorrPerRun(170249,172619,0.9909,0.9909,0.9975,0.9994,1.0112,0.9962,1.0012,0.9962,1.0072);
+  photpresel->AddEnCorrPerRun(172620,173692,0.9909,0.9909,0.9975,0.9977,1.0096,0.9963,1.0013,0.9947,1.0057);
+  photpresel->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
+  photpresel->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
+  photpresel->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086); 
   photpresel->SetDoMCR9Scaling(kTRUE);
   photpresel->SetMCR9Scale(1.0035, 1.0035);  
   photpresel->SetDoMCSigIEtaIEtaScaling(kTRUE);
   photpresel->SetDoMCWidthScaling(kTRUE);  
   photpresel->SetDoMCErrScaling(kTRUE);
-  photpresel->SetMCErrScale(1.09, 1.06);    
+  photpresel->SetMCErrScale(1.07, 1.045);    
   photpresel->SetIsData(isData);
 
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
@@ -375,18 +376,18 @@ void runHgg(const char *fileset    = "",
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
   photpreselinverteleveto->SetMCSmearFactors(0.0045, 0.0084, 0.0109, 0.0156, 0.0203,0.0303,0.0326,0.0318,0.0331);
-  photpreselinverteleveto->AddEnCorrPerRun(160000,167913,0.9896,0.9916,0.9971,0.9976,1.0094,0.9994,1.0044,0.9968,1.0079);
-  photpreselinverteleveto->AddEnCorrPerRun(170249,172619,0.9900,0.9920,0.9975,0.9994,1.0112,0.9962,1.0012,0.9962,1.0072);
-  photpreselinverteleveto->AddEnCorrPerRun(172620,173692,0.9900,0.9920,0.9975,0.9977,1.0096,0.9963,1.0013,0.9947,1.0057);
-  photpreselinverteleveto->AddEnCorrPerRun(175860,177139,0.9902,0.9922,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
-  photpreselinverteleveto->AddEnCorrPerRun(177140,178421,0.9901,0.9921,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
-  photpreselinverteleveto->AddEnCorrPerRun(178424,999999,0.9894,0.9914,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);   
+  photpreselinverteleveto->AddEnCorrPerRun(160000,167913,0.9905,0.9905,0.9971,0.9976,1.0094,0.9994,1.0044,0.9968,1.0079);
+  photpreselinverteleveto->AddEnCorrPerRun(170249,172619,0.9909,0.9909,0.9975,0.9994,1.0112,0.9962,1.0012,0.9962,1.0072);
+  photpreselinverteleveto->AddEnCorrPerRun(172620,173692,0.9909,0.9909,0.9975,0.9977,1.0096,0.9963,1.0013,0.9947,1.0057);
+  photpreselinverteleveto->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
+  photpreselinverteleveto->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
+  photpreselinverteleveto->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086); 
   photpreselinverteleveto->SetDoMCR9Scaling(kTRUE);
   photpreselinverteleveto->SetMCR9Scale(1.0035, 1.0035);
   photpreselinverteleveto->SetDoMCSigIEtaIEtaScaling(kTRUE);
   photpreselinverteleveto->SetDoMCWidthScaling(kTRUE);  
   photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
-  photpreselinverteleveto->SetMCErrScale(1.09, 1.06);    
+  photpreselinverteleveto->SetMCErrScale(1.07, 1.045);    
   photpreselinverteleveto->SetApplyEleVeto(kFALSE);
   photpreselinverteleveto->SetInvertElectronVeto(kTRUE);
   photpreselinverteleveto->SetIsData(isData);  
@@ -554,6 +555,7 @@ void runHgg(const char *fileset    = "",
   else 
     d = c->FindDataset(bookstr,skimdataset.Data(),fileset);
   ana->AddDataset(d);
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/025/r11b-pho-n30-v1/4863E9D1-BC1C-E111-99BA-001A92810AF4.root");
 
   //------------------------------------------------------------------------------------------------
   // organize output

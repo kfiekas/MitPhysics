@@ -1,4 +1,4 @@
-// $Id: EGEnergyCorrector.cc,v 1.4 2011/10/07 09:56:37 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.5 2011/12/11 00:03:05 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -238,7 +238,8 @@ std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithErrorV2(const Pho
     fVals[28] = hasbc2 ? b2->E5x5()/b2->Energy() : 0.;
     fVals[29] = hasbc2 ? TMath::Sqrt(b2->CoviEtaiEta()) : 0.;
     fVals[30] = hasbc2 ? TMath::Sqrt(b2->CoviPhiiPhi()) : 0.;
-    fVals[31] = hasbc2 ? b2->CoviEtaiPhi() : 0.;
+    //fVals[31] = hasbc2 ? b2->CoviEtaiPhi() : 0.;
+    fVals[31] = hasbc2 ? b->CoviEtaiPhi() : 0.;
     fVals[32] = hasbc2 ? b2->EMax()/b2->Energy() : 0.;
     fVals[33] = hasbc2 ? log(b2->E2nd()/b2->EMax()) : 0.;
     fVals[34] = hasbc2 ? log(b2->ETop()/b2->EMax()) : 0.;
