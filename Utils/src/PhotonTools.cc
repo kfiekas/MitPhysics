@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.20 2011/12/13 21:13:23 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.23 2011/12/17 22:29:31 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -357,6 +357,8 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
       std::cout<< "   c "<<i+1<<"  pt = "<<c->Pt()<<std::endl;
 
     if(c->Pt()   < 1. )    continue; // is this refittedPirMomentum?
+
+    if (c->Prob() < 1e-6) continue;
 
     //ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
     //ThreeVector dirconvsc = p->CaloPos() - c->Position();

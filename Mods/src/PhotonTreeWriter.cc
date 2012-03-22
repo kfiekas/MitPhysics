@@ -353,6 +353,7 @@ void PhotonTreeWriter::Process()
       const Double_t dz = sqrt(2.0)*5.8;
       Double_t deltamvtx = _mass*VertexTools::DeltaMassVtx(phHard->CaloPos().X(), phHard->CaloPos().Y(), phHard->CaloPos().Z(),
             phSoft->CaloPos().X(), phSoft->CaloPos().Y(), phSoft->CaloPos().Z(),
+            fDiphotonEvent->vtxX, fDiphotonEvent->vtxY, fDiphotonEvent->vtxZ,
             dz);
             
       fDiphotonEvent->deltamvtx = deltamvtx;

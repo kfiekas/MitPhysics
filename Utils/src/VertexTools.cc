@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.8 2011/12/11 00:03:05 bendavid Exp $
+// $Id: VertexTools.cc,v 1.9 2012/03/22 15:54:07 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -420,12 +420,6 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   // ...this will return NULL in case conv==NULL
   const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, conv, 0.1, 0.1, 0.1);
   const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, conv, 0.1, 0.1, 0.1);
-
-//   if (conv1) printf("conv1 prob = %5e\n",conv1->Prob());
-//   if (conv2) printf("conv2 prob = %5e\n",conv1->Prob());
-  
-  if( conv1 && ( conv1->Prob() < 0.0005) ) conv1 = NULL;
-  if( conv2 && ( conv2->Prob() < 0.0005) ) conv2 = NULL;
   
   double zconv  = 0.;
   double dzconv = 0.;
@@ -628,11 +622,20 @@ double VertexTools::VtxMvaP(float ptbal, float ptasym, float logsumpt2, float li
 //Compute contribution to relative uncertainty sigma_m/m from primary vertex location
 //given ecal shower positions of two photons, plus the vtx z uncertainty (typically sqrt(2)*beamspot width)
 //code originally from Y. Gershtein
-Double_t VertexTools::DeltaMassVtx(Double_t x1, Double_t y1, Double_t z1,
-            Double_t x2, Double_t y2, Double_t z2,
+Double_t VertexTools::DeltaMassVtx(Double_t xp1, Double_t yp1, Double_t zp1,
+            Double_t xp2, Double_t yp2, Double_t zp2,
+	    Double_t xv,  Double_t yv,  Double_t zv,
             Double_t dz)
 {
+  
+      Double_t x1 = xp1 - xv;
+      Double_t y1 = yp1 - yv;
+      Double_t z1 = zp1 - zv;
 
+      Double_t x2 = xp2 - xv;
+      Double_t y2 = yp2 - yv;
+      Double_t z2 = zp2 - zv;      
+      
       Double_t r1 = sqrt(x1*x1+y1*y1+z1*z1);
       Double_t r2 = sqrt(x2*x2+y2*y2+z2*z2);
       Double_t phi1 = atan2(y1,x1);

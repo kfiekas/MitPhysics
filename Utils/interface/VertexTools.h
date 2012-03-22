@@ -83,8 +83,9 @@ namespace mithep {
     Bool_t IsInitMvaM() const { return fIsInitMvaM; }
     Bool_t IsInitMvaP() const { return fIsInitMvaP; }
     
-    static Double_t DeltaMassVtx(Double_t x1, Double_t y1, Double_t z1,
-            Double_t x2, Double_t y2, Double_t z2,
+    static Double_t DeltaMassVtx(Double_t xp1, Double_t yp1, Double_t zp1,
+            Double_t xp2, Double_t yp2, Double_t zp2,
+	    Double_t xv,  Double_t yv,  Double_t zv,
             Double_t dz);
     
   private:
