@@ -1,4 +1,4 @@
-// $Id: doubleLepton.C,v 1.7 2011/10/01 14:17:37 ceballos Exp $
+// $Id: doubleLepton.C,v 1.8 2011/10/03 14:40:07 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -126,6 +126,8 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
     hltmod->AddTrigger("!HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v4&!HLT_Mu17_Ele8_CaloIdL_v9&!HLT_Mu13_Mu8_v7&!HLT_Mu40_v6&!HLT_IsoMu24_v9&!HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8&HLT_Ele65_CaloIdVT_TrkIdT_v4",173199,999999);
   }
   if(isData == false){
+    hltmod->AddTrigger("HLT_Mu15_v9");
+    hltmod->AddTrigger("!HLT_Mu15_v9");
     hltmod->AddTrigger("HLT_Mu15_v1");
     hltmod->AddTrigger("!HLT_Mu15_v1");
     hltmod->AddTrigger("HLT_Mu15_v2");
@@ -193,6 +195,7 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
   //------------------------------------------------------------------------------------------------
   OutputMod *outMod = new OutputMod;
   outMod->Keep("*");
+  outMod->Drop("CorMuonMet");
   selMod->Add(outMod);
   TString rootFile = "";
   rootFile += TString("skims/") + dataset + TString("/");
