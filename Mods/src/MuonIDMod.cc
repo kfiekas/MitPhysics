@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.65 2012/01/26 15:29:13 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.66 2012/01/27 11:48:26 sixie Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -604,20 +604,20 @@ Bool_t MuonIDMod::PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex,
   if (muTrk->Pt() > 20.0) ptBin = 2;
 
   Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 0 && ptBin == 1) MVABin = 2;
-  if (subdet == 1 && ptBin == 1) MVABin = 3;
-  if (subdet == 0 && ptBin == 2) MVABin = 4;
-  if (subdet == 1 && ptBin == 2) MVABin = 5;
+  if      (subdet == 0 && ptBin == 0) MVABin = 0;
+  else if (subdet == 1 && ptBin == 0) MVABin = 1;
+  else if (subdet == 0 && ptBin == 1) MVABin = 2;
+  else if (subdet == 1 && ptBin == 1) MVABin = 3;
+  else if (subdet == 0 && ptBin == 2) MVABin = 4;
+  else if (subdet == 1 && ptBin == 2) MVABin = 5;
 
   Double_t MVACut = -999;
-  if (MVABin == 0) MVACut = -0.5618;
-  if (MVABin == 1) MVACut = -0.3002;
-  if (MVABin == 2) MVACut = -0.4642;
-  if (MVABin == 3) MVACut = -0.2478;
-  if (MVABin == 4) MVACut = 0.1706;
-  if (MVABin == 5) MVACut = 0.8146;
+  if      (MVABin == 0) MVACut = -0.5618;
+  else if (MVABin == 1) MVACut = -0.3002;
+  else if (MVABin == 2) MVACut = -0.4642;
+  else if (MVABin == 3) MVACut = -0.2478;
+  else if (MVABin == 4) MVACut =  0.1706;
+  else if (MVABin == 5) MVACut =  0.8146;
 
   if (MVAValue > MVACut) return kTRUE;
   return kFALSE;

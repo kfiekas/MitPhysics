@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.112 2012/01/27 11:48:26 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.113 2012/02/08 16:57:20 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -139,35 +139,35 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
   Int_t ptBin = 0;
   if (el->Pt() > 20.0) ptBin = 1;
   Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 2 && ptBin == 0) MVABin = 2;
-  if (subdet == 0 && ptBin == 1) MVABin = 3;
-  if (subdet == 1 && ptBin == 1) MVABin = 4;
-  if (subdet == 2 && ptBin == 1) MVABin = 5;
+  if      (subdet == 0 && ptBin == 0) MVABin = 0;
+  else if (subdet == 1 && ptBin == 0) MVABin = 1;
+  else if (subdet == 2 && ptBin == 0) MVABin = 2;
+  else if (subdet == 0 && ptBin == 1) MVABin = 3;
+  else if (subdet == 1 && ptBin == 1) MVABin = 4;
+  else if (subdet == 2 && ptBin == 1) MVABin = 5;
 
   Double_t MVACut = -9999;
   if (idType == ElectronTools::kMVAID_BDTG_NoIPInfo) {
-    if (MVABin == 0) MVACut = 0.133;
-    if (MVABin == 1) MVACut = 0.465;
-    if (MVABin == 2) MVACut = 0.518; 
-    if (MVABin == 3) MVACut = 0.942;
-    if (MVABin == 4) MVACut = 0.947;
-    if (MVABin == 5) MVACut = 0.878 ;
+    if      (MVABin == 0) MVACut = 0.133;
+    else if (MVABin == 1) MVACut = 0.465;
+    else if (MVABin == 2) MVACut = 0.518; 
+    else if (MVABin == 3) MVACut = 0.942;
+    else if (MVABin == 4) MVACut = 0.947;
+    else if (MVABin == 5) MVACut = 0.878 ;
   } else if (idType == ElectronTools::kMVAID_BDTG_WithIPInfo) {
-    if (MVABin == 0) MVACut = 0.139;
-    if (MVABin == 1) MVACut = 0.525;
-    if (MVABin == 2) MVACut = 0.543; 
-    if (MVABin == 3) MVACut = 0.947;
-    if (MVABin == 4) MVACut = 0.950;
-    if (MVABin == 5) MVACut = 0.884;
+    if      (MVABin == 0) MVACut = 0.139;
+    else if (MVABin == 1) MVACut = 0.525;
+    else if (MVABin == 2) MVACut = 0.543; 
+    else if (MVABin == 3) MVACut = 0.947;
+    else if (MVABin == 4) MVACut = 0.950;
+    else if (MVABin == 5) MVACut = 0.884;
   } else if (idType == ElectronTools::kMVAID_BDTG_IDIsoCombined) {
-    if (MVABin == 0) MVACut = 0.4202;
-    if (MVABin == 1) MVACut = 0.6206;
-    if (MVABin == 2) MVACut = 0.619; 
-    if (MVABin == 3) MVACut = 0.959;
-    if (MVABin == 4) MVACut = 0.9586;
-    if (MVABin == 5) MVACut = 0.9278;
+    if      (MVABin == 0) MVACut = 0.4202;
+    else if (MVABin == 1) MVACut = 0.6206;
+    else if (MVABin == 2) MVACut = 0.6190; 
+    else if (MVABin == 3) MVACut = 0.9590;
+    else if (MVABin == 4) MVACut = 0.9586;
+    else if (MVABin == 5) MVACut = 0.9278;
   }
 
   if (MVAValue > MVACut) return kTRUE;
