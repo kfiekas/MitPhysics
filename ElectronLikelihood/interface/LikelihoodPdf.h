@@ -11,7 +11,7 @@ class LikelihoodPdf {
 
  public:
   LikelihoodPdf() {};
-  LikelihoodPdf(const LikelihoodPdf& pdf) {}; 
+  LikelihoodPdf(const LikelihoodPdf& pdf) { if (false) printf("PDF: %p",(void*) &pdf); }; 
   LikelihoodPdf(const char* name, const char* species, int ecalsubdet, int ptbin);
   virtual ~LikelihoodPdf();
   

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.6 2011/12/13 21:13:22 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.8 2011/12/17 22:29:30 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -56,16 +56,16 @@ namespace mithep
       Float_t scpse;
       Float_t sceta;
       Float_t scphi;
-      UInt_t scnclusters;
-      UInt_t scnhits;
+      UInt_t  scnclusters;
+      UInt_t  scnhits;
       Float_t scetawidth;
       Float_t scphiwidth;
       Float_t hovere;
       Float_t sigietaieta;
-      Bool_t isbarrel;
-      Bool_t isr9reco;
-      Bool_t isr9cat;
-      Char_t phcat;
+      Bool_t  isbarrel;
+      Bool_t  isr9reco;
+      Bool_t  isr9cat;
+      Char_t  phcat;
       Float_t eerr;
       Float_t eerrsmeared;
       Float_t esmearing;
@@ -85,10 +85,10 @@ namespace mithep
       Float_t eseed;
       Float_t etaseed;
       Float_t phiseed;
-      Int_t ietaseed;
-      Int_t iphiseed;
-      Int_t ixseed;
-      Int_t iyseed;
+      Int_t   ietaseed;
+      Int_t   iphiseed;
+      Int_t   ixseed;
+      Int_t   iyseed;
       Float_t etacryseed;
       Float_t phicryseed;
       Float_t xcryseed;
@@ -121,15 +121,14 @@ namespace mithep
       Float_t zseedseed;
       UInt_t  nhitsseed;
       
-      
       //quantities from second basic cluster, if present
       Float_t ebc2;
       Float_t etabc2;
       Float_t phibc2;
-      Int_t ietabc2;
-      Int_t iphibc2;
-      Int_t ixbc2;
-      Int_t iybc2;
+      Int_t   ietabc2;
+      Int_t   iphibc2;
+      Int_t   ixbc2;
+      Int_t   iybc2;
       Float_t etacrybc2;
       Float_t phicrybc2;
       Float_t xcrybc2;
@@ -166,10 +165,10 @@ namespace mithep
       Float_t ebclast;
       Float_t etabclast;
       Float_t phibclast;
-      Int_t ietabclast;
-      Int_t iphibclast;
-      Int_t ixbclast;
-      Int_t iybclast;
+      Int_t   ietabclast;
+      Int_t   iphibclast;
+      Int_t   ixbclast;
+      Int_t   iybclast;
       Float_t etacrybclast;
       Float_t phicrybclast;
       Float_t xcrybclast;
@@ -187,10 +186,10 @@ namespace mithep
       Float_t ebclast2;
       Float_t etabclast2;
       Float_t phibclast2;
-      Int_t ietabclast2;
-      Int_t iphibclast2;
-      Int_t ixbclast2;
-      Int_t iybclast2;
+      Int_t   ietabclast2;
+      Int_t   iphibclast2;
+      Int_t   ixbclast2;
+      Int_t   iybclast2;
       Float_t etacrybclast2;
       Float_t phicrybclast2;
       Float_t xcrybclast2;
@@ -238,13 +237,13 @@ namespace mithep
       Float_t convleadpt;
       Float_t convtrailpt;
       Float_t convleadtrackpt;
-      Char_t convleadtrackalgo;
-      Char_t convleadtrackalgos;
-      Char_t convleadtrackcharge;
+      Char_t  convleadtrackalgo;
+      Char_t  convleadtrackalgos;
+      Char_t  convleadtrackcharge;
       Float_t convtrailtrackpt;
-      Char_t convtrailtrackalgo;
-      Char_t convtrailtrackalgos;      
-      Char_t trailtrackcharge;
+      Char_t  convtrailtrackalgo;
+      Char_t  convtrailtrackalgos;      
+      Char_t  trailtrackcharge;
       
       //electron quantities
       UChar_t haselectron;
@@ -254,7 +253,7 @@ namespace mithep
       Float_t elept;
       Float_t eleeta;
       Float_t elephi;
-      Char_t elecharge;
+      Char_t  elecharge;
       Float_t elefbrem;
       Float_t eledeta;
       Float_t eledphi;
@@ -278,9 +277,6 @@ namespace mithep
       Float_t genz;
       Int_t   pdgid;
       Int_t   motherpdgid;
-      
-
-      
   };
   
   class PhotonTreeWriterDiphotonEvent
@@ -361,8 +357,6 @@ namespace mithep
       Float_t dphidijetgg;
       
       PhotonTreeWriterPhoton photons[2];
-
-    
   };
   
   class PhotonTreeWriter : public BaseMod
@@ -396,27 +390,27 @@ namespace mithep
     // set basic Cut variables (FOR PRE-SELECTION)
 
     // is Data Or Not?
-    void                SetIsData (Bool_t b) { fIsData = b;};
+    void                SetIsData (Bool_t b)                 { fIsData = b; };
     
 
     void                SetApplyElectronVeto(Bool_t b)   { fApplyElectronVeto = b;     }          
 
-    void                SetTupleName(const char* c)     { fTupleName     = c; }
+    void                SetTupleName(const char* c)          { fTupleName = c; }
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
-    void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
-    void                SetWriteDiphotonTree(Bool_t b)  { fWriteDiphotonTree = b; }
-    void                SetWriteSingleTree(Bool_t b)    { fWriteSingleTree = b; }
-    void                SetLoopOnGoodElectrons(Bool_t b) { fLoopOnGoodElectrons = b; }
-    void                SetExcludeSinglePrompt(Bool_t b) { fExcludeSinglePrompt = b; }
-    void                SetExcludeDoublePrompt(Bool_t b) { fExcludeDoublePrompt = b; }
+    void                SetGoodElectronName(TString name)    { fGoodElectronName = name; }
+    void                SetWriteDiphotonTree(Bool_t b)       { fWriteDiphotonTree = b; }
+    void                SetWriteSingleTree(Bool_t b)         { fWriteSingleTree = b; }
+    void                SetLoopOnGoodElectrons(Bool_t b)     { fLoopOnGoodElectrons = b; }
+    void                SetExcludeSinglePrompt(Bool_t b)     { fExcludeSinglePrompt = b; }
+    void                SetExcludeDoublePrompt(Bool_t b)     { fExcludeDoublePrompt = b; }
 
   protected:
     void                Process();
     void                SlaveBegin();
-
-    // private auxiliary methods...
+    // Private auxiliary methods...
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);
-    Float_t             GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonTools::CiCBaseLineCats cat2);
+    Float_t             GetEventCat    (PhotonTools::CiCBaseLineCats cat1,
+					PhotonTools::CiCBaseLineCats cat2);
 
     // Names for the input Collections
     TString             fPhotonBranchName;
@@ -443,43 +437,43 @@ namespace mithep
     Bool_t              fGoodElectronsFromBranch;
     Bool_t              fPFJetsFromBranch;
 
-    const PhotonCol              *fPhotons;
-    const ElectronCol            *fElectrons;
-    const ElectronCol            *fGoodElectrons;    
-    const DecayParticleCol       *fConversions;
-    const TrackCol               *fTracks;
-    const PileupEnergyDensityCol *fPileUpDen;
-    const VertexCol              *fPV;
-    const BeamSpotCol            *fBeamspot;
-    const PFCandidateCol         *fPFCands;
-    const MCParticleCol          *fMCParticles;
-    const PileupInfoCol          *fPileUp;    
-    const SuperClusterCol        *fSuperClusters;   
-    const PFMetCol               *fPFMet;
-    const JetCol                 *fPFJets;
+    const PhotonCol               *fPhotons;
+    const ElectronCol             *fElectrons;
+    const ElectronCol             *fGoodElectrons;    
+    const DecayParticleCol        *fConversions;
+    const TrackCol                *fTracks;
+    const PileupEnergyDensityCol  *fPileUpDen;
+    const VertexCol               *fPV;
+    const BeamSpotCol             *fBeamspot;
+    const PFCandidateCol          *fPFCands;
+    const MCParticleCol           *fMCParticles;
+    const PileupInfoCol           *fPileUp;    
+    const SuperClusterCol         *fSuperClusters;   
+    const PFMetCol                *fPFMet;
+    const JetCol                  *fPFJets;
     
     // --------------------------------
-    Bool_t fLoopOnGoodElectrons; //primary loop over good electrons collection instead of photons
-    Bool_t              fApplyElectronVeto;    //=true then invert electron veto (for cic selection only atm)     
-    Bool_t fWriteDiphotonTree;
-    Bool_t fWriteSingleTree;
+    Bool_t                         fLoopOnGoodElectrons; //loop over good elecs instead of photons
+    Bool_t                         fApplyElectronVeto;   //invert elec veto (for cic sel. only atm)
+    Bool_t                         fWriteDiphotonTree;
+    Bool_t                         fWriteSingleTree;
 
-    Bool_t fExcludeSinglePrompt;
-    Bool_t fExcludeDoublePrompt;
+    Bool_t                         fExcludeSinglePrompt;
+    Bool_t                         fExcludeDoublePrompt;
     
-    Bool_t fEnableJets;
+    Bool_t                         fEnableJets;
     
-    TString fPhFixDataFile;
-    PhotonFix fPhfixph;
-    PhotonFix fPhfixele;
+    TString                        fPhFixDataFile;
+    PhotonFix                      fPhfixph;
+    PhotonFix                      fPhfixele;
 
     // --------------------------------
     // validation Tuple
-    TString fTupleName;
+    TString                        fTupleName;
     PhotonTreeWriterDiphotonEvent* fDiphotonEvent;
-    PhotonTreeWriterPhoton* fSinglePhoton;    
-    TTree* hCiCTuple;
-    TTree* hCiCTupleSingle;
+    PhotonTreeWriterPhoton*        fSinglePhoton;    
+    TTree*                         hCiCTuple;
+    TTree*                         hCiCTupleSingle;
 
     ClassDef(PhotonTreeWriter, 1) // Photon identification module
   };

@@ -2051,7 +2051,7 @@ bool PhotonFix::initialiseGeometry(const std::string &s,const std::string &infil
   std::ifstream fin(infile.c_str());
   assert(fin);
 
-  std::cout << "Reading in here" << std::endl;
+  //std::cout << "Reading in here" << std::endl;
   for(unsigned i(0);i<169;i++) {
     for(unsigned j(0);j<360;j++) {
       for(unsigned k(0);k<2;k++) {

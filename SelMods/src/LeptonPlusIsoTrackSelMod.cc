@@ -1,4 +1,4 @@
-// $Id: LeptonPlusIsoTrackSelMod.cc,v 1.2 2009/06/15 15:00:22 loizides Exp $
+// $Id: LeptonPlusIsoTrackSelMod.cc,v 1.3 2009/06/17 14:52:59 loizides Exp $
 
 #include "MitPhysics/SelMods/interface/LeptonPlusIsoTrackSelMod.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
@@ -44,7 +44,7 @@ void mithep::LeptonPlusIsoTrackSelMod::Process()
   fNAccCounters->Fill(0);
 
   fLeptonCol = GetObjThisEvt<Collection<Particle> >(GetLeptonColName());
-  if (!fLeptonCol ) {
+  if (!fLeptonCol) {
     this->SendError(kAbortModule, "Process", 
                     "Could not obtain collection with name %s!", GetLeptonColName());
     return;
@@ -60,7 +60,7 @@ void mithep::LeptonPlusIsoTrackSelMod::Process()
   fNAccCounters->Fill(1);
 
   UInt_t LeptonCounter = 0;
-  for(UInt_t i=0;i<fLeptonCol->GetEntries();++i) {
+  for (UInt_t i=0;i<fLeptonCol->GetEntries();++i) {
     if (fLeptonCol->At(i)->Pt() >= fLeptonPtMin   && 
         fLeptonCol->At(i)->Pt() <= fLeptonPtMax   &&
         fLeptonCol->At(i)->Eta() >= fLeptonEtaMin && 

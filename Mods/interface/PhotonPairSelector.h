@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.16 2011/12/17 22:29:30 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.17 2011/12/19 21:56:55 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -38,8 +38,8 @@ namespace mithep
   class PhotonPairSelector : public BaseMod
   {
   public:
-    PhotonPairSelector(const char *name ="PhotonPairSelector", 
-		       const char *title="Selecting PhotonPairs");
+    PhotonPairSelector(const char *name  = "PhotonPairSelector", 
+		       const char *title = "Selecting PhotonPairs");
     
     ~PhotonPairSelector();
 
@@ -222,60 +222,60 @@ namespace mithep
     std::vector<Double_t> fDataEnCorr_EEhighEta_hR9;
     std::vector<Double_t> fDataEnCorr_EEhighEta_lR9;
     
-    std::vector<UInt_t> fRunStart;
-    std::vector<UInt_t> fRunEnd;
+    std::vector<UInt_t>   fRunStart;
+    std::vector<UInt_t>   fRunEnd;
     
-    Double_t fMCSmear_EBlowEta_hR9central;
-    Double_t fMCSmear_EBlowEta_hR9gap;
-    Double_t fMCSmear_EBlowEta_lR9;
-    Double_t fMCSmear_EBhighEta_hR9;
-    Double_t fMCSmear_EBhighEta_lR9;    
-    Double_t fMCSmear_EElowEta_hR9;
-    Double_t fMCSmear_EElowEta_lR9;
-    Double_t fMCSmear_EEhighEta_hR9;
-    Double_t fMCSmear_EEhighEta_lR9;    
+    Double_t              fMCSmear_EBlowEta_hR9central;
+    Double_t              fMCSmear_EBlowEta_hR9gap;
+    Double_t              fMCSmear_EBlowEta_lR9;
+    Double_t              fMCSmear_EBhighEta_hR9;
+    Double_t              fMCSmear_EBhighEta_lR9;    
+    Double_t              fMCSmear_EElowEta_hR9;
+    Double_t              fMCSmear_EElowEta_lR9;
+    Double_t              fMCSmear_EEhighEta_hR9;
+    Double_t              fMCSmear_EEhighEta_lR9;    
 
     // pointer to RNG ionstance for smearing
-    TRandom3* rng;
-    EGEnergyCorrector egcor;
-    Bool_t fDoRegression;
-    TString fPhFixString;
-    TString fPhFixFile;
-    TString fRegWeights; 
-  
-    const TH1D *fEtaCorrections;
+    TRandom3*             fRng;
+    EGEnergyCorrector     fEgCor;
+    Bool_t                fDoRegression;
+    TString               fPhFixString;
+    TString               fPhFixFile;
+    TString               fRegWeights; 
+  		         
+    const TH1D           *fEtaCorrections;
     
     // --------------------------------
     // some streagin flags, not adjustable yet (FIX-ME)
-    bool fDoDataEneCorr;
-    bool fDoMCSmear;
-    bool fDoVtxSelection;
-    bool fApplyEleVeto;
-    Bool_t              fInvertElectronVeto;    //=true then invert electron veto (for cic selection only atm)   
+    bool                  fDoDataEneCorr;
+    bool                  fDoMCSmear;
+    bool                  fDoVtxSelection;
+    bool                  fApplyEleVeto;
+    Bool_t                fInvertElectronVeto; //=true (invert ele veto, for cic sel only atm)
    
     //MVA
-    int                         fVariableType;
-    TString                     fEndcapWeights;
-    TString                     fBarrelWeights;
-    MVATools                    fTool;
-    Float_t                     fbdtCutBarrel;
-    Float_t                     fbdtCutEndcap;
+    int                   fVariableType;
+    TString               fEndcapWeights;
+    TString               fBarrelWeights;
+    MVATools              fTool;
+    Float_t               fbdtCutBarrel;
+    Float_t               fbdtCutEndcap;
 
-    VertexTools                 fVtxTools;
+    VertexTools           fVtxTools;
     
-    Bool_t fDoMCR9Scaling;
-    Double_t fMCR9ScaleEB;
-    Double_t fMCR9ScaleEE;
-
-    Bool_t fDoMCSigIEtaIEtaScaling;
-    Bool_t fDoMCWidthScaling;
-    
-    Bool_t fDoMCErrScaling;
-    Double_t fMCErrScaleEB;
-    Double_t fMCErrScaleEE;    
-    UInt_t fRegressionVersion;
-    
-    Bool_t fRelativePtCuts;
+    Bool_t                fDoMCR9Scaling;
+    Double_t              fMCR9ScaleEB;
+    Double_t              fMCR9ScaleEE;
+	                  
+    Bool_t                fDoMCSigIEtaIEtaScaling;
+    Bool_t                fDoMCWidthScaling;
+    	                  
+    Bool_t                fDoMCErrScaling;
+    Double_t              fMCErrScaleEB;
+    Double_t              fMCErrScaleEE;    
+    UInt_t                fRegressionVersion;
+    	                  
+    Bool_t                fRelativePtCuts;
     
     ClassDef(PhotonPairSelector, 1) // Photon identification module
   };
