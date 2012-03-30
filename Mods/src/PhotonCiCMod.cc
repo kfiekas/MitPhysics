@@ -448,7 +448,7 @@ void PhotonCiCMod::Process()
   Float_t _decayZ = -100.;
   if( !fIsData ) findHiggsPtAndZ(_pth, _decayZ);
 
-  Float_t fillEvent[] = { _tRho,
+  Float_t fillEvent[] = { (float)_tRho,
 			  _pth,
 			  _decayZ,
 			  _theVtxZ,

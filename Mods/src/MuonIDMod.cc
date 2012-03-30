@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.66 2012/01/27 11:48:26 sixie Exp $
+// $Id: MuonIDMod.cc,v 1.67 2012/03/29 20:47:47 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -323,7 +323,7 @@ void MuonIDMod::Process()
       case kCombinedRelativeEffectiveAreaCorrected:
         { 
           Double_t tmpRho = 0;
-          if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || isinf(fPileupEnergyDensity->At(0)->Rho())))
+          if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || std::isinf(fPileupEnergyDensity->At(0)->Rho())))
             tmpRho = fPileupEnergyDensity->At(0)->Rho();
           
           isocut = ( mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() 
