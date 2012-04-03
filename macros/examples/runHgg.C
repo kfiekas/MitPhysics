@@ -1,4 +1,4 @@
-// $Id: runHgg.C,v 1.4 2011/12/19 21:56:23 bendavid Exp $
+// $Id: runHgg.C,v 1.5 2012/03/22 15:54:08 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -28,27 +28,14 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runHgg(const char *fileset    = "",
-	    const char *skim       = "noskim",
-	    //const char *dataset    = "w10-h120gg-gf-v8-pu",
-           // const char *dataset    = "w10-qcd2em40-v8-pu",
-            //const char *dataset    = "s11-qcd2em40-v11-pu",
-            //const char *dataset    = "r11b-pho-n30-v1",          
-	    //const char *dataset    = "s11-h120gg-gf-v11-pu",
-	    //const char *dataset    = "s11-pj-2em20-v11-pu",
-            //const char *dataset      = "s11-h130gg-gf-v11-pu",
-            //const char *dataset    = "f11-pj-2em20-v14b-pu",
-            //const char *dataset    = "f11--qcd-2em40-v14b-pu",
-            //const char *dataset    = "f11--h120gg-gf-v14b-pu",
-            const char *dataset = "f11--h135gg-vh-v14b-pu",
-            //const char *dataset    = "f11--2pibx10_25-v14b-pu",
-            //const char *dataset = "s11-zeem20-powheg-v11-pu",
-            //const char *dataset = "s11-wjets-v11-pu",
-            //const char *dataset = "p11-zll50-v1g1-pu",
-	    const char *book       = "local/filefi/025",
-	    const char *catalogDir = "/home/cmsprod/catalog",
-	    const char *outputName = "hgg",
-	    int         nEvents    = -1)
+void runHgg(const char *fileset    = "0000",
+            const char *skim       = "noskim",
+	    //const char *dataset = "f11--h123gg-gf-v14b-pu",
+            const char *dataset = "r11a-pho-j16-v1",   
+            const char *book       = "local/filefi/025",
+            const char *catalogDir = "/home/cmsprod/catalog",
+            const char *outputName = "hgg",
+            int         nEvents    = 2000)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -64,9 +51,9 @@ void runHgg(const char *fileset    = "",
     //return;
   } 
 
-  TString jsonFile = TString("/home/bendavid/json/") + TString(json);
-  //TString jsonFile = TString("/home/bendavid/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
-  Bool_t  isData   = ( (jsonFile.CompareTo("/home/bendavid/json/~") != 0) );
+  TString jsonFile = TString("/home/mingyang/cms/json/") + TString(json);
+  //TString jsonFile = TString("/home/mingyang/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
+  Bool_t  isData   = ( (jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) );
   
   if (gSystem->Getenv("MIT_PROD_OVERLAP")) {
     sprintf(overlap,"%s",gSystem->Getenv("MIT_PROD_OVERLAP"));
@@ -103,11 +90,11 @@ void runHgg(const char *fileset    = "",
   sysMod->SetIsData(isData);
   
   // only select on run- and lumisection numbers when valid json file present
-  if ((jsonFile.CompareTo("/home/bendavid/json/~") != 0) &&
-      (jsonFile.CompareTo("/home/bendavid/json/-") != 0)   ) {
+  if ((jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) &&
+      (jsonFile.CompareTo("/home/mingyang/cms/json/-") != 0)   ) {
     runLumiSel->AddJSONFile(jsonFile.Data());
   }
-  if ((jsonFile.CompareTo("/home/bendavid/json/-") == 0)   ) {
+  if ((jsonFile.CompareTo("/home/mingyang/cms/json/-") == 0)   ) {
     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
   }
@@ -352,13 +339,20 @@ void runHgg(const char *fileset    = "",
   photpresel->DoDataEneCorr(kTRUE);
   photpresel->SetPhotonsFromBranch(kFALSE);
   photpresel->SetInputPhotonsName(photreg->GetOutputName());
-  photpresel->SetMCSmearFactors(0.0045, 0.0084, 0.0109, 0.0156, 0.0203,0.0303,0.0326,0.0318,0.0331);
-  photpresel->AddEnCorrPerRun(160000,167913,0.9905,0.9905,0.9971,0.9976,1.0094,0.9994,1.0044,0.9968,1.0079);
-  photpresel->AddEnCorrPerRun(170249,172619,0.9909,0.9909,0.9975,0.9994,1.0112,0.9962,1.0012,0.9962,1.0072);
-  photpresel->AddEnCorrPerRun(172620,173692,0.9909,0.9909,0.9975,0.9977,1.0096,0.9963,1.0013,0.9947,1.0057);
-  photpresel->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
-  photpresel->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
-  photpresel->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086); 
+  //photpresel->SetMCSmearFactors(0.0045, 0.0084, 0.0109, 0.0156, 0.0203,0.0303,0.0326,0.0318,0.0331);
+  photpresel->SetMCSmearFactors(0.0067,0.0077,0.0096,0.0141,0.0196,0.0268,0.0279,0.0293,0.0301);//ming:smear(sigE/E)
+  //photpresel->AddEnCorrPerRun(160000,167913,0.9905,0.9905,0.9971,0.9976,1.0094,0.9994,1.0044,0.9968,1.0079);
+  //photpresel->AddEnCorrPerRun(170249,172619,0.9909,0.9909,0.9975,0.9994,1.0112,0.9962,1.0012,0.9962,1.0072);
+  //photpresel->AddEnCorrPerRun(172620,173692,0.9909,0.9909,0.9975,0.9977,1.0096,0.9963,1.0013,0.9947,1.0057);
+  //photpresel->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
+  //photpresel->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
+  //photpresel->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086); 
+  photpresel->AddEnCorrPerRun(160431,167913,0.9941,0.9941,1.0004,0.9916,1.0045,1.0033,1.0082,0.9958,1.0064);//ming:Emc/Edata
+  photpresel->AddEnCorrPerRun(170000,172619,0.9954,0.9954,1.0016,0.9937,1.0066,0.9976,1.0025,0.9940,1.0046);
+  photpresel->AddEnCorrPerRun(172620,173692,0.9955,0.9955,1.0017,0.9929,1.0058,0.9986,1.0035,0.9923,1.0029);
+  photpresel->AddEnCorrPerRun(175830,177139,0.9958,0.9958,1.0021,0.9944,1.0073,0.9968,1.0017,0.9933,1.004);
+  photpresel->AddEnCorrPerRun(177140,178421,0.9962,0.9962,1.0025,0.9946,1.0075,0.9960,1.0010,0.9944,1.005);
+  photpresel->AddEnCorrPerRun(178424,180252,0.9961,0.9961,1.0024,0.9942,1.0071,0.9921,0.9970,0.9953,1.0059); 
   photpresel->SetDoMCR9Scaling(kTRUE);
   photpresel->SetMCR9Scale(1.0035, 1.0035);  
   photpresel->SetDoMCSigIEtaIEtaScaling(kTRUE);
@@ -489,12 +483,12 @@ void runHgg(const char *fileset    = "",
   }
   
   // high level trigger is always first
-  mcselmod         ->Add(hltModE);
-  mcselmod         ->Add(hltModES);
+  //mcselmod         ->Add(hltModE);
+  //mcselmod         ->Add(hltModES);
   mcselmod         ->Add(hltModP);
 
   hltModP         ->Add(goodPVFilterMod);
-  hltModE         ->Add(goodPVFilterModE);
+  //hltModE         ->Add(goodPVFilterModE);
   //hltModES        ->Add(goodPVFilterModES);
   
   //goodPVFilterMod ->Add(muonId);
@@ -503,27 +497,27 @@ void runHgg(const char *fileset    = "",
   pubJet->Add(jetCorr);
   
   // simple object id modules
-  goodPVFilterModE ->Add(elecId);
+  //goodPVFilterModE ->Add(elecId);
   //goodPVFilterModES ->Add(elecIdS);
 
   
-  jetCorr          ->Add(photcic);
-  jetCorr          ->Add(photcicnoeleveto);  
+  //jetCorr          ->Add(photcic);
+  //jetCorr          ->Add(photcicnoeleveto);  
   jetCorr          ->Add(photpresel);  
-  jetCorr          ->Add(photpreselinverteleveto);  
-  jetCorr          ->Add(photpreselnosmear);  
+  //jetCorr          ->Add(photpreselinverteleveto);  
+  //jetCorr          ->Add(photpreselnosmear);  
 
-  photcic         ->Add(phottreecic);
-  photcicnoeleveto         ->Add(phottreecicnoeleveto);
+  //photcic         ->Add(phottreecic);
+  //photcicnoeleveto         ->Add(phottreecicnoeleveto);
   photpresel    ->Add(phottreepresel);
-  photpreselinverteleveto    ->Add(phottreepreselinverteleveto);
-  photpreselnosmear    ->Add(phottreepreselnosmear);
+  //photpreselinverteleveto    ->Add(phottreepreselinverteleveto);
+  //photpreselnosmear    ->Add(phottreepreselnosmear);
 
 
-  jetCorr          ->Add(photidcic);
-  photidcic       ->Add(phottreesingle);
+  //jetCorr          ->Add(photidcic);
+  //photidcic       ->Add(phottreesingle);
   
-  elecId->Add(phottreeE);
+  //elecId->Add(phottreeE);
   //elecIdS->Add(phottreeES);
   
 
