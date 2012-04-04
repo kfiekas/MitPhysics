@@ -505,7 +505,7 @@ Double_t JetTools::dRMean(const PFJet *iJet,int iPFType) {
     const PFCandidate *pCand = iJet->PFCand(i0);
     if(iPFType != -1 && pCand->PFType() != iPFType) continue;
     double pDR = MathUtils::DeltaR(iJet->Mom(),pCand->Mom());
-    lDRMean    += pDR*(pCand->Pt())/iJet->Pt();
+    lDRMean    += pDR*(pCand->Pt())/iJet->RawMom().Pt();
   }
   return lDRMean;
 }

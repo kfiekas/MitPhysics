@@ -74,14 +74,22 @@ namespace mithep {
 			Float_t iDRCH1  
 			);
 
+      //UNcorrected Jets
       Bool_t   pass(const PFJet *iJet,const Vertex *iVertex,
 		    FactorizedJetCorrector *iJetCorrector,
 		    const PileupEnergyDensityCol *iPileupEnergyDensity);
-			
-
+      
+      //Corrected Jets
+      Bool_t   pass(const PFJet *iJet,const Vertex *iVertex);
+		    			
+      //Uncorrected Jets
       Double_t MVAValue(const PFJet *iJet,const Vertex *iVertex,
 			FactorizedJetCorrector *iJetCorrector,
 			const PileupEnergyDensityCol *iPileupEnergyDensity,
+			Bool_t printDebug=false);
+
+      //Corrected Jets
+      Double_t MVAValue(const PFJet *iJet,const Vertex *iVertex,
 			Bool_t printDebug=false);
 
 

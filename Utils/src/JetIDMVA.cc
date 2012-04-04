@@ -187,6 +187,16 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,
   return true;
 }
 //--------------------------------------------------------------------------------------------------
+Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex) { 
+  if(!JetTools::passPFLooseId(iJet))                 return false;
+  if(iJet->Pt() < fJetPtMin && iJet->TrackCountingHighEffBJetTagsDisc() == -100) return false; //This line is a bug in the Met training
+  if( fabs(JetTools::impactParameter(iJet,iVertex,true)) < 0.2) return true;
+  double lMVA = MVAValue(iJet,iVertex);
+  if(lMVA < -0.8)                            return false;
+  if(lMVA < -0.5 && fabs(iJet->Eta()) > 3.0) return false;
+  return true;
+}
+//--------------------------------------------------------------------------------------------------
 Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, //Vertex here is the PV
 			    FactorizedJetCorrector *iJetCorrector,
 			    const PileupEnergyDensityCol *iPileupEnergyDensity,
@@ -229,6 +239,94 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, //Vertex he
   //fChEta1       = lLeadCh  ->Eta(); 
   fChPhi1       = lLeadCh  ->Phi(); 
   fLFr1         = lLead->Pt()/iJet->Pt();
+
+  fDRLC1        = MathUtils::DeltaR(iJet->Mom(),lLead  ->Mom());
+  fDRLS1        = MathUtils::DeltaR(iJet->Mom(),lSecond->Mom());
+  fDRM1         = JetTools::dRMean (iJet,-1);
+  fDRNE1        = JetTools::dRMean (iJet, 5);
+  fDREM1        = JetTools::dRMean (iJet, 4);
+  fDRCH1        = JetTools::dRMean (iJet, 1);
+
+  double lMVA = fReader->EvaluateMVA( fMethodName );
+   
+  if (printDebug == kTRUE) {
+    std::cout << "Debug Jet MVA: "
+	      << fNPV    << " "
+	      << fJPt1   << " "
+	      << fJEta1  << " "
+	      << fJPhi1  << " "
+	      << fJD01   << " "
+	      << fJDZ1   << " "
+	      << fJM1    << " "
+	      << fNPart1 << " "
+	      << fLPt1   << " "
+	      << fLEta1  << " "
+	      << fLPhi1  << " "
+	      << fSPt1   << " "
+	      << fSEta1  << " "
+	      << fSPhi1  << " "
+	      << fNEPt1  << " "
+	      << fNEEta1 << " "
+	      << fNEPhi1 << " "
+	      << fEMPt1  << " "
+	      << fEMEta1 << " "
+	      << fEMPhi1 << " "
+	      << fChPt1  << " "
+	      << fChPhi1 << " "
+	      << fLFr1   << " "
+	      << fDRLC1  << " "
+	      << fDRLS1  << " "
+	      << fDRM1   << " "
+	      << fDRNE1 << " "
+	      << fDREM1  << " "
+	      << fDRCH1  << " "
+              << " === : === "
+              << lMVA << " "    
+              << std::endl;
+  }
+
+  return lMVA;
+}
+Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, //Vertex here is the PV
+			    Bool_t printDebug) {
+  
+  if (!fIsInitialized) { 
+    std::cout << "Error: JetIDMVA not properly initialized.\n"; 
+    return -9999;
+  }
+  if(!JetTools::passPFLooseId(iJet)) return -2.;
+
+  //set all input variables
+  fJPt1      = iJet->Pt();
+  fJEta1     = iJet->RawMom().Eta();
+  fJPhi1     = iJet->RawMom().Phi();
+  fJM1       = iJet->Mass();
+
+  const mithep::PFCandidate *lLead     = JetTools::leadCand(iJet,-1); 
+  const mithep::PFCandidate *lSecond   = JetTools::leadCand(iJet,-1,true); 
+  const mithep::PFCandidate *lLeadNeut = JetTools::leadCand(iJet ,5); 
+  const mithep::PFCandidate *lLeadEm   = JetTools::leadCand(iJet ,4); 
+  const mithep::PFCandidate *lLeadCh   = JetTools::leadCand(iJet ,1); 
+
+  fJD01         = JetTools::impactParameter(iJet,iVertex);  
+  fJDZ1         = JetTools::impactParameter(iJet,iVertex,true);
+  fNPart1       = iJet->NPFCands();
+  fLPt1         = lLead    ->Pt(); 
+  fLEta1        = lLead    ->Eta(); 
+  fLPhi1        = lLead    ->Phi(); 
+  fSPt1         = lSecond  ->Pt(); 
+  fSEta1        = lSecond  ->Eta(); 
+  fSPhi1        = lSecond  ->Phi(); 
+  fNEPt1        = lLeadNeut->Pt(); 
+  fNEEta1       = lLeadNeut->Eta(); 
+  fNEPhi1       = lLeadNeut->Phi(); 
+  fEMPt1        = lLeadEm  ->Pt(); 
+  fEMEta1       = lLeadEm  ->Eta(); 
+  fEMPhi1       = lLeadEm  ->Phi(); 
+  fChPt1        = lLeadCh  ->Pt(); 
+  //fChEta1       = lLeadCh  ->Eta(); 
+  fChPhi1       = lLeadCh  ->Phi(); 
+  fLFr1         = lLead->Pt()/iJet->RawMom().Pt();
 
   fDRLC1        = MathUtils::DeltaR(iJet->Mom(),lLead  ->Mom());
   fDRLS1        = MathUtils::DeltaR(iJet->Mom(),lSecond->Mom());
