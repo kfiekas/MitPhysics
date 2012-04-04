@@ -81,6 +81,19 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,
   if(iSign < 0) iVec += lVec;
   iSumEt += lPt;
 }
+
+//--------------------------------------------------------------------------------------------------
+//Corrected Jets
+void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,int iSign) { 
+  FourVectorM lVec(0,0,0,0);
+  double lPt = iJet->Pt();
+  lPt *= (iJet->NeutralEmEnergy()/iJet->E() + iJet->NeutralHadronEnergy()/iJet->E());
+  lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
+  if(iSign > 0) iVec -= lVec;
+  if(iSign < 0) iVec += lVec;
+  iSumEt += lPt;
+}
+
 //--------------------------------------------------------------------------------------------------
 Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJetCorrector,
 			  const PileupEnergyDensityCol *iPileupEnergyDensity,
@@ -109,6 +122,32 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
   return lMet;
 }
 //--------------------------------------------------------------------------------------------------
+//Corrected Jets
+Met RecoilTools::NoPUMet( const PFJetCol       *iJets,const PFCandidateCol *iCands,const Vertex *iVertex,
+			  Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2,Double_t iDZCut) { 
+
+  FourVectorM lVec        (0,0,0,0); double lSumEt          = 0; 
+  for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
+    const PFCandidate *pPF = iCands->At(i0);
+    const Track* pTrack = pPF->TrackerTrk();
+    if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
+    if(pTrack        ==  0                           ) continue;
+    if(	 !((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
+	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    lVec     -= pPF->Mom();
+    lSumEt   += pPF->Pt();
+  }
+  for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
+    const PFJet *pJet = iJets->At(i0);
+    if(!fJetIDMVA->pass(pJet,iVertex))                                    continue;
+    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                             continue; //Quick cleaning==> if not done already
+    addNeut(pJet,lVec,lSumEt);
+  }
+  Met lMet(lVec.Px(),lVec.Py());
+  lMet.SetSumEt(lSumEt);
+  return lMet;
+}
+//--------------------------------------------------------------------------------------------------
 Met RecoilTools::NoPURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 			    const PFJetCol       *iJets,FactorizedJetCorrector *iJetCorrector,
 			    const PileupEnergyDensityCol *iPileupEnergyDensity,
@@ -117,6 +156,19 @@ Met RecoilTools::NoPURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 			    Double_t iDZCut) { 
   
   Met lNoPUMet = NoPUMet(iJets,iJetCorrector,iPileupEnergyDensity,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2,iDZCut);
+  lNoPUMet.SetMex  (lNoPUMet.Mex()+iVisPt*cos(iVisPhi));  
+  lNoPUMet.SetMey  (lNoPUMet.Mey()+iVisPt*sin(iVisPhi));
+  lNoPUMet.SetSumEt(lNoPUMet.SumEt()-iVisSumEt);
+  return lNoPUMet;
+}
+//--------------------------------------------------------------------------------------------------
+//Corrected Jets
+Met RecoilTools::NoPURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
+			    const PFJetCol       *iJets,const PFCandidateCol *iCands,const Vertex *iVertex,
+			    Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2,
+			    Double_t iDZCut) { 
+  
+  Met lNoPUMet = NoPUMet(iJets,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2,iDZCut);
   lNoPUMet.SetMex  (lNoPUMet.Mex()+iVisPt*cos(iVisPhi));  
   lNoPUMet.SetMey  (lNoPUMet.Mey()+iVisPt*sin(iVisPhi));
   lNoPUMet.SetSumEt(lNoPUMet.SumEt()-iVisSumEt);
@@ -159,6 +211,42 @@ Met RecoilTools::PUCMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJe
   lMet.SetSumEt(lSumEt);
   return lMet;
 }
+//--------------------------------------------------------------------------------------------------
+//Corrected jets
+Met RecoilTools::PUCMet( const PFJetCol       *iJets,const PFCandidateCol *iCands,const Vertex *iVertex,
+			 Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2,
+			 Double_t iDZCut) { 
+
+  FourVectorM lVec        (0,0,0,0); double lSumEt          = 0; 
+  for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
+    const PFCandidate *pPF = iCands->At(i0);
+    const Track* pTrack = pPF->TrackerTrk();
+    if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
+    if(pTrack == 0                                   && 
+       (pPF->PFType() == PFCandidate::eGamma         || 
+	pPF->PFType() == PFCandidate::eEGammaHF      || 
+	pPF->PFType() == PFCandidate::eNeutralHadron || 
+	pPF->PFType() == PFCandidate::eHadronHF      ))
+      {lVec -= pPF->Mom(); lSumEt += pPF->Pt();}
+    if(pTrack        ==  0                           ) continue;
+    if(	 !((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
+	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    lVec     -= pPF->Mom();
+    lSumEt   += pPF->Pt();
+  }
+  for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
+    const PFJet *pJet = iJets->At(i0);
+    if(pJet->Pt() < fJetIDMVA->fJetPtMin
+       && pJet->TrackCountingHighEffBJetTagsDisc() == -100)              continue; //This line is a bug in the Met training//
+    if(!JetTools::passPFLooseId(pJet))                                   continue;
+    if(fJetIDMVA->pass(pJet,iVertex))                                    continue;
+    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                            continue; //Quick cleaning==> if not done already
+    addNeut(pJet,lVec,lSumEt,-1);
+  }
+  Met lMet(lVec.Px(),lVec.Py());
+  lMet.SetSumEt(lSumEt);
+  return lMet;
+}
 //----> This MET is a bug need to fix it
 //--------------------------------------------------------------------------------------------------
 Met RecoilTools::PUCRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
@@ -168,6 +256,19 @@ Met RecoilTools::PUCRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 			   Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2,
 			   Double_t iDZCut) { 
   Met lPUCMet = PUCMet(iJets,iJetCorrector,iPileupEnergyDensity,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2,iDZCut);
+  lPUCMet.SetMex  (lPUCMet.Mex()+iVisPt*cos(iVisPhi));  
+  lPUCMet.SetMey  (lPUCMet.Mey()+iVisPt*sin(iVisPhi));
+  lPUCMet.SetSumEt(lPUCMet.SumEt()-iVisSumEt);
+  return lPUCMet;
+}
+//--------------------------------------------------------------------------------------------------
+//Corrected Jets
+Met RecoilTools::PUCRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
+			   const PFJetCol       *iJets,
+			   const PFCandidateCol *iCands,const Vertex *iVertex,
+			   Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2,
+			   Double_t iDZCut) { 
+  Met lPUCMet = PUCMet(iJets,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2,iDZCut);
   lPUCMet.SetMex  (lPUCMet.Mex()+iVisPt*cos(iVisPhi));  
   lPUCMet.SetMey  (lPUCMet.Mey()+iVisPt*sin(iVisPhi));
   lPUCMet.SetSumEt(lPUCMet.SumEt()-iVisSumEt);
@@ -205,6 +306,37 @@ Met RecoilTools::PUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJet
   return lMet;
 }
 //--------------------------------------------------------------------------------------------------
+//Corrected Jets
+Met RecoilTools::PUMet( const PFJetCol       *iJets,
+			const PFCandidateCol *iCands,const Vertex *iVertex,
+			Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2,
+			Double_t iDZCut) { 
+
+  FourVectorM lVec        (0,0,0,0); double lSumEt          = 0; 
+  for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
+    const PFCandidate *pPF = iCands->At(i0);
+    const Track* pTrack = pPF->TrackerTrk();
+    if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
+    if(pTrack        ==  0                           ) continue;
+    if(	  ((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
+	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    lVec     -= pPF->Mom();
+    lSumEt   += pPF->Pt();
+  }
+  for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
+    const PFJet *pJet = iJets->At(i0);
+    if(pJet->Pt() < fJetIDMVA->fJetPtMin
+       && pJet->TrackCountingHighEffBJetTagsDisc() == -100)              continue; //This line is a bug in the Met training//
+    if(!JetTools::passPFLooseId(pJet))                                   continue;
+    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                            continue; //Quick cleaning
+    if(fJetIDMVA->pass(pJet,iVertex))                                    continue;
+    addNeut(pJet,lVec,lSumEt);
+  }
+  Met lMet(lVec.Px(),lVec.Py());
+  lMet.SetSumEt(lSumEt);
+  return lMet;
+}
+//--------------------------------------------------------------------------------------------------
 Met RecoilTools::PURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 			  const PFJetCol       *iJets,FactorizedJetCorrector *iJetCorrector,
 			  const PileupEnergyDensityCol *iPileupEnergyDensity,
@@ -212,6 +344,19 @@ Met RecoilTools::PURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 			  Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2,
 			  Double_t iDZCut) { 
   Met lPUMet = PUMet(iJets,iJetCorrector,iPileupEnergyDensity,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2,iDZCut);
+  lPUMet.SetMex  (lPUMet.Mex()+iVisPt*cos(iVisPhi));  
+  lPUMet.SetMey  (lPUMet.Mey()+iVisPt*sin(iVisPhi));
+  lPUMet.SetSumEt(lPUMet.SumEt()-iVisSumEt);
+  return lPUMet;
+}
+//--------------------------------------------------------------------------------------------------
+//Corrected Jets
+Met RecoilTools::PURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
+			  const PFJetCol       *iJets,
+			  const PFCandidateCol *iCands,const Vertex *iVertex,
+			  Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2,
+			  Double_t iDZCut) { 
+  Met lPUMet = PUMet(iJets,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2,iDZCut);
   lPUMet.SetMex  (lPUMet.Mex()+iVisPt*cos(iVisPhi));  
   lPUMet.SetMey  (lPUMet.Mey()+iVisPt*sin(iVisPhi));
   lPUMet.SetSumEt(lPUMet.SumEt()-iVisSumEt);

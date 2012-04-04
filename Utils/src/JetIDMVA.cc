@@ -13,9 +13,9 @@ using namespace mithep;
 
 //--------------------------------------------------------------------------------------------------
 JetIDMVA::JetIDMVA() :
+  fJetPtMin(10), //We need to lower this
   fMethodName("JetIDMA"),
   fIsInitialized(kFALSE),
-  fJetPtMin(10), //We need to lower this
   fNPV    (0),
   fJPt1   (0),
   fJEta1  (0),
