@@ -22,6 +22,7 @@
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 #include "MitPhysics/Utils/interface/RecoilTools.h"
+#include "MitPhysics/Utils/interface/GBRForest.h"
 
 class TRandom3;
 
@@ -34,15 +35,22 @@ namespace mithep {
       kBaseline = 0
     };
 
-    void    setVariables(TMVA::Reader *iReader,bool iScale);
-    void    Initialize( TString iU1MethodName="U1MVA",
-			TString iPhiMethodName="PhiMVA",
-			TString iJetMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
-			TString iU1Weights="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilRegress_baseline.weights.xml",
-			TString iPhiWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID.weights.xml", 
-			MVAType iType=kBaseline);
-
+    //void    setVariables(TMVA::Reader *iReader,bool iScale);
+    //void    Initialize( TString iU1MethodName="U1MVA",
+    //                    TString iPhiMethodName="PhiMVA",
+    //			TString iJetMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
+    //			TString iU1Weights="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilRegress_baseline.weights.xml",
+    //			TString iPhiWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID.weights.xml", 
+    //			MVAType iType=kBaseline);
+    void    Initialize( 
+		       TString iJetMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
+		       TString iU1Weights ="$CMSSW_BASE/src/MitPhysics/data/gbrmet.root",
+		       TString iPhiWeights="$CMSSW_BASE/src/MitPhysics/data/gbrmetphi.root",
+		       MVAType iType=kBaseline);
+        
     Bool_t   IsInitialized() const { return fIsInitialized; }
+    Double_t evaluatePhi();
+    Double_t evaluateU1();
     Double_t MVAValue(  bool iPhi,
 			Float_t iPFSumEt, 
 			Float_t iU      ,
@@ -78,6 +86,13 @@ namespace mithep {
 			int iNPV,
 			Bool_t printDebug=false);
 
+    Met GetMet( 	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
+			const PFMet            *iMet  ,
+			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFJetCol         *iJets ,
+			int iNPV,
+			Bool_t printDebug=false);
+
     Met GetMet(	        Bool_t iPhi,
 			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
 			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
@@ -88,8 +103,19 @@ namespace mithep {
 			const PileupEnergyDensityCol *iPUEnergyDensity,
 			int iNPV,
 			Bool_t printDebug);
+
+    Met GetMet(	        Bool_t iPhi,
+			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
+			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
+			const PFMet            *iMet  ,
+			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFJetCol         *iJets ,
+			int iNPV,
+			Bool_t printDebug);
+    
     RecoilTools *fRecoilTools;
-    protected:
+    
+  protected:
     TString      fPhiMethodName;
     TString      fU1MethodName;
     Bool_t       fIsInitialized;
@@ -119,9 +145,15 @@ namespace mithep {
     Float_t fNAllJet;
     Float_t fNPV    ;
     Float_t fUPhiMVA;
-
-    TMVA::Reader* fPhiReader;
-    TMVA::Reader* fU1Reader;
+    
+    Float_t* fPhiVals;
+    Float_t* fU1Vals;
+    
+    
+    GBRForest *fPhiReader;
+    GBRForest *fU1Reader;
+    //TMVA::Reader* fPhiReader;
+    //TMVA::Reader* fU1Reader;
     ClassDef(MVAMet,0)
   };
 }
