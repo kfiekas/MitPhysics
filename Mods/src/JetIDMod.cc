@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.24 2011/03/11 15:13:09 ceballos Exp $
+// $Id: JetIDMod.cc,v 1.25 2011/04/12 07:38:26 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -26,6 +26,8 @@ JetIDMod::JetIDMod(const char *name, const char *title) :
   fVertices(0)
 {
   // Constructor.
+  fJetIDMVA = new JetIDMVA();
+  fJetIDMVA->Initialize(JetIDMVA::kLoose);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -81,6 +83,8 @@ void JetIDMod::Process()
     }
     if(passBetaCut == kFALSE)
       continue;
+
+    if(fJetIDMVA->pass(pfJet,fVertices->At(0),fVertices)) continue;
 
     // add good jet to collection
     GoodJets->Add(jet);

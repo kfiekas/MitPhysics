@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.14 2009/11/03 08:36:56 ceballos Exp $
+// $Id: JetIDMod.h,v 1.15 2011/02/21 13:50:20 ceballos Exp $
 //
 // JetIDMod
 //
@@ -14,6 +14,7 @@
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/VertexCol.h"
+#include "MitPhysics/Utils/interface/JetIDMVA.h"
 
 namespace mithep 
 {
@@ -54,7 +55,7 @@ namespace mithep
       Double_t          fJetEEMFractionMinCut;  //jet Eem fraction min cut
       Bool_t            fApplyBetaCut;          //=true then apply beta cut
       const VertexCol  *fVertices;	        //Vertices branches
-
+      JetIDMVA         *fJetIDMVA;
       ClassDef(JetIDMod, 1) // Jet identification module
   };
 }
