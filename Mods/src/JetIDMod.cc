@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.26 2012/04/05 12:25:10 pharris Exp $
+// $Id: JetIDMod.cc,v 1.27 2012/04/07 09:36:32 pharris Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -23,16 +23,10 @@ JetIDMod::JetIDMod(const char *name, const char *title) :
   fJetEtaMaxCut(5.0),
   fJetEEMFractionMinCut(0.01),
   fApplyBetaCut(kFALSE),
+  fApplyMVACut(kFALSE),
   fVertices(0)
 {
-  // Constructor.
-  fJetIDMVA = new JetIDMVA();
-  fJetIDMVA->Initialize(JetIDMVA::kLoose,
-			TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
-                        TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
-                        JetIDMVA::kBaseline,
-                        TString(getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")));
- }
+}
 
 //-------------------------------------------------------------------------------------------------
 void JetIDMod::Process()
@@ -88,7 +82,8 @@ void JetIDMod::Process()
     if(passBetaCut == kFALSE)
       continue;
 
-    if(fJetIDMVA->pass(pfJet,fVertices->At(0),fVertices)) continue;
+    if(fApplyMVACut == kTRUE && 
+       fJetIDMVA->pass(pfJet,fVertices->At(0),fVertices) == kFALSE) continue;
 
     // add good jet to collection
     GoodJets->Add(jet);
@@ -101,3 +96,26 @@ void JetIDMod::Process()
   AddObjThisEvt(GoodJets);  
 }
 
+//--------------------------------------------------------------------------------------------------
+void JetIDMod::SlaveBegin()
+{
+  // Run startup code on the computer (slave) doing the actual analysis. Here,
+  // we typically initialize histograms and other analysis objects and request
+  // branches. For this module, we request a branch of the MitTree.
+
+ if(fApplyMVACut == kTRUE){
+   fJetIDMVA = new JetIDMVA();
+   fJetIDMVA->Initialize(JetIDMVA::kLoose,
+	 		 TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
+                         TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
+                         JetIDMVA::kBaseline,
+                         TString(getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")));
+ }
+
+}
+
+//--------------------------------------------------------------------------------------------------
+void JetIDMod::SlaveTerminate()
+{
+  delete fJetIDMVA;
+}
