@@ -1,4 +1,4 @@
-// $Id: MVAMetMod.cc,v 1.4 2012/04/07 13:55:35 ceballos Exp $
+// $Id: MVAMetMod.cc,v 1.5 2012/04/07 16:45:04 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -64,15 +64,17 @@ void MVAMetMod::Process()
                                   thePFJets,
                                   int(fVertices->GetEntries()));
 
-  delete thePFJets;
-
   MVAMet->Add(&lMVAMet);
 
   // sort according to pt
   MVAMet->Sort();
-  
+
   // add to event for other modules to use
   AddObjThisEvt(MVAMet);
+
+  // delete temporal PFJet
+  delete thePFJets;
+
 }
 
 //--------------------------------------------------------------------------------------------------
