@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.15 2011/02/21 13:50:20 ceballos Exp $
+// $Id: JetIDMod.h,v 1.16 2012/04/05 12:25:09 pharris Exp $
 //
 // JetIDMod
 //
@@ -33,6 +33,7 @@ namespace mithep
       Double_t          GetEtaMaxCut()                 const { return fJetEtaMaxCut;        }
       Double_t          GetJetEEMFractionMinCut()      const { return fJetEEMFractionMinCut;}
       Bool_t            GetApplyBetaCut()              const { return fApplyBetaCut;        }
+      Bool_t            GetApplyMVACut()               const { return fApplyMVACut;         }
       void              SetGoodJetsName(const char *name)    { fGoodJetsName = name;       }
       void              SetGoodName(const char *name)        { SetGoodJetsName(name);      }
       void              SetInputName(const char *name)       { fJetsName = name;           }
@@ -42,9 +43,12 @@ namespace mithep
       void              SetEtaMaxCut(Double_t cut)           { fJetEtaMaxCut = cut;        }
       void              SetJetEEMFractionMinCut(Double_t cut){ fJetEEMFractionMinCut = cut;}
       void              SetApplyBetaCut(Bool_t b)            { fApplyBetaCut = b;          }
+      void              SetApplyMVACut(Bool_t b)             { fApplyMVACut = b;           }
 
     protected:
       void              Process();
+      void              SlaveBegin();
+      void              SlaveTerminate();
 
       TString           fJetsName;              //name of jet collection (input)
       TString           fGoodJetsName;          //name of good jets collection (output)
@@ -54,6 +58,7 @@ namespace mithep
       Double_t          fJetEtaMaxCut;          //jet eta max cut
       Double_t          fJetEEMFractionMinCut;  //jet Eem fraction min cut
       Bool_t            fApplyBetaCut;          //=true then apply beta cut
+      Bool_t            fApplyMVACut;           //=true then apply MVA cut
       const VertexCol  *fVertices;	        //Vertices branches
       JetIDMVA         *fJetIDMVA;
       ClassDef(JetIDMod, 1) // Jet identification module
