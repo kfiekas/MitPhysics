@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MVAMetMod.h,v 1.2 2012/04/07 11:52:02 ceballos Exp $
+// $Id: MVAMetMod.h,v 1.3 2012/04/07 13:55:35 ceballos Exp $
 //
 // MVAMetMod
 //
@@ -12,6 +12,7 @@
 #define MITPHYSICS_MODS_MVAMETOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h" 
+#include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"

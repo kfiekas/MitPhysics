@@ -1,4 +1,4 @@
-// $Id: MVAMetMod.cc,v 1.3 2012/04/07 12:25:26 ceballos Exp $
+// $Id: MVAMetMod.cc,v 1.4 2012/04/07 13:55:35 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -15,7 +15,7 @@ ClassImp(mithep::MVAMetMod)
 MVAMetMod::MVAMetMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fMVAMetName("MetMVA"),  
-  fJetsName  ("dummy"),
+  fJetsName  ("correctPFJets"),
   fPFCandName(Names::gkPFCandidatesBrn),
   fVertexName(ModNames::gkGoodVertexesName),
   fPFMetName ("PFMet"),
@@ -32,6 +32,7 @@ void MVAMetMod::Process()
   // Process entries of the tree. 
 
   fJets = GetObjThisEvt<JetCol> (fJetsName); //corrected Jets
+  //LoadBranch(fJetsName);
   LoadBranch(fPFCandName);
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
   LoadBranch(fPFMetName);
@@ -48,13 +49,22 @@ void MVAMetMod::Process()
 
   MetOArr *MVAMet = new MetOArr; 
   MVAMet->SetName(fMVAMetName);
+  
+  PFJetOArr *thePFJets = new PFJetOArr; 
+  for(UInt_t i=0; i<fJets->GetEntries(); i++) {
+    const PFJet *ptJet = dynamic_cast<const PFJet*>(fJets->At(i));
+    thePFJets->Add(ptJet);
+  }
+
   Met lMVAMet = fMVAMet->GetMet(  false,
                                   lPt0,lPhi0,lEta0,
                                   lPt1,lPhi1,lEta1,
                                   fPFMet->At(0),
                                   fCands,fVertices->At(0),fVertices,
-                                  dynamic_cast<const PFJetCol*>(fJets),
+                                  thePFJets,
                                   int(fVertices->GetEntries()));
+
+  delete thePFJets;
 
   MVAMet->Add(&lMVAMet);
 
@@ -62,7 +72,7 @@ void MVAMetMod::Process()
   MVAMet->Sort();
   
   // add to event for other modules to use
-  AddObjThisEvt(MVAMet);  
+  AddObjThisEvt(MVAMet);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -72,6 +82,7 @@ void MVAMetMod::SlaveBegin()
   // we typically initialize histograms and other analysis objects and request
   // branches. For this module, we request a branch of the MitTree.
 
+  //ReqBranch(fJetsName,   fJets);
   ReqBranch(fPFCandName, fCands);
   ReqBranch(fPFMetName,  fPFMet);
 
