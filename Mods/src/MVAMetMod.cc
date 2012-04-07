@@ -1,8 +1,9 @@
-// $Id: MVAMetMod.cc,v 1.5 2012/04/07 16:45:04 ceballos Exp $
+// $Id: MVAMetMod.cc,v 1.6 2012/04/07 17:37:27 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/MetCol.h"
+#include "MitAna/DataTree/interface/ParticleCol.h"
 #include "MitAna/DataTree/interface/Names.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -43,9 +44,17 @@ void MVAMetMod::Process()
               fJetsName.Data());
     return;
   }
-  //Random lepton selection
+  // lepton selection
   Float_t lPt0 = 0; Float_t lEta0 = 0; Float_t lPhi0 = 0;
   Float_t lPt1 = 0; Float_t lEta1 = 0; Float_t lPhi1 = 0;
+
+  ParticleOArr *leptons = GetObjThisEvt<ParticleOArr>(ModNames::gkMergedLeptonsName);
+  if(leptons->GetEntries() >= 1){
+    lPt0 = leptons->At(0)->Pt();  lEta0 = leptons->At(0)->Eta(); lPhi0 = leptons->At(0)->Phi();
+  }
+  if(leptons->GetEntries() >= 2){
+    lPt1 = leptons->At(1)->Pt();  lEta1 = leptons->At(1)->Eta(); lPhi1 = leptons->At(1)->Phi();
+  }
 
   MetOArr *MVAMet = new MetOArr; 
   MVAMet->SetName(fMVAMetName);
