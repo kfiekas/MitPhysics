@@ -1,4 +1,4 @@
-// $Id: MVAMetMod.cc,v 1.1 2012/04/07 10:25:15 pharris Exp $
+// $Id: MVAMetMod.cc,v 1.2 2012/04/07 11:52:02 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -14,7 +14,7 @@ ClassImp(mithep::MVAMetMod)
 //--------------------------------------------------------------------------------------------------
 MVAMetMod::MVAMetMod(const char *name, const char *title) : 
   BaseMod(name,title),
-  fMVAMetName("MVAMet"),  
+  fMVAMetName("MetMVA"),  
   fJetsName  ("dummy"),
   fPFCandName(Names::gkPFCandidatesBrn),
   fVertexName(ModNames::gkGoodVertexesName),
