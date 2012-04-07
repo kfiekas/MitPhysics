@@ -43,10 +43,12 @@ namespace mithep {
     //			TString iPhiWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID.weights.xml", 
     //			MVAType iType=kBaseline);
     void    Initialize( 
-		       TString iJetMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
-		       TString iU1Weights ="$CMSSW_BASE/src/MitPhysics/data/gbrmet.root",
-		       TString iPhiWeights="$CMSSW_BASE/src/MitPhysics/data/gbrmetphi.root",
-		       MVAType iType=kBaseline);
+		       TString iJetLowPtFile ="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
+		       TString iJetHighPtFile="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
+		       TString iJetCutFile   ="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
+		       TString iU1Weights    ="$CMSSW_BASE/src/MitPhysics/data/gbrmet.root",
+		       TString iPhiWeights   ="$CMSSW_BASE/src/MitPhysics/data/gbrmetphi.root",
+		       MVAMet::MVAType  iType=kBaseline);
         
     Bool_t   IsInitialized() const { return fIsInitialized; }
     Double_t evaluatePhi();
@@ -79,7 +81,8 @@ namespace mithep {
 
     Met GetMet( 	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
 			const PFMet            *iMet  ,
-			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFCandidateCol   *iCands,
+			const Vertex *iVertex,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			FactorizedJetCorrector *iJetCorrector,
 			const PileupEnergyDensityCol *iPileupEnergyDensity,
@@ -88,7 +91,8 @@ namespace mithep {
 
     Met GetMet( 	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
 			const PFMet            *iMet  ,
-			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFCandidateCol   *iCands,
+			const Vertex *iVertex,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug=false);
@@ -97,7 +101,8 @@ namespace mithep {
 			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
 			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
 			const PFMet            *iMet  ,
-			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFCandidateCol   *iCands,
+			const Vertex *iVertex,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			FactorizedJetCorrector *iJetCorrector,
 			const PileupEnergyDensityCol *iPUEnergyDensity,
@@ -108,7 +113,8 @@ namespace mithep {
 			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
 			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
 			const PFMet            *iMet  ,
-			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFCandidateCol   *iCands,
+			const Vertex *iVertex,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug);

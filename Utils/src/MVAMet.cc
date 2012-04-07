@@ -109,14 +109,16 @@ void MVAMet::Initialize( TString iU1MethodName,
 }
 */
 //--------------------------------------------------------------------------------------------------
-void MVAMet::Initialize( TString iJetMVAFile, 
-			 TString iU1Weights, 
-			 TString iPhiWeights, 
-			 MVAMet::MVAType     iType) { 
+void MVAMet::Initialize(TString iJetLowPtFile, 
+			TString iJetHighPtFile,
+			TString iJetCutFile,
+			TString iU1Weights, 
+			TString iPhiWeights, 
+			MVAMet::MVAType     iType) { 
   
   fIsInitialized = kTRUE;
-  fRecoilTools = new RecoilTools(iJetMVAFile);
-  
+  fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile);
+
   fType          = iType;
 
   TFile *lPhiForest = new TFile(iPhiWeights,"READ");
@@ -257,7 +259,8 @@ Double_t MVAMet::MVAValue(  Bool_t iPhi,
 //====> Please not that the jet collection must be cleaned => all jets near leptons must be removed
 Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
 			const PFMet            *iMet  ,
-			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFCandidateCol   *iCands,
+			const Vertex *iVertex,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			FactorizedJetCorrector *iJetCorrector,
 			const PileupEnergyDensityCol *iPUEnergyDensity,
@@ -266,9 +269,9 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   
   Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iMet);
   Met lTKRec = fRecoilTools->trackRecoil(iPtVis,iPhiVis,iSumEtVis,iCands,iVertex); 
-  Met lNPRec = fRecoilTools->NoPURecoil (iPtVis,iPhiVis,iSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex);  
-  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex);
-  Met lPUMet = fRecoilTools->PUMet      (iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex);
+  Met lNPRec = fRecoilTools->NoPURecoil (iPtVis,iPhiVis,iSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);  
+  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);
+  Met lPUMet = fRecoilTools->PUMet      (iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);
   
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 
@@ -277,7 +280,6 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   for(unsigned int i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     Double_t pPt = fRecoilTools->fJetIDMVA->correctedPt(pJet,iJetCorrector,iPUEnergyDensity);
-    if( pJet->TrackCountingHighEffBJetTagsDisc() == -100 && pPt < 10.) continue;
     if(!JetTools::passPFLooseId(pJet)) continue;
     lNAllJet++;
     if(pPt  > 30)  lNJet++;
@@ -362,16 +364,17 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
 //====> Corrected Jets
 Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
 			const PFMet            *iMet  ,
-			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFCandidateCol   *iCands,
+			const Vertex *iVertex         ,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug) {
   
   Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iMet);
-  Met lTKRec = fRecoilTools->trackRecoil(iPtVis,iPhiVis,iSumEtVis,iCands,iVertex); 
-  Met lNPRec = fRecoilTools->NoPURecoil (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex);  
-  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex);
-  Met lPUMet = fRecoilTools->PUMet      (iJets,iCands,iVertex);
+  Met lTKRec = fRecoilTools->trackRecoil(iPtVis,iPhiVis,iSumEtVis,      iCands,iVertex); 
+  Met lNPRec = fRecoilTools->NoPURecoil (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices);  
+  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices);
+  Met lPUMet = fRecoilTools->PUMet      (                         iJets,iCands,iVertex,iVertices);
   
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 
@@ -380,7 +383,6 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   for(unsigned int i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     Double_t pPt = pJet->Pt();
-    if( pJet->TrackCountingHighEffBJetTagsDisc() == -100 && pPt < 10.) continue;
     if(!JetTools::passPFLooseId(pJet)) continue;
     lNAllJet++;
     if(pPt  > 30)  lNJet++;
@@ -466,7 +468,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
 			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
 			const PFMet            *iMet  ,
-			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFCandidateCol   *iCands,
+			const Vertex           *iVertex,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			FactorizedJetCorrector *iJetCorrector,
 			const PileupEnergyDensityCol *iPUEnergyDensity,
@@ -481,9 +484,12 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   Float_t lSumEtVis = iPt1 + iPt2;
   Met lPFRec = fRecoilTools->pfRecoil   (lPtVis,lPhiVis,lSumEtVis,iMet);
   Met lTKRec = fRecoilTools->trackRecoil(lPtVis,lPhiVis,lSumEtVis,iCands,iVertex); 
-  Met lNPRec = fRecoilTools->NoPURecoil (lPtVis,lPhiVis,lSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2);  
-  Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis,lPhiVis,lSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2);
-  Met lPUMet = fRecoilTools->PUMet      (                         iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2);
+  Met lNPRec = fRecoilTools->NoPURecoil (lPtVis,lPhiVis,lSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,
+					 iPhi1,iEta1,iPhi2,iEta2);  
+  Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis,lPhiVis,lSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,
+					 iPhi1,iEta1,iPhi2,iEta2);
+  Met lPUMet = fRecoilTools->PUMet      (                         iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,
+								  iPhi1,iEta1,iPhi2,iEta2);
 
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 
@@ -492,7 +498,6 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   for(unsigned int i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     Double_t pPt = fRecoilTools->fJetIDMVA->correctedPt(pJet,iJetCorrector,iPUEnergyDensity);
-    if( pJet->TrackCountingHighEffBJetTagsDisc() == -100 && pPt < 10.) continue;
     double pDEta1 = pJet->Eta() - iEta1;
     double pDPhi1 = fabs(pJet->Phi() - iPhi1); if(pDPhi1 > 2.*TMath::Pi()-pDPhi1) pDPhi1 = 2.*TMath::Pi()-pDPhi1;
     double pDR1   = sqrt(pDEta1*pDEta1 + pDPhi1*pDPhi1);
@@ -584,7 +589,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
 			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
 			const PFMet            *iMet  ,
-			const PFCandidateCol   *iCands,const Vertex *iVertex,
+			const PFCandidateCol   *iCands,
+			const Vertex           *iVertex,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug) {
@@ -597,9 +603,9 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   Float_t lSumEtVis = iPt1 + iPt2;
   Met lPFRec = fRecoilTools->pfRecoil   (lPtVis,lPhiVis,lSumEtVis,iMet);
   Met lTKRec = fRecoilTools->trackRecoil(lPtVis,lPhiVis,lSumEtVis,iCands,iVertex); 
-  Met lNPRec = fRecoilTools->NoPURecoil (lPtVis,lPhiVis,lSumEtVis,iJets,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2);  
-  Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis,lPhiVis,lSumEtVis,iJets,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2);
-  Met lPUMet = fRecoilTools->PUMet      (                         iJets,iCands,iVertex,iPhi1,iEta1,iPhi2,iEta2);
+  Met lNPRec = fRecoilTools->NoPURecoil (lPtVis,lPhiVis,lSumEtVis,iJets,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);  
+  Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis,lPhiVis,lSumEtVis,iJets,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);
+  Met lPUMet = fRecoilTools->PUMet      (                         iJets,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);
 
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 

@@ -36,10 +36,17 @@ namespace mithep {
         kBaseline = 0
       };
 
+      enum CutType {
+        kTight     = 0,
+        kMedium    = 1,
+        kLoose     = 2
+      };
 
-      void     Initialize(TString           iMethodName="JetIDMVA",
-                          TString           iWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID.weights.xml",
-                          JetIDMVA::MVAType iType=kBaseline );
+      void     Initialize(JetIDMVA::CutType iCutType,
+			  TString           iLowPtWeights ="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
+			  TString           iHighPtWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
+			  JetIDMVA::MVAType iType=kBaseline,
+			  TString           iCutFileName  ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py");
       
       Bool_t   IsInitialized() const { return fIsInitialized; }
       Double_t MVAValue(    
@@ -49,47 +56,34 @@ namespace mithep {
 			Float_t iJPhi1  ,
 			Float_t iJD01   ,
 			Float_t iJDZ1   ,
-			Float_t iJM1    ,
-			Float_t iNPart1 ,
-			Float_t iLPt1   ,
-			Float_t iLEta1  ,
-			Float_t iLPhi1  ,
-			Float_t iSPt1   ,
-			Float_t iSEta1  ,
-			Float_t iSPhi1  ,
-			Float_t iNEPt1  ,
-			Float_t iNEEta1 ,
-			Float_t iNEPhi1 ,
-			Float_t iEMPt1  ,
-			Float_t iEMEta1 ,
-			Float_t iEMPhi1 ,
-			Float_t iChPt1  ,
-			Float_t iChPhi1 ,
-			Float_t iLFr1   ,
-			Float_t iDRlC1  ,
-			Float_t iDRLS1  ,
-			Float_t iDRM1   ,
-			Float_t iDRMNE1 ,
-			Float_t iDREM1  ,
-			Float_t iDRCH1  
+			Float_t iBeta   ,
+			Float_t iBetaStar,
+			Float_t iNCharged,
+			Float_t iNNeutrals,
+			Float_t iDRMean  ,
+			Float_t iFrac01  ,
+			Float_t iFrac02  ,
+			Float_t iFrac03  ,
+			Float_t iFrac04  ,
+			Float_t iFrac05  
 			);
 
       //UNcorrected Jets
-      Bool_t   pass(const PFJet *iJet,const Vertex *iVertex,
+      Bool_t   pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
 		    FactorizedJetCorrector *iJetCorrector,
 		    const PileupEnergyDensityCol *iPileupEnergyDensity);
       
       //Corrected Jets
-      Bool_t   pass(const PFJet *iJet,const Vertex *iVertex);
+      Bool_t   pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices);
 		    			
       //Uncorrected Jets
-      Double_t MVAValue(const PFJet *iJet,const Vertex *iVertex,
+      Double_t MVAValue(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
 			FactorizedJetCorrector *iJetCorrector,
 			const PileupEnergyDensityCol *iPileupEnergyDensity,
 			Bool_t printDebug=false);
 
       //Corrected Jets
-      Double_t MVAValue(const PFJet *iJet,const Vertex *iVertex,
+      Double_t MVAValue(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
 			Bool_t printDebug=false);
 
 
@@ -97,43 +91,34 @@ namespace mithep {
 			  const PileupEnergyDensityCol *iPUEnergyDensity);
 
       Float_t                  fJetPtMin;
+      Float_t                  fDZCut;
 
     protected:      
       TMVA::Reader            *fReader;
-      TString                  fMethodName;
+      TString                  fLowPtMethodName;
+      TString                  fHighPtMethodName;
       MVAType                  fType;
+      CutType                  fCutType;
       Bool_t                   fIsInitialized;
-      
-      Float_t fNPV;
-      Float_t fJPt1;
-      Float_t fJEta1;
-      Float_t fJPhi1;
-      Float_t fJD01 ;
-      Float_t fJDZ1 ;
-      Float_t fJM1  ;
-      Float_t fNPart1;
-      Float_t fLPt1 ;
-      Float_t fLEta1;
-      Float_t fLPhi1;
-      Float_t fSPt1 ;
-      Float_t fSEta1;
-      Float_t fSPhi1;
-      Float_t fNEPt1;
-      Float_t fNEEta1;
-      Float_t fNEPhi1;
-      Float_t fEMPt1;
-      Float_t fEMEta1;
-      Float_t fEMPhi1;
-      Float_t fChPt1;
-      Float_t fChPhi1;
-      Float_t fLFr1 ;
-      Float_t fDRLC1;
-      Float_t fDRLS1;
-      Float_t fDRM1 ;
-      Float_t fDRNE1;
-      Float_t fDREM1;
-      Float_t fDRCH1;
-        
+      Float_t                  fMVACut[4][4]; //Fix the cut array
+
+      Float_t fNVtx     ;
+      Float_t fJPt1     ;
+      Float_t fJEta1    ;
+      Float_t fJPhi1    ;
+      Float_t fJD01     ;
+      Float_t fJDZ1     ;
+      Float_t fBeta     ;
+      Float_t fBetaStar ;
+      Float_t fNCharged ;
+      Float_t fNNeutrals;
+      Float_t fDRMean   ;
+      Float_t fFrac01   ;
+      Float_t fFrac02   ;
+      Float_t fFrac03   ;
+      Float_t fFrac04   ;
+      Float_t fFrac05   ;
+
       ClassDef(JetIDMVA,0)
 	};
 }

@@ -509,6 +509,38 @@ Double_t JetTools::dRMean(const PFJet *iJet,int iPFType) {
   }
   return lDRMean;
 }
+Double_t JetTools::frac(const PFJet *iJet,Double_t iDRMax,Double_t iDRMin,Int_t iPFType) {
+  double lFrac = 0;
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) {
+    const PFCandidate *pCand = iJet->PFCand(i0);
+    if(iPFType != -1 && pCand->PFType() != iPFType) continue;
+    Double_t pDR = MathUtils::DeltaR(iJet->Mom(),pCand->Mom());
+    if(pDR > iDRMax) continue;
+    if(pDR < iDRMax-0.1) continue;
+    lFrac += pCand->Pt()/iJet->Pt();
+  }
+  return lFrac;
+}
+Double_t JetTools::betaStar(const PFJet *iJet,const Vertex *iVertex,const VertexCol* iVertices,Double_t iDZCut) {
+  Double_t lTotal = 0;  
+  Double_t lPileup = 0;
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) {
+    const PFCandidate* pPF   = iJet->PFCand(i0);
+    const Track* pTrack      = pPF->TrackerTrk();
+    if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
+    if(pTrack == 0) continue;
+
+    lTotal += pPF->Pt();
+    for(unsigned int i1 = 0; i1 < iVertices->GetEntries(); i1++) {
+      const Vertex *pV = iVertices->At(i1);
+      if(fabs(pTrack->DzCorrected(*pV))             < iDZCut  &&
+	 (pV->Position() - iVertex->Position()).R() > 0.02 )
+	{ lPileup  +=pPF->Pt();}
+    }
+  }
+  if(lTotal == 0) lTotal = 1;
+  return lPileup/(lTotal);
+}
 Bool_t  JetTools::passPFLooseId(const PFJet *iJet) { 
   if(iJet->E()                              == 0)       return false;
   if(iJet->NeutralHadronEnergy()/iJet->E()  >  0.99)    return false;

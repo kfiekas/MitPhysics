@@ -47,6 +47,8 @@ namespace mithep {
     static Double_t           impactParameter(const PFJet *iJet,const Vertex *iVertex,bool iDZ=false);
     static const PFCandidate* leadCand       (const PFJet *iJet,int iPFType,bool i2nd=false);
     static Double_t           dRMean         (const PFJet *iJet,int iPFType);
+    static Double_t           frac           (const PFJet *iJet,Double_t iDRMax,Double_t iDRMin,Int_t iPFType);
+    static Double_t           betaStar       (const PFJet *iJet,const Vertex *iVertex,const VertexCol* iVertices,Double_t iDZCut=0.2);
     static Bool_t             passPFLooseId  (const PFJet *iJet);
     ClassDef(JetTools, 0)
   };

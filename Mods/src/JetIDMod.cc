@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.25 2011/04/12 07:38:26 ceballos Exp $
+// $Id: JetIDMod.cc,v 1.26 2012/04/05 12:25:10 pharris Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -27,8 +27,12 @@ JetIDMod::JetIDMod(const char *name, const char *title) :
 {
   // Constructor.
   fJetIDMVA = new JetIDMVA();
-  fJetIDMVA->Initialize(JetIDMVA::kLoose);
-}
+  fJetIDMVA->Initialize(JetIDMVA::kLoose,
+			TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
+                        TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
+                        JetIDMVA::kBaseline,
+                        TString(getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")));
+ }
 
 //-------------------------------------------------------------------------------------------------
 void JetIDMod::Process()
