@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MVAMetMod.h,v 1.1 2012/04/07 10:25:15 pharris Exp $
+// $Id: MVAMetMod.h,v 1.2 2012/04/07 11:52:02 ceballos Exp $
 //
 // MVAMetMod
 //
@@ -15,7 +15,6 @@
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"
-#include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitPhysics/Utils/interface/MVAMet.h"
 
 namespace mithep 
@@ -37,7 +36,7 @@ namespace mithep
       TString             fPFCandName;
       TString             fVertexName;
       TString             fPFMetName ;
-      const PFJetCol       *fJets;
+      const JetCol         *fJets;
       const PFCandidateCol *fCands;
       const VertexCol      *fVertices;
       const PFMetCol       *fPFMet;

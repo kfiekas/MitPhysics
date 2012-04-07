@@ -1,4 +1,4 @@
-// $Id: MVAMetMod.cc,v 1.2 2012/04/07 11:52:02 ceballos Exp $
+// $Id: MVAMetMod.cc,v 1.3 2012/04/07 12:25:26 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -31,10 +31,10 @@ void MVAMetMod::Process()
 {
   // Process entries of the tree. 
 
-  fJets     = GetObjThisEvt<PFJetCol>      (fJetsName); //corrected Jets
-  fCands    = GetObjThisEvt<PFCandidateCol>(fPFCandName);
-  fVertices = GetObjThisEvt<VertexOArr>    (fVertexName);
-  fPFMet    = GetObjThisEvt<PFMetCol>      (fPFMetName);
+  fJets = GetObjThisEvt<JetCol> (fJetsName); //corrected Jets
+  LoadBranch(fPFCandName);
+  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
+  LoadBranch(fPFMetName);
 
   if (!fJets || !fCands || !fVertices || !fPFMet) {
     SendError(kAbortModule, "Process", 
@@ -53,7 +53,7 @@ void MVAMetMod::Process()
                                   lPt1,lPhi1,lEta1,
                                   fPFMet->At(0),
                                   fCands,fVertices->At(0),fVertices,
-                                  fJets,
+                                  dynamic_cast<const PFJetCol*>(fJets),
                                   int(fVertices->GetEntries()));
 
   MVAMet->Add(&lMVAMet);
@@ -71,6 +71,9 @@ void MVAMetMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we typically initialize histograms and other analysis objects and request
   // branches. For this module, we request a branch of the MitTree.
+
+  ReqBranch(fPFCandName, fCands);
+  ReqBranch(fPFMetName,  fPFMet);
 
   fMVAMet    = new MVAMet();
   fMVAMet->Initialize(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
