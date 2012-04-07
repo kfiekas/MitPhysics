@@ -23,7 +23,6 @@ HwwExampleAnalysisMod::HwwExampleAnalysisMod(const char *name, const char *title
   BaseMod(name,title),
   fMuonBranchName(Names::gkMuonBrn),
   fMetName("NoDefaultNameSet"),
-  fCleanJetsName("NoDefaultNameSet"),
   fCleanJetsNoPtCutName("NoDefaultNameSet"),
   fVertexName(ModNames::gkGoodVertexesName),
   fPFCandidatesName(Names::gkPFCandidatesBrn),
@@ -139,8 +138,6 @@ void HwwExampleAnalysisMod::Process()
   ObjArray<Electron> *CleanElectrons = dynamic_cast<ObjArray<Electron>* >(FindObjThisEvt(ModNames::gkCleanElectronsName));
   ParticleOArr *CleanLeptons = dynamic_cast<mithep::ParticleOArr*>
     (FindObjThisEvt(ModNames::gkMergedLeptonsName));
-  ObjArray<Jet> *CleanJets = dynamic_cast<ObjArray<Jet>* >
-    (FindObjThisEvt(fCleanJetsName.Data()));
   ObjArray<Jet> *CleanJetsNoPtCut = dynamic_cast<ObjArray<Jet>* >
     (FindObjThisEvt(fCleanJetsNoPtCutName.Data()));
   TParameter<Double_t> *NNLOWeight = GetObjThisEvt<TParameter<Double_t> >("NNLOWeight");
@@ -262,13 +259,13 @@ void HwwExampleAnalysisMod::Process()
     sortedJetsAll.push_back(jet_a);
   }
 
-  for(UInt_t i=0; i<CleanJets->GetEntries(); i++){
-    if(TMath::Abs(CleanJets->At(i)->Eta()) < 5.0 &&
-       CleanJets->At(i)->Pt() > 30.0){
-      Jet* jet_b = new Jet(CleanJets->At(i)->Px(),
-     			   CleanJets->At(i)->Py(),
-   			   CleanJets->At(i)->Pz(),
-   			   CleanJets->At(i)->E() );
+  for(UInt_t i=0; i<CleanJetsNoPtCut->GetEntries(); i++){
+    if(TMath::Abs(CleanJetsNoPtCut->At(i)->Eta()) < 5.0 &&
+       CleanJetsNoPtCut->At(i)->Pt() > 30.0){
+      Jet* jet_b = new Jet(CleanJetsNoPtCut->At(i)->Px(),
+     			   CleanJetsNoPtCut->At(i)->Py(),
+   			   CleanJetsNoPtCut->At(i)->Pz(),
+   			   CleanJetsNoPtCut->At(i)->E() );
       sortedJets.push_back(jet_b);
     }
   }
