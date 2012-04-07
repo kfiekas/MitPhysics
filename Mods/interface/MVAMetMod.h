@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetIDMod.h,v 1.16 2012/04/05 12:25:09 pharris Exp $
+// $Id: MVAMetMod.h,v 1.1 2012/04/07 10:25:15 pharris Exp $
 //
 // MVAMetMod
 //
@@ -25,9 +25,13 @@ namespace mithep
     public:
       MVAMetMod(const char *name="MVAMetMod", 
 		const char *title="MVAMet example");
+      void   SetJetsName(TString s) { fJetsName = s;}   
 
     protected:
       void                Process();
+      void                SlaveBegin();
+      void                SlaveTerminate();
+
       TString             fMVAMetName;
       TString             fJetsName  ;
       TString             fPFCandName;
@@ -37,7 +41,6 @@ namespace mithep
       const PFCandidateCol *fCands;
       const VertexCol      *fVertices;
       const PFMetCol       *fPFMet;
-      const MuonCol        *fMuons;
 
       MVAMet         *fMVAMet;
       ClassDef(MVAMetMod, 1) // Jet identification module
