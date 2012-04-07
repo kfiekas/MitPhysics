@@ -107,7 +107,7 @@ namespace mithep {
 			FactorizedJetCorrector *iJetCorrector,
 			const PileupEnergyDensityCol *iPUEnergyDensity,
 			int iNPV,
-			Bool_t printDebug);
+			Bool_t printDebug=false);
 
     Met GetMet(	        Bool_t iPhi,
 			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
@@ -117,7 +117,7 @@ namespace mithep {
 			const Vertex *iVertex,const VertexCol *iVertices,
 			const PFJetCol         *iJets ,
 			int iNPV,
-			Bool_t printDebug);
+			Bool_t printDebug=false);
     
     RecoilTools *fRecoilTools;
     

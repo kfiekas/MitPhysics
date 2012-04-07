@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.30 2011/12/11 00:03:04 bendavid Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.31 2011/12/13 21:13:23 bendavid Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -13,6 +13,7 @@
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitPhysics/Mods/interface/JetCleaningMod.h"
 #include "MitPhysics/Mods/interface/JetIDMod.h"
+#include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
@@ -51,6 +52,7 @@
 #pragma link C++ class mithep::HKFactorProducer+;
 #pragma link C++ class mithep::JetCleaningMod+;
 #pragma link C++ class mithep::JetIDMod+;
+#pragma link C++ class mithep::MVAMetMod+;
 #pragma link C++ class mithep::JetCorrectionMod+;
 #pragma link C++ class mithep::MergeLeptonsMod+;
 #pragma link C++ class mithep::MuonIDMod+;
