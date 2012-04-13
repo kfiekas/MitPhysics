@@ -94,6 +94,9 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   for(int i0 = 0; i0 < 4; i0++) fMVACut[1][i0] = lPt1020[i0];
   for(int i0 = 0; i0 < 4; i0++) fMVACut[2][i0] = lPt2030[i0];
   for(int i0 = 0; i0 < 4; i0++) fMVACut[3][i0] = lPt3050[i0];
+  //std::cout << " Working Points : << " << std::endl;
+  //for(int i0 = 0; i0 < 4; i0++) for(int i1 = 0; i1 < 4; i1++) 
+  //  std::cout << " ==> " << i0 << " -- " << i1 << " -- " << fMVACut[i0][i1] << std::endl;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -151,9 +154,9 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *i
   
   if(!JetTools::passPFLooseId(iJet))                 return false;
   if(iJet->Pt() < fJetPtMin)                         return false; 
-  if(iJet->Pt() > 50)                                return true; //==> we can raise this 
-  if(fabs(iJet->Eta()) > 4.99)                       return false;//Castor
-
+  if(fabs(iJet->Eta()) > 4.99)                       return true; //==> Castor
+  //if(iJet->Pt() > 50)                                return true; //==> we can raise this 
+  
   double lMVA = MVAValue   (iJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity);
   double lPt  = correctedPt(iJet,                  iJetCorrector,iPileupEnergyDensity);
 
@@ -179,10 +182,9 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *i
 //--------------------------------------------------------------------------------------------------
 Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices) { 
   if(!JetTools::passPFLooseId(iJet))                 return false;
-  if(iJet->Pt() < fJetPtMin)                         return false; 
-  if(iJet->Pt() > 50)                                return true; //==> we can raise this 
-  if(fabs(iJet->Eta()) > 4.99)                       return false;//Castor
-
+  if(iJet->Pt()        < fJetPtMin) return false; 
+  //if(iJet->Pt()        > 50)        return true; //==> we can raise this 
+  if(fabs(iJet->Eta()) > 4.99)     return true; //==> Castor
   double lMVA = MVAValue(iJet,iVertex,iVertices);
   
   int lPtId = 0; 
@@ -237,7 +239,6 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex,const Vertex
   double lMVA = 0;
   if(fJPt1 < 10) lMVA = fReader->EvaluateMVA( fLowPtMethodName  );
   if(fJPt1 > 10) lMVA = fReader->EvaluateMVA( fHighPtMethodName );
-   
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
 	      << fNVtx      << " "
@@ -294,7 +295,7 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, const Verte
   double lMVA = 0;
   if(fJPt1 < 10) lMVA = fReader->EvaluateMVA( fLowPtMethodName  );
   if(fJPt1 > 10) lMVA = fReader->EvaluateMVA( fHighPtMethodName );
-
+  
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
 	      << fNVtx      << " "

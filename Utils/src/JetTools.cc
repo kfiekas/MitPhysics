@@ -340,9 +340,9 @@ Double_t JetTools::Beta(const TrackCol *tracks, Jet *jet, const Vertex *vertex, 
 Double_t JetTools::Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_z){  
   double Pt_jets= 0. ;
   double Pt_jetsTot = 0. ;
-
+  
   for(UInt_t i=0;i<jet->NPFCands();i++){
-    if(jet->PFCand(i)->BestTrk()){
+    if(jet->PFCand(i)->BestTrk()){ 
       Pt_jetsTot += jet->PFCand(i)->BestTrk()->Pt();
       double pDz = TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertex));
       if(pDz < delta_z){
@@ -351,7 +351,7 @@ Double_t JetTools::Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_
     }
   }
 
-  Double_t beta = 1.0;
+  Double_t beta = 0.;
   if (Pt_jetsTot > 0)
     beta = Pt_jets/Pt_jetsTot;
 
@@ -492,9 +492,9 @@ Double_t JetTools::impactParameter(const PFJet *iJet,const Vertex *iVertex,bool 
   for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) { 
     const PFCandidate *pCand = iJet->PFCand(i0);
     if(pCand->BestTrk() == 0) continue;
-    if(pCand->Pt() < 1.) continue;
-    if(iDZ)  lDZCorr = pCand->BestTrk()->DzCorrected(*iVertex);
-    if(!iDZ) lDZCorr = pCand->BestTrk()->D0Corrected(*iVertex);
+    //if(pCand->Pt() < 1.) continue; => previous iterations
+    if(iDZ)  lDZCorr = fabs(pCand->BestTrk()->DzCorrected(*iVertex));
+    if(!iDZ) lDZCorr = fabs(pCand->BestTrk()->D0Corrected(*iVertex));
     break;
   }
   return lDZCorr;

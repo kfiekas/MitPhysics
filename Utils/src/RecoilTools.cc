@@ -80,6 +80,9 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,
   if(iSign > 0) iVec -= lVec;
   if(iSign < 0) iVec += lVec;
   iSumEt += lPt;
+  //=== Above was a bug in the training
+  //if(iSign > 0) iSumEt += lPt;
+  //if(iSign < 0) iSumEt -= lPt;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -89,9 +92,12 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,i
   double lPt = iJet->Pt();
   lPt *= (iJet->NeutralEmEnergy()/iJet->E() + iJet->NeutralHadronEnergy()/iJet->E());
   lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
-  if(iSign > 0) iVec -= lVec;
-  if(iSign < 0) iVec += lVec;
+  if(iSign > 0) iVec   -= lVec;
+  if(iSign < 0) iVec   += lVec;
   iSumEt += lPt;
+  //=== Above was a bug in the training
+  //if(iSign > 0) iSumEt += lPt;
+  //if(iSign < 0) iSumEt -= lPt;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -111,14 +117,16 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
     lVec     -= pPF->Mom();
     lSumEt   += pPF->Pt();
   }
+  int lNPass = 0;
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
-    if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue; //Quick cleaning==> if not done already
+    if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
+    lNPass++;
   }
   Met lMet(lVec.Px(),lVec.Py());
-  lMet.SetSumEt(lSumEt);
+  lMet.SetSumEt( lSumEt);
   return lMet;
 }
 //--------------------------------------------------------------------------------------------------
