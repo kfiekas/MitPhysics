@@ -37,9 +37,9 @@ namespace mithep {
 
     Met pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,const PFMet *iMet);
    
-    Met trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Double_t iDZCut=0.1);
+    Met trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Double_t iDZCut=0.2);
     Met trackRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
-			     const PFCandidateCol *iCands,const Vertex *iVertex,double iDZCut=0.1);
+			     const PFCandidateCol *iCands,const Vertex *iVertex,double iDZCut=0.2);
 
     bool filter (const PFJet *iJet,Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2);
     
