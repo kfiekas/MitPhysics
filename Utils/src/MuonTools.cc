@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.23 2011/12/31 23:18:39 sixie Exp $
+// $Id: MuonTools.cc,v 1.24 2012/01/23 20:05:41 sixie Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -521,7 +521,8 @@ Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices, con
   return kTRUE;
 }
 
-Double_t MuonTools::MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta) {
+Double_t MuonTools::MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta, 
+                                      EMuonEffectiveAreaTarget EffectiveAreaTarget) {
 
   Double_t EffectiveArea = 0;
   if (fabs(Eta) < 1.0) {
@@ -610,6 +611,296 @@ Double_t MuonTools::MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta)
     if (type == kMuEMIso05)      EffectiveArea = 0.139;
     if (type == kMuHadIso05)     EffectiveArea = 0.228;
   }
+
+
+  //NoCorrections
+  if (EffectiveAreaTarget == kMuEANoCorr) {
+    return 0.0;
+  }
+  //2011 Data Effective Areas
+  if (EffectiveAreaTarget == kMuEAData2011) {
+    if (type == kMuGammaIsoDR0p0To0p1) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.004;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.002;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.002;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.005;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.000;
+    }
+    if (type == kMuGammaIsoDR0p1To0p2) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.011;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.008;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.005;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.008;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.008;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.011;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.000;
+    }
+    if (type == kMuGammaIsoDR0p2To0p3) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.023;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.016;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.010;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.014;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.017;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.021;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.011;
+    }
+    if (type == kMuGammaIsoDR0p3To0p4) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.036;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.026;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.017;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.023;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.028;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.032;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.030;
+    }
+    if (type == kMuGammaIsoDR0p4To0p5) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.051;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.037;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.028;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.033;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.042;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.052;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.054;
+    }
+    if (type == kMuNeutralHadronIsoDR0p0To0p1) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.002;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.001;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.001;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.001;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.005;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.007;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.000;
+    }
+    if (type == kMuNeutralHadronIsoDR0p1To0p2) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.005;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.008;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.010;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.014;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.008;
+    }
+    if (type == kMuNeutralHadronIsoDR0p2To0p3) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.010;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.015;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.017;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.017;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.019;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.024;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.022;
+    }
+    if (type == kMuNeutralHadronIsoDR0p3To0p4) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.015;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.021;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.024;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.032;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.038;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.038;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.077;
+    }
+    if (type == kMuNeutralHadronIsoDR0p4To0p5) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.020;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.026;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.033;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.045;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.051;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.114;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.195;
+    }
+  } 
+
+  //Summer11 MC Effective Areas
+  else if (EffectiveAreaTarget == kMuEASummer11MC) {
+    //Fall11 MC Effective Areas
+    if (type == kMuGammaIsoDR0p0To0p1) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.006;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.017;
+    }
+    if (type == kMuGammaIsoDR0p1To0p2) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.012;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.007;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.006;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.008;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.019;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.015;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.007;
+    }
+    if (type == kMuGammaIsoDR0p2To0p3) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.023;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.018;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.013;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.016;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.024;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.036;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.030;
+    }
+    if (type == kMuGammaIsoDR0p3To0p4) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.038;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.027;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.019;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.033;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.041;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.062;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.058;
+    }
+    if (type == kMuGammaIsoDR0p4To0p5) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.055;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.038;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.032;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.052;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.066;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.093;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.074;
+    }
+    if (type == kMuNeutralHadronIsoDR0p0To0p1) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.002;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.005;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.000;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.003;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.011;
+    }
+    if (type == kMuNeutralHadronIsoDR0p1To0p2) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.005;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.006;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.008;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.013;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.012;
+    }
+    if (type == kMuNeutralHadronIsoDR0p2To0p3) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.013;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.015;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.016;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.020;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.024;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.017;
+    }
+    if (type == kMuNeutralHadronIsoDR0p3To0p4) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.012;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.019;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.021;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.025;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.030;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.044;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.082;
+    }
+    if (type == kMuNeutralHadronIsoDR0p4To0p5) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.016;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.026;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.030;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.038;
+     if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.048;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.118;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.168;
+    }
+  }
+
+  //Fall11 MC Effective Areas
+  else if (EffectiveAreaTarget == kMuEAFall11MC) {
+    //Fall11 MC Effective Areas
+    if (type == kMuGammaIsoDR0p0To0p1) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.004;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.002;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.003;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.003;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.011;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.003;
+    }
+    if (type == kMuGammaIsoDR0p1To0p2) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.012;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.008;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.006;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.012;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.019;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.024;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.021;
+    }
+    if (type == kMuGammaIsoDR0p2To0p3) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.026;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.020;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.012;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.022;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.027;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.034;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.055;
+    }
+    if (type == kMuGammaIsoDR0p3To0p4) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.042;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.033;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.022;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.036;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.059;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.068;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.083;
+    }
+    if (type == kMuGammaIsoDR0p4To0p5) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.060;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.043;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.036;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.055;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.092;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.115;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.128;
+    }
+    if (type == kMuNeutralHadronIsoDR0p0To0p1) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.002;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.004;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.004;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.004;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.010;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.014;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.011;
+    }
+    if (type == kMuNeutralHadronIsoDR0p1To0p2) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.005;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.007;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.015;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.017;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.014;
+    }
+    if (type == kMuNeutralHadronIsoDR0p2To0p3) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.009;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.015;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.016;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.018;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.022;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.026;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.021;
+    }
+    if (type == kMuNeutralHadronIsoDR0p3To0p4) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.013;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.021;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.026;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.032;
+      if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.037;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.042;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.086;
+    }
+    if (type == kMuNeutralHadronIsoDR0p4To0p5) {
+      if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 ) EffectiveArea = 0.017;
+      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.026;
+      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.035;
+      if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 ) EffectiveArea = 0.046;
+     if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 ) EffectiveArea = 0.063;
+      if (fabs(Eta) >= 2.3 && fabs(Eta) < 2.4 ) EffectiveArea = 0.135;
+      if (fabs(Eta) >= 2.4) EffectiveArea = 0.200;
+    }
+  }
+
   return EffectiveArea;
 }
 

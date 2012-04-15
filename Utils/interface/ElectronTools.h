@@ -78,9 +78,26 @@ namespace mithep {
         kEleNeutralHadronIso007, 
         kEleHoverE, 
         kEleHcalDepth1OverEcal, 
-        kEleHcalDepth2OverEcal    
+        kEleHcalDepth2OverEcal,
+        kEleGammaIsoDR0p0To0p1,
+        kEleGammaIsoDR0p1To0p2,
+        kEleGammaIsoDR0p2To0p3,
+        kEleGammaIsoDR0p3To0p4,
+        kEleGammaIsoDR0p4To0p5,
+        kEleNeutralHadronIsoDR0p0To0p1,
+        kEleNeutralHadronIsoDR0p1To0p2,
+        kEleNeutralHadronIsoDR0p2To0p3,
+        kEleNeutralHadronIsoDR0p3To0p4,
+        kEleNeutralHadronIsoDR0p4To0p5
       };
       
+      enum EElectronEffectiveAreaTarget {
+        kEleEANoCorr,
+        kEleEAData2011,
+        kEleEASummer11MC,
+        kEleEAFall11MC
+      };
+
       static Bool_t       PassChargeFilter(const Electron *el);
       static Bool_t       PassConversionFilter(const Electron *el, const DecayParticleCol *conversions, 
                                                const BaseVertex *vtx, UInt_t nWrongHitsMax=0, Double_t probMin=1e-6,
@@ -99,7 +116,8 @@ namespace mithep {
                                       Double_t beta = 1.0);
       static bool         compute_cut(double x, double et, double cut_min, double cut_max, bool gtn=false);
       static Double_t     Likelihood(ElectronLikelihood *LH, const Electron *ele);
-      static Double_t     ElectronEffectiveArea(EElectronEffectiveAreaType type, Double_t Eta);
+      static Double_t     ElectronEffectiveArea(EElectronEffectiveAreaType type, Double_t Eta, 
+                                                EElectronEffectiveAreaTarget EffectiveAreaTarget = kEleEAData2011);
 
     ClassDef(ElectronTools, 0) // Muon tools
   };

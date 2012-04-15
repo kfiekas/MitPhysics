@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.20 2011/12/31 23:18:39 sixie Exp $
+// $Id: MuonTools.h,v 1.21 2012/01/23 20:05:20 sixie Exp $
 //
 // MuonTools
 //
@@ -61,7 +61,24 @@ namespace mithep {
         kMuHadIso03, 
         kMuTrkIso05, 
         kMuEMIso05, 
-        kMuHadIso05 
+        kMuHadIso05,
+        kMuGammaIsoDR0p0To0p1,
+        kMuGammaIsoDR0p1To0p2,
+        kMuGammaIsoDR0p2To0p3,
+        kMuGammaIsoDR0p3To0p4,
+        kMuGammaIsoDR0p4To0p5,
+        kMuNeutralHadronIsoDR0p0To0p1,
+        kMuNeutralHadronIsoDR0p1To0p2,
+        kMuNeutralHadronIsoDR0p2To0p3,
+        kMuNeutralHadronIsoDR0p3To0p4,
+        kMuNeutralHadronIsoDR0p4To0p5
+      };
+
+      enum EMuonEffectiveAreaTarget {
+        kMuEANoCorr,
+        kMuEAData2011,
+        kMuEASummer11MC,
+        kMuEAFall11MC
       };
 
       Bool_t          Init(const char *mutemp, const char *pitemp);
@@ -74,7 +91,8 @@ namespace mithep {
       static Bool_t   PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t fDZCut, Int_t nVertex = 0);
       static Bool_t   PassSoftMuonCut(const Muon *mu, const VertexCol *vertices, const Double_t fDZCut = 0.2,
                                     const Bool_t applyIso = kTRUE);
-      static Double_t MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta);
+      static Double_t MuonEffectiveArea(EMuonEffectiveAreaType type, Double_t Eta, 
+                                        EMuonEffectiveAreaTarget EffectiveAreaTarget = kMuEAData2011);
 
     protected:
       void        DeleteHistos();

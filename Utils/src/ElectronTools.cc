@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.33 2011/12/31 23:17:40 sixie Exp $
+// $Id: ElectronTools.cc,v 1.34 2012/01/04 10:29:35 sixie Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1059,11 +1059,11 @@ Double_t ElectronTools::Likelihood(ElectronLikelihood *LH, const Electron *ele)
 
 }
 
-Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, Double_t Eta) {
+Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, Double_t SCEta, EElectronEffectiveAreaTarget EffectiveAreaTarget) {
 
   Double_t EffectiveArea = 0;
-
-  if (fabs(Eta) < 1.0) {
+  
+  if (fabs(SCEta) < 1.0) {
     if (type == ElectronTools::kEleChargedIso03) EffectiveArea = 0.000;
     if (type == ElectronTools::kEleNeutralHadronIso03) EffectiveArea = 0.017;
     if (type == ElectronTools::kEleGammaIso03) EffectiveArea = 0.045;
@@ -1076,7 +1076,7 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
     if (type == ElectronTools::kEleHoverE) EffectiveArea = 0.00016;
     if (type == ElectronTools::kEleHcalDepth1OverEcal) EffectiveArea = 0.00016;
     if (type == ElectronTools::kEleHcalDepth2OverEcal) EffectiveArea = 0.00000;    
-  } else if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) {
+  } else if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) {
     if (type == ElectronTools::kEleChargedIso03) EffectiveArea = 0.000;
     if (type == ElectronTools::kEleNeutralHadronIso03) EffectiveArea = 0.025;
     if (type == ElectronTools::kEleGammaIso03) EffectiveArea = 0.052;
@@ -1089,7 +1089,7 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
     if (type == ElectronTools::kEleHoverE) EffectiveArea = 0.00022;
     if (type == ElectronTools::kEleHcalDepth1OverEcal) EffectiveArea = 0.00022;
     if (type == ElectronTools::kEleHcalDepth2OverEcal) EffectiveArea = 0.00000;    
-  } else if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) {
+  } else if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) {
     if (type == ElectronTools::kEleChargedIso03) EffectiveArea = 0.000;
     if (type == ElectronTools::kEleNeutralHadronIso03) EffectiveArea = 0.030;
     if (type == ElectronTools::kEleGammaIso03) EffectiveArea = 0.170;
@@ -1102,7 +1102,7 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
     if (type == ElectronTools::kEleHoverE) EffectiveArea = 0.00030;
     if (type == ElectronTools::kEleHcalDepth1OverEcal) EffectiveArea = 0.00026;
     if (type == ElectronTools::kEleHcalDepth2OverEcal) EffectiveArea = 0.00002;        
-  } else if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.25 ) {
+  } else if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.25 ) {
     if (type == ElectronTools::kEleChargedIso03) EffectiveArea = 0.000;
     if (type == ElectronTools::kEleNeutralHadronIso03) EffectiveArea = 0.022;
     if (type == ElectronTools::kEleGammaIso03) EffectiveArea = 0.623;
@@ -1115,7 +1115,7 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
     if (type == ElectronTools::kEleHoverE) EffectiveArea = 0.00054;
     if (type == ElectronTools::kEleHcalDepth1OverEcal) EffectiveArea = 0.00045;
     if (type == ElectronTools::kEleHcalDepth2OverEcal) EffectiveArea = 0.00003;
-  } else if (fabs(Eta) >= 2.25 && fabs(Eta) < 2.5 ) {
+  } else if (fabs(SCEta) >= 2.25 && fabs(SCEta) < 2.5 ) {
     if (type == ElectronTools::kEleChargedIso03) EffectiveArea = 0.000;
     if (type == ElectronTools::kEleNeutralHadronIso03) EffectiveArea = 0.018;
     if (type == ElectronTools::kEleGammaIso03) EffectiveArea = 1.198;
@@ -1130,6 +1130,294 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
     if (type == ElectronTools::kEleHcalDepth2OverEcal) EffectiveArea = 0.00004;
   }
     
+  //NoCorrections
+  if (EffectiveAreaTarget == kEleEANoCorr) {
+    return 0.0;
+  }
+  //2011 Data Effective Areas
+  else if (EffectiveAreaTarget == kEleEAData2011) {
+    if (type == kEleGammaIsoDR0p0To0p1) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.017;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.033;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.005;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.007;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.004;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.000;
+    }
+    if (type == kEleGammaIsoDR0p1To0p2) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.010;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.010;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.019;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.042;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.041;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.035;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.041;
+    }
+    if (type == kEleGammaIsoDR0p2To0p3) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.020;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.017;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.014;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.029;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.039;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.042;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.048;
+    }
+    if (type == kEleGammaIsoDR0p3To0p4) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.036;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.029;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.020;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.029;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.042;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.047;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.054;
+    }
+    if (type == kEleGammaIsoDR0p4To0p5) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.051;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.038;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.028;
+     if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.036;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.047;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.057;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.059;
+    }
+    if (type == kEleNeutralHadronIsoDR0p0To0p1) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.001;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.002;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.002;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.000;
+    }
+    if (type == kEleNeutralHadronIsoDR0p1To0p2) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.005;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.008;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.008;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.006;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.003;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.001;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.003;
+    }
+    if (type == kEleNeutralHadronIsoDR0p2To0p3) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.010;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.014;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.017;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.016;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.016;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.016;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.019;
+    }
+    if (type == kEleNeutralHadronIsoDR0p3To0p4) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.015;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.021;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.025;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.030;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.036;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.038;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.084;
+    }
+    if (type == kEleNeutralHadronIsoDR0p4To0p5) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.020;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.027;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.035;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.045;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.051;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.107;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.228;
+    }
+  } 
+
+  //Summer11 MC Effective Areas
+  else if (EffectiveAreaTarget == kEleEASummer11MC) {
+    if (type == kEleGammaIsoDR0p0To0p1) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.015;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.030;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.004;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.010;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.014;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.024;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.023;
+    }
+    if (type == kEleGammaIsoDR0p1To0p2) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.012;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.010;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.009;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.037;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.046;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.055;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.046;
+    }
+    if (type == kEleGammaIsoDR0p2To0p3) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.021;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.018;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.013;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.026;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.038;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.045;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.059;
+    }
+    if (type == kEleGammaIsoDR0p3To0p4) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.036;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.030;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.017;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.036;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.058;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.073;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.083;
+    }
+    if (type == kEleGammaIsoDR0p4To0p5) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.053;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.037;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.032;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.048;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.062;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.085;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.118;
+    }
+    if (type == kEleNeutralHadronIsoDR0p0To0p1) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.000;
+    }
+    if (type == kEleNeutralHadronIsoDR0p1To0p2) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.004;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.007;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.009;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.004;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.003;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.004;
+    }
+    if (type == kEleNeutralHadronIsoDR0p2To0p3) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.008;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.013;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.016;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.013;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.014;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.016;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.021;
+    }
+    if (type == kEleNeutralHadronIsoDR0p3To0p4) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.012;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.017;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.020;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.024;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.040;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.036;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.086;
+    }
+    if (type == kEleNeutralHadronIsoDR0p4To0p5) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.016;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.026;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.030;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.038;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.051;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.105;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.169;
+    }
+  } 
+  
+  //Fall11 MC Effective Areas
+  else if (EffectiveAreaTarget == kEleEAFall11MC) {
+    if (type == kEleGammaIsoDR0p0To0p1) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.014;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.020;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.004;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.012;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.016;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.021;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.012;
+    }
+    if (type == kEleGammaIsoDR0p1To0p2) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.012;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.011;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.015;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.042;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.055;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.068;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.067;
+    }
+    if (type == kEleGammaIsoDR0p2To0p3) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.024;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.020;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.017;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.038;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.051;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.066;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.080;
+    }
+    if (type == kEleGammaIsoDR0p3To0p4) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.040;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.032;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.021;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.047;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.066;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.083;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.123;
+    }
+    if (type == kEleGammaIsoDR0p4To0p5) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.059;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.041;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.037;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.057;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.095;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.123;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.133;
+    }
+    if (type == kEleNeutralHadronIsoDR0p0To0p1) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.002;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.003;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.000;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.000;
+    }
+    if (type == kEleNeutralHadronIsoDR0p1To0p2) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.006;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.008;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.010;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.006;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.005;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.002;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.007;
+    }
+    if (type == kEleNeutralHadronIsoDR0p2To0p3) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.009;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.014;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.018;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.016;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.017;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.020;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.021;
+    }
+    if (type == kEleNeutralHadronIsoDR0p3To0p4) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.013;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.019;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.027;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.035;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.037;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.043;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.110;
+    }
+    if (type == kEleNeutralHadronIsoDR0p4To0p5) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.017;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.027;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.036;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.045;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.057;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.123;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.220;
+    }
+  }
+
+
+
   return EffectiveArea;  
 }
 
