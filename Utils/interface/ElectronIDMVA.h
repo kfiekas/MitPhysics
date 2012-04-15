@@ -16,9 +16,11 @@
 #include "MitAna/DataTree/interface/TrackFwd.h"
 #include "MitAna/DataTree/interface/Electron.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitPhysics/Utils/interface/ElectronTools.h"
 
 class TRandom3;
 namespace TMVA {
@@ -32,13 +34,24 @@ namespace mithep {
       ~ElectronIDMVA(); 
 
       enum MVAType {
-        kBaseline = 0,      // SigmaIEtaIEta, DEtaIn, DPhiIn, FBrem, SigmaIPhiIPhi, NBrem, OneOverEMinusOneOverP
-        kNoIPInfo,          // kBaseline + EOverP, ESeedClusterOverPout, ESeedClusterOverPIn
-        kWithIPInfo,        // kBaseline + d0 , IP3d, IP3dSig
-        kIDIsoCombined      // ID variables , PFIso03 , PFIso04
+        kUninitialized = 0,
+        kBaseline,           // SigmaIEtaIEta, DEtaIn, DPhiIn, FBrem, SigmaIPhiIPhi, NBrem, OneOverEMinusOneOverP
+        kNoIPInfo,              // kBaseline + EOverP, ESeedClusterOverPout, ESeedClusterOverPIn
+        kWithIPInfo,            // kBaseline + d0 , IP3d, IP3dSig
+        kIDIsoCombined,         // ID variables , PFIso03 , PFIso04
+        kIDEGamma2012TrigV0,    // EGamma certified (Spring 2012) ID-only MVA
+        kIDEGamma2012NonTrigV0, // EGamma certified (Spring 2012) ID-only MVA
+        kIsoRingsV0             // Isolation MVA with IsoRings as input
       };
 
 
+      void     Initialize( std::string methodName,
+                           std::string weightsfile,
+                           ElectronIDMVA::MVAType type);
+      void     Initialize( std::string methodName,
+                           ElectronIDMVA::MVAType type,
+                           Bool_t useBinnedVersion,
+                           std::vector<std::string> weightsfiles );
       void     Initialize(TString methodName,
                           TString Subdet0Pt10To20Weights , 
                           TString Subdet1Pt10To20Weights , 
@@ -49,11 +62,21 @@ namespace mithep {
                           ElectronIDMVA::MVAType type );
       
       Bool_t   IsInitialized() const { return fIsInitialized; }
-      Double_t MVAValue(const Electron *ele, const Vertex *vertex);
+      void     bindVariables();
+      UInt_t   GetMVABin(double eta,double pt ) const;
+
+      Double_t MVAValue(const Electron *ele, const Vertex *vertex, Bool_t printDebug = kFALSE);
       Double_t MVAValue(const Electron *ele, const Vertex *vertex, 
                         const PFCandidateCol *PFCands, 
                         const PileupEnergyDensityCol *PileupEnergyDensity,
                         Double_t intRadius,
+                        Bool_t printDebug = kFALSE);
+      Double_t MVAValue(const Electron *ele, const Vertex *vertex, 
+                        const PFCandidateCol *PFCands, 
+                        const PileupEnergyDensityCol *PileupEnergyDensity,
+                        ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
+                        const ElectronCol *goodElectrons,
+                        const MuonCol *goodMuons,                       
                         Bool_t printDebug = kFALSE);
       Double_t MVAValue(Double_t ElePt , Double_t EleEta,
                         Double_t EleSigmaIEtaIEta,
@@ -106,11 +129,15 @@ namespace mithep {
 
 
     protected:      
-      TMVA::Reader            *fTMVAReader[6];
-      TString                  fMethodname;
-      
+      std::vector<TMVA::Reader*> fTMVAReader;
+      TString                   fMethodname;
       Bool_t                    fIsInitialized;
-      
+      MVAType                   fMVAType;
+      Bool_t                    fUseBinnedVersion;
+      UInt_t                    fNMVABins;
+
+      Float_t                   fMVAVar_ElePt; 
+      Float_t                   fMVAVar_EleEta; 
       Float_t                   fMVAVar_EleSigmaIEtaIEta; 
       Float_t                   fMVAVar_EleDEtaIn; 
       Float_t                   fMVAVar_EleDPhiIn; 
@@ -140,7 +167,29 @@ namespace mithep {
       Float_t                   fMVAVar_EleChargedIso04OverPt;
       Float_t                   fMVAVar_EleNeutralHadronIso04OverPt;
       Float_t                   fMVAVar_EleGammaIso04OverPt;
-        
+
+      Float_t                   fMVAVar_EleEEleClusterOverPout;
+      Float_t                   fMVAVar_EleKFTrkChiSqr;
+      Float_t                   fMVAVar_EleKFTrkNHits;
+      Float_t                   fMVAVar_EleE1x5OverE5x5;
+
+      Float_t                   fMVAVar_ChargedIso_DR0p0To0p1;
+      Float_t                   fMVAVar_ChargedIso_DR0p1To0p2;
+      Float_t                   fMVAVar_ChargedIso_DR0p2To0p3;
+      Float_t                   fMVAVar_ChargedIso_DR0p3To0p4;
+      Float_t                   fMVAVar_ChargedIso_DR0p4To0p5;
+      Float_t                   fMVAVar_GammaIso_DR0p0To0p1;
+      Float_t                   fMVAVar_GammaIso_DR0p1To0p2;
+      Float_t                   fMVAVar_GammaIso_DR0p2To0p3;
+      Float_t                   fMVAVar_GammaIso_DR0p3To0p4;
+      Float_t                   fMVAVar_GammaIso_DR0p4To0p5;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p0To0p1;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p1To0p2;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p2To0p3;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p3To0p4;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p4To0p5;
+
+
     ClassDef(ElectronIDMVA, 0) // Muon tools
       };
 }
