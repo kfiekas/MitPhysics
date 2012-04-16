@@ -171,6 +171,7 @@ namespace mithep {
       Float_t                   fMVAVar_EleEEleClusterOverPout;
       Float_t                   fMVAVar_EleKFTrkChiSqr;
       Float_t                   fMVAVar_EleKFTrkNHits;
+      Float_t                   fMVAVar_EleKFTrkNLayers;
       Float_t                   fMVAVar_EleE1x5OverE5x5;
 
       Float_t                   fMVAVar_ChargedIso_DR0p0To0p1;
