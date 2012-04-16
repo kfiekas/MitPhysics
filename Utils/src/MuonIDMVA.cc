@@ -15,149 +15,263 @@ using namespace mithep;
 //--------------------------------------------------------------------------------------------------
 MuonIDMVA::MuonIDMVA() :
 fMethodname("BDTG method"),
-fIsInitialized(kFALSE)
+fIsInitialized(kFALSE),
+fMVAType(MuonIDMVA::kUninitialized),
+fUseBinnedVersion(kTRUE),
+fNMVABins(0)
 {
-  // Constructor.
-  for(UInt_t i=0; i<6; ++i) {
-    fTMVAReader[i] = 0;
-  }
 }
 
 
 //--------------------------------------------------------------------------------------------------
 MuonIDMVA::~MuonIDMVA()
 {
-  for(UInt_t i=0; i<6; ++i) {
+  for(UInt_t i=0; i<fTMVAReader.size(); ++i) {
     if (fTMVAReader[i]) delete fTMVAReader[i];
   }
 }
 
 //--------------------------------------------------------------------------------------------------
-void MuonIDMVA::Initialize( TString methodName,
-                            TString Subdet0Pt10To14p5Weights , 
-                            TString Subdet1Pt10To14p5Weights , 
-                            TString Subdet0Pt14p5To20Weights,
-                            TString Subdet1Pt14p5To20Weights, 
-                            TString Subdet0Pt20ToInfWeights, 
-                            TString Subdet1Pt20ToInfWeights,
-                            MuonIDMVA::MVAType type) {
+void MuonIDMVA::Initialize( std::string methodName,
+                                std::string weightsfile,
+                                MuonIDMVA::MVAType type)
+{
   
-  fIsInitialized = kTRUE;
-  
-  fMethodname = methodName;
-    
-  for(UInt_t i=0; i<6; ++i) {
-    if (fTMVAReader[i]) delete fTMVAReader[i];
+  std::vector<std::string> tempWeightFileVector;
+  tempWeightFileVector.push_back(weightsfile);
+  Initialize(methodName,type,kFALSE,tempWeightFileVector);
+}
 
-    fTMVAReader[i] = new TMVA::Reader( "!Color:!Silent:Error" );  
-    fTMVAReader[i]->SetVerbose(kTRUE);
+//--------------------------------------------------------------------------------------------------
+void MuonIDMVA::Initialize( TString methodName,
+                                TString Subdet0Pt10To20Weights , 
+                                TString Subdet1Pt10To20Weights , 
+                                TString Subdet2Pt10To20Weights,
+                                TString Subdet0Pt20ToInfWeights,
+                                TString Subdet1Pt20ToInfWeights, 
+                                TString Subdet2Pt20ToInfWeights,
+                                MuonIDMVA::MVAType type) {
+
+  std::vector<std::string> tempWeightFileVector;
+  tempWeightFileVector.push_back(std::string(Subdet0Pt10To20Weights.Data()));
+  tempWeightFileVector.push_back(std::string(Subdet1Pt10To20Weights.Data()));
+  tempWeightFileVector.push_back(std::string(Subdet2Pt10To20Weights.Data()));
+  tempWeightFileVector.push_back(std::string(Subdet0Pt20ToInfWeights.Data()));
+  tempWeightFileVector.push_back(std::string(Subdet1Pt20ToInfWeights.Data()));
+  tempWeightFileVector.push_back(std::string(Subdet2Pt20ToInfWeights.Data()));
+  Initialize(std::string(methodName.Data()),type,kTRUE,tempWeightFileVector);
+
+}
+
+
+//--------------------------------------------------------------------------------------------------
+void MuonIDMVA::Initialize(  std::string methodName,
+                                 MuonIDMVA::MVAType type,
+                                 Bool_t useBinnedVersion,
+                                 std::vector<std::string> weightsfiles) {
+  
+  //clean up first
+  for (uint i=0;i<fTMVAReader.size(); ++i) {
+    if (fTMVAReader[i]) delete fTMVAReader[i];
+  }
+  fTMVAReader.clear();
+
+
+  //initialize
+  fIsInitialized = kTRUE;
+  fMethodname = methodName;
+  fMVAType = type;
+  fUseBinnedVersion = useBinnedVersion;
+
+  //Define expected number of bins
+  UInt_t ExpectedNBins = 0;
+  if (!fUseBinnedVersion) {
+    ExpectedNBins = 1;
+  } else if (type == kV2 
+             ||type == kV3
+             ||type == kV8
+             ||type == kIDIsoCombinedDetIso) {
+    ExpectedNBins = 6;
+  } else if (type == kIDIsoCombinedIsoRingsV0) {
+    ExpectedNBins = 5;
+  } else if (type == kIsoRingsV0) {
+    ExpectedNBins = 4;
+  }
+  fNMVABins = ExpectedNBins;
+
+  //Check number of weight files given
+  if (fNMVABins != weightsfiles.size() ) {
+    std::cout << "Error: Expected Number of bins = " << fNMVABins << " does not equal to weightsfiles.size() = " 
+              << weightsfiles.size() << std::endl;
+    assert(fNMVABins == weightsfiles.size());
+  }
+
+  for(UInt_t i=0; i<fNMVABins; ++i) {
+    TMVA::Reader *tmpTMVAReader = new TMVA::Reader( "!Color:!Silent:Error" );  
+    tmpTMVAReader->SetVerbose(kTRUE);
 
     if (type == kV2) {
-      fTMVAReader[i]->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
-      fTMVAReader[i]->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
-      fTMVAReader[i]->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
-      fTMVAReader[i]->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
-      fTMVAReader[i]->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
-      fTMVAReader[i]->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
-      fTMVAReader[i]->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
-      fTMVAReader[i]->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
-      fTMVAReader[i]->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
-      fTMVAReader[i]->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
-      fTMVAReader[i]->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  ); 
+      tmpTMVAReader->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
+      tmpTMVAReader->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
+      tmpTMVAReader->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
+      tmpTMVAReader->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
+      tmpTMVAReader->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
+      tmpTMVAReader->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
+      tmpTMVAReader->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
+      tmpTMVAReader->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
+      tmpTMVAReader->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
+      tmpTMVAReader->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
+      tmpTMVAReader->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  ); 
     }
 
     if (type == kV3) {
-      fTMVAReader[i]->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
-      fTMVAReader[i]->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
-      fTMVAReader[i]->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
-      fTMVAReader[i]->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
-      fTMVAReader[i]->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
-      fTMVAReader[i]->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
-      fTMVAReader[i]->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
-      fTMVAReader[i]->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
-      fTMVAReader[i]->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
-      fTMVAReader[i]->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
-      fTMVAReader[i]->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  );      
-      fTMVAReader[i]->AddVariable( "CaloCompatibility",    &fMVAVar_MuCaloCompatibility     );      
-      fTMVAReader[i]->AddVariable( "HadEnergyOverPt",      &fMVAVar_MuHadEnergyOverPt       );      
+      tmpTMVAReader->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
+      tmpTMVAReader->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
+      tmpTMVAReader->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
+      tmpTMVAReader->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
+      tmpTMVAReader->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
+      tmpTMVAReader->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
+      tmpTMVAReader->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
+      tmpTMVAReader->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
+      tmpTMVAReader->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
+      tmpTMVAReader->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
+      tmpTMVAReader->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  );      
+      tmpTMVAReader->AddVariable( "CaloCompatibility",    &fMVAVar_MuCaloCompatibility     );      
+      tmpTMVAReader->AddVariable( "HadEnergyOverPt",      &fMVAVar_MuHadEnergyOverPt       );      
       if (i==0 || i==2 || i==4) {
-        fTMVAReader[i]->AddVariable( "HoEnergyOverPt",     &fMVAVar_MuHoEnergyOverPt        );      
+        tmpTMVAReader->AddVariable( "HoEnergyOverPt",     &fMVAVar_MuHoEnergyOverPt        );      
       }
-      fTMVAReader[i]->AddVariable( "EmEnergyOverPt",       &fMVAVar_MuEmEnergyOverPt        );      
-      fTMVAReader[i]->AddVariable( "HadS9EnergyOverPt",    &fMVAVar_MuHadS9EnergyOverPt     );      
+      tmpTMVAReader->AddVariable( "EmEnergyOverPt",       &fMVAVar_MuEmEnergyOverPt        );      
+      tmpTMVAReader->AddVariable( "HadS9EnergyOverPt",    &fMVAVar_MuHadS9EnergyOverPt     );      
       if (i==0 || i==2 || i==4) {
-        fTMVAReader[i]->AddVariable( "HoS9EnergyOverPt",   &fMVAVar_MuHoS9EnergyOverPt      );      
+        tmpTMVAReader->AddVariable( "HoS9EnergyOverPt",   &fMVAVar_MuHoS9EnergyOverPt      );      
       }
-      fTMVAReader[i]->AddVariable( "EmS9EnergyOverPt",     &fMVAVar_MuEmS9EnergyOverPt      );      
+      tmpTMVAReader->AddVariable( "EmS9EnergyOverPt",     &fMVAVar_MuEmS9EnergyOverPt      );      
     }
 
     if (type == kV8) {
-      fTMVAReader[i]->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
-      fTMVAReader[i]->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
-      fTMVAReader[i]->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
-      fTMVAReader[i]->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
-      fTMVAReader[i]->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
-      fTMVAReader[i]->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
-      fTMVAReader[i]->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
-      fTMVAReader[i]->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
-      fTMVAReader[i]->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
-      fTMVAReader[i]->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
-      fTMVAReader[i]->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  );      
-      fTMVAReader[i]->AddVariable( "CaloCompatibility",    &fMVAVar_MuCaloCompatibility     );      
-      fTMVAReader[i]->AddVariable( "HadEnergyOverPt",      &fMVAVar_MuHadEnergyOverPt       );      
-      fTMVAReader[i]->AddVariable( "EmEnergyOverPt",       &fMVAVar_MuEmEnergyOverPt        );      
-      fTMVAReader[i]->AddVariable( "HadS9EnergyOverPt",    &fMVAVar_MuHadS9EnergyOverPt     );      
-      fTMVAReader[i]->AddVariable( "EmS9EnergyOverPt",     &fMVAVar_MuEmS9EnergyOverPt      );      
-      fTMVAReader[i]->AddVariable( "ChargedIso03OverPt",   &fMVAVar_MuChargedIso03OverPt    );
-      fTMVAReader[i]->AddVariable( "NeutralIso03OverPt",   &fMVAVar_MuNeutralIso03OverPt    );      
-      fTMVAReader[i]->AddVariable( "ChargedIso04OverPt",   &fMVAVar_MuChargedIso04OverPt    );
-      fTMVAReader[i]->AddVariable( "NeutralIso04OverPt",   &fMVAVar_MuNeutralIso04OverPt    );      
+      tmpTMVAReader->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
+      tmpTMVAReader->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
+      tmpTMVAReader->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
+      tmpTMVAReader->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
+      tmpTMVAReader->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
+      tmpTMVAReader->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
+      tmpTMVAReader->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
+      tmpTMVAReader->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
+      tmpTMVAReader->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
+      tmpTMVAReader->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
+      tmpTMVAReader->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  );      
+      tmpTMVAReader->AddVariable( "CaloCompatibility",    &fMVAVar_MuCaloCompatibility     );      
+      tmpTMVAReader->AddVariable( "HadEnergyOverPt",      &fMVAVar_MuHadEnergyOverPt       );      
+      tmpTMVAReader->AddVariable( "EmEnergyOverPt",       &fMVAVar_MuEmEnergyOverPt        );      
+      tmpTMVAReader->AddVariable( "HadS9EnergyOverPt",    &fMVAVar_MuHadS9EnergyOverPt     );      
+      tmpTMVAReader->AddVariable( "EmS9EnergyOverPt",     &fMVAVar_MuEmS9EnergyOverPt      );      
+      tmpTMVAReader->AddVariable( "ChargedIso03OverPt",   &fMVAVar_MuChargedIso03OverPt    );
+      tmpTMVAReader->AddVariable( "NeutralIso03OverPt",   &fMVAVar_MuNeutralIso03OverPt    );      
+      tmpTMVAReader->AddVariable( "ChargedIso04OverPt",   &fMVAVar_MuChargedIso04OverPt    );
+      tmpTMVAReader->AddVariable( "NeutralIso04OverPt",   &fMVAVar_MuNeutralIso04OverPt    );      
     }
     
     if (type == kIDIsoCombinedDetIso) {
-      fTMVAReader[i]->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
-      fTMVAReader[i]->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
-      fTMVAReader[i]->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
-      fTMVAReader[i]->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
-      fTMVAReader[i]->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
-      fTMVAReader[i]->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
-      fTMVAReader[i]->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
-      fTMVAReader[i]->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
-      fTMVAReader[i]->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
-      fTMVAReader[i]->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
-      fTMVAReader[i]->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  );      
-      fTMVAReader[i]->AddVariable( "CaloCompatibility",    &fMVAVar_MuCaloCompatibility     );      
-      fTMVAReader[i]->AddVariable( "HadEnergyOverPt",      &fMVAVar_MuHadEnergyOverPt       );      
-      fTMVAReader[i]->AddVariable( "EmEnergyOverPt",       &fMVAVar_MuEmEnergyOverPt        );      
-      fTMVAReader[i]->AddVariable( "HadS9EnergyOverPt",    &fMVAVar_MuHadS9EnergyOverPt     );      
-      fTMVAReader[i]->AddVariable( "EmS9EnergyOverPt",     &fMVAVar_MuEmS9EnergyOverPt      );      
-      fTMVAReader[i]->AddVariable( "TrkIso03OverPt",       &fMVAVar_MuTrkIso03OverPt        );
-      fTMVAReader[i]->AddVariable( "EMIso03OverPt",        &fMVAVar_MuEMIso03OverPt         );
-      fTMVAReader[i]->AddVariable( "HadIso03OverPt",       &fMVAVar_MuHadIso03OverPt        );
-      fTMVAReader[i]->AddVariable( "TrkIso05OverPt",       &fMVAVar_MuTrkIso05OverPt        );
-      fTMVAReader[i]->AddVariable( "EMIso05OverPt",        &fMVAVar_MuEMIso05OverPt         );
-      fTMVAReader[i]->AddVariable( "HadIso05OverPt",       &fMVAVar_MuHadIso05OverPt        );
-    
+      tmpTMVAReader->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
+      tmpTMVAReader->AddVariable( "GlobalNchi2",          &fMVAVar_MuGlobalNchi2           );
+      tmpTMVAReader->AddVariable( "NValidHits",           &fMVAVar_MuNValidHits            );
+      tmpTMVAReader->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
+      tmpTMVAReader->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
+      tmpTMVAReader->AddVariable( "NMatches",             &fMVAVar_MuNMatches              );
+      tmpTMVAReader->AddVariable( "D0",                   &fMVAVar_MuD0                    );      
+      tmpTMVAReader->AddVariable( "IP3d",                 &fMVAVar_MuIP3d                  );      
+      tmpTMVAReader->AddVariable( "IP3dSig",              &fMVAVar_MuIP3dSig               );      
+      tmpTMVAReader->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
+      tmpTMVAReader->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  );      
+      tmpTMVAReader->AddVariable( "CaloCompatibility",    &fMVAVar_MuCaloCompatibility     );      
+      tmpTMVAReader->AddVariable( "HadEnergyOverPt",      &fMVAVar_MuHadEnergyOverPt       );      
+      tmpTMVAReader->AddVariable( "EmEnergyOverPt",       &fMVAVar_MuEmEnergyOverPt        );      
+      tmpTMVAReader->AddVariable( "HadS9EnergyOverPt",    &fMVAVar_MuHadS9EnergyOverPt     );      
+      tmpTMVAReader->AddVariable( "EmS9EnergyOverPt",     &fMVAVar_MuEmS9EnergyOverPt      );      
+      tmpTMVAReader->AddVariable( "TrkIso03OverPt",       &fMVAVar_MuTrkIso03OverPt        );
+      tmpTMVAReader->AddVariable( "EMIso03OverPt",        &fMVAVar_MuEMIso03OverPt         );
+      tmpTMVAReader->AddVariable( "HadIso03OverPt",       &fMVAVar_MuHadIso03OverPt        );
+      tmpTMVAReader->AddVariable( "TrkIso05OverPt",       &fMVAVar_MuTrkIso05OverPt        );
+      tmpTMVAReader->AddVariable( "EMIso05OverPt",        &fMVAVar_MuEMIso05OverPt         );
+      tmpTMVAReader->AddVariable( "HadIso05OverPt",       &fMVAVar_MuHadIso05OverPt        );
+    }
+
+    if (type == kIsoRingsV0) {
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p0To0p1",         &fMVAVar_ChargedIso_DR0p0To0p1        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p1To0p2",         &fMVAVar_ChargedIso_DR0p1To0p2        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p2To0p3",         &fMVAVar_ChargedIso_DR0p2To0p3        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p3To0p4",         &fMVAVar_ChargedIso_DR0p3To0p4        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p4To0p5",         &fMVAVar_ChargedIso_DR0p4To0p5        );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p0To0p1",           &fMVAVar_GammaIso_DR0p0To0p1          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p1To0p2",           &fMVAVar_GammaIso_DR0p1To0p2          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p2To0p3",           &fMVAVar_GammaIso_DR0p2To0p3          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p3To0p4",           &fMVAVar_GammaIso_DR0p3To0p4          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p4To0p5",           &fMVAVar_GammaIso_DR0p4To0p5          );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p0To0p1",   &fMVAVar_NeutralHadronIso_DR0p0To0p1  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p1To0p2",   &fMVAVar_NeutralHadronIso_DR0p1To0p2  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p2To0p3",   &fMVAVar_NeutralHadronIso_DR0p2To0p3  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p3To0p4",   &fMVAVar_NeutralHadronIso_DR0p3To0p4  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p4To0p5",   &fMVAVar_NeutralHadronIso_DR0p4To0p5  );
+      tmpTMVAReader->AddSpectator("eta",            &fMVAVar_MuEta);
+      tmpTMVAReader->AddSpectator("pt",             &fMVAVar_MuPt);
     }
     
-    if (i==0) fTMVAReader[i]->BookMVA(fMethodname , Subdet0Pt10To14p5Weights );
-    if (i==1) fTMVAReader[i]->BookMVA(fMethodname , Subdet1Pt10To14p5Weights );
-    if (i==2) fTMVAReader[i]->BookMVA(fMethodname , Subdet0Pt14p5To20Weights );
-    if (i==3) fTMVAReader[i]->BookMVA(fMethodname , Subdet1Pt14p5To20Weights );
-    if (i==4) fTMVAReader[i]->BookMVA(fMethodname , Subdet0Pt20ToInfWeights  );
-    if (i==5) fTMVAReader[i]->BookMVA(fMethodname , Subdet1Pt20ToInfWeights  );
+    tmpTMVAReader->BookMVA(fMethodname , weightsfiles[i] );
+    std::cout << "MVABin " << i << " : MethodName = " << fMethodname 
+              << " , type == " << type << " , "
+              << "Load weights file : " << weightsfiles[i] 
+              << std::endl;
+    fTMVAReader.push_back(tmpTMVAReader);
 
   }
+  std::cout << "Muon ID MVA Completed\n";
+}
 
-  std::cout << "Muon ID MVA Initialization\n";
-  std::cout << "MethodName : " << fMethodname << " , type == " << type << std::endl;
-  std::cout << "Load weights file : " << Subdet0Pt10To14p5Weights << std::endl;
-  std::cout << "Load weights file : " << Subdet1Pt10To14p5Weights << std::endl;
-  std::cout << "Load weights file : " << Subdet0Pt14p5To20Weights << std::endl;
-  std::cout << "Load weights file : " << Subdet1Pt14p5To20Weights << std::endl;
-  std::cout << "Load weights file : " << Subdet0Pt20ToInfWeights << std::endl;
-  std::cout << "Load weights file : " << Subdet1Pt20ToInfWeights << std::endl;
+//--------------------------------------------------------------------------------------------------
+UInt_t MuonIDMVA::GetMVABin( double eta, double pt, 
+                             Bool_t isGlobal, Bool_t isTrackerMuon) const {
+  
+    //Default is to return the first bin
+    uint bin = 0;
 
+    //return the first bin if not using binned version
+    if (!fUseBinnedVersion) return 0;
+
+    if (fMVAType == MuonIDMVA::kV2 
+        || fMVAType == MuonIDMVA::kV3
+        || fMVAType == MuonIDMVA::kV8
+        || fMVAType == MuonIDMVA::kIDIsoCombinedDetIso) {
+      if (pt < 14.5 && fabs(eta) < 1.5) bin = 0;
+      if (pt < 14.5 && fabs(eta) >= 1.5) bin = 1;
+      if (pt >= 14.5 && pt < 20 && fabs(eta) < 1.5) bin = 2;
+      if (pt >= 14.5 && pt < 20 && fabs(eta) >= 1.5) bin = 3;
+      if (pt >= 20 && fabs(eta) < 1.5) bin = 4;
+      if (pt >= 20 && fabs(eta) >= 1.5) bin = 5;
+    }
+
+    if (fMVAType == MuonIDMVA::kIDIsoCombinedIsoRingsV0) {
+      if (isGlobal && isTrackerMuon) {
+        if (pt < 10 && fabs(eta) < 1.479) bin = 0;
+        if (pt < 10 && fabs(eta) >= 1.479) bin = 1;
+        if (pt >= 10 && fabs(eta) < 1.479) bin = 2;
+        if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
+      } else if (!isGlobal && isTrackerMuon) {
+        bin = 4;
+      } else {
+        std::cout << "Warning: Muon is not a tracker muon. Such muons are not supported. \n";
+        bin = 0;
+      }
+    }
+
+    if (fMVAType == MuonIDMVA::kIsoRingsV0) {
+      if (pt < 10 && fabs(eta) < 1.479) bin = 0;
+      if (pt < 10 && fabs(eta) >= 1.479) bin = 1;
+      if (pt >= 10 && fabs(eta) < 1.479) bin = 2;
+      if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
+    }
+
+    return bin;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -192,13 +306,6 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
     return -9999;
   }
 
-  Int_t subdet = 0;
-  if (fabs(MuEta) < 1.479) subdet = 0;
-  else subdet = 1;
-  Int_t ptBin = 0;
-  if (MuPt > 14.5) ptBin = 1;
-  if (MuPt > 20.0) ptBin = 2;
-
   
   //set all input variables
   fMVAVar_MuTkNchi2              = MuTkNchi2; 
@@ -226,22 +333,13 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
-
-  Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 0 && ptBin == 1) MVABin = 2;
-  if (subdet == 1 && ptBin == 1) MVABin = 3;
-  if (subdet == 0 && ptBin == 2) MVABin = 4;
-  if (subdet == 1 && ptBin == 2) MVABin = 5;
-  assert(MVABin >= 0 && MVABin <= 5);
-  reader = fTMVAReader[MVABin];
+  reader = fTMVAReader[GetMVABin(MuEta, MuPt, kTRUE, kTRUE )];
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug) {
     std::cout << "Debug Muon MVA: "
-	 << MuPt << " " << MuEta << " --> MVABin " << MVABin << " : "     
+	 << MuPt << " " << MuEta << " --> MVABin " << GetMVABin(MuEta, MuPt, kTRUE, kTRUE ) << " : "     
 	 << fMVAVar_MuTkNchi2              << " " 
 	 << fMVAVar_MuGlobalNchi2          << " " 
 	 << fMVAVar_MuNValidHits           << " " 
@@ -306,14 +404,6 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
     std::cout << "Error: MuonIDMVA not properly initialized.\n"; 
     return -9999;
   }
-
-  Int_t subdet = 0;
-  if (fabs(MuEta) < 1.479) subdet = 0;
-  else subdet = 1;
-  Int_t ptBin = 0;
-  if (MuPt > 14.5) ptBin = 1;
-  if (MuPt > 20.0) ptBin = 2;
-
   
   //set all input variables
   fMVAVar_MuTkNchi2              = MuTkNchi2; 
@@ -343,22 +433,13 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
-
-  Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 0 && ptBin == 1) MVABin = 2;
-  if (subdet == 1 && ptBin == 1) MVABin = 3;
-  if (subdet == 0 && ptBin == 2) MVABin = 4;
-  if (subdet == 1 && ptBin == 2) MVABin = 5;
-  assert(MVABin >= 0 && MVABin <= 5);
-  reader = fTMVAReader[MVABin];
+  reader = fTMVAReader[GetMVABin(MuEta, MuPt, kTRUE, kTRUE )];
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug) {
     std::cout << "Debug Muon MVA: "
-	 << MuPt << " " << MuEta << " --> MVABin " << MVABin << " : "     
+	 << MuPt << " " << MuEta << " --> MVABin " << GetMVABin(MuEta, MuPt, kTRUE, kTRUE ) << " : "     
 	 << fMVAVar_MuTkNchi2              << " " 
 	 << fMVAVar_MuGlobalNchi2          << " " 
 	 << fMVAVar_MuNValidHits           << " " 
@@ -425,13 +506,7 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
   Double_t Rho = 0;
   if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
 
-  Int_t subdet = 0;
-  if (fabs(muTrk->Eta()) < 1.479) subdet = 0;
-  else subdet = 1;
-  Int_t ptBin = 0;
-  if (muTrk->Pt() > 14.5) ptBin = 1;
-  if (muTrk->Pt() > 20.0) ptBin = 2;
-
+ 
   //set all input variables
   fMVAVar_MuTkNchi2              = muTrk->RChi2();
   fMVAVar_MuGlobalNchi2          = muNchi2;
@@ -464,23 +539,14 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
-
-  Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 0 && ptBin == 1) MVABin = 2;
-  if (subdet == 1 && ptBin == 1) MVABin = 3;
-  if (subdet == 0 && ptBin == 2) MVABin = 4;
-  if (subdet == 1 && ptBin == 2) MVABin = 5;
-  assert(MVABin >= 0 && MVABin <= 5);
-  reader = fTMVAReader[MVABin];
+  reader = fTMVAReader[GetMVABin(muTrk->Eta(), muTrk->Pt(), mu->IsGlobalMuon(), mu->IsTrackerMuon())];
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug) {
     std::cout << "Debug Muon MVA: "
               << mu->Pt() << " " << mu->Eta() << " " << mu->Phi() << " : "
-              << muTrk->Pt() << " " << muTrk->Eta() << " --> MVABin " << MVABin << " : "     
+              << muTrk->Pt() << " " << muTrk->Eta() << " --> MVABin " << GetMVABin(muTrk->Eta(), muTrk->Pt(), mu->IsGlobalMuon(), mu->IsTrackerMuon()) << " : "     
               << fMVAVar_MuTkNchi2              << " " 
               << fMVAVar_MuGlobalNchi2          << " " 
               << fMVAVar_MuNValidHits           << " " 
@@ -511,6 +577,259 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
               << fMVAVar_MuHadIso05OverPt   << " " 
               << " === : === "
               << mva 
+              << std::endl;
+  }
+
+  return mva;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fMuonTools,
+                             const PFCandidateCol *PFCands, 
+                             const PileupEnergyDensityCol *PileupEnergyDensity, 
+                             MuonTools::EMuonEffectiveAreaTarget EffectiveAreaTarget,
+                             const ElectronCol *goodElectrons,
+                             const MuonCol *goodMuons,
+                             Bool_t printDebug) {
+  
+  if (!fIsInitialized) { 
+    std::cout << "Error: MuonIDMVA not properly initialized.\n"; 
+    return -9999;
+  }
+
+  const Track *muTrk=0;
+  if(mu->HasTrackerTrk())         { muTrk = mu->TrackerTrk();    }
+  else if(mu->HasStandaloneTrk()) { muTrk = mu->StandaloneTrk(); } 
+  
+  Double_t muNchi2 = 0.0; 
+  if(mu->HasGlobalTrk())          { muNchi2 = mu->GlobalTrk()->RChi2();     }
+  else if(mu->HasStandaloneTrk()) { muNchi2 = mu->StandaloneTrk()->RChi2(); }
+  else if(mu->HasTrackerTrk())    { muNchi2 = mu->TrackerTrk()->RChi2();    }
+
+  Double_t ChargedIso03 = 0;
+  Double_t NeutralIso03_05Threshold = 0;
+  Double_t ChargedIso04 = 0;
+  Double_t NeutralIso04_05Threshold = 0;
+  ChargedIso03 = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.1, 99999, 0.3, 0.0, 0.0);
+  NeutralIso03_05Threshold = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.0, 0.5, 0.3, 0.0, 0.0);
+  ChargedIso04 = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.1, 99999, 0.4, 0.0, 0.0);
+  NeutralIso04_05Threshold = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.0, 0.5, 0.4, 0.0, 0.0);
+  
+  Double_t Rho = 0;
+  if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
+
+
+  //set all input variables
+  fMVAVar_MuPt                   = muTrk->Pt();
+  fMVAVar_MuEta                  = muTrk->Eta();
+  fMVAVar_MuTkNchi2              = muTrk->RChi2();
+  fMVAVar_MuGlobalNchi2          = muNchi2;
+  fMVAVar_MuNValidHits           = mu->NValidHits();
+  fMVAVar_MuNTrackerHits         = muTrk->NHits();
+  fMVAVar_MuNPixelHits           = muTrk->NPixelHits();
+  fMVAVar_MuNMatches             = mu->NMatches();
+  fMVAVar_MuD0                   = muTrk->D0Corrected(*vertex);
+  fMVAVar_MuIP3d                 = mu->Ip3dPV();
+  fMVAVar_MuIP3dSig              = mu->Ip3dPVSignificance();
+  fMVAVar_MuTrkKink              = mu->TrkKink();
+  fMVAVar_MuSegmentCompatibility = fMuonTools->GetSegmentCompatability(mu);
+  fMVAVar_MuCaloCompatibility    = fMuonTools->GetCaloCompatability(mu, kTRUE, kTRUE);
+  fMVAVar_MuHadEnergy            = mu->HadEnergy() ;
+  fMVAVar_MuEmEnergy             = mu->EmEnergy();
+  fMVAVar_MuHadS9Energy          = mu->HadS9Energy();
+  fMVAVar_MuEmS9Energy           = mu->EmS9Energy();
+  fMVAVar_MuChargedIso03OverPt   = (ChargedIso03 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuChargedIso03,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuNeutralIso03OverPt   = (NeutralIso03_05Threshold - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuChargedIso04OverPt   = (ChargedIso04 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuChargedIso04,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuNeutralIso04OverPt   = (NeutralIso04_05Threshold - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso04,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuTrkIso03OverPt       = (mu->IsoR03SumPt() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuTrkIso03,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuEMIso03OverPt        = (mu->IsoR03EmEt() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuEMIso03,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuHadIso03OverPt       = (mu->IsoR03HadEt() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadIso03,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuTrkIso05OverPt       = (mu->IsoR05SumPt() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuTrkIso05,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuEMIso05OverPt        = (mu->IsoR05EmEt() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuEMIso05,muTrk->Eta()))/muTrk->Pt();
+  fMVAVar_MuHadIso05OverPt       = (mu->IsoR05HadEt() - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadIso05,muTrk->Eta()))/muTrk->Pt();
+
+
+  Double_t tmpChargedIso_DR0p0To0p1  = 0;
+  Double_t tmpChargedIso_DR0p1To0p2  = 0;
+  Double_t tmpChargedIso_DR0p2To0p3  = 0;
+  Double_t tmpChargedIso_DR0p3To0p4  = 0;
+  Double_t tmpChargedIso_DR0p4To0p5  = 0;
+  Double_t tmpGammaIso_DR0p0To0p1  = 0;
+  Double_t tmpGammaIso_DR0p1To0p2  = 0;
+  Double_t tmpGammaIso_DR0p2To0p3  = 0;
+  Double_t tmpGammaIso_DR0p3To0p4  = 0;
+  Double_t tmpGammaIso_DR0p4To0p5  = 0;
+  Double_t tmpNeutralHadronIso_DR0p0To0p1  = 0;
+  Double_t tmpNeutralHadronIso_DR0p1To0p2  = 0;
+  Double_t tmpNeutralHadronIso_DR0p2To0p3  = 0;
+  Double_t tmpNeutralHadronIso_DR0p3To0p4  = 0;
+  Double_t tmpNeutralHadronIso_DR0p4To0p5  = 0;
+
+  for (UInt_t p=0; p<PFCands->GetEntries();p++) {   
+    const PFCandidate *pf = PFCands->At(p);
+      
+    //exclude the muon itself
+    if(pf->TrackerTrk() && mu->TrackerTrk() &&
+       pf->TrackerTrk() == mu->TrackerTrk()) continue;      
+
+    //************************************************************
+    // New Isolation Calculations
+    //************************************************************
+    Double_t dr = MathUtils::DeltaR(mu->Mom(), pf->Mom());
+
+    if (dr < 0.5) {
+      Bool_t IsLeptonFootprint = kFALSE;
+      //************************************************************
+      // Lepton Footprint Removal
+      //************************************************************            
+      for (UInt_t q=0; q < goodElectrons->GetEntries() ; ++q) {
+	//if pf candidate matches an electron passing ID cuts, then veto it
+	if(pf->GsfTrk() && goodElectrons->At(q)->GsfTrk() &&
+	   pf->GsfTrk() == goodElectrons->At(q)->GsfTrk()) IsLeptonFootprint = kTRUE;
+	if(pf->TrackerTrk() && goodElectrons->At(q)->TrackerTrk() &&
+	   pf->TrackerTrk() == goodElectrons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
+	//if pf candidate lies in veto regions of electron passing ID cuts, then veto it
+	if(pf->BestTrk() && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 
+           && MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.015) IsLeptonFootprint = kTRUE;
+	if(pf->PFType() == PFCandidate::eGamma && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 &&
+	   MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.08) IsLeptonFootprint = kTRUE;
+      }
+      for (UInt_t q=0; q < goodMuons->GetEntries() ; ++q) {
+	//if pf candidate matches an muon passing ID cuts, then veto it
+	if(pf->TrackerTrk() && goodMuons->At(q)->TrackerTrk() &&
+	   pf->TrackerTrk() == goodMuons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
+	//if pf candidate lies in veto regions of muon passing ID cuts, then veto it
+	if(pf->BestTrk() && MathUtils::DeltaR(goodMuons->At(q)->Mom(), pf->Mom()) < 0.01) IsLeptonFootprint = kTRUE;
+      }
+
+      if (!IsLeptonFootprint) {
+	Bool_t passVeto = kTRUE;
+	//Charged
+	 if(pf->BestTrk()) {	  	   
+           if (!(fabs(pf->BestTrk()->DzCorrected(*vertex) - mu->BestTrk()->DzCorrected(*vertex)) < 0.2)) passVeto = kFALSE;
+	   //************************************************************
+	   // Veto any PFmuon, or PFEle
+	   if (pf->PFType() == PFCandidate::eElectron || pf->PFType() == PFCandidate::eMuon) passVeto = kFALSE;
+	   //************************************************************
+	   //************************************************************
+	   // Footprint Veto
+	   if (dr < 0.01) passVeto = kFALSE;
+	   //************************************************************
+	   if (passVeto) {
+	     if (dr < 0.1) tmpChargedIso_DR0p0To0p1 += pf->Pt();
+	     if (dr >= 0.1 && dr < 0.2) tmpChargedIso_DR0p1To0p2 += pf->Pt();
+	     if (dr >= 0.2 && dr < 0.3) tmpChargedIso_DR0p2To0p3 += pf->Pt();
+	     if (dr >= 0.3 && dr < 0.4) tmpChargedIso_DR0p3To0p4 += pf->Pt();
+	     if (dr >= 0.4 && dr < 0.5) tmpChargedIso_DR0p4To0p5 += pf->Pt();
+	   } //pass veto	   
+	 }
+	 //Gamma
+	 else if (pf->PFType() == PFCandidate::eGamma) {
+           if (dr < 0.1) tmpGammaIso_DR0p0To0p1 += pf->Pt();
+           if (dr >= 0.1 && dr < 0.2) tmpGammaIso_DR0p1To0p2 += pf->Pt();
+           if (dr >= 0.2 && dr < 0.3) tmpGammaIso_DR0p2To0p3 += pf->Pt();
+           if (dr >= 0.3 && dr < 0.4) tmpGammaIso_DR0p3To0p4 += pf->Pt();
+           if (dr >= 0.4 && dr < 0.5) tmpGammaIso_DR0p4To0p5 += pf->Pt();
+	 }
+	 //NeutralHadron
+	 else {
+           if (dr < 0.1) tmpNeutralHadronIso_DR0p0To0p1 += pf->Pt();
+           if (dr >= 0.1 && dr < 0.2) tmpNeutralHadronIso_DR0p1To0p2 += pf->Pt();
+           if (dr >= 0.2 && dr < 0.3) tmpNeutralHadronIso_DR0p2To0p3 += pf->Pt();
+           if (dr >= 0.3 && dr < 0.4) tmpNeutralHadronIso_DR0p3To0p4 += pf->Pt();
+           if (dr >= 0.4 && dr < 0.5) tmpNeutralHadronIso_DR0p4To0p5 += pf->Pt();
+	 }
+      } //not lepton footprint
+    } //in 1.0 dr cone
+  } //loop over PF candidates
+  
+  Double_t fMVAVar_ChargedIso_DR0p0To0p1  = 0;
+  Double_t fMVAVar_ChargedIso_DR0p1To0p2  = 0;
+  Double_t fMVAVar_ChargedIso_DR0p2To0p3  = 0;
+  Double_t fMVAVar_ChargedIso_DR0p3To0p4  = 0;
+  Double_t fMVAVar_ChargedIso_DR0p4To0p5  = 0;
+  Double_t fMVAVar_GammaIso_DR0p0To0p1  = 0;
+  Double_t fMVAVar_GammaIso_DR0p1To0p2  = 0;
+  Double_t fMVAVar_GammaIso_DR0p2To0p3  = 0;
+  Double_t fMVAVar_GammaIso_DR0p3To0p4  = 0;
+  Double_t fMVAVar_GammaIso_DR0p4To0p5  = 0;
+  Double_t fMVAVar_NeutralHadronIso_DR0p0To0p1  = 0;
+  Double_t fMVAVar_NeutralHadronIso_DR0p1To0p2  = 0;
+  Double_t fMVAVar_NeutralHadronIso_DR0p2To0p3  = 0;
+  Double_t fMVAVar_NeutralHadronIso_DR0p3To0p4  = 0;
+  Double_t fMVAVar_NeutralHadronIso_DR0p4To0p5  = 0;
+
+  fMVAVar_ChargedIso_DR0p0To0p1   = TMath::Min((tmpChargedIso_DR0p0To0p1)/mu->Pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p1To0p2   = TMath::Min((tmpChargedIso_DR0p1To0p2)/mu->Pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p2To0p3 = TMath::Min((tmpChargedIso_DR0p2To0p3)/mu->Pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p3To0p4 = TMath::Min((tmpChargedIso_DR0p3To0p4)/mu->Pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p4To0p5 = TMath::Min((tmpChargedIso_DR0p4To0p5)/mu->Pt(), 2.5); 
+  fMVAVar_GammaIso_DR0p0To0p1 = TMath::Max(TMath::Min((tmpGammaIso_DR0p0To0p1 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p0To0p1, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpGammaIso_DR0p1To0p2 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p1To0p2, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpGammaIso_DR0p2To0p3 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p2To0p3, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpGammaIso_DR0p3To0p4 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p3To0p4, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpGammaIso_DR0p4To0p5 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p4To0p5, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p0To0p1 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p0To0p1 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p0To0p1, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p1To0p2 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p1To0p2, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p2To0p3 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p2To0p3, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p3To0p4 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p3To0p4, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p4To0p5, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  
+
+
+  Double_t mva = -9999;  
+  TMVA::Reader *reader = 0;
+ 
+  if (printDebug) {
+    std::cout <<" -> BIN: " << fMVAVar_MuEta << " " << fMVAVar_MuPt << " : " 
+              << GetMVABin(muTrk->Eta(), muTrk->Pt(), mu->IsGlobalMuon(), mu->IsTrackerMuon() )
+              << std::endl;
+  }
+
+  reader = fTMVAReader[GetMVABin(muTrk->Eta(), muTrk->Pt(), mu->IsGlobalMuon(), mu->IsTrackerMuon() )];
+                              
+  mva = reader->EvaluateMVA( fMethodname );
+
+  if (printDebug) {
+    std::cout << "Debug Muon MVA: \n";
+    std::cout << " MuTkNchi2 " << fMVAVar_MuTkNchi2              
+              << " MuGlobalNchi2 " << fMVAVar_MuGlobalNchi2          
+              << " MuNValidHits " << fMVAVar_MuNValidHits           
+              << " MuNTrackerHits " << fMVAVar_MuNTrackerHits         
+              << " MuNPixelHits " << fMVAVar_MuNPixelHits           
+              << " MuNMatches " << fMVAVar_MuNMatches             
+              << " MuD0 " << fMVAVar_MuD0                
+              << " MuIP3d " << fMVAVar_MuIP3d               
+              << " MuIP3dSig " << fMVAVar_MuIP3dSig            
+              << " MuTrkKink " << fMVAVar_MuTrkKink              
+              << " MuSegmentCompatibility " << fMVAVar_MuSegmentCompatibility 
+              << " MuCaloCompatibility " << fMVAVar_MuCaloCompatibility    
+              << " MuHadEnergy " << fMVAVar_MuHadEnergy      
+              << " MuEmEnergy " << fMVAVar_MuEmEnergy       
+              << " MuHadS9Energy " << fMVAVar_MuHadS9Energy    
+              << " MuEmS9Energy " << fMVAVar_MuEmS9Energy     
+              << " eta " << fMVAVar_MuEta  
+              << " pt " << fMVAVar_MuPt << std::endl;
+    
+    std::cout << fMVAVar_ChargedIso_DR0p0To0p1 << " "
+              << fMVAVar_ChargedIso_DR0p1To0p2 << " "
+              << fMVAVar_ChargedIso_DR0p2To0p3 << " "
+              << fMVAVar_ChargedIso_DR0p3To0p4 << " "
+              << fMVAVar_ChargedIso_DR0p4To0p5 << " "
+              << fMVAVar_GammaIso_DR0p0To0p1 << " "
+              << fMVAVar_GammaIso_DR0p1To0p2 << " "
+              << fMVAVar_GammaIso_DR0p2To0p3 << " "
+              << fMVAVar_GammaIso_DR0p3To0p4 << " "
+              << fMVAVar_GammaIso_DR0p4To0p5 << " "
+              << fMVAVar_NeutralHadronIso_DR0p0To0p1 << " "
+              << fMVAVar_NeutralHadronIso_DR0p1To0p2 << " "
+              << fMVAVar_NeutralHadronIso_DR0p2To0p3 << " "
+              << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
+              << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "
+              << std::endl;
+    std::cout << "MVA: " << mva 
               << std::endl;
   }
 

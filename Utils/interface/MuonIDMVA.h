@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------------------
 // $Id $
 //
-// ElectronIDMVA
+// MuonIDMVA
 //
 // Helper Class for Muon Identification MVA
 //
@@ -16,6 +16,7 @@
 #include "MitAna/DataTree/interface/TrackFwd.h"
 #include "MitAna/DataTree/interface/Muon.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -33,13 +34,23 @@ namespace mithep {
       ~MuonIDMVA(); 
 
       enum MVAType {
+        kUninitialized,
         kV2,
         kV3,
         kV8,
-        kIDIsoCombinedDetIso
+        kIDIsoCombinedDetIso,
+        kIsoRingsV0,
+        kIDIsoCombinedIsoRingsV0
       };
 
 
+      void     Initialize( std::string methodName,
+                           std::string weightsfile,
+                           MuonIDMVA::MVAType type);
+      void     Initialize( std::string methodName,
+                           MuonIDMVA::MVAType type,
+                           Bool_t useBinnedVersion,
+                           std::vector<std::string> weightsfiles );
       void     Initialize(TString methodName,
                           TString Subdet0Pt10To14p5Weights , 
                           TString Subdet1Pt10To14p5Weights , 
@@ -48,11 +59,20 @@ namespace mithep {
                           TString Subdet0Pt20ToInfWeights, 
                           TString Subdet1Pt20ToInfWeights,
                           MuonIDMVA::MVAType type);
-      
+
       Bool_t   IsInitialized() const { return fIsInitialized; }
+      UInt_t   GetMVABin(double eta,double pt,
+                         Bool_t isGlobal, Bool_t isTrackerMuon ) const;
       Double_t MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fMuonTools,
                         const PFCandidateCol *PFCands, 
                         const PileupEnergyDensityCol *PileupEnergyDensity, 
+                        Bool_t printDebug = kFALSE);
+      Double_t MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fMuonTools,
+                        const PFCandidateCol *PFCands, 
+                        const PileupEnergyDensityCol *PileupEnergyDensity, 
+                        MuonTools::EMuonEffectiveAreaTarget EffectiveAreaTarget,
+                        const ElectronCol *goodElectrons,
+                        const MuonCol *goodMuons,            
                         Bool_t printDebug = kFALSE);
       Double_t MVAValue( Double_t MuPt , Double_t MuEta,
                          Double_t                   MuTkNchi2, 
@@ -109,11 +129,15 @@ namespace mithep {
 
 
     protected:      
-      TMVA::Reader            *fTMVAReader[6];
-      TString                  fMethodname;
-      
+      std::vector<TMVA::Reader*> fTMVAReader;
+      TString                   fMethodname;
       Bool_t                    fIsInitialized;
+      MVAType                   fMVAType;
+      Bool_t                    fUseBinnedVersion;
+      UInt_t                    fNMVABins;
       
+      Float_t                   fMVAVar_MuPt; 
+      Float_t                   fMVAVar_MuEta; 
       Float_t                   fMVAVar_MuTkNchi2; 
       Float_t                   fMVAVar_MuGlobalNchi2; 
       Float_t                   fMVAVar_MuNValidHits; 
@@ -132,6 +156,10 @@ namespace mithep {
       Float_t                   fMVAVar_MuHadS9EnergyOverPt; 
       Float_t                   fMVAVar_MuHoS9EnergyOverPt; 
       Float_t                   fMVAVar_MuEmS9EnergyOverPt; 
+      Float_t                   fMVAVar_MuHadEnergy; 
+      Float_t                   fMVAVar_MuEmEnergy; 
+      Float_t                   fMVAVar_MuHadS9Energy; 
+      Float_t                   fMVAVar_MuEmS9Energy; 
       Float_t                   fMVAVar_MuChargedIso03OverPt;
       Float_t                   fMVAVar_MuNeutralIso03OverPt;
       Float_t                   fMVAVar_MuChargedIso04OverPt;
@@ -143,7 +171,25 @@ namespace mithep {
       Float_t                   fMVAVar_MuEMIso05OverPt;
       Float_t                   fMVAVar_MuHadIso05OverPt;
 
-      
+      Float_t                   fMVAVar_ChargedIso_DR0p0To0p1;
+      Float_t                   fMVAVar_ChargedIso_DR0p1To0p2;
+      Float_t                   fMVAVar_ChargedIso_DR0p2To0p3;
+      Float_t                   fMVAVar_ChargedIso_DR0p3To0p4;
+      Float_t                   fMVAVar_ChargedIso_DR0p4To0p5;
+      Float_t                   fMVAVar_ChargedIso_DR0p5To0p7;
+      Float_t                   fMVAVar_GammaIso_DR0p0To0p1;
+      Float_t                   fMVAVar_GammaIso_DR0p1To0p2;
+      Float_t                   fMVAVar_GammaIso_DR0p2To0p3;
+      Float_t                   fMVAVar_GammaIso_DR0p3To0p4;
+      Float_t                   fMVAVar_GammaIso_DR0p4To0p5;
+      Float_t                   fMVAVar_GammaIso_DR0p5To0p7;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p0To0p1;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p1To0p2;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p2To0p3;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p3To0p4;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p4To0p5;
+      Float_t                   fMVAVar_NeutralHadronIso_DR0p5To0p7;
+
     ClassDef(MuonIDMVA, 0) // Muon MVA
       };
 }
