@@ -627,8 +627,13 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
 
 
   fMVAVar_EleEEleClusterOverPout = 0;
-  fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
-  fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
+  if (ele->TrackerTrk()) {
+    fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
+    fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
+  } else {
+    fMVAVar_EleKFTrkChiSqr = -1;
+    fMVAVar_EleKFTrkNHits = 0;
+  }
   fMVAVar_EleGsfTrackChi2OverNdof = ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof();
   fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
   fMVAVar_EleSCEtaWidth = ele->SCluster()->EtaWidth();
