@@ -187,7 +187,7 @@ void ElectronIDMVA::Initialize(  std::string methodName,
       // Pure tracking variables
       tmpTMVAReader->AddVariable("fbrem",           &fMVAVar_EleFBrem);
       tmpTMVAReader->AddVariable("kfchi2",          &fMVAVar_EleKFTrkChiSqr);
-      tmpTMVAReader->AddVariable("kfhits",          &fMVAVar_EleKFTrkNHits);  //Don't have this in BAMBU
+      tmpTMVAReader->AddVariable("kfhits",          &fMVAVar_EleKFTrkNLayers);  //Don't have this in (BAMBU <= 025)
       tmpTMVAReader->AddVariable("kfhitsall",       &fMVAVar_EleKFTrkNHits);
       tmpTMVAReader->AddVariable("gsfchi2",         &fMVAVar_EleGsfTrackChi2OverNdof);
       tmpTMVAReader->AddVariable("deta",            &fMVAVar_EleDEtaIn);
@@ -202,8 +202,8 @@ void ElectronIDMVA::Initialize(  std::string methodName,
       tmpTMVAReader->AddVariable("HoE",             &fMVAVar_EleHoverE);
       tmpTMVAReader->AddVariable("EoP",             &fMVAVar_EleEOverP); 
       tmpTMVAReader->AddVariable("IoEmIoP",         &fMVAVar_EleOneOverEMinusOneOverP);
-      tmpTMVAReader->AddVariable("eleEoPout",       &fMVAVar_EleEEleClusterOverPout); 
-      tmpTMVAReader->AddVariable("EoPout",          &fMVAVar_EleESeedClusterOverPout); //we have this only in BAMBU
+      tmpTMVAReader->AddVariable("eleEoPout",       &fMVAVar_EleEEleClusterOverPout); //Don't have this in (BAMBU <= 025)
+      tmpTMVAReader->AddVariable("EoPout",          &fMVAVar_EleESeedClusterOverPout); 
       tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_ElePreShowerOverRaw);
     
       tmpTMVAReader->AddSpectator("eta",            &fMVAVar_EleEta);
@@ -247,6 +247,9 @@ UInt_t ElectronIDMVA::GetMVABin( double eta, double pt) const {
   
     //Default is to return the first bin
     uint bin = 0;
+
+    //return the first bin if not using binned version
+    if (!fUseBinnedVersion) return 0;
 
     if (fMVAType == ElectronIDMVA::kBaseline 
         ||fMVAType == ElectronIDMVA::kNoIPInfo
@@ -307,13 +310,6 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta,
     return -9999;
   }
 
-  Int_t subdet = 0;
-  if (fabs(EleEta) < 1.0) subdet = 0;
-  else if (fabs(EleEta) < 1.479) subdet = 1;
-  else subdet = 2;
-  Int_t ptBin = 0;
-  if (ElePt > 20.0) ptBin = 1;
-  
   //set all input variables
   fMVAVar_EleSigmaIEtaIEta = EleSigmaIEtaIEta;
   fMVAVar_EleDEtaIn = EleDEtaIn;
@@ -333,15 +329,7 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta,
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
-  Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 2 && ptBin == 0) MVABin = 2;
-  if (subdet == 0 && ptBin == 1) MVABin = 3;
-  if (subdet == 1 && ptBin == 1) MVABin = 4;
-  if (subdet == 2 && ptBin == 1) MVABin = 5;
-  assert(MVABin >= 0 && MVABin <= 5);
-  reader = fTMVAReader[MVABin];
+  reader = fTMVAReader[GetMVABin( EleEta, ElePt)];
                                                 
   mva = reader->EvaluateMVA( fMethodname );
 
@@ -390,13 +378,6 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta, Double_t Pile
   Double_t Rho = 0;
   if (!(TMath::IsNaN(PileupEnergyDensity) || isinf(PileupEnergyDensity))) Rho = PileupEnergyDensity;
 
-  Int_t subdet = 0;
-  if (fabs(EleEta) < 1.0) subdet = 0;
-  else if (fabs(EleEta) < 1.479) subdet = 1;
-  else subdet = 2;
-  Int_t ptBin = 0;
-  if (ElePt > 20.0) ptBin = 1;
-  
   //set all input variables
   fMVAVar_EleSigmaIEtaIEta = EleSigmaIEtaIEta;
   fMVAVar_EleDEtaIn = EleDEtaIn;
@@ -449,21 +430,12 @@ Double_t ElectronIDMVA::MVAValue(Double_t ElePt , Double_t EleEta, Double_t Pile
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
-  Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 2 && ptBin == 0) MVABin = 2;
-  if (subdet == 0 && ptBin == 1) MVABin = 3;
-  if (subdet == 1 && ptBin == 1) MVABin = 4;
-  if (subdet == 2 && ptBin == 1) MVABin = 5;
-  assert(MVABin >= 0 && MVABin <= 5);
-  reader = fTMVAReader[MVABin];
-                                                
+  reader = fTMVAReader[GetMVABin( EleEta, ElePt)];
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug == kTRUE) {
     std::cout << "Debug Electron MVA: "
-	 << ElePt << " " << EleEta << " " << " --> MVABin " << MVABin << " : "     
+	 << ElePt << " " << EleEta << " " << " --> MVABin " << GetMVABin( EleEta, ElePt) << " : "     
 	 << fMVAVar_EleSigmaIEtaIEta << " " 
 	 << fMVAVar_EleDEtaIn << " " 
 	 << fMVAVar_EleDPhiIn << " " 
@@ -513,13 +485,6 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
     std::cout << "Error: ElectronIDMVA not properly initialized.\n"; 
     return -9999;
   }
-
-  Int_t subdet = 0;
-  if (ele->SCluster()->AbsEta() < 1.0) subdet = 0;
-  else if (ele->SCluster()->AbsEta() < 1.479) subdet = 1;
-  else subdet = 2;
-  Int_t ptBin = 0;
-  if (ele->Pt() > 20.0) ptBin = 1;
 
   Double_t Rho = 0;
   if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
@@ -573,67 +538,26 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
        + Rho * ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIsoVetoEtaStrip04,ele->SCluster()->Eta())) / ele->Pt();
   
   //Additional vars
-  fMVAVar_EleEEleClusterOverPout = 0;
-  fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
-  fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
+  fMVAVar_EleEEleClusterOverPout = ele->EEleClusterOverPout();
+  if (ele->TrackerTrk()) {
+    fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
+    fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
+  } else {
+    fMVAVar_EleKFTrkChiSqr = -1;
+    fMVAVar_EleKFTrkNHits = 0;
+  }
   fMVAVar_EleE1x5OverE5x5 = ele->SCluster()->Seed()->E1x5() / ele->SCluster()->Seed()->E5x5();
-
-
 
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
-  Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 2 && ptBin == 0) MVABin = 2;
-  if (subdet == 0 && ptBin == 1) MVABin = 3;
-  if (subdet == 1 && ptBin == 1) MVABin = 4;
-  if (subdet == 2 && ptBin == 1) MVABin = 5;
-  assert(MVABin >= 0 && MVABin <= 5);
-  reader = fTMVAReader[MVABin];
-                                                
+  reader = fTMVAReader[GetMVABin( ele->SCluster()->Eta(), ele->Pt())];
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug == kTRUE) {
-//     std::cout << "Debug Electron MVA: "
-//               << ele->Pt() << " " << ele->Eta() << " " << ele->Phi() << " : "
-//               << ele->Pt() << " " << ele->SCluster()->AbsEta() << " --> MVABin " << MVABin << " : "     
-//               << fMVAVar_EleSigmaIEtaIEta << " " 
-//               << fMVAVar_EleDEtaIn << " " 
-//               << fMVAVar_EleDPhiIn << " " 
-//               << fMVAVar_EleHoverE << " " 
-//               << fMVAVar_EleD0 << " " 
-//               << fMVAVar_EleDZ << " " 
-//               << fMVAVar_EleFBrem << " " 
-//               << fMVAVar_EleEOverP << " " 
-//               << fMVAVar_EleESeedClusterOverPout << " " 
-//               << fMVAVar_EleSigmaIPhiIPhi << " " 
-//               << fMVAVar_EleNBrem << " " 
-//               << fMVAVar_EleOneOverEMinusOneOverP << " " 
-//               << fMVAVar_EleESeedClusterOverPIn << " " 
-//               << fMVAVar_EleIP3d << " " 
-//               << fMVAVar_EleIP3dSig << " " 
-//               << fMVAVar_EleGsfTrackChi2OverNdof << " "
-//               << fMVAVar_EledEtaCalo << " "
-//               << fMVAVar_EledPhiCalo << " "
-//               << fMVAVar_EleR9 << " "
-//               << fMVAVar_EleSCEtaWidth << " "
-//               << fMVAVar_EleSCPhiWidth << " "
-//               << fMVAVar_EleCovIEtaIPhi << " "
-//               << fMVAVar_ElePreShowerOverRaw << " "
-//               << fMVAVar_EleChargedIso03OverPt  << " "
-//               << fMVAVar_EleNeutralHadronIso03OverPt  << " "
-//               << fMVAVar_EleGammaIso03OverPt  << " "
-//               << fMVAVar_EleChargedIso04OverPt  << " "
-//               << fMVAVar_EleNeutralHadronIso04OverPt  << " "
-//               << fMVAVar_EleGammaIso04OverPt  << " "
-//               << " === : === "
-//               << mva << " "    
-//               << std::endl;
     std::cout << "Debug Electron MVA: "
               << ele->Pt() << " " << ele->Eta() << " " << ele->Phi() << " : "
-              << ele->Pt() << " " << ele->SCluster()->AbsEta() << " --> MVABin " << MVABin << " : "     
+              << ele->Pt() << " " << ele->SCluster()->AbsEta() << " --> MVABin " << GetMVABin( ele->SCluster()->Eta(), ele->Pt()) << " : "     
               << fMVAVar_EleSigmaIEtaIEta << " " 
               << fMVAVar_EleDEtaIn << " " 
               << fMVAVar_EleDPhiIn << " " 
@@ -680,13 +604,6 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
     return -9999;
   }
 
-  Int_t subdet = 0;
-  if (ele->SCluster()->AbsEta() < 1.0) subdet = 0;
-  else if (ele->SCluster()->AbsEta() < 1.479) subdet = 1;
-  else subdet = 2;
-  Int_t ptBin = 0;
-  if (ele->Pt() > 20.0) ptBin = 1;
-  
   fMVAVar_ElePt = ele->Pt();
   fMVAVar_EleEta = ele->Eta();
 
@@ -727,22 +644,13 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
-  Int_t MVABin = -1;
-  if (subdet == 0 && ptBin == 0) MVABin = 0;
-  if (subdet == 1 && ptBin == 0) MVABin = 1;
-  if (subdet == 2 && ptBin == 0) MVABin = 2;
-  if (subdet == 0 && ptBin == 1) MVABin = 3;
-  if (subdet == 1 && ptBin == 1) MVABin = 4;
-  if (subdet == 2 && ptBin == 1) MVABin = 5;
-  assert(MVABin >= 0 && MVABin <= 5);
-  reader = fTMVAReader[MVABin];
-                                                
+  reader = fTMVAReader[GetMVABin( ele->SCluster()->Eta(), ele->Pt())];                                              
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug == kTRUE) {
     std::cout << "Debug Electron MVA: "
               << ele->Pt() << " " << ele->Eta() << " " << ele->Phi() << " : "
-              << ele->Pt() << " " << ele->SCluster()->AbsEta() << " --> MVABin " << MVABin << " : "     
+              << ele->Pt() << " " << ele->SCluster()->AbsEta() << " --> MVABin " << GetMVABin( ele->SCluster()->Eta(), ele->Pt()) << " : "     
               << fMVAVar_EleSigmaIEtaIEta << " " 
               << fMVAVar_EleDEtaIn << " " 
               << fMVAVar_EleDPhiIn << " " 
@@ -843,9 +751,11 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   if (ele->TrackerTrk()) {
     fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
     fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
+    fMVAVar_EleKFTrkNLayers = ele->CTFTrkNLayersWithMeasurement();
   } else {
-    fMVAVar_EleKFTrkChiSqr = 0;
-    fMVAVar_EleKFTrkNHits = -1;
+    fMVAVar_EleKFTrkChiSqr = -1;
+    fMVAVar_EleKFTrkNHits = 0;
+    fMVAVar_EleKFTrkNLayers = 0;
   }
   
   fMVAVar_EleE1x5OverE5x5 = (ele->SCluster()->Seed()->E5x5() > 0.0) ? 1.0-ele->SCluster()->Seed()->E1x5() / ele->SCluster()->Seed()->E5x5() : -1. ;
@@ -986,9 +896,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   fMVAVar_NeutralHadronIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p1To0p2 - Rho*ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIsoDR0p1To0p2, ele->SCluster()->Eta(), EffectiveAreaTarget))/ele->Pt(), 2.5), 0.0);
   fMVAVar_NeutralHadronIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p2To0p3 - Rho*ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIsoDR0p2To0p3, ele->SCluster()->Eta(), EffectiveAreaTarget))/ele->Pt(), 2.5), 0.0);
   fMVAVar_NeutralHadronIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p3To0p4 - Rho*ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIsoDR0p3To0p4, ele->SCluster()->Eta(), EffectiveAreaTarget))/ele->Pt(), 2.5), 0.0);
-  fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5 - Rho*ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIsoDR0p4To0p5, ele->SCluster()->Eta(), EffectiveAreaTarget))/ele->Pt(), 2.5), 0.0);
-  
-//   cout << "gg: " << tmpGammaIso_DR0p4To0p5 << " : " << ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIsoDR0p4To0p5, ele->SCluster()->Eta(), EffectiveAreaTarget) << " " << EffectiveAreaTarget << endl;
+  fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5 - Rho*ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIsoDR0p4To0p5, ele->SCluster()->Eta(), EffectiveAreaTarget))/ele->Pt(), 2.5), 0.0); 
 
   //Do Binding of MVA input variables
   if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 
@@ -999,22 +907,11 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
-  Int_t MVABin = -1;
-
-  if (fMVAVar_ElePt < 10 && fabs(fMVAVar_EleEta) < 1.479) MVABin = 0;
-  if (fMVAVar_ElePt < 10 && fabs(fMVAVar_EleEta) >= 1.479) MVABin = 1;
-  if (fMVAVar_ElePt > 10 && fabs(fMVAVar_EleEta) < 1.479) MVABin = 2;
-  if (fMVAVar_ElePt > 10 && fabs(fMVAVar_EleEta) >= 1.479) MVABin = 3;
   
-  std::cout <<" -> BIN: " << fMVAVar_EleEta << " " << fMVAVar_ElePt << " : " << MVABin << std::endl;
-
-  if (!fUseBinnedVersion) {
-    reader = fTMVAReader[0];
-  } else {
-    reader = fTMVAReader[MVABin];
+  if (printDebug == kTRUE) {
+    std::cout <<" -> BIN: " << fMVAVar_EleEta << " " << fMVAVar_ElePt << " : " << GetMVABin( fMVAVar_EleEta , fMVAVar_ElePt) << std::endl;
   }
-
-                                     
+  reader = fTMVAReader[GetMVABin( fMVAVar_EleEta , fMVAVar_ElePt)];                                              
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug == kTRUE) {
@@ -1061,7 +958,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
               << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "  
               << std::endl;
     std::cout << "MVA: " << mva << " "    
-         << std::endl;    
+              << std::endl;    
   }
 
   return mva;
