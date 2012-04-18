@@ -1,4 +1,4 @@
-// $Id: doubleLepton.C,v 1.8 2011/10/03 14:40:07 ceballos Exp $
+// $Id: doubleLepton.C,v 1.9 2012/03/26 08:51:39 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -128,10 +128,16 @@ void doubleLepton(const char *catalogDir   = "/home/ceballos/catalog",
   if(isData == false){
     hltmod->AddTrigger("HLT_Mu15_v9");
     hltmod->AddTrigger("!HLT_Mu15_v9");
-    hltmod->AddTrigger("HLT_Mu15_v1");
-    hltmod->AddTrigger("!HLT_Mu15_v1");
     hltmod->AddTrigger("HLT_Mu15_v2");
     hltmod->AddTrigger("!HLT_Mu15_v2");
+    hltmod->AddTrigger("HLT_Mu9");
+    hltmod->AddTrigger("!HLT_Mu9");
+    hltmod->AddTrigger("HLT_Mu12_v13");
+    hltmod->AddTrigger("!HLT_Mu12_v13");
+    hltmod->AddTrigger("HLT_Mu12_v14");
+    hltmod->AddTrigger("!HLT_Mu12_v14");
+    hltmod->AddTrigger("HLT_Mu12_v16");
+    hltmod->AddTrigger("!HLT_Mu12_v16");
   }
   hltmod->SetTrigObjsName("myhltobjs");
 
