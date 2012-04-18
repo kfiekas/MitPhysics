@@ -44,8 +44,8 @@ Met RecoilTools::trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Dou
   double trkSumEt = 0; 
   for(UInt_t i=0; i<iCands->GetEntries(); ++i) {
     const PFCandidate *pfcand = iCands->At(i);
-    if( (pfcand->HasTrackerTrk() && (fabs(pfcand->TrackerTrk()->DzCorrected(*iVertex))< iDZCut)) ||
-        (pfcand->HasGsfTrk()     && (fabs(pfcand->GsfTrk()->DzCorrected(*iVertex))    < iDZCut)) ) {
+    if( (pfcand->HasTrackerTrk() && (fabs(pfcand->TrackerTrk()->DzCorrected(*iVertex))< iDZCut)) ) {
+      //(pfcand->HasGsfTrk()     && (fabs(pfcand->GsfTrk()->DzCorrected(*iVertex))    < iDZCut)) ) {
       trkMetx  -= pfcand->Px();
       trkMety  -= pfcand->Py();
       trkSumEt += pfcand->Pt();
