@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.35 2012/04/15 12:06:26 sixie Exp $
+// $Id: ElectronTools.cc,v 1.36 2012/04/18 14:38:38 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -191,8 +191,10 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
 
   Bool_t isoCut = kTRUE;
   if(idType == kVBTFWorkingPointFakeableId){
+    double isoEcal = ele->EcalRecHitIsoDr03();
+    if(ele->IsEB()) isoEcal = isoEcal - 1.0;
     isoCut = (ele->TrackIsolationDr03() < ele->Pt()*0.2) &&
-   	     (ele->EcalRecHitIsoDr03()  < ele->Pt()*0.2) &&
+   	     (isoEcal                   < ele->Pt()*0.2) &&
    	     (ele->HcalTowerSumEtDr03() < ele->Pt()*0.2);
   }
   if(isoCut == kFALSE) return kFALSE;
