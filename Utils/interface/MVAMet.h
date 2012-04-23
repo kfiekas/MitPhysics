@@ -123,8 +123,8 @@ namespace mithep {
 			int iNPV,
 			Bool_t printDebug=false);
 
-    TMatrixD GetMetCovariance() { return fCov;         }
-    double   GetSignificance () { return fSignificance;}
+    TMatrixD* GetMetCovariance() { return fCov;         }
+    double    GetSignificance () { return fSignificance;}
     RecoilTools *fRecoilTools;
     
   protected:
@@ -135,6 +135,7 @@ namespace mithep {
     Bool_t       fIsInitialized;
     MVAType      fType;
     
+    Float_t fSumEt  ;
     Float_t fU      ;
     Float_t fUPhi   ;
     Float_t fTKSumEt;
@@ -170,8 +171,8 @@ namespace mithep {
     GBRForest *fCovU1Reader;
     GBRForest *fCovU2Reader;
 
-    Float_t  fSignificance;
-    TMatrixD fCov;
+    Float_t   fSignificance;
+    TMatrixD *fCov;
 
     //TMVA::Reader* fPhiReader;
     //TMVA::Reader* fU1Reader;
