@@ -39,7 +39,8 @@ namespace mithep {
       enum CutType {
         kTight     = 0,
         kMedium    = 1,
-        kLoose     = 2
+        kLoose     = 2,
+        kMET       = 3
       };
 
       void     Initialize(JetIDMVA::CutType iCutType,

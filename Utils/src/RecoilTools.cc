@@ -8,7 +8,7 @@ using namespace mithep;
 
 RecoilTools::RecoilTools(TString iJetLowPtMVAFile,TString iJetHighPtMVAFile,TString iCutFile) { 
   fJetIDMVA = new JetIDMVA();
-  fJetIDMVA->Initialize( JetIDMVA::kLoose,iJetLowPtMVAFile,iJetHighPtMVAFile,JetIDMVA::kBaseline,iCutFile);
+  fJetIDMVA->Initialize( JetIDMVA::kMET,iJetLowPtMVAFile,iJetHighPtMVAFile,JetIDMVA::kBaseline,iCutFile);
 }
 //--------------------------------------------------------------------------------------------------
 RecoilTools::~RecoilTools() { 
@@ -75,6 +75,7 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,
 			  int iSign) { 
   FourVectorM lVec(0,0,0,0);
   double lPt = fJetIDMVA->correctedPt(iJet,iJetCorrector,iPUEnergyDensity);
+  if(iJet->RawMom().Pt() < 10) lPt = TMath::Max(iJet->RawMom().Pt()-iJet->JetArea()*iPUEnergyDensity->At(0)->Rho(),0.);
   lPt *= (iJet->NeutralEmEnergy()/iJet->E() + iJet->NeutralHadronEnergy()/iJet->E());
   lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
   if(iSign > 0) iVec -= lVec;
@@ -90,6 +91,7 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,
 void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,int iSign) { 
   FourVectorM lVec(0,0,0,0);
   double lPt = iJet->Pt();
+  if(iJet->RawMom().Pt() < 10) lPt = iJet->RawMom().Pt()*iJet->L1OffsetCorrectionScale();
   lPt *= (iJet->NeutralEmEnergy()/iJet->E() + iJet->NeutralHadronEnergy()/iJet->E());
   lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
   if(iSign > 0) iVec   -= lVec;

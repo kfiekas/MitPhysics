@@ -8,7 +8,7 @@
 
 #ifndef MITPHYSICS_UTILS_MVAMet_H
 #define MITPHYSICS_UTILS_MVAMet_H
-
+#include <TMatrixD.h>
 #include "MitAna/DataTree/interface/PFJetFwd.h"
 #include "MitAna/DataTree/interface/VertexFwd.h"
 #include "MitAna/DataTree/interface/TrackFwd.h"
@@ -48,11 +48,15 @@ namespace mithep {
 		       TString iJetCutFile   ="$CMSSW_BASE/src/MitPhysics/data/mva_RecoilPhiRegress_baseline.weights.xml",
 		       TString iU1Weights    ="$CMSSW_BASE/src/MitPhysics/data/gbrmet.root",
 		       TString iPhiWeights   ="$CMSSW_BASE/src/MitPhysics/data/gbrmetphi.root",
+		       TString iCovU1Weights   ="$CMSSW_BASE/src/MitPhysics/data/gbrcovu1_52.root",
+		       TString iCovU2Weights   ="$CMSSW_BASE/src/MitPhysics/data/gbrcovu2_52.root",
 		       MVAMet::MVAType  iType=kBaseline);
         
     Bool_t   IsInitialized() const { return fIsInitialized; }
     Double_t evaluatePhi();
     Double_t evaluateU1();
+    Double_t evaluateCovU1();
+    Double_t evaluateCovU2();
     Double_t MVAValue(  bool iPhi,
 			Float_t iPFSumEt, 
 			Float_t iU      ,
@@ -118,12 +122,16 @@ namespace mithep {
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug=false);
-    
+
+    TMatrixD GetMetCovariance() { return fCov;         }
+    double   GetSignificance () { return fSignificance;}
     RecoilTools *fRecoilTools;
     
   protected:
     TString      fPhiMethodName;
     TString      fU1MethodName;
+    TString      fCovU1MethodName;
+    TString      fCovU2MethodName;
     Bool_t       fIsInitialized;
     MVAType      fType;
     
@@ -151,13 +159,20 @@ namespace mithep {
     Float_t fNAllJet;
     Float_t fNPV    ;
     Float_t fUPhiMVA;
+    Float_t fUMVA;
     
     Float_t* fPhiVals;
     Float_t* fU1Vals;
-    
+    Float_t* fCovVals;
     
     GBRForest *fPhiReader;
     GBRForest *fU1Reader;
+    GBRForest *fCovU1Reader;
+    GBRForest *fCovU2Reader;
+
+    Float_t  fSignificance;
+    TMatrixD fCov;
+
     //TMVA::Reader* fPhiReader;
     //TMVA::Reader* fU1Reader;
     ClassDef(MVAMet,0)

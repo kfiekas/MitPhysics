@@ -86,6 +86,7 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   std::string lCutType = "Tight";
   if(fCutType == kMedium) lCutType = "Medium";
   if(fCutType == kLoose ) lCutType = "Loose";
+  if(fCutType == kMET   ) lCutType = "MET";
   std::vector<double> lPt010  = lConfig.getParameter<std::vector<double> >(("Pt010_" +lCutType).c_str());
   std::vector<double> lPt1020 = lConfig.getParameter<std::vector<double> >(("Pt1020_"+lCutType).c_str());
   std::vector<double> lPt2030 = lConfig.getParameter<std::vector<double> >(("Pt2030_"+lCutType).c_str());

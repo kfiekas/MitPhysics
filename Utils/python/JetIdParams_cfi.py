@@ -20,4 +20,10 @@ JetIdParams = cms.PSet(
     Pt1020_Loose   = cms.vdouble(-0.4,-0.4,-0.4,0.4),
     Pt2030_Loose   = cms.vdouble( 0. , 0. , 0.2,0.6),
     Pt3050_Loose   = cms.vdouble( 0. , 0. , 0.6,0.2)
+
+    #MET
+    Pt010_MET      = cms.vdouble(-0.2, 0. , 0.2, 0.5),
+    Pt1020_MET     = cms.vdouble( 0.2,-0.6,-0.6,-0.4),
+    Pt2030_MET     = cms.vdouble( 0.2,-0.6,-0.6,-0.4),
+    Pt3050_MET     = cms.vdouble( 0.2,-0.8,-0.8,-0.4)
 )
