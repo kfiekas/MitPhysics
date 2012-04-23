@@ -92,7 +92,7 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,i
   FourVectorM lVec(0,0,0,0);
   double lPt = iJet->Pt();
   if(iJet->RawMom().Pt() < 10) lPt = iJet->RawMom().Pt()*iJet->L1OffsetCorrectionScale();
-  lPt *= (iJet->NeutralEmEnergy()/iJet->E() + iJet->NeutralHadronEnergy()/iJet->E());
+  lPt *= (iJet->NeutralEmEnergy()/iJet->RawMom().E() + iJet->NeutralHadronEnergy()/iJet->RawMom().E());
   lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
   if(iSign > 0) iVec   -= lVec;
   if(iSign < 0) iVec   += lVec;
