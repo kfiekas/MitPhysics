@@ -22,6 +22,7 @@
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 #include "MitPhysics/Utils/interface/RecoilTools.h"
+#include "CondFormats/EgammaObjects/interface/GBRForest.h"
 
 class TRandom3;
 class GBRForest;
@@ -96,7 +97,7 @@ namespace mithep {
     Met GetMet( 	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
 			const PFMet            *iMet  ,
 			const PFCandidateCol   *iCands,
-			const Vertex *iVertex,const VertexCol *iVertices,
+			const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug=false);
@@ -118,13 +119,14 @@ namespace mithep {
 			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
 			const PFMet            *iMet  ,
 			const PFCandidateCol   *iCands,
-			const Vertex *iVertex,const VertexCol *iVertices,
+			const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug=false);
 
-    TMatrixD* GetMetCovariance() { return fCov;         }
-    double    GetSignificance () { return fSignificance;}
+    TMatrixD*   GetMetCovariance() { return fCov;         }
+    Float_t     GetSignificance () { return fSignificance;}
+    Float_t     GetUncertainty  () { return fUncertainty;}
     RecoilTools *fRecoilTools;
     
   protected:
@@ -172,6 +174,7 @@ namespace mithep {
     GBRForest *fCovU2Reader;
 
     Float_t   fSignificance;
+    Float_t   fUncertainty;
     TMatrixD *fCov;
 
     //TMVA::Reader* fPhiReader;

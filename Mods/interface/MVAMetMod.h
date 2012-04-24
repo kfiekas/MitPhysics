@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MVAMetMod.h,v 1.3 2012/04/07 13:55:35 ceballos Exp $
+// $Id: MVAMetMod.h,v 1.4 2012/04/07 16:45:04 ceballos Exp $
 //
 // MVAMetMod
 //
@@ -16,6 +16,7 @@
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"
+#include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitPhysics/Utils/interface/MVAMet.h"
 
 namespace mithep 
@@ -37,10 +38,13 @@ namespace mithep
       TString             fPFCandName;
       TString             fVertexName;
       TString             fPFMetName ;
-      const JetCol         *fJets;
-      const PFCandidateCol *fCands;
-      const VertexCol      *fVertices;
-      const PFMetCol       *fPFMet;
+      TString             fRhoName   ;
+
+      const JetCol                 *fJets;
+      const PFCandidateCol         *fCands;
+      const VertexCol              *fVertices;
+      const PFMetCol               *fPFMet;
+      const PileupEnergyDensityCol *fRhoCol;
 
       MVAMet         *fMVAMet;
       ClassDef(MVAMetMod, 1) // Jet identification module

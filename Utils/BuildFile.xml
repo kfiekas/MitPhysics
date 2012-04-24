@@ -1,5 +1,6 @@
 <use   name="MitAna/DataTree"/>
 <use   name="MitAna/DataUtil"/>
+<use   name="CondFormats/EgammaObjects"/>
 <use   name="MitCommon/MathTools"/>
 <use   name="MitPhysics/ElectronLikelihood"/>
 <use   name="CondFormats/EgammaObjects"/>

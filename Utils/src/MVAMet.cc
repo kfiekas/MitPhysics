@@ -127,16 +127,11 @@ void MVAMet::Initialize(TString iJetLowPtFile,
   fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile);
 
   fType          = iType;
-  fPhiVals = new Float_t[23];
-  fU1Vals  = new Float_t[25];
-  fCovVals = new Float_t[26];
 
   ROOT::Cintex::Cintex::Enable();   
   
   TFile *lPhiForest = new TFile(iPhiWeights,"READ");
   fPhiReader = (GBRForest*)lPhiForest->Get(fPhiMethodName);
-  for(int i0 = 0; i0 < 23; i0++) fPhiVals[i0] = 0;
-  fPhiReader->GetResponse(fPhiVals);
   lPhiForest->Close();
 
   TFile *lU1Forest = new TFile(iU1Weights,"READ");
@@ -152,7 +147,9 @@ void MVAMet::Initialize(TString iJetLowPtFile,
   lCovU2Forest->Close();
   
   fCov = new TMatrixD(2,2);
-  
+  fPhiVals = new Float_t[23];
+  fU1Vals  = new Float_t[25];
+  fCovVals = new Float_t[26];
 }
 //--------------------------------------------------------------------------------------------------
 Double_t MVAMet::evaluatePhi() { 
@@ -352,7 +349,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
 			int iNPV,
 			Bool_t printDebug) {
   
-  Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iMet);
+  Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(iPtVis,iPhiVis,iSumEtVis,iCands,iVertex); 
   Met lNPRec = fRecoilTools->NoPURecoil (iPtVis,iPhiVis,iSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);  
   Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);
@@ -403,8 +400,10 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   //fNPSumEt  /= lPFRec.SumEt();
   //fPUSumEt  /= lPFRec.SumEt();
   //fPCSumEt  /= lPFRec.SumEt();
-  if(!iPhi) lMVA     = evaluateU1();//fU1Reader    ->EvaluateMVA( fU1MethodName );  
-  TLorentzVector lUVec(0,0,0,0);   lUVec .SetPtEtaPhiM(fU*lMVA,0,fUPhiMVA,0);
+   if(!iPhi) lMVA     = evaluateU1();//fU1Reader    ->EvaluateMVA( fU1MethodName );  
+  fUMVA              = fU*lMVA;
+
+  TLorentzVector lUVec(0,0,0,0);   lUVec .SetPtEtaPhiM(fUMVA,0,fUPhiMVA,0);
   TLorentzVector lVVec(0,0,0,0);   lVVec .SetPtEtaPhiM(iPtVis ,0,iPhiVis ,0);
   if(lMVA < 0) lUVec .RotateZ(TMath::Pi());                                                   
   lUVec      -= lVVec;
@@ -424,8 +423,9 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
   
-  fSignificance = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
-
+  fUncertainty   = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fSignificance  = lMet.Pt()/fUncertainty;
+  
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
 	      <<  fU        << " : "
@@ -464,16 +464,16 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
 Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
 			const PFMet            *iMet  ,
 			const PFCandidateCol   *iCands,
-			const Vertex *iVertex         ,const VertexCol *iVertices,
+			const Vertex *iVertex         ,const VertexCol *iVertices,Double_t iRho,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug) {
   
-  Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iMet);
+  Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(iPtVis,iPhiVis,iSumEtVis,      iCands,iVertex); 
-  Met lNPRec = fRecoilTools->NoPURecoil (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices);  
-  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices);
-  Met lPUMet = fRecoilTools->PUMet      (                         iJets,iCands,iVertex,iVertices);
+  Met lNPRec = fRecoilTools->NoPURecoil (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices,iRho);  
+  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices,iRho);
+  Met lPUMet = fRecoilTools->PUMet      (                         iJets,iCands,iVertex,iVertices,iRho);
   
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 
@@ -513,7 +513,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   fNJet     = lNJet   ;
   fNAllJet  = lNAllJet;
   fNPV      = iNPV    ;
-
+  
   Float_t lMVA = evaluatePhi();
   
   if(!iPhi) fUPhiMVA = fUPhi + lMVA; 
@@ -522,9 +522,10 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   //fNPSumEt  /= lPFRec.SumEt();
   //fPUSumEt  /= lPFRec.SumEt();
   //fPCSumEt  /= lPFRec.SumEt();
-  if(!iPhi) lMVA     = evaluateU1();//fU1Reader    ->EvaluateMVA( fU1MethodName );  
-
-  TLorentzVector lUVec(0,0,0,0);   lUVec .SetPtEtaPhiM(fU*lMVA,0,fUPhiMVA,0);
+  if(!iPhi) lMVA    = evaluateU1();//fU1Reader    ->EvaluateMVA( fU1MethodName );  
+  fUMVA        = lMVA*fU;
+  
+  TLorentzVector lUVec(0,0,0,0);   lUVec .SetPtEtaPhiM(fUMVA  ,0,fUPhiMVA,0);
   TLorentzVector lVVec(0,0,0,0);   lVVec .SetPtEtaPhiM(iPtVis ,0,iPhiVis ,0);
   if(lMVA < 0) lUVec .RotateZ(TMath::Pi());                                                   
   lUVec      -= lVVec;
@@ -541,7 +542,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  fSignificance = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fUncertainty   = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fSignificance  = lMet.Pt()/fUncertainty;
 
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
@@ -595,7 +597,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   Float_t lPtVis    = lVVec1.Pt();
   Float_t lPhiVis   = lVVec1.Phi();
   Float_t lSumEtVis = iPt1 + iPt2;
-  Met lPFRec = fRecoilTools->pfRecoil   (lPtVis,lPhiVis,lSumEtVis,iMet);
+  Met lPFRec = fRecoilTools->pfRecoil   (lPtVis,lPhiVis,lSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(lPtVis,lPhiVis,lSumEtVis,iCands,iVertex); 
   Met lNPRec = fRecoilTools->NoPURecoil (lPtVis,lPhiVis,lSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,
 					 iPhi1,iEta1,iPhi2,iEta2);  
@@ -657,8 +659,10 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   //fNPSumEt  /= lPFRec.SumEt();
   //fPUSumEt  /= lPFRec.SumEt();
   //fPCSumEt  /= lPFRec.SumEt();
-  if(!iPhi) lMVA     = evaluateU1();//fU1Reader    ->EvaluateMVA( fU1MethodName );  
-  TLorentzVector lUVec (0,0,0,0);   lUVec .SetPtEtaPhiM(fU*lMVA,0,fUPhiMVA,0);
+  if(!iPhi) lMVA    = evaluateU1();//fU1Reader    ->EvaluateMVA( fU1MethodName );  
+  fUMVA             = fU*lMVA;
+
+  TLorentzVector lUVec (0,0,0,0);   lUVec .SetPtEtaPhiM(fUMVA  ,0,fUPhiMVA,0);
   TLorentzVector lVVec (0,0,0,0);   lVVec .SetPtEtaPhiM(lPtVis ,0,lPhiVis ,0);
   if(lMVA < 0) lUVec .RotateZ(TMath::Pi());                                                   
   lUVec      -= lVVec;
@@ -675,7 +679,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  fSignificance = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fUncertainty   = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fSignificance  = lMet.Pt()/fUncertainty;
 
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
@@ -715,7 +720,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
 			const PFMet            *iMet  ,
 			const PFCandidateCol   *iCands,
-			const Vertex           *iVertex,const VertexCol *iVertices,
+			const Vertex           *iVertex,const VertexCol *iVertices,Double_t iRho,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug) {
@@ -726,7 +731,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   Float_t lPtVis    = lVVec1.Pt();
   Float_t lPhiVis   = lVVec1.Phi();
   Float_t lSumEtVis = iPt1 + iPt2;
-  Met lPFRec = fRecoilTools->pfRecoil   (lPtVis,lPhiVis,lSumEtVis,iMet);
+  Met lPFRec = fRecoilTools->pfRecoil   (lPtVis,lPhiVis,lSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(lPtVis,lPhiVis,lSumEtVis,iCands,iVertex); 
   Met lNPRec = fRecoilTools->NoPURecoil (lPtVis,lPhiVis,lSumEtVis,iJets,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);  
   Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis,lPhiVis,lSumEtVis,iJets,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);
@@ -786,11 +791,12 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   //fNPSumEt  /= lPFRec.SumEt();
   //fPUSumEt  /= lPFRec.SumEt();
   //fPCSumEt  /= lPFRec.SumEt();
-  if(!iPhi) lMVA     = evaluateU1();//fU1Reader    ->EvaluateMVA( fU1MethodName );  
-
-  TLorentzVector lUVec (0,0,0,0);   lUVec .SetPtEtaPhiM(fU*lMVA,0,fUPhiMVA,0);
+  if(!iPhi) lMVA    = evaluateU1();//fU1Reader    ->EvaluateMVA( fU1MethodName );  
+  fUMVA        = lMVA*fU;
+  
+  TLorentzVector lUVec (0,0,0,0);   lUVec .SetPtEtaPhiM(fUMVA  ,0,fUPhiMVA,0);
   TLorentzVector lVVec (0,0,0,0);   lVVec .SetPtEtaPhiM(lPtVis ,0,lPhiVis ,0);
-  if(lMVA < 0) lUVec .RotateZ(TMath::Pi());                                                   
+  if(lMVA   < 0) lUVec .RotateZ(TMath::Pi());                                                   
   lUVec      -= lVVec;
   Met lMet(lUVec.Px(),lUVec.Py());
   //Cov matrix                                                                                                                                                                           
@@ -804,8 +810,9 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  fSignificance = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
-
+  fUncertainty   = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fSignificance  = lMet.Pt()/fUncertainty;
+  
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
 	      <<  fU        << " : "

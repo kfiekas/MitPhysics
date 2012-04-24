@@ -35,7 +35,7 @@ namespace mithep {
     ~RecoilTools();
     JetIDMVA *fJetIDMVA;
 
-    Met pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,const PFMet *iMet);
+    Met pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,const PFCandidateCol *iCands);
    
     Met trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Double_t iDZCut=0.1);
     Met trackRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
@@ -49,7 +49,7 @@ namespace mithep {
 		 int iSign=1);
 
     //Corrected Jets
-    void addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt, 
+    void addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,Double_t iRho,
 		 int iSign=1);
     
     //Uncorrected Jets
@@ -60,7 +60,7 @@ namespace mithep {
 		 Double_t iDZCut=0.1);
     //Corrected Jets
     Met NoPUMet( const PFJetCol       *iJets,
-		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
+		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 		 Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		 Double_t iDZCut=0.1);
 
@@ -75,7 +75,7 @@ namespace mithep {
     //Corrrected Jets
     Met NoPURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,   
 		   const PFJetCol       *iJets,
-		   const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
+		   const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 		   Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		   Double_t iDZCut=0.1);
 
@@ -88,7 +88,7 @@ namespace mithep {
 
     //Corrected Jets
     Met PUCMet( const PFJetCol       *iJets,
-		const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
+		const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 		Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		Double_t iDZCut=0.1);
 
@@ -103,7 +103,7 @@ namespace mithep {
     //Corrected Jets
     Met PUCRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 		  const PFJetCol       *iJets,
-		  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
+		  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 		  Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		  Double_t iDZCut=0.1);
 
@@ -116,7 +116,7 @@ namespace mithep {
 
     //Corrected Jets
     Met PUMet( const PFJetCol       *iJets,
-	       const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
+	       const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 	       Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 	       Double_t iDZCut=0.2);
 
@@ -131,7 +131,7 @@ namespace mithep {
     //Corrected Jets
     Met PURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 		 const PFJetCol       *iJets,
-		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
+		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 		 Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		 Double_t iDZCut=0.1);
       

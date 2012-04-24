@@ -1,4 +1,4 @@
-// $Id: MVAMetMod.cc,v 1.6 2012/04/07 17:37:27 ceballos Exp $
+// $Id: MVAMetMod.cc,v 1.7 2012/04/07 20:12:20 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -20,10 +20,12 @@ MVAMetMod::MVAMetMod(const char *name, const char *title) :
   fPFCandName(Names::gkPFCandidatesBrn),
   fVertexName(ModNames::gkGoodVertexesName),
   fPFMetName ("PFMet"),
+  fRhoName   ("Rho"),
   fJets(0),
   fCands(0),
   fVertices(0),
-  fPFMet(0)
+  fPFMet(0),
+  fRhoCol(0)
 {
 }
 
@@ -37,6 +39,7 @@ void MVAMetMod::Process()
   LoadBranch(fPFCandName);
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
   LoadBranch(fPFMetName);
+  LoadBranch(fRhoName);
 
   if (!fJets || !fCands || !fVertices || !fPFMet) {
     SendError(kAbortModule, "Process", 
@@ -69,7 +72,7 @@ void MVAMetMod::Process()
                                   lPt0,lPhi0,lEta0,
                                   lPt1,lPhi1,lEta1,
                                   fPFMet->At(0),
-                                  fCands,fVertices->At(0),fVertices,
+                                  fCands,fVertices->At(0),fVertices,fRhoCol->At(0)->Rho(),
                                   thePFJets,
                                   int(fVertices->GetEntries()));
 
@@ -96,13 +99,16 @@ void MVAMetMod::SlaveBegin()
   //ReqBranch(fJetsName,   fJets);
   ReqBranch(fPFCandName, fCands);
   ReqBranch(fPFMetName,  fPFMet);
+  ReqBranch(fRhoName,    fRhoCol);
 
   fMVAMet    = new MVAMet();
   fMVAMet->Initialize(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
                       TString(getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")),
-                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmet.root"))),
-                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetphi.root")))
+                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmet_52.root"))),
+                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetphi_52.root"))),
+                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu1cov_52.root"))),
+                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetphiu1cov_52.root")))
                       );
 }
 
