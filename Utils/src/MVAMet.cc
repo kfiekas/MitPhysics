@@ -238,7 +238,6 @@ Double_t MVAMet::evaluateCovU1() {
   return fCovU1Reader->GetResponse(fCovVals);
 }
 //--------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------                                                                                                          
 Double_t MVAMet::evaluateCovU2() {
   fCovVals[0]  =  fSumEt   ;
   fCovVals[1]  =  fNPV     ;
@@ -423,7 +422,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
   
-  fUncertainty   = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fUncertainty   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1)); 
   fSignificance  = lMet.Pt()/fUncertainty;
   
   if (printDebug == kTRUE) {
@@ -542,7 +541,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  fUncertainty   = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fUncertainty   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1)); 
   fSignificance  = lMet.Pt()/fUncertainty;
 
   if (printDebug == kTRUE) {
@@ -679,7 +678,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  fUncertainty   = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  fUncertainty   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1)); 
   fSignificance  = lMet.Pt()/fUncertainty;
 
   if (printDebug == kTRUE) {
@@ -810,7 +809,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  fUncertainty   = lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1); 
+  
+  fUncertainty   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1)); 
   fSignificance  = lMet.Pt()/fUncertainty;
   
   if (printDebug == kTRUE) {
