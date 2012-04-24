@@ -88,15 +88,15 @@ void MuonIDMVA::Initialize(  std::string methodName,
   if (!fUseBinnedVersion) {
     ExpectedNBins = 1;
   } else if (type == kV2 
-             ||type == kV3
-             ||type == kV8
-             ||type == kIDIsoCombinedDetIso) {
+             || type == kV3
+             || type == kV8
+             || type == kIDIsoCombinedDetIso
+             || type == kIsoRingsV0
+             || type == kIDV0 
+             || type == kIDIsoCombinedIsoRingsV0
+    ) {
     ExpectedNBins = 6;
-  } else if (type == kIDIsoCombinedIsoRingsV0) {
-    ExpectedNBins = 5;
-  } else if (type == kIsoRingsV0) {
-    ExpectedNBins = 4;
-  }
+  } 
   fNMVABins = ExpectedNBins;
 
   //Check number of weight files given
@@ -197,6 +197,22 @@ void MuonIDMVA::Initialize(  std::string methodName,
       tmpTMVAReader->AddVariable( "HadIso05OverPt",       &fMVAVar_MuHadIso05OverPt        );
     }
 
+    if (type == kIDV0) {
+      tmpTMVAReader->AddVariable( "TkNchi2",              &fMVAVar_MuTkNchi2               );
+      if (i!=4) tmpTMVAReader->AddVariable( "GlobalNchi2",&fMVAVar_MuGlobalNchi2           );
+      if (i!=4) tmpTMVAReader->AddVariable( "NValidHits", &fMVAVar_MuNValidHits            );
+      tmpTMVAReader->AddVariable( "NTrackerHits",         &fMVAVar_MuNTrackerHits          );
+      tmpTMVAReader->AddVariable( "NPixelHits",           &fMVAVar_MuNPixelHits            );
+      if (i!=5) tmpTMVAReader->AddVariable( "NMatches",   &fMVAVar_MuNMatches              );
+      tmpTMVAReader->AddVariable( "TrkKink",              &fMVAVar_MuTrkKink               );      
+      tmpTMVAReader->AddVariable( "SegmentCompatibility", &fMVAVar_MuSegmentCompatibility  );      
+      tmpTMVAReader->AddVariable( "CaloCompatibility",    &fMVAVar_MuCaloCompatibility     );      
+      tmpTMVAReader->AddVariable( "HadEnergy",            &fMVAVar_MuHadEnergy             );      
+      tmpTMVAReader->AddVariable( "EmEnergy",             &fMVAVar_MuEmEnergy              );      
+      tmpTMVAReader->AddVariable( "HadS9Energy",          &fMVAVar_MuHadS9Energy           );      
+      tmpTMVAReader->AddVariable( "EmS9Energy",           &fMVAVar_MuEmS9Energy            );
+    }
+
     if (type == kIsoRingsV0) {
       tmpTMVAReader->AddVariable( "ChargedIso_DR0p0To0p1",         &fMVAVar_ChargedIso_DR0p0To0p1        );
       tmpTMVAReader->AddVariable( "ChargedIso_DR0p1To0p2",         &fMVAVar_ChargedIso_DR0p1To0p2        );
@@ -213,8 +229,6 @@ void MuonIDMVA::Initialize(  std::string methodName,
       tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p2To0p3",   &fMVAVar_NeutralHadronIso_DR0p2To0p3  );
       tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p3To0p4",   &fMVAVar_NeutralHadronIso_DR0p3To0p4  );
       tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p4To0p5",   &fMVAVar_NeutralHadronIso_DR0p4To0p5  );
-      tmpTMVAReader->AddSpectator("eta",            &fMVAVar_MuEta);
-      tmpTMVAReader->AddSpectator("pt",             &fMVAVar_MuPt);
     }
     
     tmpTMVAReader->BookMVA(fMethodname , weightsfiles[i] );
@@ -250,25 +264,21 @@ UInt_t MuonIDMVA::GetMVABin( double eta, double pt,
       if (pt >= 20 && fabs(eta) >= 1.5) bin = 5;
     }
 
-    if (fMVAType == MuonIDMVA::kIDIsoCombinedIsoRingsV0) {
+    if (fMVAType == MuonIDMVA::kIsoRingsV0 || fMVAType == MuonIDMVA::kIDV0
+        || fMVAType == MuonIDMVA::kIDIsoCombinedIsoRingsV0) {
       if (isGlobal && isTrackerMuon) {
         if (pt < 10 && fabs(eta) < 1.479) bin = 0;
-        if (pt < 10 && fabs(eta) >= 1.479) bin = 1;
-        if (pt >= 10 && fabs(eta) < 1.479) bin = 2;
+        if (pt >= 10 && fabs(eta) < 1.479) bin = 1;
+        if (pt < 10 && fabs(eta) >= 1.479) bin = 2;
         if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
       } else if (!isGlobal && isTrackerMuon) {
         bin = 4;
+      } else if (isGlobal && !isTrackerMuon) {
+        bin = 5;
       } else {
         std::cout << "Warning: Muon is not a tracker muon. Such muons are not supported. \n";
         bin = 0;
       }
-    }
-
-    if (fMVAType == MuonIDMVA::kIsoRingsV0) {
-      if (pt < 10 && fabs(eta) < 1.479) bin = 0;
-      if (pt < 10 && fabs(eta) >= 1.479) bin = 1;
-      if (pt >= 10 && fabs(eta) < 1.479) bin = 2;
-      if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
     }
 
     return bin;
@@ -469,6 +479,160 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
 	 << std::endl;
   }
 
+  return mva;
+}
+
+
+Double_t MuonIDMVA::MVAValue_IsoRings( Double_t MuPt,
+                                       Double_t MuEta,
+                                       Double_t ChargedIso_DR0p0To0p1,
+                                       Double_t ChargedIso_DR0p1To0p2,
+                                       Double_t ChargedIso_DR0p2To0p3,
+                                       Double_t ChargedIso_DR0p3To0p4,
+                                       Double_t ChargedIso_DR0p4To0p5,
+                                       Double_t GammaIso_DR0p0To0p1,
+                                       Double_t GammaIso_DR0p1To0p2,
+                                       Double_t GammaIso_DR0p2To0p3,
+                                       Double_t GammaIso_DR0p3To0p4,
+                                       Double_t GammaIso_DR0p4To0p5,
+                                       Double_t NeutralHadronIso_DR0p0To0p1,
+                                       Double_t NeutralHadronIso_DR0p1To0p2,
+                                       Double_t NeutralHadronIso_DR0p2To0p3,
+                                       Double_t NeutralHadronIso_DR0p3To0p4,
+                                       Double_t NeutralHadronIso_DR0p4To0p5,
+                                       Bool_t printDebug) {
+
+  if (fMVAType != MuonIDMVA::kIsoRingsV0) {
+    std::cout << "Error: This function is only supported for MVAType == kIsoRingsV0.\n" << std::endl;
+    assert(kFALSE);
+  }
+
+  fMVAVar_MuPt = MuPt;
+  fMVAVar_MuEta = MuEta;
+  fMVAVar_ChargedIso_DR0p0To0p1 = ChargedIso_DR0p0To0p1;
+  fMVAVar_ChargedIso_DR0p1To0p2 = ChargedIso_DR0p1To0p2;
+  fMVAVar_ChargedIso_DR0p2To0p3 = ChargedIso_DR0p2To0p3;
+  fMVAVar_ChargedIso_DR0p3To0p4 = ChargedIso_DR0p3To0p4;
+  fMVAVar_ChargedIso_DR0p4To0p5 = ChargedIso_DR0p4To0p5;
+  fMVAVar_GammaIso_DR0p0To0p1 = GammaIso_DR0p0To0p1;
+  fMVAVar_GammaIso_DR0p1To0p2 = GammaIso_DR0p1To0p2;
+  fMVAVar_GammaIso_DR0p2To0p3 = GammaIso_DR0p2To0p3;
+  fMVAVar_GammaIso_DR0p3To0p4 = GammaIso_DR0p3To0p4;
+  fMVAVar_GammaIso_DR0p4To0p5 = GammaIso_DR0p4To0p5;
+  fMVAVar_NeutralHadronIso_DR0p0To0p1 = NeutralHadronIso_DR0p0To0p1;
+  fMVAVar_NeutralHadronIso_DR0p1To0p2 = NeutralHadronIso_DR0p1To0p2;
+  fMVAVar_NeutralHadronIso_DR0p2To0p3 = NeutralHadronIso_DR0p2To0p3;
+  fMVAVar_NeutralHadronIso_DR0p3To0p4 = NeutralHadronIso_DR0p3To0p4;
+  fMVAVar_NeutralHadronIso_DR0p4To0p5 = NeutralHadronIso_DR0p4To0p5;
+
+  Double_t mva = -9999;  
+  TMVA::Reader *reader = 0;
+
+  if (printDebug == kTRUE) {
+    std::cout <<" -> BIN: " << fMVAVar_MuEta << " " << fMVAVar_MuPt << " : " 
+              << GetMVABin( fMVAVar_MuEta , fMVAVar_MuPt) << std::endl;
+  }
+  reader = fTMVAReader[GetMVABin( fMVAVar_MuEta , fMVAVar_MuPt)];                                              
+  mva = reader->EvaluateMVA( fMethodname );
+
+  if (printDebug == kTRUE) {
+
+    std::cout << "Debug Muon MVA: \n";
+    std::cout << fMVAVar_ChargedIso_DR0p0To0p1 << " "
+              << fMVAVar_ChargedIso_DR0p1To0p2 << " "
+              << fMVAVar_ChargedIso_DR0p2To0p3 << " "
+              << fMVAVar_ChargedIso_DR0p3To0p4 << " "
+              << fMVAVar_ChargedIso_DR0p4To0p5 << " "
+              << fMVAVar_GammaIso_DR0p0To0p1 << " "
+              << fMVAVar_GammaIso_DR0p1To0p2 << " "
+              << fMVAVar_GammaIso_DR0p2To0p3 << " "
+              << fMVAVar_GammaIso_DR0p3To0p4 << " "
+              << fMVAVar_GammaIso_DR0p4To0p5 << " "
+              << fMVAVar_NeutralHadronIso_DR0p0To0p1 << " "
+              << fMVAVar_NeutralHadronIso_DR0p1To0p2 << " "
+              << fMVAVar_NeutralHadronIso_DR0p2To0p3 << " "
+              << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
+              << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "  
+              << std::endl;
+    std::cout << "MVA: " << mva << " "    
+              << std::endl;    
+  }  
+  return mva;
+}
+
+
+
+Double_t MuonIDMVA::MVAValue_ID( Double_t MuPt,
+                                 Double_t MuEta,
+                                 Bool_t MuIsGlobal,
+                                 Bool_t MuIsTracker,                                
+                                 Double_t MuTkNchi2, 
+                                 Double_t MuGlobalNchi2, 
+                                 Double_t MuNValidHits, 
+                                 Double_t MuNTrackerHits, 
+                                 Double_t MuNPixelHits, 
+                                 Double_t MuNMatches, 
+                                 Double_t MuTrkKink, 
+                                 Double_t MuSegmentCompatibility, 
+                                 Double_t MuCaloCompatibility, 
+                                 Double_t MuHadEnergy, 
+                                 Double_t MuEmEnergy, 
+                                 Double_t MuHadS9Energy, 
+                                 Double_t MuEmS9Energy, 
+                                 Bool_t printDebug) {
+
+  if (fMVAType != MuonIDMVA::kIDV0) {
+    std::cout << "Error: This function is only supported for MVAType == kIDV0.\n" << std::endl;
+    assert(kFALSE);
+  }
+
+  fMVAVar_MuPt = MuPt;
+  fMVAVar_MuEta = MuEta;
+
+  fMVAVar_MuTkNchi2 = MuTkNchi2; 
+  fMVAVar_MuGlobalNchi2 = MuGlobalNchi2; 
+  fMVAVar_MuNValidHits = MuNValidHits; 
+  fMVAVar_MuNTrackerHits = MuNTrackerHits; 
+  fMVAVar_MuNPixelHits = MuNPixelHits; 
+  fMVAVar_MuNMatches = MuNMatches; 
+  fMVAVar_MuTrkKink = MuTrkKink; 
+  fMVAVar_MuSegmentCompatibility = MuSegmentCompatibility; 
+  fMVAVar_MuCaloCompatibility = MuCaloCompatibility; 
+  fMVAVar_MuHadEnergy = MuHadEnergy; 
+  fMVAVar_MuEmEnergy = MuEmEnergy; 
+  fMVAVar_MuHadS9Energy = MuHadS9Energy; 
+  fMVAVar_MuEmS9Energy = MuEmS9Energy; 
+
+  Double_t mva = -9999;  
+  TMVA::Reader *reader = 0;
+
+  if (printDebug == kTRUE) {
+    std::cout <<" -> BIN: " << fMVAVar_MuEta << " " << fMVAVar_MuPt << " : " 
+              << GetMVABin( fMVAVar_MuEta , fMVAVar_MuPt, MuIsGlobal, MuIsTracker) << std::endl;
+  }
+  reader = fTMVAReader[GetMVABin( fMVAVar_MuEta , fMVAVar_MuPt, MuIsGlobal, MuIsTracker)];                                              
+  mva = reader->EvaluateMVA( fMethodname );
+
+  if (printDebug == kTRUE) {
+
+    std::cout << "Debug Muon MVA: \n";
+    std::cout << fMVAVar_MuTkNchi2              << " " 
+              << fMVAVar_MuGlobalNchi2          << " " 
+              << fMVAVar_MuNValidHits           << " " 
+              << fMVAVar_MuNTrackerHits         << " " 
+              << fMVAVar_MuNPixelHits           << " "  
+              << fMVAVar_MuNMatches             << " "       
+              << fMVAVar_MuTrkKink              << " " 
+              << fMVAVar_MuSegmentCompatibility << " " 
+              << fMVAVar_MuCaloCompatibility    << " " 
+              << fMVAVar_MuHadEnergy            << " "  
+              << fMVAVar_MuEmEnergy             << " " 
+              << fMVAVar_MuHadS9Energy          << " "  
+              << fMVAVar_MuEmS9Energy           << " "    
+              << std::endl;
+    std::cout << "MVA: " << mva << " "    
+              << std::endl;    
+  }
   return mva;
 }
 

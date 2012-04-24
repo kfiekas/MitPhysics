@@ -40,7 +40,8 @@ namespace mithep {
         kV8,
         kIDIsoCombinedDetIso,
         kIsoRingsV0,
-        kIDIsoCombinedIsoRingsV0
+        kIDIsoCombinedIsoRingsV0,
+        kIDV0
       };
 
 
@@ -62,7 +63,7 @@ namespace mithep {
 
       Bool_t   IsInitialized() const { return fIsInitialized; }
       UInt_t   GetMVABin(double eta,double pt,
-                         Bool_t isGlobal, Bool_t isTrackerMuon ) const;
+                         Bool_t isGlobal = kTRUE, Bool_t isTrackerMuon = kTRUE ) const;
       Double_t MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fMuonTools,
                         const PFCandidateCol *PFCands, 
                         const PileupEnergyDensityCol *PileupEnergyDensity, 
@@ -126,7 +127,42 @@ namespace mithep {
                          Double_t                   MuHadIso05OverPt,
                          Bool_t                     printDebug = kFALSE
         );
-
+      Double_t MVAValue_IsoRings( Double_t MuPt,
+                                  Double_t MuEta,
+                                  Double_t ChargedIso_DR0p0To0p1,
+                                  Double_t ChargedIso_DR0p1To0p2,
+                                  Double_t ChargedIso_DR0p2To0p3,
+                                  Double_t ChargedIso_DR0p3To0p4,
+                                  Double_t ChargedIso_DR0p4To0p5,
+                                  Double_t GammaIso_DR0p0To0p1,
+                                  Double_t GammaIso_DR0p1To0p2,
+                                  Double_t GammaIso_DR0p2To0p3,
+                                  Double_t GammaIso_DR0p3To0p4,
+                                  Double_t GammaIso_DR0p4To0p5,
+                                  Double_t NeutralHadronIso_DR0p0To0p1,
+                                  Double_t NeutralHadronIso_DR0p1To0p2,
+                                  Double_t NeutralHadronIso_DR0p2To0p3,
+                                  Double_t NeutralHadronIso_DR0p3To0p4,
+                                  Double_t NeutralHadronIso_DR0p4To0p5,
+                                  Bool_t printDebug = kFALSE);
+      Double_t MVAValue_ID( Double_t MuPt, 
+                            Double_t MuEta,                             
+                            Bool_t MuIsGlobal,
+                            Bool_t MuIsTracker,
+                            Double_t MuTkNchi2, 
+                            Double_t MuGlobalNchi2, 
+                            Double_t MuNValidHits, 
+                            Double_t MuNTrackerHits, 
+                            Double_t MuNPixelHits, 
+                            Double_t MuNMatches, 
+                            Double_t MuTrkKink, 
+                            Double_t MuSegmentCompatibility, 
+                            Double_t MuCaloCompatibility, 
+                            Double_t MuHadEnergy, 
+                            Double_t MuEmEnergy, 
+                            Double_t MuHadS9Energy, 
+                            Double_t MuEmS9Energy, 
+                            Bool_t printDebug = kFALSE);
 
     protected:      
       std::vector<TMVA::Reader*> fTMVAReader;
