@@ -37,9 +37,9 @@ namespace mithep {
 
     Met pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,const PFMet *iMet);
    
-    Met trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Double_t iDZCut=0.2);
+    Met trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Double_t iDZCut=0.1);
     Met trackRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
-			     const PFCandidateCol *iCands,const Vertex *iVertex,double iDZCut=0.2);
+			     const PFCandidateCol *iCands,const Vertex *iVertex,double iDZCut=0.1);
 
     bool filter (const PFJet *iJet,Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iEta2);
     
@@ -57,12 +57,12 @@ namespace mithep {
 		 const PileupEnergyDensityCol *iPileupEnergyDensity,
 		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		 Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		 Double_t iDZCut=0.2);
+		 Double_t iDZCut=0.1);
     //Corrected Jets
     Met NoPUMet( const PFJetCol       *iJets,
 		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		 Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		 Double_t iDZCut=0.2);
+		 Double_t iDZCut=0.1);
 
     //UnCorrrected Jets
     Met NoPURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,   
@@ -70,27 +70,27 @@ namespace mithep {
 		   const PileupEnergyDensityCol *iPileupEnergyDensity,
 		   const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		   Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		   Double_t iDZCut=0.2);
+		   Double_t iDZCut=0.1);
 
     //Corrrected Jets
     Met NoPURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,   
 		   const PFJetCol       *iJets,
 		   const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		   Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		   Double_t iDZCut=0.2);
+		   Double_t iDZCut=0.1);
 
     //Uncorrected Jets
     Met PUCMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJetCorrector,
 		const PileupEnergyDensityCol *iPileupEnergyDensity,
 		const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		Double_t iDZCut=0.2);
+		Double_t iDZCut=0.1);
 
     //Corrected Jets
     Met PUCMet( const PFJetCol       *iJets,
 		const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		Double_t iDZCut=0.2);
+		Double_t iDZCut=0.1);
 
     //Uncorrected Jets
     Met PUCRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
@@ -98,14 +98,14 @@ namespace mithep {
 		  const PileupEnergyDensityCol *iPileupEnergyDensity,
 		  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		  Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		  Double_t iDZCut=0.2);
+		  Double_t iDZCut=0.1);
 
     //Corrected Jets
     Met PUCRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 		  const PFJetCol       *iJets,
 		  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		  Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		  Double_t iDZCut=0.2);
+		  Double_t iDZCut=0.1);
 
     //Uncorrected Jets
     Met PUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJetCorrector,
@@ -126,14 +126,14 @@ namespace mithep {
 		 const PileupEnergyDensityCol *iPileupEnergyDensity,
 		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		 Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		 Double_t iDZCut=0.2);
+		 Double_t iDZCut=0.1);
 
     //Corrected Jets
     Met PURecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 		 const PFJetCol       *iJets,
 		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
 		 Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
-		 Double_t iDZCut=0.2);
+		 Double_t iDZCut=0.1);
       
     ClassDef(RecoilTools, 0) // Recoil tools
   };
