@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.54 2011/12/31 23:15:32 sixie Exp $
+// $Id: ElectronIDMod.h,v 1.55 2012/01/27 11:48:23 sixie Exp $
 //
 // ElectronIDMod
 //
@@ -81,7 +81,13 @@ namespace mithep
       void                SetApplyDZCut(Bool_t b)                { fApplyDZCut         = b;    }
       void                SetCaloIsoCut(Double_t cut)            { fCaloIsolationCut   = cut;  }
       void                SetCombIsoCut(Double_t cut)            { fCombIsolationCut   = cut;  }
-      void                SetCombRelativeIsoCut(Double_t cut)    { fCombRelativeIsolationCut = cut; }
+      void                SetCombRelativeIsoCut(Double_t cut, Double_t cut_EE = -1.)    { 
+	fCombRelativeIsolationCut = cut; 
+	if ( cut_EE < 0. )
+	  fCombRelativeIsolationCut_EE = cut;
+	else
+	  fCombRelativeIsolationCut_EE = cut_EE;
+      }
       void                SetPFIsoCut(Double_t cut)              { fPFIsolationCut     = cut;  }
       void                SetD0Cut(Double_t cut)                 { fD0Cut = cut;	       }
       void                SetDZCut(Double_t cut)                 { fDZCut = cut;	       }
@@ -156,6 +162,7 @@ namespace mithep
       Double_t                  fHcalIsolationCut;       //cut value for hcal isolation
       Double_t                  fCombIsolationCut;       //cut value for combined isolation
       Double_t                  fCombRelativeIsolationCut; //cut value for combined relative isolation
+      Double_t                  fCombRelativeIsolationCut_EE; //cut value for combined relative isolation (EE)
       Double_t                  fPFIsolationCut;         //cut value for PF isolation, default -1.0
       Bool_t                    fApplyConvFilterType1;   //whether remove conversions using fit method
       Bool_t                    fApplyConvFilterType2;   //whether remove conversions using DCotTheta method

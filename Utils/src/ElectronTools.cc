@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.36 2012/04/18 14:38:38 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.37 2012/04/20 20:25:58 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -359,6 +359,10 @@ Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, 
   Bool_t d0cut = kFALSE;
 
   Double_t d0_real = 1e30;
+
+  if( nVertex >= (int) vertices->GetEntries() )
+    nVertex = vertices->GetEntries() - 1;
+  
   if(nVertex >= 0) d0_real = TMath::Abs(ele->GsfTrk()->D0Corrected(*vertices->At(nVertex)));
   else            {
     Double_t distVtx = 999.0;
@@ -398,6 +402,10 @@ Bool_t ElectronTools::PassDZCut(const Electron *ele, const VertexCol *vertices, 
   Bool_t dzcut = kFALSE;
 
   Double_t distVtx = 999.0;
+
+  if( nVertex >= (int) vertices->GetEntries() )
+    nVertex = vertices->GetEntries()-1;
+  
   if(nVertex >= 0) distVtx = TMath::Abs(ele->GsfTrk()->DzCorrected(*vertices->At(nVertex)));
   else {
     for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
@@ -407,7 +415,7 @@ Bool_t ElectronTools::PassDZCut(const Electron *ele, const VertexCol *vertices, 
       }
     }
   }
-
+  
   if(distVtx < fDZCut) dzcut = kTRUE;
   
   return dzcut;
@@ -1432,3 +1440,26 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
 }
 
 
+Bool_t ElectronTools::PassHggLeptonTagID(const Electron* ele) {
+  
+  float dist = ( ele->ConvPartnerDist()      == -9999.? 9999:TMath::Abs(ele->ConvPartnerDist()));
+  float dcot = ( ele->ConvPartnerDCotTheta() == -9999.? 9999:TMath::Abs(ele->ConvPartnerDCotTheta()));  
+  
+  if (dist < 0.02) return false;
+  if (dcot < 0.02) return false;
+
+  int numInnerHits = ele->Trk()->NExpectedHitsInner();
+  if( numInnerHits > 0 ) return false;
+
+  float coviEtaiEta = ele->CoviEtaiEta();
+  if( ele->SCluster()->AbsEta() < 1.5 && coviEtaiEta > 0.01 ) return false;
+  else if( ele->SCluster()->AbsEta() > 1.5 && coviEtaiEta > 0.031 ) return false;
+
+  Double_t deltaPhiIn   = TMath::Abs(ele->DeltaPhiSuperClusterTrackAtVtx());
+  Double_t deltaEtaIn   = TMath::Abs(ele->DeltaEtaSuperClusterTrackAtVtx());
+
+  if( ele->SCluster()->AbsEta() < 1.5 && ( deltaPhiIn > 0.039 || deltaEtaIn > 0.005 ) ) return false;
+  else if ( ele->SCluster()->AbsEta() > 1.5 && ( deltaPhiIn > 0.028 || deltaEtaIn > 0.007 ) ) return false;
+
+  return true;
+}

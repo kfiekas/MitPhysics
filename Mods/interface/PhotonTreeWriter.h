@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.8 2011/12/17 22:29:30 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.9 2012/03/29 23:41:56 paus Exp $
 //
 // PhotonTreeWriter
 //
@@ -18,6 +18,7 @@
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/PileupInfoCol.h"
 #include "MitAna/DataTree/interface/MCParticleCol.h"
@@ -282,6 +283,7 @@ namespace mithep
   class PhotonTreeWriterDiphotonEvent
   {
     public:
+      Int_t leptonTag;
       Float_t rho;
       Float_t genHiggspt;
       Float_t genHiggsZ;
@@ -384,6 +386,7 @@ namespace mithep
     void                SetPFJetName(const char *n)       { fPFJetName = n;              }
     void                SetPFJetsFromBranch(Bool_t b)     { fPFJetsFromBranch = b;       }
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
+    void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
 
 
@@ -403,6 +406,9 @@ namespace mithep
     void                SetLoopOnGoodElectrons(Bool_t b)     { fLoopOnGoodElectrons = b; }
     void                SetExcludeSinglePrompt(Bool_t b)     { fExcludeSinglePrompt = b; }
     void                SetExcludeDoublePrompt(Bool_t b)     { fExcludeDoublePrompt = b; }
+
+    void                SetLeptonTagElectronsName(TString name) { fLeptonTagElectronsName = name; }
+    void                SetLeptonTagMuonsName    (TString name) { fLeptonTagMuonsName     = name; }
 
   protected:
     void                Process();
@@ -427,6 +433,10 @@ namespace mithep
     TString             fSuperClusterName;
     TString             fPFMetName;
     TString             fPFJetName;
+
+    TString             fLeptonTagElectronsName;
+    TString             fLeptonTagMuonsName;
+
     
     // is it Data or MC?
     Bool_t              fIsData;
@@ -452,6 +462,9 @@ namespace mithep
     const PFMetCol                *fPFMet;
     const JetCol                  *fPFJets;
     
+    const ElectronCol             *fLeptonTagElectrons;
+    const MuonCol                 *fLeptonTagMuons;
+
     // --------------------------------
     Bool_t                         fLoopOnGoodElectrons; //loop over good elecs instead of photons
     Bool_t                         fApplyElectronVeto;   //invert elec veto (for cic sel. only atm)
@@ -462,6 +475,8 @@ namespace mithep
     Bool_t                         fExcludeDoublePrompt;
     
     Bool_t                         fEnableJets;
+
+    Bool_t                         fApplyLeptonTag;
     
     TString                        fPhFixDataFile;
     PhotonFix                      fPhfixph;

@@ -38,6 +38,10 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fSuperClusterName       ("PFSuperClusters"),
   fPFMetName              ("PFMet"),
   fPFJetName              (Names::gkPFJetBrn),
+
+  fLeptonTagElectronsName ("HggLeptonTagElectrons"),
+  fLeptonTagMuonsName     ("HggLeptonTagMuons"),
+
   fIsData                 (false),
   fPhotonsFromBranch      (kTRUE),  
   fPVFromBranch           (kTRUE),
@@ -57,6 +61,10 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPileUp                 (0),
   fSuperClusters          (0),
   fPFJets                 (0),
+
+  fLeptonTagElectrons     (0),
+  fLeptonTagMuons         (0),
+
   fLoopOnGoodElectrons    (kFALSE),
   fApplyElectronVeto      (kTRUE),  
   fWriteDiphotonTree      (kTRUE),
@@ -64,6 +72,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fExcludeSinglePrompt    (kFALSE),
   fExcludeDoublePrompt    (kFALSE),
   fEnableJets             (kFALSE),
+  fApplyLeptonTag         (kFALSE),
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fTupleName              ("hPhotonTree")
@@ -83,6 +92,13 @@ void PhotonTreeWriter::Process()
   // Process entries of the tree. 
   LoadEventObject(fPhotonBranchName,   fPhotons);
   LoadEventObject(fGoodElectronName,   fGoodElectrons);
+
+  // lepton tag collections
+  if( fApplyLeptonTag ) {
+    LoadEventObject(fLeptonTagElectronsName, fLeptonTagElectrons);
+    LoadEventObject(fLeptonTagMuonsName,     fLeptonTagMuons);
+  }
+
   const BaseCollection *egcol = 0;
   if (fLoopOnGoodElectrons)
     egcol = fGoodElectrons;
@@ -134,6 +150,8 @@ void PhotonTreeWriter::Process()
   Float_t _genmass = -100.;
   if (!fIsData)
     FindHiggsPtAndZ(_pth, _decayZ, _genmass);
+
+  fDiphotonEvent->leptonTag = -1; // disabled
 
   fDiphotonEvent->rho = rho;
   fDiphotonEvent->genHiggspt = _pth;
@@ -412,7 +430,41 @@ void PhotonTreeWriter::Process()
     
     //printf("r9 = %5f, photon sigieie = %5f, seed sigieie = %5f\n",phHard->R9(),
     //       phHard->CoviEtaiEta(),sqrt(phHard->SCluster()->Seed()->CoviEtaiEta()));
-    
+
+    if( fApplyLeptonTag ) {
+      // perform lepton tagging
+      // the diphoton event record will have one more entry; i.e. leptonTag
+      // leptonTag = -1   -> lepton-taggng was swicthed off
+      //           =  0   -> event tagged as 'non-lepton-event'
+      //           = +1   -> event tagged as muon-event
+      //           = +2   -> event tagged as electron-event
+      fDiphotonEvent->leptonTag = 0;
+
+      if ( fLeptonTagMuons->GetEntries() > 0 ) {
+	// need to have dR > 1 for with respect to both photons
+	for(UInt_t iMuon = 0; iMuon <fLeptonTagMuons->GetEntries(); ++iMuon) {
+	  if(MathUtils::DeltaR(fLeptonTagMuons->At(iMuon),phHard) < 1.) continue;
+	  if(MathUtils::DeltaR(fLeptonTagMuons->At(iMuon),phSoft) < 1.) continue;
+
+	  fDiphotonEvent->leptonTag = 1;
+	  break;
+	}
+      }
+      if ( fDiphotonEvent->leptonTag < 1 && fLeptonTagElectrons->GetEntries() > 0 ) {
+	for(UInt_t iEle = 0; iEle < fLeptonTagElectrons->GetEntries(); ++iEle) {
+	  if(MathUtils::DeltaR(fLeptonTagElectrons->At(iEle),phHard) < 1.) continue;
+	  if(MathUtils::DeltaR(fLeptonTagElectrons->At(iEle),phSoft) < 1.) continue;
+
+	  // here we also check the mass ....
+	  if ( TMath::Abs( (phHard->Mom()+fLeptonTagElectrons->At(iEle)->Mom()).M()-91.19 ) < 5. ) continue;
+	  if ( TMath::Abs( (phSoft->Mom()+fLeptonTagElectrons->At(iEle)->Mom()).M()-91.19 ) < 5. ) continue;
+	  
+	  fDiphotonEvent->leptonTag = 2;
+	  break;
+	}
+      }
+    }
+
     if (fWriteDiphotonTree)
       hCiCTuple->Fill();  
   }
@@ -483,6 +535,11 @@ void PhotonTreeWriter::SlaveBegin()
 {
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the photon collection branch.
+
+  if( fApplyLeptonTag ) {
+    ReqEventObject(fLeptonTagElectronsName,    fLeptonTagElectrons,    false);  
+    ReqEventObject(fLeptonTagMuonsName,        fLeptonTagMuons,        false);  
+  }
 
   ReqEventObject(fPhotonBranchName,fPhotons,      fPhotonsFromBranch);
   ReqEventObject(fTrackBranchName, fTracks,       true);

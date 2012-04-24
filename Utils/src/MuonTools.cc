@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.24 2012/01/23 20:05:41 sixie Exp $
+// $Id: MuonTools.cc,v 1.25 2012/04/15 12:07:00 sixie Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -435,6 +435,9 @@ Bool_t MuonTools::PassD0Cut(const Muon *mu, const VertexCol *vertices, Double_t 
   const Track *mt = mu->BestTrk();
   if (!mt) return kFALSE;
 
+  if( nVertex >= (int) vertices->GetEntries() )
+    nVertex = vertices->GetEntries() - 1;
+
   Double_t d0_real = 1e30;
   if(nVertex >= 0) d0_real = TMath::Abs(mt->D0Corrected(*vertices->At(nVertex)));
   else            {
@@ -478,6 +481,9 @@ Bool_t MuonTools::PassDZCut(const Muon *mu, const VertexCol *vertices, Double_t 
   Bool_t dzcut = kFALSE;
   const Track *mt = mu->BestTrk();
   if (!mt) return kFALSE;
+
+  if( nVertex >= (int) vertices->GetEntries() )
+    nVertex = vertices->GetEntries() - 1;
 
   Double_t distVtx = 999.0;
   if(nVertex >= 0) distVtx = TMath::Abs(mt->DzCorrected(*vertices->At(nVertex)));

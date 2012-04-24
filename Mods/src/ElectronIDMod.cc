@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.113 2012/02/08 16:57:20 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.114 2012/03/29 20:47:47 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -41,6 +41,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fHcalIsolationCut(5.0),
   fCombIsolationCut(0.1),
   fCombRelativeIsolationCut(0.10),
+  fCombRelativeIsolationCut_EE(0.10),
   fPFIsolationCut(-1.0),
   fApplyConvFilterType1(kTRUE),
   fApplyConvFilterType2(kFALSE),
@@ -221,6 +222,9 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
     case ElectronTools::kVBTFWorkingPoint70Id:
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPoint70Id);
       break;
+    case ElectronTools::kHggLeptonTagId:
+      idcut = ElectronTools::PassHggLeptonTagID(ele);
+      break;
     case ElectronTools::kMVAID_BDTG_NoIPInfo:
     {
       idcut = ElectronTools::PassCustomID(ele, ElectronTools::kVBTFWorkingPointFakeableId);
@@ -289,8 +293,13 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     case ElectronTools::kCombinedRelativeConeAreaCorrected:
     {
       Double_t totalIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03() - rho * TMath::Pi() * 0.3 * 0.3;
-      if (totalIso < (ele->Pt()*fCombRelativeIsolationCut) )
-        isocut = kTRUE;
+      if (ele->SCluster()->AbsEta() < 1.5)  { // Barrel
+	if (totalIso < (ele->Pt()*fCombRelativeIsolationCut) )
+	  isocut = kTRUE;
+      } else {
+	if (totalIso < (ele->Pt()*fCombRelativeIsolationCut_EE) )
+	  isocut = kTRUE;
+      }
     }
     break;
     case ElectronTools::kPFIso:
@@ -408,7 +417,7 @@ void ElectronIDMod::Process()
   ElectronOArr *GoodElectrons = new ElectronOArr;
   GoodElectrons->SetName(fGoodElectronsName);
 
-  for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
+  for (UInt_t i=0; i<fElectrons->GetEntries() && fVertices->GetEntries() > 0 ; ++i) {
     const Electron *e = fElectrons->At(i);        
 
     if (e->SCluster() == 0) 
@@ -622,6 +631,10 @@ void ElectronIDMod::Setup()
     fElIdType = ElectronTools::kMVAID_BDTG_WithIPInfo; 
   else if (fElectronIDType.CompareTo("MVA_BDTG_IDIsoCombined") == 0)
     fElIdType = ElectronTools::kMVAID_BDTG_IDIsoCombined; 
+
+  else if (fElectronIDType.CompareTo("Hgg_LeptonTag_WP85Id") == 0)
+    fElIdType = ElectronTools::kHggLeptonTagId;
+
   else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified electron identification %s is not defined.",

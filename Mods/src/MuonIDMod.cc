@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.67 2012/03/29 20:47:47 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.68 2012/03/30 01:08:39 paus Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -90,7 +90,7 @@ void MuonIDMod::Process()
 
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
-  for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
+  for (UInt_t i=0; i<fMuons->GetEntries() && fVertices->GetEntries() > 0 ; ++i) {
     const Muon *mu = fMuons->At(i);
 
     Bool_t pass = kFALSE;

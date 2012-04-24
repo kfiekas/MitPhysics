@@ -42,7 +42,8 @@ namespace mithep {
         kVBTFWorkingPoint70Id,
         kMVAID_BDTG_NoIPInfo,
         kMVAID_BDTG_WithIPInfo,
-        kMVAID_BDTG_IDIsoCombined
+        kMVAID_BDTG_IDIsoCombined,
+	kHggLeptonTagId
       };
 
       enum EElIsoType {
@@ -118,6 +119,8 @@ namespace mithep {
       static Double_t     Likelihood(ElectronLikelihood *LH, const Electron *ele);
       static Double_t     ElectronEffectiveArea(EElectronEffectiveAreaType type, Double_t Eta, 
                                                 EElectronEffectiveAreaTarget EffectiveAreaTarget = kEleEAData2011);
+
+      static Bool_t       PassHggLeptonTagID(const Electron *el);
 
     ClassDef(ElectronTools, 0) // Muon tools
   };
