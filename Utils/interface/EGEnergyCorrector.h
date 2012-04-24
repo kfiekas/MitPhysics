@@ -42,7 +42,7 @@ namespace mithep {
       EGEnergyCorrector();
       ~EGEnergyCorrector(); 
 
-      void Initialize(Bool_t ismc, TString phfixstring, TString phfixfile, TString regweights);
+      void Initialize(TString phfixstring, TString phfixfile, TString regweights);
       Bool_t IsInitialized() const { return fIsInitialized; }
       
       void CorrectEnergyWithError(Photon *p, const VertexCol *vtxs = 0, UInt_t version=1);
@@ -63,34 +63,6 @@ namespace mithep {
       Bool_t fIsMC;
 
       Float_t *fVals;
-      
-      Float_t r9;
-      Float_t e5x5norm;
-      Float_t scrawe;
-      Float_t scpsenorm;
-      Float_t sceta;
-      Float_t scphi;
-      Float_t scetawidth;
-      Float_t scphiwidth;
-      Float_t hovere;
-      Float_t sigietaieta;
-      Float_t etac;
-      Float_t etas;
-      Float_t etam;
-      Float_t phic;
-      Float_t phis;
-      Float_t phim;  
-      Float_t xz;
-      Float_t xc;
-      Float_t xs;
-      Float_t xm;
-      Float_t yz;
-      Float_t yc;
-      Float_t ys;
-      Float_t ym; 
-      
-      Float_t fSpectator;
-      
       
     ClassDef(EGEnergyCorrector, 0) // Muon tools
       };

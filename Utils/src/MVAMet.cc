@@ -4,9 +4,8 @@
 #include "MitAna/DataTree/interface/StableData.h"
 #include <TFile.h>
 #include <TRandom3.h>
-//#include "TMVA/Tools.h"
-//#include "TMVA/Reader.h"
-
+#include "CondFormats/EgammaObjects/interface/GBRForest.h"
+#include "Cintex/Cintex.h"
 
 ClassImp(mithep::MVAMet)
 
@@ -132,6 +131,8 @@ void MVAMet::Initialize(TString iJetLowPtFile,
   fU1Vals  = new Float_t[25];
   fCovVals = new Float_t[26];
 
+  ROOT::Cintex::Cintex::Enable();   
+  
   TFile *lPhiForest = new TFile(iPhiWeights,"READ");
   fPhiReader = (GBRForest*)lPhiForest->Get(fPhiMethodName);
   for(int i0 = 0; i0 < 23; i0++) fPhiVals[i0] = 0;

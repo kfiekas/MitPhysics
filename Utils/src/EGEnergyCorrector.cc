@@ -1,15 +1,13 @@
-// $Id: EGEnergyCorrector.cc,v 1.5 2011/12/11 00:03:05 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.6 2012/03/22 15:54:07 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
-#include "MitPhysics/Utils/interface/GBRForest.h"
 #include "MitAna/DataTree/interface/StableData.h"
+#include "CondFormats/EgammaObjects/interface/GBRForest.h"
+#include "Cintex/Cintex.h"
 #include <TFile.h>
 #include <TRandom3.h>
-#include "TMVA/Tools.h"
-#include "TMVA/Reader.h"
-
 
 ClassImp(mithep::EGEnergyCorrector)
 
@@ -23,7 +21,6 @@ fReaderee(0),
 fReadereevariance(0),
 fMethodname("BDTG method"),
 fIsInitialized(kFALSE),
-fIsMC(kFALSE),
 fVals(0)
 {
   // Constructor.
@@ -42,9 +39,8 @@ EGEnergyCorrector::~EGEnergyCorrector()
 }
 
 //--------------------------------------------------------------------------------------------------
-void EGEnergyCorrector::Initialize(Bool_t ismc, TString phfixstring, TString phfixfile, TString regweights) {
+void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TString regweights) {
     fIsInitialized = kTRUE;
-    fIsMC = ismc;
     fPhFix.initialise(std::string(phfixstring),std::string(phfixfile));
 
     if (fVals) delete [] fVals;
@@ -54,6 +50,8 @@ void EGEnergyCorrector::Initialize(Bool_t ismc, TString phfixstring, TString phf
     if (fReadereevariance) delete fReadereevariance;    
     
     fVals = new Float_t[73];
+    
+    ROOT::Cintex::Cintex::Enable();   
     
     TFile *fgbr = new TFile(regweights,"READ");
     fReadereb = (GBRForest*)fgbr->Get("EBCorrection");

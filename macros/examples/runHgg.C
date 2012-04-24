@@ -1,4 +1,4 @@
-// $Id: runHgg.C,v 1.5 2012/03/22 15:54:08 bendavid Exp $
+// $Id: runHgg.C,v 1.6 2012/04/03 08:23:23 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -30,8 +30,8 @@
 //--------------------------------------------------------------------------------------------------
 void runHgg(const char *fileset    = "0000",
             const char *skim       = "noskim",
-	    //const char *dataset = "f11--h123gg-gf-v14b-pu",
-            const char *dataset = "r11a-pho-j16-v1",   
+	    const char *dataset = "f11--h123gg-gf-v14b-pu",
+            //const char *dataset = "r11a-pho-j16-v1",   
             const char *book       = "local/filefi/025",
             const char *catalogDir = "/home/cmsprod/catalog",
             const char *outputName = "hgg",

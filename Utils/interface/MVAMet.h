@@ -22,9 +22,9 @@
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 #include "MitPhysics/Utils/interface/RecoilTools.h"
-#include "MitPhysics/Utils/interface/GBRForest.h"
 
 class TRandom3;
+class GBRForest;
 
 namespace mithep {
   class MVAMet {

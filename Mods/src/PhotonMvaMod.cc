@@ -67,7 +67,7 @@ PhotonMvaMod::PhotonMvaMod(const char *name, const char *title) :
   // ---------------------------------------
   fDoRegression      (kTRUE),
   fPhFixString       ("4_2"),
-  fRegWeights         (gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/gbrv2ph.root")),
+  fRegWeights         (gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/gbrv2ph_52x.root")),
   // ---------------------------------------
   fApplyEleVeto      (true),
   //MVA
@@ -130,7 +130,7 @@ void PhotonMvaMod::Process()
 
     if (fDoRegression) {
       if (!egcor.IsInitialized()) {
-        egcor.Initialize(!fIsData,fPhFixString,fPhFixFile,fRegWeights);
+        egcor.Initialize(fPhFixString,fPhFixFile,fRegWeights);
       }
     
       egcor.CorrectEnergyWithError(outph,fPV,fRegressionVersion);
