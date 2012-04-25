@@ -1,4 +1,4 @@
-// $Id: MVAMetMod.cc,v 1.7 2012/04/07 20:12:20 ceballos Exp $
+// $Id: MVAMetMod.cc,v 1.8 2012/04/24 21:28:00 pharris Exp $
 
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -108,7 +108,7 @@ void MVAMetMod::SlaveBegin()
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmet_52.root"))),
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetphi_52.root"))),
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu1cov_52.root"))),
-                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetphiu1cov_52.root")))
+                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu2cov_52.root")))
                       );
 }
 
