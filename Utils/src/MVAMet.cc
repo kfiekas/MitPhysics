@@ -421,9 +421,11 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  if(fCov->Determinant() != 0) fCov->Invert();
-  fUncertainty   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1)); 
-  fSignificance  = lMet.Pt()/fUncertainty;
+  TMatrixD lInv(2,2); 
+  lInv(0,0) = (*fCov)(0,0); lInv(1,1) = (*fCov)(1,1); lInv(1,0) = (*fCov)(1,0); lInv(0,1) = (*fCov)(0,1);
+  if(lInv.Determinant() != 0) lInv.Invert();
+  fSignificance   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(lInv)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(lInv)(1,0)  + lUVec.Py()*lUVec.Py()*(lInv)(1,1)); 
+  fUncertainty     = sqrt(lCovU1+lCovU2);
   
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
@@ -541,9 +543,11 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  if(fCov->Determinant() != 0) fCov->Invert();
-  fUncertainty   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1))/lUVec.Pt(); 
-  fSignificance  = lMet.Pt()/fUncertainty;
+  TMatrixD lInv(2,2); 
+  lInv(0,0) = (*fCov)(0,0); lInv(1,1) = (*fCov)(1,1); lInv(1,0) = (*fCov)(1,0); lInv(0,1) = (*fCov)(0,1);
+  if(lInv.Determinant() != 0) lInv.Invert();
+  fSignificance   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(lInv)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(lInv)(1,0)  + lUVec.Py()*lUVec.Py()*(lInv)(1,1)); 
+  fUncertainty     = sqrt(lCovU1+lCovU2);
 
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
@@ -679,9 +683,12 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  if(fCov->Determinant() != 0) fCov->Invert();
-  fUncertainty   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1))/lUVec.Pt(); 
-  fSignificance  = lMet.Pt()/fUncertainty;
+  TMatrixD lInv(2,2); 
+  lInv(0,0) = (*fCov)(0,0); lInv(1,1) = (*fCov)(1,1); lInv(1,0) = (*fCov)(1,0); lInv(0,1) = (*fCov)(0,1);
+  if(lInv.Determinant() != 0) lInv.Invert();
+  fSignificance   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(lInv)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(lInv)(1,0)  + lUVec.Py()*lUVec.Py()*(lInv)(1,1)); 
+  fUncertainty     = sqrt(lCovU1+lCovU2);
+
 
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
@@ -811,9 +818,11 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   (*fCov)(1,0)   = -lCovU1*sin(fUPhiMVA)*cos(fUPhiMVA)+lCovU2*sin(fUPhiMVA)*cos(fUPhiMVA);
   (*fCov)(0,1)   =  (*fCov)(1,0);
   (*fCov)(1,1)   =  lCovU1*lSin2+lCovU2*lCos2;
-  if(fCov->Determinant() != 0) fCov->Invert();
-  fUncertainty   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(*fCov)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(*fCov)(1,0)  + lUVec.Py()*lUVec.Py()*(*fCov)(1,1))/lUVec.Pt(); 
-  fSignificance  = lMet.Pt()/fUncertainty;
+  TMatrixD lInv(2,2); 
+  lInv(0,0) = (*fCov)(0,0); lInv(1,1) = (*fCov)(1,1); lInv(1,0) = (*fCov)(1,0); lInv(0,1) = (*fCov)(0,1);
+  if(lInv.Determinant() != 0) lInv.Invert();
+  fSignificance   = TMath::Sqrt(lUVec.Px()*lUVec.Px()*(lInv)(0,0) + 2.*lUVec.Px()*lUVec.Py()*(lInv)(1,0)  + lUVec.Py()*lUVec.Py()*(lInv)(1,1)); 
+  fUncertainty     = sqrt(lCovU1+lCovU2);  
   
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
