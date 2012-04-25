@@ -1,4 +1,4 @@
-// $Id: MVAMetMod.cc,v 1.8 2012/04/24 21:28:00 pharris Exp $
+// $Id: MVAMetMod.cc,v 1.9 2012/04/25 10:12:00 pharris Exp $
 
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -104,7 +104,7 @@ void MVAMetMod::SlaveBegin()
   fMVAMet    = new MVAMet();
   fMVAMet->Initialize(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
-                      TString(getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")),
+                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py"))),
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmet_52.root"))),
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetphi_52.root"))),
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu1cov_52.root"))),
