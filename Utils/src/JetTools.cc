@@ -529,7 +529,7 @@ Double_t JetTools::betaStar(const PFJet *iJet,const Vertex *iVertex,const Vertex
     const Track* pTrack      = pPF->TrackerTrk();
     //if(pPF->GsfTrk()) pTrack = pPF->GsfTrk(); ==> not used in CMSSW
     if(pTrack == 0) continue;
-    lTotal += pPF->Pt();
+    lTotal += pTrack->Pt();
     double pDZPV  = fabs(pTrack->DzCorrected(*iVertex));
     double pDZMin = pDZPV;
     for(unsigned int i1 = 0; i1 < iVertices->GetEntries(); i1++) {
