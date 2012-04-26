@@ -342,11 +342,11 @@ Double_t JetTools::Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_
   double Pt_jetsTot = 0. ;
   
   for(UInt_t i=0;i<jet->NPFCands();i++){
-    if(jet->PFCand(i)->BestTrk()){ 
-      Pt_jetsTot += jet->PFCand(i)->BestTrk()->Pt();
-      double pDz = TMath::Abs(jet->PFCand(i)->BestTrk()->DzCorrected(*vertex));
+    if(jet->PFCand(i)->Trk()){ 
+      Pt_jetsTot += jet->PFCand(i)->Trk()->Pt();
+      double pDz = TMath::Abs(jet->PFCand(i)->Trk()->DzCorrected(*vertex));
       if(pDz < delta_z){
-        Pt_jets += jet->PFCand(i)->BestTrk()->Pt();
+        Pt_jets += jet->PFCand(i)->Trk()->Pt();
       }
     }
   }
@@ -527,16 +527,18 @@ Double_t JetTools::betaStar(const PFJet *iJet,const Vertex *iVertex,const Vertex
   for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) {
     const PFCandidate* pPF   = iJet->PFCand(i0);
     const Track* pTrack      = pPF->TrackerTrk();
-    if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
+    //if(pPF->GsfTrk()) pTrack = pPF->GsfTrk(); ==> not used in CMSSW
     if(pTrack == 0) continue;
-
     lTotal += pPF->Pt();
+    double pDZPV  = fabs(pTrack->DzCorrected(*iVertex));
+    double pDZMin = pDZPV;
     for(unsigned int i1 = 0; i1 < iVertices->GetEntries(); i1++) {
       const Vertex *pV = iVertices->At(i1);
-      if(fabs(pTrack->DzCorrected(*pV))             < iDZCut  &&
-	 (pV->Position() - iVertex->Position()).R() > 0.02 )
-	{ lPileup  +=pPF->Pt();}
+      if(pV->Ndof() < 4 ||
+	 (pV->Position() - iVertex->Position()).R() > 0.02 ) continue;
+      pDZMin = TMath::Min(pDZMin,fabs(pTrack->DzCorrected(*pV)));
     }
+    if(pDZPV > 0.2 && pDZMin < 0.2) lPileup += pTrack->Pt(); 
   }
   if(lTotal == 0) lTotal = 1;
   return lPileup/(lTotal);
