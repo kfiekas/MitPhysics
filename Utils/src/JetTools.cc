@@ -535,7 +535,7 @@ Double_t JetTools::betaStar(const PFJet *iJet,const Vertex *iVertex,const Vertex
     for(unsigned int i1 = 0; i1 < iVertices->GetEntries(); i1++) {
       const Vertex *pV = iVertices->At(i1);
       if(pV->Ndof() < 4 ||
-	 (pV->Position() - iVertex->Position()).R() > 0.02 ) continue;
+	 (pV->Position() - iVertex->Position()).R() < 0.02 ) continue;
       pDZMin = TMath::Min(pDZMin,fabs(pTrack->DzCorrected(*pV)));
     }
     if(pDZPV > 0.2 && pDZMin < 0.2) lPileup += pTrack->Pt(); 
