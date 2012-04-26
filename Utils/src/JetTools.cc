@@ -491,7 +491,7 @@ Double_t JetTools::impactParameter(const PFJet *iJet,const Vertex *iVertex,bool 
   double lDZCorr = -1000;
   for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) { 
     const PFCandidate *pCand = iJet->PFCand(i0);
-    if(pCand->Trk() == 0) continue;
+    if(pCand->TrackerTrk() == 0) continue;
     //if(pCand->Pt() < 1.) continue; => previous iterations
     if(iDZ)  lDZCorr = fabs(pCand->TrackerTrk()->DzCorrected(*iVertex));
     if(!iDZ) lDZCorr = fabs(pCand->TrackerTrk()->D0Corrected(*iVertex));
