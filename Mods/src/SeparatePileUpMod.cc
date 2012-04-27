@@ -1,4 +1,4 @@
-// $Id: SeparatePileUpMod.cc,v 1.9 2010/07/06 08:33:16 sixie Exp $
+// $Id: SeparatePileUpMod.cc,v 1.1 2012/04/27 21:03:35 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/SeparatePileUpMod.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
@@ -15,8 +15,10 @@ SeparatePileUpMod::SeparatePileUpMod(const char *name, const char *title) :
   fPFCandidatesName(Names::gkPFCandidatesBrn),
   fPFPileUpName("PFPileUp"),
   fPFNoPileUpName("PFNoPileUp"),
+  fAllVertexName(Names::gkPVBrn),
   fVertexName(ModNames::gkGoodVertexesName),
   fPFCandidates(0),
+  fAllVertices(0),
   fVertices(0),
   fCheckClosestZVertex(kTRUE)
 {
@@ -36,6 +38,7 @@ void SeparatePileUpMod::Process()
   PFCandidateOArr *pfNoPileUp = new PFCandidateOArr;
   pfNoPileUp->SetName(fPFNoPileUpName);
 
+  LoadBranch(fAllVertexName);
   fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
   for(UInt_t i = 0; i < fPFCandidates->GetEntries(); i++) {
@@ -54,8 +57,8 @@ void SeparatePileUpMod::Process()
         const Vertex *closestVtx = 0;
         Double_t dzmin = 10000;
 
-	for(UInt_t j = 0; j < fVertices->GetEntries(); j++) {
-	  const Vertex *vtx = fVertices->At(j);
+	for(UInt_t j = 0; j < fAllVertices->GetEntries(); j++) {
+	  const Vertex *vtx = fAllVertices->At(j);
 	  assert(vtx);
 
 	  if(pf->HasTrackerTrk() && 
@@ -104,5 +107,6 @@ void SeparatePileUpMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the Tau collection branch.
 
+  ReqBranch(fAllVertexName,    fAllVertices);
   ReqBranch(fPFCandidatesName, fPFCandidates);
 }

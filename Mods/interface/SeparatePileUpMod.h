@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: SeparatePileUpMod.h,v 1.6 2009/06/15 15:00:21 loizides Exp $
+// $Id: SeparatePileUpMod.h,v 1.1 2012/04/27 21:03:34 ceballos Exp $
 //
 // SeparatePileUpMod
 //
@@ -26,6 +26,7 @@ namespace mithep
       void                SetPFCandidatesName(const char *n)    { fPFCandidatesName  = n;  }  
       void                SetPFPileUpName(const char *n)	{ fPFPileUpName  = n;      }  
       void                SetPFNoPileUpName(const char *n)	{ fPFNoPileUpName  = n;    }  
+      void                SetAllVertexName(const char *n)       { fAllVertexName = n;      }
       void                SetVertexName(const char *n)          { fVertexName = n;         }
       void                SetCheckClosestZVertex(Bool_t b)      { fCheckClosestZVertex = b;}
 
@@ -36,12 +37,14 @@ namespace mithep
       TString               fPFCandidatesName;    //name of PF collection (input)
       TString               fPFPileUpName;        //name of exported PFPileUp collection (output)
       TString               fPFNoPileUpName;      //name of exported PFNoPileUp collection (output)
-      TString               fVertexName;	  //name of vertex collection
+      TString               fAllVertexName;	  //name of all vertex collection
+      TString               fVertexName;	  //name of good vertex collection
       const PFCandidateCol *fPFCandidates;	  //!pfcandidate branch
-      const VertexCol      *fVertices;  	  //!vertices branches
+      const VertexCol      *fAllVertices;  	  //!all vertices branches
+      const VertexCol      *fVertices;  	  //!good vertices branches
       Bool_t                fCheckClosestZVertex; //boolean to use the closest vertex approach
 
-    ClassDef(SeparatePileUpMod, 1) // Tau identification module
+    ClassDef(SeparatePileUpMod, 1) // PFNoPU identification module
   };
 }
 #endif
