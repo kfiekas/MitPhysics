@@ -517,7 +517,7 @@ Double_t JetTools::frac(const PFJet *iJet,Double_t iDRMax,Double_t iDRMin,Int_t 
     Double_t pDR = MathUtils::DeltaR(iJet->Mom(),pCand->Mom());
     if(pDR > iDRMax) continue;
     if(pDR < iDRMax-0.1) continue;
-    lFrac += pCand->Pt()/iJet->Pt();
+    lFrac += pCand->Pt()/iJet->RawMom().Pt();
   }
   return lFrac;
 }
