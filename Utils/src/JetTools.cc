@@ -544,12 +544,12 @@ Double_t JetTools::betaStar(const PFJet *iJet,const Vertex *iVertex,const Vertex
   return lPileup/(lTotal);
 }
 Bool_t  JetTools::passPFLooseId(const PFJet *iJet) { 
-  if(iJet->E()                              == 0)       return false;
-  if(iJet->NeutralHadronEnergy()/iJet->E()  >  0.99)    return false;
-  if(iJet->NeutralEmEnergy()/iJet->E()      >  0.99)    return false;
+  if(iJet->RawMom().E()                              == 0)       return false;
+  if(iJet->NeutralHadronEnergy()/iJet->RawMom().E()  >  0.99)    return false;
+  if(iJet->NeutralEmEnergy()/iJet->RawMom().E()      >  0.99)    return false;
   if(iJet->NConstituents()                  <  2)	return false;
-  if(iJet->ChargedHadronEnergy()/iJet->E()  <= 0     && fabs(iJet->Eta()) < 2.4 ) return false;
-  if(iJet->ChargedEmEnergy()/iJet->E()      >  0.99  && fabs(iJet->Eta()) < 2.4 ) return false;
+  if(iJet->ChargedHadronEnergy()/iJet->RawMom().E()  <= 0     && fabs(iJet->Eta()) < 2.4 ) return false;
+  if(iJet->ChargedEmEnergy()/iJet->RawMom().E()      >  0.99  && fabs(iJet->Eta()) < 2.4 ) return false;
   if(iJet->ChargedMultiplicity()            < 1      && fabs(iJet->Eta()) < 2.4 ) return false;
   return true;
 }
