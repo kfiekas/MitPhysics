@@ -43,7 +43,8 @@ namespace mithep {
         kMVAID_BDTG_NoIPInfo,
         kMVAID_BDTG_WithIPInfo,
         kMVAID_BDTG_IDIsoCombined,
-	kHggLeptonTagId
+	kHggLeptonTagId,
+        kMVAID_BDTG_IDEGamma2012TrigV0
       };
 
       enum EElIsoType {

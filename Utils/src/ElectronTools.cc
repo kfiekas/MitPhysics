@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.37 2012/04/20 20:25:58 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.38 2012/04/24 11:45:53 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1433,8 +1433,6 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
       if (fabs(SCEta) >= 2.4) EffectiveArea = 0.220;
     }
   }
-
-
 
   return EffectiveArea;  
 }
