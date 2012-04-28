@@ -909,21 +909,21 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
     } //in 1.0 dr cone
   } //loop over PF candidates
   
-  Double_t fMVAVar_ChargedIso_DR0p0To0p1  = 0;
-  Double_t fMVAVar_ChargedIso_DR0p1To0p2  = 0;
-  Double_t fMVAVar_ChargedIso_DR0p2To0p3  = 0;
-  Double_t fMVAVar_ChargedIso_DR0p3To0p4  = 0;
-  Double_t fMVAVar_ChargedIso_DR0p4To0p5  = 0;
-  Double_t fMVAVar_GammaIso_DR0p0To0p1  = 0;
-  Double_t fMVAVar_GammaIso_DR0p1To0p2  = 0;
-  Double_t fMVAVar_GammaIso_DR0p2To0p3  = 0;
-  Double_t fMVAVar_GammaIso_DR0p3To0p4  = 0;
-  Double_t fMVAVar_GammaIso_DR0p4To0p5  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p0To0p1  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p1To0p2  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p2To0p3  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p3To0p4  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p4To0p5  = 0;
+//   Double_t fMVAVar_ChargedIso_DR0p0To0p1  = 0;
+//   Double_t fMVAVar_ChargedIso_DR0p1To0p2  = 0;
+//   Double_t fMVAVar_ChargedIso_DR0p2To0p3  = 0;
+//   Double_t fMVAVar_ChargedIso_DR0p3To0p4  = 0;
+//   Double_t fMVAVar_ChargedIso_DR0p4To0p5  = 0;
+//   Double_t fMVAVar_GammaIso_DR0p0To0p1  = 0;
+//   Double_t fMVAVar_GammaIso_DR0p1To0p2  = 0;
+//   Double_t fMVAVar_GammaIso_DR0p2To0p3  = 0;
+//   Double_t fMVAVar_GammaIso_DR0p3To0p4  = 0;
+//   Double_t fMVAVar_GammaIso_DR0p4To0p5  = 0;
+//   Double_t fMVAVar_NeutralHadronIso_DR0p0To0p1  = 0;
+//   Double_t fMVAVar_NeutralHadronIso_DR0p1To0p2  = 0;
+//   Double_t fMVAVar_NeutralHadronIso_DR0p2To0p3  = 0;
+//   Double_t fMVAVar_NeutralHadronIso_DR0p3To0p4  = 0;
+//   Double_t fMVAVar_NeutralHadronIso_DR0p4To0p5  = 0;
 
   fMVAVar_ChargedIso_DR0p0To0p1   = TMath::Min((tmpChargedIso_DR0p0To0p1)/mu->Pt(), 2.5);
   fMVAVar_ChargedIso_DR0p1To0p2   = TMath::Min((tmpChargedIso_DR0p1To0p2)/mu->Pt(), 2.5);
