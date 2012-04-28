@@ -41,7 +41,8 @@ namespace mithep {
         kIDIsoCombined,         // ID variables , PFIso03 , PFIso04
         kIDEGamma2012TrigV0,    // EGamma certified (Spring 2012) ID-only MVA
         kIDEGamma2012NonTrigV0, // EGamma certified (Spring 2012) ID-only MVA
-        kIsoRingsV0             // Isolation MVA with IsoRings as input
+        kIsoRingsV0,            // Isolation MVA with IsoRings as input
+        kIDHWW2012TrigV0        // HWW certified (Spring 2012) ID-only MVA
       };
 
 
