@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.26 2011/12/31 23:16:13 sixie Exp $
+// $Id: IsolationTools.cc,v 1.27 2012/04/28 11:34:15 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -116,6 +116,40 @@ Double_t IsolationTools::CaloTowerEmIsolation(const ThreeVector *p, Double_t ext
     }
   }
   return sumEt;
+}
+
+//--------------------------------------------------------------------------------------------------
+Double_t IsolationTools::PFRadialMuonIsolation(const Muon *p, const PFCandidateCol *PFCands, 
+                                               Double_t ptMin, Double_t extRadius)
+{
+  //Computes the PF Radial Muon Isolation: Summed Transverse Momentum of all PF candidates inside an 
+  //annulus around the particle seed track with a dR weighting
+
+  double RadialIso = 0;
+  for (UInt_t i=0; i<PFCands->GetEntries();i++) {   
+    const PFCandidate *pf = PFCands->At(i);
+
+    // exclude muon
+    if(pf->TrackerTrk() && p->TrackerTrk() &&
+       pf->TrackerTrk() == p->TrackerTrk()) continue;
+
+    Double_t dr = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    
+    // inner cone veto for tracks
+    if (dr < 0.01) continue;
+
+    // pt cut applied to neutrals
+    if(!pf->HasTrk() && pf->Pt() <= ptMin) continue;
+
+    // exclude PFMuons and PFElectrons within the cone
+    if (pf->HasTrk() &&
+       (pf->PFType() == PFCandidate::eElectron || 
+        pf->PFType() == PFCandidate::eMuon)) continue;
+
+    // add the pf pt if it is inside the extRadius 
+    if (dr < extRadius) RadialIso += pf->Pt() * (1.0 - 3.0*dr);
+  }
+  return RadialIso;
 }
 
 //--------------------------------------------------------------------------------------------------

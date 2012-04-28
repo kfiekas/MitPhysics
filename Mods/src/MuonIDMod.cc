@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.68 2012/03/30 01:08:39 paus Exp $
+// $Id: MuonIDMod.cc,v 1.69 2012/04/24 11:45:53 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -46,6 +46,7 @@ ClassImp(mithep::MuonIDMod)
   fBeamSpot(0),
   fTracks(0),
   fPFCandidates(0),
+  fPFNoPileUpCands(0),
   fIntRadius(0.0),
   fNonIsolatedMuons(0),
   fNonIsolatedElectrons(0),
@@ -80,9 +81,13 @@ void MuonIDMod::Process()
   if(fMuIsoType == kTrackCaloSliding || 
      fMuIsoType == kCombinedRelativeConeAreaCorrected || 
      fMuIsoType == kPFIsoEffectiveAreaCorrected || 
-     fMuIsoType == kMVAIso_BDTG_IDIso  
+     fMuIsoType == kMVAIso_BDTG_IDIso
     ) {
     LoadEventObject(fPileupEnergyDensityName, fPileupEnergyDensity);
+  }
+  if(fMuIsoType == kPFRadialIso){
+    // Name is hardcoded, can be changed if someone feels to do it
+    fPFNoPileUpCands = GetObjThisEvt<PFCandidateCol>("PFNoPileUp");    
   }
 
   MuonOArr *CleanMuons = new MuonOArr;
@@ -357,6 +362,23 @@ void MuonIDMod::Process()
             isocut = kTRUE;
 	}
         break;
+      case kPFRadialIso:
+        {
+          Double_t pfIsoCutValue = 9999;
+          if(fPFIsolationCut > 0){
+            pfIsoCutValue = fPFIsolationCut;
+          } else {
+            if (mu->Pt() > 20) {
+              pfIsoCutValue = 0.10;
+            } else {
+              pfIsoCutValue = 0.05;
+            }
+          }
+          Double_t totalIso =  IsolationTools::PFRadialMuonIsolation(mu, fPFNoPileUpCands, 1.0, 0.3);
+          if (totalIso < (mu->Pt()*pfIsoCutValue) )
+            isocut = kTRUE;
+	}
+        break;
       case kPFIsoEffectiveAreaCorrected:
         {
           Double_t pfIsoCutValue = 9999;
@@ -527,6 +549,8 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kCombinedRelativeEffectiveAreaCorrected;
   else if (fMuonIsoType.CompareTo("PFIso") == 0)
     fMuIsoType = kPFIso;
+  else if (fMuonIsoType.CompareTo("PFRadialIso") == 0)
+    fMuIsoType = kPFRadialIso;
   else if (fMuonIsoType.CompareTo("PFIsoEffectiveAreaCorrected") == 0)
     fMuIsoType = kPFIsoEffectiveAreaCorrected;
   else if (fMuonIsoType.CompareTo("PFIsoNoL") == 0)

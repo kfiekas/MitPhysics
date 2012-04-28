@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.10 2011/07/07 20:22:19 sixie Exp $
+// $Id: MetTools.cc,v 1.11 2011/09/17 13:55:23 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -13,6 +13,7 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
+  float CHSNumeratorX  =0, CHSNumeratorY  =0, NHSNumeratorX  =0, NHSNumeratorY  =0;
 
   // muons Pt
   for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
@@ -22,6 +23,18 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
 
   // PF candidates pT
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
+
+    // CHS computation
+    if (fPFCandidates->At(i)->HasTrk()){
+	CHSNumeratorX -= fPFCandidates->At(i)->Px();
+	CHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
+    // NHS computation
+    if (fPFCandidates->At(i)->HasTrk() ||
+       (fPFCandidates->At(i)->AbsEta() < 3.0 && fPFCandidates->At(i)->Pt() > 4.0)){
+	NHSNumeratorX -= fPFCandidates->At(i)->Px();
+	NHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
 
     // charged
     if (fPFCandidates->At(i)->HasTrackerTrk()){
@@ -55,6 +68,8 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
 
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
   fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
+  fCHSMet = mithep::Met(CHSNumeratorX, CHSNumeratorY);
+  fNHSMet = mithep::Met(NHSNumeratorX, NHSNumeratorY);
 }
 
 MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, const Vertex *fVertex, 
@@ -62,6 +77,7 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
+  float CHSNumeratorX  =0, CHSNumeratorY  =0, NHSNumeratorX  =0, NHSNumeratorY  =0;
 
   // electrons Pt
   for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
@@ -71,6 +87,18 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
 
   // PF candidates pT
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
+
+    // CHS computation
+    if (fPFCandidates->At(i)->HasTrk()){
+	CHSNumeratorX -= fPFCandidates->At(i)->Px();
+	CHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
+    // NHS computation
+    if (fPFCandidates->At(i)->HasTrk() ||
+       (fPFCandidates->At(i)->AbsEta() < 3.0 && fPFCandidates->At(i)->Pt() > 4.0)){
+	NHSNumeratorX -= fPFCandidates->At(i)->Px();
+	NHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
 
     // charged
     if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()){
@@ -105,6 +133,8 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
 
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
   fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
+  fCHSMet = mithep::Met(CHSNumeratorX, CHSNumeratorY);
+  fNHSMet = mithep::Met(NHSNumeratorX, NHSNumeratorY);
 }
 
 
@@ -114,6 +144,7 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
+  float CHSNumeratorX  =0, CHSNumeratorY  =0, NHSNumeratorX  =0, NHSNumeratorY  =0;
 
   // muons Pt
   for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
@@ -130,6 +161,18 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
   // PF candidates pT
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
     
+    // CHS computation
+    if (fPFCandidates->At(i)->HasTrk()){
+	CHSNumeratorX -= fPFCandidates->At(i)->Px();
+	CHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
+    // NHS computation
+    if (fPFCandidates->At(i)->HasTrk() ||
+       (fPFCandidates->At(i)->AbsEta() < 3.0 && fPFCandidates->At(i)->Pt() > 4.0)){
+	NHSNumeratorX -= fPFCandidates->At(i)->Px();
+	NHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
+
     // jets
     bool inTheJet = false;
     for (UInt_t j = 0; j < pfJets->GetEntries(); ++j) {
@@ -175,6 +218,8 @@ MetTools::MetTools(const MuonCol *fMuons, const PFCandidateCol *fPFCandidates, c
 
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
   fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
+  fCHSMet = mithep::Met(CHSNumeratorX, CHSNumeratorY);
+  fNHSMet = mithep::Met(NHSNumeratorX, NHSNumeratorY);
 }
 
 
@@ -183,6 +228,7 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
+  float CHSNumeratorX  =0, CHSNumeratorY  =0, NHSNumeratorX  =0, NHSNumeratorY  =0;
 
   // electrons Pt
   for (UInt_t m = 0; m < fElectrons->GetEntries(); ++m) {
@@ -198,6 +244,18 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
 
   // PF candidates pT
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
+
+    // CHS computation
+    if (fPFCandidates->At(i)->HasTrk()){
+	CHSNumeratorX -= fPFCandidates->At(i)->Px();
+	CHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
+    // NHS computation
+    if (fPFCandidates->At(i)->HasTrk() ||
+       (fPFCandidates->At(i)->AbsEta() < 3.0 && fPFCandidates->At(i)->Pt() > 4.0)){
+	NHSNumeratorX -= fPFCandidates->At(i)->Px();
+	NHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
 
     // jets
     bool inTheJet = false;
@@ -245,6 +303,8 @@ MetTools::MetTools(const ElectronCol *fElectrons, const PFCandidateCol *fPFCandi
 
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
   fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
+  fCHSMet = mithep::Met(CHSNumeratorX, CHSNumeratorY);
+  fNHSMet = mithep::Met(NHSNumeratorX, NHSNumeratorY);
 }
 
 
@@ -396,6 +456,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
+  float CHSNumeratorX  =0, CHSNumeratorY  =0, NHSNumeratorX  =0, NHSNumeratorY  =0;
 
   // muons Pt
   for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
@@ -411,6 +472,18 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 
   // PF candidates pT
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
+
+    // CHS computation
+    if (fPFCandidates->At(i)->HasTrk()){
+	CHSNumeratorX -= fPFCandidates->At(i)->Px();
+	CHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
+    // NHS computation
+    if (fPFCandidates->At(i)->HasTrk() ||
+       (fPFCandidates->At(i)->AbsEta() < 3.0 && fPFCandidates->At(i)->Pt() > 4.0)){
+	NHSNumeratorX -= fPFCandidates->At(i)->Px();
+	NHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
 
     // charged
     if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()){
@@ -461,6 +534,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
   }
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
   fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
+  fCHSMet = mithep::Met(CHSNumeratorX, CHSNumeratorY);
+  fNHSMet = mithep::Met(NHSNumeratorX, NHSNumeratorY);
 }
 
 
@@ -470,6 +545,7 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
+  float CHSNumeratorX  =0, CHSNumeratorY  =0, NHSNumeratorX  =0, NHSNumeratorY  =0;
 
   // muons Pt
   for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
@@ -491,6 +567,18 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
 
   // PF candidates pT
   for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {
+
+    // CHS computation
+    if (fPFCandidates->At(i)->HasTrk()){
+	CHSNumeratorX -= fPFCandidates->At(i)->Px();
+	CHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
+    // NHS computation
+    if (fPFCandidates->At(i)->HasTrk() ||
+       (fPFCandidates->At(i)->AbsEta() < 3.0 && fPFCandidates->At(i)->Pt() > 4.0)){
+	NHSNumeratorX -= fPFCandidates->At(i)->Px();
+	NHSNumeratorY -= fPFCandidates->At(i)->Py();
+    }
 
     // jets
     bool inTheJet = false;
@@ -555,6 +643,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
   }
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
   fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
+  fCHSMet = mithep::Met(CHSNumeratorX, CHSNumeratorY);
+  fNHSMet = mithep::Met(NHSNumeratorX, NHSNumeratorY);
 }
 
 

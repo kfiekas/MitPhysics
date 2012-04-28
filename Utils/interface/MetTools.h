@@ -64,6 +64,8 @@ namespace mithep {
     Met  GetMinimumTrackMet                       (const Met *UncorrectedMet);
     Met  GetCorrectedMet()         { return fCorrectedMet; }
     Met  GetCorrectedTrackMet()    { return fCorrectedTrackMet; }
+    Met  GetCHSMet()               { return fCHSMet; }
+    Met  GetNHSMet()               { return fNHSMet; }
     FourVectorM  Recoil()          { return fRecoil; }
     FourVectorM  ChargedRecoil()   { return fChargedRecoil; }
 
@@ -77,6 +79,8 @@ namespace mithep {
   private:
     Met fCorrectedMet;
     Met fCorrectedTrackMet;
+    Met fCHSMet;
+    Met fNHSMet;
     FourVectorM fRecoil;
     FourVectorM fChargedRecoil;
     
@@ -87,11 +91,9 @@ namespace mithep {
   double MetTools::GetProjectedMet(const V *fV, const Met *UncorrectedMet) {
     double projectedMet = UncorrectedMet->Pt();
     double minDPhi = 999;
-    int index = -1;
     for (UInt_t m = 0; m < fV->GetEntries(); ++m) {
       if (fabs(MathUtils::DeltaPhi(UncorrectedMet->Phi(), fV->At(m)->Phi())) < minDPhi) {
 	minDPhi = fabs(MathUtils::DeltaPhi(UncorrectedMet->Phi(), fV->At(m)->Phi()));
-	index = m;
       }
     }
     if (minDPhi < TMath::Pi()/2.) return projectedMet = projectedMet * sin(minDPhi);
@@ -102,11 +104,9 @@ namespace mithep {
   double MetTools::GetProjectedMet(const V *fV) {
     double projectedMet = fCorrectedMet.Pt();
     double minDPhi = 999;
-    int index = -1;
     for (UInt_t m = 0; m < fV->GetEntries(); ++m) {
       if (fabs(MathUtils::DeltaPhi(fCorrectedMet.Phi(), fV->At(m)->Phi())) < minDPhi) {
 	minDPhi = fabs(MathUtils::DeltaPhi(fCorrectedMet.Phi(), fV->At(m)->Phi()));
-	index = m;
       }
     }
     if (minDPhi < TMath::Pi()/2.) return projectedMet = projectedMet * sin(minDPhi);
@@ -117,11 +117,9 @@ namespace mithep {
   double MetTools::GetProjectedTrackMet(const V *fV) {
     double projectedMet = fCorrectedTrackMet.Pt();
     double minDPhi = 999;
-    int index = -1;
     for (UInt_t m = 0; m < fV->GetEntries(); ++m) {
       if (fabs(MathUtils::DeltaPhi(fCorrectedTrackMet.Phi(), fV->At(m)->Phi())) < minDPhi) {
 	minDPhi = fabs(MathUtils::DeltaPhi(fCorrectedTrackMet.Phi(), fV->At(m)->Phi()));
-	index = m;
       }
     }
     if (minDPhi < TMath::Pi()/2.) return projectedMet = projectedMet * sin(minDPhi);

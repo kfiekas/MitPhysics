@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.40 2012/01/23 20:08:30 sixie Exp $
+// $Id: MuonIDMod.h,v 1.41 2012/01/27 11:48:23 sixie Exp $
 //
 // MuonIDMod
 //
@@ -105,6 +105,7 @@ namespace mithep
         kCombinedRelativeEffectiveAreaCorrected,
         kCustomIso,         	            //"Custom"
         kPFIso,             	            //"PFIso"
+        kPFRadialIso,             	    //"PFRadialIso"
         kPFIsoEffectiveAreaCorrected,       //"PFIso with EffectiveArea Pileup Correction"
         kPFIsoNoL,          	            //"PFIsoNoL"
         kNoIso,                             //"NoIso"
@@ -158,6 +159,7 @@ namespace mithep
       const BeamSpotCol *fBeamSpot;            //!beamspot branch
       const TrackCol    *fTracks;              //!track branch     
       const PFCandidateCol *fPFCandidates;     //!pfcandidate branch
+      const PFCandidateCol *fPFNoPileUpCands;  //!pfnpu collection
       Double_t           fIntRadius;           //!min IntRadius cut in pf isolation
       MuonCol	         *fNonIsolatedMuons;	//!pointer to old muon collection 
       ElectronCol        *fNonIsolatedElectrons;//!pointer to old electron collection
