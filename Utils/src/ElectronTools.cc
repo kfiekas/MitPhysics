@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.38 2012/04/24 11:45:53 fabstoec Exp $
+// $Id: ElectronTools.cc,v 1.39 2012/04/27 21:08:05 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1081,6 +1081,17 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
 
   Double_t EffectiveArea = 0;
   
+  if(type == ElectronTools::kEleNeutralIso04){
+    if     (fabs(SCEta) < 1.0                           ) EffectiveArea = 0.19;
+    else if(fabs(SCEta) >= 1.0   && fabs(SCEta) < 1.479 ) EffectiveArea = 0.25;
+    else if(fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.000 ) EffectiveArea = 0.12;
+    else if(fabs(SCEta) >= 2.000 && fabs(SCEta) < 2.200 ) EffectiveArea = 0.21;
+    else if(fabs(SCEta) >= 2.200 && fabs(SCEta) < 2.300 ) EffectiveArea = 0.27;
+    else if(fabs(SCEta) >= 2.300 && fabs(SCEta) < 2.400 ) EffectiveArea = 0.44;
+    else                                                  EffectiveArea = 0.52;
+    return EffectiveArea;
+  }
+
   if (fabs(SCEta) < 1.0) {
     if (type == ElectronTools::kEleChargedIso03) EffectiveArea = 0.000;
     if (type == ElectronTools::kEleNeutralHadronIso03) EffectiveArea = 0.017;

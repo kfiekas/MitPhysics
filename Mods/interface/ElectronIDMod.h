@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.55 2012/01/27 11:48:23 sixie Exp $
+// $Id: ElectronIDMod.h,v 1.56 2012/04/24 11:45:54 fabstoec Exp $
 //
 // ElectronIDMod
 //
@@ -19,7 +19,6 @@
 #include "MitAna/DataTree/interface/VertexFwd.h"
 #include "MitAna/DataTree/interface/TrackFwd.h"
 #include "MitAna/DataTree/interface/DecayParticleFwd.h"
-#include "MitAna/DataTree/interface/PFCandidateFwd.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/ElectronLikelihood/interface/ElectronLikelihood.h"
@@ -191,6 +190,7 @@ namespace mithep
       const BeamSpotCol        *fBeamSpot;               //!beamspot branch
       const TrackCol           *fTracks;                 //!Track branch     
       const PFCandidateCol     *fPFCandidates;           //!pfcandidate branch
+      PFCandidateCol           *fPFNoPileUpCands;        //!pfcandidate branch with PFNoPU     
       Double_t                  fIntRadius;	         //!min IntRadius cut in pf isolation
       MuonCol  	               *fNonIsolatedMuons;	 //!pointer to old muon collection 
       ElectronCol	       *fNonIsolatedElectrons;	 //!pointer to old electron collection

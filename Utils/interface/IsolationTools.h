@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.21 2011/11/02 20:12:03 ceballos Exp $
+// $Id: IsolationTools.h,v 1.22 2011/12/31 23:16:04 sixie Exp $
 //
 // IsolationTools
 //
@@ -23,6 +23,8 @@
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/TrackCol.h"
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
+#include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
+#include "MitPhysics/Utils/interface/ElectronTools.h"
 
 namespace mithep
 {
@@ -54,6 +56,12 @@ namespace mithep
                       	     		  const MuonCol *goodMuons, const ElectronCol *goodElectrons,
 					  const Vertex *vertex, Double_t  delta_z, Double_t ptMin,
 			     		  Double_t extRadius, Double_t intRadius, Int_t PFCandidateType = -1);
+      static Double_t PFElectronIsolation2012(const Electron *ele, const Vertex *vertex, 
+                                              const PFCandidateCol *PFCands, 
+                                              const PileupEnergyDensityCol *PileupEnergyDensity,
+                                              ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
+                                              const ElectronCol *goodElectrons,
+                                              const MuonCol *goodMuons, Double_t dRMax = 0.4);
        static Double_t BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
                             Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			    Double_t intRadius);
@@ -73,7 +81,7 @@ namespace mithep
                                          UInt_t maxNExpectedHitsInner = 999,
                                          const mithep::DecayParticleCol *conversions = 0);
 
-      // methods for Hgg BaseLien Selection. These isoaltion are stupid, but what can we do.... ;(
+      // methods for Hgg BaseLien Selection. These isolation are stupid, but what can we do.... ;(
       static Double_t CiCTrackIsolation(const mithep::Photon*, 
 					const BaseVertex*, 
 					Double_t extRadius, 

@@ -65,7 +65,8 @@ namespace mithep {
         kVBTFWorkingPoint85Iso,
         kVBTFWorkingPoint80Iso,
         kVBTFWorkingPoint70Iso,
-        kMVAIso_BDTG_IDIsoCombined
+        kMVAIso_BDTG_IDIsoCombined,
+        kPFIso_HWW2012TrigV0
       };
 
       enum EElectronEffectiveAreaType {
@@ -78,6 +79,7 @@ namespace mithep {
         kEleGammaIso04, 
         kEleGammaIsoVetoEtaStrip04, 
         kEleNeutralHadronIso007, 
+        kEleNeutralIso04, 
         kEleHoverE, 
         kEleHcalDepth1OverEcal, 
         kEleHcalDepth2OverEcal,

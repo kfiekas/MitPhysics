@@ -303,9 +303,7 @@ UInt_t ElectronIDMVA::GetMVABin( double eta, double pt) const {
       if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
     }
 
-    if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
-        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
-	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0) {
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0) {
       bin = 0;
       if (pt < 10 && fabs(eta) < 0.8) bin = 0;
       if (pt < 10 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
@@ -313,6 +311,17 @@ UInt_t ElectronIDMVA::GetMVABin( double eta, double pt) const {
       if (pt >= 10 && fabs(eta) < 0.8) bin = 3;
       if (pt >= 10 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 4;
       if (pt >= 10 && fabs(eta) >= 1.479) bin = 5;
+    }
+
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
+	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0) {
+      bin = 0;
+      if (pt < 20 && fabs(eta) < 0.8) bin = 0;
+      if (pt < 20 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
+      if (pt < 20 && fabs(eta) >= 1.479) bin = 2;
+      if (pt >= 20 && fabs(eta) < 0.8) bin = 3;
+      if (pt >= 20 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 4;
+      if (pt >= 20 && fabs(eta) >= 1.479) bin = 5;
     }
 
     return bin;
@@ -560,7 +569,7 @@ Double_t ElectronIDMVA::MVAValue_IsoRings( Double_t ElePt,
 
   if (printDebug == kTRUE) {
 
-    std::cout << "Debug Electron MVA: \n";
+    std::cout << "Debug Electron MVA-ISO: ";
     std::cout << fMVAVar_ChargedIso_DR0p0To0p1 << " "
               << fMVAVar_ChargedIso_DR0p1To0p2 << " "
               << fMVAVar_ChargedIso_DR0p2To0p3 << " "
@@ -641,7 +650,7 @@ Double_t ElectronIDMVA::MVAValue_IDNonTrig( Double_t ElePt,
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug == kTRUE) {
-    std::cout << "Debug Electron MVA: \n";
+    std::cout << "Debug Electron MVA: ";
     std::cout << " fbrem " <<  fMVAVar_EleFBrem  
               << " kfchi2 " << fMVAVar_EleKFTrkChiSqr  
               << " kfhits " << fMVAVar_EleKFTrkNHits  
@@ -1145,8 +1154,10 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
 
   if (printDebug == kTRUE) {
 
-    std::cout << "Debug Electron MVA: \n";
-    std::cout << " fbrem " <<  fMVAVar_EleFBrem  
+    std::cout << "Debug Electron MVA-ID: "
+              << fMVAVar_ElePt<< " " << fMVAVar_EleEta << " " 
+	      << " --> MVABin " << GetMVABin( fMVAVar_EleEta , fMVAVar_ElePt) << " : "	  
+              << " fbrem " <<  fMVAVar_EleFBrem  
               << " kfchi2 " << fMVAVar_EleKFTrkChiSqr  
               << " kfhits " << fMVAVar_EleKFTrkNHits  
               << " kfhitsall " << fMVAVar_EleKFTrkNHits  
@@ -1168,9 +1179,12 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
               << " d0 " << fMVAVar_EleD0  
               << " ip3d " << fMVAVar_EleIP3d  
               << " eta " << fMVAVar_EleEta  
-              << " pt " << fMVAVar_ElePt << std::endl;
-      
-    std::cout << fMVAVar_ChargedIso_DR0p0To0p1 << " "
+              << " pt " << fMVAVar_ElePt
+              << " === : === "
+              << mva << " "    
+              << std::endl;
+    std::cout << "Debug Electron MVA-ISO: "
+              << fMVAVar_ChargedIso_DR0p0To0p1 << " "
               << fMVAVar_ChargedIso_DR0p1To0p2 << " "
               << fMVAVar_ChargedIso_DR0p2To0p3 << " "
               << fMVAVar_ChargedIso_DR0p3To0p4 << " "
@@ -1186,8 +1200,6 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
               << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
               << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "  
               << std::endl;
-    std::cout << "MVA: " << mva << " "    
-              << std::endl;    
   }
 
   return mva;
