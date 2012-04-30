@@ -758,7 +758,6 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   for(unsigned int i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     Double_t pPt = pJet->Pt();
-    if( pJet->TrackCountingHighEffBJetTagsDisc() == -100 && pPt < 10.) continue;
     double pDEta1 = pJet->Eta() - iEta1;
     double pDPhi1 = fabs(pJet->Phi() - iPhi1); if(pDPhi1 > 2.*TMath::Pi()-pDPhi1) pDPhi1 = 2.*TMath::Pi()-pDPhi1;
     double pDR1   = sqrt(pDEta1*pDEta1 + pDPhi1*pDPhi1);
