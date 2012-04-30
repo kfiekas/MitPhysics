@@ -428,7 +428,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   fUncertainty     = sqrt(lCovU1+lCovU2);
   
   if (printDebug == kTRUE) {
-    std::cout << "Debug Jet MVA: "
+    std::cout << "Debug Met MVA: "
 	      <<  fU        << " : "
 	      <<  fUPhi     << " : "
 	      <<  fTKSumEt  << " : "
@@ -550,7 +550,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   fUncertainty     = sqrt(lCovU1+lCovU2);
 
   if (printDebug == kTRUE) {
-    std::cout << "Debug Jet MVA: "
+    std::cout << "Debug Met MVA: "
 	      <<  fU        << " : "
 	      <<  fUPhi     << " : "
 	      <<  fTKSumEt  << " : "
@@ -691,7 +691,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 
 
   if (printDebug == kTRUE) {
-    std::cout << "Debug Jet MVA: "
+    std::cout << "Debug Met MVA: "
 	      <<  fU        << " : "
 	      <<  fUPhi     << " : "
 	      <<  fTKSumEt  << " : "
@@ -825,7 +825,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   fUncertainty     = sqrt(lCovU1+lCovU2);  
   
   if (printDebug == kTRUE) {
-    std::cout << "Debug Jet MVA: "
+    std::cout << "Debug Met MVA: "
 	      <<  fU        << " : "
 	      <<  fUPhi     << " : "
 	      <<  fTKSumEt  << " : "
