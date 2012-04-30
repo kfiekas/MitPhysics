@@ -454,6 +454,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
 	      <<  fNAllJet << " : "
 	      <<  fNPV     << " : "
               << " === : === "
+              << lMet.Pt()  << " : "
+              << lMet.Phi() << " : "
               << std::endl;
   }
 
@@ -576,6 +578,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
 	      <<  fNAllJet << " : "
 	      <<  fNPV     << " : "
               << " === : === "
+              << lMet.Pt()  << " : "
+              << lMet.Phi() << " : "
               << std::endl;
   }
 
@@ -716,6 +720,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 	      <<  fNAllJet  << " : "
 	      <<  fNPV      << " : "
               << " === : === "
+              << lMet.Pt()  << " : "
+              << lMet.Phi() << " : "
               << std::endl;
   }
 
@@ -850,6 +856,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 	      <<  fNAllJet  << " : "
 	      <<  fNPV      << " : "
               << " === : === "
+              << lMet.Pt()  << " : "
+              << lMet.Phi() << " : "
               << std::endl;
   }
 
