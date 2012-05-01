@@ -127,11 +127,11 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue; //Quick cleaning==> if not done already
-    if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) 
-      std::cout << " =====> Jet Passes Id : " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << std::endl;
-    if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) 
-      std::cout << " =====> Jet Fails  Id :  " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << std::endl;
-    
+    double lPt = fJetIDMVA->correctedPt(pJet,iJetCorrector,iPileupEnergyDensity);
+    //if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) 
+    //  std::cout << " =====> Jet Passes Id : " << lPt << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << std::endl;
+    //if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) 
+    //  std::cout << " =====> Jet Fails  Id :  " << lPt << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << std::endl;
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
     lNPass++;
@@ -160,10 +160,10 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                             continue; //Quick cleaning==> if not done already
-    if(fJetIDMVA->pass(pJet,iVertex,iVertices)) 
-      std::cout << " =====> Jet Passes Id : " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices) << std::endl;
-    if(!fJetIDMVA->pass(pJet,iVertex,iVertices)) 
-      std::cout << " =====> Jet Fails  Id :  " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices) << std::endl;
+    //if(fJetIDMVA->pass(pJet,iVertex,iVertices)) 
+    //  std::cout << " =====> Jet Passes Id : " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices) << std::endl;
+    //if(!fJetIDMVA->pass(pJet,iVertex,iVertices)) 
+    //  std::cout << " =====> Jet Fails  Id :  " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices) << std::endl;
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices))                          continue;
     addNeut(pJet,lVec,lSumEt,iRho);
   }
