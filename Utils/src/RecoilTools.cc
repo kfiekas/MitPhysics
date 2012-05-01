@@ -79,7 +79,7 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,
   FourVectorM lVec(0,0,0,0);
   double lPt = fJetIDMVA->correctedPt(iJet,iJetCorrector,iPUEnergyDensity);
   if(iJet->RawMom().Pt() < 10) lPt = TMath::Max(iJet->RawMom().Pt()-iJet->JetArea()*iPUEnergyDensity->At(0)->Rho(),0.);
-  lPt *= (iJet->NeutralEmEnergy()/iJet->E() + iJet->NeutralHadronEnergy()/iJet->E());
+  lPt *= (iJet->NeutralEmEnergy()/iJet->RawMom().E() + iJet->NeutralHadronEnergy()/iJet->RawMom().E());
   lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
   if(iSign > 0) iVec -= lVec;
   if(iSign < 0) iVec += lVec;
@@ -96,7 +96,7 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,d
   double lPt = iJet->Pt();
   if(iJet->RawMom().Pt() < 10) lPt = TMath::Max(iJet->RawMom().Pt()-iJet->JetArea()*iRho,0.);//to be fixed
   //if(iJet->RawMom().Pt() < 10) lPt = iJet->RawMom().Pt()*iJet->L1OffsetCorrectionScale();
-  lPt *= (iJet->NeutralEmEnergy()/iJet->E() + iJet->NeutralHadronEnergy()/iJet->E());
+  lPt *= (iJet->NeutralEmEnergy()/iJet->RawMom().E() + iJet->NeutralHadronEnergy()/iJet->RawMom().E());
   lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
   if(iSign > 0) iVec   -= lVec;
   if(iSign < 0) iVec   += lVec;
@@ -127,6 +127,11 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue; //Quick cleaning==> if not done already
+    if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) 
+      std::cout << " =====> Jet Passes Id : " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << std::endl;
+    if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) 
+      std::cout << " =====> Jet Fails  Id :  " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << std::endl;
+    
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
     lNPass++;
@@ -154,8 +159,12 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,
   }
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
-    if(!fJetIDMVA->pass(pJet,iVertex,iVertices))                          continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                             continue; //Quick cleaning==> if not done already
+    if(fJetIDMVA->pass(pJet,iVertex,iVertices)) 
+      std::cout << " =====> Jet Passes Id : " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices) << std::endl;
+    if(!fJetIDMVA->pass(pJet,iVertex,iVertices)) 
+      std::cout << " =====> Jet Fails  Id :  " << pJet->Pt() << " -- " << pJet->Eta() << " --- " << fJetIDMVA->pass(pJet,iVertex,iVertices) << std::endl;
+    if(!fJetIDMVA->pass(pJet,iVertex,iVertices))                          continue;
     addNeut(pJet,lVec,lSumEt,iRho);
   }
   Met lMet(lVec.Px(),lVec.Py());
