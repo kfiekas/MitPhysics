@@ -347,6 +347,15 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
 			const PileupEnergyDensityCol *iPUEnergyDensity,
 			int iNPV,
 			Bool_t printDebug) {
+
+  int lNPV = 0;
+  for(unsigned int i0 = 0; i0 < iVertices->GetEntries(); i0++) { 
+    const Vertex *lPV = iVertices->At(i0);
+    if(lPV->Ndof()           < 4.0)       continue;
+    if(fabs(lPV->Z())        > 24.)       continue;
+    if(lPV->Position().Rho() > 2.)        continue;
+    lNPV++;
+  }
   
   Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(iPtVis,iPhiVis,iSumEtVis,iCands,iVertex); 
@@ -391,7 +400,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   fJSPhi2   = 0; if(l2nd  != 0) fJSPhi2 = l2nd ->Phi();
   fNJet     = lNJet   ;
   fNAllJet  = lNAllJet;
-  fNPV      = iNPV    ;
+  fNPV      = lNPV    ;
    Float_t lMVA = evaluatePhi();
    if(!iPhi) fUPhiMVA = fUPhi + lMVA; 
   //Not no nice feature of teh training
@@ -471,7 +480,16 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug) {
-  
+
+  int lNPV = 0;
+  for(unsigned int i0 = 0; i0 < iVertices->GetEntries(); i0++) { 
+    const Vertex *lPV = iVertices->At(i0);
+    if(lPV->Ndof()           < 4.0)       continue;
+    if(fabs(lPV->Z())        > 24.)       continue;
+    if(lPV->Position().Rho() > 2.)        continue;
+    lNPV++;
+  }
+
   Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(iPtVis,iPhiVis,iSumEtVis,      iCands,iVertex); 
   Met lNPRec = fRecoilTools->NoPURecoil (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices,iRho);  
@@ -515,7 +533,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
   fJSPhi2   = 0; if(l2nd  != 0) fJSPhi2 = l2nd ->Phi();
   fNJet     = lNJet   ;
   fNAllJet  = lNAllJet;
-  fNPV      = iNPV    ;
+  fNPV      = lNPV    ;
   
   Float_t lMVA = evaluatePhi();
   
@@ -598,7 +616,16 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 			const PileupEnergyDensityCol *iPUEnergyDensity,
 			int iNPV,
 			Bool_t printDebug) {
-  
+
+  int lNPV = 0;
+  for(unsigned int i0 = 0; i0 < iVertices->GetEntries(); i0++) { 
+    const Vertex *lPV = iVertices->At(i0);
+    if(lPV->Ndof()           < 4.0)       continue;
+    if(fabs(lPV->Z())        > 24.)       continue;
+    if(lPV->Position().Rho() > 2.)        continue;
+    lNPV++;
+  }
+
   TLorentzVector lVVec1(0,0,0,0);   lVVec1.SetPtEtaPhiM(iPt1,0,iPhi1 ,0);
   TLorentzVector lVVec2(0,0,0,0);   lVVec2.SetPtEtaPhiM(iPt2,0,iPhi2 ,0);
   lVVec1+=lVVec2;
@@ -659,7 +686,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   fJSPhi2  = 0; if(l2nd  != 0) fJSPhi2 = l2nd ->Phi();
   fNJet    = lNJet   ;
   fNAllJet = lNAllJet;
-  fNPV     = iNPV    ;
+  fNPV     = lNPV    ;
   
   Float_t lMVA = evaluatePhi();//fPhiReader                 ->EvaluateMVA( fPhiMethodName );
   if(!iPhi) fUPhiMVA = fUPhi + lMVA; 
@@ -696,6 +723,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 
   if (printDebug == kTRUE) {
     std::cout << "Debug Met MVA: "
+	      <<  fSumEt    << " : "
 	      <<  fU        << " : "
 	      <<  fUPhi     << " : "
 	      <<  fTKSumEt  << " : "
@@ -738,6 +766,14 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 			const PFJetCol         *iJets ,
 			int iNPV,
 			Bool_t printDebug) {
+  int lNPV = 0;
+  for(unsigned int i0 = 0; i0 < iVertices->GetEntries(); i0++) { 
+    const Vertex *lPV = iVertices->At(i0);
+    if(lPV->Ndof()           < 4.0)       continue;
+    if(fabs(lPV->Z())        > 24.)       continue;
+    if(lPV->Position().Rho() > 2.)        continue;
+    lNPV++;
+  }
   
   TLorentzVector lVVec1(0,0,0,0);   lVVec1.SetPtEtaPhiM(iPt1,0,iPhi1 ,0);
   TLorentzVector lVVec2(0,0,0,0);   lVVec2.SetPtEtaPhiM(iPt2,0,iPhi2 ,0);
@@ -795,7 +831,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   fJSPhi2  = 0; if(l2nd  != 0) fJSPhi2 = l2nd ->Phi();
   fNJet    = lNJet   ;
   fNAllJet = lNAllJet;
-  fNPV     = iNPV    ;
+  fNPV     = lNPV    ;
 
   Float_t lMVA = evaluatePhi();//fPhiReader                 ->EvaluateMVA( fPhiMethodName );
   

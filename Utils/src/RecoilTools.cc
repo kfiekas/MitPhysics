@@ -32,7 +32,7 @@ Met RecoilTools::pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 			  const PFCandidateCol *iCands) { 
   double lSumEt = 0;
   FourVectorM lVec(0,0,0,0);
-  for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { lVec -= iCands->At(i0)->Mom(); lSumEt += iCands->At(i0)->Pt();}
+  for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { lVec -= iCands->At(i0)->Mom(); lSumEt += iCands->At(i0)->Et();}
   Met lPFMet(lVec.Px(),lVec.Py()); 
   lPFMet.SetSumEt(lSumEt);
   lPFMet.SetMex  (lPFMet.Mex()+iVisPt*cos(iVisPhi));  

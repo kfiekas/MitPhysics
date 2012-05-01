@@ -551,6 +551,7 @@ Bool_t  JetTools::passPFLooseId(const PFJet *iJet) {
   if(iJet->ChargedHadronEnergy()/iJet->RawMom().E()  <= 0     && fabs(iJet->Eta()) < 2.4 ) return false;
   if(iJet->ChargedEmEnergy()/iJet->RawMom().E()      >  0.99  && fabs(iJet->Eta()) < 2.4 ) return false;
   if(iJet->ChargedMultiplicity()                     < 1      && fabs(iJet->Eta()) < 2.4 ) return false;
+  if(fabs(iJet->Eta())                               > 4.99) return false;
   return true;
 }
 
