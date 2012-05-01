@@ -1146,9 +1146,6 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
   
-  if (printDebug == kTRUE) {
-    std::cout <<" -> BIN: " << fMVAVar_EleEta << " " << fMVAVar_ElePt << " : " << GetMVABin( fMVAVar_EleEta , fMVAVar_ElePt) << std::endl;
-  }
   reader = fTMVAReader[GetMVABin( fMVAVar_EleEta , fMVAVar_ElePt)];                                              
   mva = reader->EvaluateMVA( fMethodname );
 
