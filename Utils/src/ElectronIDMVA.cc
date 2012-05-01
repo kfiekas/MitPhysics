@@ -654,7 +654,7 @@ Double_t ElectronIDMVA::MVAValue_IDNonTrig( Double_t ElePt,
     std::cout << " fbrem " <<  fMVAVar_EleFBrem  
               << " kfchi2 " << fMVAVar_EleKFTrkChiSqr  
               << " kfhits " << fMVAVar_EleKFTrkNHits  
-              << " kfhitsall " << fMVAVar_EleKFTrkNHits  
+              << " kfhitsall " << fMVAVar_EleKFTrkNLayers  
               << " gsfchi2 " << fMVAVar_EleGsfTrackChi2OverNdof  
               << " deta " <<  fMVAVar_EleDEtaIn  
               << " dphi " << fMVAVar_EleDPhiIn  
@@ -1157,7 +1157,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
               << " fbrem " <<  fMVAVar_EleFBrem  
               << " kfchi2 " << fMVAVar_EleKFTrkChiSqr  
               << " kfhits " << fMVAVar_EleKFTrkNHits  
-              << " kfhitsall " << fMVAVar_EleKFTrkNHits  
+              << " kfhitsall " << fMVAVar_EleKFTrkNLayers  
               << " gsfchi2 " << fMVAVar_EleGsfTrackChi2OverNdof  
               << " deta " <<  fMVAVar_EleDEtaIn  
               << " dphi " << fMVAVar_EleDPhiIn  
