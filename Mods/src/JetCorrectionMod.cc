@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.11 2011/04/18 22:20:22 ceballos Exp $
+// $Id: JetCorrectionMod.cc,v 1.12 2011/06/13 15:29:13 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -24,7 +24,8 @@ ClassImp(mithep::JetCorrectionMod)
     rhoEtaMax(5.0),
     fJetCorrector(0),
     fEvtHdrName(Names::gkEvtHeaderBrn),
-    fEventHeader(0)
+    fEventHeader(0),
+    fTheRhoType(RhoUtilities::NONE)
 {
   // Constructor.
 }
@@ -237,13 +238,30 @@ void JetCorrectionMod::ApplyL1FastJetCorrection(Jet *jet)
     
   } else {
     const PileupEnergyDensity *fR = fRho->At(0);
-    if (rhoEtaMax > 2.5) rho = fR->RhoHighEta();
-    else rho = fR->Rho();
+    
+    switch (fTheRhoType) {
+    case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+      rho = fR->RhoLowEta();
+      break;
+    case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+      rho = fR->Rho();
+      break;
+    case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+      rho = fR->RhoRandomLowEta();
+      break;
+    case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+      rho = fR->RhoRandom();
+      break;
+    default:      
+      if (rhoEtaMax > 2.5) rho = fR->RhoHighEta();
+      else rho = fR->Rho();
+    };
+
   }
   
   Double_t l1Scale = (jet->Pt() - rho*jet->JetArea())/jet->Pt();
   l1Scale = (l1Scale>0) ? l1Scale : 0.0;
-
+  
   jet->SetL1OffsetCorrectionScale(l1Scale);
 }
 

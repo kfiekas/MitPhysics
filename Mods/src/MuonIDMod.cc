@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.69 2012/04/24 11:45:53 fabstoec Exp $
+// $Id: MuonIDMod.cc,v 1.70 2012/04/28 19:10:00 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -59,7 +59,9 @@ ClassImp(mithep::MuonIDMod)
   fMuonMVAWeights_Subdet0Pt14p5To20(""),
   fMuonMVAWeights_Subdet1Pt14p5To20(""),
   fMuonMVAWeights_Subdet0Pt20ToInf(""),
-  fMuonMVAWeights_Subdet1Pt20ToInf("")
+  fMuonMVAWeights_Subdet1Pt20ToInf(""),
+
+  fTheRhoType(RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA)
 {
   // Constructor.
 }
@@ -279,6 +281,28 @@ void MuonIDMod::Process()
     if (!idpass)
       continue;
 
+    Double_t Rho = 0.;
+    const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
+    
+    switch (fTheRhoType) {
+    case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+      Rho = rho->RhoLowEta();
+      break;
+    case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+      Rho = rho->Rho();
+      break;
+    case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+      Rho = rho->RhoRandomLowEta();
+      break;
+    case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+      Rho = rho->RhoRandom();
+      break;
+    default:
+      Rho = rho->Rho();
+    }
+
+    if ((TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || std::isinf(fPileupEnergyDensity->At(0)->Rho()))) Rho = 0.;
+    
     Bool_t isocut = kFALSE;
     switch (fMuIsoType) {
       case kTrackCalo:
@@ -292,8 +316,7 @@ void MuonIDMod::Process()
         break;
       case kTrackCaloSliding:
         { 
-          const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
-          Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - rho->Rho() * TMath::Pi() * 0.3 * 0.3 ;
+          Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - Rho * TMath::Pi() * 0.3 * 0.3 ;
           // trick to change the signal region cut
           double theIsoCut = fCombIsolationCut;
 	  if(theIsoCut < 0.20){
@@ -319,18 +342,18 @@ void MuonIDMod::Process()
         break;
       case kCombinedRelativeConeAreaCorrected:
         { 
-          const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
-          Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - rho->Rho() * TMath::Pi() * 0.3 * 0.3 ;
+          //const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0); // Fabian: made Rho customable
+          Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - Rho * TMath::Pi() * 0.3 * 0.3 ;
           double theIsoCut = fCombRelativeIsolationCut;
           if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
         }
         break;           
-      case kCombinedRelativeEffectiveAreaCorrected:
-        { 
-          Double_t tmpRho = 0;
-          if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || std::isinf(fPileupEnergyDensity->At(0)->Rho())))
-            tmpRho = fPileupEnergyDensity->At(0)->Rho();
-          
+    case kCombinedRelativeEffectiveAreaCorrected:
+      { 
+	Double_t tmpRho = Rho;   // Fabian: made the Rho type customable.
+	//if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || std::isinf(fPileupEnergyDensity->At(0)->Rho())))
+	//tmpRho = fPileupEnergyDensity->At(0)->Rho();
+	
           isocut = ( mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() 
                      -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuEMIso03, mu->Eta())
                      -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadIso03, mu->Eta())
@@ -388,7 +411,8 @@ void MuonIDMod::Process()
             pfIsoCutValue = fPFIsolationCut; //leave it like this for now
           }
           Double_t EffectiveAreaCorrectedPFIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius)
-            - fPileupEnergyDensity->At(0)->Rho() * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta());
+            - Rho * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta());
+	  //- fPileupEnergyDensity->At(0)->Rho() * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta());  // Fabian: made Rho-type customable
           isocut = EffectiveAreaCorrectedPFIso < (mu->Pt() * pfIsoCutValue);
           break;
         }

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.7 2011/04/18 22:20:14 ceballos Exp $
+// $Id: JetCorrectionMod.h,v 1.8 2011/06/13 15:29:40 ceballos Exp $
 //
 // JetCorrectionMod
 //
@@ -19,7 +19,9 @@
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataCont/interface/Types.h"
- 
+
+#include "MitPhysics/Utils/interface/RhoUtilities.h"
+
 class FactorizedJetCorrector;
 namespace mithep 
 {
@@ -42,6 +44,7 @@ namespace mithep
       void              SetCorrectedName(const char *name)        { SetCorrectedJetsName(name);     }    
       void              SetInputName(const char *name)            { fJetsName = name;               }  
 
+      void              SetRhoType(RhoUtilities::RhoType type) { fTheRhoType = type; };
 
     protected:
       void              SlaveBegin();
@@ -65,6 +68,8 @@ namespace mithep
       std::vector<Jet::ECorr> fEnabledCorrections; //vector of enabled corrections
 
       bool              fUseFixedGrid;             // flag to use fixed grid method to compute energy density 
+
+      RhoUtilities::RhoType   fTheRhoType;
 
       ClassDef(JetCorrectionMod, 2) // Jet identification module
   };

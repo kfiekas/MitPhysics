@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.41 2012/01/27 11:48:23 sixie Exp $
+// $Id: MuonIDMod.h,v 1.42 2012/04/28 19:10:00 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -24,6 +24,8 @@
 #include "MitPhysics/Utils/interface/MuonIDMVA.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
+
+#include "MitPhysics/Utils/interface/RhoUtilities.h"
 
 namespace mithep 
 {
@@ -81,6 +83,9 @@ namespace mithep
                          { fMuonMVAWeights_Subdet0Pt20ToInf = s; }
       void               SetMuonMVAWeightsSubdet1Pt20ToInf(TString s) 
                          { fMuonMVAWeights_Subdet1Pt20ToInf = s; }
+
+      void               SetRhoType(RhoUtilities::RhoType type)
+	{ fTheRhoType = type; };
 
       enum EMuIdType {
         kIdUndef = 0,       //not defined
@@ -174,6 +179,8 @@ namespace mithep
       TString             fMuonMVAWeights_Subdet0Pt20ToInf;
       TString             fMuonMVAWeights_Subdet1Pt20ToInf;
 
+      RhoUtilities::RhoType fTheRhoType;
+      
     ClassDef(MuonIDMod, 1) // Muon identification module
   };
 }

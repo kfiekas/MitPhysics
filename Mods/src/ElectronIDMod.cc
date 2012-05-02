@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.117 2012/04/28 07:11:16 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.118 2012/04/28 11:34:15 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -83,7 +83,9 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronMVAWeights_Subdet2Pt10To20(""),
   fElectronMVAWeights_Subdet0Pt20ToInf(""),
   fElectronMVAWeights_Subdet1Pt20ToInf(""),
-  fElectronMVAWeights_Subdet2Pt20ToInf("")
+  fElectronMVAWeights_Subdet2Pt20ToInf(""),
+
+  fTheRhoType(RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA)
   
 {
   // Constructor.
@@ -527,7 +529,24 @@ void ElectronIDMod::Process()
         || fElIsoType == ElectronTools::kCombinedRelativeConeAreaCorrected 
         || fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombined 
       ) {      
-      Rho = fPileupEnergyDensity->At(0)->Rho();
+      switch(fTheRhoType) {
+      case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+	Rho = fPileupEnergyDensity->At(0)->Rho();
+	break;
+      case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+	Rho = fPileupEnergyDensity->At(0)->RhoLowEta();
+	break;
+      case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+	Rho = fPileupEnergyDensity->At(0)->RhoRandom();
+	break;
+      case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+	Rho = fPileupEnergyDensity->At(0)->RhoRandomLowEta();
+	break;
+      default:
+	// use the old default
+	Rho = fPileupEnergyDensity->At(0)->Rho();
+	break;
+      }
     }
     Bool_t isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0), Rho);
     if (!isocut)

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.56 2012/04/24 11:45:54 fabstoec Exp $
+// $Id: ElectronIDMod.h,v 1.57 2012/04/28 11:34:08 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -29,6 +29,9 @@
 #include <TFile.h>
 #include <TDirectory.h>
 #include "TMVA/Reader.h"
+
+// for Rho definitons
+#include "MitPhysics/Utils/interface/RhoUtilities.h"
 
 namespace mithep 
 {
@@ -133,6 +136,9 @@ namespace mithep
       void                SetElectronMVAWeightsSubdet2Pt20ToInf(TString s) 
                           { fElectronMVAWeights_Subdet2Pt20ToInf = s; }
 
+      void                SetRhoType(RhoUtilities::RhoType type) { fTheRhoType = type; };
+
+
     protected:
       void                Process();
       void                SlaveBegin();
@@ -204,6 +210,9 @@ namespace mithep
       TString                   fElectronMVAWeights_Subdet0Pt20ToInf;
       TString                   fElectronMVAWeights_Subdet1Pt20ToInf;
       TString                   fElectronMVAWeights_Subdet2Pt20ToInf;
+
+      RhoUtilities::RhoType    fTheRhoType;
+
 
     ClassDef(ElectronIDMod, 1) // Electron identification module
   };
