@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.9 2012/03/29 23:41:56 paus Exp $
+// $Id: PhotonTreeWriter.h,v 1.10 2012/04/24 11:45:54 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -284,6 +284,41 @@ namespace mithep
   {
     public:
       Int_t leptonTag;
+      // ---------- MUON STUFF --------------------
+      Float_t muonPt;
+      Float_t muonEta;
+      Float_t muDR1;
+      Float_t muDR2;
+      Float_t muIso1;
+      Float_t muIso2;
+      Float_t muIso3;
+      Float_t muIso4;
+      Float_t muD0;
+      Float_t muDZ;
+      Int_t muNhits;
+      Float_t muChi2;
+      Int_t muNpixhits;
+      Int_t muNegs;
+      Int_t muNMatch;      
+      // ----------- ELECTRON STUFF --------------
+      Float_t elePt;
+      Float_t eleEta;
+      Float_t eleSCEta;     
+      Float_t eleIso1;
+      Float_t eleIso2;
+      Float_t eleIso3;
+      Float_t eleIso4;
+      Float_t eleDist;
+      Float_t eleDcot;
+      Float_t eleCoviee;
+      Float_t eleDphiin;
+      Float_t eleDetain;
+      Float_t eleDR1;
+      Float_t eleDR2;
+      Float_t eleMass1;
+      Float_t eleMass2;
+      Int_t eleNinnerHits;     
+      // -----------------------------------------
       Float_t rho;
       Float_t genHiggspt;
       Float_t genHiggsZ;

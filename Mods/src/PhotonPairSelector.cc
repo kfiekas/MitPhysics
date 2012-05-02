@@ -354,17 +354,21 @@ void PhotonPairSelector::Process()
 
     // store the vertex for this pair
     switch (fVtxSelType) {
+
     case kStdVtxSelection:
       theVtx[iPair] = fPV->At(0);
       break;
+
     case kCiCVtxSelection:
       theVtx[iPair] = fVtxTools.findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV,
                                                     fConversions,kFALSE,vtxProb);
       break;
+
     case kCiCMVAVtxSelection:
       theVtx[iPair] = fVtxTools.findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV,
                                                     fConversions,kTRUE,vtxProb);
       break;
+
     case kMITVtxSelection:
       // need PFCandidate Collection
       theVtx[iPair] = VertexTools::BestVtx(fPFCands, fPV, bsp,
@@ -560,8 +564,12 @@ void PhotonPairSelector::SlaveBegin()
     fVtxSelType =       kMITVtxSelection;
   else if (fVertexSelType.CompareTo("CiCMVASelection") == 0)
     fVtxSelType =       kCiCMVAVtxSelection;
-  else
+  else if (fVertexSelType.CompareTo("ZeroVtxSelection") == 0)
     fVtxSelType =       kStdVtxSelection;
+  else {
+    std::cerr<<" Vertex Seclection "<<fVertexSelType<<" not implemented."<<std::endl;
+    return;
+  }
 
   if (fIsData)
     fPhFixFile = gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat");
