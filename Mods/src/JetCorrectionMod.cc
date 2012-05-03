@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.13 2012/05/02 16:33:44 fabstoec Exp $
+// $Id: JetCorrectionMod.cc,v 1.14 2012/05/03 08:45:29 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -125,7 +125,26 @@ void JetCorrectionMod::Process()
     fJetCorrector->setJetPhi(rawMom.Phi());
     fJetCorrector->setJetE(rawMom.E());
     const PileupEnergyDensity *fR = fRho->At(0);
-    fJetCorrector->setRho(fR->RhoHighEta());
+
+    Double_t theRho = 0.;
+    switch (fTheRhoType) {
+    case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+      theRho = fR->RhoLowEta();
+      break;
+    case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+      theRho = fR->Rho();
+      break;
+    case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+      theRho = fR->RhoRandomLowEta();
+      break;
+    case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+      theRho = fR->RhoRandom();
+      break;
+    default:      
+      theRho = fR->RhoHighEta();
+    };
+
+    fJetCorrector->setRho(theRho);
     fJetCorrector->setJetA(jet->JetArea());
     
     //emf only valid for CaloJets
