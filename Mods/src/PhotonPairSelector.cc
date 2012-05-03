@@ -144,9 +144,12 @@ void PhotonPairSelector::Process()
   VertexOArr  *ChosenVtx   = new VertexOArr;
   ChosenVtx->SetName(fChosenVtxName);
   ChosenVtx->SetOwner(kTRUE);
+
   // add to event for other modules to use
   AddObjThisEvt(GoodPhotons);
   AddObjThisEvt(ChosenVtx);
+
+  //AddObjThisEvt(ChosenVtx);
 
   if (fPhotons->GetEntries()<2)
     return;
@@ -524,12 +527,16 @@ void PhotonPairSelector::Process()
   }
 
   // we also store the chosen Vtx, so later modules can use it
-  Vertex* chosenVtx = new Vertex( *vtx );
-  if( vtx ) ChosenVtx->AddOwned( chosenVtx );  
+
+  Vertex* chosenVtx = NULL;
+  if ( vtx ) {
+    chosenVtx = new Vertex( *vtx );
+    ChosenVtx->AddOwned( chosenVtx );
+  }
   
   // sort according to pt
   GoodPhotons->Sort();
-
+  
   // delete auxiliary photon collection...
   delete preselPh;
   //delete[] theVtx;
