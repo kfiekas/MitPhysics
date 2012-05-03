@@ -8,6 +8,9 @@
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/VertexTools.h"
+#include "MitPhysics/Utils/interface/PFMetCorrectionTools.h"
+#include "MitAna/DataTree/interface/PFJetCol.h"
+#include "MitAna/DataTree/interface/GenJetCol.h"
 #include "TDataMember.h"
 #include <TNtuple.h>
 #include <TRandom3.h>
@@ -38,7 +41,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fSuperClusterName       ("PFSuperClusters"),
   fPFMetName              ("PFMet"),
   fPFJetName              (Names::gkPFJetBrn),
-
+  funcorrPFJetName        ("AKt5PFJets"),
+  fGenJetName             ("AKT5GenJets"),
   fLeptonTagElectronsName ("HggLeptonTagElectrons"),
   fLeptonTagMuonsName     ("HggLeptonTagMuons"),
 
@@ -61,6 +65,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPileUp                 (0),
   fSuperClusters          (0),
   fPFJets                 (0),
+  fGenJets                (0),
+  funcorrPFJets           (0),
 
   fLeptonTagElectrons     (0),
   fLeptonTagMuons         (0),
@@ -116,9 +122,12 @@ void PhotonTreeWriter::Process()
   LoadEventObject(fPFCandName,         fPFCands);
   LoadEventObject(fSuperClusterName,   fSuperClusters);
   LoadEventObject(fPFMetName,          fPFMet);  
-  if (fEnableJets)
+  if (fEnableJets){
     LoadEventObject(fPFJetName,        fPFJets);  
-
+    //LoadEventObject(funcorrPFJetName,  funcorrPFJets);
+    LoadBranch(funcorrPFJetName);
+    //   if(!fIsData) LoadEventObject(fGenJetName,        fGenJets);
+  }
   // ------------------------------------------------------------  
   // load event based information
   Int_t _numPU      = -1.;        // some sensible default values....
@@ -134,7 +143,8 @@ void PhotonTreeWriter::Process()
   if( !fIsData ) {
     LoadBranch(fMCParticleName);
     LoadBranch(fPileUpName);
-  }  
+    if (fEnableJets) LoadEventObject(fGenJetName,        fGenJets);
+  }  else fGenJets = NULL;
   
   if( !fIsData ) {
     for (UInt_t i=0; i<fPileUp->GetEntries(); ++i) {
@@ -354,6 +364,55 @@ void PhotonTreeWriter::Process()
       }
     }
     
+
+    //added gen. info of whether a lep. or nutrino is from W or Z --Heng 02/14/2012 12:30 EST
+    Double_t _fromZ = -99;
+    Double_t _fromW = -99;
+    Float_t _zpt = -99;
+    Float_t _zEta = -99;
+    Float_t _allZpt = -99;
+    Float_t _allZEta = -99;
+
+    if( !fIsData ){
+      
+      // loop over all GEN particles and look for nutrinos whoes mother is Z
+      for(UInt_t j=0; j<fMCParticles->GetEntries(); ++j) {
+	const MCParticle* p = fMCParticles->At(j);
+	if( p->AbsPdgId()==23 ||p->AbsPdgId()==32 || p->AbsPdgId()==33 ) {
+	  _allZpt=p->Pt();
+	  _allZEta=p->Eta();
+	  if (p->HasDaughter(12,kFALSE) || p->HasDaughter(14,kFALSE) || p->HasDaughter(16,kFALSE) ||p->HasDaughter(18,kFALSE) ) {
+	  _fromZ=1;
+	  _zpt=p->Pt();
+	  _zEta=p->Eta();
+	  }
+	}
+	else _fromW=1;
+      }
+    }
+    
+      /*
+      for(UInt_t j=0; j<fMCParticles->GetEntries(); ++j) {
+	const MCParticle* p = fMCParticles->At(j);
+	if( p->AbsPdgId()==23 ||p->AbsPdgId()==32 || p->AbsPdgId()==33 ) {
+	    _fromZ=1;
+	    _zpt=p->Pt();
+	  }
+	  else _fromW=1;
+      }
+    }
+
+      */
+    fDiphotonEvent->fromZ = _fromZ;
+    fDiphotonEvent->fromW = _fromW;
+    fDiphotonEvent->zpt = _zpt;
+    fDiphotonEvent->zEta = _zEta;
+    fDiphotonEvent->allZpt = _allZpt;
+    fDiphotonEvent->allZEta = _allZEta;
+
+    Double_t _dphiMetgg = -99;
+    Double_t _cosdphiMetgg = -99;
+    Double_t _dphiPhPh = -99;
     Double_t _mass = -99.;
     Double_t _masserr = -99.;
     Double_t _masserrsmeared = -99.;
@@ -365,6 +424,9 @@ void PhotonTreeWriter::Process()
     Double_t _costheta = -99.;
     PhotonTools::DiphotonR9EtaPtCats _evtcat = PhotonTools::kOctCat0;
     if (phHard && phSoft) {
+      _dphiMetgg = MathUtils::DeltaPhi((phHard->Mom()+phSoft->Mom()).Phi(),fPFMet->At(0)->Phi());
+      _cosdphiMetgg = TMath::Cos(_dphiMetgg);
+      _dphiPhPh = MathUtils::DeltaPhi((phHard->Mom()).Phi(),(phSoft->Mom()).Phi());
       _mass = (phHard->Mom()+phSoft->Mom()).M();
       _masserr = 0.5*_mass*TMath::Sqrt(phHard->EnergyErr()*phHard->EnergyErr()/phHard->E()/phHard->E() + phSoft->EnergyErr()*phSoft->EnergyErr()/phSoft->E()/phSoft->E());
       _masserrsmeared = 0.5*_mass*TMath::Sqrt(phHard->EnergyErrSmeared()*phHard->EnergyErrSmeared()/phHard->E()/phHard->E() + phSoft->EnergyErrSmeared()*phSoft->EnergyErrSmeared()/phSoft->E()/phSoft->E());
@@ -397,6 +459,15 @@ void PhotonTreeWriter::Process()
       
     }
     
+    Met *corrMet = new Met(fPFMet->At(0)->Px(),fPFMet->At(0)->Py());
+    PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,1,1,funcorrPFJets,fGenJets,fPFJets);
+    PFMetCorrectionTools::shiftMet(corrMet,fIsData);
+
+    fDiphotonEvent->corrpfmet = corrMet->Pt();
+    fDiphotonEvent->corrpfmetphi = corrMet->Phi();
+    fDiphotonEvent->corrpfmetx = corrMet->Px();
+    fDiphotonEvent->corrpfmety = corrMet->Py();
+
     Float_t _massele = -99.;
     Float_t _ptee = -99.;
     Float_t _costhetaele = -99.;
@@ -412,6 +483,9 @@ void PhotonTreeWriter::Process()
     }
   
     fDiphotonEvent->gencostheta = _gencostheta;
+    fDiphotonEvent->dphiMetgg = _dphiMetgg;
+    fDiphotonEvent->cosdphiMetgg = _cosdphiMetgg;
+    fDiphotonEvent->dphiPhPh = _dphiPhPh;
     fDiphotonEvent->mass = _mass;
     fDiphotonEvent->masserr = _masserr;
     fDiphotonEvent->masserrsmeared = _masserrsmeared;
@@ -622,6 +696,9 @@ void PhotonTreeWriter::Process()
 			   fElectrons,fApplyElectronVeto);
     hCiCTupleSingle->Fill();
   }
+
+
+
     
   return;
 }
@@ -648,11 +725,15 @@ void PhotonTreeWriter::SlaveBegin()
   ReqEventObject(fPFCandName,      fPFCands,      true);
   ReqEventObject(fSuperClusterName,fSuperClusters,true);
   ReqEventObject(fPFMetName,       fPFMet,        true);
-  if (fEnableJets)
-    ReqEventObject(fPFJetName,     fPFJets,       fPFJetsFromBranch);
+  if (fEnableJets){
+    ReqEventObject(fPFJetName,       fPFJets,       fPFJetsFromBranch);
+    ReqBranch(funcorrPFJetName, funcorrPFJets);
+    //   if (!fIsData) ReqEventObject(fGenJetName, fGenJets, true);
+  }
   if (!fIsData) {
     ReqBranch(fPileUpName,         fPileUp);
     ReqBranch(fMCParticleName,     fMCParticles);
+    if (fEnableJets) ReqEventObject(fGenJetName, fGenJets, true);
   }
   if (fIsData) {
     fPhFixDataFile = gSystem->Getenv("CMSSW_BASE") +

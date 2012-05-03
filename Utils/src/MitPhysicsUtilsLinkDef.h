@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.19 2012/04/16 11:06:02 sixie Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.20 2012/04/24 15:37:14 bendavid Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -24,7 +24,7 @@
 #include "MitPhysics/Utils/interface/MuonIDMVA.h"
 #include "MitPhysics/Utils/interface/JetIDMVA.h"
 #include "MitPhysics/Utils/interface/MVAMet.h"
-
+#include "MitPhysics/Utils/interface/PFMetCorrectionTools.h"
 
 #endif
 
@@ -65,4 +65,5 @@
 #pragma link C++ class mithep::MuonIDMVA; 
 #pragma link C++ class mithep::JetIDMVA; 
 #pragma link C++ class mithep::MVAMet; 
+#pragma link C++ class mithep::PFMetCorrectionTools;
 #endif

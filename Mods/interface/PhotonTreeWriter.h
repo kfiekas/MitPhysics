@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.11 2012/05/02 16:57:20 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.12 2012/05/03 08:45:29 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -25,6 +25,8 @@
 #include "MitAna/DataTree/interface/SuperClusterCol.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"
 #include "MitAna/DataTree/interface/JetCol.h"
+#include "MitAna/DataTree/interface/PFJetCol.h"
+#include "MitAna/DataTree/interface/GenJetCol.h"
 #include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 
@@ -363,6 +365,19 @@ namespace mithep
       UInt_t  lumi;
       UChar_t evtcat;
       UInt_t  nobj;
+      Double_t fromZ; //added: Heng 2/14/2012
+      Double_t fromW; //added: Heng
+      Float_t zpt; //added: Heng
+      Float_t allZpt; //added: Heng
+      Float_t zEta; //added: Heng
+      Float_t allZEta; //added: Heng
+      Float_t corrpfmet;
+      Float_t corrpfmetphi;
+      Float_t corrpfmetx;
+      Float_t corrpfmety;
+      Double_t dphiMetgg;
+      Double_t cosdphiMetgg;
+      Double_t dphiPhPh;
       Float_t pfmet;
       Float_t pfmetphi;
       Float_t pfmetx;
@@ -424,6 +439,9 @@ namespace mithep
     void                SetPFCandName(const char *n)      { fPFCandName = n;             }
     void                SetSuperClusterName(const char *n) { fSuperClusterName = n;      }
     void                SetPFJetName(const char *n)       { fPFJetName = n;              }
+    void                SetGenJetName(const char *n)      { fGenJetName = n;             }
+    void                SetuncorrPFJetName(const char *n) { funcorrPFJetName = n;        }
+
     void                SetPFJetsFromBranch(Bool_t b)     { fPFJetsFromBranch = b;       }
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
@@ -475,6 +493,9 @@ namespace mithep
     TString             fPFMetName;
     TString             fPFJetName;
 
+    TString             fGenJetName;   //added to do pfmet correction 05/01/2012
+    TString             funcorrPFJetName;
+
     TString             fLeptonTagElectronsName;
     TString             fLeptonTagMuonsName;
 
@@ -502,6 +523,8 @@ namespace mithep
     const SuperClusterCol         *fSuperClusters;   
     const PFMetCol                *fPFMet;
     const JetCol                  *fPFJets;
+    const GenJetCol               *fGenJets;
+    const PFJetCol                *funcorrPFJets;
     
     const ElectronCol             *fLeptonTagElectrons;
     const MuonCol                 *fLeptonTagMuons;
