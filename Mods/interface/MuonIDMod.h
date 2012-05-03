@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.42 2012/04/28 19:10:00 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.43 2012/05/02 16:33:50 fabstoec Exp $
 //
 // MuonIDMod
 //
@@ -87,6 +87,8 @@ namespace mithep
       void               SetRhoType(RhoUtilities::RhoType type)
 	{ fTheRhoType = type; };
 
+      void               SetVertexName(const char* name) { fVertexName = name; }
+      
       enum EMuIdType {
         kIdUndef = 0,       //not defined
         kWMuId,             //"WMuId"

@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.12 2011/06/13 15:29:13 ceballos Exp $
+// $Id: JetCorrectionMod.cc,v 1.13 2012/05/02 16:33:44 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -25,7 +25,7 @@ ClassImp(mithep::JetCorrectionMod)
     fJetCorrector(0),
     fEvtHdrName(Names::gkEvtHeaderBrn),
     fEventHeader(0),
-    fTheRhoType(RhoUtilities::NONE)
+    fTheRhoType(RhoUtilities::DEFAULT)
 {
   // Constructor.
 }

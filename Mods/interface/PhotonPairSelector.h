@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.17 2011/12/19 21:56:55 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.18 2012/03/29 23:41:56 paus Exp $
 //
 // PhotonPairSelector
 //
@@ -77,6 +77,10 @@ namespace mithep
     // get/set the Names for the output Photon Collection
     const char         *GetOutputName()             const { return fGoodPhotonsName;     }   
     void                SetOutputName(const char *n)      { fGoodPhotonsName=n;          }    
+
+    const char         *GetOutputVtxName()          const { return fChosenVtxName;       }
+    void                SetOutputVtxName(const char* n)   { fChosenVtxName = n;          }
+
 
     // set basic Cut variables (FOR PRE-SELECTION)
     void                SetPtMin(Double_t pt)             { fPhotonPtMin     = pt;       }
@@ -177,6 +181,7 @@ namespace mithep
     TString             fPileUpName;
     
     TString             fGoodPhotonsName;      //name of exported "good photon" collection
+    TString             fChosenVtxName;        //name of exported "chosen Vtx"  collection
     
     // Selection Types
     TString             fPhotonSelType;

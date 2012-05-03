@@ -73,6 +73,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fExcludeDoublePrompt    (kFALSE),
   fEnableJets             (kFALSE),
   fApplyLeptonTag         (kFALSE),
+  fApplyBTag              (kFALSE),
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fTupleName              ("hPhotonTree")
@@ -279,6 +280,28 @@ void PhotonTreeWriter::Process()
       fDiphotonEvent->vtxprob = phHard->VtxProb();
     }
     
+    // fill Btag information... set to true if One jet fullfills 
+    fDiphotonEvent -> btag       = -1.;
+    fDiphotonEvent -> btagJetPt  = -99.;
+    fDiphotonEvent -> btagJetEta = -99.;
+    if( fApplyBTag && fEnableJets ) {
+      float highTag     = 0.;
+      float highJetPt   = 0.;
+      float highJetEta  = 0.;
+      for (UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet) {
+	const Jet *jet = fPFJets->At(ijet);
+	if( jet->Pt() < 20. || jet->AbsEta() > 2.4 ) continue;
+	if ( jet->CombinedSecondaryVertexBJetTagsDisc() > highTag ) {
+	  highTag    = jet->CombinedSecondaryVertexBJetTagsDisc();
+	  highJetPt  = jet->Pt();
+	  highJetEta = jet->Eta();
+	}
+      }
+      fDiphotonEvent -> btag       = highTag;
+      fDiphotonEvent -> btagJetPt  = highJetPt;
+      fDiphotonEvent -> btagJetEta = highJetEta;      
+    }
+    
     //fill jet variables
     if (fEnableJets) {
       for (UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet) {
@@ -373,7 +396,6 @@ void PhotonTreeWriter::Process()
       }
       
     }
-      
     
     Float_t _massele = -99.;
     Float_t _ptee = -99.;

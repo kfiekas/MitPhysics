@@ -37,6 +37,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCParticleName                (Names::gkMCPartBrn),
   fPileUpName                    (Names::gkPileupInfoBrn),
   fGoodPhotonsName               (ModNames::gkGoodPhotonsName),
+  fChosenVtxName                 ("HggChosenVtx"),
   // ----------------------------------------
   // Selection Types
   fPhotonSelType                 ("NoSelection"),
@@ -138,8 +139,14 @@ void PhotonPairSelector::Process()
   PhotonOArr  *GoodPhotons = new PhotonOArr;
   GoodPhotons->SetName(fGoodPhotonsName);
   GoodPhotons->SetOwner(kTRUE);
+
+
+  VertexOArr  *ChosenVtx   = new VertexOArr;
+  ChosenVtx->SetName(fChosenVtxName);
+  ChosenVtx->SetOwner(kTRUE);
   // add to event for other modules to use
   AddObjThisEvt(GoodPhotons);
+  AddObjThisEvt(ChosenVtx);
 
   if (fPhotons->GetEntries()<2)
     return;
@@ -485,8 +492,9 @@ void PhotonPairSelector::Process()
   Photon*        phHard  = NULL;
   Photon*        phSoft  = NULL;
 
-  PhotonTools::CiCBaseLineCats catPh1 = PhotonTools::kCiCNoCat;
-  PhotonTools::CiCBaseLineCats catPh2 = PhotonTools::kCiCNoCat;
+  // not used at all....
+  //PhotonTools::CiCBaseLineCats catPh1 = PhotonTools::kCiCNoCat;
+  //PhotonTools::CiCBaseLineCats catPh2 = PhotonTools::kCiCNoCat;
 
   double maxSumEt = 0.;
   for (unsigned int iPair=0; iPair<passPairs.size(); ++iPair) {
@@ -496,8 +504,8 @@ void PhotonPairSelector::Process()
       maxSumEt = sumEt;
       phHard   = fixPh1st[passPairs[iPair]];
       phSoft   = fixPh2nd[passPairs[iPair]];
-      catPh1   = cat1st  [passPairs[iPair]];
-      catPh2   = cat2nd  [passPairs[iPair]];
+      //catPh1   = cat1st  [passPairs[iPair]];
+      //catPh2   = cat2nd  [passPairs[iPair]];
       vtx      = theVtx[iPair];
     }
   }
@@ -515,15 +523,16 @@ void PhotonPairSelector::Process()
     GoodPhotons->AddOwned(phSoft);
   }
 
-
+  // we also store the chosen Vtx, so later modules can use it
+  Vertex* chosenVtx = new Vertex( *vtx );
+  if( vtx ) ChosenVtx->AddOwned( chosenVtx );  
+  
   // sort according to pt
   GoodPhotons->Sort();
 
   // delete auxiliary photon collection...
   delete preselPh;
   //delete[] theVtx;
-
-  return;
 
   return;
 }

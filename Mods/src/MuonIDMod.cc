@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.70 2012/04/28 19:10:00 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.71 2012/05/02 16:33:14 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -61,7 +61,7 @@ ClassImp(mithep::MuonIDMod)
   fMuonMVAWeights_Subdet0Pt20ToInf(""),
   fMuonMVAWeights_Subdet1Pt20ToInf(""),
 
-  fTheRhoType(RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA)
+  fTheRhoType(RhoUtilities::DEFAULT)
 {
   // Constructor.
 }

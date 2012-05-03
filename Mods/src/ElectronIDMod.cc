@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.118 2012/04/28 11:34:15 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.119 2012/05/02 16:33:46 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -85,7 +85,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronMVAWeights_Subdet1Pt20ToInf(""),
   fElectronMVAWeights_Subdet2Pt20ToInf(""),
 
-  fTheRhoType(RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA)
+  fTheRhoType(RhoUtilities::DEFAULT)
   
 {
   // Constructor.

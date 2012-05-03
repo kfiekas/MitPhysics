@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.10 2012/04/24 11:45:54 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.11 2012/05/02 16:57:20 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -283,6 +283,11 @@ namespace mithep
   class PhotonTreeWriterDiphotonEvent
   {
     public:
+      // ------------ BTAG STUFF -------------------
+      Float_t btag;
+      Float_t btagJetPt;
+      Float_t btagJetEta;
+      // ----------- LEPTON TAG STUFF -------------
       Int_t leptonTag;
       // ---------- MUON STUFF --------------------
       Float_t muonPt;
@@ -422,6 +427,7 @@ namespace mithep
     void                SetPFJetsFromBranch(Bool_t b)     { fPFJetsFromBranch = b;       }
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
+    void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
 
 
@@ -512,7 +518,8 @@ namespace mithep
     Bool_t                         fEnableJets;
 
     Bool_t                         fApplyLeptonTag;
-    
+    Bool_t                         fApplyBTag;
+
     TString                        fPhFixDataFile;
     PhotonFix                      fPhfixph;
     PhotonFix                      fPhfixele;
