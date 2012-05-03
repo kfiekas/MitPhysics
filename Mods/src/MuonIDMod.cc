@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.71 2012/05/02 16:33:14 fabstoec Exp $
+// $Id: MuonIDMod.cc,v 1.72 2012/05/03 08:45:28 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -60,7 +60,6 @@ ClassImp(mithep::MuonIDMod)
   fMuonMVAWeights_Subdet1Pt14p5To20(""),
   fMuonMVAWeights_Subdet0Pt20ToInf(""),
   fMuonMVAWeights_Subdet1Pt20ToInf(""),
-
   fTheRhoType(RhoUtilities::DEFAULT)
 {
   // Constructor.
@@ -282,27 +281,29 @@ void MuonIDMod::Process()
       continue;
 
     Double_t Rho = 0.;
-    const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
-    
-    switch (fTheRhoType) {
-    case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
-      Rho = rho->RhoLowEta();
-      break;
-    case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
-      Rho = rho->Rho();
-      break;
-    case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
-      Rho = rho->RhoRandomLowEta();
-      break;
-    case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
-      Rho = rho->RhoRandom();
-      break;
-    default:
-      Rho = rho->Rho();
+    if(fPileupEnergyDensity){
+      const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0);
+
+      switch (fTheRhoType) {
+      case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+	Rho = rho->RhoLowEta();
+	break;
+      case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+	Rho = rho->Rho();
+	break;
+      case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+	Rho = rho->RhoRandomLowEta();
+	break;
+      case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+	Rho = rho->RhoRandom();
+	break;
+      default:
+	Rho = rho->Rho();
+      }
+
+      if ((TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || std::isinf(fPileupEnergyDensity->At(0)->Rho()))) Rho = 0.;
     }
 
-    if ((TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || std::isinf(fPileupEnergyDensity->At(0)->Rho()))) Rho = 0.;
-    
     Bool_t isocut = kFALSE;
     switch (fMuIsoType) {
       case kTrackCalo:
