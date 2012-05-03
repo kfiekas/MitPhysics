@@ -15,7 +15,7 @@ using namespace mithep;
 
 //--------------------------------------------------------------------------------------------------
 JetIDMVA::JetIDMVA() :
-  fJetPtMin(0)  , //We need to lower this
+  fJetPtMin(0.)  , //We need to lower this
   fDZCut   (0.2),
   fLowPtMethodName ("JetIDMVALowPt" ),
   fHighPtMethodName("JetIDMVAHighPt"),
@@ -154,11 +154,11 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *i
 		      const PileupEnergyDensityCol *iPileupEnergyDensity) { 
   
   if(!JetTools::passPFLooseId(iJet))                 return false;
-  if(iJet->Pt() < fJetPtMin)                         return false; 
   if(fabs(iJet->Eta()) > 4.99)                       return false;
   
   double lMVA = MVAValue   (iJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity);
   double lPt  = correctedPt(iJet,                  iJetCorrector,iPileupEnergyDensity);
+  if(lPt < fJetPtMin)                         return false; 
   if(lPt > 50)                                return true; //==> we can raise this 
   
   int lPtId = 0; 

@@ -136,6 +136,7 @@ namespace mithep {
     TString      fCovU2MethodName;
     Bool_t       fIsInitialized;
     MVAType      fType;
+    Bool_t       f42;
     
     Float_t fSumEt  ;
     Float_t fU      ;

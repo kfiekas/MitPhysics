@@ -1,3 +1,4 @@
+
 #include "MitPhysics/Utils/interface/MVAMet.h"
 #include "MitPhysics/Utils/interface/JetTools.h"
 #include "MitPhysics/Utils/interface/RecoilTools.h"
@@ -125,8 +126,9 @@ void MVAMet::Initialize(TString iJetLowPtFile,
   
   fIsInitialized = kTRUE;
   fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile);
-
   fType          = iType;
+  f42            = iU1Weights.Contains("42");
+  if(f42) fRecoilTools->fJetIDMVA->fJetPtMin = 1.;
 
   ROOT::Cintex::Cintex::Enable();   
   
@@ -371,7 +373,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
     const PFJet *pJet = iJets->At(i0);
     Double_t pPt = fRecoilTools->fJetIDMVA->correctedPt(pJet,iJetCorrector,iPUEnergyDensity);
     if(!JetTools::passPFLooseId(pJet)) continue;
-    lNAllJet++;
+    if(f42 && pPt > 1.) lNAllJet++;
+    if(!f42)            lNAllJet++;
     if(pPt  > 30)  lNJet++;
     if(lPt0 < pPt) {lPt0 = pPt; lLead = pJet; continue;}    
     if(lPt1 < pPt) {lPt1 = pPt; l2nd  = pJet; continue;}
@@ -504,7 +507,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis
     const PFJet *pJet = iJets->At(i0);
     Double_t pPt = pJet->Pt();
     if(!JetTools::passPFLooseId(pJet)) continue;
-    lNAllJet++;
+    if(f42 && pPt > 1.) lNAllJet++;
+    if(!f42)            lNAllJet++;
     if(pPt  > 30)  lNJet++;
     if(lPt0 < pPt) {lPt0 = pPt; lLead = pJet; continue;}    
     if(lPt1 < pPt) {lPt1 = pPt; l2nd  = pJet; continue;}
@@ -657,7 +661,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
     double pDR2   = sqrt(pDEta2*pDEta2 + pDPhi2*pDPhi2);
     if(pDR2 < 0.5) continue;  
     if(!JetTools::passPFLooseId(pJet)) continue;
-    lNAllJet++;
+    if(f42 && pPt > 1.) lNAllJet++;
+    if(!f42)            lNAllJet++;
     if(pPt  > 30.)  lNJet++;
     if(lPt0 < pPt) {lPt0 = pPt; lLead = pJet; continue;}    
     if(lPt1 < pPt) {lPt1 = pPt; l2nd  = pJet; continue;}
@@ -803,7 +808,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
     double pDR2   = sqrt(pDEta2*pDEta2 + pDPhi2*pDPhi2);
     if(pDR2 < 0.5) continue;  
     if(!JetTools::passPFLooseId(pJet)) continue;
-    lNAllJet++;
+    if(f42 && pPt > 1.) lNAllJet++;
+    if(!f42)            lNAllJet++;
     if(pPt  > 30.)  lNJet++;
     if(lPt0 < pPt) {lPt0 = pPt; lLead = pJet; continue;}    
     if(lPt1 < pPt) {lPt1 = pPt; l2nd  = pJet; continue;}
