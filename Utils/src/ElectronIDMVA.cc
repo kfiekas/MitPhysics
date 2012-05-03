@@ -1032,24 +1032,28 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
       //************************************************************
       // Lepton Footprint Removal
       //************************************************************            
-      for (UInt_t q=0; q < goodElectrons->GetEntries() ; ++q) {
-	//if pf candidate matches an electron passing ID cuts, then veto it
-	if(pf->GsfTrk() && goodElectrons->At(q)->GsfTrk() &&
-	   pf->GsfTrk() == goodElectrons->At(q)->GsfTrk()) IsLeptonFootprint = kTRUE;
-	if(pf->TrackerTrk() && goodElectrons->At(q)->TrackerTrk() &&
-	   pf->TrackerTrk() == goodElectrons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
-	//if pf candidate lies in veto regions of electron passing ID cuts, then veto it
-	if(pf->BestTrk() && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 
-           && MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.015) IsLeptonFootprint = kTRUE;
-	if(pf->PFType() == PFCandidate::eGamma && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 &&
-	   MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.08) IsLeptonFootprint = kTRUE;
+      if(goodElectrons) {
+        for (UInt_t q=0; q < goodElectrons->GetEntries() ; ++q) {
+	  //if pf candidate matches an electron passing ID cuts, then veto it
+	  if(pf->GsfTrk() && goodElectrons->At(q)->GsfTrk() &&
+	     pf->GsfTrk() == goodElectrons->At(q)->GsfTrk()) IsLeptonFootprint = kTRUE;
+	  if(pf->TrackerTrk() && goodElectrons->At(q)->TrackerTrk() &&
+	     pf->TrackerTrk() == goodElectrons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
+	  //if pf candidate lies in veto regions of electron passing ID cuts, then veto it
+	  if(pf->BestTrk() && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 
+             && MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.015) IsLeptonFootprint = kTRUE;
+	  if(pf->PFType() == PFCandidate::eGamma && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 &&
+	     MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.08) IsLeptonFootprint = kTRUE;
+        }
       }
-      for (UInt_t q=0; q < goodMuons->GetEntries() ; ++q) {
-	//if pf candidate matches an muon passing ID cuts, then veto it
-	if(pf->TrackerTrk() && goodMuons->At(q)->TrackerTrk() &&
-	   pf->TrackerTrk() == goodMuons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
-	//if pf candidate lies in veto regions of muon passing ID cuts, then veto it
-	if(pf->BestTrk() && MathUtils::DeltaR(goodMuons->At(q)->Mom(), pf->Mom()) < 0.01) IsLeptonFootprint = kTRUE;
+      if(goodMuons) {
+        for (UInt_t q=0; q < goodMuons->GetEntries() ; ++q) {
+	  //if pf candidate matches an muon passing ID cuts, then veto it
+	  if(pf->TrackerTrk() && goodMuons->At(q)->TrackerTrk() &&
+	     pf->TrackerTrk() == goodMuons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
+	  //if pf candidate lies in veto regions of muon passing ID cuts, then veto it
+	  if(pf->BestTrk() && MathUtils::DeltaR(goodMuons->At(q)->Mom(), pf->Mom()) < 0.01) IsLeptonFootprint = kTRUE;
+        }
       }
 
       if (!IsLeptonFootprint) {
@@ -1102,22 +1106,6 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
       } //not lepton footprint
     } //in 1.0 dr cone
   } //loop over PF candidates
-
-  Double_t fMVAVar_ChargedIso_DR0p0To0p1  = 0;
-  Double_t fMVAVar_ChargedIso_DR0p1To0p2  = 0;
-  Double_t fMVAVar_ChargedIso_DR0p2To0p3  = 0;
-  Double_t fMVAVar_ChargedIso_DR0p3To0p4  = 0;
-  Double_t fMVAVar_ChargedIso_DR0p4To0p5  = 0;
-  Double_t fMVAVar_GammaIso_DR0p0To0p1  = 0;
-  Double_t fMVAVar_GammaIso_DR0p1To0p2  = 0;
-  Double_t fMVAVar_GammaIso_DR0p2To0p3  = 0;
-  Double_t fMVAVar_GammaIso_DR0p3To0p4  = 0;
-  Double_t fMVAVar_GammaIso_DR0p4To0p5  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p0To0p1  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p1To0p2  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p2To0p3  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p3To0p4  = 0;
-  Double_t fMVAVar_NeutralHadronIso_DR0p4To0p5  = 0;
 
   fMVAVar_ChargedIso_DR0p0To0p1   = TMath::Min((tmpChargedIso_DR0p0To0p1)/ele->Pt(), 2.5);
   fMVAVar_ChargedIso_DR0p1To0p2   = TMath::Min((tmpChargedIso_DR0p1To0p2)/ele->Pt(), 2.5);
