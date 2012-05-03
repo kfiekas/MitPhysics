@@ -41,8 +41,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fSuperClusterName       ("PFSuperClusters"),
   fPFMetName              ("PFMet"),
   fPFJetName              (Names::gkPFJetBrn),
-  funcorrPFJetName        ("AKt5PFJets"),
   fGenJetName             ("AKT5GenJets"),
+  funcorrPFJetName        ("AKt5PFJets"),
   fLeptonTagElectronsName ("HggLeptonTagElectrons"),
   fLeptonTagMuonsName     ("HggLeptonTagMuons"),
 
@@ -80,6 +80,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fEnableJets             (kFALSE),
   fApplyLeptonTag         (kFALSE),
   fApplyBTag              (kFALSE),
+  fApplyPFMetCorrections  (kFALSE),
+
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fTupleName              ("hPhotonTree")
@@ -124,9 +126,7 @@ void PhotonTreeWriter::Process()
   LoadEventObject(fPFMetName,          fPFMet);  
   if (fEnableJets){
     LoadEventObject(fPFJetName,        fPFJets);  
-    //LoadEventObject(funcorrPFJetName,  funcorrPFJets);
     LoadBranch(funcorrPFJetName);
-    //   if(!fIsData) LoadEventObject(fGenJetName,        fGenJets);
   }
   // ------------------------------------------------------------  
   // load event based information
@@ -143,8 +143,8 @@ void PhotonTreeWriter::Process()
   if( !fIsData ) {
     LoadBranch(fMCParticleName);
     LoadBranch(fPileUpName);
-    if (fEnableJets) LoadEventObject(fGenJetName,        fGenJets);
-  }  else fGenJets = NULL;
+    if ( fApplyPFMetCorrections ) LoadEventObject(fGenJetName,        fGenJets);
+  }
   
   if( !fIsData ) {
     for (UInt_t i=0; i<fPileUp->GetEntries(); ++i) {
@@ -459,14 +459,25 @@ void PhotonTreeWriter::Process()
       
     }
     
-    Met *corrMet = new Met(fPFMet->At(0)->Px(),fPFMet->At(0)->Py());
-    PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,1,1,funcorrPFJets,fGenJets,fPFJets);
-    PFMetCorrectionTools::shiftMet(corrMet,fIsData);
+    
+    fDiphotonEvent->corrpfmet    = -99.;
+    fDiphotonEvent->corrpfmetphi = -99.;
+    fDiphotonEvent->corrpfmetx   = -99.;
+    fDiphotonEvent->corrpfmety   = -99.;
 
-    fDiphotonEvent->corrpfmet = corrMet->Pt();
-    fDiphotonEvent->corrpfmetphi = corrMet->Phi();
-    fDiphotonEvent->corrpfmetx = corrMet->Px();
-    fDiphotonEvent->corrpfmety = corrMet->Py();
+    Met *corrMet = NULL;
+    if( fApplyPFMetCorrections ) {
+      corrMet = new Met(fPFMet->At(0)->Px(),fPFMet->At(0)->Py());
+      PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,1,1,funcorrPFJets,fGenJets,fPFJets);
+      PFMetCorrectionTools::shiftMet(corrMet,fIsData);
+      
+      fDiphotonEvent->corrpfmet = corrMet->Pt();
+      fDiphotonEvent->corrpfmetphi = corrMet->Phi();
+      fDiphotonEvent->corrpfmetx = corrMet->Px();
+      fDiphotonEvent->corrpfmety = corrMet->Py();
+
+      delete corrMet;
+    }
 
     Float_t _massele = -99.;
     Float_t _ptee = -99.;
@@ -728,12 +739,11 @@ void PhotonTreeWriter::SlaveBegin()
   if (fEnableJets){
     ReqEventObject(fPFJetName,       fPFJets,       fPFJetsFromBranch);
     ReqBranch(funcorrPFJetName, funcorrPFJets);
-    //   if (!fIsData) ReqEventObject(fGenJetName, fGenJets, true);
   }
   if (!fIsData) {
     ReqBranch(fPileUpName,         fPileUp);
     ReqBranch(fMCParticleName,     fMCParticles);
-    if (fEnableJets) ReqEventObject(fGenJetName, fGenJets, true);
+    if ( fApplyPFMetCorrections ) ReqEventObject(fGenJetName, fGenJets, true);
   }
   if (fIsData) {
     fPhFixDataFile = gSystem->Getenv("CMSSW_BASE") +

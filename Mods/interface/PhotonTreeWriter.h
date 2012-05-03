@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.12 2012/05/03 08:45:29 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.13 2012/05/03 12:02:27 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -446,8 +446,8 @@ namespace mithep
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
+    void                SetApplyPFMetCorr(Bool_t b)       { fApplyPFMetCorrections = b;  }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
-
 
     // set basic Cut variables (FOR PRE-SELECTION)
 
@@ -542,6 +542,7 @@ namespace mithep
 
     Bool_t                         fApplyLeptonTag;
     Bool_t                         fApplyBTag;
+    Bool_t                         fApplyPFMetCorrections;
 
     TString                        fPhFixDataFile;
     PhotonFix                      fPhfixph;

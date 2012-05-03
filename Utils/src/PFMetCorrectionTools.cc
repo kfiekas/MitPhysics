@@ -19,10 +19,7 @@ using namespace mithep;
 ClassImp(mithep::PFMetCorrectionTools)
 
 
-  //   TLorentzVector theSmearedMet = correctMet(tlvPFmet);
-//     TLorentzVector theShiftedMet = shiftMet(tlvPFmet);
-//     TLorentzVector theShiftedScaledMet = correctMet(theShiftedMet,0,1);
-//     TLorentzVector theSmearedShiftedMet = shiftMet(theSmearedMet);
+
 //--------------------------------------------------------------------------------------------------
 PFMetCorrectionTools::PFMetCorrectionTools()  
 {
@@ -94,85 +91,66 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
   jetSumUnsmeared.SetXYZT(0.,0.,0.,0);
 
    if( !fPFJet || !fcorrJet) {
-     //    std::cout<<" One of the PFJet colleciton empty."<<std::endl;
      return;
    }
-
-//   std::cout<<fPFJet->GetEntries()<<std::endl;
-//   std::cout<<fcorrJet->GetEntries()<<std::endl;
 
   if(fPFJet->GetEntries() != fcorrJet->GetEntries()) return;
 
   // associating reco - gen met                                                                                                            
-  for(int i=0; i<int(fPFJet->GetEntries()); i++){
+  for( unsigned int i=0; i<fPFJet->GetEntries(); ++i){
     const Jet *recojet=fPFJet->At(i);
     const Jet *corrjet=fcorrJet->At(i);
-
-    //    std::cout<<" Testiong Jet # "<<i<<std::endl;
-
-     if( !recojet || !corrjet ) {
-       //       std::cout<<" Could not ontsain jet."<<std::endl;
-       return;
-     }
-
-     if (! phSoft || !phHard ) {
-       //      std::cout<<" One photon is not defined. "<<std::endl;
-       return;
-     }
-
-    // remove identified photons
-    //        if(!jetnoisophot.at(i)) continue;
-     if ((phHard && MathUtils::DeltaR(recojet->RawMom(),phHard->Mom())<0.5) ||(phSoft && MathUtils::DeltaR(recojet->RawMom(),phSoft->Mom())<0.5)) continue; 
-     // smearing via association with genjets
-
-     int ass(-999);
-     Double_t DRmin(999.);
-
-     //     std::cout<<( !fGenJet ? "No GenJets" : "Yes GenJets")<<std::endl;
     
+    if( !recojet || !corrjet )  return;
+       
+    if (! phSoft || !phHard ) {
+      return;
+    }
+    
+    // remove identified photons
+    if ((phHard && MathUtils::DeltaR(recojet->RawMom(),phHard->Mom())<0.5) ||(phSoft && MathUtils::DeltaR(recojet->RawMom(),phSoft->Mom())<0.5)) continue; 
+    // smearing via association with genjets
+    int match        = -999;
+    Double_t DRmin = 999.;     
     if (fGenJet){
-      for(int j=0; j<int(fGenJet->GetEntries()); j++){
-	//Double_t DR = sqrt(delta_eta(etaJet_pfakt5[i],etaJetGen_akt5[j])*delta_eta(etaJet_pfakt5[i],etaJetGen_akt5[j]) +	       delta_phi(phiJet_pfakt5[i],phiJetGen_akt5[j])*delta_phi(phiJet_pfakt5[i],phiJetGen_akt5[j]) ) ;
+      for(unsigned int j=0; j< fGenJet->GetEntries(); ++j){
 	const GenJet *genjet=fGenJet->At(j);
+	if(!genjet) {
+	  std::cout<<" genjet not there..."<<std::endl;
+	  continue;
+	}
+	
 	Double_t DR = MathUtils::DeltaR(recojet->RawMom(),genjet->Mom());
 	
 	Double_t expres = ErrEt(corrjet->RawMom().Pt(),recojet->RawMom().Eta());  
 	
 	if(DR < DRmin && (corrjet->RawMom().Pt()-genjet->Mom().Pt())/corrjet->RawMom().Pt() < 5. * expres) {
-	  ass = j;
+	  match = (int) j;
 	  DRmin = DR;
 	}
       }
-      
-      if(DRmin > 0.1 + 0.3 * exp(-0.05*(fGenJet->At(ass)->Mom().Pt()-10)))  ass = -999;
+      if( match > -1 )
+	if(DRmin > 0.1 + 0.3 * exp(-0.05*(fGenJet->At(match)->Mom().Pt()-10)))  match = -999;
     }
-    else ass=-999;
-    //     if(ass>-1) jetDR->Fill(fGenJet->At(ass).Pt(),DRmin);
-    //     if(ass>-1) jetresp->Fill(fGenJet->At(ass).Pt(),(corrjet->RawMom().Pt()-fGenJet->At(ass).Pt())/fGenJet->At(ass).Pt());
+    else match=-999;
     
-    //       std::cout<<" **** 2 "<<ass<<"  "<<(recojet ? " jet is good" : "no good jet :(")<<std::endl;
-    
-
     // smearing for non-associated jets, using expected resolutions
     float smear = -999.;
     if (fabs(recojet->RawMom().Eta())<=1.1)                               smear = 1.06177;
     if (fabs(recojet->RawMom().Eta())<=1.7 && fabs(recojet->RawMom().Eta())>1.1) smear = 1.08352;
     if (fabs(recojet->RawMom().Eta())<=2.3 && fabs(recojet->RawMom().Eta())>1.7) smear = 1.02911;
     if (fabs(recojet->RawMom().Eta())>2.3)                                smear = 1.15288;
-
-
-    //     std::cout<<" **** "<<ass<<std::endl;
     
-    Double_t shift(0);
-    if( ass>-1 && fGenJet )
-      shift = (smear-1) * (corrjet->RawMom().Pt() - fGenJet->At(ass)->Mom().Pt())/corrjet->RawMom().Pt();
+    
+    
+    Double_t shift=0;
+    if( match>-1 && fGenJet )
+      shift = (smear-1) * (corrjet->RawMom().Pt() - fGenJet->At(match)->Mom().Pt())/corrjet->RawMom().Pt();
     else {
       Double_t expres = ErrEt(recojet->RawMom().Pt(),recojet->RawMom().Eta());
       Double_t relsmear = expres * sqrt(smear*smear-1);
-
       gRandom->SetSeed(1);
-
-      shift = gRandom->Gaus(0.,relsmear); //wth is gen_???
+      shift = gRandom->Gaus(0.,relsmear);
     }
     
     float ptSmeared  = recojet->RawMom().Pt();
@@ -185,7 +163,7 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
     
     // JEC scaling to correct for residual jet corrections
     if(scale) {
-      Double_t factor(1);
+      Double_t factor=1;
       if(TMath::Abs(recojet->RawMom().Eta())<1.5) factor = 1.015;
       else if(TMath::Abs(recojet->RawMom().Eta())<3) factor = 1.04;
       else factor = 1.15;
@@ -207,9 +185,6 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
     
   }
 
-//   std::cout<<" done with loop over jets"<<std::endl;
-//   if(!met) { std::cout<<" No MET fdound."<<std::endl; return; }
-  
   //  TLorentzVector correctedMet;
   //  correctedMet = uncormet + jetSumUnsmeared - jetSumSmeared;
   //  Double_t px=met.Pt()*cos(met.Phi())+jetSumUnsmeared.Px()-jetSumSmeared.Px();
@@ -228,7 +203,8 @@ void PFMetCorrectionTools::shiftMet(Met *uncormet, Bool_t fIsData) {
   //  TLorentzVector correctedMet;
   Double_t spfMet=uncormet->SumEt();
   // correction for METx, METy bias
-  Double_t px(0), py(0);
+  Double_t px=0;
+  Double_t py=0;
   // data
   if(fIsData){
     px =uncormet->Px() -0.00563109*spfMet+0.959742;
