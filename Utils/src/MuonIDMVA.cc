@@ -848,24 +848,28 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
       //************************************************************
       // Lepton Footprint Removal
       //************************************************************            
-      for (UInt_t q=0; q < goodElectrons->GetEntries() ; ++q) {
-	//if pf candidate matches an electron passing ID cuts, then veto it
-	if(pf->GsfTrk() && goodElectrons->At(q)->GsfTrk() &&
-	   pf->GsfTrk() == goodElectrons->At(q)->GsfTrk()) IsLeptonFootprint = kTRUE;
-	if(pf->TrackerTrk() && goodElectrons->At(q)->TrackerTrk() &&
-	   pf->TrackerTrk() == goodElectrons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
-	//if pf candidate lies in veto regions of electron passing ID cuts, then veto it
-	if(pf->BestTrk() && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 
-           && MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.015) IsLeptonFootprint = kTRUE;
-	if(pf->PFType() == PFCandidate::eGamma && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 &&
-	   MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.08) IsLeptonFootprint = kTRUE;
+      if(goodElectrons) {
+        for (UInt_t q=0; q < goodElectrons->GetEntries() ; ++q) {
+	  //if pf candidate matches an electron passing ID cuts, then veto it
+	  if(pf->GsfTrk() && goodElectrons->At(q)->GsfTrk() &&
+	     pf->GsfTrk() == goodElectrons->At(q)->GsfTrk()) IsLeptonFootprint = kTRUE;
+	  if(pf->TrackerTrk() && goodElectrons->At(q)->TrackerTrk() &&
+	     pf->TrackerTrk() == goodElectrons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
+	  //if pf candidate lies in veto regions of electron passing ID cuts, then veto it
+	  if(pf->BestTrk() && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 
+             && MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.015) IsLeptonFootprint = kTRUE;
+	  if(pf->PFType() == PFCandidate::eGamma && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 &&
+	     MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.08) IsLeptonFootprint = kTRUE;
+        }
       }
-      for (UInt_t q=0; q < goodMuons->GetEntries() ; ++q) {
-	//if pf candidate matches an muon passing ID cuts, then veto it
-	if(pf->TrackerTrk() && goodMuons->At(q)->TrackerTrk() &&
-	   pf->TrackerTrk() == goodMuons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
-	//if pf candidate lies in veto regions of muon passing ID cuts, then veto it
-	if(pf->BestTrk() && MathUtils::DeltaR(goodMuons->At(q)->Mom(), pf->Mom()) < 0.01) IsLeptonFootprint = kTRUE;
+      if(goodMuons) {
+        for (UInt_t q=0; q < goodMuons->GetEntries() ; ++q) {
+	  //if pf candidate matches an muon passing ID cuts, then veto it
+	  if(pf->TrackerTrk() && goodMuons->At(q)->TrackerTrk() &&
+	     pf->TrackerTrk() == goodMuons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
+	  //if pf candidate lies in veto regions of muon passing ID cuts, then veto it
+	  if(pf->BestTrk() && MathUtils::DeltaR(goodMuons->At(q)->Mom(), pf->Mom()) < 0.01) IsLeptonFootprint = kTRUE;
+        }
       }
 
       if (!IsLeptonFootprint) {
