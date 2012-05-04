@@ -1,4 +1,4 @@
-// $Id: SeparatePileUpMod.cc,v 1.1 2012/04/27 21:03:35 ceballos Exp $
+// $Id: SeparatePileUpMod.cc,v 1.2 2012/04/27 22:41:41 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/SeparatePileUpMod.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
@@ -20,7 +20,8 @@ SeparatePileUpMod::SeparatePileUpMod(const char *name, const char *title) :
   fPFCandidates(0),
   fAllVertices(0),
   fVertices(0),
-  fCheckClosestZVertex(kTRUE)
+  fCheckClosestZVertex(kTRUE),
+  fUseAllVertices(kTRUE)
 {
   // Constructor.
 }
@@ -39,7 +40,9 @@ void SeparatePileUpMod::Process()
   pfNoPileUp->SetName(fPFNoPileUpName);
 
   LoadBranch(fAllVertexName);
-  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
+  
+  if(fUseAllVertices == kTRUE) fVertices = fAllVertices;
+  else                         fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
   for(UInt_t i = 0; i < fPFCandidates->GetEntries(); i++) {
     const PFCandidate *pf = fPFCandidates->At(i);

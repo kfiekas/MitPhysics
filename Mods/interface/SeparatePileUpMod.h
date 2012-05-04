@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: SeparatePileUpMod.h,v 1.2 2012/04/27 22:41:41 ceballos Exp $
+// $Id: SeparatePileUpMod.h,v 1.3 2012/05/04 20:28:33 ceballos Exp $
 //
 // SeparatePileUpMod
 //
@@ -29,7 +29,7 @@ namespace mithep
       void                SetAllVertexName(const char *n)       { fAllVertexName = n;      }
       void                SetVertexName(const char *n)          { fVertexName = n;         }
       void                SetCheckClosestZVertex(Bool_t b)      { fCheckClosestZVertex = b;}
-      void                SetUseAllVerteces(Boot_t b)           { fUseAllVertices = b;     }
+      void                SetUseAllVerteces(Bool_t b)           { fUseAllVertices = b;     }
 
     protected:
       void                Process();
