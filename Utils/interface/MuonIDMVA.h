@@ -41,7 +41,8 @@ namespace mithep {
         kIDIsoCombinedDetIso,
         kIsoRingsV0,
         kIDIsoCombinedIsoRingsV0,
-        kIDV0
+        kIDV0,
+	kIsoDeltaR
       };
 
 
@@ -225,6 +226,15 @@ namespace mithep {
       Float_t                   fMVAVar_NeutralHadronIso_DR0p3To0p4;
       Float_t                   fMVAVar_NeutralHadronIso_DR0p4To0p5;
       Float_t                   fMVAVar_NeutralHadronIso_DR0p5To0p7;
+
+    // isolation variables II
+      Float_t                   fMVAVar_MuRelIsoPFCharged;
+      Float_t                   fMVAVar_MuRelIsoPFNeutral;
+      Float_t                   fMVAVar_MuRelIsoPFPhotons;
+      Float_t                   fMVAVar_MuDeltaRMean;
+      Float_t                   fMVAVar_MuDeltaRSum;
+      Float_t                   fMVAVar_MuDensity;
+
 
     ClassDef(MuonIDMVA, 0) // Muon MVA
       };

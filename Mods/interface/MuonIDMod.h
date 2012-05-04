@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.44 2012/05/03 08:45:30 fabstoec Exp $
+// $Id: MuonIDMod.h,v 1.45 2012/05/04 16:36:39 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -50,6 +50,8 @@ namespace mithep
                                                 const PileupEnergyDensityCol *PileupEnergyDensity) const;
       Bool_t             PassMuonIsoRingsV0_BDTG_Iso(const Muon *mu, const Vertex *vertex, 
                                                      const PileupEnergyDensityCol *PileupEnergyDensity) const;
+      Bool_t             PassMuonIsoDeltaR(const Muon *mu, const Vertex *vertex, 
+                                           const PileupEnergyDensityCol *PileupEnergyDensity) const;
       void               SetPrintMVADebugInfo(Bool_t b)       { fPrintMVADebugInfo = b;     }
       void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
       void               SetApplyDZCut(Bool_t b)              { fApplyDZCut        = b;     }
@@ -119,7 +121,8 @@ namespace mithep
         kPFIsoNoL,          	            //"PFIsoNoL"
         kNoIso,                             //"NoIso"
         kMVAIso_BDTG_IDIso,                 //"BDTG ID + Iso03, Iso04 Combined"
-	kIsoRingsV0_BDTG_Iso                //"BDTG Iso Rings"
+	kIsoRingsV0_BDTG_Iso,               //"BDTG Iso Rings"
+        kIsoDeltaR                          //"BGDT Iso dR"              
       };
       enum EMuClassType {
         kClassUndef = 0,    //not defined
@@ -136,6 +139,7 @@ namespace mithep
     protected:
       void               Process();
       void               SlaveBegin();
+      void               Terminate();
 
       Bool_t             fPrintMVADebugInfo;   //print MVA debug information
       TString            fMuonBranchName;      //name of muon collection (input)

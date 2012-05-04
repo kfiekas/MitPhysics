@@ -87,7 +87,7 @@ void MuonIDMVA::Initialize(  std::string methodName,
   UInt_t ExpectedNBins = 0;
   if (!fUseBinnedVersion) {
     ExpectedNBins = 1;
-  } else if (type == kV2 
+  } else if    (type == kV2 
              || type == kV3
              || type == kV8
              || type == kIDIsoCombinedDetIso
@@ -96,7 +96,10 @@ void MuonIDMVA::Initialize(  std::string methodName,
              || type == kIDIsoCombinedIsoRingsV0
     ) {
     ExpectedNBins = 6;
-  } 
+  } else if (type == kIsoDeltaR){
+    ExpectedNBins = 4;
+  }
+
   fNMVABins = ExpectedNBins;
 
   //Check number of weight files given
@@ -230,6 +233,15 @@ void MuonIDMVA::Initialize(  std::string methodName,
       tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p3To0p4",   &fMVAVar_NeutralHadronIso_DR0p3To0p4  );
       tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p4To0p5",   &fMVAVar_NeutralHadronIso_DR0p4To0p5  );
     }
+
+    if (type == kIsoDeltaR) {
+      tmpTMVAReader->AddVariable("PFCharged",                     &fMVAVar_MuRelIsoPFCharged       );
+      tmpTMVAReader->AddVariable("PFNeutral",                     &fMVAVar_MuRelIsoPFNeutral       );
+      tmpTMVAReader->AddVariable("PFPhotons",                     &fMVAVar_MuRelIsoPFPhotons       );
+      tmpTMVAReader->AddVariable("SumDeltaR",                     &fMVAVar_MuDeltaRSum             );
+      tmpTMVAReader->AddVariable("DeltaRMean",                    &fMVAVar_MuDeltaRMean            );
+      tmpTMVAReader->AddVariable("Density",                       &fMVAVar_MuDensity               );
+    }
     
     tmpTMVAReader->BookMVA(fMethodname , weightsfiles[i] );
     std::cout << "MVABin " << i << " : MethodName = " << fMethodname 
@@ -279,6 +291,13 @@ UInt_t MuonIDMVA::GetMVABin( double eta, double pt,
         std::cout << "Warning: Muon is not a tracker muon. Such muons are not supported. \n";
         bin = 0;
       }
+    }
+
+    if (fMVAType == MuonIDMVA::kIsoDeltaR){
+      if (pt <  20 && fabs(eta) <  1.479) bin = 0;
+      if (pt <  20 && fabs(eta) >= 1.479) bin = 1;
+      if (pt >= 20 && fabs(eta) <  1.479) bin = 2;
+      if (pt >= 20 && fabs(eta) >= 1.479) bin = 3;
     }
 
     return bin;
@@ -831,6 +850,11 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
   Double_t tmpNeutralHadronIso_DR0p3To0p4  = 0;
   Double_t tmpNeutralHadronIso_DR0p4To0p5  = 0;
 
+  Double_t tmpMuDeltaRMean = 0;
+  Double_t tmpMuDeltaRSum = 0;
+  Double_t tmpMuDensity = 0;
+  Double_t tmpMuNPFCand = 0;
+
   for (UInt_t p=0; p<PFCands->GetEntries();p++) {   
     const PFCandidate *pf = PFCands->At(p);
       
@@ -909,6 +933,13 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
            if (dr >= 0.3 && dr < 0.4) tmpNeutralHadronIso_DR0p3To0p4 += pf->Pt();
            if (dr >= 0.4 && dr < 0.5) tmpNeutralHadronIso_DR0p4To0p5 += pf->Pt();
 	 }
+
+         if (dr < 0.5) {
+	   tmpMuNPFCand++;
+    	   tmpMuDeltaRMean += dr;
+    	   tmpMuDeltaRSum  += dr;
+    	   tmpMuDensity    += pf->Pt() / dr;
+         }
       } //not lepton footprint
     } //in 1.0 dr cone
   } //loop over PF candidates
@@ -929,8 +960,8 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
 //   Double_t fMVAVar_NeutralHadronIso_DR0p3To0p4  = 0;
 //   Double_t fMVAVar_NeutralHadronIso_DR0p4To0p5  = 0;
 
-  fMVAVar_ChargedIso_DR0p0To0p1   = TMath::Min((tmpChargedIso_DR0p0To0p1)/mu->Pt(), 2.5);
-  fMVAVar_ChargedIso_DR0p1To0p2   = TMath::Min((tmpChargedIso_DR0p1To0p2)/mu->Pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p0To0p1 = TMath::Min((tmpChargedIso_DR0p0To0p1)/mu->Pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p1To0p2 = TMath::Min((tmpChargedIso_DR0p1To0p2)/mu->Pt(), 2.5);
   fMVAVar_ChargedIso_DR0p2To0p3 = TMath::Min((tmpChargedIso_DR0p2To0p3)/mu->Pt(), 2.5);
   fMVAVar_ChargedIso_DR0p3To0p4 = TMath::Min((tmpChargedIso_DR0p3To0p4)/mu->Pt(), 2.5);
   fMVAVar_ChargedIso_DR0p4To0p5 = TMath::Min((tmpChargedIso_DR0p4To0p5)/mu->Pt(), 2.5); 
@@ -944,8 +975,32 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
   fMVAVar_NeutralHadronIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p2To0p3 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p2To0p3, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
   fMVAVar_NeutralHadronIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p3To0p4 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p3To0p4, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
   fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p4To0p5, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
-  
 
+  // Variables for dR MVA 
+  fMVAVar_MuRelIsoPFCharged  = 0.;
+  fMVAVar_MuRelIsoPFCharged += TMath::Min((tmpChargedIso_DR0p0To0p1)/mu->Pt(), 2.5);
+  fMVAVar_MuRelIsoPFCharged += TMath::Min((tmpChargedIso_DR0p1To0p2)/mu->Pt(), 2.5);
+  fMVAVar_MuRelIsoPFCharged += TMath::Min((tmpChargedIso_DR0p2To0p3)/mu->Pt(), 2.5);
+  fMVAVar_MuRelIsoPFCharged += TMath::Min((tmpChargedIso_DR0p3To0p4)/mu->Pt(), 2.5);
+  fMVAVar_MuRelIsoPFCharged += TMath::Min((tmpChargedIso_DR0p4To0p5)/mu->Pt(), 2.5);
+  
+  fMVAVar_MuRelIsoPFNeutral  = 0.;
+  fMVAVar_MuRelIsoPFNeutral += TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p0To0p1 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p0To0p1, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_MuRelIsoPFNeutral += TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p1To0p2 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p1To0p2, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_MuRelIsoPFNeutral += TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p2To0p3 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p2To0p3, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_MuRelIsoPFNeutral += TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p3To0p4 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p3To0p4, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_MuRelIsoPFNeutral += TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralHadronIsoDR0p4To0p5, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+
+  fMVAVar_MuRelIsoPFPhotons  = 0.;
+  fMVAVar_MuRelIsoPFPhotons += TMath::Max(TMath::Min((tmpGammaIso_DR0p0To0p1 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p0To0p1, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_MuRelIsoPFPhotons += TMath::Max(TMath::Min((tmpGammaIso_DR0p1To0p2 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p1To0p2, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_MuRelIsoPFPhotons += TMath::Max(TMath::Min((tmpGammaIso_DR0p2To0p3 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p2To0p3, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_MuRelIsoPFPhotons += TMath::Max(TMath::Min((tmpGammaIso_DR0p3To0p4 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p3To0p4, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+  fMVAVar_MuRelIsoPFPhotons += TMath::Max(TMath::Min((tmpGammaIso_DR0p4To0p5 - Rho*MuonTools::MuonEffectiveArea(MuonTools::kMuGammaIsoDR0p4To0p5, mu->Eta(), EffectiveAreaTarget))/mu->Pt(), 2.5), 0.0);
+
+  fMVAVar_MuDeltaRMean      = tmpMuDeltaRMean/TMath::Max(1.0,tmpMuNPFCand);
+  fMVAVar_MuDeltaRSum       = tmpMuDeltaRSum;
+  fMVAVar_MuDensity         = tmpMuDensity;
 
   Double_t mva = -9999;  
   TMVA::Reader *reader = 0;
@@ -979,8 +1034,8 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
               << " MuHadS9Energy " << fMVAVar_MuHadS9Energy    
               << " MuEmS9Energy " << fMVAVar_MuEmS9Energy     
               << " eta " << fMVAVar_MuEta  
-              << " pt " << fMVAVar_MuPt << std::endl;
-    
+              << " pt " << fMVAVar_MuPt
+              << " isoInfo: ";
     std::cout << fMVAVar_ChargedIso_DR0p0To0p1 << " "
               << fMVAVar_ChargedIso_DR0p1To0p2 << " "
               << fMVAVar_ChargedIso_DR0p2To0p3 << " "
@@ -995,8 +1050,13 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
               << fMVAVar_NeutralHadronIso_DR0p1To0p2 << " "
               << fMVAVar_NeutralHadronIso_DR0p2To0p3 << " "
               << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
-              << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "
-              << std::endl;
+              << fMVAVar_NeutralHadronIso_DR0p4To0p5;
+    std::cout << " MuRelIsoPFCharged: " << fMVAVar_MuRelIsoPFCharged
+	      << " MuRelIsoPFNeutral: " << fMVAVar_MuRelIsoPFNeutral
+	      << " MuRelIsoPFPhotons: " << fMVAVar_MuRelIsoPFPhotons
+	      << " MuDeltaRMean: "      << fMVAVar_MuDeltaRMean
+	      << " MuDeltaRMean: "      << fMVAVar_MuDeltaRMean
+	      << " MuDensity: "         << fMVAVar_MuDensity;	      
     std::cout << "MVA: " << mva 
               << std::endl;
   }
