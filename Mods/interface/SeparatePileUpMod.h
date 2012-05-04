@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: SeparatePileUpMod.h,v 1.1 2012/04/27 21:03:34 ceballos Exp $
+// $Id: SeparatePileUpMod.h,v 1.2 2012/04/27 22:41:41 ceballos Exp $
 //
 // SeparatePileUpMod
 //
@@ -29,6 +29,7 @@ namespace mithep
       void                SetAllVertexName(const char *n)       { fAllVertexName = n;      }
       void                SetVertexName(const char *n)          { fVertexName = n;         }
       void                SetCheckClosestZVertex(Bool_t b)      { fCheckClosestZVertex = b;}
+      void                SetUseAllVerteces(Boot_t b)           { fUseAllVertices = b;     }
 
     protected:
       void                Process();
@@ -43,6 +44,7 @@ namespace mithep
       const VertexCol      *fAllVertices;  	  //!all vertices branches
       const VertexCol      *fVertices;  	  //!good vertices branches
       Bool_t                fCheckClosestZVertex; //boolean to use the closest vertex approach
+      Bool_t                fUseAllVertices;      //boolean to use all vertices
 
     ClassDef(SeparatePileUpMod, 1) // PFNoPU identification module
   };
