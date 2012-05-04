@@ -1057,7 +1057,7 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
 	      << " MuDeltaRMean: "      << fMVAVar_MuDeltaRMean
 	      << " MuDeltaRMean: "      << fMVAVar_MuDeltaRMean
 	      << " MuDensity: "         << fMVAVar_MuDensity;	      
-    std::cout << "MVA: " << mva 
+    std::cout << " MVA: " << mva 
               << std::endl;
   }
 
