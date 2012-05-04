@@ -1016,7 +1016,7 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug) {
-    std::cout << "Debug Muon MVA: \n";
+    std::cout << "Debug Muon MVA: ";
     std::cout << " MuTkNchi2 " << fMVAVar_MuTkNchi2              
               << " MuGlobalNchi2 " << fMVAVar_MuGlobalNchi2          
               << " MuNValidHits " << fMVAVar_MuNValidHits           
