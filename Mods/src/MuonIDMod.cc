@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.72 2012/05/03 08:45:28 fabstoec Exp $
+// $Id: MuonIDMod.cc,v 1.73 2012/05/03 10:22:10 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -82,7 +82,8 @@ void MuonIDMod::Process()
   if(fMuIsoType == kTrackCaloSliding || 
      fMuIsoType == kCombinedRelativeConeAreaCorrected || 
      fMuIsoType == kPFIsoEffectiveAreaCorrected || 
-     fMuIsoType == kMVAIso_BDTG_IDIso
+     fMuIsoType == kMVAIso_BDTG_IDIso ||
+     fMuIsoType == kIsoRingsV0_BDTG_Iso
     ) {
     LoadEventObject(fPileupEnergyDensityName, fPileupEnergyDensity);
   }
@@ -466,6 +467,13 @@ void MuonIDMod::Process()
 
       }
         break;
+      case kIsoRingsV0_BDTG_Iso:
+      {
+	
+        isocut = PassMuonIsoRingsV0_BDTG_Iso(mu, fVertices->At(0), fPileupEnergyDensity);
+
+      }
+        break;
       case kNoIso:
         isocut = kTRUE;
         break;
@@ -524,8 +532,9 @@ void MuonIDMod::SlaveBegin()
   if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0 
       || fMuonIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0
       || fMuonIsoType.CompareTo("CombinedRelativeEffectiveAreaCorrected") == 0
-       || fMuonIsoType.CompareTo("PFIsoEffectiveAreaCorrected") == 0
+      || fMuonIsoType.CompareTo("PFIsoEffectiveAreaCorrected") == 0
       || fMuonIsoType.CompareTo("MVA_BDTG_IDIso") == 0
+      || fMuonIsoType.CompareTo("IsoRingsV0_BDTG_Iso") == 0
     ) {
     ReqEventObject(fPileupEnergyDensityName, fPileupEnergyDensity, kTRUE);
   }
@@ -586,8 +595,10 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kCustomIso;
     SendError(kWarning, "SlaveBegin",
               "Custom muon isolation is not yet implemented.");
-  } else if (fMuonIDType.CompareTo("MVA_BDTG_IDIso") == 0) {
+  } else if (fMuonIsoType.CompareTo("MVA_BDTG_IDIso") == 0) {
     fMuIsoType = kMVAIso_BDTG_IDIso;
+  } else if (fMuonIsoType.CompareTo("IsoRingsV0_BDTG_Iso") == 0) {
+    fMuIsoType = kIsoRingsV0_BDTG_Iso;
   } else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified muon isolation %s is not defined.",
@@ -618,7 +629,7 @@ void MuonIDMod::SlaveBegin()
 
 
   //If we use MVA ID, need to load MVA weights
-  if(fMuIsoType == kMVAIso_BDTG_IDIso || fMuIDType == kMVAID_BDTG_IDIso) {
+  if     (fMuIsoType == kMVAIso_BDTG_IDIso || fMuIDType == kMVAID_BDTG_IDIso) {
     fMuonTools = new MuonTools();
     fMuonIDMVA = new MuonIDMVA();
     fMuonIDMVA->Initialize("BDTG method",
@@ -629,6 +640,21 @@ void MuonIDMod::SlaveBegin()
                            fMuonMVAWeights_Subdet0Pt20ToInf,
                            fMuonMVAWeights_Subdet1Pt20ToInf,
                            MuonIDMVA::kIDIsoCombinedDetIso);
+  }
+  else if(fMuIsoType == kIsoRingsV0_BDTG_Iso) {
+    std::vector<std::string> muonidiso_weightfiles;
+    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_barrel_lowpt.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_barrel_highpt.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_endcap_lowpt.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_endcap_highpt.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_tracker.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_global.weights.xml"))));
+    fMuonTools = new MuonTools();
+    fMuonIDMVA = new MuonIDMVA();
+    fMuonIDMVA->Initialize("MuonIso_BDTG_IsoRings",
+                       MuonIDMVA::kIsoRingsV0,
+                       kTRUE,
+                       muonidiso_weightfiles);
   }
 
 }
@@ -667,6 +693,36 @@ Bool_t MuonIDMod::PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex,
   else if (MVABin == 3) MVACut = -0.2478;
   else if (MVABin == 4) MVACut =  0.1706;
   else if (MVABin == 5) MVACut =  0.8146;
+
+  if (MVAValue > MVACut) return kTRUE;
+  return kFALSE;
+}
+
+//--------------------------------------------------------------------------------------------------
+Bool_t MuonIDMod::PassMuonIsoRingsV0_BDTG_Iso(const Muon *mu, const Vertex *vertex, 
+                                              const PileupEnergyDensityCol *PileupEnergyDensity) const
+{
+
+  const Track *muTrk=0;
+  if(mu->HasTrackerTrk())         { muTrk = mu->TrackerTrk();    }
+  else if(mu->HasStandaloneTrk()) { muTrk = mu->StandaloneTrk(); } 
+  
+  ElectronOArr *tempElectrons = new  ElectronOArr;
+  MuonOArr     *tempMuons     = new  MuonOArr;
+  Double_t MVAValue = fMuonIDMVA->MVAValue(mu,vertex,fMuonTools,fPFCandidates,
+                      PileupEnergyDensity,MuonTools::kMuEAFall11MC,tempElectrons,tempMuons,kFALSE);
+  delete tempElectrons;
+  delete tempMuons;
+
+  Int_t MVABin = fMuonIDMVA->GetMVABin(muTrk->Eta(), muTrk->Pt(), mu->IsGlobalMuon(), mu->IsTrackerMuon());
+
+  Double_t MVACut = -999;
+  if      (MVABin == 0) MVACut = -0.593;
+  else if (MVABin == 1) MVACut =  0.337;
+  else if (MVABin == 2) MVACut = -0.767;
+  else if (MVABin == 3) MVACut =  0.410;
+  else if (MVABin == 4) MVACut = -0.989;
+  else if (MVABin == 5) MVACut = -0.995;
 
   if (MVAValue > MVACut) return kTRUE;
   return kFALSE;

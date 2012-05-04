@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.43 2012/05/02 16:33:50 fabstoec Exp $
+// $Id: MuonIDMod.h,v 1.44 2012/05/03 08:45:30 fabstoec Exp $
 //
 // MuonIDMod
 //
@@ -48,6 +48,8 @@ namespace mithep
       Double_t           GetTrackIsoCut()               const { return fTrackIsolationCut;  }
       Bool_t             PassMuonMVA_BDTG_IdIso(const Muon *mu, const Vertex *vertex, 
                                                 const PileupEnergyDensityCol *PileupEnergyDensity) const;
+      Bool_t             PassMuonIsoRingsV0_BDTG_Iso(const Muon *mu, const Vertex *vertex, 
+                                                     const PileupEnergyDensityCol *PileupEnergyDensity) const;
       void               SetPrintMVADebugInfo(Bool_t b)       { fPrintMVADebugInfo = b;     }
       void               SetApplyD0Cut(Bool_t b)              { fApplyD0Cut        = b;     }
       void               SetApplyDZCut(Bool_t b)              { fApplyDZCut        = b;     }
@@ -116,7 +118,8 @@ namespace mithep
         kPFIsoEffectiveAreaCorrected,       //"PFIso with EffectiveArea Pileup Correction"
         kPFIsoNoL,          	            //"PFIsoNoL"
         kNoIso,                             //"NoIso"
-        kMVAIso_BDTG_IDIso                  //"BDTG ID + Iso03, Iso04 Combined"
+        kMVAIso_BDTG_IDIso,                 //"BDTG ID + Iso03, Iso04 Combined"
+	kIsoRingsV0_BDTG_Iso                //"BDTG Iso Rings"
       };
       enum EMuClassType {
         kClassUndef = 0,    //not defined
