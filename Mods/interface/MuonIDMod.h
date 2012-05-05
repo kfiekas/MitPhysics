@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.45 2012/05/04 16:36:39 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.46 2012/05/04 21:47:03 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -75,18 +75,6 @@ namespace mithep
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
       void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
       void               SetIntRadius(Double_t dr)            { fIntRadius = dr;            }
-      void               SetMuonMVAWeightsSubdet0Pt10To14p5(TString s)  
-                         { fMuonMVAWeights_Subdet0Pt10To14p5  = s; }
-      void               SetMuonMVAWeightsSubdet1Pt10To14p5(TString s)  
-                         { fMuonMVAWeights_Subdet1Pt10To14p5  = s; }
-      void               SetMuonMVAWeightsSubdet0Pt14p5To20(TString s)  
-                         { fMuonMVAWeights_Subdet0Pt14p5To20  = s; }
-      void               SetMuonMVAWeightsSubdet1Pt14p5To20(TString s) 
-                         { fMuonMVAWeights_Subdet1Pt14p5To20 = s; }
-      void               SetMuonMVAWeightsSubdet0Pt20ToInf(TString s) 
-                         { fMuonMVAWeights_Subdet0Pt20ToInf = s; }
-      void               SetMuonMVAWeightsSubdet1Pt20ToInf(TString s) 
-                         { fMuonMVAWeights_Subdet1Pt20ToInf = s; }
 
       void               SetRhoType(RhoUtilities::RhoType type)
 	{ fTheRhoType = type; };
@@ -181,12 +169,6 @@ namespace mithep
       const PileupEnergyDensityCol *fPileupEnergyDensity;
       MuonTools          *fMuonTools;           // interface to tools for muon ID
       MuonIDMVA          *fMuonIDMVA;           // helper class for MuonMVA
-      TString             fMuonMVAWeights_Subdet0Pt10To14p5;
-      TString             fMuonMVAWeights_Subdet1Pt10To14p5;
-      TString             fMuonMVAWeights_Subdet0Pt14p5To20;
-      TString             fMuonMVAWeights_Subdet1Pt14p5To20;
-      TString             fMuonMVAWeights_Subdet0Pt20ToInf;
-      TString             fMuonMVAWeights_Subdet1Pt20ToInf;
 
       RhoUtilities::RhoType fTheRhoType;
       

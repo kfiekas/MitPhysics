@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.74 2012/05/04 16:36:39 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.75 2012/05/04 21:47:03 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -54,12 +54,6 @@ ClassImp(mithep::MuonIDMod)
   fPileupEnergyDensity(0),
   fMuonTools(0),
   fMuonIDMVA(0),
-  fMuonMVAWeights_Subdet0Pt10To14p5(""),
-  fMuonMVAWeights_Subdet1Pt10To14p5(""),
-  fMuonMVAWeights_Subdet0Pt14p5To20(""),
-  fMuonMVAWeights_Subdet1Pt14p5To20(""),
-  fMuonMVAWeights_Subdet0Pt20ToInf(""),
-  fMuonMVAWeights_Subdet1Pt20ToInf(""),
   fTheRhoType(RhoUtilities::DEFAULT)
 {
   // Constructor.
@@ -644,12 +638,12 @@ void MuonIDMod::SlaveBegin()
     fMuonTools = new MuonTools();
     fMuonIDMVA = new MuonIDMVA();
     fMuonIDMVA->Initialize("BDTG method",
-                           fMuonMVAWeights_Subdet0Pt10To14p5,
-                           fMuonMVAWeights_Subdet1Pt10To14p5,
-                           fMuonMVAWeights_Subdet0Pt14p5To20,
-                           fMuonMVAWeights_Subdet1Pt14p5To20,
-                           fMuonMVAWeights_Subdet0Pt20ToInf,
-                           fMuonMVAWeights_Subdet1Pt20ToInf,
+                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/BarrelPtBin0_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/EndcapPtBin0_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/BarrelPtBin1_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/EndcapPtBin1_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/BarrelPtBin2_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/EndcapPtBin2_IDIsoCombined_BDTG.weights.xml"))),
                            MuonIDMVA::kIDIsoCombinedDetIso);
   }
   else if(fMuIsoType == kIsoRingsV0_BDTG_Iso) {
@@ -764,7 +758,7 @@ Bool_t MuonIDMod::PassMuonIsoDeltaR(const Muon *mu, const Vertex *vertex,
   ElectronOArr *tempElectrons = new  ElectronOArr;
   MuonOArr     *tempMuons     = new  MuonOArr;
   Double_t MVAValue = fMuonIDMVA->MVAValue(mu,vertex,fMuonTools,fPFNoPileUpCands,
-                      PileupEnergyDensity,MuonTools::kMuEAFall11MC,tempElectrons,tempMuons,kFALSE);
+                      PileupEnergyDensity,MuonTools::kMuEAFall11MC,tempElectrons,tempMuons,kTRUE);
   delete tempElectrons;
   delete tempMuons;
 
