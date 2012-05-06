@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.76 2012/05/05 08:51:06 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.77 2012/05/06 10:30:41 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -254,7 +254,7 @@ void MuonIDMod::Process()
       case kWWMuIdV4:
         idpass = mu->BestTrk() != 0 &&
 	         mu->NTrkLayersHit() > 5 &&
-		 mu->isPFMuon() == kTRUE &&
+		 mu->IsPFMuon() == kTRUE &&
 		 mu->BestTrk()->NPixelHits() > 0 &&
 		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1 &&
 		 mu->TrkKink() < 20.0;
