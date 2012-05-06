@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonTools.h,v 1.21 2012/01/23 20:05:20 sixie Exp $
+// $Id: MuonTools.h,v 1.22 2012/04/15 12:07:00 sixie Exp $
 //
 // MuonTools
 //
@@ -46,9 +46,39 @@ namespace mithep {
       };
 
       enum EMuonEffectiveAreaType {
-        kMuChargedIso03, 
+	kMuTrkIso03, 
+	kMuEcalIso03, 
+	kMuHcalIso03, 
+	kMuTrkIso05, 
+	kMuEcalIso05, 
+	kMuHcalIso05, 
+	kMuChargedIso03, 
+	kMuGammaIso03, 
+	kMuNeutralHadronIso03, 
+	kMuGammaAndNeutralHadronIso03,
+	kMuGammaIso03Tight, 
+	kMuNeutralHadronIso03Tight, 
+	kMuGammaAndNeutralHadronIso03Tight,
+	kMuChargedIso04, 
+	kMuGammaIso04, 
+	kMuNeutralHadronIso04, 
+	kMuGammaAndNeutralHadronIso04,
+	kMuGammaIso04Tight, 
+	kMuNeutralHadronIso04Tight, 
+	kMuGammaAndNeutralHadronIso04Tight,
+	kMuGammaIsoDR0p0To0p1,
+	kMuGammaIsoDR0p1To0p2,
+	kMuGammaIsoDR0p2To0p3,
+	kMuGammaIsoDR0p3To0p4,
+	kMuGammaIsoDR0p4To0p5,
+	kMuNeutralHadronIsoDR0p0To0p1,
+	kMuNeutralHadronIsoDR0p1To0p2,
+	kMuNeutralHadronIsoDR0p2To0p3,
+	kMuNeutralHadronIsoDR0p3To0p4,
+	kMuNeutralHadronIsoDR0p4To0p5,
+	kMuGammaIso05,
+	kMuNeutralIso05,
         kMuNeutralIso03, 
-        kMuChargedIso04, 
         kMuNeutralIso04, 
         kMuHadEnergy, 
         kMuHoEnergy, 
@@ -56,29 +86,18 @@ namespace mithep {
         kMuHadS9Energy, 
         kMuHoS9Energy, 
         kMuEmS9Energy,
-        kMuTrkIso03, 
         kMuEMIso03, 
         kMuHadIso03, 
-        kMuTrkIso05, 
         kMuEMIso05, 
-        kMuHadIso05,
-        kMuGammaIsoDR0p0To0p1,
-        kMuGammaIsoDR0p1To0p2,
-        kMuGammaIsoDR0p2To0p3,
-        kMuGammaIsoDR0p3To0p4,
-        kMuGammaIsoDR0p4To0p5,
-        kMuNeutralHadronIsoDR0p0To0p1,
-        kMuNeutralHadronIsoDR0p1To0p2,
-        kMuNeutralHadronIsoDR0p2To0p3,
-        kMuNeutralHadronIsoDR0p3To0p4,
-        kMuNeutralHadronIsoDR0p4To0p5
+        kMuHadIso05
       };
 
       enum EMuonEffectiveAreaTarget {
-        kMuEANoCorr,
-        kMuEAData2011,
-        kMuEASummer11MC,
-        kMuEAFall11MC
+	kMuEANoCorr,
+	kMuEAData2011,
+	kMuEASummer11MC,
+	kMuEAFall11MC,
+	kMuEAData2012
       };
 
       Bool_t          Init(const char *mutemp, const char *pitemp);

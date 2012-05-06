@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.77 2012/05/06 10:30:41 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.78 2012/05/06 10:32:30 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -74,8 +74,6 @@ void MuonIDMod::Process()
   LoadEventObject(fTrackName, fTracks);
   LoadEventObject(fPFCandidatesName, fPFCandidates);
   if(fMuIsoType == kTrackCaloSliding || 
-     fMuIsoType == kCombinedRelativeConeAreaCorrected || 
-     fMuIsoType == kPFIsoEffectiveAreaCorrected || 
      fMuIsoType == kMVAIso_BDTG_IDIso ||
      fMuIsoType == kIsoRingsV0_BDTG_Iso ||
      fMuIsoType == kIsoDeltaR
@@ -345,26 +343,6 @@ void MuonIDMod::Process()
 	  if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
 	}
         break;
-      case kCombinedRelativeConeAreaCorrected:
-        { 
-          //const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0); // Fabian: made Rho customable
-          Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - Rho * TMath::Pi() * 0.3 * 0.3 ;
-          double theIsoCut = fCombRelativeIsolationCut;
-          if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
-        }
-        break;           
-    case kCombinedRelativeEffectiveAreaCorrected:
-      { 
-	Double_t tmpRho = Rho;   // Fabian: made the Rho type customable.
-	//if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || std::isinf(fPileupEnergyDensity->At(0)->Rho())))
-	//tmpRho = fPileupEnergyDensity->At(0)->Rho();
-	
-          isocut = ( mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() 
-                     -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuEMIso03, mu->Eta())
-                     -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadIso03, mu->Eta())
-            ) < (mu->Pt()* 0.40);
-        }
-        break;           
       case kPFIso:
         {
           Double_t pfIsoCutValue = 9999;
@@ -407,20 +385,6 @@ void MuonIDMod::Process()
             isocut = kTRUE;
 	}
         break;
-      case kPFIsoEffectiveAreaCorrected:
-        {
-          Double_t pfIsoCutValue = 9999;
-          if(fPFIsolationCut > 0){
-            pfIsoCutValue = fPFIsolationCut;
-          } else {
-            pfIsoCutValue = fPFIsolationCut; //leave it like this for now
-          }
-          Double_t EffectiveAreaCorrectedPFIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius)
-            - Rho * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta());
-	  //- fPileupEnergyDensity->At(0)->Rho() * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta());  // Fabian: made Rho-type customable
-          isocut = EffectiveAreaCorrectedPFIso < (mu->Pt() * pfIsoCutValue);
-          break;
-        }
       case kPFIsoNoL:
         {
           fNonIsolatedMuons     = GetObjThisEvt<MuonCol>(fNonIsolatedMuonsName);
@@ -452,19 +416,6 @@ void MuonIDMod::Process()
       case kMVAIso_BDTG_IDIso:
       {
 
-	// **************************************************************************
-	// Don't use effective area correction denominator. Instead use the old one.
-	// **************************************************************************
-
-	//         Double_t tmpRho = 0;
-	//         if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || isinf(fPileupEnergyDensity->At(0)->Rho())))
-	//           tmpRho = fPileupEnergyDensity->At(0)->Rho();
-	
-	//         isocut = ( mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() 
-	//                    -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuEMIso03, mu->Eta())
-	//                    -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadIso03, mu->Eta())
-	//           ) < (mu->Pt()* 0.40);
-	
 	Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius);
 	isocut = (totalIso < (mu->Pt()*0.4));
 
@@ -540,9 +491,6 @@ void MuonIDMod::SlaveBegin()
   ReqEventObject(fTrackName, fTracks, kTRUE);
   ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
   if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0 
-      || fMuonIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0
-      || fMuonIsoType.CompareTo("CombinedRelativeEffectiveAreaCorrected") == 0
-      || fMuonIsoType.CompareTo("PFIsoEffectiveAreaCorrected") == 0
       || fMuonIsoType.CompareTo("MVA_BDTG_IDIso") == 0
       || fMuonIsoType.CompareTo("IsoRingsV0_BDTG_Iso") == 0
       || fMuonIsoType.CompareTo("IsoDeltaR") == 0
@@ -588,16 +536,10 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kTrackCaloSliding;
   else if (fMuonIsoType.CompareTo("TrackCaloSlidingNoCorrection") == 0)
     fMuIsoType = kTrackCaloSlidingNoCorrection;
-  else if (fMuonIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0)
-    fMuIsoType = kCombinedRelativeConeAreaCorrected;
-  else if (fMuonIsoType.CompareTo("CombinedRelativeEffectiveAreaCorrected") == 0)
-    fMuIsoType = kCombinedRelativeEffectiveAreaCorrected;
   else if (fMuonIsoType.CompareTo("PFIso") == 0)
     fMuIsoType = kPFIso;
   else if (fMuonIsoType.CompareTo("PFRadialIso") == 0)
     fMuIsoType = kPFRadialIso;
-  else if (fMuonIsoType.CompareTo("PFIsoEffectiveAreaCorrected") == 0)
-    fMuIsoType = kPFIsoEffectiveAreaCorrected;
   else if (fMuonIsoType.CompareTo("PFIsoNoL") == 0)
     fMuIsoType = kPFIsoNoL;
   else if (fMuonIsoType.CompareTo("NoIso") == 0)

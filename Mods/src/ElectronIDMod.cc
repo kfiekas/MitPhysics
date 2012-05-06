@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.119 2012/05/02 16:33:46 fabstoec Exp $
+// $Id: ElectronIDMod.cc,v 1.120 2012/05/03 08:45:29 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -186,12 +186,12 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     else if (MVABin == 4) MVACut = 0.9586;
     else if (MVABin == 5) MVACut = 0.9278;
   } else if (idType == ElectronTools::kMVAID_BDTG_IDHWW2012TrigV0) {
-    if      (MVABin == 0) MVACut = 0.294;
-    else if (MVABin == 1) MVACut = 0.730;
-    else if (MVABin == 2) MVACut = 0.802;
-    else if (MVABin == 3) MVACut = 0.950;
-    else if (MVABin == 4) MVACut = 0.970;
-    else if (MVABin == 5) MVACut = 0.950;
+    if      (MVABin == 0) MVACut = 0.000;
+    else if (MVABin == 1) MVACut = 0.100;
+    else if (MVABin == 2) MVACut = 0.620;
+    else if (MVABin == 3) MVACut = 0.940;
+    else if (MVABin == 4) MVACut = 0.850;
+    else if (MVABin == 5) MVACut = 0.920;
   }
 
   if (MVAValue > MVACut) return kTRUE;
@@ -418,6 +418,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       if (ele->Pt() >= 20 && eta <  0.800		       ) IsoCut = 0.154;
       if (ele->Pt() >= 20 && eta >= 0.800 && fabs(eta) < 1.479 ) IsoCut = 0.154;
       if (ele->Pt() >= 20 && eta >= 1.479		       ) IsoCut = 0.100;
+      IsoCut = 0.150;
       if (IsoOverPt < IsoCut ) isocut = kTRUE;
     }
       break;
