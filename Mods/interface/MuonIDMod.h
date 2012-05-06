@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.46 2012/05/04 21:47:03 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.47 2012/05/05 08:51:09 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -90,6 +90,7 @@ namespace mithep
         kWWMuIdV1,          //"WWMuIdV1"
         kWWMuIdV2,          //"WWMuIdV2"
         kWWMuIdV3,          //"WWMuIdV3"
+        kWWMuIdV4,          //"WWMuIdV4"
         kNoId,              //"NoId"        
         kCustomId,          //"Custom"
         kMVAID_BDTG_IDIso   //"BDTG ID + Iso03, Iso04 Combined"
