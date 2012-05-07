@@ -1,4 +1,4 @@
-// $Id: JetCorrectionMod.cc,v 1.14 2012/05/03 08:45:29 fabstoec Exp $
+// $Id: JetCorrectionMod.cc,v 1.15 2012/05/03 12:03:09 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
@@ -139,6 +139,9 @@ void JetCorrectionMod::Process()
       break;
     case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
       theRho = fR->RhoRandom();
+      break;
+    case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+      theRho = fR->RhoKt6PFJets();
       break;
     default:      
       theRho = fR->RhoHighEta();

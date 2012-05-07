@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: JetCorrectionMod.h,v 1.8 2011/06/13 15:29:40 ceballos Exp $
+// $Id: JetCorrectionMod.h,v 1.9 2012/05/02 16:33:50 fabstoec Exp $
 //
 // JetCorrectionMod
 //
@@ -42,8 +42,7 @@ namespace mithep
       void              ApplyL1FastJetCorrection(Jet * jet);
       void              SetCorrectedJetsName(const char *name)    { fCorrectedJetsName = name;      }     
       void              SetCorrectedName(const char *name)        { SetCorrectedJetsName(name);     }    
-      void              SetInputName(const char *name)            { fJetsName = name;               }  
-
+      void              SetInputName(const char *name)            { fJetsName = name;               }
       void              SetRhoType(RhoUtilities::RhoType type) { fTheRhoType = type; };
 
     protected:
