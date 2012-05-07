@@ -18,7 +18,8 @@ fMethodname("BDTG method"),
 fIsInitialized(kFALSE),
 fMVAType(MuonIDMVA::kUninitialized),
 fUseBinnedVersion(kTRUE),
-fNMVABins(0)
+fNMVABins(0),
+fTheRhoType(RhoUtilities::DEFAULT)
 {
 }
 
@@ -33,24 +34,26 @@ MuonIDMVA::~MuonIDMVA()
 
 //--------------------------------------------------------------------------------------------------
 void MuonIDMVA::Initialize( std::string methodName,
-                                std::string weightsfile,
-                                MuonIDMVA::MVAType type)
+                            std::string weightsfile,
+                            MuonIDMVA::MVAType type,
+			    RhoUtilities::RhoType theRhoType)
 {
   
   std::vector<std::string> tempWeightFileVector;
   tempWeightFileVector.push_back(weightsfile);
-  Initialize(methodName,type,kFALSE,tempWeightFileVector);
+  Initialize(methodName,type,kFALSE,tempWeightFileVector,theRhoType);
 }
 
 //--------------------------------------------------------------------------------------------------
 void MuonIDMVA::Initialize( TString methodName,
-                                TString Subdet0Pt10To20Weights , 
-                                TString Subdet1Pt10To20Weights , 
-                                TString Subdet2Pt10To20Weights,
-                                TString Subdet0Pt20ToInfWeights,
-                                TString Subdet1Pt20ToInfWeights, 
-                                TString Subdet2Pt20ToInfWeights,
-                                MuonIDMVA::MVAType type) {
+                            TString Subdet0Pt10To20Weights , 
+                            TString Subdet1Pt10To20Weights , 
+                            TString Subdet2Pt10To20Weights,
+                            TString Subdet0Pt20ToInfWeights,
+                            TString Subdet1Pt20ToInfWeights, 
+                            TString Subdet2Pt20ToInfWeights,
+                            MuonIDMVA::MVAType type,
+			    RhoUtilities::RhoType theRhoType) {
 
   std::vector<std::string> tempWeightFileVector;
   tempWeightFileVector.push_back(std::string(Subdet0Pt10To20Weights.Data()));
@@ -59,16 +62,17 @@ void MuonIDMVA::Initialize( TString methodName,
   tempWeightFileVector.push_back(std::string(Subdet0Pt20ToInfWeights.Data()));
   tempWeightFileVector.push_back(std::string(Subdet1Pt20ToInfWeights.Data()));
   tempWeightFileVector.push_back(std::string(Subdet2Pt20ToInfWeights.Data()));
-  Initialize(std::string(methodName.Data()),type,kTRUE,tempWeightFileVector);
+  Initialize(std::string(methodName.Data()),type,kTRUE,tempWeightFileVector,theRhoType);
 
 }
 
 
 //--------------------------------------------------------------------------------------------------
-void MuonIDMVA::Initialize(  std::string methodName,
-                                 MuonIDMVA::MVAType type,
-                                 Bool_t useBinnedVersion,
-                                 std::vector<std::string> weightsfiles) {
+void MuonIDMVA::Initialize( std::string methodName,
+                            MuonIDMVA::MVAType type,
+                            Bool_t useBinnedVersion,
+                            std::vector<std::string> weightsfiles,
+			    RhoUtilities::RhoType theRhoType) {
   
   //clean up first
   for (uint i=0;i<fTMVAReader.size(); ++i) {
@@ -82,6 +86,7 @@ void MuonIDMVA::Initialize(  std::string methodName,
   fMethodname = methodName;
   fMVAType = type;
   fUseBinnedVersion = useBinnedVersion;
+  fTheRhoType = theRhoType;
 
   //Define expected number of bins
   UInt_t ExpectedNBins = 0;
@@ -687,8 +692,27 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
   NeutralIso04_05Threshold = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.0, 0.5, 0.4, 0.0, 0.0);
   
   Double_t Rho = 0;
-  if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
-
+ switch(fTheRhoType) {
+   case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+   case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoLowEta();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandom();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandomLowEta();
+     break;
+   case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+     Rho = PileupEnergyDensity->At(0)->RhoKt6PFJets();
+     break;
+   default:
+     // use the old default
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+ }
  
   //set all input variables
   fMVAVar_MuTkNchi2              = muTrk->RChi2();
@@ -800,8 +824,27 @@ Double_t MuonIDMVA::MVAValue(const Muon *mu, const Vertex *vertex, MuonTools *fM
   NeutralIso04_05Threshold = IsolationTools::PFMuonIsolation(mu, PFCands, vertex, 0.0, 0.5, 0.4, 0.0, 0.0);
   
   Double_t Rho = 0;
-  if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
-
+ switch(fTheRhoType) {
+   case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+   case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoLowEta();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandom();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandomLowEta();
+     break;
+   case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+     Rho = PileupEnergyDensity->At(0)->RhoKt6PFJets();
+     break;
+   default:
+     // use the old default
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+ }
 
   //set all input variables
   fMVAVar_MuPt                   = muTrk->Pt();

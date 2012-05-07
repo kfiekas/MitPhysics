@@ -22,6 +22,9 @@
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
 
+// for Rho definitons
+#include "MitPhysics/Utils/interface/RhoUtilities.h"
+
 class TRandom3;
 namespace TMVA {
   class Reader;
@@ -48,11 +51,13 @@ namespace mithep {
 
       void     Initialize( std::string methodName,
                            std::string weightsfile,
-                           MuonIDMVA::MVAType type);
+                           MuonIDMVA::MVAType type,
+			   RhoUtilities::RhoType theRhoType = RhoUtilities::DEFAULT);
       void     Initialize( std::string methodName,
                            MuonIDMVA::MVAType type,
                            Bool_t useBinnedVersion,
-                           std::vector<std::string> weightsfiles );
+                           std::vector<std::string> weightsfiles,
+			   RhoUtilities::RhoType theRhoType = RhoUtilities::DEFAULT);
       void     Initialize(TString methodName,
                           TString Subdet0Pt10To14p5Weights , 
                           TString Subdet1Pt10To14p5Weights , 
@@ -60,7 +65,8 @@ namespace mithep {
                           TString Subdet1Pt14p5To20Weights, 
                           TString Subdet0Pt20ToInfWeights, 
                           TString Subdet1Pt20ToInfWeights,
-                          MuonIDMVA::MVAType type);
+                          MuonIDMVA::MVAType type,
+			  RhoUtilities::RhoType theRhoType = RhoUtilities::DEFAULT);
 
       Bool_t   IsInitialized() const { return fIsInitialized; }
       UInt_t   GetMVABin(double eta,double pt,
@@ -172,7 +178,8 @@ namespace mithep {
       MVAType                   fMVAType;
       Bool_t                    fUseBinnedVersion;
       UInt_t                    fNMVABins;
-      
+      RhoUtilities::RhoType     fTheRhoType;
+
       Float_t                   fMVAVar_MuPt; 
       Float_t                   fMVAVar_MuEta; 
       Float_t                   fMVAVar_MuTkNchi2; 

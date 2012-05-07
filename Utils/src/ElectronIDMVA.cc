@@ -18,7 +18,8 @@ fMethodname("BDTG method"),
 fIsInitialized(kFALSE),
 fMVAType(ElectronIDMVA::kUninitialized),
 fUseBinnedVersion(kTRUE),
-fNMVABins(0)
+fNMVABins(0),
+fTheRhoType(RhoUtilities::DEFAULT)
 {
   // Constructor.
 }
@@ -35,12 +36,13 @@ ElectronIDMVA::~ElectronIDMVA()
 //--------------------------------------------------------------------------------------------------
 void ElectronIDMVA::Initialize( std::string methodName,
                                 std::string weightsfile,
-                                ElectronIDMVA::MVAType type)
+                                ElectronIDMVA::MVAType type,
+			        RhoUtilities::RhoType theRhoType)
 {
   
   std::vector<std::string> tempWeightFileVector;
   tempWeightFileVector.push_back(weightsfile);
-  Initialize(methodName,type,kFALSE,tempWeightFileVector);
+  Initialize(methodName,type,kFALSE,tempWeightFileVector,theRhoType);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -51,7 +53,8 @@ void ElectronIDMVA::Initialize( TString methodName,
                                 TString Subdet0Pt20ToInfWeights,
                                 TString Subdet1Pt20ToInfWeights, 
                                 TString Subdet2Pt20ToInfWeights,
-                                ElectronIDMVA::MVAType type) {
+                                ElectronIDMVA::MVAType type,
+			        RhoUtilities::RhoType theRhoType) {
 
   std::vector<std::string> tempWeightFileVector;
   tempWeightFileVector.push_back(std::string(Subdet0Pt10To20Weights.Data()));
@@ -60,16 +63,17 @@ void ElectronIDMVA::Initialize( TString methodName,
   tempWeightFileVector.push_back(std::string(Subdet0Pt20ToInfWeights.Data()));
   tempWeightFileVector.push_back(std::string(Subdet1Pt20ToInfWeights.Data()));
   tempWeightFileVector.push_back(std::string(Subdet2Pt20ToInfWeights.Data()));
-  Initialize(std::string(methodName.Data()),type,kTRUE,tempWeightFileVector);
+  Initialize(std::string(methodName.Data()),type,kTRUE,tempWeightFileVector,theRhoType);
 
 }
 
 
 //--------------------------------------------------------------------------------------------------
-void ElectronIDMVA::Initialize(  std::string methodName,
-                                 ElectronIDMVA::MVAType type,
-                                 Bool_t useBinnedVersion,
-                                 std::vector<std::string> weightsfiles
+void ElectronIDMVA::Initialize( std::string methodName,
+                                ElectronIDMVA::MVAType type,
+                                Bool_t useBinnedVersion,
+                                std::vector<std::string> weightsfiles,
+			        RhoUtilities::RhoType theRhoType
                                  
 ) {
 
@@ -84,6 +88,7 @@ void ElectronIDMVA::Initialize(  std::string methodName,
   fMethodname = methodName;
   fMVAType = type;
   fUseBinnedVersion = useBinnedVersion;
+  fTheRhoType = theRhoType;
 
   //Define expected number of bins
   UInt_t ExpectedNBins = 0;
@@ -653,8 +658,8 @@ Double_t ElectronIDMVA::MVAValue_IDNonTrig( Double_t ElePt,
     std::cout << "Debug Electron MVA: ";
     std::cout << " fbrem " <<  fMVAVar_EleFBrem  
               << " kfchi2 " << fMVAVar_EleKFTrkChiSqr  
-              << " kfhits " << fMVAVar_EleKFTrkNHits  
-              << " kfhitsall " << fMVAVar_EleKFTrkNLayers  
+              << " kfhits " << fMVAVar_EleKFTrkNLayers  
+              << " kfhitsall " <<  fMVAVar_EleKFTrkNHits 
               << " gsfchi2 " << fMVAVar_EleGsfTrackChi2OverNdof  
               << " deta " <<  fMVAVar_EleDEtaIn  
               << " dphi " << fMVAVar_EleDPhiIn  
@@ -694,7 +699,27 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   }
 
   Double_t Rho = 0;
-  if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
+ switch(fTheRhoType) {
+   case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+   case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoLowEta();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandom();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandomLowEta();
+     break;
+   case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+     Rho = PileupEnergyDensity->At(0)->RhoKt6PFJets();
+     break;
+   default:
+     // use the old default
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+ }
 
   //set all input variables
   fMVAVar_EleSigmaIEtaIEta = ele->CoviEtaiEta() ; 
@@ -833,7 +858,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
 
 
-  fMVAVar_EleEEleClusterOverPout = 0;
+  fMVAVar_EleEEleClusterOverPout = ele->EEleClusterOverPout();
   if (ele->TrackerTrk()) {
     fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
     fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
@@ -920,7 +945,27 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   }
 
   Double_t Rho = 0;
-  if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
+ switch(fTheRhoType) {
+   case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+   case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoLowEta();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandom();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandomLowEta();
+     break;
+   case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+     Rho = PileupEnergyDensity->At(0)->RhoKt6PFJets();
+     break;
+   default:
+     // use the old default
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+ }
 
   //set all input variables
   fMVAVar_ElePt = ele->Pt();
@@ -967,7 +1012,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   fMVAVar_ElePreShowerOverRaw = ele->SCluster()->PreshowerEnergy() / ele->SCluster()->RawEnergy();
 
   //Additional vars
-  fMVAVar_EleEEleClusterOverPout = 0;
+  fMVAVar_EleEEleClusterOverPout = ele->EEleClusterOverPout();
   if (ele->TrackerTrk()) {
     if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
         fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
@@ -979,9 +1024,9 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
     fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
     fMVAVar_EleKFTrkNLayers = ele->CTFTrkNLayersWithMeasurement();
   } else {
-    fMVAVar_EleKFTrkChiSqr = -1;
-    fMVAVar_EleKFTrkNHits = 0;
-    fMVAVar_EleKFTrkNLayers = 0;
+    fMVAVar_EleKFTrkChiSqr = 0;
+    fMVAVar_EleKFTrkNHits = -1;
+    fMVAVar_EleKFTrkNLayers = -1;
   }
   
   if( ele->SCluster()->Seed()->E5x5() > 0.0 ) {
@@ -1144,8 +1189,8 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
 	      << " --> MVABin " << GetMVABin( fMVAVar_EleEta , fMVAVar_ElePt) << " : "	  
               << " fbrem " <<  fMVAVar_EleFBrem  
               << " kfchi2 " << fMVAVar_EleKFTrkChiSqr  
-              << " kfhits " << fMVAVar_EleKFTrkNHits  
-              << " kfhitsall " << fMVAVar_EleKFTrkNLayers  
+              << " kfhits " << fMVAVar_EleKFTrkNLayers
+              << " kfhitsall " << fMVAVar_EleKFTrkNHits
               << " gsfchi2 " << fMVAVar_EleGsfTrackChi2OverNdof  
               << " deta " <<  fMVAVar_EleDEtaIn  
               << " dphi " << fMVAVar_EleDPhiIn  
@@ -1159,7 +1204,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
               << " HoE " << fMVAVar_EleHoverE  
               << " EoP " << fMVAVar_EleEOverP  
               << " IoEmIoP " << fMVAVar_EleOneOverEMinusOneOverP  
-              << " eleEoPout " << fMVAVar_EleESeedClusterOverPout  
+              << " eleEoPout " << fMVAVar_EleEEleClusterOverPout  
               << " EoPout " << fMVAVar_EleESeedClusterOverPout  
               << " d0 " << fMVAVar_EleD0  
               << " ip3d " << fMVAVar_EleIP3d  

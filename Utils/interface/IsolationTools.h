@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.23 2012/04/28 11:34:09 ceballos Exp $
+// $Id: IsolationTools.h,v 1.24 2012/04/28 19:10:01 ceballos Exp $
 //
 // IsolationTools
 //
@@ -63,7 +63,7 @@ namespace mithep
                                               const PileupEnergyDensityCol *PileupEnergyDensity,
                                               ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
                                               const ElectronCol *goodElectrons,
-                                              const MuonCol *goodMuons, Double_t dRMax = 0.4);
+                                              const MuonCol *goodMuons, Double_t dRMax = 0.4, Bool_t isDebug = kFALSE);
        static Double_t BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
                             Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			    Double_t intRadius);

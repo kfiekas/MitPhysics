@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.27 2012/04/28 11:34:15 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.28 2012/04/28 19:10:01 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -413,7 +413,7 @@ Double_t IsolationTools::PFElectronIsolation2012(const Electron *ele, const Vert
                                                  const PileupEnergyDensityCol *PileupEnergyDensity,
                                                  ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
                                                  const ElectronCol *goodElectrons,
-                                                 const MuonCol *goodMuons, Double_t dRMax){
+                                                 const MuonCol *goodMuons, Double_t dRMax, Bool_t isDebug){
 
   Double_t tmpChargedIso_DR       = 0;
   Double_t tmpGammaIso_DR         = 0;
@@ -421,12 +421,12 @@ Double_t IsolationTools::PFElectronIsolation2012(const Electron *ele, const Vert
 
   for (UInt_t p=0; p<PFCands->GetEntries();p++) {   
     const PFCandidate *pf = PFCands->At(p);
-      
+
     //exclude the electron itself
-    if(pf->GsfTrk() && ele->GsfTrk() &&
-       pf->GsfTrk() == ele->GsfTrk()) continue;
-    if(pf->TrackerTrk() && ele->TrackerTrk() &&
-       pf->TrackerTrk() == ele->TrackerTrk()) continue;      
+    //if(pf->GsfTrk() && ele->GsfTrk() &&
+    //   pf->GsfTrk() == ele->GsfTrk()) continue;
+    //if(pf->TrackerTrk() && ele->TrackerTrk() &&
+    //   pf->TrackerTrk() == ele->TrackerTrk()) continue;      
 
     //************************************************************
     // New Isolation Calculations
@@ -505,9 +505,15 @@ Double_t IsolationTools::PFElectronIsolation2012(const Electron *ele, const Vert
   Double_t IsoVar_NeutralIso_DR = tmpGammaIso_DR + tmpNeutralHadronIso_DR;
   // Careful here, we have kEleNeutralIso04 only for now
   if(dRMax != 0.4) assert(0);
-  IsoVar_NeutralIso_DR = TMath::Max((IsoVar_NeutralIso_DR - Rho*ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralIso04, ele->SCluster()->Eta(), EffectiveAreaTarget))/ele->Pt(), 0.0);
+  double EA = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralIso04, ele->SCluster()->Eta(), EffectiveAreaTarget);
+  IsoVar_NeutralIso_DR = TMath::Max((IsoVar_NeutralIso_DR - Rho*EA)/ele->Pt(), 0.0);
+  
+  if(isDebug == kTRUE){
+    printf("Iso(ch, em, nh), EA, RelIso = (%f, %f, %f), %f, %f\n",tmpChargedIso_DR,tmpGammaIso_DR,tmpNeutralHadronIso_DR,
+           EA,IsoVar_ChargedIso_DR + IsoVar_NeutralIso_DR);
+  }
 
-  return (IsoVar_ChargedIso_DR +  IsoVar_NeutralIso_DR);
+  return (IsoVar_ChargedIso_DR + IsoVar_NeutralIso_DR);
 }
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 

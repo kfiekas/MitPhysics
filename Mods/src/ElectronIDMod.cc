@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.120 2012/05/03 08:45:29 fabstoec Exp $
+// $Id: ElectronIDMod.cc,v 1.121 2012/05/06 12:27:41 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -84,9 +84,7 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronMVAWeights_Subdet0Pt20ToInf(""),
   fElectronMVAWeights_Subdet1Pt20ToInf(""),
   fElectronMVAWeights_Subdet2Pt20ToInf(""),
-
   fTheRhoType(RhoUtilities::DEFAULT)
-  
 {
   // Constructor.
 }
@@ -136,7 +134,8 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
   else if(idType == ElectronTools::kMVAID_BDTG_IDHWW2012TrigV0) {
     ElectronOArr *tempElectrons = new  ElectronOArr;
     MuonOArr     *tempMuons     = new  MuonOArr;
-    MVAValue = fElectronIDMVA->MVAValue(el, vertex, PFCands, PileupEnergyDensity, ElectronTools::kEleEANoCorr, tempElectrons, tempMuons, kFALSE);
+    MVAValue = fElectronIDMVA->MVAValue(el, vertex, PFCands, PileupEnergyDensity, ElectronTools::kEleEANoCorr, 
+                                        tempElectrons, tempMuons, kFALSE);
     delete tempElectrons;
     delete tempMuons;
   }
@@ -192,6 +191,13 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     else if (MVABin == 3) MVACut = 0.940;
     else if (MVABin == 4) MVACut = 0.850;
     else if (MVABin == 5) MVACut = 0.920;
+  }
+
+  Bool_t isDebug = kFALSE;
+  if(isDebug == kTRUE){
+    printf("PassElMVAID: %d, pt, eta = %f, %f, rho = %f(%f) : MVA = %f, bin: %d\n",
+           GetEventHeader()->EvtNum(),el->Pt(), eta,
+	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets(),MVAValue,MVABin);
   }
 
   if (MVAValue > MVACut) return kTRUE;
@@ -404,21 +410,26 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       break;
     case ElectronTools::kPFIso_HWW2012TrigV0:
     {
+      Bool_t isDebug = kFALSE;
+      if(isDebug == kTRUE){
+        printf("PFIso_HWW2012TrigV0: %d, pt, eta = %f, %f, rho = %f(%f) : ",
+           GetEventHeader()->EvtNum(),ele->Pt(), ele->Eta(),
+	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets());
+      }
       ElectronOArr *tempIsoElectrons = new  ElectronOArr;
       MuonOArr     *tempIsoMuons     = new  MuonOArr;
       Double_t IsoOverPt = IsolationTools::PFElectronIsolation2012(ele, vertex, fPFNoPileUpCands, 
-       fPileupEnergyDensity, ElectronTools::kEleEANoCorr, tempIsoElectrons, tempIsoMuons, 0.4);
+       fPileupEnergyDensity, ElectronTools::kEleEANoCorr, tempIsoElectrons, tempIsoMuons, 0.4, isDebug);
       delete tempIsoElectrons;
       delete tempIsoMuons;
       Double_t eta = ele->SCluster()->AbsEta();
       Double_t IsoCut = -1;
-      if (ele->Pt() <  20 && eta <  0.800		       ) IsoCut = 0.158;
-      if (ele->Pt() <  20 && eta >= 0.800 && fabs(eta) < 1.479 ) IsoCut = 0.158;
-      if (ele->Pt() <  20 && eta >= 1.479		       ) IsoCut = 0.108;
-      if (ele->Pt() >= 20 && eta <  0.800		       ) IsoCut = 0.154;
-      if (ele->Pt() >= 20 && eta >= 0.800 && fabs(eta) < 1.479 ) IsoCut = 0.154;
-      if (ele->Pt() >= 20 && eta >= 1.479		       ) IsoCut = 0.100;
-      IsoCut = 0.150;
+      if (ele->Pt() <  20 && eta <  0.800		 ) IsoCut = 0.150;
+      if (ele->Pt() <  20 && eta >= 0.800 && eta < 1.479 ) IsoCut = 0.150;
+      if (ele->Pt() <  20 && eta >= 1.479		 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta <  0.800		 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta >= 0.800 && eta < 1.479 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta >= 1.479		 ) IsoCut = 0.150;
       if (IsoOverPt < IsoCut ) isocut = kTRUE;
     }
       break;
@@ -490,22 +501,6 @@ void ElectronIDMod::Process()
     if (e->AbsEta() > fElectronEtaMax) 
       continue;
 
-    //***********************************************************************************************
-    //Debug Info For Lepton MVA
-    //***********************************************************************************************
-    if (fPrintMVADebugInfo && 
-        ( fElIdType == ElectronTools::kMVAID_BDTG_IDIsoCombined || 
-          fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombined || 
-          fElIdType == ElectronTools::kMVAID_BDTG_IDHWW2012TrigV0 )
-      ) {
-      cout << "Event: " << GetEventHeader()->RunNum() << " " << GetEventHeader()->LumiSec() << " "
-           << GetEventHeader()->EvtNum() << " : Rho = " << fPileupEnergyDensity->At(0)->Rho() 
-           << " : Electron " << i << " "
-           << endl;
-      fElectronIDMVA->MVAValue(e, fVertices->At(0), fPFCandidates, fPileupEnergyDensity, kTRUE);
-    }
-    //***********************************************************************************************
-
     if (fApplyEcalFiducial && ( (e->SCluster()->AbsEta()>1.4442 && e->SCluster()->AbsEta()<1.5666) || e->SCluster()->AbsEta()>2.5 )) {
       continue;
     }
@@ -542,6 +537,9 @@ void ElectronIDMod::Process()
 	break;
       case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
 	Rho = fPileupEnergyDensity->At(0)->RhoRandomLowEta();
+	break;
+      case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+	Rho = fPileupEnergyDensity->At(0)->RhoKt6PFJets();
 	break;
       default:
 	// use the old default
@@ -778,7 +776,8 @@ void ElectronIDMod::Setup()
                                fElectronMVAWeights_Subdet0Pt20ToInf,
                                fElectronMVAWeights_Subdet1Pt20ToInf,
                                fElectronMVAWeights_Subdet2Pt20ToInf,
-                               ElectronIDMVA::kNoIPInfo);
+                               ElectronIDMVA::kNoIPInfo,
+			       fTheRhoType);
   }
   if (fElIdType == ElectronTools::kMVAID_BDTG_WithIPInfo) {
     fElectronIDMVA = new ElectronIDMVA();
@@ -789,7 +788,8 @@ void ElectronIDMod::Setup()
                                fElectronMVAWeights_Subdet0Pt20ToInf,
                                fElectronMVAWeights_Subdet1Pt20ToInf,
                                fElectronMVAWeights_Subdet2Pt20ToInf,
-                               ElectronIDMVA::kWithIPInfo);
+                               ElectronIDMVA::kWithIPInfo,
+			       fTheRhoType);
   }
   if (fElIdType == ElectronTools::kMVAID_BDTG_IDIsoCombined || fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombined ) {
     fElectronIDMVA = new ElectronIDMVA();
@@ -800,7 +800,8 @@ void ElectronIDMod::Setup()
                                fElectronMVAWeights_Subdet0Pt20ToInf,
                                fElectronMVAWeights_Subdet1Pt20ToInf,
                                fElectronMVAWeights_Subdet2Pt20ToInf,
-                               ElectronIDMVA::kIDIsoCombined);
+                               ElectronIDMVA::kIDIsoCombined,
+			       fTheRhoType);
   }
 
   if (fElIdType == ElectronTools::kMVAID_BDTG_IDHWW2012TrigV0 ) {
@@ -812,7 +813,8 @@ void ElectronIDMod::Setup()
                                fElectronMVAWeights_Subdet0Pt20ToInf,
                                fElectronMVAWeights_Subdet1Pt20ToInf,
                                fElectronMVAWeights_Subdet2Pt20ToInf,
-                               ElectronIDMVA::kIDHWW2012TrigV0);
+                               ElectronIDMVA::kIDHWW2012TrigV0,
+			       fTheRhoType);
   }
 
 }

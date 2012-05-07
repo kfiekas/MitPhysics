@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.78 2012/05/06 10:32:30 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.79 2012/05/06 12:27:41 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -171,22 +171,6 @@ void MuonIDMod::Process()
     if (eta >= fEtaCut) 
       continue;
 
-
-    //***********************************************************************************************
-    //Debug Info For Lepton MVA
-    //***********************************************************************************************
-    if( fPrintMVADebugInfo && 
-        (fMuIsoType == kMVAIso_BDTG_IDIso || fMuIDType == kMVAID_BDTG_IDIso)
-      ) {
-      cout << "Event: " << GetEventHeader()->RunNum() << " " << GetEventHeader()->LumiSec() << " "
-           << GetEventHeader()->EvtNum() << " : Rho = " << fPileupEnergyDensity->At(0)->Rho() 
-           << " : Muon " << i << " "
-           << endl;
-      fMuonIDMVA->MVAValue(mu,fVertices->At(0),fMuonTools,fPFCandidates,fPileupEnergyDensity,kTRUE);
-    }
-    //***********************************************************************************************
-
-
     Double_t RChi2 = 0.0;
     if     (mu->HasGlobalTrk()) {
       RChi2 = mu->GlobalTrk()->Chi2()/mu->GlobalTrk()->Ndof();
@@ -298,6 +282,9 @@ void MuonIDMod::Process()
 	break;
       case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
 	Rho = rho->RhoRandom();
+	break;
+      case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+	Rho = rho->RhoKt6PFJets();
 	break;
       default:
 	Rho = rho->Rho();
@@ -513,6 +500,8 @@ void MuonIDMod::SlaveBegin()
     fMuIDType = kWWMuIdV2;
   else if (fMuonIDType.CompareTo("WWMuIdV3") == 0) 
     fMuIDType = kWWMuIdV3;
+  else if (fMuonIDType.CompareTo("WWMuIdV4") == 0) 
+    fMuIDType = kWWMuIdV4;
   else if (fMuonIDType.CompareTo("NoId") == 0) 
     fMuIDType = kNoId;
   else if (fMuonIDType.CompareTo("Custom") == 0) {
@@ -594,7 +583,8 @@ void MuonIDMod::SlaveBegin()
                            string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/EndcapPtBin1_IDIsoCombined_BDTG.weights.xml"))),
                            string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/BarrelPtBin2_IDIsoCombined_BDTG.weights.xml"))),
                            string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/EndcapPtBin2_IDIsoCombined_BDTG.weights.xml"))),
-                           MuonIDMVA::kIDIsoCombinedDetIso);
+                           MuonIDMVA::kIDIsoCombinedDetIso,
+			   fTheRhoType);
   }
   else if(fMuIsoType == kIsoRingsV0_BDTG_Iso) {
     std::vector<std::string> muonidiso_weightfiles;
@@ -609,7 +599,8 @@ void MuonIDMod::SlaveBegin()
     fMuonIDMVA->Initialize("MuonIso_BDTG_IsoRings",
                        MuonIDMVA::kIsoRingsV0,
                        kTRUE,
-                       muonidiso_weightfiles);
+                       muonidiso_weightfiles,
+		       fTheRhoType);
   }
   else if(fMuIsoType == kIsoDeltaR) {
     std::vector<std::string> muonidiso_weightfiles;
@@ -622,7 +613,8 @@ void MuonIDMod::SlaveBegin()
     fMuonIDMVA->Initialize("muonHZZ2012IsoDRMVA",
                        MuonIDMVA::kIsoDeltaR,
                        kTRUE,
-                       muonidiso_weightfiles);
+                       muonidiso_weightfiles,
+		       fTheRhoType);
   }
 
 }
@@ -671,6 +663,7 @@ Bool_t MuonIDMod::PassMuonIsoRingsV0_BDTG_Iso(const Muon *mu, const Vertex *vert
                                               const PileupEnergyDensityCol *PileupEnergyDensity) const
 {
 
+  Bool_t isDebug = kFALSE;
   const Track *muTrk=0;
   if(mu->HasTrackerTrk())         { muTrk = mu->TrackerTrk();    }
   else if(mu->HasStandaloneTrk()) { muTrk = mu->StandaloneTrk(); } 
@@ -678,19 +671,24 @@ Bool_t MuonIDMod::PassMuonIsoRingsV0_BDTG_Iso(const Muon *mu, const Vertex *vert
   ElectronOArr *tempElectrons = new  ElectronOArr;
   MuonOArr     *tempMuons     = new  MuonOArr;
   Double_t MVAValue = fMuonIDMVA->MVAValue(mu,vertex,fMuonTools,fPFCandidates,
-                      PileupEnergyDensity,MuonTools::kMuEAFall11MC,tempElectrons,tempMuons,kFALSE);
+                      PileupEnergyDensity,MuonTools::kMuEAFall11MC,tempElectrons,tempMuons,isDebug);
   delete tempElectrons;
   delete tempMuons;
 
   Int_t MVABin = fMuonIDMVA->GetMVABin(muTrk->Eta(), muTrk->Pt(), mu->IsGlobalMuon(), mu->IsTrackerMuon());
 
-  Double_t MVACut = -999;
-  if      (MVABin == 0) MVACut = -0.593;
-  else if (MVABin == 1) MVACut =  0.337;
-  else if (MVABin == 2) MVACut = -0.767;
-  else if (MVABin == 3) MVACut =  0.410;
-  else if (MVABin == 4) MVACut = -0.989;
-  else if (MVABin == 5) MVACut = -0.995;
+  Double_t MVACut = -1.0;
+  Double_t eta = mu->AbsEta();
+  if     (mu->Pt() <  20 && eta <  1.479) MVACut = 0.86;
+  else if(mu->Pt() <  20 && eta >= 1.479) MVACut = 0.82;
+  else if(mu->Pt() >= 20 && eta <  1.479) MVACut = 0.82;
+  else if(mu->Pt() >= 20 && eta >= 1.479) MVACut = 0.86;
+
+  if(isDebug == kTRUE){
+    printf("PassMuonIsoRingsV0_BDTG_IsoDebug: %d, pt, eta = %f, %f, rho = %f(%f) : RingsMVA = %f, bin: %d\n",
+           GetEventHeader()->EvtNum(),mu->Pt(), mu->Eta(),
+	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets(),MVAValue,MVABin);
+  }
 
   if (MVAValue > MVACut) return kTRUE;
   return kFALSE;
@@ -708,7 +706,7 @@ Bool_t MuonIDMod::PassMuonIsoDeltaR(const Muon *mu, const Vertex *vertex,
   ElectronOArr *tempElectrons = new  ElectronOArr;
   MuonOArr     *tempMuons     = new  MuonOArr;
   Double_t MVAValue = fMuonIDMVA->MVAValue(mu,vertex,fMuonTools,fPFNoPileUpCands,
-                      PileupEnergyDensity,MuonTools::kMuEAFall11MC,tempElectrons,tempMuons,kTRUE);
+                      PileupEnergyDensity,MuonTools::kMuEAFall11MC,tempElectrons,tempMuons,kFALSE);
   delete tempElectrons;
   delete tempMuons;
 
