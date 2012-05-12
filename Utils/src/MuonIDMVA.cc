@@ -509,6 +509,8 @@ Double_t MuonIDMVA::MVAValue(Double_t MuPt , Double_t MuEta,
 
 Double_t MuonIDMVA::MVAValue_IsoRings( Double_t MuPt,
                                        Double_t MuEta,
+																			 Bool_t MuIsGlobal,
+																			 Bool_t MuIsTracker,
                                        Double_t ChargedIso_DR0p0To0p1,
                                        Double_t ChargedIso_DR0p1To0p2,
                                        Double_t ChargedIso_DR0p2To0p3,
@@ -554,9 +556,9 @@ Double_t MuonIDMVA::MVAValue_IsoRings( Double_t MuPt,
 
   if (printDebug == kTRUE) {
     std::cout <<" -> BIN: " << fMVAVar_MuEta << " " << fMVAVar_MuPt << " : " 
-              << GetMVABin( fMVAVar_MuEta , fMVAVar_MuPt) << std::endl;
+              << GetMVABin( fMVAVar_MuEta , fMVAVar_MuPt, MuIsGlobal, MuIsTracker) << std::endl;
   }
-  reader = fTMVAReader[GetMVABin( fMVAVar_MuEta , fMVAVar_MuPt)];                                              
+  reader = fTMVAReader[GetMVABin( fMVAVar_MuEta , fMVAVar_MuPt, MuIsGlobal, MuIsTracker)];                                              
   mva = reader->EvaluateMVA( fMethodname );
 
   if (printDebug == kTRUE) {

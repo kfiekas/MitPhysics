@@ -136,6 +136,8 @@ namespace mithep {
         );
       Double_t MVAValue_IsoRings( Double_t MuPt,
                                   Double_t MuEta,
+																	Bool_t MuIsGlobal,
+                            			Bool_t MuIsTracker,
                                   Double_t ChargedIso_DR0p0To0p1,
                                   Double_t ChargedIso_DR0p1To0p2,
                                   Double_t ChargedIso_DR0p2To0p3,
