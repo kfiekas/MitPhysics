@@ -159,7 +159,6 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *i
   double lMVA = MVAValue   (iJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity);
   double lPt  = correctedPt(iJet,                  iJetCorrector,iPileupEnergyDensity);
   if(lPt < fJetPtMin)                         return false; 
-  if(lPt > 50)                                return true; //==> we can raise this 
   
   int lPtId = 0; 
   if(lPt > 10 && lPt < 20) lPtId = 1;
@@ -184,7 +183,6 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *i
 Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices) { 
   if(!JetTools::passPFLooseId(iJet))                 return false;
   if(iJet->Pt()        < fJetPtMin) return false; 
-  if(iJet->Pt()        > 50)        return true; //==> we can raise this 
   if(fabs(iJet->Eta()) > 4.99)      return false;
   double lMVA = MVAValue(iJet,iVertex,iVertices);
   
