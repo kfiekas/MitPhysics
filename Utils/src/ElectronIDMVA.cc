@@ -685,7 +685,6 @@ Double_t ElectronIDMVA::MVAValue_IDNonTrig( Double_t ElePt,
   return mva;
 }
 
-
 //--------------------------------------------------------------------------------------------------
 Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex, 
                                  const PFCandidateCol *PFCands, 
@@ -699,7 +698,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   }
 
   Double_t Rho = 0;
- switch(fTheRhoType) {
+  switch(fTheRhoType) {
    case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
      Rho = PileupEnergyDensity->At(0)->Rho();
      break;
@@ -734,7 +733,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
   else fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
   fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
-  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->SCluster()->Energy())) - 1.0 / ele->BestTrk()->P(); 
+  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->CorrectedEcalEnergy())) - 1.0 / ele->BestTrk()->P(); 
   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
   fMVAVar_EleIP3d = ele->Ip3dPV(); 
   fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
@@ -852,7 +851,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
   else fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
   fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
-  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->SCluster()->Energy())) - 1.0 / ele->BestTrk()->P(); 
+  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->CorrectedEcalEnergy())) - 1.0 / ele->BestTrk()->P(); 
   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
   fMVAVar_EleIP3d = ele->Ip3dPV(); 
   fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
@@ -874,7 +873,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   fMVAVar_EleR9 = ele->SCluster()->R9();
   fMVAVar_EleHoverE = ele->HadronicOverEm(); 
   fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
-  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->SCluster()->Energy())) - 1.0 / ele->BestTrk()->P(); 
+  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->CorrectedEcalEnergy())) - 1.0 / ele->BestTrk()->P(); 
   fMVAVar_EleR9 = ele->SCluster()->R9();
   fMVAVar_ElePreShowerOverRaw = ele->SCluster()->PreshowerEnergy() / ele->SCluster()->RawEnergy();
     
@@ -980,7 +979,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
     fMVAVar_EleFBrem = TMath::Max(double(ele->FBrem()),-1.0); 
     fMVAVar_EleEOverP = TMath::Min(double(ele->ESuperClusterOverP()), 20.0); 
     fMVAVar_EleESeedClusterOverPout = TMath::Min(double(ele->ESeedClusterOverPout()),20.0); 
-    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->SCluster()->Energy())) - 1.0 / ele->P(); 
+    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->CorrectedEcalEnergy())) - 1.0 / ele->P(); 
     fMVAVar_EleGsfTrackChi2OverNdof = TMath::Min(double( ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof()),200.0);
     fMVAVar_EledEtaCalo =  TMath::Min(fabs(double(ele->DeltaEtaSeedClusterTrackAtCalo())),0.2);
     fMVAVar_EleR9 = TMath::Min(double(ele->SCluster()->R9()), 5.0);   
@@ -990,7 +989,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
     fMVAVar_EleFBrem = ele->FBrem(); 
     fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
     fMVAVar_EleESeedClusterOverPout = ele->ESeedClusterOverPout(); 
-    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->SCluster()->Energy())) - 1.0 / ele->BestTrk()->P();
+    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->CorrectedEcalEnergy())) - 1.0 / ele->BestTrk()->P();
     fMVAVar_EleGsfTrackChi2OverNdof = ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof();
     fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
     fMVAVar_EleR9 = ele->SCluster()->R9();   
@@ -1206,6 +1205,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
               << " IoEmIoP " << fMVAVar_EleOneOverEMinusOneOverP  
               << " eleEoPout " << fMVAVar_EleEEleClusterOverPout  
               << " EoPout " << fMVAVar_EleESeedClusterOverPout  
+	      << " PreShowerOverRaw" << fMVAVar_ElePreShowerOverRaw  
               << " d0 " << fMVAVar_EleD0  
               << " ip3d " << fMVAVar_EleIP3d  
               << " eta " << fMVAVar_EleEta  
