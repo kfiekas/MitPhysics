@@ -151,13 +151,14 @@ Double_t JetIDMVA::MVAValue(
 //--------------------------------------------------------------------------------------------------
 Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
 		      FactorizedJetCorrector *iJetCorrector,
-		      const PileupEnergyDensityCol *iPileupEnergyDensity) { 
+		      const PileupEnergyDensityCol *iPileupEnergyDensity,
+		      RhoUtilities::RhoType type) { 
   
   if(!JetTools::passPFLooseId(iJet))                 return false;
   if(fabs(iJet->Eta()) > 4.99)                       return false;
   
   double lMVA = MVAValue   (iJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity);
-  double lPt  = correctedPt(iJet,                  iJetCorrector,iPileupEnergyDensity);
+  double lPt  = correctedPt(iJet,                  iJetCorrector,iPileupEnergyDensity,type);
   if(lPt < fJetPtMin)                         return false; 
   
   int lPtId = 0; 
@@ -173,11 +174,6 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *i
   double lMVACut = fMVACut[lPtId][lEtaId];
   if(lMVA < lMVACut) return false;
   return true;
-   //if( fabs(JetTools::impactParameter(iJet,iVertex,true)) < 0.2) return true;
-  //if(correctedPt(iJet,iJetCorrector,iPileupEnergyDensity) < fJetPtMin && iJet->TrackCountingHighEffBJetTagsDisc() == -100) return false; 
-  //This line is a bug in the Met training
-  //if(lMVA < -0.8)                            return false;
-  //if(lMVA < -0.5 && fabs(iJet->Eta()) > 3.0) return false;
 }
 //--------------------------------------------------------------------------------------------------
 Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices) { 
@@ -320,13 +316,38 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, const Verte
 
   return lMVA;
 }
-Double_t JetIDMVA::correctedPt(const PFJet *iJet, FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol *iPUEnergyDensity) { 
+Double_t JetIDMVA::correctedPt(const PFJet *iJet, FactorizedJetCorrector *iJetCorrector,
+                               const PileupEnergyDensityCol *iPUEnergyDensity,
+			       RhoUtilities::RhoType type) { 
+  Double_t Rho = 0.0;
+  switch(type) {
+  case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+    Rho = iPUEnergyDensity->At(0)->Rho();
+    break;
+  case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+    Rho = iPUEnergyDensity->At(0)->RhoLowEta();
+    break;
+  case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+    Rho = iPUEnergyDensity->At(0)->RhoRandom();
+    break;
+  case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+    Rho = iPUEnergyDensity->At(0)->RhoRandomLowEta();
+    break;
+  case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+    Rho = iPUEnergyDensity->At(0)->RhoKt6PFJets();
+    break;
+  default:
+    // use the old default
+    Rho = iPUEnergyDensity->At(0)->Rho();
+    break;
+  }
+    
   const FourVectorM rawMom = iJet->RawMom();
   iJetCorrector->setJetEta(rawMom.Eta());
   iJetCorrector->setJetPt (rawMom.Pt());
   iJetCorrector->setJetPhi(rawMom.Phi());
   iJetCorrector->setJetE  (rawMom.E());
-  iJetCorrector->setRho   (iPUEnergyDensity->At(0)->RhoHighEta());
+  iJetCorrector->setRho   (Rho);
   iJetCorrector->setJetA  (iJet->JetArea());
   iJetCorrector->setJetEMF(-99.0);     
   Double_t correction = iJetCorrector->getCorrection();

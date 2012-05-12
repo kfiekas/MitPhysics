@@ -21,6 +21,9 @@
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
+// for Rho definitons
+#include "MitPhysics/Utils/interface/RhoUtilities.h"
+
 class TRandom3;
 namespace TMVA {
   class Reader;
@@ -72,8 +75,9 @@ namespace mithep {
       //UNcorrected Jets
       Bool_t   pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
 		    FactorizedJetCorrector *iJetCorrector,
-		    const PileupEnergyDensityCol *iPileupEnergyDensity);
-      
+		    const PileupEnergyDensityCol *iPileupEnergyDensity,
+		    RhoUtilities::RhoType type = RhoUtilities::DEFAULT);
+
       //Corrected Jets
       Bool_t   pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices);
 		    			
@@ -89,7 +93,8 @@ namespace mithep {
 
 
       double  correctedPt(const PFJet *iJet, FactorizedJetCorrector *iJetCorrector,
-			  const PileupEnergyDensityCol *iPUEnergyDensity);
+			  const PileupEnergyDensityCol *iPUEnergyDensity,
+		          RhoUtilities::RhoType type = RhoUtilities::DEFAULT);
 
       Float_t                  fJetPtMin;
       Float_t                  fDZCut;
