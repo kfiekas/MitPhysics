@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.121 2012/05/06 12:27:41 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.122 2012/05/07 18:05:51 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -127,6 +127,7 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
                                 const Vertex *vertex, const PFCandidateCol *PFCands,
                                 const PileupEnergyDensityCol *PileupEnergyDensity) const
 { 
+  Bool_t isDebug = kFALSE;
   Double_t MVAValue = 0;
   if     (idType == ElectronTools::kMVAID_BDTG_IDIsoCombined) {
     MVAValue = fElectronIDMVA->MVAValue(el, vertex, PFCands, PileupEnergyDensity, fIntRadius);
@@ -135,7 +136,7 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     ElectronOArr *tempElectrons = new  ElectronOArr;
     MuonOArr     *tempMuons     = new  MuonOArr;
     MVAValue = fElectronIDMVA->MVAValue(el, vertex, PFCands, PileupEnergyDensity, ElectronTools::kEleEANoCorr, 
-                                        tempElectrons, tempMuons, kFALSE);
+                                        tempElectrons, tempMuons, isDebug);
     delete tempElectrons;
     delete tempMuons;
   }
@@ -193,10 +194,9 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     else if (MVABin == 5) MVACut = 0.920;
   }
 
-  Bool_t isDebug = kFALSE;
   if(isDebug == kTRUE){
-    printf("PassElMVAID: %d, pt, eta = %f, %f, rho = %f(%f) : MVA = %f, bin: %d\n",
-           GetEventHeader()->EvtNum(),el->Pt(), eta,
+    printf("PassElMVAID(%d): %d, pt, eta = %f, %f, rho = %f(%f) : MVA = %f, bin: %d\n",
+           (MVAValue > MVACut),GetEventHeader()->EvtNum(),el->Pt(), eta,
 	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets(),MVAValue,MVABin);
   }
 
