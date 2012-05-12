@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.48 2012/05/06 10:30:40 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.49 2012/05/06 12:27:38 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -80,7 +80,7 @@ namespace mithep
 	{ fTheRhoType = type; };
 
       void               SetVertexName(const char* name) { fVertexName = name; }
-      
+
       enum EMuIdType {
         kIdUndef = 0,       //not defined
         kWMuId,             //"WMuId"
