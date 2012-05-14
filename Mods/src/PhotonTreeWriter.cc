@@ -41,8 +41,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fSuperClusterName       ("PFSuperClusters"),
   fPFMetName              ("PFMet"),
   fPFJetName              (Names::gkPFJetBrn),
-  fGenJetName             ("AKT5GenJets"),
   funcorrPFJetName        ("AKt5PFJets"),
+  fGenJetName             ("AKT5GenJets"),
   fLeptonTagElectronsName ("HggLeptonTagElectrons"),
   fLeptonTagMuonsName     ("HggLeptonTagMuons"),
 
@@ -81,7 +81,6 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fApplyLeptonTag         (kFALSE),
   fApplyBTag              (kFALSE),
   fApplyPFMetCorrections  (kFALSE),
-
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fTupleName              ("hPhotonTree")
@@ -126,7 +125,9 @@ void PhotonTreeWriter::Process()
   LoadEventObject(fPFMetName,          fPFMet);  
   if (fEnableJets){
     LoadEventObject(fPFJetName,        fPFJets);  
+    //LoadEventObject(funcorrPFJetName,  funcorrPFJets);
     LoadBranch(funcorrPFJetName);
+    //   if(!fIsData) LoadEventObject(fGenJetName,        fGenJets);
   }
   // ------------------------------------------------------------  
   // load event based information
@@ -143,8 +144,8 @@ void PhotonTreeWriter::Process()
   if( !fIsData ) {
     LoadBranch(fMCParticleName);
     LoadBranch(fPileUpName);
-    if ( fApplyPFMetCorrections ) LoadEventObject(fGenJetName,        fGenJets);
-  }
+    if (fEnableJets) LoadEventObject(fGenJetName,        fGenJets);
+  }  else fGenJets = NULL;
   
   if( !fIsData ) {
     for (UInt_t i=0; i<fPileUp->GetEntries(); ++i) {
@@ -162,6 +163,8 @@ void PhotonTreeWriter::Process()
   if (!fIsData)
     FindHiggsPtAndZ(_pth, _decayZ, _genmass);
 
+
+  Double_t _spfMet = fPFMet->At(0)->SumEt();
   fDiphotonEvent->leptonTag = -1; // disabled
 
   fDiphotonEvent->rho = rho;
@@ -196,6 +199,7 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->pfmetphi = fPFMet->At(0)->Phi();
   fDiphotonEvent->pfmetx = fPFMet->At(0)->Px();
   fDiphotonEvent->pfmety = fPFMet->At(0)->Py();
+  fDiphotonEvent->spfMet = _spfMet;
   fDiphotonEvent->masscor = -99.;
   fDiphotonEvent->masscorerr = -99.;
   fDiphotonEvent->masscorele = -99.;
@@ -228,6 +232,30 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->zeppenfeld = -99.;
   fDiphotonEvent->dphidijetgg = -99.;
   
+  //uncorrected jets
+//   const Jet *uncorrjet1 = 0;
+//   const Jet *uncorrjet2 = 0;
+//   const Jet *uncorrjetcentral = 0;
+
+//   fDiphotonEvent->uncorrjet1pt   = -99.;
+//   fDiphotonEvent->uncorrjet1eta  = -99.;
+//   fDiphotonEvent->uncorrjet1phi  = -99.;
+//   fDiphotonEvent->uncorrjet1mass = -99.;
+//   fDiphotonEvent->uncorrjet2pt   = -99.;
+//   fDiphotonEvent->uncorrjet2eta  = -99.;
+//   fDiphotonEvent->uncorrjet2phi  = -99.;
+//   fDiphotonEvent->uncorrjet2mass = -99.;
+//   fDiphotonEvent->uncorrjetcentralpt   = -99.;
+//   fDiphotonEvent->uncorrjetcentraleta  = -99.;
+//   fDiphotonEvent->uncorrjetcentralphi  = -99.;
+//   fDiphotonEvent->uncorrjetcentralmass = -99.;
+//   fDiphotonEvent->diuncorrjetpt = -99.;
+//   fDiphotonEvent->diuncorrjeteta = -99.;
+//   fDiphotonEvent->diuncorrjetphi = -99.;
+//   fDiphotonEvent->diuncorrjetmass = -99.; 
+
+
+
   Int_t nhitsbeforevtxmax = 1;
   if (!fApplyElectronVeto)
     nhitsbeforevtxmax = 999;  
@@ -291,31 +319,38 @@ void PhotonTreeWriter::Process()
     }
     
     // fill Btag information... set to true if One jet fullfills 
-    fDiphotonEvent -> btagJet1    = -1.;
-    fDiphotonEvent -> btagJet1Pt  = -99.;
-    fDiphotonEvent -> btagJet1Eta = -99.;
-    fDiphotonEvent -> btagJet2    = -1.;
-    fDiphotonEvent -> btagJet2Pt  = -99.;
-    fDiphotonEvent -> btagJet2Eta = -99.;
+    fDiphotonEvent -> btagJet1       = -1.;
+    fDiphotonEvent -> btagJet1Pt     = -99.;
+    fDiphotonEvent -> btagJet1Eta    = -99.;
+
+    fDiphotonEvent -> btagJet2       = -1.;
+    fDiphotonEvent -> btagJet2Pt     = -99.;
+    fDiphotonEvent -> btagJet2Eta    = -99.;
 
     if( fApplyBTag && fEnableJets ) {
       float highTag     = 0.;
-      float trailTag    = 0.;
       float highJetPt   = 0.;
       float highJetEta  = 0.;
+
+      float trailTag     = 0.;
       float trailJetPt   = 0.;
       float trailJetEta  = 0.;
+
       for (UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet) {
 	const Jet *jet = fPFJets->At(ijet);
 	if( jet->Pt() < 20. || jet->AbsEta() > 2.4 ) continue;
 	if ( jet->CombinedSecondaryVertexBJetTagsDisc() > highTag ) {
-	  trailTag    = highTag;
-	  trailJetPt  = highJetPt;
+	  
+	  trailTag = highTag;
+	  trailJetPt = highJetPt;
 	  trailJetEta = highJetEta;
+
 	  highTag    = jet->CombinedSecondaryVertexBJetTagsDisc();
 	  highJetPt  = jet->Pt();
 	  highJetEta = jet->Eta();
+
 	} else if ( jet->CombinedSecondaryVertexBJetTagsDisc() > trailTag ) {
+
 	  trailTag    = jet->CombinedSecondaryVertexBJetTagsDisc();
 	  trailJetPt  = jet->Pt();
 	  trailJetEta = jet->Eta();
@@ -323,10 +358,12 @@ void PhotonTreeWriter::Process()
       }
       fDiphotonEvent -> btagJet1    = highTag;
       fDiphotonEvent -> btagJet1Pt  = highJetPt;
-      fDiphotonEvent -> btagJet1Eta = highJetEta;
-      fDiphotonEvent -> btagJet2    = trailTag;
-      fDiphotonEvent -> btagJet2Pt  = trailJetPt;
-      fDiphotonEvent -> btagJet2Eta = trailJetEta;
+      fDiphotonEvent -> btagJet1Eta = highJetEta;      
+
+      fDiphotonEvent -> btagJet1    = trailTag;
+      fDiphotonEvent -> btagJet1Pt  = trailJetPt;
+      fDiphotonEvent -> btagJet1Eta = trailJetEta;      
+
     }
     
     //fill jet variables
@@ -339,7 +376,7 @@ void PhotonTreeWriter::Process()
           else if (!jetcentral && 0) jetcentral = jet;
         }
         if (jet1&&jet2&&jetcentral) break;
-      }
+      }      
     }
     
     if (jet1) {
@@ -381,7 +418,6 @@ void PhotonTreeWriter::Process()
       }
     }
     
-
     //added gen. info of whether a lep. or nutrino is from W or Z --Heng 02/14/2012 12:30 EST
     Double_t _fromZ = -99;
     Double_t _fromW = -99;
@@ -408,18 +444,6 @@ void PhotonTreeWriter::Process()
       }
     }
     
-      /*
-      for(UInt_t j=0; j<fMCParticles->GetEntries(); ++j) {
-	const MCParticle* p = fMCParticles->At(j);
-	if( p->AbsPdgId()==23 ||p->AbsPdgId()==32 || p->AbsPdgId()==33 ) {
-	    _fromZ=1;
-	    _zpt=p->Pt();
-	  }
-	  else _fromW=1;
-      }
-    }
-
-      */
     fDiphotonEvent->fromZ = _fromZ;
     fDiphotonEvent->fromW = _fromW;
     fDiphotonEvent->zpt = _zpt;
@@ -475,25 +499,32 @@ void PhotonTreeWriter::Process()
       }
       
     }
-    
-    
-    fDiphotonEvent->corrpfmet    = -99.;
+
+    fDiphotonEvent->corrpfmet = -99.;
     fDiphotonEvent->corrpfmetphi = -99.;
-    fDiphotonEvent->corrpfmetx   = -99.;
-    fDiphotonEvent->corrpfmety   = -99.;
+    fDiphotonEvent->corrpfmetx = -99.;
+    fDiphotonEvent->corrpfmety = -99.;
 
-    Met *corrMet = NULL;
-    if( fApplyPFMetCorrections ) {
-      corrMet = new Met(fPFMet->At(0)->Px(),fPFMet->At(0)->Py());
+    Met *corrMet =NULL;
+    
+    if (fApplyPFMetCorrections){
+    corrMet = new Met(fPFMet->At(0)->Px(),fPFMet->At(0)->Py());
+    
+    if (!fIsData){
       PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,1,1,funcorrPFJets,fGenJets,fPFJets);
-      PFMetCorrectionTools::shiftMet(corrMet,fIsData);
-      
-      fDiphotonEvent->corrpfmet = corrMet->Pt();
-      fDiphotonEvent->corrpfmetphi = corrMet->Phi();
-      fDiphotonEvent->corrpfmetx = corrMet->Px();
-      fDiphotonEvent->corrpfmety = corrMet->Py();
+      PFMetCorrectionTools::shiftMet(corrMet,fIsData,_spfMet);
+    }
+    else {
+      PFMetCorrectionTools::shiftMet(corrMet,fIsData,_spfMet);
+       PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,0,1,funcorrPFJets,fGenJets,fPFJets);
+     }    
+ 
+    fDiphotonEvent->corrpfmet = corrMet->Pt();
+    fDiphotonEvent->corrpfmetphi = corrMet->Phi();
+    fDiphotonEvent->corrpfmetx = corrMet->Px();
+    fDiphotonEvent->corrpfmety = corrMet->Py();
 
-      delete corrMet;
+    delete corrMet;
     }
 
     Float_t _massele = -99.;
@@ -756,11 +787,12 @@ void PhotonTreeWriter::SlaveBegin()
   if (fEnableJets){
     ReqEventObject(fPFJetName,       fPFJets,       fPFJetsFromBranch);
     ReqBranch(funcorrPFJetName, funcorrPFJets);
+    //   if (!fIsData) ReqEventObject(fGenJetName, fGenJets, true);
   }
   if (!fIsData) {
     ReqBranch(fPileUpName,         fPileUp);
     ReqBranch(fMCParticleName,     fMCParticles);
-    if ( fApplyPFMetCorrections ) ReqEventObject(fGenJetName, fGenJets, true);
+    if (fEnableJets) ReqEventObject(fGenJetName, fGenJets, true);
   }
   if (fIsData) {
     fPhFixDataFile = gSystem->Getenv("CMSSW_BASE") +

@@ -12,8 +12,6 @@
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include <TFile.h>
 #include <TRandom3.h>
-// #include "CondFormats/EgammaObjects/interface/GBRForest.h"
-// #include "Cintex/Cintex.h"
 #include <TLorentzVector.h>
 using namespace mithep;
 ClassImp(mithep::PFMetCorrectionTools)
@@ -89,119 +87,121 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
   
   TLorentzVector jetSumUnsmeared;
   jetSumUnsmeared.SetXYZT(0.,0.,0.,0);
-
-   if( !fPFJet || !fcorrJet) {
-     return;
-   }
-
+  
+  
+  if( !fPFJet || !fcorrJet) {
+    return;
+  }
+  
   if(fPFJet->GetEntries() != fcorrJet->GetEntries()) return;
-
+  
   // associating reco - gen met                                                                                                            
   for( unsigned int i=0; i<fPFJet->GetEntries(); ++i){
     const Jet *recojet=fPFJet->At(i);
-    const Jet *corrjet=fcorrJet->At(i);
-    
-    if( !recojet || !corrjet )  return;
-       
-    if (! phSoft || !phHard ) {
-      return;
+    float ptSmeared  = recojet->Mom().Pt();
+    float eneSmeared = recojet->Mom().E();    
+    if ( (phHard && MathUtils::DeltaR(recojet->Mom(),phHard->Mom())<0.5 )|| (phSoft && MathUtils::DeltaR(recojet->Mom(),phSoft->Mom())<0.5)){
+      //     std::cout<<"removed jet  "<<recojet->Pt()<< "  "<<recojet->Eta()<<std::endl;
+      continue;
     }
-    
-    // remove identified photons
-    if ((phHard && MathUtils::DeltaR(recojet->RawMom(),phHard->Mom())<0.5) ||(phSoft && MathUtils::DeltaR(recojet->RawMom(),phSoft->Mom())<0.5)) continue; 
-    // smearing via association with genjets
-    int match        = -999;
-    Double_t DRmin = 999.;     
-    if (fGenJet){
-      for(unsigned int j=0; j< fGenJet->GetEntries(); ++j){
-	const GenJet *genjet=fGenJet->At(j);
-	if(!genjet) {
-	  std::cout<<" genjet not there..."<<std::endl;
-	  continue;
-	}
-	
-	Double_t DR = MathUtils::DeltaR(recojet->RawMom(),genjet->Mom());
-	
-	Double_t expres = ErrEt(corrjet->RawMom().Pt(),recojet->RawMom().Eta());  
-	
-	if(DR < DRmin && (corrjet->RawMom().Pt()-genjet->Mom().Pt())/corrjet->RawMom().Pt() < 5. * expres) {
-	  match = (int) j;
-	  DRmin = DR;
-	}
+
+    if (smearing){
+      const Jet *corrjet=fcorrJet->At(i);
+      
+      if( !recojet || !corrjet )  return;
+      
+      if (! phSoft || !phHard ) {
+	return;
       }
-      if( match > -1 )
-	if(DRmin > 0.1 + 0.3 * exp(-0.05*(fGenJet->At(match)->Mom().Pt()-10)))  match = -999;
+
+ 
+      // smearing via association with genjets
+      int match        = -999;
+      Double_t DRmin = 999.;     
+      if (fGenJet){
+	for(unsigned int j=0; j< fGenJet->GetEntries(); ++j){
+	  const GenJet *genjet=fGenJet->At(j);
+	  if(!genjet) {
+	    std::cout<<" genjet not there..."<<std::endl;
+	    continue;
+	  }
+	  
+	  Double_t DR = MathUtils::DeltaR(recojet->Mom(),genjet->Mom());
+	  
+	  Double_t expres = ErrEt(corrjet->Mom().Pt(),recojet->Mom().Eta());  
+	  
+	  if(DR < DRmin && (corrjet->Mom().Pt()-genjet->Mom().Pt())/corrjet->Mom().Pt() < 5. * expres) {
+	    match = (int) j;
+	    DRmin = DR;
+	  }
+	}
+	if( match > -1 && DRmin > 0.1 + 0.3 * exp(-0.05*(fGenJet->At(match)->Mom().Pt()-10)))  match = -999;
+      }
+      else match=-999;
+      
+      // smearing for non-associated jets, using expected resolutions
+      float smear = -999.;
+      if (fabs(recojet->Mom().Eta())<=1.1)                               smear = 1.06177;
+      if (fabs(recojet->Mom().Eta())<=1.7 && fabs(recojet->Mom().Eta())>1.1) smear = 1.08352;
+      if (fabs(recojet->Mom().Eta())<=2.3 && fabs(recojet->Mom().Eta())>1.7) smear = 1.02911;
+      if (fabs(recojet->Mom().Eta())>2.3)                                smear = 1.15288;
+      
+      
+      
+      Double_t shift=0;
+      if( match>-1 && fGenJet )
+	shift = (smear-1) * (corrjet->Mom().Pt() - fGenJet->At(match)->Mom().Pt())/corrjet->Mom().Pt();
+      else {
+	Double_t expres = ErrEt(recojet->Mom().Pt(),recojet->Mom().Eta());
+	Double_t relsmear = expres * sqrt(smear*smear-1);
+	gRandom->SetSeed(1);
+	shift = gRandom->Gaus(0.,relsmear);
+      }
+      
+      
+      
+      if(smearing && shift>-1 && shift < 2) {
+	ptSmeared  *= 1 + shift;
+	eneSmeared *= 1 + shift;
+      }
+
+
     }
-    else match=-999;
     
-    // smearing for non-associated jets, using expected resolutions
-    float smear = -999.;
-    if (fabs(recojet->RawMom().Eta())<=1.1)                               smear = 1.06177;
-    if (fabs(recojet->RawMom().Eta())<=1.7 && fabs(recojet->RawMom().Eta())>1.1) smear = 1.08352;
-    if (fabs(recojet->RawMom().Eta())<=2.3 && fabs(recojet->RawMom().Eta())>1.7) smear = 1.02911;
-    if (fabs(recojet->RawMom().Eta())>2.3)                                smear = 1.15288;
-    
-    
-    
-    Double_t shift=0;
-    if( match>-1 && fGenJet )
-      shift = (smear-1) * (corrjet->RawMom().Pt() - fGenJet->At(match)->Mom().Pt())/corrjet->RawMom().Pt();
-    else {
-      Double_t expres = ErrEt(recojet->RawMom().Pt(),recojet->RawMom().Eta());
-      Double_t relsmear = expres * sqrt(smear*smear-1);
-      gRandom->SetSeed(1);
-      shift = gRandom->Gaus(0.,relsmear);
-    }
-    
-    float ptSmeared  = recojet->RawMom().Pt();
-    float eneSmeared = recojet->RawMom().Pt();
-    
-    if(smearing && shift>-1 && shift < 2) {
-      ptSmeared  *= 1 + shift;
-      eneSmeared *= 1 + shift;
-    }
     
     // JEC scaling to correct for residual jet corrections
     if(scale) {
       Double_t factor=1;
-      if(TMath::Abs(recojet->RawMom().Eta())<1.5) factor = 1.015;
-      else if(TMath::Abs(recojet->RawMom().Eta())<3) factor = 1.04;
+      if(TMath::Abs(recojet->Mom().Eta())<1.5) factor = 1.015;
+      else if(TMath::Abs(recojet->Mom().Eta())<3) factor = 1.04;
       else factor = 1.15;
       ptSmeared  *= factor;
       eneSmeared *= factor;
     }
     
     TLorentzVector thisJetSmeared;
-    thisJetSmeared.SetPtEtaPhiE(ptSmeared,recojet->RawMom().Eta(),recojet->RawMom().Phi(),eneSmeared);
+    thisJetSmeared.SetPtEtaPhiE(ptSmeared,recojet->Mom().Eta(),recojet->Mom().Phi(),eneSmeared);
     
     TLorentzVector thisJetUnsmeared;
+    thisJetUnsmeared.SetPtEtaPhiE(recojet->Mom().Pt(),recojet->Mom().Eta(),recojet->Mom().Phi(),recojet->Mom().E());
     
-    thisJetUnsmeared.SetPtEtaPhiE(recojet->RawMom().Pt(),recojet->RawMom().Eta(),recojet->RawMom().Phi(),recojet->RawMom().E());
-    
-    if (recojet->RawMom().Pt()>10 && TMath::Abs(recojet->RawMom().Eta())<4.7) {
+    if (recojet->Mom().Pt()>10 && TMath::Abs(recojet->Mom().Eta())<4.7) {
       jetSumSmeared   += thisJetSmeared;
       jetSumUnsmeared += thisJetUnsmeared;
     }
     
   }
-
-  //  TLorentzVector correctedMet;
-  //  correctedMet = uncormet + jetSumUnsmeared - jetSumSmeared;
-  //  Double_t px=met.Pt()*cos(met.Phi())+jetSumUnsmeared.Px()-jetSumSmeared.Px();
-  //  Double_t py=met.Pt()*sin(met.Phi())+jetSumUnsmeared.Py()-jetSumSmeared.Py();
+  
   Double_t px=met->Px()+jetSumUnsmeared.Px()-jetSumSmeared.Px();
   Double_t py=met->Py()+jetSumUnsmeared.Py()-jetSumSmeared.Py();
-  //  Double_t e = sqrt(px*px+py*py);
-  //  met.SetPxPyPzE(px,px,0,e);
+
   met->SetMex(px);
   met->SetMey(py);
   return;
 }
 
-void PFMetCorrectionTools::shiftMet(Met *uncormet, Bool_t fIsData) {
-
-  //  TLorentzVector correctedMet;
-  Double_t spfMet=uncormet->SumEt();
+void PFMetCorrectionTools::shiftMet(Met *uncormet, Bool_t fIsData, Double_t spfMet) {
+  //  Double_t spfMet=uncormet->SumEt();
   // correction for METx, METy bias
   Double_t px=0;
   Double_t py=0;

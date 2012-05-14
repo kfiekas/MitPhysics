@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.14 2012/05/03 15:49:34 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.12 2012/05/03 08:45:29 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -374,6 +374,8 @@ namespace mithep
       Float_t allZpt; //added: Heng
       Float_t zEta; //added: Heng
       Float_t allZEta; //added: Heng
+
+      //Met stuff
       Float_t corrpfmet;
       Float_t corrpfmetphi;
       Float_t corrpfmetx;
@@ -385,6 +387,7 @@ namespace mithep
       Float_t pfmetphi;
       Float_t pfmetx;
       Float_t pfmety;
+      Double_t spfMet;
       UChar_t  ismc;
       
       //corrected quantities from PhotonFix corrections
@@ -413,6 +416,25 @@ namespace mithep
       Float_t jetetaplus;
       Float_t jetetaminus;
       
+      //      Float_t uncorrjet1pt;
+      //      Float_t uncorrjet1eta;
+      //      Float_t uncorrjet1phi;
+      //      Float_t uncorrjet1mass;
+      //      Float_t uncorrjet2pt;
+      //      Float_t uncorrjet2eta;
+      //      Float_t uncorrjet2phi;
+      //      Float_t uncorrjet2mass;
+      //      Float_t uncorrjetcentralpt;
+      //      Float_t uncorrjetcentraleta;
+      //      Float_t uncorrjetcentralphi;
+      //      Float_t uncorrjetcentralmass;
+      //      Float_t diuncorrjetpt;
+      //      Float_t diuncorrjeteta;
+      //      Float_t diuncorrjetphi;
+      //      Float_t diuncorrjetmass;
+      //      Float_t uncorrjetetaplus;
+      //      Float_t uncorrjetetaminus;
+
       Float_t zeppenfeld;
       Float_t dphidijetgg;
       
@@ -451,6 +473,7 @@ namespace mithep
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
     void                SetApplyPFMetCorr(Bool_t b)       { fApplyPFMetCorrections = b;  }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
+
 
     // set basic Cut variables (FOR PRE-SELECTION)
 
@@ -496,8 +519,8 @@ namespace mithep
     TString             fPFMetName;
     TString             fPFJetName;
 
-    TString             fGenJetName;   //added to do pfmet correction 05/01/2012
     TString             funcorrPFJetName;
+    TString             fGenJetName;   //added to do pfmet correction 05/01/2012
 
     TString             fLeptonTagElectronsName;
     TString             fLeptonTagMuonsName;

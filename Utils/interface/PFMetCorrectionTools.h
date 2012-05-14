@@ -5,6 +5,7 @@
 #include "MitAna/DataUtil/interface/Debug.h"
 #include "MitAna/DataTree/interface/Names.h"
 #include "MitAna/DataTree/interface/ParticleCol.h"
+#include "MitAna/DataTree/interface/Particle.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/PFJetCol.h"
@@ -27,10 +28,9 @@ namespace mithep {
     PFMetCorrectionTools();
     static Double_t ErrEt( Double_t Et, Double_t Eta);
     static void correctMet(Met *met, const Photon *phHard,const Photon *phSoft, Bool_t smearing, Bool_t scale, const PFJetCol *fPFJet, const GenJetCol *fGenJet, const JetCol *fcorrJet);
-    static void shiftMet(Met *uncormet, Bool_t fIsData);
+    static void shiftMet(Met *uncormet, Bool_t fIsData, Double_t spfMet);
     ClassDef(PFMetCorrectionTools, 0)
   };
-
 }
 
 #endif
