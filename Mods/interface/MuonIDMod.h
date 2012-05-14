@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.49 2012/05/06 12:27:38 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.50 2012/05/12 06:23:30 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -101,9 +101,12 @@ namespace mithep
         kTrackCaloCombined, 	            //"TrackCaloCombined"
         kTrackCaloSliding,  	            //"TrackCaloSliding"
         kTrackCaloSlidingNoCorrection,      //"TrackCaloSlidingNoCorrection"
+	kCombinedRelativeConeAreaCorrected, //"CombinedRelativeConeAreaCorrected" 	 
+	kCombinedRelativeEffectiveAreaCorrected,
         kCustomIso,         	            //"Custom"
         kPFIso,             	            //"PFIso"
         kPFRadialIso,             	    //"PFRadialIso"
+	kPFIsoEffectiveAreaCorrected,       //"PFIso with EffectiveArea Pileup Correction"
         kPFIsoNoL,          	            //"PFIsoNoL"
         kNoIso,                             //"NoIso"
         kMVAIso_BDTG_IDIso,                 //"BDTG ID + Iso03, Iso04 Combined"

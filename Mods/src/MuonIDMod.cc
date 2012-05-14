@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.79 2012/05/06 12:27:41 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.80 2012/05/07 18:05:51 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -74,6 +74,8 @@ void MuonIDMod::Process()
   LoadEventObject(fTrackName, fTracks);
   LoadEventObject(fPFCandidatesName, fPFCandidates);
   if(fMuIsoType == kTrackCaloSliding || 
+     fMuIsoType == kCombinedRelativeConeAreaCorrected || 	 
+     fMuIsoType == kPFIsoEffectiveAreaCorrected ||
      fMuIsoType == kMVAIso_BDTG_IDIso ||
      fMuIsoType == kIsoRingsV0_BDTG_Iso ||
      fMuIsoType == kIsoDeltaR
@@ -316,7 +318,7 @@ void MuonIDMod::Process()
 	  if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
 	}
         break;
-      case kTrackCaloSlidingNoCorrection:
+    case kTrackCaloSlidingNoCorrection:
         { 
           Double_t totalIso =  1.0 * mu->IsoR03SumPt() + 
                                1.0 * mu->IsoR03EmEt()  + 
@@ -330,40 +332,60 @@ void MuonIDMod::Process()
 	  if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE;
 	}
         break;
-      case kPFIso:
-        {
-          Double_t pfIsoCutValue = 9999;
-          if(fPFIsolationCut > 0){
-            pfIsoCutValue = fPFIsolationCut;
-          } else {
-            if (mu->AbsEta() < 1.479) {
-              if (mu->Pt() > 20) {
-        	pfIsoCutValue = 0.13;
-              } else {
-        	pfIsoCutValue = 0.06;
-              }
-            } else {
-              if (mu->Pt() > 20) {
-                pfIsoCutValue = 0.09;
-              } else {
-                pfIsoCutValue = 0.05;
-              }
+    case kCombinedRelativeConeAreaCorrected: 	 
+      { 	 
+	//const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0); // Fabian: made Rho customable 	 
+	Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - Rho * TMath::Pi() * 0.3 * 0.3 ; 	 
+	double theIsoCut = fCombRelativeIsolationCut; 	 
+	if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE; 	 
+      } 	 
+      break; 	 
+    case kCombinedRelativeEffectiveAreaCorrected: 	 
+      { 	 
+	Double_t tmpRho = Rho;   // Fabian: made the Rho type customable. 	 
+	//if (!(TMath::IsNaN(fPileupEnergyDensity->At(0)->Rho()) || std::isinf(fPileupEnergyDensity->At(0)->Rho()))) 	 
+	//tmpRho = fPileupEnergyDensity->At(0)->Rho(); 	 
+	
+	isocut = ( mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() 	 
+		   -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuEMIso03, mu->Eta()) 	 
+		   -  tmpRho*MuonTools::MuonEffectiveArea(MuonTools::kMuHadIso03, mu->Eta()) 	 
+		   ) < (mu->Pt()* 0.40); 	 
+      } 	 
+      break;
+    case kPFIso:
+      {
+	Double_t pfIsoCutValue = 9999;
+	if(fPFIsolationCut > 0){
+	  pfIsoCutValue = fPFIsolationCut;
+	} else {
+	  if (mu->AbsEta() < 1.479) {
+	    if (mu->Pt() > 20) {
+	      pfIsoCutValue = 0.13;
+	    } else {
+	      pfIsoCutValue = 0.06;
 	    }
-          }
-          Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius);
-          if (totalIso < (mu->Pt()*pfIsoCutValue) )
-            isocut = kTRUE;
+	  } else {
+	    if (mu->Pt() > 20) {
+	      pfIsoCutValue = 0.09;
+	    } else {
+	      pfIsoCutValue = 0.05;
+	    }
+	  }
 	}
-        break;
-      case kPFRadialIso:
-        {
-          Double_t pfIsoCutValue = 9999;
-          if(fPFIsolationCut > 0){
-            pfIsoCutValue = fPFIsolationCut;
-          } else {
-            if (mu->Pt() > 20) {
-              pfIsoCutValue = 0.10;
-            } else {
+	Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius);
+	if (totalIso < (mu->Pt()*pfIsoCutValue) )
+	  isocut = kTRUE;
+      }
+      break;
+    case kPFRadialIso:
+      {
+	Double_t pfIsoCutValue = 9999;
+	if(fPFIsolationCut > 0){
+	  pfIsoCutValue = fPFIsolationCut;
+	} else {
+	  if (mu->Pt() > 20) {
+	    pfIsoCutValue = 0.10;
+	  } else {
               pfIsoCutValue = 0.05;
             }
           }
@@ -371,8 +393,24 @@ void MuonIDMod::Process()
           if (totalIso < (mu->Pt()*pfIsoCutValue) )
             isocut = kTRUE;
 	}
-        break;
-      case kPFIsoNoL:
+      break;
+    case kPFIsoEffectiveAreaCorrected: 	 
+      { 	 
+	Double_t pfIsoCutValue = 9999; 	 
+	if(fPFIsolationCut > 0){ 	 
+	  pfIsoCutValue = fPFIsolationCut; 	 
+	} else { 	 
+	  pfIsoCutValue = fPFIsolationCut; //leave it like this for now 	 
+	} 	 
+	Double_t EffectiveAreaCorrectedPFIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius) 	 
+	  - Rho * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta()); 	 
+	//- fPileupEnergyDensity->At(0)->Rho() * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta());  // Fabian: made Rho-type customable 	 
+	isocut = EffectiveAreaCorrectedPFIso < (mu->Pt() * pfIsoCutValue); 	 
+	break; 	 
+      }
+      
+      
+    case kPFIsoNoL:
         {
           fNonIsolatedMuons     = GetObjThisEvt<MuonCol>(fNonIsolatedMuonsName);
           fNonIsolatedElectrons = GetObjThisEvt<ElectronCol>(fNonIsolatedElectronsName);
@@ -478,6 +516,9 @@ void MuonIDMod::SlaveBegin()
   ReqEventObject(fTrackName, fTracks, kTRUE);
   ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
   if (fMuonIsoType.CompareTo("TrackCaloSliding") == 0 
+      || fMuonIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0 	 
+      || fMuonIsoType.CompareTo("CombinedRelativeEffectiveAreaCorrected") == 0 	 
+      || fMuonIsoType.CompareTo("PFIsoEffectiveAreaCorrected") == 0
       || fMuonIsoType.CompareTo("MVA_BDTG_IDIso") == 0
       || fMuonIsoType.CompareTo("IsoRingsV0_BDTG_Iso") == 0
       || fMuonIsoType.CompareTo("IsoDeltaR") == 0
@@ -525,10 +566,16 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kTrackCaloSliding;
   else if (fMuonIsoType.CompareTo("TrackCaloSlidingNoCorrection") == 0)
     fMuIsoType = kTrackCaloSlidingNoCorrection;
+  else if (fMuonIsoType.CompareTo("CombinedRelativeConeAreaCorrected") == 0) 	 
+    fMuIsoType = kCombinedRelativeConeAreaCorrected; 	 
+  else if (fMuonIsoType.CompareTo("CombinedRelativeEffectiveAreaCorrected") == 0) 	 
+    fMuIsoType = kCombinedRelativeEffectiveAreaCorrected;
   else if (fMuonIsoType.CompareTo("PFIso") == 0)
     fMuIsoType = kPFIso;
   else if (fMuonIsoType.CompareTo("PFRadialIso") == 0)
     fMuIsoType = kPFRadialIso;
+  else if (fMuonIsoType.CompareTo("PFIsoEffectiveAreaCorrected") == 0) 	 
+    fMuIsoType = kPFIsoEffectiveAreaCorrected;
   else if (fMuonIsoType.CompareTo("PFIsoNoL") == 0)
     fMuIsoType = kPFIsoNoL;
   else if (fMuonIsoType.CompareTo("NoIso") == 0)
