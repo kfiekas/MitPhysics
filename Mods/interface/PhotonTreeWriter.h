@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.13 2012/05/03 12:02:27 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.14 2012/05/03 15:49:34 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -286,9 +286,12 @@ namespace mithep
   {
     public:
       // ------------ BTAG STUFF -------------------
-      Float_t btag;
-      Float_t btagJetPt;
-      Float_t btagJetEta;
+      Float_t btagJet1;
+      Float_t btagJet1Pt;
+      Float_t btagJet1Eta;
+      Float_t btagJet2;
+      Float_t btagJet2Pt;
+      Float_t btagJet2Eta;
       // ----------- LEPTON TAG STUFF -------------
       Int_t leptonTag;
       // ---------- MUON STUFF --------------------

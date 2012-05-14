@@ -291,25 +291,42 @@ void PhotonTreeWriter::Process()
     }
     
     // fill Btag information... set to true if One jet fullfills 
-    fDiphotonEvent -> btag       = -1.;
-    fDiphotonEvent -> btagJetPt  = -99.;
-    fDiphotonEvent -> btagJetEta = -99.;
+    fDiphotonEvent -> btagJet1    = -1.;
+    fDiphotonEvent -> btagJet1Pt  = -99.;
+    fDiphotonEvent -> btagJet1Eta = -99.;
+    fDiphotonEvent -> btagJet2    = -1.;
+    fDiphotonEvent -> btagJet2Pt  = -99.;
+    fDiphotonEvent -> btagJet2Eta = -99.;
+
     if( fApplyBTag && fEnableJets ) {
       float highTag     = 0.;
+      float trailTag    = 0.;
       float highJetPt   = 0.;
       float highJetEta  = 0.;
+      float trailJetPt   = 0.;
+      float trailJetEta  = 0.;
       for (UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet) {
 	const Jet *jet = fPFJets->At(ijet);
 	if( jet->Pt() < 20. || jet->AbsEta() > 2.4 ) continue;
 	if ( jet->CombinedSecondaryVertexBJetTagsDisc() > highTag ) {
+	  trailTag    = highTag;
+	  trailJetPt  = highJetPt;
+	  trailJetEta = highJetEta;
 	  highTag    = jet->CombinedSecondaryVertexBJetTagsDisc();
 	  highJetPt  = jet->Pt();
 	  highJetEta = jet->Eta();
+	} else if ( jet->CombinedSecondaryVertexBJetTagsDisc() > trailTag ) {
+	  trailTag    = jet->CombinedSecondaryVertexBJetTagsDisc();
+	  trailJetPt  = jet->Pt();
+	  trailJetEta = jet->Eta();
 	}
       }
-      fDiphotonEvent -> btag       = highTag;
-      fDiphotonEvent -> btagJetPt  = highJetPt;
-      fDiphotonEvent -> btagJetEta = highJetEta;      
+      fDiphotonEvent -> btagJet1    = highTag;
+      fDiphotonEvent -> btagJet1Pt  = highJetPt;
+      fDiphotonEvent -> btagJet1Eta = highJetEta;
+      fDiphotonEvent -> btagJet2    = trailTag;
+      fDiphotonEvent -> btagJet2Pt  = trailJetPt;
+      fDiphotonEvent -> btagJet2Eta = trailJetEta;
     }
     
     //fill jet variables
