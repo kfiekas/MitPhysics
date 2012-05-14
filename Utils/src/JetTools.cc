@@ -509,6 +509,19 @@ Double_t JetTools::dRMean(const PFJet *iJet,int iPFType) {
   }
   return lDRMean;
 }
+Double_t JetTools::dR2Mean(const PFJet *iJet,int iPFType) { 
+  double lDR2Mean = 0;
+  double lSumPt2 = 0;
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) { 
+    const PFCandidate *pCand = iJet->PFCand(i0);
+    if(iPFType != -1 && pCand->PFType() != iPFType) continue;
+    lSumPt2   += pCand->Pt()*pCand->Pt();
+    double pDR = MathUtils::DeltaR(iJet->Mom(),pCand->Mom());
+    lDR2Mean    += pDR*pDR*(pCand->Pt()*pCand->Pt());
+  }
+  lDR2Mean/=lSumPt2;
+  return lDR2Mean;
+}
 Double_t JetTools::frac(const PFJet *iJet,Double_t iDRMax,Double_t iDRMin,Int_t iPFType) {
   double lFrac = 0;
   for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) {

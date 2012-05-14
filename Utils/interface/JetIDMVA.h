@@ -36,7 +36,9 @@ namespace mithep {
       ~JetIDMVA(); 
 
       enum MVAType {
-        kBaseline = 0
+        kBaseline = 0,
+	k42       = 1,
+	k52       = 2
       };
 
       enum CutType {
@@ -69,7 +71,8 @@ namespace mithep {
 			Float_t iFrac02  ,
 			Float_t iFrac03  ,
 			Float_t iFrac04  ,
-			Float_t iFrac05  
+			Float_t iFrac05  ,
+			Float_t iDR2Mean 
 			);
 
       //UNcorrected Jets
@@ -101,6 +104,7 @@ namespace mithep {
 
     protected:      
       TMVA::Reader            *fReader;
+      TMVA::Reader            *fLowPtReader;
       TString                  fLowPtMethodName;
       TString                  fHighPtMethodName;
       MVAType                  fType;
@@ -124,6 +128,7 @@ namespace mithep {
       Float_t fFrac03   ;
       Float_t fFrac04   ;
       Float_t fFrac05   ;
+      Float_t fDR2Mean  ;
 
       ClassDef(JetIDMVA,0)
 	};
