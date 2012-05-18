@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.23 2011/12/17 22:29:31 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.24 2012/03/22 16:25:19 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -168,6 +168,39 @@ const SuperCluster *PhotonTools::MatchedSC(const SuperCluster *psc, const SuperC
     }
   }
   
+  return match;
+}
+
+//--------------------------------------------------------------------------------------------------
+const SuperCluster *PhotonTools::MatchedPFSC(const SuperCluster *psc, const PhotonCol *pfphos, const ElectronCol *eles, Double_t drMin) {
+
+  
+  if (pfphos) {
+    for (UInt_t i=0; i<pfphos->GetEntries(); ++i) {
+      const Photon *pfpho = pfphos->At(i);
+      if (psc == pfpho->SCluster() && pfpho->PFSCluster()) return pfpho->PFSCluster();
+    }
+  }
+  
+  for (UInt_t i=0; i<eles->GetEntries(); ++i) {
+    const Electron *ele = eles->At(i);
+    if (psc == ele->SCluster() && ele->PFSCluster()) return ele->PFSCluster();
+  }  
+
+  Double_t drsmallest = 999.;
+  const SuperCluster *match = 0;
+  for (UInt_t i=0; i<eles->GetEntries(); ++i) {
+    const Electron *ele = eles->At(i);
+    //if (psc == ele->SCluster() && ele->HasPFSCluster()) return ele->PFSCluster();
+    if (!ele->PFSCluster()) continue;
+    
+    Double_t dr = MathUtils::DeltaR(*ele->PFSCluster(),*psc);
+    if ( dr<drsmallest && dr<drMin ) {
+      drsmallest = dr;
+      match = ele->PFSCluster();
+    }    
+  }  
+    
   return match;
 }
 

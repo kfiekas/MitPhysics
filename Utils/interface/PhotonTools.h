@@ -118,7 +118,9 @@ namespace mithep {
     static const Electron *MatchedElectron(const Photon *p, const ElectronCol *els);
     static const Photon *MatchedPhoton(const Electron *e, const PhotonCol *phs);
     static const SuperCluster *MatchedSC(const SuperCluster *psc, const SuperClusterCol *scs, Double_t drMin=0.3);
-                                                     
+
+    static const SuperCluster *MatchedPFSC(const SuperCluster *psc, const PhotonCol *pfphos, const ElectronCol *eles, Double_t drMin=0.1);
+    
     static bool PassCiCSelection(const Photon* ph, 
 				 const Vertex* vtx, 
 				 const TrackCol*    trackCol,
