@@ -98,6 +98,7 @@ namespace mithep {
       enum EElectronEffectiveAreaTarget {
         kEleEANoCorr,
         kEleEAData2011,
+				kEleEAData2012,
         kEleEASummer11MC,
         kEleEAFall11MC
       };
