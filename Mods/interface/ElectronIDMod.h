@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.57 2012/04/28 11:34:08 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.58 2012/05/02 16:33:50 fabstoec Exp $
 //
 // ElectronIDMod
 //
@@ -71,7 +71,8 @@ namespace mithep
                                     const Vertex *vertex) const;
       Bool_t              PassIsolationCut(const Electron *el, ElectronTools::EElIsoType isoType,
                                            const TrackCol *tracks, const Vertex *vertex, 
-					   const Double_t rho) const;
+					   const Double_t rho,
+					   ElectronTools::EElIdType idType = ElectronTools::kNoId) const;
       Bool_t              GetCombinedIdCut()               const { return fCombinedIdCut;      }
       void                SetPrintMVADebugInfo(Bool_t b)         { fPrintMVADebugInfo = b;     }
       void                SetApplyConversionFilterType1(Bool_t b){ fApplyConvFilterType1 = b;  }
