@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.80 2012/05/07 18:05:51 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.81 2012/05/14 16:38:01 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -30,7 +30,7 @@ ClassImp(mithep::MuonIDMod)
   fCaloIsolationCut(3.0),
   fCombIsolationCut(0.15),
   fCombRelativeIsolationCut(0.15),
-  fPFIsolationCut(-1.0),
+  fPFIsolationCut(-999.0),
   fMuonPtMin(10),
   fApplyD0Cut(kTRUE),
   fApplyDZCut(kTRUE),
@@ -730,6 +730,8 @@ Bool_t MuonIDMod::PassMuonIsoRingsV0_BDTG_Iso(const Muon *mu, const Vertex *vert
   else if(mu->Pt() <  20 && eta >= 1.479) MVACut = 0.82;
   else if(mu->Pt() >= 20 && eta <  1.479) MVACut = 0.82;
   else if(mu->Pt() >= 20 && eta >= 1.479) MVACut = 0.86;
+
+  if(fPFIsolationCut > -1.0) MVACut = fPFIsolationCut;
 
   if(isDebug == kTRUE){
     printf("PassMuonIsoRingsV0_BDTG_IsoDebug: %d, pt, eta = %f, %f, rho = %f(%f) : RingsMVA = %f, bin: %d\n",
