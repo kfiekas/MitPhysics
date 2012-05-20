@@ -76,6 +76,7 @@ namespace mithep {
         kEleGammaIsoVetoEtaStrip03, 
         kEleChargedIso04, 
         kEleNeutralHadronIso04, 
+        kEleGammaAndNeutralHadronIso04,
         kEleGammaIso04, 
         kEleGammaIsoVetoEtaStrip04, 
         kEleNeutralHadronIso007, 
