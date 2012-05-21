@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.123 2012/05/12 06:31:53 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.124 2012/05/19 14:59:14 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -416,25 +416,21 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
            GetEventHeader()->EvtNum(),ele->Pt(), ele->Eta(),
 	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets());
       }
-      if(idType == ElectronTools::kVBTFWorkingPointFakeableId && ele->Pt() > 20.0){
-        isocut = kTRUE;
-      } else {
-	ElectronOArr *tempIsoElectrons = new  ElectronOArr;
-	MuonOArr     *tempIsoMuons     = new  MuonOArr;
-	Double_t IsoOverPt = IsolationTools::PFElectronIsolation2012(ele, vertex, fPFNoPileUpCands, 
-	 fPileupEnergyDensity, ElectronTools::kEleEANoCorr, tempIsoElectrons, tempIsoMuons, 0.4, isDebug);
-	delete tempIsoElectrons;
-	delete tempIsoMuons;
-	Double_t eta = ele->SCluster()->AbsEta();
-	Double_t IsoCut = -1;
-	if (ele->Pt() <  20 && eta <  0.800		   ) IsoCut = 0.150;
-	if (ele->Pt() <  20 && eta >= 0.800 && eta < 1.479 ) IsoCut = 0.150;
-	if (ele->Pt() <  20 && eta >= 1.479		   ) IsoCut = 0.150;
-	if (ele->Pt() >= 20 && eta <  0.800		   ) IsoCut = 0.150;
-	if (ele->Pt() >= 20 && eta >= 0.800 && eta < 1.479 ) IsoCut = 0.150;
-	if (ele->Pt() >= 20 && eta >= 1.479		   ) IsoCut = 0.150;
-	if (IsoOverPt < IsoCut ) isocut = kTRUE;
-      }
+      ElectronOArr *tempIsoElectrons = new  ElectronOArr;
+      MuonOArr     *tempIsoMuons     = new  MuonOArr;
+      Double_t IsoOverPt = IsolationTools::PFElectronIsolation2012(ele, vertex, fPFNoPileUpCands, 
+       fPileupEnergyDensity, ElectronTools::kEleEANoCorr, tempIsoElectrons, tempIsoMuons, 0.4, isDebug);
+      delete tempIsoElectrons;
+      delete tempIsoMuons;
+      Double_t eta = ele->SCluster()->AbsEta();
+      Double_t IsoCut = -1;
+      if (ele->Pt() <  20 && eta <  0.800		 ) IsoCut = 0.150;
+      if (ele->Pt() <  20 && eta >= 0.800 && eta < 1.479 ) IsoCut = 0.150;
+      if (ele->Pt() <  20 && eta >= 1.479		 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta <  0.800		 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta >= 0.800 && eta < 1.479 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta >= 1.479		 ) IsoCut = 0.150;
+      if (IsoOverPt < IsoCut ) isocut = kTRUE;
     }
       break;
     case ElectronTools::kNoIso:

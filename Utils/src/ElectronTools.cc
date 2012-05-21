@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.42 2012/05/19 14:59:15 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.43 2012/05/20 18:10:33 khahn Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -191,7 +191,7 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
 
   // Apply detector isolation at high pt only
   Bool_t isoCut = kTRUE;
-  if(idType == kVBTFWorkingPointFakeableId && ele->Pt() > 20.0){
+  if(idType == kVBTFWorkingPointFakeableId){
     double isoEcal = ele->EcalRecHitIsoDr03();
     if(ele->IsEB()) isoEcal = isoEcal - 1.0;
     isoCut = (ele->TrackIsolationDr03() < ele->Pt()*0.2) &&
