@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.28 2012/04/28 19:10:01 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.29 2012/05/07 18:05:52 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -791,4 +791,346 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
       std::cout<<"   max TrkIso is given by Vtx #0 with an amount of tIso = "<<maxIso<<std::endl;
   } 
   return maxIso;
+}
+
+//ChargedIso_selvtx_DR0To0p001=IsolationTools::PFChargedIsolation(p, SelVtx, 0.01, 0, 0.0, 0.0, 0.1, 0.2,fPFCands);
+
+Double_t IsolationTools::PFChargedIsolation(const mithep::Photon* p, 
+					    const BaseVertex* theVtx, 
+					    Double_t extRadius, 
+					    Double_t intRadius, 
+					    Double_t ptLow, 
+					    Double_t etaStrip,
+					    Double_t maxD0,
+					    Double_t maxDZ,
+					    const PFCandidateCol *PFCands,
+					    unsigned int* worstVtxIndex,
+					    const mithep::Collection<mithep::Vertex> *vtxs,
+					    const mithep::Collection<mithep::Electron> *eles,
+					    bool print,
+					    double* ptmax,
+					    double* dRmax) {
+  
+  UInt_t numVtx = 1;
+  
+  const BaseVertex* iVtx = theVtx;
+  
+  if( vtxs ) { 
+    numVtx = vtxs->GetEntries();
+    if (numVtx > 0)
+      iVtx = vtxs->At(0);
+    else
+      return 0.;
+  }
+  
+  // NEW for Electron T&P: need to remove the electron Gsf Track (applied if eles != NULL)
+  const Track* theGsfTrack = NULL;
+  if ( eles ) {
+    // find the electron that matches the Photon SC
+    for(UInt_t j=0; j<eles->GetEntries(); ++j) {
+      if ( eles->At(j)->SCluster() == p->SCluster() ) {
+	if( eles->At(j)->HasTrackerTrk() )
+	  theGsfTrack = eles->At(j)->TrackerTrk();
+	break;
+      }
+    }
+  }
+  
+  if(print) {
+    std::cout<<" Testing photon with"<<std::endl;
+    std::cout<<"             Et  = "<<p->Et()<<std::endl;
+    std::cout<<"             Eta = "<<p->Eta()<<std::endl;
+    std::cout<<"             Phi = "<<p->Phi()<<std::endl;
+  }
+  
+  Double_t iIso = 0.;
+  Double_t maxIso = 0.;
+  
+  if(worstVtxIndex)
+    *worstVtxIndex=0;
+  
+  double t_ptmax = 0.;
+  double t_dRmax = 0.;
+  
+  for(UInt_t i=0; i<numVtx; ++i) {
+    
+    if(i>0) iVtx = vtxs->At(i);
+    
+    
+    if(print) {
+      std::cout<<"   Vertex #"<<i<<std::endl;
+      std::cout<<"       with X = "<<iVtx->X()<<std::endl;
+      std::cout<<"       with Y = "<<iVtx->Y()<<std::endl;
+      std::cout<<"       with Z = "<<iVtx->Z()<<std::endl;
+    }
+    
+    Photon* phTemp = new Photon(*p);
+    
+    // RESET CALO_POS! //ming: why?
+    phTemp->SetCaloPosXYZ(p->SCluster()->Point().X(),p->SCluster()->Point().Y(),p->SCluster()->Point().Z());
+    
+    // compute the ph momentum with respect to this Vtx
+    FourVectorM phMom = phTemp->MomVtx(iVtx->Position());
+    
+    delete phTemp;
+    
+    if(print) {
+      std::cout<<"         photon has changed to:"<<std::endl;
+      std::cout<<"             Et  = "<<phMom.Et()<<std::endl;
+      std::cout<<"             eta = "<<phMom.Eta()<<std::endl;
+      std::cout<<"             Phi = "<<phMom.Phi()<<std::endl;
+    }
+    
+    iIso = 0.;
+    
+    for(UInt_t j=0; j<PFCands->GetEntries(); ++j) {
+      const PFCandidate *pf= PFCands->At(j);
+      if(pf->HasTrk() && (pf->PFType()==PFCandidate::eHadron || pf->PFType()==PFCandidate::eElectron || pf->PFType()==PFCandidate::eMuon)){
+	const Track* t = pf->BestTrk();
+        if(pf->PFType()==PFCandidate::eElectron && pf->HasGsfTrk()){t = pf->GsfTrk();}
+	if(!(pf->PFType()==PFCandidate::eElectron) && pf->HasTrackerTrk()){t = pf->TrackerTrk();}
+	
+	if( theGsfTrack && t == theGsfTrack ) continue;
+	
+	Double_t dR   = MathUtils::DeltaR(pf->Mom(),phMom);
+	Double_t dEta = TMath::Abs(pf->Eta()-phMom.Eta());
+	
+	if(print && pf->Pt()>1. && false) {
+	  std::cout<<"              passing track #"<<j<<std::endl;
+	  std::cout<<"                          pt = "<<pf->Pt()<<std::endl;
+	  std::cout<<"                         eta = "<<pf->Eta()<<std::endl;
+	  std::cout<<"                         phi = "<<pf->Phi()<<std::endl;
+	  std::cout<<"                          d0 = "<<fabs(t->D0Corrected( *iVtx ))<<std::endl;
+	  std::cout<<"                          dZ = "<<fabs(t->DzCorrected( *iVtx ))<<std::endl;
+	  std::cout<<"                          dR = "<<dR<<std::endl;
+	  std::cout<<"                        dEta = "<<dEta<<std::endl;
+	  std::cout<<"                          vx = "<<t->X0()<<std::endl;
+	  std::cout<<"                          vy = "<<t->Y0()<<std::endl;
+	  std::cout<<"                          vz = "<<t->Z0()<<std::endl;
+	}
+	
+	if ( pf->Pt() < ptLow ) continue;
+	
+	// only check for beamspot if available, otherwise ignore cut
+	if ( fabs(t->D0Corrected( *iVtx )) > maxD0) continue;
+	if ( fabs(t->DzCorrected( *iVtx )) > maxDZ) continue;
+	
+	
+	if(dR < extRadius && dR > intRadius && dEta > etaStrip) {
+	  iIso += pf->Pt();
+	  
+	  if(pf->Pt() > t_ptmax) {
+	    t_ptmax=pf->Pt();
+	    t_dRmax=dR;
+	  }
+	  
+	  if(print && pf->Pt()>1.) {
+	    std::cout<<"              passing track #"<<j<<std::endl;
+	    std::cout<<"                          pt = "<<pf->Pt()<<std::endl;
+	    std::cout<<"                         eta = "<<pf->Eta()<<std::endl;
+	    std::cout<<"                         phi = "<<pf->Phi()<<std::endl;
+	    std::cout<<"                          d0 = "<<fabs(t->D0Corrected( *iVtx ))<<std::endl;
+	    std::cout<<"                          dZ = "<<fabs(t->DzCorrected( *iVtx ))<<std::endl;
+	    std::cout<<"                          dR = "<<dR<<std::endl;
+	    std::cout<<"                        dEta = "<<dEta<<std::endl;
+	    std::cout<<"                          vx = "<<t->X0()<<std::endl;
+	    std::cout<<"                          vy = "<<t->Y0()<<std::endl;
+	    std::cout<<"                          vz = "<<t->Z0()<<std::endl;
+	    std::cout<<"                             new  tIso = "<<iIso<<std::endl;
+	  }
+	}
+      }
+    }
+    
+    if ( iIso > maxIso ) {
+      maxIso = iIso;
+      if(worstVtxIndex)
+	*worstVtxIndex=i;
+    }
+  }
+  
+  if(ptmax) (*ptmax)=t_ptmax;
+  if(dRmax) (*dRmax)=t_dRmax;
+
+  if(print) {
+    if(worstVtxIndex)
+      std::cout<<"   max TrkIso is given by Vtx #"<<*worstVtxIndex<<" with an amount of tIso = "<<maxIso<<std::endl;
+    else
+      std::cout<<"   max TrkIso is given by Vtx #0 with an amount of tIso = "<<maxIso<<std::endl;
+  }
+  return maxIso;
+}
+
+//
+Float_t IsolationTools::PFChargedCount(const mithep::Photon* p, 
+				   const BaseVertex* theVtx, 
+				   Double_t extRadius, 
+				   Double_t intRadius, 
+				   Double_t ptLow, 
+				   Double_t etaStrip,
+				   Double_t maxD0,
+				   Double_t maxDZ,
+				   const PFCandidateCol *PFCands,
+				   unsigned int* worstVtxIndex,
+				   const mithep::Collection<mithep::Vertex> *vtxs,
+				   const mithep::Collection<mithep::Electron> *eles,
+				   bool print,
+				   double* ptmax,
+				   double* dRmax) {
+  
+  UInt_t numVtx = 1;
+  
+  const BaseVertex* iVtx = theVtx;
+  
+  if( vtxs ) { 
+    numVtx = vtxs->GetEntries();
+    if (numVtx > 0)
+      iVtx = vtxs->At(0);
+    else
+      return 0.;
+  }
+  
+  // NEW for Electron T&P: need to remove the electron Gsf Track (applied if eles != NULL)
+  const Track* theGsfTrack = NULL;
+  if ( eles ) {
+    // find the electron that matches the Photon SC
+    for(UInt_t j=0; j<eles->GetEntries(); ++j) {
+      if ( eles->At(j)->SCluster() == p->SCluster() ) {
+	if( eles->At(j)->HasTrackerTrk() )
+	  theGsfTrack = eles->At(j)->TrackerTrk();
+	break;
+      }
+    }
+  }
+  
+  if(print) {
+    std::cout<<" Testing photon with"<<std::endl;
+    std::cout<<"             Et  = "<<p->Et()<<std::endl;
+    std::cout<<"             Eta = "<<p->Eta()<<std::endl;
+    std::cout<<"             Phi = "<<p->Phi()<<std::endl;
+  }
+  
+  Double_t iIso = 0.;
+  Double_t maxIso = 0.;
+
+  Float_t iNumParticles = 0.;
+  Float_t maxNumParticles = 0.;
+  
+  if(worstVtxIndex)
+    *worstVtxIndex=0;
+  
+  double t_ptmax = 0.;
+  double t_dRmax = 0.;
+  
+  for(UInt_t i=0; i<numVtx; ++i) {
+    
+    if(i>0) iVtx = vtxs->At(i);
+    
+    
+    if(print) {
+      std::cout<<"   Vertex #"<<i<<std::endl;
+      std::cout<<"       with X = "<<iVtx->X()<<std::endl;
+      std::cout<<"       with Y = "<<iVtx->Y()<<std::endl;
+      std::cout<<"       with Z = "<<iVtx->Z()<<std::endl;
+    }
+    
+    Photon* phTemp = new Photon(*p);
+    
+    // RESET CALO_POS! //ming: why?
+    phTemp->SetCaloPosXYZ(p->SCluster()->Point().X(),p->SCluster()->Point().Y(),p->SCluster()->Point().Z());
+    
+    // compute the ph momentum with respect to this Vtx
+    FourVectorM phMom = phTemp->MomVtx(iVtx->Position());
+    
+    delete phTemp;
+    
+    if(print) {
+      std::cout<<"         photon has changed to:"<<std::endl;
+      std::cout<<"             Et  = "<<phMom.Et()<<std::endl;
+      std::cout<<"             eta = "<<phMom.Eta()<<std::endl;
+      std::cout<<"             Phi = "<<phMom.Phi()<<std::endl;
+    }
+    
+    iIso = 0.;
+    iNumParticles = 0.;
+    
+    for(UInt_t j=0; j<PFCands->GetEntries(); ++j) {
+      const PFCandidate *pf= PFCands->At(j);
+      if(pf->HasTrk() && (pf->PFType()==PFCandidate::eHadron || pf->PFType()==PFCandidate::eElectron || pf->PFType()==PFCandidate::eMuon)){
+	const Track* t = pf->BestTrk();
+        if(pf->PFType()==PFCandidate::eElectron && pf->HasGsfTrk()){t = pf->GsfTrk();}
+	if(!(pf->PFType()==PFCandidate::eElectron) && pf->HasTrackerTrk()){t = pf->TrackerTrk();}
+	
+	if( theGsfTrack && t == theGsfTrack ) continue;
+	
+	Double_t dR   = MathUtils::DeltaR(pf->Mom(),phMom);
+	Double_t dEta = TMath::Abs(pf->Eta()-phMom.Eta());
+	
+	if(print && pf->Pt()>1. && false) {
+	  std::cout<<"              passing track #"<<j<<std::endl;
+	  std::cout<<"                          pt = "<<pf->Pt()<<std::endl;
+	  std::cout<<"                         eta = "<<pf->Eta()<<std::endl;
+	  std::cout<<"                         phi = "<<pf->Phi()<<std::endl;
+	  std::cout<<"                          d0 = "<<fabs(t->D0Corrected( *iVtx ))<<std::endl;
+	  std::cout<<"                          dZ = "<<fabs(t->DzCorrected( *iVtx ))<<std::endl;
+	  std::cout<<"                          dR = "<<dR<<std::endl;
+	  std::cout<<"                        dEta = "<<dEta<<std::endl;
+	  std::cout<<"                          vx = "<<t->X0()<<std::endl;
+	  std::cout<<"                          vy = "<<t->Y0()<<std::endl;
+	  std::cout<<"                          vz = "<<t->Z0()<<std::endl;
+	}
+	
+	if ( pf->Pt() < ptLow ) continue;
+	
+	// only check for beamspot if available, otherwise ignore cut
+	if ( fabs(t->D0Corrected( *iVtx )) > maxD0) continue;
+	if ( fabs(t->DzCorrected( *iVtx )) > maxDZ) continue;
+	
+	
+	if(dR < extRadius && dR > intRadius && dEta > etaStrip) {
+	  iIso += pf->Pt();
+	  iNumParticles += 1;
+
+	  if(pf->Pt() > t_ptmax) {
+	    t_ptmax=pf->Pt();
+	    t_dRmax=dR;
+	  }
+	  
+	  if(print && pf->Pt()>1.) {
+	    std::cout<<"              passing track #"<<j<<std::endl;
+	    std::cout<<"                          pt = "<<pf->Pt()<<std::endl;
+	    std::cout<<"                         eta = "<<pf->Eta()<<std::endl;
+	    std::cout<<"                         phi = "<<pf->Phi()<<std::endl;
+	    std::cout<<"                          d0 = "<<fabs(t->D0Corrected( *iVtx ))<<std::endl;
+	    std::cout<<"                          dZ = "<<fabs(t->DzCorrected( *iVtx ))<<std::endl;
+	    std::cout<<"                          dR = "<<dR<<std::endl;
+	    std::cout<<"                        dEta = "<<dEta<<std::endl;
+	    std::cout<<"                          vx = "<<t->X0()<<std::endl;
+	    std::cout<<"                          vy = "<<t->Y0()<<std::endl;
+	    std::cout<<"                          vz = "<<t->Z0()<<std::endl;
+	    std::cout<<"                             new  tIso = "<<iIso<<std::endl;
+	  }
+	}
+      }
+    }
+    
+    if ( iIso > maxIso ) {
+      maxIso = iIso;
+      maxNumParticles = iNumParticles;
+      
+      if(worstVtxIndex)
+	*worstVtxIndex=i;
+    }
+  }
+  
+  if(ptmax) (*ptmax)=t_ptmax;
+  if(dRmax) (*dRmax)=t_dRmax;
+
+  if(print) {
+    if(worstVtxIndex)
+      std::cout<<"   max TrkIso is given by Vtx #"<<*worstVtxIndex<<" with an amount of tIso = "<<maxIso<<std::endl;
+    else
+      std::cout<<"   max TrkIso is given by Vtx #0 with an amount of tIso = "<<maxIso<<std::endl;
+  }
+  return maxNumParticles;
 }

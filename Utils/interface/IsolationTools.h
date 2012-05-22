@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.24 2012/04/28 19:10:01 ceballos Exp $
+// $Id: IsolationTools.h,v 1.25 2012/05/07 18:06:07 ceballos Exp $
 //
 // IsolationTools
 //
@@ -99,9 +99,40 @@ namespace mithep
 					bool print=false,
 					double* ptmax=NULL, 
 					double* dRmax=NULL);
+      
+      static Double_t PFChargedIsolation(const mithep::Photon*, 
+					 const BaseVertex*, 
+					 Double_t extRadius, 
+					 Double_t intRadius, 
+					 Double_t ptLow, 
+					 Double_t etaStrip,
+					 Double_t maxD0,
+					 Double_t maxDZ,
+					 const PFCandidateCol *PFCands,
+					 unsigned int* worstVtxIndex = NULL,
+					 const mithep::Collection<mithep::Vertex> *vtxs = NULL,
+					 const mithep::Collection<mithep::Electron> *eles = NULL,
+					 bool print = NULL,
+					 double* ptmax = NULL, 
+					 double* dRmax = NULL);
 
-
-    ClassDef(IsolationTools, 0) // Isolation tools
-  };
+      static Float_t PFChargedCount(const mithep::Photon*, 
+				const BaseVertex*, 
+				Double_t extRadius, 
+				Double_t intRadius, 
+				Double_t ptLow, 
+				Double_t etaStrip,
+				Double_t maxD0,
+				Double_t maxDZ,
+				const PFCandidateCol *PFCands,
+				unsigned int* worstVtxIndex = NULL,
+				const mithep::Collection<mithep::Vertex> *vtxs = NULL,
+				const mithep::Collection<mithep::Electron> *eles = NULL,
+				bool print = NULL,
+				double* ptmax = NULL, 
+				double* dRmax = NULL);
+      
+      ClassDef(IsolationTools, 0) // Isolation tools
+	};
 }
 #endif
