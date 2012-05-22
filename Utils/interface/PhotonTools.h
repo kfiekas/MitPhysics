@@ -26,6 +26,8 @@
 #include "MitAna/DataTree/interface/SuperClusterCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
+#include "MitAna/DataTree/interface/PFCandidateCol.h"
+
 class TRandom3;
 
 namespace mithep {
@@ -91,6 +93,7 @@ namespace mithep {
     static void ScalePhotonError(Photon *p, Double_t scale);
 
     static Bool_t       PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol, const Vertex *vtx, double rho, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);
+    static Bool_t       PassSinglePhotonPreselPFISO(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);
     static Bool_t       PassConversionId(const Photon *p, const DecayParticle *c);
     static Bool_t       PassElectronVeto(const Photon *p, const ElectronCol *els);
     static Double_t     ElectronVetoCiC(const Photon *p, const ElectronCol *els);
