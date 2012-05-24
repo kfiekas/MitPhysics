@@ -1,4 +1,4 @@
-// $Id: JetIDMod.cc,v 1.27 2012/04/07 09:36:32 pharris Exp $
+// $Id: JetIDMod.cc,v 1.28 2012/04/07 11:51:10 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -117,5 +117,5 @@ void JetIDMod::SlaveBegin()
 //--------------------------------------------------------------------------------------------------
 void JetIDMod::SlaveTerminate()
 {
-  delete fJetIDMVA;
+  if(fApplyMVACut == kTRUE) delete fJetIDMVA;
 }
