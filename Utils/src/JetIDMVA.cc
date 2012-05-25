@@ -135,8 +135,9 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   std::cout << "MethodName : " << fLowPtMethodName << " , type == " << fType << std::endl;
 
   std::string lCutId = "JetIdParams";
-  if(fType == k42) lCutId = "PuJetIdOptMVA_wp";
-  if(fType == k52) lCutId = "full_5x_wp";
+  if(fType == k42)  lCutId = "PuJetIdOptMVA_wp";
+  if(fType == k52)  lCutId = "full_5x_wp";
+  if(fType == kCut) lCutId = "PuJetIdCutBased_wp";
   //Load Cut Matrix
   edm::ParameterSet lDefConfig = edm::readPSetsFrom(iCutFileName.Data())->getParameter<edm::ParameterSet>("JetIdParams");
   edm::ParameterSet lConfig    = edm::readPSetsFrom(iCutFileName.Data())->getParameter<edm::ParameterSet>(lCutId);
@@ -144,18 +145,40 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   if(fCutType == kMedium) lCutType = "Medium";
   if(fCutType == kLoose ) lCutType = "Loose";
   if(fCutType == kMET   ) lCutType = "MET";
-  std::string lLowPtCut = "MET";
-  std::vector<double> lPt010  = lDefConfig.getParameter<std::vector<double> >(("Pt010_" +lLowPtCut).c_str());
-  std::vector<double> lPt1020 = lConfig.getParameter<std::vector<double> >(("Pt1020_"+lCutType).c_str());
-  std::vector<double> lPt2030 = lConfig.getParameter<std::vector<double> >(("Pt2030_"+lCutType).c_str());
-  std::vector<double> lPt3050 = lConfig.getParameter<std::vector<double> >(("Pt3050_"+lCutType).c_str());
-  for(int i0 = 0; i0 < 4; i0++) fMVACut[0][i0] = lPt010 [i0];
-  for(int i0 = 0; i0 < 4; i0++) fMVACut[1][i0] = lPt1020[i0];
-  for(int i0 = 0; i0 < 4; i0++) fMVACut[2][i0] = lPt2030[i0];
-  for(int i0 = 0; i0 < 4; i0++) fMVACut[3][i0] = lPt3050[i0];
-  //std::cout << " Working Points : << " << std::endl;
-  //for(int i0 = 0; i0 < 4; i0++) for(int i1 = 0; i1 < 4; i1++) 
-  //  std::cout << " ==> " << i0 << " -- " << i1 << " -- " << fMVACut[i0][i1] << std::endl;
+  if(fType != kCut) { 
+    std::string lLowPtCut = "MET";
+    std::vector<double> lPt010  = lDefConfig.getParameter<std::vector<double> >(("Pt010_" +lLowPtCut).c_str());
+    std::vector<double> lPt1020 = lConfig.getParameter<std::vector<double> >(("Pt1020_"+lCutType).c_str());
+    std::vector<double> lPt2030 = lConfig.getParameter<std::vector<double> >(("Pt2030_"+lCutType).c_str());
+    std::vector<double> lPt3050 = lConfig.getParameter<std::vector<double> >(("Pt3050_"+lCutType).c_str());
+    for(int i0 = 0; i0 < 4; i0++) fMVACut[0][i0] = lPt010 [i0];
+    for(int i0 = 0; i0 < 4; i0++) fMVACut[1][i0] = lPt1020[i0];
+    for(int i0 = 0; i0 < 4; i0++) fMVACut[2][i0] = lPt2030[i0];
+    for(int i0 = 0; i0 < 4; i0++) fMVACut[3][i0] = lPt3050[i0];
+  }
+  if(fType == kCut) { 
+    for(int i0 = 0; i0 < 2; i0++) { 
+      std::string lFullCutType = lCutType;
+      if(i0 == 0) lFullCutType = "BetaStar"+ lCutType; 
+      if(i0 == 1) lFullCutType = "RMS"     + lCutType; 
+      std::vector<double> pt010  = lConfig.getParameter<std::vector<double> >(("Pt010_" +lFullCutType).c_str());
+      std::vector<double> pt1020 = lConfig.getParameter<std::vector<double> >(("Pt1020_"+lFullCutType).c_str());
+      std::vector<double> pt2030 = lConfig.getParameter<std::vector<double> >(("Pt2030_"+lFullCutType).c_str());
+      std::vector<double> pt3050 = lConfig.getParameter<std::vector<double> >(("Pt3050_"+lFullCutType).c_str());
+      if(i0 == 0) { 
+	for(int i2 = 0; i2 < 4; i2++) fBetaStarCut[0][i2] = pt010 [i2];
+	for(int i2 = 0; i2 < 4; i2++) fBetaStarCut[1][i2] = pt1020[i2];
+	for(int i2 = 0; i2 < 4; i2++) fBetaStarCut[2][i2] = pt2030[i2];
+	for(int i2 = 0; i2 < 4; i2++) fBetaStarCut[3][i2] = pt3050[i2];
+      }
+      if(i0 == 1) { 
+	for(int i2 = 0; i2 < 4; i2++) fRMSCut[0][i2] = pt010 [i2];
+	for(int i2 = 0; i2 < 4; i2++) fRMSCut[1][i2] = pt1020[i2];
+	for(int i2 = 0; i2 < 4; i2++) fRMSCut[2][i2] = pt2030[i2];
+	for(int i2 = 0; i2 < 4; i2++) fRMSCut[3][i2] = pt3050[i2];
+      }
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -236,10 +259,37 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *i
   return true;
 }
 //--------------------------------------------------------------------------------------------------
+Bool_t JetIDMVA::passCut(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices) { 
+  if(!JetTools::passPFLooseId(iJet))                 return false;
+  if(iJet->Pt()        < fJetPtMin) return false; 
+  if(fabs(iJet->Eta()) > 4.99)      return false;
+  if(fType == kCut) passCut(iJet,iVertex,iVertices);
+
+  double lPt = iJet->Pt();
+  int lPtId = 0; 
+  if(lPt > 10 && lPt < 20) lPtId = 1;
+  if(lPt > 20 && lPt < 30) lPtId = 2;
+  if(lPt > 30                   ) lPtId = 3;
+  
+  int lEtaId = 0;
+  if(fabs(iJet->Eta()) > 2.5  && fabs(iJet->Eta()) < 2.75) lEtaId = 1; 
+  if(fabs(iJet->Eta()) > 2.75 && fabs(iJet->Eta()) < 3.0 ) lEtaId = 2; 
+  if(fabs(iJet->Eta()) > 3.0  && fabs(iJet->Eta()) < 5.0 ) lEtaId = 3; 
+  float betaStarModified = JetTools::betaStarClassic(iJet,iVertex,iVertices)/log(iVertices ->GetEntries()-0.64);
+  float dR2Mean          = JetTools::dR2Mean(iJet,-1);
+  
+  if(betaStarModified < fBetaStarCut[lPtId][lEtaId] && 
+     dR2Mean          < fRMSCut     [lPtId][lEtaId]
+     ) return true;
+  
+  return false;
+}
+//--------------------------------------------------------------------------------------------------
 Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices) { 
   if(!JetTools::passPFLooseId(iJet))                 return false;
   if(iJet->Pt()        < fJetPtMin) return false; 
   if(fabs(iJet->Eta()) > 4.99)      return false;
+  if(fType == kCut) passCut(iJet,iVertex,iVertices);
   double lMVA = MVAValue(iJet,iVertex,iVertices);
   
   int lPtId = 0; 

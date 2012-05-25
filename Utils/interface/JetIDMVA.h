@@ -38,7 +38,8 @@ namespace mithep {
       enum MVAType {
         kBaseline = 0,
 	k42       = 1,
-	k52       = 2
+	k52       = 2,
+	kCut      = 3
       };
 
       enum CutType {
@@ -74,6 +75,8 @@ namespace mithep {
 			Float_t iFrac05  ,
 			Float_t iDR2Mean 
 			);
+      //Cut Based
+      Bool_t passCut(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices);
 
       //UNcorrected Jets
       Bool_t   pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
@@ -111,7 +114,9 @@ namespace mithep {
       CutType                  fCutType;
       Bool_t                   fIsInitialized;
       Float_t                  fMVACut[4][4]; //Fix the cut array
-
+      Float_t                  fRMSCut[4][4];
+      Float_t                  fBetaStarCut[4][4];
+      
       Float_t fNVtx     ;
       Float_t fJPt1     ;
       Float_t fJEta1    ;

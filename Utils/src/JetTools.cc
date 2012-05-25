@@ -556,6 +556,29 @@ Double_t JetTools::betaStar(const PFJet *iJet,const Vertex *iVertex,const Vertex
   if(lTotal == 0) lTotal = 1;
   return lPileup/(lTotal);
 }
+Double_t JetTools::betaStarClassic(const PFJet *iJet,const Vertex *iVertex,const VertexCol* iVertices) {
+  Double_t lTotal = 0;  
+  Double_t lPileup = 0;
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) {
+    const PFCandidate* pPF   = iJet->PFCand(i0);
+    const Track* pTrack      = pPF->TrackerTrk();
+    //if(pPF->GsfTrk()) pTrack = pPF->GsfTrk(); ==> not used in CMSSW
+    if(pTrack == 0) continue;
+    lTotal += pTrack->Pt();
+    bool isPV    = iVertex->HasTrack(pPF->TrackerTrk());
+    bool isOtherV = false;
+    for(unsigned int i1 = 0; i1 < iVertices->GetEntries(); i1++) {
+      const Vertex *pV = iVertices->At(i1);
+      if(isOtherV || isPV) continue;
+      if(pV->Ndof() < 4 ||
+	 (pV->Position() - iVertex->Position()).R() < 0.02 ) continue;
+      isOtherV    = pV->HasTrack(pPF->TrackerTrk());
+    }
+    if(!isPV && isOtherV) lPileup += pTrack->Pt(); 
+  }
+  if(lTotal == 0) lTotal = 1;
+  return lPileup/(lTotal);
+}
 Bool_t  JetTools::passPFLooseId(const PFJet *iJet) { 
   if(iJet->RawMom().E()                              == 0)       return false;
   if(iJet->NeutralHadronEnergy()/iJet->RawMom().E()  >  0.99)    return false;
