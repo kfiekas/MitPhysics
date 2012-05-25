@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: IsolationTools.h,v 1.25 2012/05/07 18:06:07 ceballos Exp $
+// $Id: IsolationTools.h,v 1.26 2012/05/22 23:47:02 mingyang Exp $
 //
 // IsolationTools
 //
@@ -100,22 +100,25 @@ namespace mithep
 					double* ptmax=NULL, 
 					double* dRmax=NULL);
       
-      static Double_t PFChargedIsolation(const mithep::Photon*, 
-					 const BaseVertex*, 
-					 Double_t extRadius, 
-					 Double_t intRadius, 
-					 Double_t ptLow, 
-					 Double_t etaStrip,
-					 Double_t maxD0,
-					 Double_t maxDZ,
+      static Double_t PFChargedIsolation(const mithep::Photon *p, 
+					 const BaseVertex *theVtx, 
+					 Double_t extRadius,
+                                         Double_t intRadius,
 					 const PFCandidateCol *PFCands,
 					 unsigned int* worstVtxIndex = NULL,
 					 const mithep::Collection<mithep::Vertex> *vtxs = NULL,
-					 const mithep::Collection<mithep::Electron> *eles = NULL,
-					 bool print = NULL,
-					 double* ptmax = NULL, 
-					 double* dRmax = NULL);
+					 bool print = NULL);
 
+      static Double_t PFGammaIsolation(const mithep::Photon *p, 
+                                         Double_t extRadius,
+                                         Double_t intRadius,
+                                         const PFCandidateCol *PFCands);                                         
+
+      static Double_t PFNeutralHadronIsolation(const mithep::Photon *p, 
+                                         Double_t extRadius,
+                                         Double_t intRadius,
+                                         const PFCandidateCol *PFCands);                                                                                  
+                                         
       static Float_t PFChargedCount(const mithep::Photon*, 
 				const BaseVertex*, 
 				Double_t extRadius, 

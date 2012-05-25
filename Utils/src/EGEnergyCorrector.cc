@@ -1,4 +1,4 @@
-// $Id: EGEnergyCorrector.cc,v 1.6 2012/03/22 15:54:07 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.7 2012/04/24 15:37:14 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -63,7 +63,7 @@ void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TStri
 }
 
 //--------------------------------------------------------------------------------------------------
-void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs, UInt_t version) {
+void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs, Double_t rho, UInt_t version) {
   
   std::pair<double,double> correction;
   if (version == 1) {
@@ -71,6 +71,9 @@ void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs,
   }
   else if (version == 2) {
     correction = CorrectedEnergyWithErrorV2(p,vtxs);
+  }
+  else if (version == 3) {
+    correction = CorrectedEnergyWithErrorV3(p,vtxs,rho);
   }
 
   //printf("photon: e = %5f, eerr = %5f, sceta = %5f\n",p->E(),p->EnergyErr(),p->SCluster()->Eta());
@@ -314,6 +317,82 @@ std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithErrorV2(const Pho
   
   Double_t ecor = reader->GetResponse(fVals)*den;
   Double_t ecorerr = readervar->GetResponse(fVals)*den*varscale;
+  
+  return std::pair<double,double>(ecor,ecorerr);
+}
+
+//--------------------------------------------------------------------------------------------------
+std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithErrorV3(const Photon *p, const VertexCol *vtxs, Double_t rho) {
+  
+  const SuperCluster *s = p->SCluster();
+  const BasicCluster *b = s->Seed();
+  
+  
+  Bool_t isbarrel = (s->AbsEta()<1.5);
+  
+  //basic supercluster variables
+  fVals[0]  = s->RawEnergy();
+  fVals[1]  = s->Eta();
+  fVals[2]  = s->Phi();
+  fVals[3]  = p->R9();
+  fVals[4]  = p->E55()/s->RawEnergy();  
+  fVals[5] = s->EtaWidth();
+  fVals[6] = s->PhiWidth();
+  fVals[7] = s->NClusters();
+  fVals[8] = p->HadOverEmTow();
+  fVals[9] = rho;
+  fVals[10] = vtxs->GetEntries();
+  fVals[11] = b->Eta()-s->Eta();
+  fVals[12] = atan2(sin(b->Phi()-s->Phi()), cos(b->Phi()-s->Phi()));
+  fVals[13] = b->Energy()/s->RawEnergy();
+  fVals[14] = b->E3x3()/b->Energy();
+  fVals[15] = b->E5x5()/b->Energy();
+  fVals[16] = TMath::Sqrt(b->CoviEtaiEta());
+  fVals[17] = TMath::Sqrt(b->CoviPhiiPhi());
+  fVals[18] = b->CoviEtaiPhi();  
+  fVals[19] = b->EMax()/b->Energy();                       //crystal energy ratio gap variables   
+  fVals[20] = b->E2nd()/b->Energy();
+  fVals[21] = b->ETop()/b->Energy();
+  fVals[22] = b->EBottom()/b->Energy();
+  fVals[23] = b->ELeft()/b->Energy();
+  fVals[24] = b->ERight()/b->Energy();
+  fVals[25] = b->E2x5Max()/b->Energy();                       //crystal energy ratio gap variables   
+  fVals[26] = b->E2x5Top()/b->Energy();
+  fVals[27] = b->E2x5Bottom()/b->Energy();
+  fVals[28] = b->E2x5Left()/b->Energy();
+  fVals[29] = b->E2x5Right()/b->Energy();  
+  
+  if (isbarrel) {
+    fVals[30] = b->IEta();
+    fVals[31] = b->IPhi();
+    fVals[32] = b->IEta()%5;
+    fVals[33] = b->IPhi()%2;
+    fVals[34] = (TMath::Abs(b->IEta())<=25)*(b->IEta()%25) + (TMath::Abs(b->IEta())>25)*((b->IEta()-25*TMath::Abs(b->IEta())/b->IEta())%20);
+    fVals[35] = b->IPhi()%20;
+    fVals[36] = b->EtaCry();
+    fVals[37] = b->PhiCry();    
+  }
+  else {
+    //preshower energy ratio (endcap only)
+    fVals[30]  = s->PreshowerEnergy()/s->RawEnergy();
+  }
+    
+  Double_t den;
+  const GBRForest *reader;
+  const GBRForest *readervar;
+  if (isbarrel) {
+    den = s->RawEnergy();
+    reader = fReadereb;
+    readervar = fReaderebvariance;
+  }
+  else {
+    den = s->RawEnergy() + s->PreshowerEnergy();
+    reader = fReaderee;
+    readervar = fReadereevariance;
+  }
+  
+  Double_t ecor = reader->GetResponse(fVals)*den;
+  Double_t ecorerr = readervar->GetResponse(fVals)*den;
   
   return std::pair<double,double>(ecor,ecorerr);
 }

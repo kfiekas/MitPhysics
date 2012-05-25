@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.29 2012/05/07 18:05:52 ceballos Exp $
+// $Id: IsolationTools.cc,v 1.30 2012/05/22 23:46:26 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -795,21 +795,15 @@ Double_t IsolationTools::CiCTrackIsolation(const mithep::Photon* p,
 
 //ChargedIso_selvtx_DR0To0p001=IsolationTools::PFChargedIsolation(p, SelVtx, 0.01, 0, 0.0, 0.0, 0.1, 0.2,fPFCands);
 
-Double_t IsolationTools::PFChargedIsolation(const mithep::Photon* p, 
-					    const BaseVertex* theVtx, 
-					    Double_t extRadius, 
-					    Double_t intRadius, 
-					    Double_t ptLow, 
-					    Double_t etaStrip,
-					    Double_t maxD0,
-					    Double_t maxDZ,
-					    const PFCandidateCol *PFCands,
-					    unsigned int* worstVtxIndex,
-					    const mithep::Collection<mithep::Vertex> *vtxs,
-					    const mithep::Collection<mithep::Electron> *eles,
-					    bool print,
-					    double* ptmax,
-					    double* dRmax) {
+Double_t IsolationTools::PFChargedIsolation(const mithep::Photon *p, 
+                                         const BaseVertex *theVtx, 
+                                         Double_t extRadius,
+                                         Double_t intRadius,
+                                         const PFCandidateCol *PFCands,
+                                         unsigned int* worstVtxIndex,
+                                         const mithep::Collection<mithep::Vertex> *vtxs,
+                                         bool print)
+{
   
   UInt_t numVtx = 1;
   
@@ -822,20 +816,7 @@ Double_t IsolationTools::PFChargedIsolation(const mithep::Photon* p,
     else
       return 0.;
   }
-  
-  // NEW for Electron T&P: need to remove the electron Gsf Track (applied if eles != NULL)
-  const Track* theGsfTrack = NULL;
-  if ( eles ) {
-    // find the electron that matches the Photon SC
-    for(UInt_t j=0; j<eles->GetEntries(); ++j) {
-      if ( eles->At(j)->SCluster() == p->SCluster() ) {
-	if( eles->At(j)->HasTrackerTrk() )
-	  theGsfTrack = eles->At(j)->TrackerTrk();
-	break;
-      }
-    }
-  }
-  
+    
   if(print) {
     std::cout<<" Testing photon with"<<std::endl;
     std::cout<<"             Et  = "<<p->Et()<<std::endl;
@@ -849,9 +830,6 @@ Double_t IsolationTools::PFChargedIsolation(const mithep::Photon* p,
   if(worstVtxIndex)
     *worstVtxIndex=0;
   
-  double t_ptmax = 0.;
-  double t_dRmax = 0.;
-  
   for(UInt_t i=0; i<numVtx; ++i) {
     
     if(i>0) iVtx = vtxs->At(i);
@@ -863,38 +841,23 @@ Double_t IsolationTools::PFChargedIsolation(const mithep::Photon* p,
       std::cout<<"       with Y = "<<iVtx->Y()<<std::endl;
       std::cout<<"       with Z = "<<iVtx->Z()<<std::endl;
     }
-    
-    Photon* phTemp = new Photon(*p);
-    
-    // RESET CALO_POS! //ming: why?
-    phTemp->SetCaloPosXYZ(p->SCluster()->Point().X(),p->SCluster()->Point().Y(),p->SCluster()->Point().Z());
-    
-    // compute the ph momentum with respect to this Vtx
-    FourVectorM phMom = phTemp->MomVtx(iVtx->Position());
-    
-    delete phTemp;
-    
-    if(print) {
-      std::cout<<"         photon has changed to:"<<std::endl;
-      std::cout<<"             Et  = "<<phMom.Et()<<std::endl;
-      std::cout<<"             eta = "<<phMom.Eta()<<std::endl;
-      std::cout<<"             Phi = "<<phMom.Phi()<<std::endl;
-    }
-    
+        
+    ThreeVector photondir = ThreeVector(p->SCluster()->Point()) - iVtx->Position();
+        
     iIso = 0.;
     
     for(UInt_t j=0; j<PFCands->GetEntries(); ++j) {
       const PFCandidate *pf= PFCands->At(j);
-      if(pf->HasTrk() && (pf->PFType()==PFCandidate::eHadron || pf->PFType()==PFCandidate::eElectron || pf->PFType()==PFCandidate::eMuon)){
-	const Track* t = pf->BestTrk();
-        if(pf->PFType()==PFCandidate::eElectron && pf->HasGsfTrk()){t = pf->GsfTrk();}
-	if(!(pf->PFType()==PFCandidate::eElectron) && pf->HasTrackerTrk()){t = pf->TrackerTrk();}
+      if(pf->HasTrackerTrk() && pf->PFType()==PFCandidate::eHadron) {
+	const Track* t = pf->TrackerTrk();
+        
+	Double_t dR   = MathUtils::DeltaR(*pf,photondir);
+	//Double_t dEta = TMath::Abs(pf->Eta()-photondir.Eta());
 	
-	if( theGsfTrack && t == theGsfTrack ) continue;
-	
-	Double_t dR   = MathUtils::DeltaR(pf->Mom(),phMom);
-	Double_t dEta = TMath::Abs(pf->Eta()-phMom.Eta());
-	
+        if (dR<0.02) continue;
+        if (dR<intRadius) continue;
+        if (dR>extRadius) continue;
+        
 	if(print && pf->Pt()>1. && false) {
 	  std::cout<<"              passing track #"<<j<<std::endl;
 	  std::cout<<"                          pt = "<<pf->Pt()<<std::endl;
@@ -903,42 +866,19 @@ Double_t IsolationTools::PFChargedIsolation(const mithep::Photon* p,
 	  std::cout<<"                          d0 = "<<fabs(t->D0Corrected( *iVtx ))<<std::endl;
 	  std::cout<<"                          dZ = "<<fabs(t->DzCorrected( *iVtx ))<<std::endl;
 	  std::cout<<"                          dR = "<<dR<<std::endl;
-	  std::cout<<"                        dEta = "<<dEta<<std::endl;
+	  //std::cout<<"                        dEta = "<<dEta<<std::endl;
 	  std::cout<<"                          vx = "<<t->X0()<<std::endl;
 	  std::cout<<"                          vy = "<<t->Y0()<<std::endl;
 	  std::cout<<"                          vz = "<<t->Z0()<<std::endl;
 	}
 	
-	if ( pf->Pt() < ptLow ) continue;
 	
 	// only check for beamspot if available, otherwise ignore cut
-	if ( fabs(t->D0Corrected( *iVtx )) > maxD0) continue;
-	if ( fabs(t->DzCorrected( *iVtx )) > maxDZ) continue;
+	if ( fabs(t->D0Corrected( *iVtx )) > 0.1) continue;
+	if ( fabs(t->DzCorrected( *iVtx )) > 0.2) continue;
 	
+	iIso += pf->Pt();
 	
-	if(dR < extRadius && dR > intRadius && dEta > etaStrip) {
-	  iIso += pf->Pt();
-	  
-	  if(pf->Pt() > t_ptmax) {
-	    t_ptmax=pf->Pt();
-	    t_dRmax=dR;
-	  }
-	  
-	  if(print && pf->Pt()>1.) {
-	    std::cout<<"              passing track #"<<j<<std::endl;
-	    std::cout<<"                          pt = "<<pf->Pt()<<std::endl;
-	    std::cout<<"                         eta = "<<pf->Eta()<<std::endl;
-	    std::cout<<"                         phi = "<<pf->Phi()<<std::endl;
-	    std::cout<<"                          d0 = "<<fabs(t->D0Corrected( *iVtx ))<<std::endl;
-	    std::cout<<"                          dZ = "<<fabs(t->DzCorrected( *iVtx ))<<std::endl;
-	    std::cout<<"                          dR = "<<dR<<std::endl;
-	    std::cout<<"                        dEta = "<<dEta<<std::endl;
-	    std::cout<<"                          vx = "<<t->X0()<<std::endl;
-	    std::cout<<"                          vy = "<<t->Y0()<<std::endl;
-	    std::cout<<"                          vz = "<<t->Z0()<<std::endl;
-	    std::cout<<"                             new  tIso = "<<iIso<<std::endl;
-	  }
-	}
       }
     }
     
@@ -949,8 +889,6 @@ Double_t IsolationTools::PFChargedIsolation(const mithep::Photon* p,
     }
   }
   
-  if(ptmax) (*ptmax)=t_ptmax;
-  if(dRmax) (*dRmax)=t_dRmax;
 
   if(print) {
     if(worstVtxIndex)
@@ -1133,4 +1071,75 @@ Float_t IsolationTools::PFChargedCount(const mithep::Photon* p,
       std::cout<<"   max TrkIso is given by Vtx #0 with an amount of tIso = "<<maxIso<<std::endl;
   }
   return maxNumParticles;
+}
+
+Double_t IsolationTools::PFGammaIsolation(const mithep::Photon *p, 
+                                         Double_t extRadius,
+                                         Double_t intRadius,
+                                         const PFCandidateCol *PFCands)
+{
+ 
+  Double_t iso = 0.;
+  
+  ThreeVector photondir;
+  Bool_t setdir = kFALSE;
+  
+  for (UInt_t ipfc = 0; ipfc<PFCands->GetEntries(); ++ipfc) {
+    const PFCandidate *pfc = PFCands->At(ipfc);
+    if (pfc->PFType()!=PFCandidate::eGamma) continue;
+    if (!setdir) {
+      photondir = ThreeVector(p->SCluster()->Point() - pfc->SourceVertex());
+      setdir = kTRUE;
+    }
+    
+    Double_t dR   = MathUtils::DeltaR(*pfc,photondir);
+    Double_t dEta = TMath::Abs(pfc->Eta()-photondir.Eta());
+    
+    Bool_t isbarrel = p->SCluster()->AbsEta()<1.5;
+    
+    if (isbarrel && dEta<0.015) continue;
+    if (!isbarrel && dR<0.07) continue;
+    if (dR<intRadius) continue;
+    if (dR>extRadius) continue;
+    
+    iso += pfc->Pt();
+    
+  }
+  
+  return iso;
+  
+  
+}
+
+Double_t IsolationTools::PFNeutralHadronIsolation(const mithep::Photon *p, 
+                                         Double_t extRadius,
+                                         Double_t intRadius,
+                                         const PFCandidateCol *PFCands)
+{
+ 
+  Double_t iso = 0.;
+  
+  ThreeVector photondir;
+  Bool_t setdir = kFALSE;
+  
+  for (UInt_t ipfc = 0; ipfc<PFCands->GetEntries(); ++ipfc) {
+    const PFCandidate *pfc = PFCands->At(ipfc);
+    if (pfc->PFType()!=PFCandidate::eGamma) continue;
+    if (!setdir) {
+      photondir = ThreeVector(p->SCluster()->Point() - pfc->SourceVertex());
+      setdir = kTRUE;
+    }
+    
+    Double_t dR   = MathUtils::DeltaR(*pfc,photondir);
+
+    if (dR<intRadius) continue;
+    if (dR>extRadius) continue;
+    
+    iso += pfc->Pt();
+    
+  }
+  
+  return iso;
+  
+  
 }

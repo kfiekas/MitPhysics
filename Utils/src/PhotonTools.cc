@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.25 2012/05/18 16:20:33 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.26 2012/05/22 23:49:43 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -590,6 +590,82 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
   return false;
 }
 
+
+
+bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph, 
+                                 const Vertex* vtx, 
+                                 const PFCandidateCol*    pfCol,
+                                 const VertexCol*   vtxCol,
+                                 double rho, double ptmin)
+{
+
+  
+  // these values are taken from the H2GGlobe code... (actually from Marco/s mail)
+  float cic4_allcuts_temp_sublead[] = { 
+    6.0,         4.7,         5.6,         3.6,
+    10.0,        6.5,         5.6,         4.4,
+    3.8,         2.5,         3.1,         2.2,
+    0.0108,      0.0102,      0.028,       0.028,
+    0.124,       0.092,       0.142,       0.063,
+    0.94,        0.28,        0.94,        0.24 };  // the last line is PixelmatchVeto and un-used
+  
+  // cut on Et instead of Pt???    
+  Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
+    
+  
+  
+  // compute all relevant observables first
+  double ecalIso3 = IsolationTools::PFGammaIsolation(ph, 0.3, 0.0, pfCol);
+  double ecalIso4 = IsolationTools::PFGammaIsolation(ph, 0.4, 0.0, pfCol);
+
+  unsigned int wVtxInd = 0;
+
+  double trackIsoSel03 = IsolationTools::PFChargedIsolation(ph, vtx, 0.3, 0.0, pfCol);
+
+  // track iso worst vtx
+  double trackIsoWorst04 = IsolationTools::PFChargedIsolation(ph, vtx, 0.4, 0.00, pfCol, &wVtxInd, vtxCol);
+  
+  double combIso1 = ecalIso3+trackIsoSel03 - 0.17*rho;
+  double combIso2 = ecalIso4+trackIsoWorst04 - 0.40*rho;
+  
+  double tIso1 = (combIso1) *50./ph->Et();
+  double tIso2 = (combIso2) *50./(ph->MomVtx(vtxCol->At(wVtxInd)->Position()).Pt());
+  //double tIso2 = (combIso2) *50./ph->Et();
+  double tIso3 = (trackIsoSel03)*50./ph->Et();
+  
+  double covIEtaIEta  =ph->CoviEtaiEta();
+  double HoE = ph->HadOverEm();
+  
+  double R9 = ph->R9();
+  
+  // check which category it is ...
+  int _tCat = 1;
+  if ( !isbarrel ) _tCat = 3;
+  if ( R9 < 0.94 ) _tCat++;
+  
+  float passCuts = 1.;
+
+  if ( ph->Pt()     <= ptmin      ) passCuts = -1.;
+
+  // not needed anymore, do in pre-selection...
+  //if (  ph->SCluster()->AbsEta()>=2.5 || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566)) passCuts = -1.;
+  
+  if(   ! (    tIso1                          < cic4_allcuts_temp_sublead[_tCat-1+0*4]
+               && tIso2                       < cic4_allcuts_temp_sublead[_tCat-1+1*4]
+               && tIso3                       < cic4_allcuts_temp_sublead[_tCat-1+2*4]
+               && covIEtaIEta                 < cic4_allcuts_temp_sublead[_tCat-1+3*4]
+               && HoE                         < cic4_allcuts_temp_sublead[_tCat-1+4*4]
+               && R9                          > cic4_allcuts_temp_sublead[_tCat-1+5*4] ) )   passCuts = -1.;
+  
+
+  if(passCuts > 0.) return true;
+  return false;
+}
+
+
+
+
+
 const MCParticle *PhotonTools::MatchMC(const Particle *ph, const MCParticleCol *c, Bool_t matchElectrons) {
 
 //  printf("Start loop\n");
@@ -690,7 +766,7 @@ Bool_t  PhotonTools::PassSinglePhotonPreselPFISO(const Photon *p,const ElectronC
   Bool_t PassEleVetoRaw = PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, bs);  
   Bool_t PassEleVeto = (!applyElectronVeto && !invertElectronVeto) || (applyElectronVeto && !invertElectronVeto && PassEleVetoRaw) || (!applyElectronVeto && invertElectronVeto && !PassEleVetoRaw);
  
-  float ChargedIso_selvtx_DR002To0p02=IsolationTools::PFChargedIsolation(p,vtx, 0.2, 0.02, 1, 0.0, 0.1, 0.2,fPFCands);
+  float ChargedIso_selvtx_DR002To0p02=IsolationTools::PFChargedIsolation(p,vtx, 0.2, 0.,fPFCands);
 
   if(fabs(ScEta)<1.4442){IsBarrel=kTRUE;}
   if(fabs(ScEta)>1.566 && fabs(ScEta)<2.5){IsEndcap=kTRUE;}
