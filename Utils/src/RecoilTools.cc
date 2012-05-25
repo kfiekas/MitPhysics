@@ -60,9 +60,10 @@ Met RecoilTools::pfRecoil(double iPhi1,double iEta1,double iPhi2,double iEta2,
   double lSumEt = 0;
   FourVectorM lVec(0,0,0,0);
   for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
-    if(!filter(iCands->At(i0),iPhi1,iEta1,iPhi2,iEta2)) continue;
-    lVec -= iCands->At(i0)->Mom(); 
-    lSumEt += iCands->At(i0)->Et();
+    const PFCandidate *pfcand = iCands->At(i0);
+    if(!filter(pfcand,iPhi1,iEta1,iPhi2,iEta2)) continue;
+    lVec   -= pfcand->Mom(); 
+    lSumEt += pfcand->Et();
   }
   Met lPFMet(lVec.Px(),lVec.Py()); 
   lPFMet.SetSumEt(lSumEt);
@@ -181,7 +182,7 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
   lMet.SetSumEt( lSumEt);
   return lMet;
 }
-//--------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 //Corrected Jets
 Met RecoilTools::NoPUMet( const PFJetCol       *iJets,
 			  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
