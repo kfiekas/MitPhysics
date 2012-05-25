@@ -650,27 +650,27 @@ void MakeNtuple::FillPhotonTree(const Photon *p,const Photon *p_accompany,const 
    }
 
    //iso
-   ChargedIso_selvtx_DR0To0p001=IsolationTools::PFChargedIsolation(p,SelVtx, 0.01, 0,1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR001To0p002=IsolationTools::PFChargedIsolation(p,SelVtx, 0.02, 0.01, 1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR002To0p005=IsolationTools::PFChargedIsolation(p,SelVtx, 0.05, 0.02, 1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR005To0p01=IsolationTools::PFChargedIsolation(p,SelVtx, 0.1, 0.05, 1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR01To0p02=IsolationTools::PFChargedIsolation(p,SelVtx, 0.2, 0.1, 1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR02To0p03=IsolationTools::PFChargedIsolation(p,SelVtx, 0.3, 0.2, 1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR03To0p04=IsolationTools::PFChargedIsolation(p,SelVtx, 0.4, 0.3, 1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR04To0p05=IsolationTools::PFChargedIsolation(p,SelVtx, 0.5, 0.4, 1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR05To0p06=IsolationTools::PFChargedIsolation(p,SelVtx, 0.6, 0.5, 1, 0.0, 0.1, 0.2,fPFCands);
-   ChargedIso_selvtx_DR002To0p01=IsolationTools::PFChargedIsolation(p,SelVtx, 0.1, 0.02, 1, 0.0, 0.1, 0.2,fPFCands);
+   ChargedIso_selvtx_DR0To0p001=IsolationTools::PFChargedIsolation(p,SelVtx, 0.01, 0.,fPFCands);
+   ChargedIso_selvtx_DR001To0p002=IsolationTools::PFChargedIsolation(p,SelVtx, 0.02, 0.01, fPFCands);
+   ChargedIso_selvtx_DR002To0p005=IsolationTools::PFChargedIsolation(p,SelVtx, 0.05, 0.02, fPFCands);
+   ChargedIso_selvtx_DR005To0p01=IsolationTools::PFChargedIsolation(p,SelVtx, 0.1, 0.05, fPFCands);
+   ChargedIso_selvtx_DR01To0p02=IsolationTools::PFChargedIsolation(p,SelVtx, 0.2, 0.1, fPFCands);
+   ChargedIso_selvtx_DR02To0p03=IsolationTools::PFChargedIsolation(p,SelVtx, 0.3, 0.2, fPFCands);
+   ChargedIso_selvtx_DR03To0p04=IsolationTools::PFChargedIsolation(p,SelVtx, 0.4, 0.3, fPFCands);
+   ChargedIso_selvtx_DR04To0p05=IsolationTools::PFChargedIsolation(p,SelVtx, 0.5, 0.4, fPFCands);
+   ChargedIso_selvtx_DR05To0p06=IsolationTools::PFChargedIsolation(p,SelVtx, 0.6, 0.5, fPFCands);
+   ChargedIso_selvtx_DR002To0p01=IsolationTools::PFChargedIsolation(p,SelVtx, 0.1, 0.02, fPFCands);
    
-   ChargedIso_worstvtx_DR0To0p001=IsolationTools::PFChargedIsolation(p,SelVtx, 0.01, 0,1, 0.0, 0.1, 0.2,fPFCands,&wVtxInd,fPV);
-   ChargedIso_worstvtx_DR001To0p002=IsolationTools::PFChargedIsolation(p,SelVtx, 0.02, 0.01, 1, 0.0, 0.1, 0.2,fPFCands,&wVtxInd,fPV);
-   ChargedIso_worstvtx_DR002To0p005=IsolationTools::PFChargedIsolation(p,SelVtx, 0.05, 0.02, 1, 0.0, 0.1, 0.2,fPFCands,&wVtxInd,fPV);
-   ChargedIso_worstvtx_DR005To0p01=IsolationTools::PFChargedIsolation(p,SelVtx, 0.1, 0.05, 1, 0.0, 0.1, 0.2,fPFCands, &wVtxInd,fPV);
-   ChargedIso_worstvtx_DR01To0p02=IsolationTools::PFChargedIsolation(p,SelVtx, 0.2, 0.1, 1, 0.0, 0.1, 0.2,fPFCands, &wVtxInd,fPV);
-   ChargedIso_worstvtx_DR02To0p03=IsolationTools::PFChargedIsolation(p,SelVtx, 0.3, 0.2, 1, 0.0, 0.1, 0.2,fPFCands, &wVtxInd,fPV);
-   ChargedIso_worstvtx_DR03To0p04=IsolationTools::PFChargedIsolation(p,SelVtx, 0.4, 0.3, 1, 0.0, 0.1, 0.2,fPFCands, &wVtxInd,fPV);
-   ChargedIso_worstvtx_DR04To0p05=IsolationTools::PFChargedIsolation(p,SelVtx, 0.5, 0.4, 1, 0.0, 0.1, 0.2,fPFCands, &wVtxInd,fPV);
-   ChargedIso_worstvtx_DR05To0p06=IsolationTools::PFChargedIsolation(p,SelVtx, 0.6, 0.5, 1, 0.0, 0.1, 0.2,fPFCands, &wVtxInd,fPV);
-   ChargedIso_worstvtx_DR002To0p01=IsolationTools::PFChargedIsolation(p,SelVtx, 0.1, 0.02, 1, 0.0, 0.1, 0.2,fPFCands, &wVtxInd,fPV);
+   ChargedIso_worstvtx_DR0To0p001=IsolationTools::PFChargedIsolation(p,SelVtx, 0.01, 0., fPFCands,&wVtxInd,fPV);
+   ChargedIso_worstvtx_DR001To0p002=IsolationTools::PFChargedIsolation(p,SelVtx, 0.02, 0.01, fPFCands,&wVtxInd,fPV);
+   ChargedIso_worstvtx_DR002To0p005=IsolationTools::PFChargedIsolation(p,SelVtx, 0.05, 0.02, fPFCands,&wVtxInd,fPV);
+   ChargedIso_worstvtx_DR005To0p01=IsolationTools::PFChargedIsolation(p,SelVtx, 0.1, 0.05, fPFCands, &wVtxInd,fPV);
+   ChargedIso_worstvtx_DR01To0p02=IsolationTools::PFChargedIsolation(p,SelVtx, 0.2, 0.1, fPFCands, &wVtxInd,fPV);
+   ChargedIso_worstvtx_DR02To0p03=IsolationTools::PFChargedIsolation(p,SelVtx, 0.3, 0.2, fPFCands, &wVtxInd,fPV);
+   ChargedIso_worstvtx_DR03To0p04=IsolationTools::PFChargedIsolation(p,SelVtx, 0.4, 0.3, fPFCands, &wVtxInd,fPV);
+   ChargedIso_worstvtx_DR04To0p05=IsolationTools::PFChargedIsolation(p,SelVtx, 0.5, 0.4, fPFCands, &wVtxInd,fPV);
+   ChargedIso_worstvtx_DR05To0p06=IsolationTools::PFChargedIsolation(p,SelVtx, 0.6, 0.5, fPFCands, &wVtxInd,fPV);
+   ChargedIso_worstvtx_DR002To0p01=IsolationTools::PFChargedIsolation(p,SelVtx, 0.1, 0.02,fPFCands, &wVtxInd,fPV);
 
    //count
    ChargedCount_selvtx_DR0To0p001=IsolationTools::PFChargedCount(p,SelVtx, 0.01, 0,1.6, 0.0, 0.1, 0.2,fPFCands);
