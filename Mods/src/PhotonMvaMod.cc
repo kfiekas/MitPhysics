@@ -112,9 +112,9 @@ void PhotonMvaMod::Process()
     if(ph->Et()                <  fPhotonPtMin)     continue;
     if(ph->HadOverEm()         >  0.15)     continue;
     if(ph->IsEB()) {
-      if(ph->CoviEtaiEta() > 0.014) continue;      
+      if(ph->CoviEtaiEta() > 0.015) continue;      
     } else {
-      if(ph->CoviEtaiEta() > 0.034) continue;
+      if(ph->CoviEtaiEta() > 0.035) continue;
     }    
         
     preselPh->Add(ph);
@@ -133,7 +133,7 @@ void PhotonMvaMod::Process()
         egcor.Initialize(fPhFixString,fPhFixFile,fRegWeights);
       }
     
-      egcor.CorrectEnergyWithError(outph,fPV,fRegressionVersion);
+      egcor.CorrectEnergyWithError(outph,fPV,fPileUpDen->At(0)->RhoKt6PFJets(),fRegressionVersion);
       ThreeVectorC scpos = outph->SCluster()->Point();
       outph->SetCaloPosXYZ(scpos.X(),scpos.Y(),scpos.Z());
       
