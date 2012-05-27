@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.26 2012/05/22 23:49:43 mingyang Exp $
+// $Id: PhotonTools.cc,v 1.27 2012/05/25 19:41:11 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -625,8 +625,8 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
   // track iso worst vtx
   double trackIsoWorst04 = IsolationTools::PFChargedIsolation(ph, vtx, 0.4, 0.00, pfCol, &wVtxInd, vtxCol);
   
-  double combIso1 = ecalIso3+trackIsoSel03 - 0.17*rho;
-  double combIso2 = ecalIso4+trackIsoWorst04 - 0.40*rho;
+  double combIso1 = ecalIso3+trackIsoSel03 - 0.09*rho;
+  double combIso2 = ecalIso4+trackIsoWorst04 - 0.23*rho;
   
   double tIso1 = (combIso1) *50./ph->Et();
   double tIso2 = (combIso2) *50./(ph->MomVtx(vtxCol->At(wVtxInd)->Position()).Pt());
