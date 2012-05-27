@@ -39,7 +39,7 @@ void runHgg2012(const char *fileset    = "0000",
             const char *book       = "t2mit/filefi/028",
             const char *catalogDir = "/home/cmsprod/catalog",
             const char *outputName = "hgg",
-            int         nEvents    = 1000)
+            int         nEvents    = -1)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
