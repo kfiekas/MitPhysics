@@ -104,15 +104,24 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fApplyEleVeto                  (true),
   fInvertElectronVeto            (kFALSE),
   //MVA
-  fVariableType                  (10), //please use 4 which is the correct type
+  //fVariableType                  (10), 
+  //fEndcapWeights                 (gSystem->Getenv("CMSSW_BASE")+
+  //TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
+  //TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
+  //                              TString("weights.xml")),
+  //fBarrelWeights                 (gSystem->Getenv("CMSSW_BASE")+
+  //TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
+  //                              TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
+  //                              TString("weights.xml")),
+  fVariableType                  (11),
   fEndcapWeights                 (gSystem->Getenv("CMSSW_BASE")+
-                                  TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
-                                  TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
-                                  TString("weights.xml")),
+				  TString("/src/MitPhysics/data/PhotonIDMVA2012_Globe/")+
+				  TString("TMVA_EEpf_BDT")+
+				  TString("weights.xml")),
   fBarrelWeights                 (gSystem->Getenv("CMSSW_BASE")+
-                                  TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
-                                  TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
-                                  TString("weights.xml")),
+				  TString("/src/MitPhysics/data/PhotonIDMVA2012_Globe/")+
+				  TString("TMVA_EBpf_BDT")+
+				  TString("weights.xml")),
   fbdtCutBarrel                  (0.0744), //cuts give same eff (relative to presel) with cic
   fbdtCutEndcap                  (0.0959), //cuts give same eff (relative to presel) with cic
   fDoMCR9Scaling                 (kFALSE),
@@ -538,8 +547,8 @@ void PhotonPairSelector::Process()
 
 
     //compute id bdt values
-    Double_t bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho, fElectrons, fApplyEleVeto);
-    Double_t bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho, fElectrons, fApplyEleVeto);
+    Double_t bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho,fPFCands,fElectrons,fApplyEleVeto);
+    Double_t bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho,fPFCands,fElectrons,fApplyEleVeto);
 
     fixPh1st[iPair]->SetIdMva(bdt1);
     fixPh2nd[iPair]->SetIdMva(bdt2);
