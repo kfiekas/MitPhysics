@@ -1,14 +1,17 @@
-// $Id: MVATools.cc,v 1.9 2011/12/17 20:00:40 bendavid Exp $
+// $Id: MVATools.cc,v 1.10 2011/12/19 23:45:00 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/StableData.h"
+#include <TMath.h> 
 #include <TFile.h>
 #include <TRandom3.h>
 #include "TMVA/Tools.h"//MVA
 #include "TMVA/Reader.h"//MVA
+
 
 ClassImp(mithep::MVATools)
 
@@ -187,6 +190,23 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
       readers[i]->AddVariable( "PhiWidth", &PhiWidth );      
     }    
 
+    if(VariableType==1201){
+      readers[i]->AddVariable( "myphoton_pfchargedisogood03", &myphoton_pfchargedisogood03);
+      readers[i]->AddVariable( "myphoton_pfchargedisobad03", &myphoton_pfchargedisobad03); 
+      readers[i]->AddVariable( "myphoton_pfphotoniso03", &myphoton_pfphotoniso03 );
+      readers[i]->AddVariable( "myphoton_sieie", &myphoton_sieie ); 
+      readers[i]->AddVariable( "myphoton_sieip", &myphoton_sieip );
+      readers[i]->AddVariable( "myphoton_etawidth", &myphoton_etawidth ); 
+      readers[i]->AddVariable( "myphoton_phiwidth", &myphoton_phiwidth );
+      readers[i]->AddVariable( "myphoton_r9", &myphoton_r9 ); 
+      readers[i]->AddVariable( "myphoton_s4ratio", &myphoton_s4ratio );
+      readers[i]->AddVariable( "myphoton_SCeta", &myphoton_SCeta ); 
+      readers[i]->AddVariable( "event_rho", &event_rho );
+      if(i==0){
+	readers[i]->AddVariable( "myphoton_ESEffSigmaRR", &myphoton_ESEffSigmaRR);
+      } 
+    }
+    
   }
   
   fReaderEndcap->BookMVA("BDT method",EndcapWeights);
@@ -202,7 +222,7 @@ Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackC
   //initilize the bool value
   PassMVA=kFALSE;
   
-  Float_t photon_bdt =  MVATools::GetMVAbdtValue(p,vtx,trackCol,vtxCol, _tRho, els, applyElectronVeto);
+  Float_t photon_bdt =  MVATools::GetMVAbdtValueOld(p,vtx,trackCol,vtxCol, _tRho, els, applyElectronVeto);
   
   if (isbarrel) {
     if(bdt>bdtCutBarrel){
@@ -259,7 +279,7 @@ Int_t MVATools::PassElectronVetoInt(const Photon* p, const ElectronCol* els) {
 
 //--------------------------------------------------------------------------------------------------
 
-Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const ElectronCol* els, Bool_t applyElectronVeto) {
+Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const PFCandidateCol *fPFCands,const ElectronCol* els,Bool_t applyElectronVeto) {
   
   //get the variables used to compute MVA variables
   ecalIso3 = p->EcalRecHitIsoDr03();
@@ -320,7 +340,137 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   //spectator variables
   Pt_MVA=p->Pt();
   ScEta_MVA=p->SCluster()->Eta();
+
+  //
+
+  isbarrel = (fabs(ScEta_MVA)<1.4442);
   
+  //variable 1201
+  myphoton_pfchargedisogood03=IsolationTools::PFChargedIsolation(p,vtx,0.3,0,fPFCands);
+  myphoton_pfchargedisobad03=IsolationTools::PFChargedIsolation(p,vtx,0.3,0,fPFCands,&wVtxInd,vtxCol); 
+  myphoton_pfphotoniso03=IsolationTools::PFGammaIsolation(p,0.3,0,fPFCands);
+  myphoton_sieie=covIEtaIEta; 
+  myphoton_sieip=CoviEtaiPhi;
+  myphoton_etawidth=EtaWidth; 
+  myphoton_phiwidth=PhiWidth;
+  myphoton_r9=R9; 
+  myphoton_s4ratio=p->SCluster()->Seed()->E2x2()/p->SCluster()->Seed()->E5x5();
+  myphoton_SCeta=ScEta_MVA; 
+  event_rho= _tRho;
+
+  myphoton_ESEffSigmaRR=-99;
+
+  if(!isbarrel){
+    myphoton_ESEffSigmaRR=float(sqrt((p->SCluster()->PsEffWidthSigmaXX())*(p->SCluster()->PsEffWidthSigmaXX())+(p->SCluster()->PsEffWidthSigmaYY())*(p->SCluster()->PsEffWidthSigmaYY())));
+  }
+        
+  if (isbarrel) {
+    reader = fReaderBarrel;
+  }
+  else {
+    reader = fReaderEndcap;
+  }
+  
+  assert(reader); 
+
+  bdt = reader->EvaluateMVA("BDT method");
+
+  /* printf("HoE: %f\n",HoE);
+  printf("covIEtaIEta: %f\n",covIEtaIEta);
+  printf("tIso1abs: %f\n",tIso1abs);
+  printf("tIso3abs: %f\n",tIso3abs);
+  printf("tIso2abs: %f\n",tIso2abs);
+  
+  printf("absIsoEcal: %f\n",absIsoEcal);
+  printf("absIsoHcal: %f\n",absIsoHcal);
+  printf("RelEMax: %f\n",RelEMax);
+  printf("RelETop: %f\n",RelETop);
+  printf("RelEBottom: %f\n",RelEBottom);
+  printf("RelELeft: %f\n",RelELeft);
+  printf("RelERight: %f\n",RelERight);
+  printf("RelE2x5Max: %f\n",RelE2x5Max);
+  printf("RelE2x5Top: %f\n",RelE2x5Top);
+  printf("RelE2x5Bottom: %f\n",RelE2x5Bottom);
+  printf("RelE2x5Left: %f\n",RelE2x5Left);
+  printf("RelE2x5Right;: %f\n",RelE2x5Right);
+  printf("RelE5x5: %f\n",RelE5x5);
+  
+  printf("EtaWidth: %f\n",EtaWidth);
+  printf("PhiWidth: %f\n",PhiWidth);
+  printf("CoviEtaiPhi: %f\n",CoviEtaiPhi);
+  printf("CoviPhiiPhi: %f\n",CoviPhiiPhi);
+  
+  if (!isbarrel) {
+    printf("RelPreshowerEnergy: %f\n",RelPreshowerEnergy);
+    }*/
+  
+  return bdt;
+}
+
+Float_t MVATools::GetMVAbdtValueOld(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,Bool_t applyElectronVeto) {
+  
+  //get the variables used to compute MVA variables
+  ecalIso3 = p->EcalRecHitIsoDr03();
+  ecalIso4 = p->EcalRecHitIsoDr04();
+  hcalIso4 = p->HcalTowerSumEtDr04();
+  
+  wVtxInd = 0;
+  
+  trackIso1 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, NULL, NULL, (!applyElectronVeto ? els : NULL) );//Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
+    
+  // track iso worst vtx
+  trackIso2 = IsolationTools::CiCTrackIsolation(p,vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0, trackCol, &wVtxInd,vtxCol, (!applyElectronVeto ? els : NULL) );
+  
+  combIso1 = ecalIso3+hcalIso4+trackIso1 - 0.17*_tRho;
+  combIso2 = ecalIso4+hcalIso4+trackIso2 - 0.52*_tRho;
+  
+  RawEnergy = p->SCluster()->RawEnergy();
+  
+  ScEta = p->SCluster()->Eta();
+  
+  //mva varialbes v1 and v2
+  tIso1 = (combIso1) *50./p->Et();
+  tIso3 = (trackIso1)*50./p->Et();
+  tIso2 = (combIso2) *50./(p->MomVtx(vtxCol->At(wVtxInd)->Position()).Pt());
+  RelIsoEcal=(ecalIso3-0.17*_tRho)/p->Et();
+  RelIsoHcal=(hcalIso4-0.17*_tRho)/p->Et();
+
+  //compute mva variables for v3
+  HoE = p->HadOverEm();
+  covIEtaIEta = p->CoviEtaiEta();
+  tIso1abs = combIso1;
+  tIso3abs = trackIso1;
+  tIso2abs = combIso2;
+  R9 = p->R9();
+
+  absIsoEcal=(ecalIso3-0.17*_tRho);
+  absIsoHcal=(hcalIso4-0.17*_tRho);
+  RelEMax=p->SCluster()->Seed()->EMax()/RawEnergy;
+  RelETop=p->SCluster()->Seed()->ETop()/RawEnergy;
+  RelEBottom=p->SCluster()->Seed()->EBottom()/RawEnergy;
+  RelELeft=p->SCluster()->Seed()->ELeft()/RawEnergy;
+  RelERight=p->SCluster()->Seed()->ERight()/RawEnergy;
+  RelE2x5Max=p->SCluster()->Seed()->E2x5Max()/RawEnergy;
+  RelE2x5Top=p->SCluster()->Seed()->E2x5Top()/RawEnergy;
+  RelE2x5Bottom=p->SCluster()->Seed()->E2x5Bottom()/RawEnergy;
+  RelE2x5Left=p->SCluster()->Seed()->E2x5Left()/RawEnergy;
+  RelE2x5Right=p->SCluster()->Seed()->E2x5Right()/RawEnergy;
+  RelE5x5=p->SCluster()->Seed()->E5x5()/RawEnergy;
+  
+  EtaWidth=p->EtaWidth();
+  PhiWidth=p->PhiWidth();
+  CoviEtaiPhi=p->SCluster()->Seed()->CoviEtaiPhi(); 
+  CoviPhiiPhi=p->SCluster()->Seed()->CoviPhiiPhi();
+
+  RelPreshowerEnergy=p->SCluster()->PreshowerEnergy()/RawEnergy;
+  NVertexes=vtxCol->GetEntries();
+  
+  //spectator variables
+  Pt_MVA=p->Pt();
+  ScEta_MVA=p->SCluster()->Eta();
+
+  //
+
   isbarrel = (fabs(ScEta_MVA)<1.4442);
   
   if (isbarrel) {
