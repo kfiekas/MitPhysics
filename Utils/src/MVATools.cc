@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.10 2011/12/19 23:45:00 bendavid Exp $
+// $Id: MVATools.cc,v 1.11 2012/05/27 16:39:19 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -222,7 +222,7 @@ Bool_t MVATools::PassMVASelection(const Photon* p,const Vertex* vtx,const TrackC
   //initilize the bool value
   PassMVA=kFALSE;
   
-  Float_t photon_bdt =  MVATools::GetMVAbdtValueOld(p,vtx,trackCol,vtxCol, _tRho, els, applyElectronVeto);
+  Float_t photon_bdt =  MVATools::GetMVAbdtValue_2011(p,vtx,trackCol,vtxCol, _tRho, els, applyElectronVeto);
   
   if (isbarrel) {
     if(bdt>bdtCutBarrel){
@@ -279,7 +279,7 @@ Int_t MVATools::PassElectronVetoInt(const Photon* p, const ElectronCol* els) {
 
 //--------------------------------------------------------------------------------------------------
 
-Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const PFCandidateCol *fPFCands,const ElectronCol* els,Bool_t applyElectronVeto) {
+Float_t MVATools::GetMVAbdtValue_2012_globe(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const PFCandidateCol *fPFCands,const ElectronCol* els,Bool_t applyElectronVeto) {
   
   //get the variables used to compute MVA variables
   ecalIso3 = p->EcalRecHitIsoDr03();
@@ -407,7 +407,7 @@ Float_t MVATools::GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCo
   return bdt;
 }
 
-Float_t MVATools::GetMVAbdtValueOld(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,Bool_t applyElectronVeto) {
+Float_t MVATools::GetMVAbdtValue_2011(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els,Bool_t applyElectronVeto) {
   
   //get the variables used to compute MVA variables
   ecalIso3 = p->EcalRecHitIsoDr03();

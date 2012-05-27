@@ -45,8 +45,8 @@ namespace mithep {
     void InitializeMVA(int VariableType, TString EndcapWeights,TString BarrelWeights);
     Bool_t PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,Float_t bdtCutBarrel, Float_t bdtCutEndcap, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
     Int_t PassElectronVetoInt(const Photon* p, const ElectronCol* els);
-    Float_t GetMVAbdtValueOld(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
-    Float_t GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const PFCandidateCol *fPFCands,const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
+    Float_t GetMVAbdtValue_2011(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
+    Float_t GetMVAbdtValue_2012_globe(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const PFCandidateCol *fPFCands,const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
       
       TMVA::Reader *fReaderEndcap;
       TMVA::Reader *fReaderBarrel;    

@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.20 2012/05/27 16:09:33 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.21 2012/05/27 17:02:19 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -62,6 +62,10 @@ namespace mithep
       kCiCMVAVtxSelection,
       kMetSigVtxSelection
     };
+    enum IdMVA {
+      k2011IdMVA = 0,
+      k2012IdMVA_globe
+    };
 
     // setting all the input Names
     void                SetInputPhotonsName(const char *n){ fPhotonBranchName= n;        }
@@ -80,6 +84,7 @@ namespace mithep
     // set the type of selection
     void                SetPhotonSelType(const char *type){ fPhotonSelType    = type;    }
     void                SetVertexSelType(const char *type){ fVertexSelType    = type;    }
+    void                SetIdMVAType(const char *type)    { fIdMVAType        = type;    } 
 
     // get/set the Names for the output Photon Collection
     const char         *GetOutputName()             const { return fGoodPhotonsName;     }   
@@ -200,6 +205,10 @@ namespace mithep
     PhotonSelection     fPhSelType;
     VertexSelection     fVtxSelType;    
 
+    // Id Type
+    TString             fIdMVAType;
+    IdMVA               fIdType;
+
     // Basic Pre-Selection kinematics
     Double_t            fPhotonPtMin;          // min pt cut fro PRE-SELECTION!
     Double_t            fPhotonEtaMax;         // max eta cut for PRE-SELECTION!
@@ -273,9 +282,12 @@ namespace mithep
     Bool_t                fInvertElectronVeto; //=true (invert ele veto, for cic sel only atm)
    
     //MVA
-    int                   fVariableType;
-    TString               fEndcapWeights;
-    TString               fBarrelWeights;
+    int                   fVariableType_2011;
+    TString               fEndcapWeights_2011;
+    TString               fBarrelWeights_2011;
+    int                   fVariableType_2012_globe;
+    TString               fEndcapWeights_2012_globe;
+    TString               fBarrelWeights_2012_globe;  
     MVATools              fTool;
     Float_t               fbdtCutBarrel;
     Float_t               fbdtCutEndcap;

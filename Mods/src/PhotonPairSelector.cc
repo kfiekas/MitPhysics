@@ -49,6 +49,10 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fVertexSelType                 ("StdSelection"),
   fPhSelType                     (kNoPhSelection),
   fVtxSelType                    (kStdVtxSelection),
+  //-----------------------------------------
+  // Id Types
+  fIdMVAType                     ("2011IdMVA"),
+  fIdType                        (k2011IdMVA),
   // ----------------------------------------
   fPhotonPtMin                   (20.0),
   fPhotonEtaMax                  (2.5),
@@ -104,23 +108,23 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fApplyEleVeto                  (true),
   fInvertElectronVeto            (kFALSE),
   //MVA
-  //fVariableType                  (10), 
-  //fEndcapWeights                 (gSystem->Getenv("CMSSW_BASE")+
-  //TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
-  //TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
-  //                              TString("weights.xml")),
-  //fBarrelWeights                 (gSystem->Getenv("CMSSW_BASE")+
-  //TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
-  //                              TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
-  //                              TString("weights.xml")),
-  fVariableType                  (11),
-  fEndcapWeights                 (gSystem->Getenv("CMSSW_BASE")+
-				  TString("/src/MitPhysics/data/PhotonIDMVA2012_Globe/")+
-				  TString("TMVA_EEpf_BDT")+
+  fVariableType_2011             (10), 
+  fEndcapWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
+				  TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
+				  TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
 				  TString("weights.xml")),
-  fBarrelWeights                 (gSystem->Getenv("CMSSW_BASE")+
-				  TString("/src/MitPhysics/data/PhotonIDMVA2012_Globe/")+
-				  TString("TMVA_EBpf_BDT")+
+  fBarrelWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
+				  TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
+				  TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
+				  TString("weights.xml")),
+  fVariableType_2012_globe       (1201),
+  fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+				  TString("/src/MitPhysics/data/")+
+				  TString("TMVA_EEpf_BDT_globe.")+
+				  TString("weights.xml")),
+  fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+				  TString("/src/MitPhysics/data/")+
+				  TString("TMVA_EBpf_BDT_globe.")+
 				  TString("weights.xml")),
   fbdtCutBarrel                  (0.0744), //cuts give same eff (relative to presel) with cic
   fbdtCutEndcap                  (0.0959), //cuts give same eff (relative to presel) with cic
@@ -550,12 +554,24 @@ void PhotonPairSelector::Process()
 
 
     //compute id bdt values
-    Double_t bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho,fPFCands,fElectrons,fApplyEleVeto);
-    Double_t bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho,fPFCands,fElectrons,fApplyEleVeto);
+    Double_t bdt1;
+    Double_t bdt2;
 
-    fixPh1st[iPair]->SetIdMva(bdt1);
-    fixPh2nd[iPair]->SetIdMva(bdt2);
-
+    switch (fIdType) {
+    case k2011IdMVA:
+      bdt1 = fTool.GetMVAbdtValue_2011(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho,fElectrons,fApplyEleVeto);
+      bdt2 = fTool.GetMVAbdtValue_2011(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho,fElectrons,fApplyEleVeto);
+      fixPh1st[iPair]->SetIdMva(bdt1);
+      fixPh2nd[iPair]->SetIdMva(bdt2);
+      break;
+      
+    case k2012IdMVA_globe:
+      bdt1 = fTool.GetMVAbdtValue_2012_globe(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
+      bdt2 = fTool.GetMVAbdtValue_2012_globe(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
+      fixPh1st[iPair]->SetIdMva(bdt1);
+      fixPh2nd[iPair]->SetIdMva(bdt2);
+      break;
+    }
 
     //printf("applying id\n");
 
@@ -761,7 +777,16 @@ void PhotonPairSelector::SlaveBegin()
     std::cerr<<" Vertex Seclection "<<fVertexSelType<<" not implemented."<<std::endl;
     return;
   }
-
+  
+  if      (fIdMVAType.CompareTo("2011IdMVA") == 0)
+    fIdType =       k2011IdMVA;
+  else if (fIdMVAType.CompareTo("2012IdMVA_globe") == 0)
+    fIdType =       k2012IdMVA_globe;
+  else {
+    std::cerr<<" Id MVA "<<fIdMVAType<<" not implemented."<<std::endl;
+    return;
+  }
+  
   if (fIsData)
     fPhFixFile = gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/PhotonFixGRPV22.dat");
   else
@@ -769,7 +794,16 @@ void PhotonPairSelector::SlaveBegin()
 
   printf("initialize photon pair selector\n");
 
-  fTool.InitializeMVA(fVariableType,fEndcapWeights,fBarrelWeights);
+  switch (fIdType) {
+  case k2011IdMVA:
+    fTool.InitializeMVA(fVariableType_2011,fEndcapWeights_2011,fBarrelWeights_2011);
+    break;
+    
+  case k2012IdMVA_globe:
+    fTool.InitializeMVA(fVariableType_2012_globe,fEndcapWeights_2012_globe,fBarrelWeights_2012_globe); 
+    break;
+  }
+  
   fVtxTools.InitP();
   
   if (fVtxSelType==kMetSigVtxSelection) {
