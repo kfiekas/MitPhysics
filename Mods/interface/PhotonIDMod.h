@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.24 2011/12/11 00:03:04 bendavid Exp $
+// $Id: PhotonIDMod.h,v 1.25 2012/01/13 15:27:29 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -23,6 +23,7 @@
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/PileupInfoCol.h"
 #include "MitAna/DataTree/interface/MCParticleCol.h"
+#include "MitAna/DataTree/interface/PFCandidateCol.h"
 
 #include "MitPhysics/Utils/interface/MVATools.h"
 
@@ -107,8 +108,10 @@ namespace mithep
         kLoose,             //"Loose"
         kLooseEM,           //"LooseEM"
 	kBaseLineCiC,        //"2011" Hgg BaseLine CiC
+	kBaseLineCiCPF,        //"2012" Hgg BaseLine CiC
 	kMITMVAId,          // MingMing MVA ID
 	kMITPhSelection,    //MIT loose preselection (for mva)
+	kMITPFPhSelection,    //MIT loose preselection (for mva)
         kCustomId           //"Custom"
       };
 
@@ -136,6 +139,7 @@ namespace mithep
       TString             fPVName;
       TString             fMCParticleName;
       TString             fPileUpName;
+      TString             fPFCandsName;
       TString             fPhotonIDType;         //type of photon identification we impose
       TString             fPhotonIsoType;        //type of photon isolation we impose
       Double_t            fPhotonPtMin;          //min pt cut
@@ -171,6 +175,7 @@ namespace mithep
       const VertexCol*    fPV;                   //!
       const MCParticleCol          *fMCParticles;//!
       const PileupInfoCol          *fPileUp;     //!  
+      const PFCandidateCol          *fPFCands;     //!  
 
       Double_t fbdtCutBarrel;
       Double_t fbdtCutEndcap;

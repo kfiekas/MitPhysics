@@ -98,7 +98,7 @@ void PhotonMvaMod::Process()
   if (fPhotons->GetEntries()<2) return;
   
   LoadEventObject(fPVName,             fPV);    
-
+  LoadEventObject(fPileUpDenName,      fPileUpDen);    
 
   // ------------------------------------------------------------
   // here we'll store the preselected Photons (and which CiCCategory they are...)

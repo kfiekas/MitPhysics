@@ -191,6 +191,9 @@ void PhotonPairSelector::Process()
   Float_t rho = -99.;
   if (fPileUpDen->GetEntries() > 0)
     rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
+  Float_t rho2012 = -99;
+  if (fPileUpDen->At(0)->RhoKt6PFJets()>0.) rho2012 = fPileUpDen->At(0)->RhoKt6PFJets();
+  else rho2012 = fPileUpDen->At(0)->Rho();
   const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));
 
   // ------------------------------------------------------------
@@ -573,6 +576,25 @@ void PhotonPairSelector::Process()
         pass2 = PhotonTools::PassCiCSelection(fixPh2nd[iPair], theVtx[iPair], fTracks,
                                               fElectrons, fPV, rho, trailptcut, fApplyEleVeto);
       break;
+    case kCiCPFPhSelection:
+      
+      // loose preselection for mva
+      pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
+	PhotonTools::PassSinglePhotonPreselPFISO(fixPh1st[iPair],fElectrons,fConversions,bsp,
+					    fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+					    fInvertElectronVeto);
+      if (pass1)
+	pass2 = fixPh2nd[iPair]->Pt() > trailptcut &&
+	  PhotonTools::PassSinglePhotonPreselPFISO(fixPh2nd[iPair],fElectrons,fConversions,bsp,
+					      fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+					      fInvertElectronVeto);      
+      
+      pass1 = pass1 && PhotonTools::PassCiCPFIsoSelection(fixPh1st[iPair], theVtx[iPair], fPFCands,
+                                             fPV, rho2012, leadptcut);
+      if (pass1)
+        pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
+                                               fPV, rho2012, trailptcut);
+      break;      
     case kMVAPhSelection://MVA
       pass1 = fixPh1st[iPair]->Pt()>leadptcut                                              &&
 	PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,
@@ -591,25 +613,38 @@ void PhotonPairSelector::Process()
       // loose preselection for mva
       pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
 	PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,
-					    fTracks,theVtx[iPair],rho,fApplyEleVeto,
+					    fTracks,theVtx[iPair],rho2012,fApplyEleVeto,
 					    fInvertElectronVeto);
       if (pass1)
 	pass2 = fixPh2nd[iPair]->Pt() > trailptcut &&
 	  PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,
-					      fTracks,theVtx[iPair],rho,fApplyEleVeto,
+					      fTracks,theVtx[iPair],rho2012,fApplyEleVeto,
 					      fInvertElectronVeto);
 
       break;
+    case kMITPFPhSelection:
+      // loose preselection for mva
+      pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
+	PhotonTools::PassSinglePhotonPreselPFISO(fixPh1st[iPair],fElectrons,fConversions,bsp,
+					    fTracks,theVtx[iPair],rho,fPFCands,fApplyEleVeto,
+					    fInvertElectronVeto);
+      if (pass1)
+	pass2 = fixPh2nd[iPair]->Pt() > trailptcut &&
+	  PhotonTools::PassSinglePhotonPreselPFISO(fixPh2nd[iPair],fElectrons,fConversions,bsp,
+					      fTracks,theVtx[iPair],rho,fPFCands,fApplyEleVeto,
+					      fInvertElectronVeto);
+
+      break;      
     default:
       pass1 = true;
       pass2 = true;
     }
 
     //match to good electrons if requested
-    if (fInvertElectronVeto) {
-      pass1 &= !PhotonTools::PassElectronVeto(fixPh1st[iPair],fGoodElectrons);
-      pass2 &= !PhotonTools::PassElectronVeto(fixPh2nd[iPair],fGoodElectrons);
-    }
+//     if (fInvertElectronVeto) {
+//       pass1 &= !PhotonTools::PassElectronVeto(fixPh1st[iPair],fGoodElectrons);
+//       pass2 &= !PhotonTools::PassElectronVeto(fixPh2nd[iPair],fGoodElectrons);
+//     }
     // finally, if both Photons pass the selections, add the pair to the passing pairs
     if (pass1 && pass2)
       passPairs.push_back(iPair);
@@ -697,12 +732,20 @@ void PhotonPairSelector::SlaveBegin()
   // determine photon selection type
   if      (fPhotonSelType.CompareTo("CiCSelection") == 0)
     fPhSelType =       kCiCPhSelection;
+  else if      (fPhotonSelType.CompareTo("CiCPFSelection") == 0)
+    fPhSelType =       kCiCPFPhSelection;  
   else if (fPhotonSelType.CompareTo("MVASelection") == 0) //MVA
     fPhSelType =       kMVAPhSelection;
   else if (fPhotonSelType.CompareTo("MITSelection") == 0)
     fPhSelType =       kMITPhSelection;
-  else
+  else if (fPhotonSelType.CompareTo("MITPFSelection") == 0)
+    fPhSelType =       kMITPFPhSelection;  
+  else if (fPhotonSelType.CompareTo("NoSelection") == 0)
     fPhSelType =       kNoPhSelection;
+  else {
+    std::cerr<<" Photon Seclection "<<fPhotonSelType<<" not implemented."<<std::endl;
+    return;    
+  }
 
   if      (fVertexSelType.CompareTo("CiCSelection") == 0)
     fVtxSelType =       kCiCVtxSelection;

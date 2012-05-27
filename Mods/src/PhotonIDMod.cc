@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.29 2011/12/19 23:45:00 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.30 2012/01/13 15:27:28 fabstoec Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -30,6 +30,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   // MC specific stuff...
   fMCParticleName    (Names::gkMCPartBrn),
   fPileUpName        (Names::gkPileupInfoBrn),
+  fPFCandsName       ("PFCandidates"),
 
   fPhotonIDType      ("Custom"),
   fPhotonIsoType     ("Custom"),
@@ -69,6 +70,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPV(0),
   fMCParticles       (0),
   fPileUp            (0),
+  fPFCands           (0),
 
   // MVA ID Stuff
   fbdtCutBarrel      (0.0744), //cuts give the same effiiciency (relative to preselection) with cic
@@ -105,6 +107,7 @@ void PhotonIDMod::Process()
   
   const BaseVertex *bsp = NULL;
   Double_t _tRho = -1.;
+  Float_t rho2012 = -99;
   const TriggerObjectCol *trigObjs = 0;  
   if (fPhotons->GetEntries()>0) {
     LoadEventObject(fTrackBranchName,    fTracks);
@@ -114,6 +117,8 @@ void PhotonIDMod::Process()
     LoadEventObject(fElectronName,       fElectrons);
     LoadEventObject(fGoodElectronName,   fGoodElectrons);
     LoadEventObject(fPVName,             fPV);
+    LoadEventObject(fPFCandsName,             fPFCands);
+
     
     if(fBeamspots->GetEntries() > 0)
       bsp = fBeamspots->At(0);
@@ -121,6 +126,8 @@ void PhotonIDMod::Process()
     if(fPileUpDen->GetEntries() > 0)
       _tRho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
 
+    if (fPileUpDen->At(0)->RhoKt6PFJets()>0.) rho2012 = fPileUpDen->At(0)->RhoKt6PFJets();
+    else rho2012 = fPileUpDen->At(0)->Rho();
     
     //get trigger object collection if trigger matching is enabled
     if (fApplyTriggerMatching) {
@@ -177,6 +184,12 @@ void PhotonIDMod::Process()
 	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }
+    
+    if(fPhIdType == kBaseLineCiCPF) {
+      if( PhotonTools::PassSinglePhotonPreselPFISO(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) && PhotonTools::PassCiCPFIsoSelection(ph, fPV->At(0), fPFCands, fPV, rho2012, fPhotonPtMin) )
+	GoodPhotons->AddOwned(ph);
+      continue; // go to next Photons
+    }    
     // ---------------------------------------------------------------------
 
     //loose photon preselection for subsequent mva
@@ -187,6 +200,14 @@ void PhotonIDMod::Process()
       continue;
     }
 
+    //loose photon preselection for subsequent mva
+    if(fPhIdType == kMITPFPhSelection ) {
+      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPreselPFISO(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) ) {
+        GoodPhotons->AddOwned(ph);
+      }
+      continue;
+    }    
+    
     // add MingMings MVA ID on single Photon level
     if(fPhIdType == kMITMVAId ) {
       if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _tRho ,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto) ) {
@@ -360,6 +381,7 @@ void PhotonIDMod::SlaveBegin()
   ReqEventObject(fGoodElectronName,       fGoodElectrons,   fGoodElectronsFromBranch);  
   ReqEventObject(fPVName, fPV, fPVFromBranch);
   ReqEventObject(fPileUpDenName,      fPileUpDen, kTRUE);
+  ReqEventObject(fPFCandsName,      fPFCands, kTRUE);
 
   if (!fIsData) {
     ReqBranch(fPileUpName,            fPileUp);
@@ -378,6 +400,10 @@ void PhotonIDMod::SlaveBegin()
     fPhIdType = kBaseLineCiC;
     fPhotonIsoType = "NoIso";
   }
+  else if (fPhotonIDType.CompareTo("BaseLineCiCPF") == 0) {
+    fPhIdType = kBaseLineCiCPF;
+    fPhotonIsoType = "NoIso";
+  }  
   else if (fPhotonIDType.CompareTo("MITMVAId") == 0) {
     fPhIdType = kMITMVAId;
     fPhotonIsoType = "NoIso";
@@ -385,6 +411,10 @@ void PhotonIDMod::SlaveBegin()
   }
   else if (fPhotonIDType.CompareTo("MITSelection") == 0)  {
     fPhIdType = kMITPhSelection;
+    fPhotonIsoType = "NoIso";    
+  }
+  else if (fPhotonIDType.CompareTo("MITPFSelection") == 0)  {
+    fPhIdType = kMITPFPhSelection;
     fPhotonIsoType = "NoIso";    
   }
   else {
