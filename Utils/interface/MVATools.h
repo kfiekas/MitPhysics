@@ -25,7 +25,7 @@
 #include "MitAna/DataTree/interface/SuperCluster.h"
 #include "MitAna/DataTree/interface/SuperClusterCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
-
+#include "MitAna/DataTree/interface/PFCandidateCol.h"
 
 class TRandom3;
 namespace TMVA {//MVA
@@ -45,7 +45,8 @@ namespace mithep {
     void InitializeMVA(int VariableType, TString EndcapWeights,TString BarrelWeights);
     Bool_t PassMVASelection(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,Float_t bdtCutBarrel, Float_t bdtCutEndcap, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
     Int_t PassElectronVetoInt(const Photon* p, const ElectronCol* els);
-      Float_t GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
+    Float_t GetMVAbdtValueOld(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho,const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
+    Float_t GetMVAbdtValue(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const PFCandidateCol *fPFCands,const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
       
       TMVA::Reader *fReaderEndcap;
       TMVA::Reader *fReaderBarrel;    
@@ -122,7 +123,21 @@ namespace mithep {
       
       // check which category it is ...
       int _tCat;
-      
+
+      //1201 variable
+      float myphoton_pfchargedisogood03;
+      float myphoton_pfchargedisobad03; 
+      float myphoton_pfphotoniso03;
+      float myphoton_sieie; 
+      float myphoton_sieip;
+      float myphoton_etawidth; 
+      float myphoton_phiwidth;
+      float myphoton_r9; 
+      float myphoton_s4ratio;
+      float myphoton_SCeta; 
+      float event_rho;
+      float myphoton_ESEffSigmaRR;
+
       //MVA  
       Bool_t PassMVA;
       TMVA::Reader *reader;
