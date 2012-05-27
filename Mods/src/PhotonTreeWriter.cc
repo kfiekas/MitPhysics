@@ -526,7 +526,7 @@ void PhotonTreeWriter::Process()
         selvtx = phHard->PV();
       }
      
-
+      if (0) //disable for now for performance reasons
       {
         Met mmet = fMVAMet.GetMet(  false,
                                   0.,0.,0.,
@@ -560,6 +560,7 @@ void PhotonTreeWriter::Process()
         fDiphotonEvent->mvametselsig = metsig;
       }
       
+      if (0) //disable for now for performance reasons
       {
         Met mmet = fMVAMet.GetMet(  false,
                                   0.,0.,0.,
