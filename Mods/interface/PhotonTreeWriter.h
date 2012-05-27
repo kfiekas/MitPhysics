@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.12 2012/05/03 08:45:29 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.16 2012/05/14 16:51:56 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -29,17 +29,19 @@
 #include "MitAna/DataTree/interface/GenJetCol.h"
 #include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
+#include "MitPhysics/Utils/interface/MVAMet.h"
+
 
 class TNtuple;
 class TRandom3;
 
 namespace mithep 
 {
-  
+  template <int NClus=16>
   class PhotonTreeWriterPhoton
   {
     public:  
-      void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
+      void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, Bool_t fillclusterarrays, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
       Float_t Ecor()    const { return ecor;    };
       Float_t Ecorerr() const { return ecorerr; };
       Float_t Ecorele()    const { return ecorele;    };
@@ -57,6 +59,8 @@ namespace mithep
       Float_t sce;
       Float_t scrawe;
       Float_t scpse;
+      Float_t scpssigmaxx;
+      Float_t scpssigmayy;
       Float_t sceta;
       Float_t scphi;
       UInt_t  scnclusters;
@@ -64,6 +68,7 @@ namespace mithep
       Float_t scetawidth;
       Float_t scphiwidth;
       Float_t hovere;
+      Float_t hoveretower;
       Float_t sigietaieta;
       Bool_t  isbarrel;
       Bool_t  isr9reco;
@@ -270,6 +275,11 @@ namespace mithep
       Float_t pfscrawe;
       Float_t pfsceta;
       Float_t pfscphi;
+      UInt_t  pfscnclusters;
+      UInt_t  pfscnhits;
+      Float_t pfscetawidth;
+      Float_t pfscphiwidth;
+      UInt_t  pfscnpsclusters;
       
       //generator level quantities
       UChar_t ispromptgen;
@@ -280,6 +290,87 @@ namespace mithep
       Float_t genz;
       Int_t   pdgid;
       Int_t   motherpdgid;
+      
+      Float_t ebcs[NClus];
+      Float_t etabcs[NClus];
+      Float_t phibcs[NClus];
+      Int_t ietabcs[NClus];
+      Int_t iphibcs[NClus];
+      Int_t ixbcs[NClus];
+      Int_t iybcs[NClus];
+      Float_t etacrybcs[NClus];
+      Float_t phicrybcs[NClus];
+      Float_t xcrybcs[NClus];
+      Float_t ycrybcs[NClus];
+      Float_t sigietaietabcs[NClus];
+      Float_t sigiphiphibcs[NClus];
+      Float_t covietaiphibcs[NClus];
+      Float_t sigetaetabcs[NClus];
+      Float_t sigphiphibcs[NClus];
+      Float_t covetaphibcs[NClus];      
+      Float_t e3x3bcs[NClus];
+      Float_t e5x5bcs[NClus];            
+      Float_t emaxbcs[NClus];
+      Float_t e2ndbcs[NClus];
+      Float_t etopbcs[NClus];
+      Float_t ebottombcs[NClus];
+      Float_t eleftbcs[NClus];
+      Float_t erightbcs[NClus];
+      Float_t e1x3bcs[NClus];
+      Float_t e3x1bcs[NClus];
+      Float_t e1x5bcs[NClus];
+      Float_t e2x2bcs[NClus];
+      Float_t e4x4bcs[NClus];
+      Float_t e2x5maxbcs[NClus];
+      Float_t e2x5topbcs[NClus];
+      Float_t e2x5bottombcs[NClus];
+      Float_t e2x5leftbcs[NClus];
+      Float_t e2x5rightbcs[NClus];          
+      UInt_t  nhitsbcs[NClus];      
+      
+      Float_t epfbcs[NClus];
+      Float_t etapfbcs[NClus];
+      Float_t phipfbcs[NClus];
+      Int_t ietapfbcs[NClus];
+      Int_t iphipfbcs[NClus];
+      Int_t ixpfbcs[NClus];
+      Int_t iypfbcs[NClus];
+      Float_t etacrypfbcs[NClus];
+      Float_t phicrypfbcs[NClus];
+      Float_t xcrypfbcs[NClus];
+      Float_t ycrypfbcs[NClus];
+      Float_t sigietaietapfbcs[NClus];
+      Float_t sigiphiphipfbcs[NClus];
+      Float_t covietaiphipfbcs[NClus];
+      Float_t sigetaetapfbcs[NClus];
+      Float_t sigphiphipfbcs[NClus];
+      Float_t covetaphipfbcs[NClus];      
+      Float_t e3x3pfbcs[NClus];
+      Float_t e5x5pfbcs[NClus];            
+      Float_t emaxpfbcs[NClus];
+      Float_t e2ndpfbcs[NClus];
+      Float_t etoppfbcs[NClus];
+      Float_t ebottompfbcs[NClus];
+      Float_t eleftpfbcs[NClus];
+      Float_t erightpfbcs[NClus];
+      Float_t e1x3pfbcs[NClus];
+      Float_t e3x1pfbcs[NClus];
+      Float_t e1x5pfbcs[NClus];
+      Float_t e2x2pfbcs[NClus];
+      Float_t e4x4pfbcs[NClus];
+      Float_t e2x5maxpfbcs[NClus];
+      Float_t e2x5toppfbcs[NClus];
+      Float_t e2x5bottompfbcs[NClus];
+      Float_t e2x5leftpfbcs[NClus];
+      Float_t e2x5rightpfbcs[NClus];          
+      UInt_t  nhitspfbcs[NClus];      
+      
+      Float_t epsc[100];
+      Float_t etapsc[100];
+      Float_t phipsc[100];
+      UChar_t planepsc[100];
+      
+      
   };
   
   class PhotonTreeWriterDiphotonEvent
@@ -330,6 +421,8 @@ namespace mithep
       Int_t eleNinnerHits;     
       // -----------------------------------------
       Float_t rho;
+      Float_t rho25;
+      Float_t rhoold;
       Float_t genHiggspt;
       Float_t genHiggsZ;
       Float_t genmass;
@@ -387,7 +480,21 @@ namespace mithep
       Float_t pfmetphi;
       Float_t pfmetx;
       Float_t pfmety;
+      
+      Float_t mvametsel;
+      Float_t mvametselphi;
+      Float_t mvametselx;
+      Float_t mvametsely;
+      Float_t mvametselsig;
+      
+      Float_t mvametfirst;
+      Float_t mvametfirstphi;
+      Float_t mvametfirstx;
+      Float_t mvametfirsty;      
+      Float_t mvametfirstsig;
+      
       Double_t spfMet;
+
       UChar_t  ismc;
       
       //corrected quantities from PhotonFix corrections
@@ -438,7 +545,7 @@ namespace mithep
       Float_t zeppenfeld;
       Float_t dphidijetgg;
       
-      PhotonTreeWriterPhoton photons[2];
+      PhotonTreeWriterPhoton<16> photons[2];
   };
   
   class PhotonTreeWriter : public BaseMod
@@ -489,12 +596,15 @@ namespace mithep
     void                SetWriteDiphotonTree(Bool_t b)       { fWriteDiphotonTree = b; }
     void                SetWriteSingleTree(Bool_t b)         { fWriteSingleTree = b; }
     void                SetLoopOnGoodElectrons(Bool_t b)     { fLoopOnGoodElectrons = b; }
+    void                SetEnablePFPhotons(Bool_t b)         { fEnablePFPhotons = b; }
     void                SetExcludeSinglePrompt(Bool_t b)     { fExcludeSinglePrompt = b; }
     void                SetExcludeDoublePrompt(Bool_t b)     { fExcludeDoublePrompt = b; }
 
     void                SetLeptonTagElectronsName(TString name) { fLeptonTagElectronsName = name; }
     void                SetLeptonTagMuonsName    (TString name) { fLeptonTagMuonsName     = name; }
 
+    void                SetFillClusterArrays(Bool_t b)          { fFillClusterArrays = b; }
+    
   protected:
     void                Process();
     void                SlaveBegin();
@@ -505,6 +615,7 @@ namespace mithep
 
     // Names for the input Collections
     TString             fPhotonBranchName;
+    TString             fPFPhotonName;
     TString             fElectronName;
     TString             fGoodElectronName;
     TString             fConversionName;
@@ -536,6 +647,7 @@ namespace mithep
     Bool_t              fPFJetsFromBranch;
 
     const PhotonCol               *fPhotons;
+    const PhotonCol               *fPFPhotons;
     const ElectronCol             *fElectrons;
     const ElectronCol             *fGoodElectrons;    
     const DecayParticleCol        *fConversions;
@@ -561,6 +673,8 @@ namespace mithep
     Bool_t                         fWriteDiphotonTree;
     Bool_t                         fWriteSingleTree;
 
+    Bool_t                         fEnablePFPhotons;
+    
     Bool_t                         fExcludeSinglePrompt;
     Bool_t                         fExcludeDoublePrompt;
     
@@ -570,6 +684,8 @@ namespace mithep
     Bool_t                         fApplyBTag;
     Bool_t                         fApplyPFMetCorrections;
 
+    Bool_t                         fFillClusterArrays;
+    
     TString                        fPhFixDataFile;
     PhotonFix                      fPhfixph;
     PhotonFix                      fPhfixele;
@@ -578,10 +694,13 @@ namespace mithep
     // validation Tuple
     TString                        fTupleName;
     PhotonTreeWriterDiphotonEvent* fDiphotonEvent;
-    PhotonTreeWriterPhoton*        fSinglePhoton;    
+    PhotonTreeWriterPhoton<16>*    fSinglePhoton;    
     TTree*                         hCiCTuple;
     TTree*                         hCiCTupleSingle;
 
+    MVAMet                         fMVAMet;
+    
+    
     ClassDef(PhotonTreeWriter, 1) // Photon identification module
   };
 }
