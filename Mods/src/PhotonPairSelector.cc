@@ -1,6 +1,7 @@
 #include "MitPhysics/Mods/interface/PhotonPairSelector.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
+#include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include "MitAna/DataTree/interface/StableParticle.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -14,6 +15,8 @@
 #include <TRandom3.h>
 #include <TSystem.h>
 #include <TH1D.h>
+#include "Math/SMatrix.h"
+#include "Math/SVector.h"
 
 using namespace mithep;
 
@@ -36,6 +39,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // MC specific stuff...
   fMCParticleName                (Names::gkMCPartBrn),
   fPileUpName                    (Names::gkPileupInfoBrn),
+  fJetsName                      (Names::gkPFJetBrn),
+  fPFMetName                     ("PFMet"),    
   fGoodPhotonsName               (ModNames::gkGoodPhotonsName),
   fChosenVtxName                 ("HggChosenVtx"),
   // ----------------------------------------
@@ -65,6 +70,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fPFCands                       (0),
   fMCParticles                   (0),
   fPileUp                        (0),
+  fJets                          (0),
+  fPFMet                         (0),
   // ---------------------------------------
   fDataEnCorr_EBlowEta_hR9central(0.),
   fDataEnCorr_EBlowEta_hR9gap    (0.),
@@ -162,7 +169,14 @@ void PhotonPairSelector::Process()
   LoadEventObject(fPVName,             fPV);
   LoadEventObject(fBeamspotName,       fBeamspot);
   LoadEventObject(fPFCandName,         fPFCands);
+  LoadEventObject(fJetsName,           fJets);
+  LoadEventObject(fPFMetName,          fPFMet);
 
+  if (!fIsData) {
+    LoadBranch(fMCParticleName);
+  }
+  
+  
   // ------------------------------------------------------------
   // load event based information
   Float_t rho = -99.;
@@ -214,6 +228,19 @@ void PhotonPairSelector::Process()
     delete preselPh;
     return;
   }
+
+  //fill jet collection (for experimental met-based vertex selection)
+//   PFJetOArr pfjets;
+//   for (UInt_t ijet=0; ijet<fJets->GetEntries(); ++ijet) {
+//     const PFJet *pfjet = dynamic_cast<const PFJet*>(fJets->At(ijet));
+//     if (pfjet) pfjets.Add(pfjet);
+//   }
+
+  float higgspt = -99.;
+  float higgsz = -99.;
+  float higgsmass = -99.;
+  
+  if (!fIsData) FindHiggsPtAndZ(higgspt,higgsz,higgsmass);
 
   // second loop: sort & assign the right categories..
   preselPh->Sort();
@@ -385,6 +412,98 @@ void PhotonPairSelector::Process()
                                            mithep::FourVector((fixPh1st[iPair]->Mom()+
                                                                fixPh2nd[iPair]->Mom())));
       break;
+    case kMetSigVtxSelection: {
+      // need PFCandidate Collection
+      
+      PFJetOArr pfjets;
+      for (UInt_t ijet=0; ijet<fJets->GetEntries(); ++ijet) {
+	const PFJet *pfjet = dynamic_cast<const PFJet*>(fJets->At(ijet));
+	if (pfjet && MathUtils::DeltaR(*pfjet,*fixPh1st[iPair])>0.3 && MathUtils::DeltaR(*pfjet,*fixPh2nd[iPair])>0.3) pfjets.Add(pfjet);
+      }
+      
+      PFCandidateOArr pfcands;
+      for (UInt_t icand=0; icand<fPFCands->GetEntries(); ++icand) {
+	const PFCandidate *pfcand = fPFCands->At(icand);
+	if (MathUtils::DeltaR(*pfcand,*fixPh1st[iPair])>0.05 && MathUtils::DeltaR(*pfcand,*fixPh2nd[iPair])>0.05) pfcands.Add(pfcand);
+      }      
+      
+      double minsig = 1e6;
+      for (UInt_t ivtx=0; ivtx<fPV->GetEntries(); ++ivtx) {
+//         Met mmet = fMVAMet.GetMet(  false,
+//                                   fixPh1st[iPair]->Pt(),fixPh1st[iPair]->Phi(),fixPh1st[iPair]->Eta(),
+//                                   fixPh2nd[iPair]->Pt(),fixPh2nd[iPair]->Phi(),fixPh2nd[iPair]->Eta(),
+//                                   fPFMet->At(0),
+//                                   &pfcands,fPV->At(ivtx),fPV, fPileUpDen->At(0)->Rho(),
+//                                   &pfjets,
+//                                   int(fPV->GetEntries()),
+//                                   kTRUE);
+
+        Met mmet = fMVAMet.GetMet(  false,
+                                  0.,0.,0.,
+                                  fPFMet->At(0),
+                                  &pfcands,fPV->At(ivtx),fPV, fPileUpDen->At(0)->Rho(),
+                                  &pfjets,
+                                  int(fPV->GetEntries()),
+                                  kFALSE);
+          
+	ThreeVector fullmet(mmet.Px() - fixPh1st[iPair]->Px() - fixPh2nd[iPair]->Px(),
+			    mmet.Py() - fixPh1st[iPair]->Py() - fixPh2nd[iPair]->Py(),
+			    0.);
+	
+// 	ThreeVector fullmet(mmet.Px(),
+// 			    mmet.Py(),
+// 			    0.);	
+	
+	TMatrixD *metcov = fMVAMet.GetMetCovariance();
+	
+	//Double_t metsigma =  sqrt(fullmet.X()*fullmet.X()*(*metcov)(0,0) + 2.*fullmet.X()*fullmet.Y()*(*metcov)(1,0)  + fullmet.Y()*fullmet.Y()*(*metcov)(1,1))/fullmet.Rho(); 
+
+	//Double_t metsig = fullmet.Rho()/metsigma;
+	
+        ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
+	mcov(0,0) = (*metcov)(0,0);
+	mcov(0,1) = (*metcov)(0,1);
+	mcov(1,0) = (*metcov)(1,0);
+	mcov(1,1) = (*metcov)(1,1);
+	
+	ROOT::Math::SVector<double,2> vmet;
+	vmet(0) = fullmet.X();
+	vmet(1) = fullmet.Y();
+	
+	mcov.Invert();
+		
+	Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
+	
+        if (metsig<minsig && metsig>0.) {
+          minsig = metsig;
+          theVtx[iPair] = fPV->At(ivtx);
+        }
+        
+        printf("ivtx = %i, met = %5f, metsig = %5f, dzgen = %5f\n",ivtx,fullmet.Rho(), metsig,fPV->At(ivtx)->Z()-higgsz);
+        
+      }
+      
+      double testpfmetx = 0.;
+      double testpfmety = 0.;
+      for (UInt_t icand=0; icand<pfcands.GetEntries(); ++icand) {
+	const PFCandidate *pfcand = pfcands.At(icand);
+	testpfmetx -= pfcand->Px();
+	testpfmety -= pfcand->Py();
+	//pfcands.Add(pfcand);
+      }            
+      
+      testpfmetx -= fixPh1st[iPair]->Px();
+      testpfmetx -= fixPh2nd[iPair]->Px();
+
+      testpfmety -= fixPh1st[iPair]->Py();
+      testpfmety -= fixPh2nd[iPair]->Py();     
+      
+      double testpfmet = sqrt(testpfmetx*testpfmetx + testpfmety*testpfmety);
+      
+      printf("bestvtx: metsig = %5f, dzgen = %5f, diphopt = %5f, pfmet = %5f, testpfmet = %5f\n", minsig, theVtx[iPair]->Z()-higgsz, higgspt,fPFMet->At(0)->Pt(),testpfmet);
+
+    }
+      break;      
     default:
       theVtx[iPair] = fPV->At(0);
     }
@@ -560,8 +679,10 @@ void PhotonPairSelector::SlaveBegin()
   ReqEventObject(fConversionName,     fConversions,  true);
   ReqEventObject(fBeamspotName,       fBeamspot,     true);
   ReqEventObject(fPFCandName,         fPFCands,      true);
+  ReqEventObject(fJetsName,         fJets,      false);  
+  ReqEventObject(fPFMetName,         fPFMet,      true);    
   if (!fIsData) {
-    ReqBranch(fPileUpName,            fPileUp);
+    //ReqBranch(fPileUpName,            fPileUp);
     ReqBranch(fMCParticleName,        fMCParticles);
   }
   // determine photon selection type
@@ -580,6 +701,8 @@ void PhotonPairSelector::SlaveBegin()
     fVtxSelType =       kMITVtxSelection;
   else if (fVertexSelType.CompareTo("CiCMVASelection") == 0)
     fVtxSelType =       kCiCMVAVtxSelection;
+  else if (fVertexSelType.CompareTo("MetSigSelection") == 0)
+    fVtxSelType =       kMetSigVtxSelection;  
   else if (fVertexSelType.CompareTo("ZeroVtxSelection") == 0)
     fVtxSelType =       kStdVtxSelection;
   else {
@@ -596,6 +719,28 @@ void PhotonPairSelector::SlaveBegin()
 
   fTool.InitializeMVA(fVariableType,fEndcapWeights,fBarrelWeights);
   fVtxTools.InitP();
+  
+  if (fVtxSelType==kMetSigVtxSelection) {
+    //fMVAMet.Initialize();
+//     fMVAMet.Initialize(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
+//                         TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
+//                         TString(getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")),
+//                         TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmet_42.root"))),
+//                         TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetphi_42.root"))),
+//                         TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu1_42.root"))),
+//                         TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu2_42.root")))
+//                        );
+
+    fMVAMet.Initialize(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
+                        TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
+                        TString(getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")),
+                        TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmet_52.root"))),
+                        TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetphi_52.root"))),
+                        TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu1cov_52.root"))),
+                        TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu2cov_52.root")))
+                        );
+
+  }
 
 }
 
@@ -606,7 +751,7 @@ void PhotonPairSelector::FindHiggsPtAndZ(Float_t& pt, Float_t& decayZ, Float_t& 
   pt     = -999.;
   decayZ = -999.;
   mass   = -999.;
-
+  
   // loop over all GEN particles and look for status 1 photons
   for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
     const MCParticle* p = fMCParticles->At(i);

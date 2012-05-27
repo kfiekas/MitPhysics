@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.18 2012/03/29 23:41:56 paus Exp $
+// $Id: PhotonPairSelector.h,v 1.19 2012/05/03 08:45:29 fabstoec Exp $
 //
 // PhotonPairSelector
 //
@@ -22,12 +22,16 @@
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/PileupInfoCol.h"
 #include "MitAna/DataTree/interface/MCParticleCol.h"
+#include "MitAna/DataTree/interface/JetCol.h"
+#include "MitAna/DataTree/interface/PFMetCol.h"
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 
 #include "MitPhysics/Utils/interface/MVATools.h"
 #include "MitPhysics/Utils/interface/VertexTools.h"
+
+#include "MitPhysics/Utils/interface/MVAMet.h"
 
 class TNtuple;
 class TRandom3;
@@ -53,7 +57,8 @@ namespace mithep
       kStdVtxSelection = 0,
       kCiCVtxSelection,
       kMITVtxSelection,
-      kCiCMVAVtxSelection
+      kCiCMVAVtxSelection,
+      kMetSigVtxSelection
     };
 
     // setting all the input Names
@@ -156,6 +161,8 @@ namespace mithep
     void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
     void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
     
+    void                SetJetsName(const char *n)       { fJetsName = n;              }    
+    
   protected:
     void                Process();
     void                SlaveBegin();
@@ -179,6 +186,8 @@ namespace mithep
     TString             fPFCandName;
     TString             fMCParticleName;
     TString             fPileUpName;
+    TString             fJetsName;
+    TString             fPFMetName;
     
     TString             fGoodPhotonsName;      //name of exported "good photon" collection
     TString             fChosenVtxName;        //name of exported "chosen Vtx"  collection
@@ -215,7 +224,10 @@ namespace mithep
     const PFCandidateCol         *fPFCands;
     const MCParticleCol          *fMCParticles;
     const PileupInfoCol          *fPileUp;    
-
+    const JetCol                 *fJets;
+    const PFMetCol               *fPFMet;
+    
+    
     // Vectroes to hols smeraring/correction factors
     std::vector<Double_t> fDataEnCorr_EBlowEta_hR9central;
     std::vector<Double_t> fDataEnCorr_EBlowEta_hR9gap;
@@ -281,6 +293,8 @@ namespace mithep
     UInt_t                fRegressionVersion;
     	                  
     Bool_t                fRelativePtCuts;
+    
+    MVAMet                fMVAMet;
     
     ClassDef(PhotonPairSelector, 1) // Photon identification module
   };
