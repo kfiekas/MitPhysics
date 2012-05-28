@@ -76,6 +76,8 @@ namespace mithep {
 					     const DecayParticleCol* conv, Bool_t useMva, Double_t &vtxProb);
     // ----------------------------------------------------------
 
+    
+    static std::pair<double,double> VtxZFromConversion(const Photon *p, const DecayParticle *c, const BaseVertex *bsp);
 
     void InitM(const char* str);
     void InitP();

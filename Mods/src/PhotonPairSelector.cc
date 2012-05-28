@@ -4,6 +4,7 @@
 #include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include "MitAna/DataTree/interface/StableParticle.h"
+#include "MitAna/DataTree/interface/DecayParticleFwd.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -31,6 +32,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fElectronName                  (Names::gkElectronBrn),
   fGoodElectronName              (Names::gkElectronBrn),
   fConversionName                (Names::gkMvfConversionBrn),
+  fPFConversionName              ("PFPhotonConversions"),  
   fTrackBranchName               (Names::gkTrackBrn),
   fPileUpDenName                 (Names::gkPileupEnergyDensityBrn),
   fPVName                        (Names::gkPVBeamSpotBrn),
@@ -62,11 +64,13 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fPhotonsFromBranch             (true),
   fPVFromBranch                  (true),
   fGoodElectronsFromBranch       (kTRUE),
+  fUseSingleLegConversions       (kFALSE),
   // ----------------------------------------
   // collections....
   fPhotons                       (0),
   fElectrons                     (0),
   fConversions                   (0),
+  fPFConversions                 (0),
   fTracks                        (0),
   fPileUpDen                     (0),
   fPV                            (0),
@@ -184,6 +188,7 @@ void PhotonPairSelector::Process()
   LoadEventObject(fElectronName,       fElectrons);
   LoadEventObject(fGoodElectronName,   fGoodElectrons);
   LoadEventObject(fConversionName,     fConversions);
+  if (fUseSingleLegConversions) LoadEventObject(fPFConversionName,     fPFConversions);
   LoadEventObject(fTrackBranchName,    fTracks);
   LoadEventObject(fPileUpDenName,      fPileUpDen);
   LoadEventObject(fPVName,             fPV);
@@ -252,12 +257,34 @@ void PhotonPairSelector::Process()
     return;
   }
 
-  //fill jet collection (for experimental met-based vertex selection)
-//   PFJetOArr pfjets;
-//   for (UInt_t ijet=0; ijet<fJets->GetEntries(); ++ijet) {
-//     const PFJet *pfjet = dynamic_cast<const PFJet*>(fJets->At(ijet));
-//     if (pfjet) pfjets.Add(pfjet);
-//   }
+  //fill conversion collection for vertex selection, adding single leg conversions if needed
+  //note that momentum of single leg conversions needs to be recomputed from the track
+  //as it is not filled properly
+  DecayParticleOArr vtxconversions;
+  if (fUseSingleLegConversions) {
+    vtxconversions.SetOwner(kTRUE);
+    for (UInt_t iconv=0; iconv<fConversions->GetEntries(); ++iconv) {
+      DecayParticle *conv = new DecayParticle(*fConversions->At(iconv));
+      vtxconversions.AddOwned(conv);
+    }
+    
+    for (UInt_t iconv=0; iconv<fPFConversions->GetEntries(); ++iconv) {
+      const DecayParticle *c = fPFConversions->At(iconv);
+      if (c->NDaughters()!=1) continue;
+      
+      DecayParticle *conv = new DecayParticle(*fConversions->At(iconv));
+      const Track *trk = static_cast<const StableParticle*>(conv->Daughter(0))->Trk();
+      conv->SetMom(trk->Px(), trk->Py(), trk->Pz(), trk->P());
+      vtxconversions.AddOwned(conv);
+    }    
+  }
+  else {
+    for (UInt_t iconv=0; iconv<fConversions->GetEntries(); ++iconv) {
+      const DecayParticle *c = fConversions->At(iconv);
+      vtxconversions.Add(c);
+    }    
+  }
+  
 
   float higgspt = -99.;
   float higgsz = -99.;
@@ -421,12 +448,12 @@ void PhotonPairSelector::Process()
 
     case kCiCVtxSelection:
       theVtx[iPair] = fVtxTools.findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV,
-                                                    fConversions,kFALSE,vtxProb);
+                                                    &vtxconversions,kFALSE,vtxProb);
       break;
 
     case kCiCMVAVtxSelection:
       theVtx[iPair] = fVtxTools.findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV,
-                                                    fConversions,kTRUE,vtxProb);
+                                                    &vtxconversions,kTRUE,vtxProb);
       break;
 
     case kMITVtxSelection:
@@ -744,6 +771,7 @@ void PhotonPairSelector::SlaveBegin()
   ReqEventObject(fPileUpDenName,      fPileUpDen,    true);
   ReqEventObject(fPVName,             fPV,           fPVFromBranch);
   ReqEventObject(fConversionName,     fConversions,  true);
+  if (fUseSingleLegConversions) ReqEventObject(fPFConversionName,     fPFConversions,  true);
   ReqEventObject(fBeamspotName,       fBeamspot,     true);
   ReqEventObject(fPFCandName,         fPFCands,      true);
   ReqEventObject(fJetsName,         fJets,      false);  

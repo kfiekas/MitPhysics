@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.9 2012/03/22 15:54:07 bendavid Exp $
+// $Id: VertexTools.cc,v 1.10 2012/03/22 16:25:19 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -428,91 +428,39 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   if (conv1) nConv += 1;
   if (conv2) nConv += 1;
 
+  double z1, dz1;
+  double z2, dz2;
+  
+  if (conv1) {
+    std::pair<double,double> zdz1 = VtxZFromConversion(ph1,conv1,bsp);
+    z1 = zdz1.first;
+    dz1 = zdz1.second;
+    
+    zconv = z1;
+    dzconv = dz1;
+  }
 
-  const double dzpxb = 0.016;
-  const double dztib = 0.331;
-  const double dztob = 1.564;
-  const double dzpxf = 0.082;
-  const double dztid = 0.321;
-  const double dztec = 0.815;
+  if (conv2) {
+    std::pair<double,double> zdz2 = VtxZFromConversion(ph2,conv2,bsp);
+    z2 = zdz2.first;
+    dz2 = zdz2.second;
+    
+    zconv = z2;
+    dzconv = dz2;
+  }  
+  
+  if (conv1 && conv2) {
+    zconv  = ( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
+    dzconv = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
+  }
   
   //--------------------------------------------------------------------
   // start doing the Conversion acrobatics... 'copied' from the Globe...
   if(conv1 || conv2) {
-    if( !conv2 ){
-      const mithep::ThreeVector caloPos1(ph1->CaloPos());
-      double zconvsc   = conv1->Z0EcalVtxCiC(bsp->Position(), caloPos1);
-      double zconvtrk  = conv1->DzCorrected(bsp->Position()) + bsp->Z();
-      if( ph1->IsEB() ) {
-	double rho = conv1->Position().Rho();
-	if     ( rho < 15. ) { dzconv = dzpxb; zconv = zconvtrk; }
-	else if( rho < 60. ) { dzconv = dztib; zconv = zconvsc; }
-	else                 { dzconv = dztob; zconv = zconvsc; }
-      } else {
-	double z = conv1->Position().Z();
-	if     ( TMath::Abs(z) < 50. )   { dzconv = dzpxf; zconv = zconvtrk; }
-	else if( TMath::Abs(z) < 100.)   { dzconv = dztid; zconv = zconvtrk; }
-	else                             { dzconv = dztec; zconv = zconvsc;  }
-      }
-    } else if( !conv1 ) {
-      const mithep::ThreeVector caloPos2(ph2->CaloPos());
-      double zconvsc  = conv2->Z0EcalVtxCiC(bsp->Position(), caloPos2);
-      double zconvtrk  = conv2->DzCorrected(bsp->Position()) + bsp->Z();
-      if( ph2->IsEB() ) {
-	double rho = conv2->Position().Rho();
-        if     ( rho < 15. ) { dzconv = dzpxb; zconv = zconvtrk; }
-        else if( rho < 60. ) { dzconv = dztib; zconv = zconvsc; }
-        else                 { dzconv = dztob; zconv = zconvsc; }
-      } else {
-	double z = conv2->Position().Z();
-        if     ( TMath::Abs(z) < 50. )   { dzconv = dzpxf; zconv = zconvtrk; }
-        else if( TMath::Abs(z) < 100.)   { dzconv = dztid; zconv = zconvtrk; }
-        else                             { dzconv = dztec; zconv = zconvsc;  }
-      }
-    } else {
-      const mithep::ThreeVector caloPos1(ph1->CaloPos());
-      double z1=0.;
-      double z1sc   = conv1->Z0EcalVtxCiC(bsp->Position(), caloPos1);
-      double z1trk  = conv1->DzCorrected(bsp->Position()) + bsp->Z();
-      double dz1 = 0.;
-      if( ph1->IsEB() ) {
-	double rho = conv1->Position().Rho();
-        if     ( rho < 15. ) { dz1 = dzpxb; z1 = z1trk; }
-        else if( rho < 60. ) { dz1 = dztib; z1 = z1sc; }
-        else                 { dz1 = dztob; z1 = z1sc; }
-      } else {
-	double z = conv1->Position().Z();
-        if     ( TMath::Abs(z) < 50. )   { dz1 = dzpxf; z1 = z1trk; }
-        else if( TMath::Abs(z) < 100.)   { dz1 = dztid; z1 = z1trk; }
-        else                             { dz1 = dztec; z1 = z1sc;  }
-      }
-      const mithep::ThreeVector caloPos2(ph2->CaloPos());
-      double z2 = 0.;
-      double z2sc  = conv2->Z0EcalVtxCiC(bsp->Position(), caloPos2);
-      double z2trk  = conv2->DzCorrected(bsp->Position()) + bsp->Z();
-      double dz2 = 0.;
-      if( ph2->IsEB() ) {
-	double rho = conv2->Position().Rho();
-        if     ( rho < 15. ) { dz2 = dzpxb; z2 = z2trk; }
-        else if( rho < 60. ) { dz2 = dztib; z2 = z2sc; }
-        else                 { dz2 = dztob; z2 = z2sc; }
-      } else {
-	double z = conv2->Position().Z();
-        if     ( TMath::Abs(z) < 50. )   { dz2 = dzpxf; z2 = z1trk; }
-        else if( TMath::Abs(z) < 100.)   { dz2 = dztid; z2 = z1trk; }
-        else                             { dz2 = dztec; z2 = z1sc;  }
-      }
-
-      zconv  = ( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
-      dzconv = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
-    }
-
 
     // loop over all ranked Vertices and choose the closest to the Conversion one
     int maxVertices = ( ptgg > 30 ? 3 : 5);
     double minDz = -1.; 
-
-    
     
     for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {
 
@@ -654,4 +602,60 @@ Double_t VertexTools::DeltaMassVtx(Double_t xp1, Double_t yp1, Double_t zp1,
 
       return dz * 0.5*fabs(rad1/r1 + rad2/r2);
       
+}
+
+std::pair<double,double> VertexTools::VtxZFromConversion(const Photon *p, const DecayParticle *c, const BaseVertex *bsp) {
+  
+  const double dzpxb = 0.016;
+  const double dztib = 0.331;
+  const double dztob = 1.564;
+  const double dzpxf = 0.082;
+  const double dztid = 0.321;
+  const double dztec = 0.815;
+  
+  const double dzpxbsingle = 0.036;
+  const double dztibsingle = 0.456;
+  const double dztobsingle = 0.362;
+  const double dzpxfsingle = 0.130;
+  const double dztidsingle = 0.465;
+  const double dztecsingle = 1.018;  
+  
+  
+  double zconv = -99.;
+  double dzconv = -99.;
+  
+  const mithep::ThreeVector caloPos(p->SCluster()->Point());
+  double zconvsc   = c->Z0EcalVtxCiC(bsp->Position(), caloPos);
+  double zconvtrk  = c->DzCorrected(bsp->Position()) + bsp->Z();
+  
+  if (c->NDaughters()==2) {
+    if( p->SCluster()->AbsEta()<1.5 ) {
+      double rho = c->Position().Rho();
+      if     ( rho < 15. ) { dzconv = dzpxb; zconv = zconvtrk; }
+      else if( rho < 60. ) { dzconv = dztib; zconv = zconvsc; }
+      else                 { dzconv = dztob; zconv = zconvsc; }
+    } else {
+      double z = c->Position().Z();
+      if     ( TMath::Abs(z) < 50. )   { dzconv = dzpxf; zconv = zconvtrk; }
+      else if( TMath::Abs(z) < 100.)   { dzconv = dztid; zconv = zconvtrk; }
+      else                             { dzconv = dztec; zconv = zconvsc;  }
+    }  
+  }
+  else if (c->NDaughters()==1) {
+    if( p->SCluster()->AbsEta()<1.5 ) {
+      double rho = c->Position().Rho();
+      if     ( rho < 15. ) { dzconv = dzpxbsingle; zconv = zconvsc; }
+      else if( rho < 60. ) { dzconv = dztibsingle; zconv = zconvsc; }
+      else                 { dzconv = dztobsingle; zconv = zconvsc; }
+    } else {
+      double z = c->Position().Z();
+      if     ( TMath::Abs(z) < 50. )   { dzconv = dzpxfsingle; zconv = zconvsc; }
+      else if( TMath::Abs(z) < 100.)   { dzconv = dztidsingle; zconv = zconvsc; }
+      else                             { dzconv = dztecsingle; zconv = zconvsc;  }
+    }  
+  }
+  
+  return std::pair<double,double>(zconv,dzconv);
+  
+  
 }

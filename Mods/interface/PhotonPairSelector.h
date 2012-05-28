@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.22 2012/05/27 19:40:18 mingyang Exp $
+// $Id: PhotonPairSelector.h,v 1.23 2012/05/28 02:14:29 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -156,6 +156,7 @@ namespace mithep
 
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
     void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
+    void                SetUseSingleLegConversions(Bool_t b) { fUseSingleLegConversions = b; }
     void                SetDoRegression(Bool_t b)         { fDoRegression = b; }
     void                SetEtaCorrections(const TH1D *h)  { fEtaCorrections = h; }
     void                SetBdtCutBarrel(Float_t x)        { fbdtCutBarrel = x; }
@@ -188,6 +189,7 @@ namespace mithep
     TString             fElectronName;
     TString             fGoodElectronName;
     TString             fConversionName;
+    TString             fPFConversionName;    
     TString             fTrackBranchName;
     TString             fPileUpDenName;    
     TString             fPVName;
@@ -225,11 +227,13 @@ namespace mithep
     Bool_t              fPhotonsFromBranch;
     Bool_t              fPVFromBranch;
     Bool_t              fGoodElectronsFromBranch;
+    Bool_t              fUseSingleLegConversions;
 
     const PhotonCol              *fPhotons;
     const ElectronCol            *fElectrons;
     const ElectronCol            *fGoodElectrons;    
     const DecayParticleCol       *fConversions;
+    const DecayParticleCol       *fPFConversions;
     const TrackCol               *fTracks;
     const PileupEnergyDensityCol *fPileUpDen;
     const VertexCol              *fPV;
