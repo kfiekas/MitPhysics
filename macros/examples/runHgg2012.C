@@ -1,4 +1,4 @@
-// $Id: runHgg.C,v 1.7 2012/04/24 15:37:33 bendavid Exp $
+// $Id: runHgg2012.C,v 1.1 2012/05/27 19:42:42 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -39,7 +39,7 @@ void runHgg2012(const char *fileset    = "0000",
             const char *book       = "t2mit/filefi/028",
             const char *catalogDir = "/home/cmsprod/catalog",
             const char *outputName = "hgg",
-            int         nEvents    = -1)
+            int         nEvents    = 100)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -312,6 +312,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpresel->SetOutputName("GoodPhotonsPresel");
   photpresel->SetPhotonSelType("MITPFSelection");
   photpresel->SetVertexSelType("CiCMVASelection");
+  photpresel->SetIdMVAType("2012IdMVA_globe");
   //photpresel->SetVertexSelType("MetSigSelection");
   photpresel->DoMCSmear(kTRUE);
   photpresel->DoDataEneCorr(kTRUE);
@@ -335,6 +336,8 @@ void runHgg2012(const char *fileset    = "0000",
   photpresel->SetMCR9Scale(1.0035, 1.0035);  
   photpresel->SetDoMCSigIEtaIEtaScaling(kTRUE);
   photpresel->SetDoMCWidthScaling(kTRUE);  
+  photpresel->SetMCSigIEtaIEtaScale(0.87,0.0011,0.99,0);
+  photpresel->SetMCWidthScale(0.99,0);
   photpresel->SetDoMCErrScaling(kTRUE);
   photpresel->SetMCErrScale(1.07, 1.045);    
   photpresel->SetJetsName(jetCorr->GetOutputName());  
@@ -344,6 +347,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselinverteleveto->SetOutputName("GoodPhotonsPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputVtxName("OutVtxPreselInvertEleVeto");    
   photpreselinverteleveto->SetPhotonSelType("MITPFSelection");
+  photpreselinverteleveto->SetIdMVAType("2012IdMVA_globe");
   photpreselinverteleveto->SetVertexSelType("CiCMVASelection");
   photpreselinverteleveto->DoMCSmear(kTRUE);
   photpreselinverteleveto->DoDataEneCorr(kTRUE);
@@ -359,7 +363,9 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselinverteleveto->SetDoMCR9Scaling(kTRUE);
   photpreselinverteleveto->SetMCR9Scale(1.0035, 1.0035);
   photpreselinverteleveto->SetDoMCSigIEtaIEtaScaling(kTRUE);
-  photpreselinverteleveto->SetDoMCWidthScaling(kTRUE);  
+  photpreselinverteleveto->SetDoMCWidthScaling(kTRUE); 
+  photpreselinverteleveto->SetMCSigIEtaIEtaScale(0.87,0.0011,0.99,0);
+  photpreselinverteleveto->SetMCWidthScale(0.99,0);
   photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
   photpreselinverteleveto->SetMCErrScale(1.07, 1.045);    
   photpreselinverteleveto->SetApplyEleVeto(kFALSE);
@@ -371,6 +377,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
   photpreselnosmear->SetPhotonSelType("MITPFSelection");
   photpreselnosmear->SetVertexSelType("CiCMVASelection");
+  photpreselnosmear->SetIdMVAType("2012IdMVA_globe");
   photpreselnosmear->SetPhotonsFromBranch(kFALSE);
   photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
   photpreselnosmear->SetJetsName(jetCorr->GetOutputName());  
@@ -497,23 +504,23 @@ void runHgg2012(const char *fileset    = "0000",
   //goodPVFilterModES ->Add(elecIdS);
 
   
-  jetCorr          ->Add(photcic);
-  jetCorr          ->Add(photcicnoeleveto);  
+  //jetCorr          ->Add(photcic);
+  //jetCorr          ->Add(photcicnoeleveto);  
   jetCorr          ->Add(photpresel);  
   jetCorr          ->Add(photpreselinverteleveto);  
-  jetCorr          ->Add(photpreselnosmear);  
+  //jetCorr          ->Add(photpreselnosmear);  
 
-  photcic         ->Add(phottreecic);
-  photcicnoeleveto         ->Add(phottreecicnoeleveto);
+  //photcic         ->Add(phottreecic);
+  //photcicnoeleveto         ->Add(phottreecicnoeleveto);
   photpresel    ->Add(phottreepresel);
   photpreselinverteleveto    ->Add(phottreepreselinverteleveto);
-  photpreselnosmear    ->Add(phottreepreselnosmear);
+  //photpreselnosmear    ->Add(phottreepreselnosmear);
 
 
-  jetCorr          ->Add(photidpresel);
-  photidpresel       ->Add(phottreesingle);
+  //jetCorr          ->Add(photidpresel);
+  //photidpresel       ->Add(phottreesingle);
   
-  photidpreselinvert       ->Add(phottreesingleinvert);  
+  //photidpreselinvert       ->Add(phottreesingleinvert);  
   //elecIdS->Add(phottreeES);
   
 
