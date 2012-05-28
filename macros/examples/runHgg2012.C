@@ -1,4 +1,4 @@
-// $Id: runHgg2012.C,v 1.1 2012/05/27 19:42:42 bendavid Exp $
+// $Id: runHgg2012.C,v 1.4 2012/05/28 09:48:36 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -279,6 +279,7 @@ void runHgg2012(const char *fileset    = "0000",
   photcic->SetOutputVtxName("OutVtxCiC");        
   photcic->SetPhotonSelType("CiCPFSelection");
   photcic->SetVertexSelType("CiCMVASelection");
+  photcic->SetUseSingleLegConversions(kTRUE);
   photcic->DoMCSmear(kTRUE);
   photcic->DoDataEneCorr(kTRUE);
   photcic->SetPhotonsFromBranch(kFALSE);
@@ -302,6 +303,7 @@ void runHgg2012(const char *fileset    = "0000",
   photcicnoeleveto->SetOutputVtxName("OutVtxCiCInvertEleVeto");      
   photcicnoeleveto->SetPhotonSelType("CiCPFSelection");
   photcicnoeleveto->SetVertexSelType("CiCMVASelection");
+  photcicnoeleveto->SetUseSingleLegConversions(kTRUE);
   photcicnoeleveto->DoMCSmear(kTRUE);
   photcicnoeleveto->DoDataEneCorr(kTRUE);
   photcicnoeleveto->SetPhotonsFromBranch(kFALSE);
@@ -327,6 +329,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpresel->SetOutputName("GoodPhotonsPresel");
   photpresel->SetPhotonSelType("MITPFSelection");
   photpresel->SetVertexSelType("CiCMVASelection");
+  photpresel->SetUseSingleLegConversions(kTRUE);
   photpresel->SetIdMVAType("2012IdMVA_globe");
   //photpresel->SetVertexSelType("MetSigSelection");
   photpresel->DoMCSmear(kTRUE);
@@ -364,6 +367,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselinverteleveto->SetPhotonSelType("MITPFSelection");
   photpreselinverteleveto->SetIdMVAType("2012IdMVA_globe");
   photpreselinverteleveto->SetVertexSelType("CiCMVASelection");
+  photpreselinverteleveto->SetUseSingleLegConversions(kTRUE);
   photpreselinverteleveto->DoMCSmear(kTRUE);
   photpreselinverteleveto->DoDataEneCorr(kTRUE);
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
@@ -392,6 +396,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
   photpreselnosmear->SetPhotonSelType("MITPFSelection");
   photpreselnosmear->SetVertexSelType("CiCMVASelection");
+  photpreselnosmear->SetUseSingleLegConversions(kTRUE);  
   photpreselnosmear->SetIdMVAType("2012IdMVA_globe");
   photpreselnosmear->SetPhotonsFromBranch(kFALSE);
   photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
