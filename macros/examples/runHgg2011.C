@@ -55,9 +55,9 @@ void runHgg2011(const char *fileset    = "0000",
     //return;
   } 
 
-  TString jsonFile = TString("/home/bendavid/cms/json/") + TString(json);
-  //TString jsonFile = TString("/home/bendavid/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
-  Bool_t  isData   = ( (jsonFile.CompareTo("/home/bendavid/cms/json/~") != 0) );
+  TString jsonFile = TString("/home/mingyang/cms/json/") + TString(json);
+  //TString jsonFile = TString("/home/mingyang/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
+  Bool_t  isData   = ( (jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) );
   
   if (gSystem->Getenv("MIT_PROD_OVERLAP")) {
     sprintf(overlap,"%s",gSystem->Getenv("MIT_PROD_OVERLAP"));
@@ -94,11 +94,11 @@ void runHgg2011(const char *fileset    = "0000",
   sysMod->SetIsData(isData);
   
   // only select on run- and lumisection numbers when valid json file present
-  if ((jsonFile.CompareTo("/home/bendavid/cms/json/~") != 0) &&
-      (jsonFile.CompareTo("/home/bendavid/cms/json/-") != 0)   ) {
+  if ((jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) &&
+      (jsonFile.CompareTo("/home/mingyang/cms/json/-") != 0)   ) {
     runLumiSel->AddJSONFile(jsonFile.Data());
   }
-  if ((jsonFile.CompareTo("/home/bendavid/cms/json/-") == 0)   ) {
+  if ((jsonFile.CompareTo("/home/mingyang/cms/json/-") == 0)   ) {
     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
   }

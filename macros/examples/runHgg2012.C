@@ -1,4 +1,4 @@
-// $Id: runHgg2012.C,v 1.1 2012/05/27 19:42:42 mingyang Exp $
+// $Id: runHgg2012.C,v 1.1 2012/05/27 19:42:42 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -32,10 +32,12 @@ void runHgg2012(const char *fileset    = "0000",
             const char *skim       = "noskim",
 	    //const char *dataset = "f11--h120gg-gf-v14b-pu",
             //const char *dataset = "r11a-pho-j16-v1",   
-            const char *dataset = "s12-h124gg-gf-v9",
+            //const char *dataset = "s12-h124gg-gf-v9",
             //const char *dataset = "s12-pj40-2em-v9",
             //const char *dataset = "s12-zllm50-v9",
 	    //const char *dataset = "f11--h121gg-gf-v14b-pu",
+	    //const char *dataset = "r12a-pho-pr-v1",
+	    const char *dataset = "s12-pj40-2em-v9", 
             const char *book       = "t2mit/filefi/028",
             const char *catalogDir = "/home/cmsprod/catalog",
             const char *outputName = "hgg",
@@ -55,9 +57,9 @@ void runHgg2012(const char *fileset    = "0000",
     //return;
   } 
 
-  TString jsonFile = TString("/home/bendavid/cms/json/") + TString(json);
-  //TString jsonFile = TString("/home/bendavid/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
-  Bool_t  isData   = ( (jsonFile.CompareTo("/home/bendavid/cms/json/~") != 0) );
+  TString jsonFile = TString("/home/mingyang/cms/json/") + TString(json);
+  //TString jsonFile = TString("/home/mingyang/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
+  Bool_t  isData   = ( (jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) );
   
   if (gSystem->Getenv("MIT_PROD_OVERLAP")) {
     sprintf(overlap,"%s",gSystem->Getenv("MIT_PROD_OVERLAP"));
@@ -94,11 +96,11 @@ void runHgg2012(const char *fileset    = "0000",
   sysMod->SetIsData(isData);
   
   // only select on run- and lumisection numbers when valid json file present
-  if ((jsonFile.CompareTo("/home/bendavid/cms/json/~") != 0) &&
-      (jsonFile.CompareTo("/home/bendavid/cms/json/-") != 0)   ) {
+  if ((jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) &&
+      (jsonFile.CompareTo("/home/mingyang/cms/json/-") != 0)   ) {
     runLumiSel->AddJSONFile(jsonFile.Data());
   }
-  if ((jsonFile.CompareTo("/home/bendavid/cms/json/-") == 0)   ) {
+  if ((jsonFile.CompareTo("/home/mingyang/cms/json/-") == 0)   ) {
     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
   }
@@ -143,7 +145,7 @@ void runHgg2012(const char *fileset    = "0000",
   
   HLTMod *hltModP = new HLTMod("HLTModP");
   
-  hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v*",160000,161176);
+  /*hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v*",160000,161176);
   
   hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v*",161216,165633);
   hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v*",161216,165633);
@@ -177,7 +179,18 @@ void runHgg2012(const char *fileset    = "0000",
   hltModP->AddTrigger("HLT_Photon36_CaloIdL_IsoVL_Photon22_CaloIdL_IsoVL_v*",178420,189999);
   hltModP->AddTrigger("HLT_Photon36_CaloIdL_IsoVL_Photon22_R9Id_v*",178420,189999);
   hltModP->AddTrigger("HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL_v*",178420,189999);
-  hltModP->AddTrigger("HLT_Photon36_R9Id_Photon22_R9Id_v*",178420,189999);
+  hltModP->AddTrigger("HLT_Photon36_R9Id_Photon22_R9Id_v*",178420,189999);*/
+
+  hltModP->AddTrigger("HLT_Photon26_CaloId10_Iso50_Photon18_CaloId10_Iso50_Mass60_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon26_CaloId10_Iso50_Photon18_R9Id85_Mass60_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon26_R9Id85_Photon18_CaloId10_Iso50_Mass60_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon26_R9Id85_Photon18_R9Id85_Mass60_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v*",190000,999999); 
+  hltModP->AddTrigger("HLT_Photon36_R9Id85_Photon22_R9Id85_v*",190000,999999); 
     
   hltModP->SetTrigObjsName("MyHltPhotObjs");
   hltModP->SetAbortIfNotAccepted(isData);
@@ -242,11 +255,13 @@ void runHgg2012(const char *fileset    = "0000",
   if (TString(dataset).Contains("-pj")) {
     mcselmod->ExcludeProcess(18);
     mcselmod->ExcludeProcess(114);
-    excludedoubleprompt = kTRUE;
+    //excludedoubleprompt = kTRUE;
+    excludedoubleprompt = kFALSE;
   }
   
   if (TString(dataset).Contains("-qcd2em") || TString(dataset).Contains("-qcd-2em")) {
-    excludedoubleprompt = kTRUE;
+    //excludedoubleprompt = kTRUE;
+    excludedoubleprompt = kFALSE;
   }
   
   Bool_t is25 = kFALSE;
@@ -487,10 +502,10 @@ void runHgg2012(const char *fileset    = "0000",
   // high level trigger is always first
   //mcselmod         ->Add(hltModES);
   mcselmod         ->Add(hltModP);
-  mcselmod         ->Add(hltModE);
+  //mcselmod         ->Add(hltModE);
 
   hltModP         ->Add(goodPVFilterMod);
-  hltModE         ->Add(goodPVFilterModE);
+  //hltModE         ->Add(goodPVFilterModE);
   //hltModES        ->Add(goodPVFilterModES);
   
   //goodPVFilterMod ->Add(muonId);
@@ -499,8 +514,8 @@ void runHgg2012(const char *fileset    = "0000",
   pubJet->Add(jetCorr);
   
   // simple object id modules
-  goodPVFilterModE -> Add(pubJetOpen);
-  pubJetOpen       -> Add(photidpreselinvert);
+  //goodPVFilterModE -> Add(pubJetOpen);
+  //pubJetOpen       -> Add(photidpreselinvert);
   //goodPVFilterModES ->Add(elecIdS);
 
   
