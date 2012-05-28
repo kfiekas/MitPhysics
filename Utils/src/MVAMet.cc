@@ -800,7 +800,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   Met lTKRec = fRecoilTools->trackRecoil(iPhi1,iEta1,iPhi2,iEta2,      iCands,iVertex); 
   Met lNPRec = fRecoilTools->NoPURecoil (iPhi1,iEta1,iPhi2,iEta2,iJets,iCands,iVertex,iVertices);  //Not using rho
   Met lPCRec = fRecoilTools->PUCRecoil  (iPhi1,iEta1,iPhi2,iEta2,iJets,iCands,iVertex,iVertices);
-  Met lPUMet = fRecoilTools->PUMet      (iPhi1,iEta1,iPhi2,iEta2,iJets,iCands,iVertex,iVertices);
+  Met lPUMet = fRecoilTools->PUMet      (iJets,iCands,iVertex,iVertices,iRho,iPhi1,iEta1,iPhi2,iEta2);
 
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 
