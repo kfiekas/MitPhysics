@@ -272,7 +272,7 @@ void PhotonPairSelector::Process()
       const DecayParticle *c = fPFConversions->At(iconv);
       if (c->NDaughters()!=1) continue;
       
-      DecayParticle *conv = new DecayParticle(*fConversions->At(iconv));
+      DecayParticle *conv = new DecayParticle(*c);
       const Track *trk = static_cast<const StableParticle*>(conv->Daughter(0))->Trk();
       conv->SetMom(trk->Px(), trk->Py(), trk->Pz(), trk->P());
       vtxconversions.AddOwned(conv);
