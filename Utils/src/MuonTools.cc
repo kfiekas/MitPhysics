@@ -1,4 +1,4 @@
-// $Id: MuonTools.cc,v 1.27 2012/05/06 12:27:41 ceballos Exp $
+// $Id: MuonTools.cc,v 1.28 2012/05/17 13:25:30 anlevin Exp $
 
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include <TFile.h>
@@ -508,7 +508,7 @@ Bool_t MuonTools::PassSoftMuonCut(const Muon *mu, const VertexCol *vertices, con
   
   if(!mu->Quality().Quality(MuonQuality::TMLastStationAngTight)) return kFALSE;
 
-  if(mu->BestTrk()->NHits() <= 10) return kFALSE;
+  if(mu->NTrkLayersHit() <= 5) return kFALSE;
 
   if(!PassD0Cut(mu, vertices, 0.2, 0)) return kFALSE;
 
