@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.21 2012/05/27 17:02:19 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.22 2012/05/27 19:40:18 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -165,6 +165,8 @@ namespace mithep
     void                SetMCR9Scale(Double_t ebscale, Double_t eescale) { fMCR9ScaleEB = ebscale; fMCR9ScaleEE = eescale; }
     void                SetDoMCSigIEtaIEtaScaling(Bool_t b)        { fDoMCSigIEtaIEtaScaling = b; }
     void                SetDoMCWidthScaling(Bool_t b)        { fDoMCWidthScaling = b; }
+    void                SetMCSigIEtaIEtaScale(Double_t ebscale,Double_t ebshift,Double_t eescale,Double_t eeshift) {fMCSigIEtaIEtaScaleEB=ebscale;fMCSigIEtaIEtaShiftEB=ebshift;fMCSigIEtaIEtaScaleEE=eescale;fMCSigIEtaIEtaShiftEE=eeshift;}
+    void                SetMCWidthScale(Double_t scale,Double_t shift) {fMCWidthScale=scale;fMCWidthShift=shift;}
     void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
     void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
     
@@ -300,6 +302,13 @@ namespace mithep
 	                  
     Bool_t                fDoMCSigIEtaIEtaScaling;
     Bool_t                fDoMCWidthScaling;
+
+    Double_t              fMCSigIEtaIEtaScaleEB;
+    Double_t              fMCSigIEtaIEtaShiftEB; 
+    Double_t              fMCSigIEtaIEtaScaleEE;
+    Double_t              fMCSigIEtaIEtaShiftEE; 
+    Double_t              fMCWidthScale;
+    Double_t              fMCWidthShift; 
     	                  
     Bool_t                fDoMCErrScaling;
     Double_t              fMCErrScaleEB;

@@ -1,4 +1,4 @@
-// $Id: runHgg.C,v 1.7 2012/04/24 15:37:33 bendavid Exp $
+// $Id: runHgg2011.C,v 1.1 2012/05/27 17:03:58 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -39,7 +39,7 @@ void runHgg2011(const char *fileset    = "0000",
             const char *book       = "local/filefi/025",
             const char *catalogDir = "/home/cmsprod/catalog",
             const char *outputName = "hgg",
-            int         nEvents    = -1)
+            int         nEvents    = 100)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -309,6 +309,7 @@ void runHgg2011(const char *fileset    = "0000",
   photpresel->SetOutputName("GoodPhotonsPresel");
   photpresel->SetPhotonSelType("MITSelection");
   photpresel->SetVertexSelType("CiCMVASelection");
+  photpresel->SetIdMVAType("2011IdMVA");
   //photpresel->SetVertexSelType("MetSigSelection");
   photpresel->DoMCSmear(kTRUE);
   photpresel->DoDataEneCorr(kTRUE);
@@ -332,6 +333,8 @@ void runHgg2011(const char *fileset    = "0000",
   photpresel->SetMCR9Scale(1.0035, 1.0035);  
   photpresel->SetDoMCSigIEtaIEtaScaling(kTRUE);
   photpresel->SetDoMCWidthScaling(kTRUE);  
+  photpresel->SetMCSigIEtaIEtaScale(0.87,0.0011,0.99,0);
+  photpresel->SetMCWidthScale(0.99,0);
   photpresel->SetDoMCErrScaling(kTRUE);
   photpresel->SetMCErrScale(1.07, 1.045);    
   photpresel->SetJetsName(jetCorr->GetOutputName());  
@@ -342,6 +345,7 @@ void runHgg2011(const char *fileset    = "0000",
   photpreselinverteleveto->SetOutputVtxName("OutVtxPreselInvertEleVeto");    
   photpreselinverteleveto->SetPhotonSelType("MITSelection");
   photpreselinverteleveto->SetVertexSelType("CiCMVASelection");
+  photpreselinverteleveto->SetIdMVAType("2011IdMVA");
   photpreselinverteleveto->DoMCSmear(kTRUE);
   photpreselinverteleveto->DoDataEneCorr(kTRUE);
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
@@ -358,6 +362,8 @@ void runHgg2011(const char *fileset    = "0000",
   photpreselinverteleveto->SetDoMCSigIEtaIEtaScaling(kTRUE);
   photpreselinverteleveto->SetDoMCWidthScaling(kTRUE);  
   photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
+  photpreselinverteleveto->SetMCSigIEtaIEtaScale(0.87,0.0011,0.99,0);
+  photpreselinverteleveto->SetMCWidthScale(0.99,0);
   photpreselinverteleveto->SetMCErrScale(1.07, 1.045);    
   photpreselinverteleveto->SetApplyEleVeto(kFALSE);
   photpreselinverteleveto->SetInvertElectronVeto(kTRUE);
@@ -368,6 +374,7 @@ void runHgg2011(const char *fileset    = "0000",
   photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
   photpreselnosmear->SetPhotonSelType("MITSelection");
   photpreselnosmear->SetVertexSelType("CiCMVASelection");
+  photpreselnosmear->SetIdMVAType("2011IdMVA");        
   photpreselnosmear->SetPhotonsFromBranch(kFALSE);
   photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
   photpreselnosmear->SetJetsName(jetCorr->GetOutputName());  

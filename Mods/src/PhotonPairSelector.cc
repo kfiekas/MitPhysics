@@ -133,6 +133,13 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCR9ScaleEE                   (1.0),
   fDoMCSigIEtaIEtaScaling        (kFALSE),
   fDoMCWidthScaling              (kFALSE),
+  fMCSigIEtaIEtaScaleEB          (0.87),
+  fMCSigIEtaIEtaShiftEB          (0.0011), 
+  fMCSigIEtaIEtaScaleEE          (0.99),
+  fMCSigIEtaIEtaShiftEE          (0), 
+  fMCWidthScale                  (0.99),
+  fMCWidthShift                  (0), 
+  //
   fDoMCErrScaling                (kFALSE),
   fMCErrScaleEB                  (1.0),
   fMCErrScaleEE                  (1.0),
@@ -345,20 +352,20 @@ void PhotonPairSelector::Process()
     }
 
     if (fDoMCSigIEtaIEtaScaling && !fIsData) {
-      if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetCoviEtaiEta(0.87*fixPh1st[iPair]->CoviEtaiEta() + 0.0011);
-      else fixPh1st[iPair]->SetCoviEtaiEta(0.99*fixPh1st[iPair]->CoviEtaiEta());
+      if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetCoviEtaiEta(fMCSigIEtaIEtaScaleEB*fixPh1st[iPair]->CoviEtaiEta()+fMCSigIEtaIEtaShiftEB);
+      else fixPh1st[iPair]->SetCoviEtaiEta(fMCSigIEtaIEtaScaleEE*fixPh1st[iPair]->CoviEtaiEta()+fMCSigIEtaIEtaShiftEE);
 
-      if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetCoviEtaiEta(0.87*fixPh2nd[iPair]->CoviEtaiEta() + 0.0011);
-      else fixPh2nd[iPair]->SetCoviEtaiEta(0.99*fixPh2nd[iPair]->CoviEtaiEta());
+      if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetCoviEtaiEta(fMCSigIEtaIEtaScaleEB*fixPh2nd[iPair]->CoviEtaiEta()+fMCSigIEtaIEtaShiftEB);
+      else fixPh2nd[iPair]->SetCoviEtaiEta(fMCSigIEtaIEtaScaleEE*fixPh2nd[iPair]->CoviEtaiEta()+fMCSigIEtaIEtaShiftEE);
     }
 
 
     if (fDoMCWidthScaling && !fIsData) {
-      fixPh1st[iPair]->SetEtaWidth(0.99*fixPh1st[iPair]->EtaWidth());
-      fixPh1st[iPair]->SetPhiWidth(0.99*fixPh1st[iPair]->PhiWidth());
+      fixPh1st[iPair]->SetEtaWidth(fMCWidthScale*fixPh1st[iPair]->EtaWidth()+fMCWidthShift);
+      fixPh1st[iPair]->SetPhiWidth(fMCWidthScale*fixPh1st[iPair]->PhiWidth()+fMCWidthShift);
 
-      fixPh2nd[iPair]->SetEtaWidth(0.99*fixPh2nd[iPair]->EtaWidth());
-      fixPh2nd[iPair]->SetPhiWidth(0.99*fixPh2nd[iPair]->PhiWidth());
+      fixPh2nd[iPair]->SetEtaWidth(fMCWidthScale*fixPh2nd[iPair]->EtaWidth()+fMCWidthShift);
+      fixPh2nd[iPair]->SetPhiWidth(fMCWidthScale*fixPh2nd[iPair]->PhiWidth()+fMCWidthShift);
     }
 
     PhotonTools::eScaleCats escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
