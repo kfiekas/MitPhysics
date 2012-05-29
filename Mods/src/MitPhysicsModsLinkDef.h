@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.33 2012/04/27 21:03:57 ceballos Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.34 2012/05/25 19:41:31 bendavid Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -71,6 +71,7 @@
 #pragma link C++ class mithep::PhotonTreeWriter+;
 #pragma link C++ class mithep::PhotonTreeWriterPhoton<16>+;
 #pragma link C++ class mithep::PhotonTreeWriterDiphotonEvent+;
+#pragma link C++ class mithep::PhotonTreeWriterVtx+;
 #pragma link C++ class mithep::TauCleaningMod+;
 #pragma link C++ class mithep::PFTauCleaningMod+;
 #pragma link C++ class mithep::TauIDMod+;

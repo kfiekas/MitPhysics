@@ -82,10 +82,12 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fExcludeSinglePrompt    (kFALSE),
   fExcludeDoublePrompt    (kFALSE),
   fEnableJets             (kFALSE),
+  fApplyJetId             (kFALSE),
   fApplyLeptonTag         (kFALSE),
   fApplyBTag              (kFALSE),
   fApplyPFMetCorrections  (kFALSE),
   fFillClusterArrays      (kFALSE),
+  fFillVertexTree         (kFALSE),
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fTupleName              ("hPhotonTree")
@@ -376,10 +378,15 @@ void PhotonTreeWriter::Process()
     }
     
     //fill jet variables
+    const Vertex *selvtx = fPV->At(0);
+    if (!fLoopOnGoodElectrons && phHard->HasPV()) selvtx = phHard->PV();
     if (fEnableJets) {
       for (UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet) {
         const Jet *jet = fPFJets->At(ijet);
         if (jet->AbsEta()<4.7 && MathUtils::DeltaR(jet,p1)>0.5 && MathUtils::DeltaR(jet,p2)>0.5) {
+          const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
+          if (!pfjet) continue;
+          if (fApplyJetId && !fJetId.passCut(pfjet,selvtx,fPV)) continue;
           if (!jet1) jet1 = jet;
           else if (!jet2) jet2 = jet;
           else if (!jetcentral && 0) jetcentral = jet;
@@ -792,6 +799,15 @@ void PhotonTreeWriter::Process()
 
     if (fWriteDiphotonTree)
       hCiCTuple->Fill();  
+    
+    if (fFillVertexTree && phHard && phSoft) {
+      for (UInt_t ivtx = 0; ivtx<fPV->GetEntries(); ++ivtx) {
+	const Vertex *v = fPV->At(ivtx);
+	fDiphotonVtx->SetVars(v,phHard,phSoft,fPFCands,ivtx,fPV->GetEntries(),_decayZ);
+	hVtxTree->Fill();
+      }
+    }
+    
   }
 
   if (!fWriteSingleTree)
@@ -920,6 +936,12 @@ void PhotonTreeWriter::SlaveBegin()
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu1cov_52.root"))),
                       TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/gbrmetu2cov_52.root")))
                       );                      
+                 
+  fJetId.Initialize(JetIDMVA::kMedium,
+                          "$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
+                          "$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
+                          JetIDMVA::kCut,
+                          "$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py");
                       
   fDiphotonEvent = new PhotonTreeWriterDiphotonEvent;
   fSinglePhoton  = new PhotonTreeWriterPhoton<16>;
@@ -1009,6 +1031,39 @@ void PhotonTreeWriter::SlaveBegin()
     AddOutput(hCiCTuple);
   if (fWriteSingleTree)
     AddOutput(hCiCTupleSingle);
+  
+  if (fFillVertexTree) {
+    fDiphotonVtx = new PhotonTreeWriterVtx;
+    hVtxTree = new TTree("hVtxTree","hVtxTree");
+    hVtxTree->SetAutoSave(300e9);
+    AddOutput(hVtxTree);
+    
+    TClass *vclass = TClass::GetClass("mithep::PhotonTreeWriterVtx");
+    TList  *vlist  = vclass->GetListOfDataMembers();
+
+    for (int i=0; i<vlist->GetEntries(); ++i) {
+      const TDataMember *tdm = static_cast<const TDataMember*>(vlist->At(i));
+      if (!(tdm->IsBasic() && tdm->IsPersistent())) continue;
+      TString typestring;
+      if (TString(tdm->GetTypeName()).BeginsWith("Char_t")) typestring = "B";
+      else if (TString(tdm->GetTypeName()).BeginsWith("UChar_t")) typestring = "b";
+      else if (TString(tdm->GetTypeName()).BeginsWith("Short_t")) typestring = "S";
+      else if (TString(tdm->GetTypeName()).BeginsWith("UShort_t")) typestring = "s";
+      else if (TString(tdm->GetTypeName()).BeginsWith("Int_t")) typestring = "I";
+      else if (TString(tdm->GetTypeName()).BeginsWith("UInt_t")) typestring = "i";
+      else if (TString(tdm->GetTypeName()).BeginsWith("Float_t")) typestring = "F";
+      else if (TString(tdm->GetTypeName()).BeginsWith("Double_t")) typestring = "D";
+      else if (TString(tdm->GetTypeName()).BeginsWith("Long64_t")) typestring = "L";
+      else if (TString(tdm->GetTypeName()).BeginsWith("ULong64_t")) typestring = "l";
+      else if (TString(tdm->GetTypeName()).BeginsWith("Bool_t")) typestring = "O";
+      else continue;
+      //printf("%s %s: %i\n",tdm->GetTypeName(),tdm->GetName(),int(tdm->GetOffset()));
+      Char_t *addr = (Char_t*)fDiphotonVtx;
+      assert(sizeof(Char_t)==1);
+      hVtxTree->Branch(tdm->GetName(),addr + tdm->GetOffset(),TString::Format("%s/%s",tdm->GetName(),typestring.Data()));
+    }
+  }
+  
 }
 
 // ----------------------------------------------------------------------------------------
@@ -1766,4 +1821,88 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
     pdgid = -99;
     motherpdgid = -99;
   }
+}
+
+void PhotonTreeWriterVtx::SetVars(const Vertex *v, const Photon *p1, const Photon *p2, const PFCandidateCol *pfcands, Int_t idx, Int_t numvtx, Float_t genvtxz)
+{
+ 
+  //printf("start\n");
+  
+  n = idx;
+  nvtx = numvtx;
+  zgen = genvtxz;
+  
+  x = v->X();
+  y = v->Y();
+  z = v->Z();
+  
+  Double_t dsumpt = 0.;
+  Double_t dsumptsq = 0.;
+  
+  nchalltoward = 0;
+  nchalltransverse = 0;
+  nchallaway = 0;
+  nchcuttoward = 0;
+  nchcuttransverse = 0;
+  nchcutaway = 0;  
+  
+  ThreeVector vtxmom;
+  
+  //printf("mom\n");
+  FourVectorM diphoton = p1->MomVtx(v->Position()) + p2->MomVtx(v->Position());
+  //printf("done mom\n");
+  ptgg = diphoton.Pt();
+  phigg = diphoton.Phi();
+  etagg = diphoton.Eta();
+  mgg = diphoton.M();
+  pxgg = diphoton.Px();
+  pygg = diphoton.Py();
+  pzgg = diphoton.Pz();
+  
+  //printf("loop\n");
+  
+  for (UInt_t i = 0; i<pfcands->GetEntries(); ++i) {
+    const PFCandidate *pfc = pfcands->At(i);
+    if (pfc->PFType()!=PFCandidate::eHadron || !pfc->HasTrackerTrk()) continue;
+    if (TMath::Abs( pfc->TrackerTrk()->DzCorrected(*v) ) > 0.2) continue;
+    if (TMath::Abs( pfc->TrackerTrk()->D0Corrected(*v) ) > 0.1) continue;
+    
+    vtxmom += ThreeVector(pfc->Px(),pfc->Py(),pfc->Pz());
+    
+    dsumpt += pfc->Pt();
+    dsumptsq += pfc->Pt()*pfc->Pt();
+    
+    Double_t dphi = TMath::Abs(MathUtils::DeltaPhi(*pfc,diphoton));
+    if (dphi<(TMath::Pi()/3.0)) {
+      ++nchalltoward;
+      if (pfc->Pt()>0.5) ++nchcuttoward;
+    }
+    else if (dphi>(2.0*TMath::Pi()/3.0)) {
+      ++nchallaway;
+      if (pfc->Pt()>0.5) ++nchcutaway;      
+    }
+    else {
+      ++nchalltransverse;
+      if (pfc->Pt()>0.5) ++nchcuttransverse;            
+    }
+     
+  }
+  
+  //printf("doneloop\n");
+
+    
+  sumpt = dsumpt;
+  sumptsq = dsumptsq;
+  
+  pt = vtxmom.Rho();
+  phi = vtxmom.Phi();
+  eta = vtxmom.Eta();
+  px = vtxmom.X();
+  py = vtxmom.Y();
+  pz = vtxmom.Z();
+  
+  //printf("done\n");
+  
+  return;
+  
 }

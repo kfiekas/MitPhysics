@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.16 2012/05/14 16:51:56 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.17 2012/05/27 16:09:56 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -37,6 +37,43 @@ class TRandom3;
 
 namespace mithep 
 {
+  
+  class PhotonTreeWriterVtx
+  {
+    
+    public:
+      void SetVars(const Vertex *v, const Photon *p1, const Photon *p2, const PFCandidateCol *pfcands, Int_t idx, Int_t numvtx, Float_t genvtxz);
+      
+    private:
+      Int_t n;
+      Int_t nvtx;
+      Float_t ptgg;
+      Float_t phigg;
+      Float_t etagg;
+      Float_t pxgg;
+      Float_t pygg;
+      Float_t pzgg;
+      Float_t mgg;
+      Float_t zgen;
+      Float_t x;
+      Float_t y;
+      Float_t z;
+      Float_t pt;
+      Float_t phi;
+      Float_t eta;
+      Float_t px;
+      Float_t py;
+      Float_t pz;
+      Float_t sumpt;
+      Float_t sumptsq;
+      Int_t nchalltoward;
+      Int_t nchalltransverse;
+      Int_t nchallaway;
+      Int_t nchcuttoward;
+      Int_t nchcuttransverse;
+      Int_t nchcutaway;
+  };
+  
   template <int NClus=16>
   class PhotonTreeWriterPhoton
   {
@@ -576,6 +613,7 @@ namespace mithep
 
     void                SetPFJetsFromBranch(Bool_t b)     { fPFJetsFromBranch = b;       }
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
+    void                SetApplyJetId(Bool_t b)           { fApplyJetId = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
     void                SetApplyPFMetCorr(Bool_t b)       { fApplyPFMetCorrections = b;  }
@@ -679,12 +717,14 @@ namespace mithep
     Bool_t                         fExcludeDoublePrompt;
     
     Bool_t                         fEnableJets;
+    Bool_t                         fApplyJetId;
 
     Bool_t                         fApplyLeptonTag;
     Bool_t                         fApplyBTag;
     Bool_t                         fApplyPFMetCorrections;
 
     Bool_t                         fFillClusterArrays;
+    Bool_t                         fFillVertexTree;
     
     TString                        fPhFixDataFile;
     PhotonFix                      fPhfixph;
@@ -698,8 +738,11 @@ namespace mithep
     TTree*                         hCiCTuple;
     TTree*                         hCiCTupleSingle;
 
-    MVAMet                         fMVAMet;
+    PhotonTreeWriterVtx           *fDiphotonVtx;
+    TTree                         *hVtxTree;
     
+    MVAMet                         fMVAMet;
+    JetIDMVA                       fJetId;
     
     ClassDef(PhotonTreeWriter, 1) // Photon identification module
   };

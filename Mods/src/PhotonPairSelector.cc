@@ -479,6 +479,11 @@ void PhotonPairSelector::Process()
       
       double minsig = 1e6;
       for (UInt_t ivtx=0; ivtx<fPV->GetEntries(); ++ivtx) {
+	const Vertex *v = fPV->At(ivtx);
+	
+
+	
+	
 //         Met mmet = fMVAMet.GetMet(  false,
 //                                   fixPh1st[iPair]->Pt(),fixPh1st[iPair]->Phi(),fixPh1st[iPair]->Eta(),
 //                                   fixPh2nd[iPair]->Pt(),fixPh2nd[iPair]->Phi(),fixPh2nd[iPair]->Eta(),
@@ -524,12 +529,24 @@ void PhotonPairSelector::Process()
 		
 	Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
 	
+	
+	Double_t sumptsq = 0.;
+	for (UInt_t ipfc = 0; ipfc<fPFCands->GetEntries(); ++ipfc) {
+	  const PFCandidate *pfc = fPFCands->At(ipfc);
+	  if (pfc->PFType()!=PFCandidate::eHadron || !pfc->HasTrackerTrk()) continue;
+	  if (TMath::Abs( pfc->TrackerTrk()->DzCorrected(*v) ) > 0.2) continue;
+	  if (TMath::Abs( pfc->TrackerTrk()->D0Corrected(*v) ) > 0.1) continue;	  
+	  sumptsq += pfc->Pt()*pfc->Pt();
+	}
+	
+	if (sumptsq<10.0) metsig = -99;
+	
         if (metsig<minsig && metsig>0.) {
           minsig = metsig;
           theVtx[iPair] = fPV->At(ivtx);
         }
         
-        printf("ivtx = %i, met = %5f, metsig = %5f, dzgen = %5f\n",ivtx,fullmet.Rho(), metsig,fPV->At(ivtx)->Z()-higgsz);
+        printf("ivtx = %i, sumptsq = %5f, met = %5f, metsig = %5f, dzgen = %5f\n",ivtx,sumptsq, fullmet.Rho(), metsig,fPV->At(ivtx)->Z()-higgsz);
         
       }
       
