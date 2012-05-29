@@ -938,10 +938,11 @@ void PhotonTreeWriter::SlaveBegin()
                       );                      
                  
   fJetId.Initialize(JetIDMVA::kMedium,
-                          "$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
-                          "$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
+                          TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
+                          TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
                           JetIDMVA::kCut,
-                          "$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py");
+                          TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")))
+                          );
                       
   fDiphotonEvent = new PhotonTreeWriterDiphotonEvent;
   fSinglePhoton  = new PhotonTreeWriterPhoton<16>;
