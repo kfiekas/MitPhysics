@@ -263,7 +263,7 @@ Bool_t JetIDMVA::passCut(const PFJet *iJet,const Vertex *iVertex,const VertexCol
   if(!JetTools::passPFLooseId(iJet))                 return false;
   if(iJet->Pt()        < fJetPtMin) return false; 
   if(fabs(iJet->Eta()) > 4.99)      return false;
-  if(fType == kCut) passCut(iJet,iVertex,iVertices);
+  //if(fType == kCut) passCut(iJet,iVertex,iVertices);
 
   double lPt = iJet->Pt();
   int lPtId = 0; 
@@ -289,7 +289,7 @@ Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *i
   if(!JetTools::passPFLooseId(iJet))                 return false;
   if(iJet->Pt()        < fJetPtMin) return false; 
   if(fabs(iJet->Eta()) > 4.99)      return false;
-  if(fType == kCut) passCut(iJet,iVertex,iVertices);
+  if(fType == kCut) return passCut(iJet,iVertex,iVertices);
   double lMVA = MVAValue(iJet,iVertex,iVertices);
   
   int lPtId = 0; 

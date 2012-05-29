@@ -81,10 +81,10 @@ PuJetIdCutBased_wp = cms.PSet(
             Pt3050_BetaStarTight   = cms.vdouble( 0.15, 0.15, 999., 999.),
 
                 #Medium Id => Daniele
-            Pt010_BetaStarMedium   = cms.vdouble( 0.2, 999., 999., 999.),
-            Pt1020_BetaStarMedium  = cms.vdouble( 0.2, 999., 999., 999.),
-            Pt2030_BetaStarMedium  = cms.vdouble( 0.2, 999., 999., 999.),
-            Pt3050_BetaStarMedium  = cms.vdouble( 0.2, 999., 999., 999.),
+            Pt010_BetaStarMedium   = cms.vdouble( 0.2, 0.3, 999., 999.),
+            Pt1020_BetaStarMedium  = cms.vdouble( 0.2, 0.3, 999., 999.),
+            Pt2030_BetaStarMedium  = cms.vdouble( 0.2, 0.3, 999., 999.),
+            Pt3050_BetaStarMedium  = cms.vdouble( 0.2, 0.3, 999., 999.),
 
                 #Loose Id
             Pt010_BetaStarLoose    = cms.vdouble( 0.2, 0.3, 999., 999.),
@@ -100,10 +100,10 @@ PuJetIdCutBased_wp = cms.PSet(
             Pt3050_RMSTight        = cms.vdouble( 0.05, 0.06, 0.03, 0.04),
 
                 #Medium Id => Daniele
-            Pt010_RMSMedium        = cms.vdouble( 0.06, 0.03, 0.03, 0.04),
-            Pt1020_RMSMedium       = cms.vdouble( 0.06, 0.03, 0.03, 0.04),
-            Pt2030_RMSMedium       = cms.vdouble( 0.06, 0.03, 0.03, 0.04),
-            Pt3050_RMSMedium       = cms.vdouble( 0.06, 0.03, 0.03, 0.04),
+            Pt010_RMSMedium        = cms.vdouble( 0.06, 0.05, 0.05, 0.055),
+            Pt1020_RMSMedium       = cms.vdouble( 0.06, 0.05, 0.05, 0.055),
+            Pt2030_RMSMedium       = cms.vdouble( 0.06, 0.05, 0.05, 0.055),
+            Pt3050_RMSMedium       = cms.vdouble( 0.06, 0.05, 0.05, 0.055),
 
                 #Loose Id
             Pt010_RMSLoose         = cms.vdouble( 0.08, 0.07, 0.05, 0.07),
