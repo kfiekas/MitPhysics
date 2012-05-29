@@ -1,4 +1,4 @@
-// $Id: runHgg2012.C,v 1.5 2012/05/28 14:25:37 bendavid Exp $
+// $Id: runHgg2012.C,v 1.6 2012/05/29 17:11:34 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -41,7 +41,7 @@ void runHgg2012(const char *fileset    = "0000",
             const char *book       = "t2mit/filefi/028",
             const char *catalogDir = "/home/cmsprod/catalog",
             const char *outputName = "hgg",
-            int         nEvents    = -1)
+            int         nEvents    = 1000)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -361,6 +361,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpresel->SetDoMCWidthScaling(kTRUE);  
   photpresel->SetMCSigIEtaIEtaScale(0.87,0.0011,0.99,0);
   photpresel->SetMCWidthScale(0.99,0);
+  photpresel->SetDoMCNewScaling(kTRUE);
   photpresel->SetDoMCErrScaling(kTRUE);
   photpresel->SetMCErrScale(1.07, 1.045);    
   photpresel->SetJetsName(jetCorr->GetOutputName());  
@@ -390,6 +391,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselinverteleveto->SetDoMCWidthScaling(kTRUE); 
   photpreselinverteleveto->SetMCSigIEtaIEtaScale(0.87,0.0011,0.99,0);
   photpreselinverteleveto->SetMCWidthScale(0.99,0);
+  photpreselinverteleveto->SetDoMCNewScaling(kTRUE);
   photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
   photpreselinverteleveto->SetMCErrScale(1.07, 1.045);    
   photpreselinverteleveto->SetApplyEleVeto(kFALSE);
