@@ -137,6 +137,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCR9ScaleEE                   (1.0),
   fDoMCSigIEtaIEtaScaling        (kFALSE),
   fDoMCWidthScaling              (kFALSE),
+  fDoMCNewScaling                (kFALSE),
   fMCSigIEtaIEtaScaleEB          (0.87),
   fMCSigIEtaIEtaShiftEB          (0.0011), 
   fMCSigIEtaIEtaScaleEE          (0.99),
@@ -603,10 +604,14 @@ void PhotonPairSelector::Process()
       trailptcut = trailptcut*pairmass;
     }
 
-
+    
     //compute id bdt values
     Double_t bdt1;
     Double_t bdt2;
+    Bool_t applyNewScale=kFALSE;
+    if ((!fIsData) && fDoMCNewScaling ){
+      applyNewScale=kTRUE;
+    }
 
     switch (fIdType) {
     case k2011IdMVA:
@@ -617,8 +622,8 @@ void PhotonPairSelector::Process()
       break;
       
     case k2012IdMVA_globe:
-      bdt1 = fTool.GetMVAbdtValue_2012_globe(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
-      bdt2 = fTool.GetMVAbdtValue_2012_globe(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
+      bdt1 = fTool.GetMVAbdtValue_2012_globe(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,applyNewScale,fElectrons,fApplyEleVeto);
+      bdt2 = fTool.GetMVAbdtValue_2012_globe(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,applyNewScale,fElectrons,fApplyEleVeto);
       fixPh1st[iPair]->SetIdMva(bdt1);
       fixPh2nd[iPair]->SetIdMva(bdt2);
       break;
