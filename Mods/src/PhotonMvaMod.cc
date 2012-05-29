@@ -133,7 +133,9 @@ void PhotonMvaMod::Process()
         egcor.Initialize(fPhFixString,fPhFixFile,fRegWeights);
       }
     
-      egcor.CorrectEnergyWithError(outph,fPV,fPileUpDen->At(0)->RhoKt6PFJets(),fRegressionVersion);
+      if (fRegressionVersion>0)
+        egcor.CorrectEnergyWithError(outph,fPV,fPileUpDen->At(0)->RhoKt6PFJets(),fRegressionVersion);
+      
       ThreeVectorC scpos = outph->SCluster()->Point();
       outph->SetCaloPosXYZ(scpos.X(),scpos.Y(),scpos.Z());
       
