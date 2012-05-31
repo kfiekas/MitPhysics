@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.81 2012/05/14 16:38:01 fabstoec Exp $
+// $Id: MuonIDMod.cc,v 1.82 2012/05/19 08:47:52 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -213,21 +213,22 @@ void MuonIDMod::Process()
 		 RChi2 < 10.0 &&
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
+      // 2012 WW analysis for 42x (there is no PFMuon link)
       case kWWMuIdV1:
         idpass = mu->BestTrk() != 0 &&
-	         mu->BestTrk()->NHits() > 10 &&
+	         mu->NTrkLayersHit() > 5 &&
 		 mu->BestTrk()->NPixelHits() > 0 &&
 		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1 &&
-		 RChi2 < 10.0 &&
-		(mu->NSegments() > 1 || mu->NMatches() > 1) &&
-		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
+		 mu->TrkKink() < 20.0;
         break;
+      // 2010 WW analysis
       case kWWMuIdV2:
         idpass = mu->BestTrk() != 0 &&
 	         mu->BestTrk()->NHits() > 10 &&
 		 mu->BestTrk()->NPixelHits() > 0 &&
 		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1;
         break;
+      // 2011 WW analysis
       case kWWMuIdV3:
         idpass = mu->BestTrk() != 0 &&
 	         mu->BestTrk()->NHits() > 10 &&
@@ -235,6 +236,7 @@ void MuonIDMod::Process()
 		 mu->BestTrk()->PtErr()/mu->BestTrk()->Pt() < 0.1 &&
 		 mu->TrkKink() < 20.0;
         break;
+      // 2012 WW analysis
       case kWWMuIdV4:
         idpass = mu->BestTrk() != 0 &&
 	         mu->NTrkLayersHit() > 5 &&
