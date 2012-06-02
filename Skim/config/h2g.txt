@@ -1,0 +1,20 @@
+#=======================================================================================================================
+# book/version   dataset                  skim   legend for plot                        Xsec       scale ovlap   JSON
+#=======================================================================================================================
+# Data==================================================================================================================
+#local/filefi/025 r11a-pho-j16-v1          noskim  data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11b-pho-j16-v1          noskim  data                                  -1.0       1.0   -1.0    -
+local/filefi/025 r11b-pho-n02-v1          noskim  data                                  -1.0       1.0   -1.0    -
+## MC Signal=============================================================================================================
+#local/filefi/025 f11--h125gg-gf-v14b-pu   noskim  H~#rightarrow~#gamma#gamma~125~GeV    0.03521    1.0   -1.0    ~
+#local/filefi/025 f11--h125gg-vbf-v14b-pu  noskim  H~#rightarrow~#gamma#gamma~125~GeV    0.03521    1.0   -1.0    ~
+#local/filefi/025 f11--h125gg-vh-v14b-pu   noskim  H~#rightarrow~#gamma#gamma~125~GeV    0.03521    1.0   -1.0    ~
+#local/filefi/025 f11--h125gg-tt-v14b-pu   noskim  H~#rightarrow~#gamma#gamma~125~GeV    0.03521    1.0   -1.0    ~
+## MC Background=========================================================================================================
+#local/filefi/025 f11--diphoj-v14b-pu      noskim  Box+Born                              154.0      1.3   -1.0    ~
+#local/filefi/025 f11--2pibx10_25-v14b-pu  noskim  ~                                     358.2      1.3   -1.0    ~
+#local/filefi/025 f11--2pibx25_250-v14b-pu noskim  ~                                     12.37      1.3   -1.0    ~
+#local/filefi/025 f11--2pibx250-v14b-pu    noskim  ~                                     0.000208   1.3   -1.0    ~
+#local/filefi/025 f11-pj-2em20-v14b-pu     noskim  Prompt-Fake                           493.44     1.3   -1.0    ~
+#local/filefi/025 f11--qcd-2em40-v14b-pu   noskim  Fake-Fake                             40392.0    1.0   -1.0    ~
+#local/filefi/025 f11-zjets-v14b-pu        noskim  Z~#rightarrow~ee                      2321.0     1.15  -1.0    ~
