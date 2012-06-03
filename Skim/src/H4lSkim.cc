@@ -109,10 +109,12 @@ void H4lSkim::Process()
     return;
 
   // Get primary vertices
-  // Assumes primary vertices are ordered by sum-pT^2 (as should be in CMSSW)
-  // NOTE: if no PV is found from fitting tracks, the beamspot is used
+
+  // Assumes primary vertices are ordered by sum-pT^2 (as should be in CMSSW), note: if no PV is
+  // found from fitting tracks, the beamspot is used
+
   const Vertex *bestPV = 0;
-  Bool_t hasGoodPV = kFALSE;  
+
   for (UInt_t i=0; i<fPrimVerts->GetEntries(); ++i) {
     const Vertex *pv = fPrimVerts->At(i);
     
@@ -127,7 +129,6 @@ void H4lSkim::Process()
       continue;
     if (pv->Position().Rho() > 2)
       continue;    
-    hasGoodPV = kTRUE;
     
     if (!bestPV)
       bestPV = pv;
