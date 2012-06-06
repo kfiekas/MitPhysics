@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.18 2012/05/29 16:57:11 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.19 2012/06/06 14:42:33 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -534,6 +534,7 @@ namespace mithep
       Float_t pfmetphi;
       Float_t pfmetx;
       Float_t pfmety;
+
       
       Float_t mvametsel;
       Float_t mvametselphi;
@@ -548,6 +549,7 @@ namespace mithep
       Float_t mvametfirstsig;
       
       Double_t spfMet;
+
 
       UChar_t  ismc;
       
@@ -685,8 +687,10 @@ namespace mithep
     TString             fPFMetName;
     TString             fPFJetName;
 
+
     TString             funcorrPFJetName;
     TString             fGenJetName;   //added to do pfmet correction 05/01/2012
+
 
     TString             fLeptonTagElectronsName;
     TString             fLeptonTagMuonsName;

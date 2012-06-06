@@ -77,7 +77,7 @@ Double_t PFMetCorrectionTools::ErrEt( Double_t Et, Double_t Eta) {
 
 }
 
-void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Photon *phSoft,  Bool_t smearing, Bool_t scale, const PFJetCol *fPFJet, const GenJetCol *fGenJet, const JetCol *fcorrJet) {
+void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Photon *phSoft,  Bool_t smearing, Bool_t scale, const PFJetCol *fPFJet, const GenJetCol *fGenJet, const JetCol *fcorrJet, UInt_t evt ) {
   //fPFJet is the AKt5PFJets 
   //fGenJet is the AKT5GenJets
   //fcorrJets is the corrected jets collections
@@ -87,7 +87,7 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
   
   TLorentzVector jetSumUnsmeared;
   jetSumUnsmeared.SetXYZT(0.,0.,0.,0);
-  
+  TRandom3 *jSmearRan= new TRandom3(evt);
   
   if( !fPFJet || !fcorrJet) {
     return;
@@ -96,7 +96,7 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
   if(fPFJet->GetEntries() != fcorrJet->GetEntries()) return;
   
   // associating reco - gen met                                                                                                            
-  for( unsigned int i=0; i<fPFJet->GetEntries(); ++i){
+  for( UInt_t i=0; i<fPFJet->GetEntries(); ++i){
     const Jet *recojet=fPFJet->At(i);
     float ptSmeared  = recojet->Mom().Pt();
     float eneSmeared = recojet->Mom().E();    
@@ -154,8 +154,8 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
       else {
 	Double_t expres = ErrEt(recojet->Mom().Pt(),recojet->Mom().Eta());
 	Double_t relsmear = expres * sqrt(smear*smear-1);
-	gRandom->SetSeed(1);
-	shift = gRandom->Gaus(0.,relsmear);
+	jSmearRan->SetSeed(evt+(Int_t)(recojet->Mom().Eta()*1000));
+	shift = jSmearRan->Gaus(0.,relsmear);
       }
       
       
@@ -207,12 +207,15 @@ void PFMetCorrectionTools::shiftMet(Met *uncormet, Bool_t fIsData, Double_t spfM
   Double_t py=0;
   // data
   if(fIsData){
-    px =uncormet->Px() -0.00563109*spfMet+0.959742;
-    py =uncormet->Py() +0.00586162*spfMet-0.540137;
-  // MC
-  }else{
-    px = uncormet->Px()-0.00069992*spfMet+0.430059;
-    py = uncormet->Py()+0.00262869*spfMet+0.210784;
+    //    px =uncormet->Px() -0.00563109*spfMet+0.959742;
+    //    py =uncormet->Py() +0.00586162*spfMet-0.540137; 
+    px = uncormet->Px()+0.0062*spfMet-0.67; // change shift factor for 2012 correction
+    py = uncormet->Py()-0.0046*spfMet+0.67;
+    // MC
+  }else{  
+    px =uncormet->Px() -0.0013*spfMet+0.021;
+    py =uncormet->Py() -0.0037*spfMet+0.82;
+    
   }
   //  e = sqrt(px*px+py*py);
   

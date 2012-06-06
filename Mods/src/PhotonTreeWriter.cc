@@ -173,7 +173,9 @@ void PhotonTreeWriter::Process()
     FindHiggsPtAndZ(_pth, _decayZ, _genmass);
 
 
+  Double_t _evt = GetEventHeader()->EvtNum();
   Double_t _spfMet = fPFMet->At(0)->SumEt();
+
   fDiphotonEvent->leptonTag = -1; // disabled
 
   fDiphotonEvent->rho = fPileUpDen->At(0)->RhoKt6PFJets();
@@ -392,7 +394,7 @@ void PhotonTreeWriter::Process()
           else if (!jetcentral && 0) jetcentral = jet;
         }
         if (jet1&&jet2&&jetcentral) break;
-      }      
+      }
     }
     
     if (jet1) {
@@ -434,6 +436,11 @@ void PhotonTreeWriter::Process()
       }
     }
     
+
+
+
+
+
     //added gen. info of whether a lep. or nutrino is from W or Z --Heng 02/14/2012 12:30 EST
     Double_t _fromZ = -99;
     Double_t _fromW = -99;
@@ -459,7 +466,7 @@ void PhotonTreeWriter::Process()
 	else _fromW=1;
       }
     }
-    
+ 
     fDiphotonEvent->fromZ = _fromZ;
     fDiphotonEvent->fromW = _fromW;
     fDiphotonEvent->zpt = _zpt;
@@ -470,6 +477,7 @@ void PhotonTreeWriter::Process()
     Double_t _dphiMetgg = -99;
     Double_t _cosdphiMetgg = -99;
     Double_t _dphiPhPh = -99;
+
     Double_t _mass = -99.;
     Double_t _masserr = -99.;
     Double_t _masserrsmeared = -99.;
@@ -603,6 +611,7 @@ void PhotonTreeWriter::Process()
       
     }
 
+
     fDiphotonEvent->corrpfmet = -99.;
     fDiphotonEvent->corrpfmetphi = -99.;
     fDiphotonEvent->corrpfmetx = -99.;
@@ -614,12 +623,12 @@ void PhotonTreeWriter::Process()
     corrMet = new Met(fPFMet->At(0)->Px(),fPFMet->At(0)->Py());
     
     if (!fIsData){
-      PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,1,1,funcorrPFJets,fGenJets,fPFJets);
+      PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,1,0,funcorrPFJets,fGenJets,fPFJets,_evt);
       PFMetCorrectionTools::shiftMet(corrMet,fIsData,_spfMet);
     }
     else {
       PFMetCorrectionTools::shiftMet(corrMet,fIsData,_spfMet);
-       PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,0,1,funcorrPFJets,fGenJets,fPFJets);
+      PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,0,1,funcorrPFJets,fGenJets,fPFJets,_evt);
      }    
  
     fDiphotonEvent->corrpfmet = corrMet->Pt();
@@ -629,6 +638,7 @@ void PhotonTreeWriter::Process()
 
     delete corrMet;
     }
+
 
     Float_t _massele = -99.;
     Float_t _ptee = -99.;
