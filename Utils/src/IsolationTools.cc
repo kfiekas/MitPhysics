@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.31 2012/05/25 19:41:11 bendavid Exp $
+// $Id: IsolationTools.cc,v 1.32 2012/06/06 12:13:46 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -848,7 +848,8 @@ Double_t IsolationTools::PFChargedIsolation(const mithep::Photon *p,
     
     for(UInt_t j=0; j<PFCands->GetEntries(); ++j) {
       const PFCandidate *pf= PFCands->At(j);
-      if(pf->HasTrackerTrk() && pf->PFType()==PFCandidate::eHadron) {
+
+      if( pf->HasTrackerTrk() && pf->PFType()==PFCandidate::eHadron ) {
 	const Track* t = pf->TrackerTrk();
         
 	Double_t dR   = MathUtils::DeltaR(*pf,photondir);
@@ -1082,7 +1083,7 @@ Double_t IsolationTools::PFGammaIsolation(const mithep::Photon *p,
   Double_t iso = 0.;
   
   ThreeVector photondir;
-  Bool_t setdir = kFALSE;
+  //Bool_t setdir = kFALSE;
   
   for (UInt_t ipfc = 0; ipfc<PFCands->GetEntries(); ++ipfc) {
     const PFCandidate *pfc = PFCands->At(ipfc);

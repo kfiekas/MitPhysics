@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.28 2012/05/27 16:08:50 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.29 2012/05/28 14:24:49 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -528,7 +528,7 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
     std::cout<<" hcalIso4   = "<<hcalIso4<<std::endl;
 
     std::cout<<" photon Et  = "<<ph->Et()<<std::endl;
-   std::cout<<"        Eta = "<<ph->SCluster()->Eta()<<std::endl;
+    std::cout<<"        Eta = "<<ph->SCluster()->Eta()<<std::endl;
     std::cout<<"        HoE = "<<HoE<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+4*4]<<")"<<std::endl;
     std::cout<<"         R9 = "<<R9<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+5*4]<<")"<<std::endl;
     std::cout<<"         dR = "<<dRTrack<<"   ("<<cic4_allcuts_temp_sublead[_tCat-1+6*4]<<")"<<std::endl;
@@ -590,15 +590,13 @@ bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx,
   return false;
 }
 
-
-
 bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph, 
-                                 const Vertex* vtx, 
-                                 const PFCandidateCol*    pfCol,
-                                 const VertexCol*   vtxCol,
-                                 double rho, double ptmin)
-{
-
+					const Vertex* vtx, 
+					const PFCandidateCol*    pfCol,
+					const VertexCol*   vtxCol,
+					double rho, double ptmin,
+					std::vector<double>* kin  // store variables for debugging...
+					) {
   
   // these values are taken from the H2GGlobe code... (actually from Marco/s mail)
   float cic4_allcuts_temp_sublead[] = { 
@@ -607,7 +605,7 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
     3.8,         2.5,         3.1,         2.2,
     0.0108,      0.0102,      0.028,       0.028,
     0.124,       0.092,       0.142,       0.063,
-    0.94,        0.28,        0.94,        0.24 };  // the last line is PixelmatchVeto and un-used
+    0.94,        0.28,        0.94,        0.24 };  
   
   // cut on Et instead of Pt???    
   Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
@@ -625,8 +623,8 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
   // track iso worst vtx
   double trackIsoWorst04 = IsolationTools::PFChargedIsolation(ph, vtx, 0.4, 0.00, pfCol, &wVtxInd, vtxCol);
   
-  double combIso1 = ecalIso3+trackIsoSel03 - 0.09*rho;
-  double combIso2 = ecalIso4+trackIsoWorst04 - 0.23*rho;
+  double combIso1 = ecalIso3+trackIsoSel03   + 2.5 - 0.09*rho;
+  double combIso2 = ecalIso4+trackIsoWorst04 + 2.5 - 0.23*rho;
   
   double tIso1 = (combIso1) *50./ph->Et();
   double tIso2 = (combIso2) *50./(ph->MomVtx(vtxCol->At(wVtxInd)->Position()).Pt());
@@ -644,6 +642,28 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
   if ( R9 < 0.94 ) _tCat++;
   
   float passCuts = 1.;
+
+  if( kin ) {
+    kin->resize(0);
+
+    kin->push_back(tIso1);
+    kin->push_back(tIso2);
+    kin->push_back(tIso3);
+    kin->push_back(covIEtaIEta);
+    kin->push_back(HoE);
+    kin->push_back(R9);
+
+    kin->push_back( (double) wVtxInd );
+    kin->push_back( ecalIso3 );
+    kin->push_back( ecalIso4 );
+
+    kin->push_back( trackIsoSel03 );
+    kin->push_back( trackIsoWorst04 );
+
+    kin->push_back( combIso1 );
+    kin->push_back( combIso2 );
+  }
+
 
   if ( ph->Pt()     <= ptmin      ) passCuts = -1.;
 

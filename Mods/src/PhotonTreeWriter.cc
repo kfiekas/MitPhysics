@@ -349,11 +349,11 @@ void PhotonTreeWriter::Process()
 
       for (UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet) {
 	const Jet *jet = fPFJets->At(ijet);
-	if( jet->Pt() < 20. || jet->AbsEta() > 2.4 ) continue;
+	if ( jet->Pt() < 20. || jet->AbsEta() > 2.4 ) continue;
 	if ( jet->CombinedSecondaryVertexBJetTagsDisc() > highTag ) {
 	  
-	  trailTag = highTag;
-	  trailJetPt = highJetPt;
+	  trailTag    = highTag;
+	  trailJetPt  = highJetPt;
 	  trailJetEta = highJetEta;
 
 	  highTag    = jet->CombinedSecondaryVertexBJetTagsDisc();
@@ -371,9 +371,9 @@ void PhotonTreeWriter::Process()
       fDiphotonEvent -> btagJet1Pt  = highJetPt;
       fDiphotonEvent -> btagJet1Eta = highJetEta;      
 
-      fDiphotonEvent -> btagJet1    = trailTag;
-      fDiphotonEvent -> btagJet1Pt  = trailJetPt;
-      fDiphotonEvent -> btagJet1Eta = trailJetEta;      
+      fDiphotonEvent -> btagJet2    = trailTag;
+      fDiphotonEvent -> btagJet2Pt  = trailJetPt;
+      fDiphotonEvent -> btagJet2Eta = trailJetEta;      
 
     }
     
@@ -662,8 +662,8 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->costhetaele =  _costhetaele;    
     fDiphotonEvent->evtcat = _evtcat;
 
-    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,rho,fFillClusterArrays,fElectrons,fApplyElectronVeto);
-    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,rho,fFillClusterArrays,fElectrons,fApplyElectronVeto);
+    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fApplyElectronVeto);
+    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fApplyElectronVeto);
     
     Float_t ph1ecor    = fDiphotonEvent->photons[0].Ecor();
     Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
@@ -863,7 +863,7 @@ void PhotonTreeWriter::Process()
 						 (1.0-fDiphotonEvent->cosphimetele));      
     }
     
-    fSinglePhoton->SetVars(ph,conv,ele,pfsc,phgen,fPhfixph,fPhfixele,fTracks,fPV,rho,fFillClusterArrays,
+    fSinglePhoton->SetVars(ph,conv,ele,pfsc,phgen,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,
 			   fElectrons,fApplyElectronVeto);
     hCiCTupleSingle->Fill();
   }
@@ -1108,11 +1108,13 @@ Float_t PhotonTreeWriter::GetEventCat(PhotonTools::CiCBaseLineCats cat1,
 
 template <int NClus>
 void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle *c, const Electron *ele,
-				     const SuperCluster *pfsc, const MCParticle *m,
-				     PhotonFix &phfixph, PhotonFix &phfixele,
-				     const TrackCol* trackCol,const VertexCol* vtxCol,Double_t rho,
-				     Bool_t fillclusterarrays, 
-				     const ElectronCol* els, Bool_t applyElectronVeto) {
+					    const SuperCluster *pfsc, const MCParticle *m,
+					    PhotonFix &phfixph, PhotonFix &phfixele,
+					    const TrackCol* trackCol,const VertexCol* vtxCol,
+					    const PFCandidateCol* fPFCands,
+					    Double_t rho,
+					    Bool_t fillclusterarrays, 
+					    const ElectronCol* els, Bool_t applyElectronVeto) {
   
   const SuperCluster *s = 0;
   if (p)
@@ -1190,7 +1192,30 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
   						      trackCol, &wVtxInd,vtxCol,
   						      (!applyElectronVeto ? els : NULL) );
     combiso1 = ecalisodr03+hcalisodr04+trackiso1 - 0.17*rho;
-    combiso2 = ecalisodr04+hcalisodr04+trackiso2 - 0.52*rho;        
+    combiso2 = ecalisodr04+hcalisodr04+trackiso2 - 0.52*rho;  
+
+
+    // -----------------------------------------------------
+    // PF-CiC4 Debug Stuff
+    std::vector<double> debugVals;
+    bool tmpPass = PhotonTools::PassCiCPFIsoSelection(p, vtx, fPFCands, vtxCol, rho, 20., &debugVals);
+    if( debugVals.size() == 13 ) {
+      pfcic4_tIso1   = debugVals[0];
+      pfcic4_tIso2   = debugVals[1];
+      pfcic4_tIso3   = debugVals[2];
+      pfcic4_covIEtaIEta   = debugVals[3];
+      pfcic4_HoE   = debugVals[4];
+      pfcic4_R9   = debugVals[5];
+      pfcic4_wVtxInd   = debugVals[6];
+      pfcic4_ecalIso3   = debugVals[7];
+      pfcic4_ecalIso4   = debugVals[8];
+      pfcic4_trackIsoSel03   = debugVals[9];
+      pfcic4_trackIsoWorst04   = debugVals[10];
+      pfcic4_combIso1   = debugVals[11];
+      pfcic4_combIso2   = debugVals[12];
+    }
+    // -----------------------------------------------------
+      
   }
   else {
     hasphoton = kFALSE;

@@ -463,8 +463,13 @@ void PhotonPairSelector::Process()
                                            mithep::FourVector((fixPh1st[iPair]->Mom()+
                                                                fixPh2nd[iPair]->Mom())));
       break;
+
     case kMetSigVtxSelection: {
-      // need PFCandidate Collection
+      // need PFCandidate Collection, otherwise use 0
+      if( !fJets || !fPFCands ) {
+	theVtx[iPair] = fPV->At(0);
+	break;
+      }      
       
       PFJetOArr pfjets;
       for (UInt_t ijet=0; ijet<fJets->GetEntries(); ++ijet) {
@@ -482,38 +487,35 @@ void PhotonPairSelector::Process()
       for (UInt_t ivtx=0; ivtx<fPV->GetEntries(); ++ivtx) {
 	const Vertex *v = fPV->At(ivtx);
 	
-
+	//         Met mmet = fMVAMet.GetMet(  false,
+	//                                   fixPh1st[iPair]->Pt(),fixPh1st[iPair]->Phi(),fixPh1st[iPair]->Eta(),
+	//                                   fixPh2nd[iPair]->Pt(),fixPh2nd[iPair]->Phi(),fixPh2nd[iPair]->Eta(),
+	//                                   fPFMet->At(0),
+	//                                   &pfcands,fPV->At(ivtx),fPV, fPileUpDen->At(0)->Rho(),
+	//                                   &pfjets,
+	//                                   int(fPV->GetEntries()),
+	//                                   kTRUE);
 	
-	
-//         Met mmet = fMVAMet.GetMet(  false,
-//                                   fixPh1st[iPair]->Pt(),fixPh1st[iPair]->Phi(),fixPh1st[iPair]->Eta(),
-//                                   fixPh2nd[iPair]->Pt(),fixPh2nd[iPair]->Phi(),fixPh2nd[iPair]->Eta(),
-//                                   fPFMet->At(0),
-//                                   &pfcands,fPV->At(ivtx),fPV, fPileUpDen->At(0)->Rho(),
-//                                   &pfjets,
-//                                   int(fPV->GetEntries()),
-//                                   kTRUE);
-
         Met mmet = fMVAMet.GetMet(  false,
-                                  0.,0.,0.,
-                                  fPFMet->At(0),
-                                  &pfcands,fPV->At(ivtx),fPV, fPileUpDen->At(0)->Rho(),
-                                  &pfjets,
-                                  int(fPV->GetEntries()),
-                                  kFALSE);
-          
+				    0.,0.,0.,
+				    fPFMet->At(0),
+				    &pfcands,fPV->At(ivtx),fPV, fPileUpDen->At(0)->Rho(),
+				    &pfjets,
+				    int(fPV->GetEntries()),
+				    kFALSE);
+	
 	ThreeVector fullmet(mmet.Px() - fixPh1st[iPair]->Px() - fixPh2nd[iPair]->Px(),
 			    mmet.Py() - fixPh1st[iPair]->Py() - fixPh2nd[iPair]->Py(),
 			    0.);
 	
-// 	ThreeVector fullmet(mmet.Px(),
-// 			    mmet.Py(),
-// 			    0.);	
+	// 	ThreeVector fullmet(mmet.Px(),
+	// 			    mmet.Py(),
+	// 			    0.);	
 	
 	TMatrixD *metcov = fMVAMet.GetMetCovariance();
 	
 	//Double_t metsigma =  sqrt(fullmet.X()*fullmet.X()*(*metcov)(0,0) + 2.*fullmet.X()*fullmet.Y()*(*metcov)(1,0)  + fullmet.Y()*fullmet.Y()*(*metcov)(1,1))/fullmet.Rho(); 
-
+	
 	//Double_t metsig = fullmet.Rho()/metsigma;
 	
         ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
@@ -527,7 +529,7 @@ void PhotonPairSelector::Process()
 	vmet(1) = fullmet.Y();
 	
 	mcov.Invert();
-		
+	
 	Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
 	
 	
@@ -562,14 +564,14 @@ void PhotonPairSelector::Process()
       
       testpfmetx -= fixPh1st[iPair]->Px();
       testpfmetx -= fixPh2nd[iPair]->Px();
-
+      
       testpfmety -= fixPh1st[iPair]->Py();
       testpfmety -= fixPh2nd[iPair]->Py();     
       
       double testpfmet = sqrt(testpfmetx*testpfmetx + testpfmety*testpfmety);
       
       printf("bestvtx: metsig = %5f, dzgen = %5f, diphopt = %5f, pfmet = %5f, testpfmet = %5f\n", minsig, theVtx[iPair]->Z()-higgsz, higgspt,fPFMet->At(0)->Pt(),testpfmet);
-
+    
     }
       break;      
     default:
@@ -635,12 +637,18 @@ void PhotonPairSelector::Process()
     // FIX-ME: Add other possibilities....
     bool pass1 = false;
     bool pass2 = false;
-
+    
     switch (fPhSelType) {
+
+      // --------------------------------------------------------------------
+      // trivial (no) selection with only pt-cuts
     case kNoPhSelection:
       pass1 = (fixPh1st[iPair]->Pt() > leadptcut );
       pass2 = (fixPh2nd[iPair]->Pt() > trailptcut);
       break;
+
+      // --------------------------------------------------------------------
+      // CiC4 Selection as used for the 2011 7TeV Baseline analysis
     case kCiCPhSelection:
       pass1 = PhotonTools::PassCiCSelection(fixPh1st[iPair], theVtx[iPair], fTracks,
                                             fElectrons, fPV, rho, leadptcut, fApplyEleVeto);
@@ -648,6 +656,9 @@ void PhotonPairSelector::Process()
         pass2 = PhotonTools::PassCiCSelection(fixPh2nd[iPair], theVtx[iPair], fTracks,
                                               fElectrons, fPV, rho, trailptcut, fApplyEleVeto);
       break;
+
+      // --------------------------------------------------------------------
+      // PF-CiC4 Selection, as used in the 2012 8TeV Baseline analysis
     case kCiCPFPhSelection:
       
       // loose preselection for mva
@@ -667,6 +678,9 @@ void PhotonPairSelector::Process()
         pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
                                                fPV, rho2012, trailptcut);
       break;      
+      
+      // --------------------------------------------------------------------
+      // MVA selection
     case kMVAPhSelection://MVA
       pass1 = fixPh1st[iPair]->Pt()>leadptcut                                              &&
 	PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,
@@ -681,6 +695,9 @@ void PhotonPairSelector::Process()
 				 fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
 
       break;
+
+      // --------------------------------------------------------------------
+      // MIT proposed pre-selection as used in the 2011 7TeV MVA analyses
     case kMITPhSelection:
       // loose preselection for mva
       pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
@@ -694,6 +711,9 @@ void PhotonPairSelector::Process()
 					      fInvertElectronVeto);
 
       break;
+     
+      // --------------------------------------------------------------------
+      // updated (PF absed) pre-selection as used in the 2012 8TeV MVA/Baseline analyses
     case kMITPFPhSelection:
       // loose preselection for mva
       pass1 = fixPh1st[iPair]->Pt() > leadptcut &&

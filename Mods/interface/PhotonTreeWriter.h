@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.17 2012/05/27 16:09:56 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.18 2012/05/29 16:57:11 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -78,7 +78,7 @@ namespace mithep
   class PhotonTreeWriterPhoton
   {
     public:  
-      void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, Bool_t fillclusterarrays, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
+    void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol, const PFCandidateCol* candCol, Double_t _tRho, Bool_t fillclusterarrays, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
       Float_t Ecor()    const { return ecor;    };
       Float_t Ecorerr() const { return ecorerr; };
       Float_t Ecorele()    const { return ecorele;    };
@@ -328,6 +328,23 @@ namespace mithep
       Int_t   pdgid;
       Int_t   motherpdgid;
       
+    // -----------------------------------------------------
+    // PF-CiC4 Debug Stuff
+    Float_t pfcic4_tIso1;
+    Float_t pfcic4_tIso2;
+    Float_t pfcic4_tIso3;
+    Float_t pfcic4_covIEtaIEta;
+    Float_t pfcic4_HoE;
+    Float_t pfcic4_R9;
+    Float_t pfcic4_wVtxInd;
+    Float_t pfcic4_ecalIso3;
+    Float_t pfcic4_ecalIso4;
+    Float_t pfcic4_trackIsoSel03;
+    Float_t pfcic4_trackIsoWorst04;
+    Float_t pfcic4_combIso1;
+    Float_t pfcic4_combIso2;
+    // -----------------------------------------------------
+
       Float_t ebcs[NClus];
       Float_t etabcs[NClus];
       Float_t phibcs[NClus];
