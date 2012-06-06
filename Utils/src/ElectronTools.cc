@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.44 2012/05/21 08:02:51 ceballos Exp $
+// $Id: ElectronTools.cc,v 1.45 2012/05/23 22:04:20 anlevin Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1164,12 +1164,12 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
   if (EffectiveAreaTarget == kEleEANoCorr) {
     return 0.0;
   }
-	else if (EffectiveAreaTarget == kEleEAData2012) {
+  else if (EffectiveAreaTarget == kEleEAData2012) {
     if (type == kEleGammaAndNeutralHadronIso04) {
-    	if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.19;
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.19;
       if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.25;
       if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.12;
-     	if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.21;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.21;
       if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.27;
       if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.44;
       if (fabs(SCEta) >= 2.4) EffectiveArea = 0.52;
@@ -1268,6 +1268,15 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
 
   //2011 Data Effective Areas
   else if (EffectiveAreaTarget == kEleEAData2011) {
+    if (type == kEleGammaAndNeutralHadronIso03) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.100;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.120;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.085;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.110;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.120;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.120;
+      if (fabs(SCEta) >= 2.4) EffectiveArea = 0.130;
+    }
     if (type == kEleGammaAndNeutralHadronIso04) {
       if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.180;
       if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.200;

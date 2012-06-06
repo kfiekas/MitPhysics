@@ -72,6 +72,7 @@ namespace mithep {
       enum EElectronEffectiveAreaType {
         kEleChargedIso03, 
         kEleNeutralHadronIso03, 
+	kEleGammaAndNeutralHadronIso03,
         kEleGammaIso03, 
         kEleGammaIsoVetoEtaStrip03, 
         kEleChargedIso04, 
