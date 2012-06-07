@@ -1234,11 +1234,11 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
     idmva_absIsoHcal=hcalisodr04;
     //2012  
     idmva_CoviEtaiPhi=p->SCluster()->Seed()->CoviEtaiPhi();
-    idmva_s4ratio=p->SCluster()->Seed()->E2x2()/p->SCluster()->Seed()->E5x5();
+    idmva_s4ratio=p->S4Ratio();
     idmva_GammaIso=IsolationTools::PFGammaIsolation(p,0.3,0,fPFCands);
     idmva_ChargedIso_selvtx=IsolationTools::PFChargedIsolation(p,vtx,0.3,0.,fPFCands);
     idmva_ChargedIso_worstvtx=IsolationTools::PFChargedIsolation(p,vtx,0.3,0.,fPFCands,&wVtxInd,vtxCol);
-    idmva_PsEffWidthSigmaRR=sqrt(p->SCluster()->PsEffWidthSigmaXX()*p->SCluster()->PsEffWidthSigmaXX()+p->SCluster()->PsEffWidthSigmaYY()*p->SCluster()->PsEffWidthSigmaYY());
+    idmva_PsEffWidthSigmaRR=p->EffSigmaRR();
   }
   else {
     hasphoton = kFALSE;
