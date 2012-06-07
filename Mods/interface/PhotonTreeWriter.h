@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.19 2012/06/06 14:42:33 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.20 2012/06/06 15:33:21 mtouch Exp $
 //
 // PhotonTreeWriter
 //
@@ -74,7 +74,7 @@ namespace mithep
       Int_t nchcutaway;
   };
   
-  template <int NClus=16>
+  template <int NClus=16>//ming: what's template
   class PhotonTreeWriterPhoton
   {
     public:  
@@ -345,7 +345,23 @@ namespace mithep
     Float_t pfcic4_combIso2;
     // -----------------------------------------------------
 
-      Float_t ebcs[NClus];
+    // -----------------------------------------------------
+    //id mva
+    //2011
+    Float_t idmva_tIso1abs;
+    Float_t idmva_tIso2abs;
+    Float_t idmva_tIso3abs;
+    Float_t idmva_absIsoEcal;
+    Float_t idmva_absIsoHcal;
+    //2012
+    Float_t idmva_CoviEtaiPhi;
+    Float_t idmva_s4ratio;
+    Float_t idmva_GammaIso;
+    Float_t idmva_ChargedIso_selvtx;
+    Float_t idmva_ChargedIso_worstvtx;
+    Float_t idmva_PsEffWidthSigmaRR;
+    
+        Float_t ebcs[NClus];
       Float_t etabcs[NClus];
       Float_t phibcs[NClus];
       Int_t ietabcs[NClus];

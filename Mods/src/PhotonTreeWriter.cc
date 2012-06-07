@@ -20,7 +20,7 @@
 using namespace mithep;
 
 ClassImp(mithep::PhotonTreeWriter)
-templateClassImp(mithep::PhotonTreeWriterPhoton)
+  templateClassImp(mithep::PhotonTreeWriterPhoton)//ming: what's this?
 ClassImp(mithep::PhotonTreeWriterDiphotonEvent)
 
 //--------------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ void PhotonTreeWriter::Process()
   if( fPileUpDen->GetEntries() > 0 )
     rho  = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
   
-  const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));
+  const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));//ming:what's this?
     
   if( !fIsData ) {
     LoadBranch(fMCParticleName);
@@ -976,7 +976,7 @@ void PhotonTreeWriter::SlaveBegin()
   TList  *plist  = pclass->GetListOfDataMembers();
     
   for (int i=0; i<elist->GetEntries(); ++i) {
-    const TDataMember *tdm = static_cast<const TDataMember*>(elist->At(i));
+    const TDataMember *tdm = static_cast<const TDataMember*>(elist->At(i));//ming
     if (!(tdm->IsBasic() && tdm->IsPersistent())) continue;
     TString typestring;
     if (TString(tdm->GetTypeName()).BeginsWith("Char_t")) typestring = "B";
@@ -992,7 +992,7 @@ void PhotonTreeWriter::SlaveBegin()
     else if (TString(tdm->GetTypeName()).BeginsWith("Bool_t")) typestring = "O";
     else continue;
     //printf("%s %s: %i\n",tdm->GetTypeName(),tdm->GetName(),int(tdm->GetOffset()));
-    Char_t *addr = (Char_t*)fDiphotonEvent;
+    Char_t *addr = (Char_t*)fDiphotonEvent;//ming:?
     assert(sizeof(Char_t)==1);
     if (fWriteDiphotonTree) hCiCTuple->Branch(tdm->GetName(),addr + tdm->GetOffset(),TString::Format("%s/%s",tdm->GetName(),typestring.Data()));
     if (fWriteSingleTree) hCiCTupleSingle->Branch(tdm->GetName(),addr + tdm->GetOffset(),TString::Format("%s/%s",tdm->GetName(),typestring.Data()));
@@ -1225,7 +1225,20 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
       pfcic4_combIso2   = debugVals[12];
     }
     // -----------------------------------------------------
-      
+    //id mva
+    //2011
+    idmva_tIso1abs=combiso1;
+    idmva_tIso2abs=combiso2;
+    idmva_tIso3abs=trackiso1;
+    idmva_absIsoEcal=ecalisodr03;
+    idmva_absIsoHcal=hcalisodr04;
+    //2012  
+    idmva_CoviEtaiPhi=p->SCluster()->Seed()->CoviEtaiPhi();
+    idmva_s4ratio=p->SCluster()->Seed()->E2x2()/p->SCluster()->Seed()->E5x5();
+    idmva_GammaIso=IsolationTools::PFGammaIsolation(p,0.3,0,fPFCands);
+    idmva_ChargedIso_selvtx=IsolationTools::PFChargedIsolation(p,vtx,0.3,0.,fPFCands);
+    idmva_ChargedIso_worstvtx=IsolationTools::PFChargedIsolation(p,vtx,0.3,0.,fPFCands,&wVtxInd,vtxCol);
+    idmva_PsEffWidthSigmaRR=sqrt(p->SCluster()->PsEffWidthSigmaXX()*p->SCluster()->PsEffWidthSigmaXX()+p->SCluster()->PsEffWidthSigmaYY()*p->SCluster()->PsEffWidthSigmaYY());
   }
   else {
     hasphoton = kFALSE;
