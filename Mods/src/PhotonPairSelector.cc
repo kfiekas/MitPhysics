@@ -55,6 +55,10 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // Id Types
   fIdMVAType                     ("2011IdMVA"),
   fIdType                        (k2011IdMVA),
+  //-----------------------------------------
+  // preselection Type
+  fShowerShapeType               ("2011ShowerShape"),
+  fSSType                        (k2011ShowerShape),
   // ----------------------------------------
   fPhotonPtMin                   (20.0),
   fPhotonEtaMax                  (2.5),
@@ -132,18 +136,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
 				  TString("weights.xml")),
   fbdtCutBarrel                  (0.0744), //cuts give same eff (relative to presel) with cic
   fbdtCutEndcap                  (0.0959), //cuts give same eff (relative to presel) with cic
-  fDoMCR9Scaling                 (kFALSE),
-  fMCR9ScaleEB                   (1.0),
-  fMCR9ScaleEE                   (1.0),
-  fDoMCSigIEtaIEtaScaling        (kFALSE),
-  fDoMCWidthScaling              (kFALSE),
-  fDoMCNewScaling                (kFALSE),
-  fMCSigIEtaIEtaScaleEB          (0.87),
-  fMCSigIEtaIEtaShiftEB          (0.0011), 
-  fMCSigIEtaIEtaScaleEE          (0.99),
-  fMCSigIEtaIEtaShiftEE          (0), 
-  fMCWidthScale                  (0.99),
-  fMCWidthShift                  (0), 
+  fDoShowerShapeScaling          (kFALSE),
   //
   fDoMCErrScaling                (kFALSE),
   fMCErrScaleEB                  (1.0),
@@ -366,36 +359,71 @@ void PhotonPairSelector::Process()
         PhotonTools::ScalePhotonError(fixPh2nd[iPair],fMCErrScaleEE);
     }
 
-    //scale R9 in Monte Carlo if activated
-    if (fDoMCR9Scaling && !fIsData) {
-      if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5)
-        PhotonTools::ScalePhotonR9(fixPh1st[iPair],fMCR9ScaleEB);
-      else
-        PhotonTools::ScalePhotonR9(fixPh1st[iPair],fMCR9ScaleEE);
-
-      if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5)
-        PhotonTools::ScalePhotonR9(fixPh2nd[iPair],fMCR9ScaleEB);
-      else
-        PhotonTools::ScalePhotonR9(fixPh2nd[iPair],fMCR9ScaleEE);
+    if (fDoShowerShapeScaling && !fIsData) {
+      switch (fSSType) {
+      case k2011ShowerShape:
+	//R9
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetR9(1.0035*fixPh1st[iPair]->R9());
+	else  fixPh1st[iPair]->SetR9(1.0035*fixPh1st[iPair]->R9());
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetR9(1.0035*fixPh2nd[iPair]->R9());
+	else  fixPh2nd[iPair]->SetR9(1.0035*fixPh2nd[iPair]->R9());
+	//CoviEtaiEta(SigiEtaiEta)
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetCoviEtaiEta(0.87*fixPh1st[iPair]->CoviEtaiEta()+0.0011);
+	else  fixPh1st[iPair]->SetCoviEtaiEta(0.99*fixPh1st[iPair]->CoviEtaiEta());
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetCoviEtaiEta(0.87*fixPh2nd[iPair]->CoviEtaiEta()+0.0011);
+	else  fixPh2nd[iPair]->SetCoviEtaiEta(0.99*fixPh2nd[iPair]->CoviEtaiEta());
+	//EtaWidth
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetEtaWidth(0.99*fixPh1st[iPair]->EtaWidth());
+	else  fixPh1st[iPair]->SetEtaWidth(0.99*fixPh1st[iPair]->EtaWidth());
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetEtaWidth(0.99*fixPh2nd[iPair]->EtaWidth());
+	else  fixPh2nd[iPair]->SetEtaWidth(0.99*fixPh2nd[iPair]->EtaWidth());
+	//PhiWidth
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetPhiWidth(0.99*fixPh1st[iPair]->PhiWidth());
+	else  fixPh1st[iPair]->SetPhiWidth(0.99*fixPh1st[iPair]->PhiWidth());
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetPhiWidth(0.99*fixPh2nd[iPair]->PhiWidth());
+	else  fixPh2nd[iPair]->SetPhiWidth(0.99*fixPh2nd[iPair]->PhiWidth());
+	break;
+	
+      case k2012ShowerShape:
+	//R9
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetR9(1.0045*fixPh1st[iPair]->R9()+0.001);
+	else  fixPh1st[iPair]->SetR9(1.0086*fixPh1st[iPair]->R9()-0.0007);
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetR9(1.0045*fixPh2nd[iPair]->R9()+0.001);
+	else  fixPh2nd[iPair]->SetR9(1.0086* fixPh2nd[iPair]->R9()-0.0007);
+	//CoviEtaiEta(SigiEtaiEta)
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) {
+	  if(fixPh1st[iPair]->CoviEtaiEta()<0.0087)fixPh1st[iPair]->SetCoviEtaiEta(0.976591*fixPh1st[iPair]->CoviEtaiEta()+8.1e-5);
+	  else fixPh1st[iPair]->SetCoviEtaiEta(0.980055*fixPh1st[iPair]->CoviEtaiEta()+0.000124);
+	}
+	else  fixPh1st[iPair]->SetCoviEtaiEta(0.9947*fixPh1st[iPair]->CoviEtaiEta()+0.00003);
+	
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) {
+	  if(fixPh2nd[iPair]->CoviEtaiEta()<0.0087)fixPh2nd[iPair]->SetCoviEtaiEta(0.976591*fixPh2nd[iPair]->CoviEtaiEta()+8.1e-5);
+	  else fixPh2nd[iPair]->SetCoviEtaiEta(0.980055*fixPh2nd[iPair]->CoviEtaiEta()+0.000124);
+	}
+	else  fixPh2nd[iPair]->SetCoviEtaiEta(0.9947*fixPh2nd[iPair]->CoviEtaiEta()+0.00003);
+	//EtaWidth
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetEtaWidth(1.04302*fixPh1st[iPair]->EtaWidth()- 0.000618);
+	else  fixPh1st[iPair]->SetEtaWidth(0.903254*fixPh1st[iPair]->EtaWidth()+ 0.001346);
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetEtaWidth(1.04302*fixPh2nd[iPair]->EtaWidth()- 0.000618);
+	else  fixPh2nd[iPair]->SetEtaWidth(0.903254*fixPh2nd[iPair]->EtaWidth()+ 0.001346);
+	//PhiWidth
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetPhiWidth(1.00002*fixPh1st[iPair]->PhiWidth()- 0.000371);
+	else  fixPh1st[iPair]->SetPhiWidth(0.99992*fixPh1st[iPair]->PhiWidth()+ 4.8e-07);
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetPhiWidth(1.00002*fixPh2nd[iPair]->PhiWidth()- 0.000371);
+	else  fixPh2nd[iPair]->SetPhiWidth(0.99992*fixPh2nd[iPair]->PhiWidth()+ 4.8e-07);
+	//s4Ratio
+        if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetS4Ratio(1.01894*fixPh1st[iPair]->S4Ratio()-0.01034);
+	else  fixPh1st[iPair]->SetS4Ratio(1.04969*fixPh1st[iPair]->S4Ratio()-0.03642);
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetS4Ratio(1.01894*fixPh2nd[iPair]->S4Ratio()-0.01034);
+	else  fixPh2nd[iPair]->SetS4Ratio(1.04969*fixPh2nd[iPair]->S4Ratio()-0.03642);
+	//
+	//if (fixPh1st[iPair]->SCluster()->AbsEta()>=1.5) fixPh1st[iPair]->SetEffSigmaRR(1.00101*fixPh1st[iPair]->EffSigmaRR()+0.870801);
+	//if (fixPh2nd[iPair]->SCluster()->AbsEta()>=1.5) fixPh2nd[iPair]->SetEffSigmaRR(1.00101*fixPh2nd[iPair]->EffSigmaRR()+0.870801);
+	break;
+      }
     }
-
-    if (fDoMCSigIEtaIEtaScaling && !fIsData) {
-      if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetCoviEtaiEta(fMCSigIEtaIEtaScaleEB*fixPh1st[iPair]->CoviEtaiEta()+fMCSigIEtaIEtaShiftEB);
-      else fixPh1st[iPair]->SetCoviEtaiEta(fMCSigIEtaIEtaScaleEE*fixPh1st[iPair]->CoviEtaiEta()+fMCSigIEtaIEtaShiftEE);
-
-      if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetCoviEtaiEta(fMCSigIEtaIEtaScaleEB*fixPh2nd[iPair]->CoviEtaiEta()+fMCSigIEtaIEtaShiftEB);
-      else fixPh2nd[iPair]->SetCoviEtaiEta(fMCSigIEtaIEtaScaleEE*fixPh2nd[iPair]->CoviEtaiEta()+fMCSigIEtaIEtaShiftEE);
-    }
-
-
-    if (fDoMCWidthScaling && !fIsData) {
-      fixPh1st[iPair]->SetEtaWidth(fMCWidthScale*fixPh1st[iPair]->EtaWidth()+fMCWidthShift);
-      fixPh1st[iPair]->SetPhiWidth(fMCWidthScale*fixPh1st[iPair]->PhiWidth()+fMCWidthShift);
-
-      fixPh2nd[iPair]->SetEtaWidth(fMCWidthScale*fixPh2nd[iPair]->EtaWidth()+fMCWidthShift);
-      fixPh2nd[iPair]->SetPhiWidth(fMCWidthScale*fixPh2nd[iPair]->PhiWidth()+fMCWidthShift);
-    }
-
+    
     PhotonTools::eScaleCats escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
     PhotonTools::eScaleCats escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);
 
@@ -610,10 +638,6 @@ void PhotonPairSelector::Process()
     //compute id bdt values
     Double_t bdt1;
     Double_t bdt2;
-    Bool_t applyNewScale=kFALSE;
-    if ((!fIsData) && fDoMCNewScaling ){
-      applyNewScale=kTRUE;
-    }
 
     switch (fIdType) {
     case k2011IdMVA:
@@ -624,8 +648,8 @@ void PhotonPairSelector::Process()
       break;
       
     case k2012IdMVA_globe:
-      bdt1 = fTool.GetMVAbdtValue_2012_globe(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,applyNewScale,fElectrons,fApplyEleVeto);
-      bdt2 = fTool.GetMVAbdtValue_2012_globe(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,applyNewScale,fElectrons,fApplyEleVeto);
+      bdt1 = fTool.GetMVAbdtValue_2012_globe(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
+      bdt2 = fTool.GetMVAbdtValue_2012_globe(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
       fixPh1st[iPair]->SetIdMva(bdt1);
       fixPh2nd[iPair]->SetIdMva(bdt2);
       break;
@@ -861,6 +885,15 @@ void PhotonPairSelector::SlaveBegin()
     fIdType =       k2012IdMVA_globe;
   else {
     std::cerr<<" Id MVA "<<fIdMVAType<<" not implemented."<<std::endl;
+    return;
+  }
+  
+  if      (fShowerShapeType.CompareTo("2011ShowerShape") == 0)
+    fSSType =       k2011ShowerShape;
+  else if (fShowerShapeType.CompareTo("2012ShowerShape") == 0)
+    fSSType =       k2012ShowerShape;
+  else {
+    std::cerr<<"shower shape scale "<<fShowerShapeType<<" not implemented."<<std::endl;
     return;
   }
   

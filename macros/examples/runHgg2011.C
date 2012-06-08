@@ -1,4 +1,4 @@
-// $Id: runHgg2011.C,v 1.1 2012/05/27 17:03:58 bendavid Exp $
+// $Id: runHgg2011.C,v 1.3 2012/05/28 09:48:23 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -272,12 +272,12 @@ void runHgg2011(const char *fileset    = "0000",
   photcic->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
   photcic->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   photcic->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);
-  photcic->SetDoMCR9Scaling(kTRUE);
-  photcic->SetMCR9Scale(1.0048, 1.00492);
   photcic->SetDoMCErrScaling(kTRUE);
   photcic->SetMCErrScale(1.07, 1.045);    
   photcic->SetJetsName(jetCorr->GetOutputName());    
   photcic->SetIsData(isData);
+  photcic->SetDoShowerShapeScaling(kTRUE); 
+  photcic->SetShowerShapeType("2011ShowerShape");
 
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
   photcicnoeleveto->SetOutputName("GoodPhotonsCICNoEleVeto");
@@ -303,7 +303,8 @@ void runHgg2011(const char *fileset    = "0000",
   photcicnoeleveto->SetInvertElectronVeto(kTRUE);
   photcicnoeleveto->SetJetsName(jetCorr->GetOutputName());  
   photcicnoeleveto->SetIsData(isData);
-  
+  photcicnoeleveto->SetDoShowerShapeScaling(kTRUE); 
+  photcicnoeleveto->SetShowerShapeType("2011ShowerShape");
   
   PhotonPairSelector         *photpresel = new PhotonPairSelector("PhotonPairSelectorPresel");
   photpresel->SetOutputName("GoodPhotonsPresel");
@@ -339,6 +340,8 @@ void runHgg2011(const char *fileset    = "0000",
   photpresel->SetMCErrScale(1.07, 1.045);    
   photpresel->SetJetsName(jetCorr->GetOutputName());  
   photpresel->SetIsData(isData);
+  photpresel->SetDoShowerShapeScaling(kTRUE); 
+  photpresel->SetShowerShapeType("2011ShowerShape");
 
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputName("GoodPhotonsPreselInvertEleVeto");
@@ -369,6 +372,8 @@ void runHgg2011(const char *fileset    = "0000",
   photpreselinverteleveto->SetInvertElectronVeto(kTRUE);
   photpreselinverteleveto->SetJetsName(jetCorr->GetOutputName());  
   photpreselinverteleveto->SetIsData(isData);  
+  photpreselinverteleveto->SetDoShowerShapeScaling(kTRUE); 
+  photpreselinverteleveto->SetShowerShapeType("2011ShowerShape");
   
   PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
   photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
@@ -380,7 +385,8 @@ void runHgg2011(const char *fileset    = "0000",
   photpreselnosmear->SetJetsName(jetCorr->GetOutputName());  
   photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");  
   photpreselnosmear->SetIsData(isData);  
-  
+  photpreselnosmear->SetDoShowerShapeScaling(kTRUE); 
+  photpreselnosmear->SetShowerShapeType("2011ShowerShape");
   
   PhotonTreeWriter *phottreecic = new PhotonTreeWriter("PhotonTreeWriterCiC");
   phottreecic->SetPhotonsFromBranch(kFALSE);

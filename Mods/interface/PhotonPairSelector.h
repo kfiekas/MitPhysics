@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.24 2012/05/28 14:24:48 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.25 2012/05/29 21:23:17 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -66,6 +66,10 @@ namespace mithep
       k2011IdMVA = 0,
       k2012IdMVA_globe
     };
+    enum ShowerShape {
+      k2011ShowerShape  = 0,
+      k2012ShowerShape
+    };
 
     // setting all the input Names
     void                SetInputPhotonsName(const char *n){ fPhotonBranchName= n;        }
@@ -85,6 +89,7 @@ namespace mithep
     void                SetPhotonSelType(const char *type){ fPhotonSelType    = type;    }
     void                SetVertexSelType(const char *type){ fVertexSelType    = type;    }
     void                SetIdMVAType(const char *type)    { fIdMVAType        = type;    } 
+    void                SetShowerShapeType(const char *type) { fShowerShapeType        = type;    } 
 
     // get/set the Names for the output Photon Collection
     const char         *GetOutputName()             const { return fGoodPhotonsName;     }   
@@ -161,14 +166,8 @@ namespace mithep
     void                SetEtaCorrections(const TH1D *h)  { fEtaCorrections = h; }
     void                SetBdtCutBarrel(Float_t x)        { fbdtCutBarrel = x; }
     void                SetBdtCutEndcap(Float_t x)        { fbdtCutEndcap = x; }
-    
-    void                SetDoMCR9Scaling(Bool_t b)        { fDoMCR9Scaling = b; }
-    void                SetMCR9Scale(Double_t ebscale, Double_t eescale) { fMCR9ScaleEB = ebscale; fMCR9ScaleEE = eescale; }
-    void                SetDoMCSigIEtaIEtaScaling(Bool_t b)        { fDoMCSigIEtaIEtaScaling = b; }
-    void                SetDoMCWidthScaling(Bool_t b)        { fDoMCWidthScaling = b; }
-    void                SetDoMCNewScaling(Bool_t b)        { fDoMCNewScaling = b; }
-    void                SetMCSigIEtaIEtaScale(Double_t ebscale,Double_t ebshift,Double_t eescale,Double_t eeshift) {fMCSigIEtaIEtaScaleEB=ebscale;fMCSigIEtaIEtaShiftEB=ebshift;fMCSigIEtaIEtaScaleEE=eescale;fMCSigIEtaIEtaShiftEE=eeshift;}
-    void                SetMCWidthScale(Double_t scale,Double_t shift) {fMCWidthScale=scale;fMCWidthShift=shift;}
+ 
+    void                SetDoShowerShapeScaling(Bool_t b)  { fDoShowerShapeScaling = b; }
     void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
     void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
     
@@ -213,6 +212,10 @@ namespace mithep
     // Id Type
     TString             fIdMVAType;
     IdMVA               fIdType;
+
+    // showershape
+    TString             fShowerShapeType;
+    ShowerShape         fSSType;
 
     // Basic Pre-Selection kinematics
     Double_t            fPhotonPtMin;          // min pt cut fro PRE-SELECTION!
@@ -301,14 +304,8 @@ namespace mithep
 
     VertexTools           fVtxTools;
     
-    Bool_t                fDoMCR9Scaling;
-    Double_t              fMCR9ScaleEB;
-    Double_t              fMCR9ScaleEE;
-	                  
-    Bool_t                fDoMCSigIEtaIEtaScaling;
-    Bool_t                fDoMCWidthScaling;
-    Bool_t                fDoMCNewScaling;
-
+    Bool_t                fDoShowerShapeScaling; 
+   
     Double_t              fMCSigIEtaIEtaScaleEB;
     Double_t              fMCSigIEtaIEtaShiftEB; 
     Double_t              fMCSigIEtaIEtaScaleEE;
