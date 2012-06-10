@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.12 2012/05/27 19:41:00 mingyang Exp $
+// $Id: MVATools.cc,v 1.13 2012/05/29 21:20:12 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -279,7 +279,7 @@ Int_t MVATools::PassElectronVetoInt(const Photon* p, const ElectronCol* els) {
 
 //--------------------------------------------------------------------------------------------------
 
-Float_t MVATools::GetMVAbdtValue_2012_globe(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const PFCandidateCol *fPFCands,Bool_t applyNewScale,const ElectronCol* els,Bool_t applyElectronVeto) {
+Float_t MVATools::GetMVAbdtValue_2012_globe(const Photon* p,const Vertex* vtx,const TrackCol* trackCol,const VertexCol* vtxCol,Double_t _tRho, const PFCandidateCol *fPFCands,const ElectronCol* els,Bool_t applyElectronVeto) {
   
   //get the variables used to compute MVA variables
   ecalIso3 = p->EcalRecHitIsoDr03();
@@ -362,16 +362,6 @@ Float_t MVATools::GetMVAbdtValue_2012_globe(const Photon* p,const Vertex* vtx,co
 
   if(!isbarrel){
     myphoton_ESEffSigmaRR=float(sqrt((p->SCluster()->PsEffWidthSigmaXX())*(p->SCluster()->PsEffWidthSigmaXX())+(p->SCluster()->PsEffWidthSigmaYY())*(p->SCluster()->PsEffWidthSigmaYY())));
-  }
-
-  if(applyNewScale){
-    if(isbarrel){
-      myphoton_s4ratio=1.0055*myphoton_s4ratio;
-    }
-    if(!isbarrel){
-      myphoton_s4ratio=1.0085*myphoton_s4ratio;
-      myphoton_ESEffSigmaRR=1.04*myphoton_ESEffSigmaRR;
-    }
   }
   
   if (isbarrel) {
