@@ -1,4 +1,4 @@
-// $Id: runHgg2012.C,v 1.6 2012/05/29 17:11:34 bendavid Exp $
+// $Id: runHgg2012.C,v 1.8 2012/06/08 01:18:16 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -260,13 +260,11 @@ void runHgg2012(const char *fileset    = "0000",
   if (TString(dataset).Contains("-pj")) {
     mcselmod->ExcludeProcess(18);
     mcselmod->ExcludeProcess(114);
-    //excludedoubleprompt = kTRUE;
-    excludedoubleprompt = kFALSE;
+    excludedoubleprompt = kTRUE;
   }
   
   if (TString(dataset).Contains("-qcd2em") || TString(dataset).Contains("-qcd-2em")) {
-    //excludedoubleprompt = kTRUE;
-    excludedoubleprompt = kFALSE;
+    excludedoubleprompt = kTRUE;
   }
   
   Bool_t is25 = kFALSE;
@@ -283,7 +281,7 @@ void runHgg2012(const char *fileset    = "0000",
   photcic->SetOutputName("GoodPhotonsCIC");
   photcic->SetOutputVtxName("OutVtxCiC");        
   photcic->SetPhotonSelType("CiCPFSelection");
-  photcic->SetVertexSelType("CiCMVASelection");
+  photcic->SetVertexSelType("CiCMVA2012Selection");
   //photcic->SetUseSingleLegConversions(kTRUE);
   photcic->DoMCSmear(kTRUE);
   photcic->DoDataEneCorr(kFALSE);
@@ -309,7 +307,7 @@ void runHgg2012(const char *fileset    = "0000",
   photcicnoeleveto->SetOutputName("GoodPhotonsCICNoEleVeto");
   photcicnoeleveto->SetOutputVtxName("OutVtxCiCInvertEleVeto");      
   photcicnoeleveto->SetPhotonSelType("CiCPFSelection");
-  photcicnoeleveto->SetVertexSelType("CiCMVASelection");
+  photcicnoeleveto->SetVertexSelType("CiCMVA2012Selection");
   //photcicnoeleveto->SetUseSingleLegConversions(kTRUE);
   photcicnoeleveto->DoMCSmear(kTRUE);
   photcicnoeleveto->DoDataEneCorr(kFALSE);
@@ -337,7 +335,7 @@ void runHgg2012(const char *fileset    = "0000",
   PhotonPairSelector         *photpresel = new PhotonPairSelector("PhotonPairSelectorPresel");
   photpresel->SetOutputName("GoodPhotonsPresel");
   photpresel->SetPhotonSelType("MITPFSelection");
-  photpresel->SetVertexSelType("CiCMVASelection");
+  photpresel->SetVertexSelType("CiCMVA2012Selection");
   //photpresel->SetUseSingleLegConversions(kTRUE);
   photpresel->SetIdMVAType("2012IdMVA_globe");
   //photpresel->SetVertexSelType("MetSigSelection");
@@ -371,7 +369,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselinverteleveto->SetOutputVtxName("OutVtxPreselInvertEleVeto");    
   photpreselinverteleveto->SetPhotonSelType("MITPFSelection");
   photpreselinverteleveto->SetIdMVAType("2012IdMVA_globe");
-  photpreselinverteleveto->SetVertexSelType("CiCMVASelection");
+  photpreselinverteleveto->SetVertexSelType("CiCMVA2012Selection");
   //photpreselinverteleveto->SetUseSingleLegConversions(kTRUE);
   photpreselinverteleveto->DoMCSmear(kTRUE);
   photpreselinverteleveto->DoDataEneCorr(kFALSE);
@@ -396,7 +394,7 @@ void runHgg2012(const char *fileset    = "0000",
   PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
   photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
   photpreselnosmear->SetPhotonSelType("MITPFSelection");
-  photpreselnosmear->SetVertexSelType("CiCMVASelection");
+  photpreselnosmear->SetVertexSelType("CiCMVA2012Selection");
   //photpreselnosmear->SetUseSingleLegConversions(kTRUE);  
   photpreselnosmear->SetIdMVAType("2012IdMVA_globe");
   photpreselnosmear->SetShowerShapeType("2012ShowerShape");
@@ -580,7 +578,7 @@ void runHgg2012(const char *fileset    = "0000",
   else 
     d = c->FindDataset(bookstr,skimdataset.Data(),fileset);
   ana->AddDataset(d);
-  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/025/r11b-pho-n30-v1/4863E9D1-BC1C-E111-99BA-001A92810AF4.root");
+  //ana->AddFile("/scratch/bendavid/root/DA2D6D6F-BB95-E111-9564-001A92971B7E.root");
 
   //------------------------------------------------------------------------------------------------
   // organize output
