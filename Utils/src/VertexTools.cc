@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.10 2012/03/22 16:25:19 bendavid Exp $
+// $Id: VertexTools.cc,v 1.11 2012/05/28 14:24:49 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -48,7 +48,7 @@ void VertexTools::InitM(const char* str)
 }
 
 //--------------------------------------------------------------------------------------------------
-void VertexTools::InitP()
+void VertexTools::InitP(int version)
 {
 
   readervtx = new TMVA::Reader( "!Color:!Silent" );
@@ -69,7 +69,13 @@ void VertexTools::InitP()
   readerevt->AddVariable( "MVA2", &fMvaPEvtVars[5] );
   readerevt->AddVariable( "dZ2", &fMvaPEvtVars[6] );
   readerevt->AddVariable( "nConv", &fMvaPEvtVars[7] );
-  readerevt->BookMVA( "BDTEvt", gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/TMVAClassification_evtBDTG_conversions_tmva_407.weights.xml") );  
+  if (version==1) {
+    readerevt->BookMVA( "BDTEvt", gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/TMVAClassification_evtBDTG_conversions_tmva_407.weights.xml") );  
+  }
+  else if (version==2) {
+    readerevt->BookMVA( "BDTEvt", gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/TMVAClassification_BDTvtxprob2012.weights.xml") );  
+  }
+  else assert(0);
   
   fIsInitMvaP = kTRUE;
 }

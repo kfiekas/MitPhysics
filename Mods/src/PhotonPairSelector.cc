@@ -864,12 +864,20 @@ void PhotonPairSelector::SlaveBegin()
     return;    
   }
 
-  if      (fVertexSelType.CompareTo("CiCSelection") == 0)
+  if      (fVertexSelType.CompareTo("CiCSelection") == 0) {
     fVtxSelType =       kCiCVtxSelection;
+    fVtxTools.InitP(1);
+  }
   else if (fVertexSelType.CompareTo("MITSelection") == 0)
     fVtxSelType =       kMITVtxSelection;
-  else if (fVertexSelType.CompareTo("CiCMVASelection") == 0)
+  else if (fVertexSelType.CompareTo("CiCMVASelection") == 0) {
     fVtxSelType =       kCiCMVAVtxSelection;
+    fVtxTools.InitP(1);
+  }
+  else if (fVertexSelType.CompareTo("CiCMVA2012Selection") == 0) {
+    fVtxSelType =       kCiCMVAVtxSelection;
+    fVtxTools.InitP(2);
+  }  
   else if (fVertexSelType.CompareTo("MetSigSelection") == 0)
     fVtxSelType =       kMetSigVtxSelection;  
   else if (fVertexSelType.CompareTo("ZeroVtxSelection") == 0)
@@ -914,7 +922,6 @@ void PhotonPairSelector::SlaveBegin()
     break;
   }
   
-  fVtxTools.InitP();
   
   if (fVtxSelType==kMetSigVtxSelection) {
     //fMVAMet.Initialize();

@@ -80,7 +80,7 @@ namespace mithep {
     static std::pair<double,double> VtxZFromConversion(const Photon *p, const DecayParticle *c, const BaseVertex *bsp);
 
     void InitM(const char* str);
-    void InitP();
+    void InitP(int version = 1);
     
     Bool_t IsInitMvaM() const { return fIsInitMvaM; }
     Bool_t IsInitMvaP() const { return fIsInitMvaP; }
@@ -112,6 +112,8 @@ namespace mithep {
     TMVA::Reader *readerevt;
     mutable Float_t fMvaPVars[5];
     mutable Float_t fMvaPEvtVars[8];
+    
+    TString fVtxProbMvaName;
     
     ClassDef(VertexTools, 0) // Muon tools
       };
