@@ -126,13 +126,21 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
 				  TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
 				  TString("weights.xml")),
   fVariableType_2012_globe       (1201),
+  //fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+  //TString("/src/MitPhysics/data/")+
+  //				  TString("TMVA_EEpf_BDT_globe.")+
+  //				  TString("weights.xml")),
+  //fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+  //				  TString("/src/MitPhysics/data/")+
+  //				  TString("TMVA_EBpf_BDT_globe.")+
+  //				  TString("weights.xml")),
   fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
 				  TString("/src/MitPhysics/data/")+
-				  TString("TMVA_EEpf_BDT_globe.")+
+				  TString("2012ICHEP_PhotonID_Endcap_BDT.")+
 				  TString("weights.xml")),
   fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
 				  TString("/src/MitPhysics/data/")+
-				  TString("TMVA_EBpf_BDT_globe.")+
+				  TString("2012ICHEP_PhotonID_Barrel_BDT.")+
 				  TString("weights.xml")),
   fbdtCutBarrel                  (0.0744), //cuts give same eff (relative to presel) with cic
   fbdtCutEndcap                  (0.0959), //cuts give same eff (relative to presel) with cic
@@ -418,8 +426,8 @@ void PhotonPairSelector::Process()
 	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetS4Ratio(1.01894*fixPh2nd[iPair]->S4Ratio()-0.01034);
 	else  fixPh2nd[iPair]->SetS4Ratio(1.04969*fixPh2nd[iPair]->S4Ratio()-0.03642);
 	//
-	//if (fixPh1st[iPair]->SCluster()->AbsEta()>=1.5) fixPh1st[iPair]->SetEffSigmaRR(1.00101*fixPh1st[iPair]->EffSigmaRR()+0.870801);
-	//if (fixPh2nd[iPair]->SCluster()->AbsEta()>=1.5) fixPh2nd[iPair]->SetEffSigmaRR(1.00101*fixPh2nd[iPair]->EffSigmaRR()+0.870801);
+	if (fixPh1st[iPair]->SCluster()->AbsEta()>=1.5) fixPh1st[iPair]->SetEffSigmaRR(1.00023*fixPh1st[iPair]->EffSigmaRR()+ 0.0913);
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()>=1.5) fixPh2nd[iPair]->SetEffSigmaRR(1.00023*fixPh2nd[iPair]->EffSigmaRR()+ 0.0913);
 	break;
       }
     }
