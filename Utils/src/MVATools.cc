@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.13 2012/05/29 21:20:12 mingyang Exp $
+// $Id: MVATools.cc,v 1.14 2012/06/10 16:28:40 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -191,7 +191,7 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
     }    
 
     if(VariableType==1201){
-      readers[i]->AddVariable( "myphoton_pfchargedisogood03", &myphoton_pfchargedisogood03);
+      /*readers[i]->AddVariable( "myphoton_pfchargedisogood03", &myphoton_pfchargedisogood03);
       readers[i]->AddVariable( "myphoton_pfchargedisobad03", &myphoton_pfchargedisobad03); 
       readers[i]->AddVariable( "myphoton_pfphotoniso03", &myphoton_pfphotoniso03 );
       readers[i]->AddVariable( "myphoton_sieie", &myphoton_sieie ); 
@@ -204,7 +204,21 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
       readers[i]->AddVariable( "event_rho", &event_rho );
       if(i==0){
 	readers[i]->AddVariable( "myphoton_ESEffSigmaRR", &myphoton_ESEffSigmaRR);
-      } 
+	}*/
+      readers[i]->AddVariable( "ph.r9", &myphoton_r9 ); 
+      readers[i]->AddVariable( "ph.sigietaieta", &myphoton_sieie ); 
+      readers[i]->AddVariable( "ph.scetawidth", &myphoton_etawidth ); 
+      readers[i]->AddVariable( "ph.scphiwidth", &myphoton_phiwidth );
+      readers[i]->AddVariable( "ph.idmva_CoviEtaiPhi", &myphoton_sieip );
+      readers[i]->AddVariable( "ph.idmva_s4ratio", &myphoton_s4ratio );
+      readers[i]->AddVariable( "ph.idmva_GammaIso", &myphoton_pfphotoniso03 );
+      readers[i]->AddVariable( "ph.idmva_ChargedIso_selvtx", &myphoton_pfchargedisogood03);
+      readers[i]->AddVariable( "ph.idmva_ChargedIso_worstvtx", &myphoton_pfchargedisobad03); 
+      readers[i]->AddVariable( "ph.sceta", &myphoton_SCeta ); 
+      readers[i]->AddVariable( "rho", &event_rho );
+      if(i==0){
+	readers[i]->AddVariable( "1.00023*ph.idmva_PsEffWidthSigmaRR + 0.0913", &myphoton_ESEffSigmaRR);
+      }
     }
     
   }
@@ -354,14 +368,14 @@ Float_t MVATools::GetMVAbdtValue_2012_globe(const Photon* p,const Vertex* vtx,co
   myphoton_etawidth=EtaWidth; 
   myphoton_phiwidth=PhiWidth;
   myphoton_r9=R9; 
-  myphoton_s4ratio=p->SCluster()->Seed()->E2x2()/p->SCluster()->Seed()->E5x5();
+  myphoton_s4ratio=p->S4Ratio();
   myphoton_SCeta=ScEta_MVA; 
   event_rho= _tRho;
 
   myphoton_ESEffSigmaRR=-99;
 
   if(!isbarrel){
-    myphoton_ESEffSigmaRR=float(sqrt((p->SCluster()->PsEffWidthSigmaXX())*(p->SCluster()->PsEffWidthSigmaXX())+(p->SCluster()->PsEffWidthSigmaYY())*(p->SCluster()->PsEffWidthSigmaYY())));
+    myphoton_ESEffSigmaRR=p->EffSigmaRR();
   }
   
   if (isbarrel) {
