@@ -38,6 +38,7 @@ namespace mithep {
     Met pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,const PFCandidateCol *iCands);
     //Candidate filtered
     Met pfRecoil(double iPhi1,double iEta1,double iPhi2,double iEta2,const PFCandidateCol *iCands);
+    Met pfCone  (double iPhi1,double iEta1,const PFCandidateCol *iCands);
 
     Met trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Double_t iDZCut=0.1);
 

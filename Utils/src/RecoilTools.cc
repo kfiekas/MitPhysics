@@ -45,7 +45,7 @@ Met RecoilTools::pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
   FourVectorM lVec(0,0,0,0);
   for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
     lVec -= iCands->At(i0)->Mom(); 
-    lSumEt += iCands->At(i0)->Et();
+    lSumEt += iCands->At(i0)->Pt();
   }
   Met lPFMet(lVec.Px(),lVec.Py()); 
   lPFMet.SetSumEt(lSumEt);
@@ -63,7 +63,22 @@ Met RecoilTools::pfRecoil(double iPhi1,double iEta1,double iPhi2,double iEta2,
     const PFCandidate *pfcand = iCands->At(i0);
     if(!filter(pfcand,iPhi1,iEta1,iPhi2,iEta2)) continue;
     lVec   -= pfcand->Mom(); 
-    lSumEt += pfcand->Et();
+    lSumEt += pfcand->Pt();
+  }
+  Met lPFMet(lVec.Px(),lVec.Py()); 
+  lPFMet.SetSumEt(lSumEt);
+  return lPFMet;
+}
+//--------------------------------------------------------------------------------------------------
+Met RecoilTools::pfCone(double iPhi1,double iEta1,
+			  const PFCandidateCol *iCands) { 
+  double lSumEt = 0;
+  FourVectorM lVec(0,0,0,0);
+  for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
+    const PFCandidate *pfcand = iCands->At(i0);
+    if(filter(pfcand,iPhi1,iEta1,-100,-100)) continue;
+    lVec   += pfcand->Mom(); 
+    lSumEt += pfcand->Pt();
   }
   Met lPFMet(lVec.Px(),lVec.Py()); 
   lPFMet.SetSumEt(lSumEt);
@@ -174,6 +189,7 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue; 
+    if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                 continue;
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
     lNPass++;
@@ -201,7 +217,8 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,
   }
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
-    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                             continue; 
+    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                             continue;
+   if(!fJetIDMVA->passPt(pJet))                                           continue; 
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices))                          continue;
     addNeut(pJet,lVec,lSumEt,iRho);
   }
@@ -233,6 +250,8 @@ Met RecoilTools::NoPURecoil(Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue; 
+    if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
+    //std::cout << " ======> " <<  fJetIDMVA->correctedPt(pJet,iJetCorrector,iPileupEnergyDensity) << " ---" << fJetIDMVA->MVAValue(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << " -- " << (pJet->NeutralEmEnergy()/pJet->RawMom().E() + pJet->NeutralHadronEnergy()/pJet->RawMom().E()) << std::endl;
     if(iJetCorrector != 0 && iPileupEnergyDensity != 0) if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     if(iJetCorrector == 0 || iPileupEnergyDensity == 0) if(!fJetIDMVA->pass(pJet,iVertex,iVertices)) continue;
     if(iJetCorrector != 0 && iPileupEnergyDensity != 0) addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
@@ -301,6 +320,7 @@ Met RecoilTools::PUCMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJe
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!JetTools::passPFLooseId(pJet))                                             continue;
+    if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
     if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue; //Quick cleaning==> if not done already
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity,-1);
@@ -336,6 +356,7 @@ Met RecoilTools::PUCMet( const PFJetCol       *iJets,const PFCandidateCol *iCand
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!JetTools::passPFLooseId(pJet))                                   continue;
+    if(!fJetIDMVA->passPt(pJet))                                         continue;
     if(fJetIDMVA->pass(pJet,iVertex,iVertices))                          continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                            continue; //Quick cleaning==> if not done already
     addNeut(pJet,lVec,lSumEt,iRho,-1);
@@ -374,6 +395,7 @@ Met RecoilTools::PUCRecoil( Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue; //Quick cleaning==> if not done already
+    if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
     if(!JetTools::passPFLooseId(pJet))                                             continue;
     if(iJetCorrector != 0 && iPileupEnergyDensity != 0) if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     if(iJetCorrector == 0 || iPileupEnergyDensity == 0) if(fJetIDMVA->pass(pJet,iVertex,iVertices)) continue;
@@ -435,6 +457,7 @@ Met RecoilTools::PUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJet
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!JetTools::passPFLooseId(pJet))                                             continue;
+    if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue; //Quick cleaning
     if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
@@ -464,6 +487,7 @@ Met RecoilTools::PUMet( const PFJetCol       *iJets,
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!JetTools::passPFLooseId(pJet))                                   continue;
+    if(!fJetIDMVA->passPt(pJet))                                         continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                            continue; //Quick cleaning
     if(fJetIDMVA->pass(pJet,iVertex,iVertices))                          continue;
     addNeut(pJet,lVec,lSumEt,iRho);
@@ -495,6 +519,7 @@ Met RecoilTools::PUMet( Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iE
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!JetTools::passPFLooseId(pJet))                                             continue;
+    if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue; //Quick cleaning
     if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);

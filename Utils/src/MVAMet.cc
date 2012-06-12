@@ -628,9 +628,11 @@ Met MVAMet::GetMet(	Bool_t iPhi,
     if(lPV->Position().Rho() > 2.)        continue;
     lNPV++;
   }
-
-  TLorentzVector lVVec1(0,0,0,0);   lVVec1.SetPtEtaPhiM(iPt1,0,iPhi1 ,0);
-  TLorentzVector lVVec2(0,0,0,0);   lVVec2.SetPtEtaPhiM(iPt2,0,iPhi2 ,0);
+  Met lMVec1 = fRecoilTools->pfCone(iPhi1,iEta1,iCands);
+  Met lMVec2 = fRecoilTools->pfCone(iPhi2,iEta2,iCands);
+  
+  TLorentzVector lVVec1(0,0,0,0);   lVVec1.SetPtEtaPhiM(lMVec1.Pt(),0,lMVec1.Phi() ,0);
+  TLorentzVector lVVec2(0,0,0,0);   lVVec2.SetPtEtaPhiM(lMVec2.Pt(),0,lMVec2.Phi() ,0);
   lVVec1+=lVVec2;
   Float_t lPtVis    = lVVec1.Pt();
   Float_t lPhiVis   = lVVec1.Phi();
@@ -800,7 +802,7 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   Met lTKRec = fRecoilTools->trackRecoil(iPhi1,iEta1,iPhi2,iEta2,      iCands,iVertex); 
   Met lNPRec = fRecoilTools->NoPURecoil (iPhi1,iEta1,iPhi2,iEta2,iJets,iCands,iVertex,iVertices);  //Not using rho
   Met lPCRec = fRecoilTools->PUCRecoil  (iPhi1,iEta1,iPhi2,iEta2,iJets,iCands,iVertex,iVertices);
-  Met lPUMet = fRecoilTools->PUMet      (iJets,iCands,iVertex,iVertices,iRho,iPhi1,iEta1,iPhi2,iEta2);
+  Met lPUMet = fRecoilTools->PUMet      (iPhi1,iEta1,iPhi2,iEta2,iJets,iCands,iVertex,iVertices);
 
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 

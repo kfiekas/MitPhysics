@@ -78,6 +78,9 @@ namespace mithep {
       //Cut Based
       Bool_t passCut(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices);
 
+      Bool_t passPt(const PFJet *iJet, FactorizedJetCorrector *iJetCorrector=0,
+		    const PileupEnergyDensityCol *iPileupEnergyDensity=0,
+		    RhoUtilities::RhoType type=RhoUtilities::DEFAULT);
       //UNcorrected Jets
       Bool_t   pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
 		    FactorizedJetCorrector *iJetCorrector,

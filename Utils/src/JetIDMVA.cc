@@ -236,6 +236,15 @@ Double_t JetIDMVA::MVAValue(
   return lMVA;
 }
 //--------------------------------------------------------------------------------------------------
+Bool_t JetIDMVA::passPt(const PFJet *iJet, FactorizedJetCorrector *iJetCorrector,
+			const PileupEnergyDensityCol *iPileupEnergyDensity,
+			RhoUtilities::RhoType type) { 
+  if(iJetCorrector == 0) return (iJet->Pt() > fJetPtMin);
+  double lPt  = correctedPt(iJet,                  iJetCorrector,iPileupEnergyDensity,type);
+  if(lPt < fJetPtMin)                         return false; 
+  return true;
+}
+//--------------------------------------------------------------------------------------------------
 Bool_t JetIDMVA::pass(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
 		      FactorizedJetCorrector *iJetCorrector,
 		      const PileupEnergyDensityCol *iPileupEnergyDensity,
