@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.14 2012/06/10 16:28:40 mingyang Exp $
+// $Id: MVATools.cc,v 1.15 2012/06/11 09:04:33 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -217,7 +217,8 @@ void MVATools::InitializeMVA(int VariableType, TString EndcapWeights,TString Bar
       readers[i]->AddVariable( "ph.sceta", &myphoton_SCeta ); 
       readers[i]->AddVariable( "rho", &event_rho );
       if(i==0){
-	readers[i]->AddVariable( "1.00023*ph.idmva_PsEffWidthSigmaRR + 0.0913", &myphoton_ESEffSigmaRR);
+	//readers[i]->AddVariable( "1.00023*ph.idmva_PsEffWidthSigmaRR + 0.0913", &myphoton_ESEffSigmaRR);
+        readers[i]->AddVariable( "ph.idmva_PsEffWidthSigmaRR", &myphoton_ESEffSigmaRR);
       }
     }
     
