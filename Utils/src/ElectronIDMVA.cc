@@ -101,6 +101,7 @@ void ElectronIDMVA::Initialize( std::string methodName,
     ExpectedNBins = 6;
   } else if (type == kIDEGamma2012TrigV0 || 
              type == kIDEGamma2012NonTrigV0 || 
+             type == kIDEGamma2012NonTrigV1 || 
              type == kIDHWW2012TrigV0) {
     ExpectedNBins = 6;
   } else if (type == kIsoRingsV0) {
@@ -248,6 +249,32 @@ void ElectronIDMVA::Initialize( std::string methodName,
       tmpTMVAReader->AddSpectator("pt",             &fMVAVar_ElePt);
     }
 
+    if (type == kIDEGamma2012NonTrigV1 ) {
+          // Pure tracking variables
+      tmpTMVAReader->AddVariable("fbrem",           &fMVAVar_EleFBrem);
+      tmpTMVAReader->AddVariable("kfchi2",          &fMVAVar_EleKFTrkChiSqr);
+      tmpTMVAReader->AddVariable("kfhits",          &fMVAVar_EleKFTrkNLayers);
+      tmpTMVAReader->AddVariable("gsfchi2",         &fMVAVar_EleGsfTrackChi2OverNdof);
+      tmpTMVAReader->AddVariable("deta",            &fMVAVar_EleDEtaIn);
+      tmpTMVAReader->AddVariable("dphi",            &fMVAVar_EleDPhiIn);
+      tmpTMVAReader->AddVariable("detacalo",        &fMVAVar_EledEtaCalo);
+      tmpTMVAReader->AddVariable("see",             &fMVAVar_EleSigmaIEtaIEta);
+      tmpTMVAReader->AddVariable("spp",             &fMVAVar_EleSigmaIPhiIPhi);
+      tmpTMVAReader->AddVariable("etawidth",        &fMVAVar_EleSCEtaWidth);
+      tmpTMVAReader->AddVariable("phiwidth",        &fMVAVar_EleSCPhiWidth);
+      tmpTMVAReader->AddVariable("e1x5e5x5",        &fMVAVar_EleE1x5OverE5x5);
+      tmpTMVAReader->AddVariable("R9",              &fMVAVar_EleR9);
+      tmpTMVAReader->AddVariable("HoE",             &fMVAVar_EleHoverE);
+      tmpTMVAReader->AddVariable("EoP",             &fMVAVar_EleEOverP); 
+      tmpTMVAReader->AddVariable("IoEmIoP",         &fMVAVar_EleOneOverEMinusOneOverP);
+      tmpTMVAReader->AddVariable("eleEoPout",       &fMVAVar_EleEEleClusterOverPout); 
+      if (i==2 || i==5) {
+        tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_ElePreShowerOverRaw);
+      }
+      tmpTMVAReader->AddSpectator("eta",            &fMVAVar_EleEta);
+      tmpTMVAReader->AddSpectator("pt",             &fMVAVar_ElePt);
+    }
+
     if (type == kIsoRingsV0) {
       tmpTMVAReader->AddVariable( "ChargedIso_DR0p0To0p1",         &fMVAVar_ChargedIso_DR0p0To0p1        );
       tmpTMVAReader->AddVariable( "ChargedIso_DR0p1To0p2",         &fMVAVar_ChargedIso_DR0p1To0p2        );
@@ -308,7 +335,8 @@ UInt_t ElectronIDMVA::GetMVABin( double eta, double pt) const {
       if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
     }
 
-    if (fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0) {
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+	fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1) {
       bin = 0;
       if (pt < 10 && fabs(eta) < 0.8) bin = 0;
       if (pt < 10 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
@@ -973,12 +1001,14 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
 
   if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
       fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+      fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
       fMVAType == ElectronIDMVA::kIDHWW2012TrigV0) {
     fMVAVar_EleDEtaIn = TMath::Min(fabs(double(ele->DeltaEtaSuperClusterTrackAtVtx())),0.06); ; 
     fMVAVar_EleDPhiIn = TMath::Min(fabs(double(ele->DeltaPhiSuperClusterTrackAtVtx())),0.6); 
     fMVAVar_EleFBrem = TMath::Max(double(ele->FBrem()),-1.0); 
     fMVAVar_EleEOverP = TMath::Min(double(ele->ESuperClusterOverP()), 20.0); 
     fMVAVar_EleESeedClusterOverPout = TMath::Min(double(ele->ESeedClusterOverPout()),20.0); 
+    fMVAVar_EleEEleClusterOverPout = TMath::Min(double(ele->EEleClusterOverPout()),20.0); 
     fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->P(); 
     fMVAVar_EleGsfTrackChi2OverNdof = TMath::Min(double( ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof()),200.0);
     fMVAVar_EledEtaCalo =  TMath::Min(fabs(double(ele->DeltaEtaSeedClusterTrackAtCalo())),0.2);
@@ -999,7 +1029,14 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   fMVAVar_EleD0 = ele->BestTrk()->D0Corrected(*vertex); 
   fMVAVar_EleDZ = ele->BestTrk()->DzCorrected(*vertex); 
   if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
-  else fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
+  else {
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1) {
+      fMVAVar_EleSigmaIPhiIPhi = 0;
+    } else {
+      fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
+    }
+  }
+
   fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
   fMVAVar_EleIP3d = ele->Ip3dPV(); 
@@ -1011,10 +1048,10 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   fMVAVar_ElePreShowerOverRaw = ele->SCluster()->PreshowerEnergy() / ele->SCluster()->RawEnergy();
 
   //Additional vars
-  fMVAVar_EleEEleClusterOverPout = ele->EEleClusterOverPout();
   if (ele->TrackerTrk()) {
     if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
         fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
 	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 ) {
       fMVAVar_EleKFTrkChiSqr = TMath::Min(double(ele->TrackerTrk()->RChi2()),10.0);
     } else {
@@ -1031,6 +1068,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   if( ele->SCluster()->Seed()->E5x5() > 0.0 ) {
     if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
         fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
 	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 ) {
       fMVAVar_EleE1x5OverE5x5 = TMath::Min(TMath::Max(1 - double(ele->SCluster()->Seed()->E1x5()/ele->SCluster()->Seed()->E5x5()) , -1.0),2.0);
     } else {
