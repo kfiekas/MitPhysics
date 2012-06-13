@@ -134,10 +134,14 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   //				  TString("/src/MitPhysics/data/")+
   //				  TString("TMVA_EBpf_BDT_globe.")+
   //				  TString("weights.xml")),
+  //fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+  //				  TString("/src/MitPhysics/data/")+
+  //				  TString("2012ICHEP_PhotonID_Endcap_BDT.")+
+  //				  TString("weights.xml")),
   fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
-				  TString("/src/MitPhysics/data/")+
-				  TString("2012ICHEP_PhotonID_Endcap_BDT.")+
-				  TString("weights.xml")),
+  				  TString("/src/MitPhysics/data/")+
+  				  TString("2012ICHEP_PhotonID_Endcap_BDT.")+
+  				  TString("weights_PSCorr.xml")),
   fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
 				  TString("/src/MitPhysics/data/")+
 				  TString("2012ICHEP_PhotonID_Barrel_BDT.")+
@@ -426,8 +430,8 @@ void PhotonPairSelector::Process()
 	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetS4Ratio(1.01894*fixPh2nd[iPair]->S4Ratio()-0.01034);
 	else  fixPh2nd[iPair]->SetS4Ratio(1.04969*fixPh2nd[iPair]->S4Ratio()-0.03642);
 	//
-	if (fixPh1st[iPair]->SCluster()->AbsEta()>=1.5) fixPh1st[iPair]->SetEffSigmaRR(1.00023*fixPh1st[iPair]->EffSigmaRR()+ 0.0913);
-	if (fixPh2nd[iPair]->SCluster()->AbsEta()>=1.5) fixPh2nd[iPair]->SetEffSigmaRR(1.00023*fixPh2nd[iPair]->EffSigmaRR()+ 0.0913);
+	//if (fixPh1st[iPair]->SCluster()->AbsEta()>=1.5) fixPh1st[iPair]->SetEffSigmaRR(1.00023*fixPh1st[iPair]->EffSigmaRR()+ 0.0913);
+	//if (fixPh2nd[iPair]->SCluster()->AbsEta()>=1.5) fixPh2nd[iPair]->SetEffSigmaRR(1.00023*fixPh2nd[iPair]->EffSigmaRR()+ 0.0913);
 	break;
       }
     }
