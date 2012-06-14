@@ -1,0 +1,26 @@
+#=======================================================================================================================
+# book/version   dataset                    skim   legend for plot                        Xsec      scale ovlap   JSON
+#=======================================================================================================================
+# testing
+#local/filefi/025 r11a-dmu-n02-v1            noskim data                                  -1.0       1.0   -1.0    -
+# Data==================================================================================================================
+#t2mit/filefi/028 r12a-dmu-pr-v1              noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/028 r12b-dmu-pr-v1              noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/028 r12a-smu-pr-v1              noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/028 r12b-smu-pr-v1              noskim data                                  -1.0       1.0   -1.0    -
+#
+#local/filefi/025 r11a-dmu-m10-v1            noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11a-dmu-pr-v4             noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11a-dmu-a05-v1            noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11a-dmu-o03-v1            noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11b-dmu-pr-v1             noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11a-smu-m10-v1            noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11a-smu-pr-v4             noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11a-smu-a05-v1            noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11a-smu-o03-v1            noskim data                                  -1.0       1.0   -1.0    -
+#local/filefi/025 r11b-smu-pr-v1             noskim data                                  -1.0       1.0   -1.0    -
+## MC Background=========================================================================================================
+#t2mit/filefi/025 f11-zz2e2m-powheg-v14b-pu  noskim zz                                    -1.0       1.0   -1.0    ~
+#t2mit/filefi/025 f11-zz4m-powheg-v14b-pu    noskim zz                                    -1.0       1.0   -1.0    ~
+#t2mit/filefi/025 f11-ggzz4l-v14b-pu         noskim ggzz                                  -1.0       1.0   -1.0    ~
+local/filefi/025  f11-zjets-v14b-pu          noskim Z~#rightarrow~ee                       2321.0    1.15  -1.0    ~
