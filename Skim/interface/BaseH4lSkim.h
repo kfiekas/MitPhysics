@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: BaseH4lSkim.h,v 1.1 2012/06/03 20:25:56 paus Exp $
 //
 // BaseH4lSkim
 //
@@ -13,6 +13,7 @@
 #include "MitAna/TreeMod/interface/BaseMod.h"
 #include "MitAna/DataTree/interface/CollectionsFwd.h"
 #include "MitAna/DataTree/interface/Names.h"
+#include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 
 namespace mithep
 {  
@@ -29,9 +30,7 @@ namespace mithep
     bool    PassMuonPreselNoIp(const mithep::Muon *mu);
     bool    PassElecPreselNoIp(const mithep::Electron *ele);
     bool    PassWwMuonSel     (const mithep::Muon *mu);
-    bool    PassVbtfWp80      (const mithep::Electron *ele);
     bool    PassElecTagSel    (const mithep::Electron *ele);
-    // bool PassKsTagprobeMuonId(const mithep::TMuon *muon, const Double_t rho);
 
   protected:
     void    Begin();
@@ -44,7 +43,6 @@ namespace mithep
 
     UInt_t                        fTotal,fSelected;
 
-    TString                       fTrigMaskName;         // trigger mask name
     TString                       fMuonName;             // muon collection name
     TString                       fElectronName;         // electron collection name
     TString                       fPrimVtxName;          // primary vertex collection name
@@ -53,7 +51,6 @@ namespace mithep
     TString                       fPfCandidateName;      // particle flow candidates collection name
     TString                       fTracksName;
 
-    const TriggerMask            *fTrigMask;        // trigger mask handle
     const MuonCol                *fMuons;           // muon collection handle
     const ElectronCol            *fElectrons;       // electron collection handle
     const VertexCol              *fPrimVerts;       // primary vertex collection handle

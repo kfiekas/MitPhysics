@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: $
+// $Id: H4lLightFlavorSkim.h,v 1.1 2012/06/03 20:25:56 paus Exp $
 //
 // H4lLightFlavorSkim
 //
@@ -11,6 +11,8 @@
 #ifndef H4LLIGHTFLAVORSKIM_H
 #define H4LLIGHTFLAVORSKIM_H
 
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitPhysics/Skim/interface/BaseH4lSkim.h"
 
 namespace mithep

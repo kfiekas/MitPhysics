@@ -1,4 +1,4 @@
-// $Id: runH4lSkim.C,v 1.1 2012/06/02 20:46:24 paus Exp $
+// $Id: runH4lLightFlavorSkim.C,v 1.1 2012/06/03 20:25:56 paus Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <cassert>
 #include <TSystem.h>
@@ -75,43 +75,6 @@ void runH4lLightFlavorSkim(const char *fileset    = "0000",
   }
   printf("\n Run lumi worked. \n\n");
 
-  //----------------------------------------------------------------------------------------
-  // trigger
-  //----------------------------------------------------------------------------------------
-  HLTMod *hltMod = new HLTMod("HLTMod");
-
-  TString dataset_type;
-  if      (TString(dataset).Contains("-del-"))
-    dataset_type = "del";
-  else if (TString(dataset).Contains("-smu-"))
-    dataset_type = "smu";
-  else
-    assert(0);
-
-  if (dataset_type == "smu") {
-    // Add single muon triggers
-    hltMod->AddTrigger("HLT_IsoMu24_v1"        , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v2"        , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v3"        , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v4"        , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v5"        , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v7"        , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v8"        , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v9"        , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v12"       , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_eta2p1_v3" , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_eta2p1_v6" , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_eta2p1_v7" , 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_eta2p1_v11", 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_eta2p1_v12", 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_eta2p1_v13", 160000,999999);
-    hltMod->AddTrigger("HLT_IsoMu24_v15"       , 160000,999999);
-    hltMod->SetAbortIfNotAccepted(kTRUE);
-  }
-  else
-    hltMod->SetAbortIfNotAccepted(kFALSE);
-
-
   //------------------------------------------------------------------------------------------------
   // the skimmer
   //------------------------------------------------------------------------------------------------
@@ -120,8 +83,7 @@ void runH4lLightFlavorSkim(const char *fileset    = "0000",
   //------------------------------------------------------------------------------------------------
   // making analysis chain
   //------------------------------------------------------------------------------------------------
-  runLumiSel->Add(hltMod);
-  hltMod->Add(skmMod);
+  runLumiSel->Add(skmMod);
 
   //------------------------------------------------------------------------------------------------
   // setup analysis

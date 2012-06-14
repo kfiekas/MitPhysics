@@ -1,6 +1,4 @@
 #include "MitPhysics/Skim/interface/H4lLightFlavorSkim.h"
-#include "MitAna/DataTree/interface/MuonCol.h"
-#include "MitAna/DataTree/interface/ElectronCol.h"
 
 using namespace mithep;
 
@@ -35,6 +33,7 @@ void H4lLightFlavorSkim::SlaveBegin()
 //--------------------------------------------------------------------------------------------------
 void H4lLightFlavorSkim::SlaveTerminate()
 {
+  BaseH4lSkim::SlaveTerminate();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -95,22 +94,17 @@ void H4lLightFlavorSkim::Process()
     const Muon *mu = fMuons->At(i);
     if (!PassMuonPreselNoIp(mu))
       continue;
-    // for (unsigned imu=0; imu<tightMuons.size(); imu++)
-    //   if (mu==tightMuons[imu]) continue;
     looseMuons.push_back(mu);
   }
   for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
     const Electron *ele = fElectrons->At(i);
     if (!PassElecPreselNoIp(ele))
       continue;
-    // for (unsigned iele=0; iele<tightElectrons.size(); iele++)
-    //   if (ele==tightElectrons[iele]) continue;
     looseElectrons.push_back(ele);
   }
   
   if ((tightMuons.size()     > 0 && looseElectrons.size() > 0) ||
       (tightElectrons.size() > 0 && looseMuons.size()     > 0)   ) {
-    cout << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
     fSelected++;
   }
   else

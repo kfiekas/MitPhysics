@@ -21,7 +21,6 @@ BaseH4lSkim::BaseH4lSkim(const char *name, const char *title):
   fPrimVtxName    (Names::gkPVBrn),
   fPfCandidateName(Names::gkPFCandidatesBrn),
   fTracksName     (Names::gkTrackBrn),
-  fTrigMask       (0),
   fMuons          (0),
   fElectrons      (0),
   fPrimVerts      (0),
@@ -225,53 +224,6 @@ bool BaseH4lSkim::PassWwMuonSel(const Muon *mu)
 
   return true;
 }
-//----------------------------------------------------------------------------------------
-bool BaseH4lSkim::PassVbtfWp80(const Electron *ele)
-{
-  if (ele->SCluster()->Et() < 5)
-    return false;
-  if (fabs(ele->SCluster()->Eta()) > 2.5)
-    return false;
-
-  float deta      = fabs(ele->DeltaEtaSuperClusterTrackAtVtx());
-  float dphi      = fabs(ele->DeltaPhiSuperClusterTrackAtVtx());
-  float sigieie   = ele->CoviEtaiEta();
-  float HoE       = ele->HadronicOverEm();
-  float missHits  = ele->CorrectedNExpectedHitsInner();
-
-  float maxDeta, maxDphi, maxHoE, maxSigieie, maxMissHits;
-
-  if (ele->IsEB()) {
-    maxDeta = 0.004;
-    maxDphi = 0.06 ;
-    maxHoE = 0.04;
-    maxSigieie = 0.01;
-    maxMissHits = 0;
-  } else {
-    maxDeta = 0.007;
-    maxDphi = 0.03;
-    maxHoE = 0.025;
-    maxSigieie = 0.03;
-    maxMissHits = 0;
-  }
-
-  if (deta     > maxDeta)
-    return false;
-  if (dphi     > maxDphi)
-    return false;
-  if (sigieie  > maxSigieie)
-    return false;
-  if (HoE      > maxHoE)
-    return false;
-  if (missHits > maxMissHits)
-    return false;
-
-  // note: I'm not absolutely certain this isolation is correct
-  // float det_iso = ele->ele->TrackIsolationDr04 + ele->
-  cout << " WARNING: no isolation in here yet..." << endl;
-
-  return true;
-}
 //--------------------------------------------------------------------------------------------------
 bool BaseH4lSkim::PassElecTagSel(const Electron *ele)
 {
@@ -335,25 +287,6 @@ bool BaseH4lSkim::PassElecTagSel(const Electron *ele)
 
   return (passID && passIso);
 }
-
-//--------------------------------------------------------------------------------------------------
-//bool BaseH4lSkim::PassKsTagprobeMuonId(const TMuon *muon, const Double_t rho)
-//{
-//  if (muon->nTkLayers  < 6)        return kFALSE;
-//  if (muon->nPixHits   < 1)        return kFALSE;
-//  if (fabs(muon->d0)   > 0.2)      return kFALSE;
-//  if (fabs(muon->dz)   > 0.5)      return kFALSE;
-//  if (muon->muNchi2    > 10)       return kFALSE;
-//  if (muon->nMatch     < 2)        return kFALSE;
-//  if (muon->nValidHits < 1)        return kFALSE;
-//  if (!(muon->typeBits & kGlobal)) return kFALSE;
-//  if (!(muon->typeBits & kPfMuon)) return kFALSE;
-//  Double_t iso = muon->pfChIso04 +
-//              TMath::Max(muon->pfNeuIso04 + muon->pfGamIso04 - 0.5*(muon->puIso04),Double_t(0));
-//  if (iso > 0.12*(muon->pt)) return kFALSE;
-//  return kTRUE;
-//}
-
 //--------------------------------------------------------------------------------------------------
 void BaseH4lSkim::Begin()
 {
