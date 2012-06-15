@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.50 2012/05/12 06:23:30 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.51 2012/05/14 16:38:01 fabstoec Exp $
 //
 // MuonIDMod
 //
@@ -121,8 +121,8 @@ namespace mithep
         kSta,               //"Standalone"
         kTrackerMuon,       //"TrackerMuon"
         kCaloMuon,          //"CaloMuon"
-        kTrackerBased       //"TrackerMuon or CaloMuon"
-
+        kTrackerBased,      //"TrackerMuon or CaloMuon"
+        kGlobalOnly         //"GlobalOnly"
       };
 
     protected:

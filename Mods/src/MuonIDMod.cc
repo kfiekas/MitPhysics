@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.82 2012/05/19 08:47:52 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.83 2012/05/31 08:56:50 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -160,6 +160,17 @@ void MuonIDMod::Process()
           eta = TMath::Abs(mu->TrackerTrk()->Eta());
 	}
         break;
+      case kGlobalOnly:
+        pass = mu->HasGlobalTrk();
+        if (pass && mu->TrackerTrk()) {
+          pt  = mu->TrackerTrk()->Pt();
+	  eta = TMath::Abs(mu->TrackerTrk()->Eta());
+        }
+	else {
+          pt  = mu->Pt();
+	  eta = TMath::Abs(mu->Eta());
+	}
+	break;
       default:
         break;
     }
@@ -206,12 +217,11 @@ void MuonIDMod::Process()
 		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
         break;
       case kTight:
-        idpass = mu->BestTrk() !=  0 &&
-	         mu->Quality().Quality(MuonQuality::TMOneStationTight) &&
-                 mu->Quality().Quality(MuonQuality::TM2DCompatibilityTight) &&
-		 mu->BestTrk()->NHits() > 10 &&
-		 RChi2 < 10.0 &&
-		 mu->Quality().Quality(MuonQuality::GlobalMuonPromptTight);
+        idpass = mu->BestTrk() != 0 &&
+	         mu->NTrkLayersHit() > 5 &&
+		 mu->IsPFMuon() == kTRUE &&
+		 mu->BestTrk()->NPixelHits() > 0 &&
+		 RChi2 < 10.0;
         break;
       // 2012 WW analysis for 42x (there is no PFMuon link)
       case kWWMuIdV1:
@@ -613,6 +623,8 @@ void MuonIDMod::SlaveBegin()
     fMuClassType = kCaloMuon;
   else if (fMuonClassType.CompareTo("TrackerBased") == 0) 
     fMuClassType = kTrackerBased;
+  else if (fMuonClassType.CompareTo("GlobalOnly") == 0) 
+    fMuClassType = kGlobalOnly;
   else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified muon class %s is not defined.",
