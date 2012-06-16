@@ -358,22 +358,20 @@ void PhotonPairSelector::Process()
     cat1st.push_back(preselCat[idx1st[iPair]]);
     cat2nd.push_back(preselCat[idx2nd[iPair]]);
 
-    //scale regression sigmaE in MC if activated
-    if (fDoMCErrScaling && !fIsData) {
-      if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5)
-        PhotonTools::ScalePhotonError(fixPh1st[iPair],fMCErrScaleEB);
-      else
-        PhotonTools::ScalePhotonError(fixPh1st[iPair],fMCErrScaleEE);
-
-      if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5)
-        PhotonTools::ScalePhotonError(fixPh2nd[iPair],fMCErrScaleEB);
-      else
-        PhotonTools::ScalePhotonError(fixPh2nd[iPair],fMCErrScaleEE);
-    }
-
     if (fDoShowerShapeScaling && !fIsData) {
       switch (fSSType) {
       case k2011ShowerShape:
+	//regression sigmaE
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5)
+	  PhotonTools::ScalePhotonError(fixPh1st[iPair],1.07);
+	else
+	  PhotonTools::ScalePhotonError(fixPh1st[iPair],1.045);
+
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5)
+	  PhotonTools::ScalePhotonError(fixPh2nd[iPair],1.07);
+	else
+	  PhotonTools::ScalePhotonError(fixPh2nd[iPair],1.045);
+	
 	//R9
 	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetR9(1.0035*fixPh1st[iPair]->R9());
 	else  fixPh1st[iPair]->SetR9(1.0035*fixPh1st[iPair]->R9());
@@ -397,22 +395,27 @@ void PhotonPairSelector::Process()
 	break;
 	
       case k2012ShowerShape:
+	//regression sigmaE
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5)
+	  fixPh1st[iPair]->SetEnergyErrSmeared(1.05*fixPh1st[iPair]->EnergyErrSmeared() - 0.005);
+	else
+	  fixPh1st[iPair]->SetEnergyErrSmeared(1.01372*fixPh1st[iPair]->EnergyErrSmeared() + 0.000156943);
+
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5)
+	  fixPh2nd[iPair]->SetEnergyErrSmeared(1.05*fixPh2nd[iPair]->EnergyErrSmeared() - 0.005);
+	else
+	  fixPh2nd[iPair]->SetEnergyErrSmeared(1.01372*fixPh2nd[iPair]->EnergyErrSmeared() + 0.000156943);
+	
 	//R9
 	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetR9(1.0045*fixPh1st[iPair]->R9()+0.001);
 	else  fixPh1st[iPair]->SetR9(1.0086*fixPh1st[iPair]->R9()-0.0007);
 	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetR9(1.0045*fixPh2nd[iPair]->R9()+0.001);
 	else  fixPh2nd[iPair]->SetR9(1.0086* fixPh2nd[iPair]->R9()-0.0007);
 	//CoviEtaiEta(SigiEtaiEta)
-	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) {
-	  if(fixPh1st[iPair]->CoviEtaiEta()<0.0087)fixPh1st[iPair]->SetCoviEtaiEta(0.976591*fixPh1st[iPair]->CoviEtaiEta()+8.1e-5);
-	  else fixPh1st[iPair]->SetCoviEtaiEta(0.980055*fixPh1st[iPair]->CoviEtaiEta()+0.000124);
-	}
+	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetCoviEtaiEta(0.891832*fixPh1st[iPair]->CoviEtaiEta()+0.0009133);
 	else  fixPh1st[iPair]->SetCoviEtaiEta(0.9947*fixPh1st[iPair]->CoviEtaiEta()+0.00003);
 	
-	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) {
-	  if(fixPh2nd[iPair]->CoviEtaiEta()<0.0087)fixPh2nd[iPair]->SetCoviEtaiEta(0.976591*fixPh2nd[iPair]->CoviEtaiEta()+8.1e-5);
-	  else fixPh2nd[iPair]->SetCoviEtaiEta(0.980055*fixPh2nd[iPair]->CoviEtaiEta()+0.000124);
-	}
+	if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) fixPh2nd[iPair]->SetCoviEtaiEta(0.891832*fixPh2nd[iPair]->CoviEtaiEta()+0.0009133);
 	else  fixPh2nd[iPair]->SetCoviEtaiEta(0.9947*fixPh2nd[iPair]->CoviEtaiEta()+0.00003);
 	//EtaWidth
 	if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) fixPh1st[iPair]->SetEtaWidth(1.04302*fixPh1st[iPair]->EtaWidth()- 0.000618);
