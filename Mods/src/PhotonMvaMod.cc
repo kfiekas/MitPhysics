@@ -47,6 +47,7 @@ PhotonMvaMod::PhotonMvaMod(const char *name, const char *title) :
   fPhotonEtaMax      (2.5),
 
   fIsData            (false),
+  fApplyShowerRescaling(false),
   fPhotonsFromBranch (true),  
   fPVFromBranch      (true),
   fGoodElectronsFromBranch (kTRUE),
@@ -134,7 +135,7 @@ void PhotonMvaMod::Process()
       }
     
       if (fRegressionVersion>0)
-        egcor.CorrectEnergyWithError(outph,fPV,fPileUpDen->At(0)->RhoKt6PFJets(),fRegressionVersion);
+        egcor.CorrectEnergyWithError(outph,fPV,fPileUpDen->At(0)->RhoKt6PFJets(),fRegressionVersion, fApplyShowerRescaling&&!fIsData);
       
       ThreeVectorC scpos = outph->SCluster()->Point();
       outph->SetCaloPosXYZ(scpos.X(),scpos.Y(),scpos.Z());

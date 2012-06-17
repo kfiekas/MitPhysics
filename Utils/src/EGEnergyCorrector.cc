@@ -1,4 +1,4 @@
-// $Id: EGEnergyCorrector.cc,v 1.7 2012/04/24 15:37:14 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.8 2012/05/25 19:41:11 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -63,7 +63,7 @@ void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TStri
 }
 
 //--------------------------------------------------------------------------------------------------
-void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs, Double_t rho, UInt_t version) {
+void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs, Double_t rho, UInt_t version, Bool_t applyRescale) {
   
   std::pair<double,double> correction;
   if (version == 1) {
@@ -73,7 +73,7 @@ void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs,
     correction = CorrectedEnergyWithErrorV2(p,vtxs);
   }
   else if (version == 3) {
-    correction = CorrectedEnergyWithErrorV3(p,vtxs,rho);
+    correction = CorrectedEnergyWithErrorV3(p,vtxs,rho,applyRescale);
   }
 
   //printf("photon: e = %5f, eerr = %5f, sceta = %5f\n",p->E(),p->EnergyErr(),p->SCluster()->Eta());
@@ -322,7 +322,7 @@ std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithErrorV2(const Pho
 }
 
 //--------------------------------------------------------------------------------------------------
-std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithErrorV3(const Photon *p, const VertexCol *vtxs, Double_t rho) {
+std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithErrorV3(const Photon *p, const VertexCol *vtxs, Double_t rho, Bool_t applyRescale) {
   
   const SuperCluster *s = p->SCluster();
   const BasicCluster *b = s->Seed();
@@ -392,6 +392,62 @@ std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithErrorV3(const Pho
   }
   
   Double_t ecor = reader->GetResponse(fVals)*den;
+  
+  //apply shower shape rescaling - for Monte Carlo only, and only for calculation of energy uncertainty
+  if (applyRescale) {
+    if (isbarrel) {
+      fVals[3] = 1.0045*p->R9() +0.001; //r9
+      fVals[5] = 1.04302*s->EtaWidth() - 0.000618; //etawidth
+      fVals[6] = 1.00002*s->PhiWidth() - 0.000371;  //phiwidth
+      fVals[14] = fVals[3]*s->RawEnergy()/b->Energy();  //compute consistent e3x3/eseed after r9 rescaling
+      if (fVals[15]<=1.0)  // rescale e5x5/eseed only if value is <=1.0, don't allow scaled values to exceed 1.0
+        fVals[15] = TMath::Min(1.0,1.0022*b->E5x5()/b->Energy());
+
+      fVals[4] = fVals[15]*b->Energy()/s->RawEnergy(); // compute consistent e5x5()/rawEnergy() after e5x5/eseed resacling  
+
+      fVals[16] = 0.891832*TMath::Sqrt(b->CoviEtaiEta()) + 0.0009133; //sigietaieta
+      fVals[17] = 0.993*TMath::Sqrt(b->CoviPhiiPhi());; //sigiphiiphi
+
+      fVals[19] = 1.012*b->EMax()/b->Energy();                       //crystal energy ratio gap variables   
+      fVals[20] = 1.0*b->E2nd()/b->Energy();
+      fVals[21] = 0.94*b->ETop()/b->Energy();
+      fVals[22] = 0.94*b->EBottom()/b->Energy();
+      fVals[23] = 0.94*b->ELeft()/b->Energy();
+      fVals[24] = 0.94*b->ERight()/b->Energy();
+      fVals[25] = 1.006*b->E2x5Max()/b->Energy();                       //crystal energy ratio gap variables   
+      fVals[26] = 1.09*b->E2x5Top()/b->Energy();
+      fVals[27] = 1.09*b->E2x5Bottom()/b->Energy();
+      fVals[28] = 1.09*b->E2x5Left()/b->Energy();
+      fVals[29] = 1.09*b->E2x5Right()/b->Energy();
+
+    }
+    else {
+      fVals[3] = 1.0086*p->R9() -0.0007;           //r9
+      fVals[4] = TMath::Min(1.0,1.0022*b->E5x5()/s->RawEnergy());  //e5x5/rawenergy
+      fVals[5] = 0.903254*s->EtaWidth() +0.001346;  //etawidth
+      fVals[6] = 0.99992*s->PhiWidth() +  4.8e-07;   //phiwidth
+      fVals[13] = TMath::Min(1.0,1.0022*b->Energy()/s->RawEnergy());  //eseed/rawenergy (practically equivalent to e5x5)
+
+
+      fVals[14] = fVals[3]*s->RawEnergy()/b->Energy(); //compute consistent e3x3/eseed after r9 rescaling
+
+      fVals[16] = 0.9947*TMath::Sqrt(b->CoviEtaiEta()) + 0.00003; //sigietaieta
+
+      fVals[19] = 1.005*b->EMax()/b->Energy();                  //crystal energy ratio gap variables   
+      fVals[20] = 1.02*b->E2nd()/b->Energy();
+      fVals[21] = 0.96*b->ETop()/b->Energy();
+      fVals[22] = 0.96*b->EBottom()/b->Energy();
+      fVals[23] = 0.96*b->ELeft()/b->Energy();
+      fVals[24] = 0.96*b->ERight()/b->Energy();
+      fVals[25] = 1.0075*b->E2x5Max()/b->Energy();                          //crystal energy ratio gap variables   
+      fVals[26] = 1.13*b->E2x5Top()/b->Energy();
+      fVals[27] = 1.13*b->E2x5Bottom()/b->Energy();
+      fVals[28] = 1.13*b->E2x5Left()/b->Energy();
+      fVals[29] = 1.13*b->E2x5Right()/b->Energy();
+    }
+
+  }  
+  
   Double_t ecorerr = readervar->GetResponse(fVals)*den;
   
   return std::pair<double,double>(ecor,ecorerr);

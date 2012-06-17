@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonMvaMod.h,v 1.13 2011/11/18 00:07:16 bendavid Exp $
+// $Id: PhotonMvaMod.h,v 1.1 2011/12/11 00:03:04 bendavid Exp $
 //
 // PhotonMvaMod
 //
@@ -74,7 +74,7 @@ namespace mithep
     // is Data Or Not?
     void                SetIsData (Bool_t b) { fIsData = b;};
     
-
+    void                SetApplyShowerRescaling(Bool_t b) { fApplyShowerRescaling = b; }
 
     void                ApplyEleVeto(bool a)            { fApplyEleVeto  = a; }
 
@@ -110,6 +110,7 @@ namespace mithep
     
     // is it Data or MC?
     Bool_t              fIsData;
+    Bool_t              fApplyShowerRescaling;
     
     // in case there's some PV pre-selection
     Bool_t              fPhotonsFromBranch;
