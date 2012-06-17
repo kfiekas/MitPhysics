@@ -1,4 +1,4 @@
-// $Id: runHgg2012.C,v 1.10 2012/06/10 21:43:12 bendavid Exp $
+// $Id: runHgg2012.C,v 1.11 2012/06/11 09:15:58 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -32,7 +32,7 @@ void runHgg2012(const char *fileset    = "0000",
             const char *skim       = "noskim",
 	    //const char *dataset = "f11--h120gg-gf-v14b-pu",
             //const char *dataset = "r11a-pho-j16-v1",   
-            const char *dataset = "s12-h120gg-gf-v9",
+            const char *dataset = "s12-h124gg-gf-v9",
             //const char *dataset = "s12-pj40-2em-v9",
             //const char *dataset = "s12-zllm50-v9",
 	    //const char *dataset = "f11--h121gg-gf-v14b-pu",
@@ -57,9 +57,9 @@ void runHgg2012(const char *fileset    = "0000",
     //return;
   } 
 
-  TString jsonFile = TString("/home/mingyang/cms/json/") + TString(json);
-  //TString jsonFile = TString("/home/mingyang/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
-  Bool_t  isData   = ( (jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) );
+  TString jsonFile = TString("/home/bendavid/cms/json/") + TString(json);
+  //TString jsonFile = TString("/home/bendavid/cms/json/") + TString("Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt");
+  Bool_t  isData   = ( (jsonFile.CompareTo("/home/bendavid/cms/json/~") != 0) );
   
   if (gSystem->Getenv("MIT_PROD_OVERLAP")) {
     sprintf(overlap,"%s",gSystem->Getenv("MIT_PROD_OVERLAP"));
@@ -96,11 +96,11 @@ void runHgg2012(const char *fileset    = "0000",
   sysMod->SetIsData(isData);
   
   // only select on run- and lumisection numbers when valid json file present
-  if ((jsonFile.CompareTo("/home/mingyang/cms/json/~") != 0) &&
-      (jsonFile.CompareTo("/home/mingyang/cms/json/-") != 0)   ) {
+  if ((jsonFile.CompareTo("/home/bendavid/cms/json/~") != 0) &&
+      (jsonFile.CompareTo("/home/bendavid/cms/json/-") != 0)   ) {
     runLumiSel->AddJSONFile(jsonFile.Data());
   }
-  if ((jsonFile.CompareTo("/home/mingyang/cms/json/-") == 0)   ) {
+  if ((jsonFile.CompareTo("/home/bendavid/cms/json/-") == 0)   ) {
     printf("\n WARNING -- Looking at data without JSON file: always accept.\n\n");
     runLumiSel->SetAbortIfNotAccepted(kFALSE);   // accept all events if there is no valid JSON file
   }
@@ -284,7 +284,7 @@ void runHgg2012(const char *fileset    = "0000",
   photcic->SetVertexSelType("CiCMVA2012Selection");
   //photcic->SetUseSingleLegConversions(kTRUE);
   photcic->DoMCSmear(kTRUE);
-  photcic->DoDataEneCorr(kFALSE);
+  photcic->DoDataEneCorr(kTRUE);
   photcic->SetPhotonsFromBranch(kFALSE);
   photcic->SetInputPhotonsName(photreg->GetOutputName());
   //photcic->SetMCSmearFactors(0.0067,0.0077,0.0096,0.0141,0.0196,0.0268,0.0279,0.0293,0.0301);//ming:smear(sigE/E)
@@ -294,11 +294,13 @@ void runHgg2012(const char *fileset    = "0000",
   //   photcic->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
   //   photcic->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   //   photcic->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);
-  //2012 ICHEP
-  photcic->SetMCSmearFactors(0.0149,0.0126,0.0138,0.0195,0.0222,0.0335,0.0316,0.0354,0.0385);//ming:smear(sigE/E)
-  photcic->AddEnCorrPerRun(190450,193193,0.9910,0.9910,0.9990,0.9913,1.0084,0.9961,0.9983,0.9878,1.0062);
-  photcic->AddEnCorrPerRun(193201,193686,0.9881,0.9881,0.9961,0.9872,1.0044,0.9967,0.9989,0.9942,1.0125);
-  photcic->AddEnCorrPerRun(193746,195655,0.9894,0.9894,0.9974,0.9875,1.0046,0.9980,1.0002,0.9876,1.0060);
+  //2012 ICHEP promptreco
+  photcic->SetMCSmearFactors(0.0081,0.0103,0.0113,0.0195,0.0222,0.0366,0.0334,0.0528,0.0558);//ming:smear(sigE/E)
+  photcic->AddEnCorrPerRun(190450,190781,0.9981,0.9981,1.0049,1.0005,1.0176,0.9998,1.0057,0.9893,1.0051);
+  photcic->AddEnCorrPerRun(190782,190949,1.0079,1.0079,1.0146,0.9823,0.9997,1.0054,1.0113,0.9950,1.0106);
+  photcic->AddEnCorrPerRun(190950,193193,0.9972,0.9972,1.0040,0.9965,1.0137,0.9999,1.0058,0.9753,0.9912);
+  photcic->AddEnCorrPerRun(193194,193686,0.9942,0.9942,1.0010,0.9927,1.0099,0.9981,1.0040,0.9722,0.9883);
+  photcic->AddEnCorrPerRun(193746,195655,0.9966,0.9966,1.0034,0.9949,1.0121,0.9988,1.0047,0.9903,1.0061);
   //  photcic->SetDoMCR9Scaling(kTRUE);
   //  photcic->SetMCR9Scale(1.0035, 1.0035);
   photcic->SetDoShowerShapeScaling(kTRUE); 
@@ -316,7 +318,7 @@ void runHgg2012(const char *fileset    = "0000",
   photcicnoeleveto->SetVertexSelType("CiCMVA2012Selection");
   //photcicnoeleveto->SetUseSingleLegConversions(kTRUE);
   photcicnoeleveto->DoMCSmear(kTRUE);
-  photcicnoeleveto->DoDataEneCorr(kFALSE);
+  photcicnoeleveto->DoDataEneCorr(kTRUE);
   photcicnoeleveto->SetPhotonsFromBranch(kFALSE);
   photcicnoeleveto->SetInputPhotonsName(photreg->GetOutputName());
   //  photcicnoeleveto->SetMCSmearFactors(0.0067,0.0077,0.0096,0.0141,0.0196,0.0268,0.0279,0.0293,0.0301);//ming:smear(sigE/E)
@@ -326,11 +328,13 @@ void runHgg2012(const char *fileset    = "0000",
   //   photcicnoeleveto->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
   //   photcicnoeleveto->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   //   photcicnoeleveto->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);
-  //2012 ICHEP
-  photcicnoeleveto->SetMCSmearFactors(0.0149,0.0126,0.0138,0.0195,0.0222,0.0335,0.0316,0.0354,0.0385);//ming:smear(sigE/E)
-  photcicnoeleveto->AddEnCorrPerRun(190450,193193,0.9910,0.9910,0.9990,0.9913,1.0084,0.9961,0.9983,0.9878,1.0062);
-  photcicnoeleveto->AddEnCorrPerRun(193201,193686,0.9881,0.9881,0.9961,0.9872,1.0044,0.9967,0.9989,0.9942,1.0125);
-  photcicnoeleveto->AddEnCorrPerRun(193746,195655,0.9894,0.9894,0.9974,0.9875,1.0046,0.9980,1.0002,0.9876,1.0060);
+  //2012 ICHEP promptreco
+  photcicnoeleveto->SetMCSmearFactors(0.0081,0.0103,0.0113,0.0195,0.0222,0.0366,0.0334,0.0528,0.0558);//ming:smear(sigE/E)
+  photcicnoeleveto->AddEnCorrPerRun(190450,190781,0.9981,0.9981,1.0049,1.0005,1.0176,0.9998,1.0057,0.9893,1.0051);
+  photcicnoeleveto->AddEnCorrPerRun(190782,190949,1.0079,1.0079,1.0146,0.9823,0.9997,1.0054,1.0113,0.9950,1.0106);
+  photcicnoeleveto->AddEnCorrPerRun(190950,193193,0.9972,0.9972,1.0040,0.9965,1.0137,0.9999,1.0058,0.9753,0.9912);
+  photcicnoeleveto->AddEnCorrPerRun(193194,193686,0.9942,0.9942,1.0010,0.9927,1.0099,0.9981,1.0040,0.9722,0.9883);
+  photcicnoeleveto->AddEnCorrPerRun(193746,195655,0.9966,0.9966,1.0034,0.9949,1.0121,0.9988,1.0047,0.9903,1.0061);
   //photcicnoeleveto->SetDoMCR9Scaling(kTRUE);
   //photcicnoeleveto->SetMCR9Scale(1.0035, 1.0035);
   photcicnoeleveto->SetDoShowerShapeScaling(kTRUE);
@@ -352,7 +356,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpresel->SetIdMVAType("2012IdMVA_globe");
   //photpresel->SetVertexSelType("MetSigSelection");
   photpresel->DoMCSmear(kTRUE);
-  photpresel->DoDataEneCorr(kFALSE);
+  photpresel->DoDataEneCorr(kTRUE);
   photpresel->SetPhotonsFromBranch(kFALSE);
   photpresel->SetInputPhotonsName(photreg->GetOutputName());
   //photpresel->SetMCSmearFactors(0.0045, 0.0084, 0.0109, 0.0156, 0.0203,0.0303,0.0326,0.0318,0.0331);
@@ -369,11 +373,14 @@ void runHgg2012(const char *fileset    = "0000",
   //   photpresel->AddEnCorrPerRun(175830,177139,0.9958,0.9958,1.0021,0.9944,1.0073,0.9968,1.0017,0.9933,1.004);
   //   photpresel->AddEnCorrPerRun(177140,178421,0.9962,0.9962,1.0025,0.9946,1.0075,0.9960,1.0010,0.9944,1.005);
   //   photpresel->AddEnCorrPerRun(178424,180252,0.9961,0.9961,1.0024,0.9942,1.0071,0.9921,0.9970,0.9953,1.0059); 
-  //2012 ICHEP
-  photpresel->SetMCSmearFactors(0.0149,0.0126,0.0138,0.0195,0.0222,0.0335,0.0316,0.0354,0.0385);//ming:smear(sigE/E)
-  photpresel->AddEnCorrPerRun(190450,193193,0.9910,0.9910,0.9990,0.9913,1.0084,0.9961,0.9983,0.9878,1.0062);
-  photpresel->AddEnCorrPerRun(193201,193686,0.9881,0.9881,0.9961,0.9872,1.0044,0.9967,0.9989,0.9942,1.0125);
-  photpresel->AddEnCorrPerRun(193746,195655,0.9894,0.9894,0.9974,0.9875,1.0046,0.9980,1.0002,0.9876,1.0060);
+  //2012 ICHEP promptreco
+  photpresel->SetMCSmearFactors(0.0081,0.0103,0.0113,0.0195,0.0222,0.0366,0.0334,0.0528,0.0558);//ming:smear(sigE/E)
+  photpresel->AddEnCorrPerRun(190450,190781,0.9981,0.9981,1.0049,1.0005,1.0176,0.9998,1.0057,0.9893,1.0051);
+  photpresel->AddEnCorrPerRun(190782,190949,1.0079,1.0079,1.0146,0.9823,0.9997,1.0054,1.0113,0.9950,1.0106);
+  photpresel->AddEnCorrPerRun(190950,193193,0.9972,0.9972,1.0040,0.9965,1.0137,0.9999,1.0058,0.9753,0.9912);
+  photpresel->AddEnCorrPerRun(193194,193686,0.9942,0.9942,1.0010,0.9927,1.0099,0.9981,1.0040,0.9722,0.9883);
+  photpresel->AddEnCorrPerRun(193746,195655,0.9966,0.9966,1.0034,0.9949,1.0121,0.9988,1.0047,0.9903,1.0061);
+  //photcicnoeleveto->SetDoMCR9Scaling(kTRUE);
 
   photpresel->SetDoShowerShapeScaling(kTRUE);
   photpresel->SetShowerShapeType("2012ShowerShape");
@@ -391,7 +398,7 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselinverteleveto->SetVertexSelType("CiCMVA2012Selection");
   //photpreselinverteleveto->SetUseSingleLegConversions(kTRUE);
   photpreselinverteleveto->DoMCSmear(kTRUE);
-  photpreselinverteleveto->DoDataEneCorr(kFALSE);
+  photpreselinverteleveto->DoDataEneCorr(kTRUE);
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
   //   photpreselinverteleveto->SetMCSmearFactors(0.0067,0.0077,0.0096,0.0141,0.0196,0.0268,0.0279,0.0293,0.0301);//ming:smear(sigE/E)
@@ -401,11 +408,13 @@ void runHgg2012(const char *fileset    = "0000",
   //   photpreselinverteleveto->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
   //   photpreselinverteleveto->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   //   photpreselinverteleveto->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086); 
-  //2012 ICHEP
-   photpreselinverteleveto->SetMCSmearFactors(0.0149,0.0126,0.0138,0.0195,0.0222,0.0335,0.0316,0.0354,0.0385);//ming:smear(sigE/E)
-   photpreselinverteleveto->AddEnCorrPerRun(190450,193193,0.9910,0.9910,0.9990,0.9913,1.0084,0.9961,0.9983,0.9878,1.0062);
-   photpreselinverteleveto->AddEnCorrPerRun(193201,193686,0.9881,0.9881,0.9961,0.9872,1.0044,0.9967,0.9989,0.9942,1.0125);
-   photpreselinverteleveto->AddEnCorrPerRun(193746,195655,0.9894,0.9894,0.9974,0.9875,1.0046,0.9980,1.0002,0.9876,1.0060);
+  //2012 ICHEP promptreco
+  photpreselinverteleveto->SetMCSmearFactors(0.0081,0.0103,0.0113,0.0195,0.0222,0.0366,0.0334,0.0528,0.0558);//ming:smear(sigE/E)
+  photpreselinverteleveto->AddEnCorrPerRun(190450,190781,0.9981,0.9981,1.0049,1.0005,1.0176,0.9998,1.0057,0.9893,1.0051);
+  photpreselinverteleveto->AddEnCorrPerRun(190782,190949,1.0079,1.0079,1.0146,0.9823,0.9997,1.0054,1.0113,0.9950,1.0106);
+  photpreselinverteleveto->AddEnCorrPerRun(190950,193193,0.9972,0.9972,1.0040,0.9965,1.0137,0.9999,1.0058,0.9753,0.9912);
+  photpreselinverteleveto->AddEnCorrPerRun(193194,193686,0.9942,0.9942,1.0010,0.9927,1.0099,0.9981,1.0040,0.9722,0.9883);
+  photpreselinverteleveto->AddEnCorrPerRun(193746,195655,0.9966,0.9966,1.0034,0.9949,1.0121,0.9988,1.0047,0.9903,1.0061);
    
    photpreselinverteleveto->SetShowerShapeType("2012ShowerShape");
    photpreselinverteleveto->SetDoShowerShapeScaling(kTRUE);  
@@ -576,7 +585,7 @@ void runHgg2012(const char *fileset    = "0000",
   //elecIdS->Add(phottreeES);
   
 
-  TFile::SetOpenTimeout(0);
+  //TFile::SetOpenTimeout(0);
   //TFile::SetCacheFileDir("./rootfilecache",kTRUE,kTRUE);
   TFile::SetReadaheadSize(128*1024*1024);
   
