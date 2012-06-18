@@ -8,6 +8,8 @@ t2mit/filefi/028 r12a-del-pr-v1              noskim data                        
 t2mit/filefi/028 r12b-del-pr-v1              noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/028 r12a-dmu-pr-v1              noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/028 r12b-dmu-pr-v1              noskim data                                  -1.0       1.0   -1.0    -
+t2mit/filefi/028 r12a-mueg-pr-v1             noskim data                                  -1.0       1.0   -1.0    -
+t2mit/filefi/028 r12b-mueg-pr-v1             noskim data                                  -1.0       1.0   -1.0    -
 #
 #local/filefi/025 r11a-del-m10-v1            noskim data                                  -1.0       1.0   -1.0    -
 #local/filefi/025 r11a-del-pr-v4             noskim data                                  -1.0       1.0   -1.0    -
