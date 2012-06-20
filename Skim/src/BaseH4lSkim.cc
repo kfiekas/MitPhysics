@@ -219,7 +219,7 @@ bool BaseH4lSkim::PassWwMuonSel(const Muon *mu)
   // note: this isn't really ww muon isolation
   float pfiso = ComputePfMuonIso(mu,0.3);
 
-  if (pfiso > 0.2*mu->pt())
+  if (pfiso > 0.2*mu->Pt())
     return false;
 
   return true;
