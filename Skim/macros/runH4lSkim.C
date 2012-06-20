@@ -1,4 +1,5 @@
-// $Id: $
+
+// $Id: runH4lSkim.C,v 1.1 2012/06/02 20:46:24 paus Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -153,6 +154,10 @@ void runH4lSkim(const char *fileset    = "0000",
   outMod->Keep("StandaloneMuonTracks");
   outMod->Keep("ConversionInOutElectronsStable");
   outMod->Keep("ConversionInOutTracks");
+  if(!isData) {
+    outMod->Keep("MCEventInfo");
+    outMod->Keep("MCParticles");
+  }
 
   TString rootFile = TString(outputName);
   rootFile += TString("_") + TString(dataset) + TString("_") + TString(skim);
