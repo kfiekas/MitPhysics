@@ -55,33 +55,30 @@ void H4lLightFlavorSkim::EndRun()
 void H4lLightFlavorSkim::Process()
 {
   fTotal++;
-  // Load branches
+
   LoadBranch(fMuonName);
   LoadBranch(fElectronName);
   LoadBranch(fPrimVtxName);
   LoadBranch(fPfCandidateName);
 
-  // Set fBestPv
   SetBestPv();
 
   // Look for tight leptons
   vector<const Muon*>     tightMuons;
   vector<const Electron*> tightElectrons;
-
   for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
     const Muon *mu = fMuons->At(i);
-    if (!PassWwMuonSel(mu))
+    if (!muon2012CutBasedIDTight(mu))
       continue;
     if (fabs(mu->Ip3dPVSignificance()) >= 3)
       continue;
     tightMuons.push_back(mu);
   }
-
   for (UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
     const Electron *ele = fElectrons->At(i);
-    if (fabs(ele->Ip3dPVSignificance()) >= 3)
+    if (!electron2012CutBasedIDMedium(ele))
       continue;
-    if (!PassElecTagSel(ele))
+    if (fabs(ele->Ip3dPVSignificance()) >= 3)
       continue;
     tightElectrons.push_back(ele);
   }
@@ -89,7 +86,6 @@ void H4lLightFlavorSkim::Process()
   // Look for an additional opposite-flavor lepton
   vector<const Muon*> looseMuons;
   vector<const Electron*> looseElectrons;
-
   for (UInt_t i=0; i<fMuons->GetEntries(); ++i) {
     const Muon *mu = fMuons->At(i);
     if (!PassMuonPreselNoIp(mu))
@@ -102,7 +98,8 @@ void H4lLightFlavorSkim::Process()
       continue;
     looseElectrons.push_back(ele);
   }
-  
+
+  // require cross-flavor leptons
   if ((tightMuons.size()     > 0 && looseElectrons.size() > 0) ||
       (tightElectrons.size() > 0 && looseMuons.size()     > 0)   ) {
     fSelected++;

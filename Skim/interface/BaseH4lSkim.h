@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: BaseH4lSkim.h,v 1.1 2012/06/03 20:25:56 paus Exp $
+// $Id: BaseH4lSkim.h,v 1.2 2012/06/14 13:15:20 dkralph Exp $
 //
 // BaseH4lSkim
 //
@@ -29,9 +29,9 @@ namespace mithep
     Float_t ComputePfElecIso  (const Electron *electron, const Double_t dRMax);
     bool    PassMuonPreselNoIp(const mithep::Muon *mu);
     bool    PassElecPreselNoIp(const mithep::Electron *ele);
-    bool    PassWwMuonSel     (const mithep::Muon *mu);
-    bool    PassElecTagSel    (const mithep::Electron *ele);
-
+    bool    muon2012CutBasedIDTight(const mithep::Muon *mu);
+    bool    electron2012CutBasedIDMedium(const mithep::Electron *ele);
+  
   protected:
     void    Begin();
     void    BeginRun();

@@ -6,10 +6,10 @@ export MIT_PROD_OVERLAP=-1
 
 run_skims() {
     . $codedir/config/$skim.env
-    outdir=/temp/dkralph/skims/$skim
+    outdir=/scratch/dkralph/skims/$skim
     mkdir -p $outdir
     cd $outdir
-    if echo "$outdir" | grep "/temp/dkralph/" &>/dev/null; then rm -v $outdir/*{.root,.txt}; fi
+    if echo "$outdir" | grep "/scratch/dkralph/" &>/dev/null; then rm -v $outdir/*{.root,.txt}; fi
     macro=$codedir/macros/$MIT_PROD_MACRO
     $com $macro+
     while read line; do
@@ -25,7 +25,7 @@ run_skims() {
 
 count_skim() {
     outfile=~/public_html/skims/$skim.txt
-    outdir=/temp/dkralph/skims/$skim
+    outdir=/scratch/dkralph/skims/$skim
     ntot_all=0
     nsel_all=0
     echo "${skim}:" | tee $outfile
@@ -41,7 +41,12 @@ count_skim() {
     echo "-----------------------------------"
 }
 
-for skim in h4leletagprobe h4lmutagprobe; do #h4lzplusfake h4llf; do
-    run_skims &
-#    count_skim
+#for skim in h4l; do
+#for skim in h4lzplusfake; do
+#for skim in h4leletagprobe; do
+#for skim in h4llf; do
+#for skim in h4lmutagprobe; do
+for skim in h4l h4lzplusfake h4llf h4leletagprobe h4lmutagprobe; do
+#    run_skims &
+    count_skim
 done

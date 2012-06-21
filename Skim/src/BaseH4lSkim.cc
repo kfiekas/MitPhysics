@@ -160,15 +160,11 @@ Float_t BaseH4lSkim::ComputePfElecIso(const Electron *electron, const Double_t d
 //----------------------------------------------------------------------------------------
 bool BaseH4lSkim::PassMuonPreselNoIp(const Muon *mu)
 {
-  //if (fabs(mu->Ip3dPVSignificance()) >= 100)
-  //  return false;
   if (mu->Pt() < 5)
     return false;
   if (fabs(mu->Eta()) > 2.4)
     return false;
   if (!(mu->IsTrackerMuon() || mu->IsGlobalMuon()))
-    return false;
-  if (mu->IsoR03SumPt()/mu->Pt() >= 0.7)
     return false;
 
   return true;
@@ -177,115 +173,111 @@ bool BaseH4lSkim::PassMuonPreselNoIp(const Muon *mu)
 //----------------------------------------------------------------------------------------
 bool BaseH4lSkim::PassElecPreselNoIp(const Electron *ele)
 {
-  // if (fabs(ele->Ip3dPVSignificance()) >= 100)
-  //   return false;
   if (ele->Pt() < 5)
     return false;
   if (fabs(ele->Eta()) >= 2.5)
     return false;
   if (ele->CorrectedNExpectedHitsInner() > 1)
     return false;
-  if (ele->TrackIsolationDr03()/ele->Pt() >= 0.7)
-    return false;
 
   return true;
 }
-
 //----------------------------------------------------------------------------------------
-bool BaseH4lSkim::PassWwMuonSel(const Muon *mu)
+bool BaseH4lSkim::muon2012CutBasedIDTight(const mithep::Muon *mu)
 {
-  if (mu->Pt() < 5)
-    return false;
-  if (fabs(mu->Eta()) > 2.4)
-    return false;
-  if (mu->BestTrk()->PtErr()/mu->Pt() > 0.1)
-    return false;
-  if (fabs(mu->BestTrk()->DzCorrected(*fBestPv)) > 0.1)
-    return false;
-  Bool_t isGlobal  = (mu->IsGlobalMuon()) && (mu->BestTrk()->RChi2() < 10) &&
-                      (mu->NMatches() > 1) && (mu->NValidHits() > 0);
-  Bool_t isTracker = (mu->IsTrackerMuon()) &&
-                      (mu->Quality().Quality(MuonQuality::TMLastStationTight));
-  if (!isGlobal && !isTracker)
-    return false;
-  int ntrkhits = (mu->HasTrackerTrk()) ? mu->TrackerTrk()->NHits() : 0;
-  if (ntrkhits < 10)
-    return false;
-  if (mu->BestTrk()->NPixelHits() < 1)
-    return false;
-  if (fabs(mu->BestTrk()->D0Corrected(*fBestPv)) > 0.02)
-    return false;
+  Float_t charged_iso = 0;
+  
+  for(unsigned k=0; k<fPfCandidates->GetEntries(); ++k) {
+    const mithep::PFCandidate *pf = (mithep::PFCandidate*)((*fPfCandidates)[k]);
+    Double_t dr = mithep::MathUtils::DeltaR(mu->Phi(),mu->Eta(), pf->Phi(), pf->Eta());
+    if (dr > 0.4) continue;
+    if (pf->Charge() != 0 && (pf->HasTrackerTrk()||pf->HasGsfTrk()) ) {
+      if (abs(pf->PFType()) == mithep::PFCandidate::eElectron || abs(pf->PFType()) == mithep::PFCandidate::eMuon) continue;
+      charged_iso += pf->Pt();
+    }
+  }
+  double iso_sum = charged_iso;
 
-  // note: this isn't really ww muon isolation
-  float pfiso = ComputePfMuonIso(mu,0.3);
-
-  if (pfiso > 0.2*mu->Pt())
+  if(!mu->IsGlobalMuon())
+    return false;
+  if(mu->GlobalTrk()->RChi2() > 10)
+    return false;
+  if(mu->NValidHits() == 0 )
+    return false;
+  if(mu->NMatches() <= 1)
+    return false;
+  if(fabs(mu->TrackerTrk()->D0Corrected(*fBestPv)) > 0.2)
+    return false;
+  if(fabs(mu->TrackerTrk()->DzCorrected(*fBestPv)) > 0.5)
+    return false;
+  if(mu->BestTrk()->NPixelHits() == 0)
+    return false;
+  if(mu->NTrkLayersHit() <= 5)
+    return false; 
+  if(iso_sum/mu->Pt() > 0.12 )
     return false;
 
   return true;
 }
-//--------------------------------------------------------------------------------------------------
-bool BaseH4lSkim::PassElecTagSel(const Electron *ele)
+//----------------------------------------------------------------------------------------
+bool BaseH4lSkim::electron2012CutBasedIDMedium(const mithep::Electron *ele)
 {
-  bool passID=true, passIso=true;
 
-  double scet   = ele->SCluster()->Et();
-  double sceta  = ele->SCluster()->Eta();
+  Float_t charged_iso = 0;
 
-  if (scet < 5)
-    passID = false;
-  if (fabs(sceta) > 2.5)
-    passID = false;
-
-  if (fabs(ele->BestTrk()->D0Corrected(*fBestPv)) > 0.02) // cut on impact parameter
-    passID = false;
-  if (fabs(ele->BestTrk()->DzCorrected(*fBestPv)) > 0.1)  // cut on impact parameter in z
-    passID = false;
-
-  // conversion rejection
-  double misshits = ele->CorrectedNExpectedHitsInner();
-  if (misshits > 0)
-    passID = false;
-
-  // not implemented for bambu, so leave it out for the moment...
-  //if (ele->isConv)
-  //  passID = false;
-
-  // barrel/endcap dependent requirments
-  double pfiso  = ComputePfElecIso(ele,0.4);
-  double sieie  = ele->CoviEtaiEta();
-  double dphiin = ele->DeltaPhiSuperClusterTrackAtVtx();
-  double detain = ele->DeltaPhiSuperClusterTrackAtVtx();
-  double hoe    = ele->HadronicOverEm();
-
-  if (fabs(sceta)<1.479) {
-    // barrel
-    if (pfiso        > 0.13*scet)
-      passIso = false;
-    if (sieie        > 0.01)
-      passID = false;
-    if (fabs(dphiin) > 0.06)
-      passID = false;
-    if (fabs(detain) > 0.004)
-      passID = false;
-    if (hoe          > 0.04)
-      passID = false;
+  for(unsigned k=0; k<fPfCandidates->GetEntries(); ++k) {
+    const mithep::PFCandidate *pf = (mithep::PFCandidate*)((*fPfCandidates)[k]);
+    Double_t dr = mithep::MathUtils::DeltaR(ele->Phi(),ele->Eta(), pf->Phi(), pf->Eta());
+    if (dr > 0.3) continue;
+    if (pf->Charge() != 0 && (pf->HasTrackerTrk()||pf->HasGsfTrk()) ) {
+      if (abs(pf->PFType()) == mithep::PFCandidate::eElectron || abs(pf->PFType()) == mithep::PFCandidate::eMuon) continue;
+      if (fabs(ele->SCluster()->Eta()) > 1.479 && dr < 0.015) continue;
+      charged_iso += pf->Pt();
+    }
   }
-  else {
+
+  double iso_sum = charged_iso;
+
+  if(fabs(ele->BestTrk()->D0Corrected(*fBestPv)) > 0.02)
+    return false;	
+  if(fabs(ele->BestTrk()->DzCorrected(*fBestPv)) > 0.1)
+    return false;
+  if(fabs(1 - ele->ESuperClusterOverP())/(ele->SCluster()->Et()*TMath::CosH(ele->SCluster()->Eta())) > 0.05)
+    return false;
+  if(ele->CorrectedNExpectedHitsInner() > 1)
+    return false;
+
+  // barrel
+  if(fabs(ele->Eta()) < 1.5 ) {
+    if(fabs(ele->DeltaEtaSuperClusterTrackAtVtx()) >  0.004)
+      return false;
+    if(fabs(ele->DeltaPhiSuperClusterTrackAtVtx()) > 0.06)
+      return false;
+    if(ele->CoviEtaiEta() > 0.01)
+      return false;
+    if(ele->HadronicOverEm() > 0.12)
+      return false;
+    if(iso_sum/ele->Pt() > 0.15)
+      return false;	
+  } else if(fabs(ele->Eta()) < 2.5){
     // endcap
-    if (pfiso        > 0.09*(scet))
-      passIso = false;
-    if (sieie        > 0.03)
-      passID = false;
-    if (fabs(dphiin) > 0.03)
-      passID = false;
-    if (fabs(detain) > 0.007)
-      passID = false;
-    if (hoe          > 0.10)
-      passID = false;
+    if(fabs(ele->DeltaEtaSuperClusterTrackAtVtx()) > 0.007)
+      return false;	 
+    if(fabs(ele->DeltaPhiSuperClusterTrackAtVtx()) > 0.03)
+      return false;
+    if(ele->CoviEtaiEta() > 0.03)
+      return false;	
+    if(ele->HadronicOverEm() > 0.10)
+      return false;
+    if(ele->Pt() > 20 && iso_sum/ele->Pt() > 0.15)
+      return false;
+    if(ele->Pt() < 20 && iso_sum/ele->Pt() > 0.10)
+      return false;
+  } else {
+    return false;
   }
 
-  return (passID && passIso);
+  return true;
 }
 //--------------------------------------------------------------------------------------------------
 void BaseH4lSkim::Begin()

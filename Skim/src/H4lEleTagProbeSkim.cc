@@ -55,15 +55,13 @@ void H4lEleTagProbeSkim::EndRun()
 //--------------------------------------------------------------------------------------------------
 void H4lEleTagProbeSkim::Process()
 {
-
   fTotal++;
-  // Load branches
+
   LoadBranch(fMuonName);
   LoadBranch(fElectronName);
   LoadBranch(fPrimVtxName);
   LoadBranch(fPfCandidateName);
 
-  // set fBestPv
   SetBestPv();
 
   // Find a tag
@@ -74,11 +72,13 @@ void H4lEleTagProbeSkim::Process()
     if(ele->SCluster()->Et() > 5)
       nProbes++;
 
-    if(!PassElecTagSel(ele))
+    if(!electron2012CutBasedIDMedium(ele))
       continue;
     hasTag = true;
   }
 
-  if(hasTag && nProbes>1) fSelected++;
-  else SkipEvent();
+  if(hasTag && nProbes>1)
+    fSelected++;
+  else
+    SkipEvent();
 }

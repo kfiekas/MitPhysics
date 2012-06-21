@@ -54,13 +54,12 @@ void H4lSkim::EndRun()
 void H4lSkim::Process()
 {
   fTotal++;
-  // Load branches
+
   LoadBranch(fMuonName);
   LoadBranch(fElectronName);
   LoadBranch(fPrimVtxName);
   LoadBranch(fPfCandidateName);
 
-  // Set fBestPv
   SetBestPv();
 
   int nLepPt5=0;
@@ -90,6 +89,8 @@ void H4lSkim::Process()
       nLepPt10++;
   }
 
-  if ( !(nLepPt5>=4 && nLepPt10>=2)) SkipEvent();
-  else fSelected++;
+  if ( !(nLepPt5>=4 && nLepPt10>=2) )
+    SkipEvent();
+  else
+    fSelected++;
 }

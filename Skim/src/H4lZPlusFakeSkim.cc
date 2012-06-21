@@ -56,15 +56,13 @@ void H4lZPlusFakeSkim::EndRun()
 //--------------------------------------------------------------------------------------------------
 void H4lZPlusFakeSkim::Process()
 {
-
   fTotal++;
-  // Load branches
+
   LoadBranch(fMuonName);
   LoadBranch(fElectronName);
   LoadBranch(fPrimVtxName);
   LoadBranch(fPfCandidateName);
 
-  // set fBestPv
   SetBestPv();
 
   // select good leptons
@@ -92,8 +90,10 @@ void H4lZPlusFakeSkim::Process()
       TLorentzVector mu2;
       mu2.SetPtEtaPhiM(goodMuons[jmu]->Pt(),goodMuons[jmu]->Eta(),goodMuons[jmu]->Phi(),105.658369e-3);
       TLorentzVector dimu(mu1+mu2);
-      if(dimu.M() < 60 || dimu.M() > 120) continue;
-    if(goodMuons[imu]->Charge() == goodMuons[jmu]->Charge()) continue;
+      if(dimu.M() < 60 || dimu.M() > 120)
+	continue;
+    if(goodMuons[imu]->Charge() == goodMuons[jmu]->Charge())
+      continue;
 
     zmu1 = goodMuons[imu];
     zmu2 = goodMuons[jmu];
@@ -107,8 +107,10 @@ void H4lZPlusFakeSkim::Process()
       TLorentzVector ele2;
       ele2.SetPtEtaPhiM(goodElectrons[jele]->Pt(),goodElectrons[jele]->Eta(),goodElectrons[jele]->Phi(),105.658369e-3);
       TLorentzVector diele(ele1+ele2);
-      if(diele.M() < 60 || diele.M() > 120) continue;
-      if(goodElectrons[iele]->Charge() == goodElectrons[jele]->Charge()) continue;
+      if(diele.M() < 60 || diele.M() > 120)
+	continue;
+      if(goodElectrons[iele]->Charge() == goodElectrons[jele]->Charge())
+	continue;
 
       zEle1 = goodElectrons[iele];
       zEle2 = goodElectrons[jele];
@@ -120,18 +122,26 @@ void H4lZPlusFakeSkim::Process()
   int nFakes=0;
   for(UInt_t i=0; i<fMuons->GetEntries(); ++i) {
     const Muon *mu = fMuons->At(i);
-    if(mu==zmu1 || mu==zmu2) continue;
-    if(mu->Pt() < 5) continue;
+    if(mu==zmu1 || mu==zmu2)
+      continue;
+    if(mu->Pt() < 5)
+      continue;
+
     nFakes++;
   }
   for(UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
     const Electron *ele = fElectrons->At(i);
-    if(ele==zEle1 || ele==zEle2) continue;
-    if(ele->SCluster()->Et() < 5) continue;
+    if(ele==zEle1 || ele==zEle2)
+      continue;
+    if(ele->SCluster()->Et() < 5)
+      continue;
+
     nFakes++;
   }
 
-  if(NZCandidates==1 && nFakes>0) fSelected++;
-  else SkipEvent();
+  if(NZCandidates==1 && nFakes>0)
+    fSelected++;
+  else
+    SkipEvent();
 
 }

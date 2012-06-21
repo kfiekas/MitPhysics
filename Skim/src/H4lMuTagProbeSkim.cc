@@ -56,18 +56,14 @@ void H4lMuTagProbeSkim::EndRun()
 //--------------------------------------------------------------------------------------------------
 void H4lMuTagProbeSkim::Process()
 {
-
   fTotal++;
-  
 
-  // Load branches
   LoadBranch(fMuonName);
   LoadBranch(fElectronName);
   LoadBranch(fPrimVtxName);
   LoadBranch(fPfCandidateName);
   LoadBranch(fTracksName);
 
-  // set fBestPv
   SetBestPv();
 
   // Find a tag
@@ -77,7 +73,7 @@ void H4lMuTagProbeSkim::Process()
     const Muon *mu = fMuons->At(i);
     if(mu->Pt() > 5)
       nProbes++;
-    if(!PassWwMuonSel(mu))
+    if(!muon2012CutBasedIDTight(mu))
       continue;
     hasTag = true;
   }
@@ -92,20 +88,23 @@ void H4lMuTagProbeSkim::Process()
     const mithep::Track *track = fTracks->At(i);
     
     // Check that the track is not associated with a muon.                                                                                                                                                      
-    // If it is, skip to next track...                                                                                                                                                                          
     Bool_t isMuon = kFALSE;
     for(UInt_t j=0; j<fMuons->GetEntries(); ++j) {
       if(track == (fMuons->At(j)->TrackerTrk())) isMuon = kTRUE;
     }
-    if(isMuon) continue;
-    
-    if(track->Pt() < 20) continue;  // pT cut
-    if(fabs(track->Eta()) > 2.4) continue;
+    if(isMuon)
+      continue;
+    if(track->Pt() < 20)
+      continue;
+    if(fabs(track->Eta()) > 2.4)
+      continue;
 
     nProbes++;
   }
 
 
-  if(hasTag && nProbes>1) fSelected++;
-  else SkipEvent();
+  if(hasTag && nProbes>1)
+    fSelected++;
+  else
+    SkipEvent();
 }
