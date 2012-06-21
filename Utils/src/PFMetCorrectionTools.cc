@@ -1,4 +1,4 @@
-// $Id: PFMetCorrectionTools.cc,adapted from RedNtpTree.cc from Chiara 2012/04/30  Heng $
+// $Id: PFMetCorrectionTools.cc,v 1.4 2012/06/06 15:33:21 mtouch Exp $
 
 #include "MitPhysics/Utils/interface/PFMetCorrectionTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -88,33 +88,43 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
   TLorentzVector jetSumUnsmeared;
   jetSumUnsmeared.SetXYZT(0.,0.,0.,0);
   TRandom3 *jSmearRan= new TRandom3(evt);
+
   
   if( !fPFJet || !fcorrJet) {
     return;
   }
-  
+  // printf("im here 1 \n");
+  //  printf("there are %d akt5pfjets and    %d corrJets  and     %d genjets  \n",fPFJet->GetEntries(),fcorrJet->GetEntries(),0);
+  //  printf(" ind         uncorEta      uncorPt        corrEta         corrPt \n");
+
   if(fPFJet->GetEntries() != fcorrJet->GetEntries()) return;
-  
+  //  Int_t jetColIdx =0;
+  //  Int_t uncorrJetColIdx=0;
   // associating reco - gen met                                                                                                            
   for( UInt_t i=0; i<fPFJet->GetEntries(); ++i){
     const Jet *recojet=fPFJet->At(i);
     float ptSmeared  = recojet->Mom().Pt();
     float eneSmeared = recojet->Mom().E();    
     if ( (phHard && MathUtils::DeltaR(recojet->Mom(),phHard->Mom())<0.5 )|| (phSoft && MathUtils::DeltaR(recojet->Mom(),phSoft->Mom())<0.5)){
-      //     std::cout<<"removed jet  "<<recojet->Pt()<< "  "<<recojet->Eta()<<std::endl;
+      //         std::cout<<"removed jet  "<<recojet->Pt()<< "  "<<recojet->Eta()<<std::endl;
       continue;
     }
 
+    // if (recojet->Mom().Pt()>1.) uncorrJetColIdx += 1;
+
+//     if (corrjet->Pt() < 5.0) continue;
+//     jetColIdx += 1;
+
     if (smearing){
       const Jet *corrjet=fcorrJet->At(i);
-      
       if( !recojet || !corrjet )  return;
       
       if (! phSoft || !phHard ) {
 	return;
       }
 
- 
+
+      //   printf(" jet %i pt is %f       corr jet pt is  %f   \n",i,recojet->Mom().Pt(),corrjet->Mom().Pt());
       // smearing via association with genjets
       int match        = -999;
       Double_t DRmin = 999.;     
@@ -140,12 +150,10 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
       else match=-999;
       
       // smearing for non-associated jets, using expected resolutions
-      float smear = -999.;
-      if (fabs(recojet->Mom().Eta())<=1.1)                               smear = 1.06177;
+      float smear = -999.;      if (fabs(recojet->Mom().Eta())<=1.1)                               smear = 1.06177;
       if (fabs(recojet->Mom().Eta())<=1.7 && fabs(recojet->Mom().Eta())>1.1) smear = 1.08352;
       if (fabs(recojet->Mom().Eta())<=2.3 && fabs(recojet->Mom().Eta())>1.7) smear = 1.02911;
-      if (fabs(recojet->Mom().Eta())>2.3)                                smear = 1.15288;
-      
+      if (fabs(recojet->Mom().Eta())>2.3)                                smear = 1.15288;      
       
       
       Double_t shift=0;
@@ -158,27 +166,26 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
 	shift = jSmearRan->Gaus(0.,relsmear);
       }
       
-      
-      
+           
       if(smearing && shift>-1 && shift < 2) {
 	ptSmeared  *= 1 + shift;
 	eneSmeared *= 1 + shift;
       }
-
-
     }
-    
+    //   printf("jet %i has ptsmeared = %f  \n",i,ptSmeared);
     
     // JEC scaling to correct for residual jet corrections
     if(scale) {
       Double_t factor=1;
+      //    printf("im here 2 \n");
+      //      printf("%i       %f    %f    %f      %f\n",i, recojet->Mom().Eta(),recojet->Mom().Pt(),corrjet->Eta(),corrjet->Pt());
       if(TMath::Abs(recojet->Mom().Eta())<1.5) factor = 1.015;
       else if(TMath::Abs(recojet->Mom().Eta())<3) factor = 1.04;
       else factor = 1.15;
       ptSmeared  *= factor;
       eneSmeared *= factor;
     }
-    
+    //printf("ptSmeared is %d  \n",ptSmeared);
     TLorentzVector thisJetSmeared;
     thisJetSmeared.SetPtEtaPhiE(ptSmeared,recojet->Mom().Eta(),recojet->Mom().Phi(),eneSmeared);
     
@@ -191,7 +198,7 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
     }
     
   }
-  
+  //  printf(" %d pfakt5 jets pass the cut and %d corrected jet pass the cut \n",uncorrJetColIdx,jetColIdx);
   Double_t px=met->Px()+jetSumUnsmeared.Px()-jetSumSmeared.Px();
   Double_t py=met->Py()+jetSumUnsmeared.Py()-jetSumSmeared.Py();
 
@@ -209,12 +216,12 @@ void PFMetCorrectionTools::shiftMet(Met *uncormet, Bool_t fIsData, Double_t spfM
   if(fIsData){
     //    px =uncormet->Px() -0.00563109*spfMet+0.959742;
     //    py =uncormet->Py() +0.00586162*spfMet-0.540137; 
-    px = uncormet->Px()+0.0062*spfMet-0.67; // change shift factor for 2012 correction
-    py = uncormet->Py()-0.0046*spfMet+0.67;
+    px = uncormet->Px()-0.006239*spfMet+0.662; // change shift factor for 2012 correction
+    py = uncormet->Py()+0.004613*spfMet-0.673;
     // MC
   }else{  
-    px =uncormet->Px() -0.0013*spfMet+0.021;
-    py =uncormet->Py() -0.0037*spfMet+0.82;
+    px =uncormet->Px() +0.00135*spfMet-0.021;
+    py =uncormet->Py() +0.00371*spfMet-0.826;
     
   }
   //  e = sqrt(px*px+py*py);
