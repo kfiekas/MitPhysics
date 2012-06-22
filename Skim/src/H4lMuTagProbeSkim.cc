@@ -78,12 +78,6 @@ void H4lMuTagProbeSkim::Process()
     hasTag = true;
   }
 
-  for(UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
-    const Electron *ele = fElectrons->At(i);
-    if(ele->SCluster()->Et() > 5)
-      nProbes++;
-  }
-
   for(UInt_t i=0; i<fTracks->GetEntries(); ++i) {
     const mithep::Track *track = fTracks->At(i);
     
