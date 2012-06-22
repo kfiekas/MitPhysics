@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.45 2012/05/23 22:04:20 anlevin Exp $
+// $Id: ElectronTools.cc,v 1.46 2012/06/06 15:05:40 anlevin Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1165,6 +1165,42 @@ Double_t ElectronTools::ElectronEffectiveArea(EElectronEffectiveAreaType type, D
     return 0.0;
   }
   else if (EffectiveAreaTarget == kEleEAData2012) {
+    if (type == kEleGammaIso03) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.122;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.147;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.055;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.106;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.138;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.221;
+      if (fabs(SCEta) >= 2.4 ) EffectiveArea = 0.211;
+    }
+    if (type == kEleGammaIso04) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.176;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.206;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.094;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.172;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.244;
+      if (fabs(SCEta) >= 2.4 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.333;
+      if (fabs(SCEta) >= 2.4 ) EffectiveArea = 0.348;
+    }
+    if (type == kEleNeutralHadronIso03) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.013;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.021;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.013;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.010;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.024;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.020;
+      if (fabs(SCEta) >= 2.4 ) EffectiveArea = 0.019;
+    }
+    if (type == kEleNeutralHadronIso04) {
+      if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.022;
+      if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.036;
+      if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.027;
+      if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.028;
+      if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.052;
+      if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.063;
+      if (fabs(SCEta) >= 2.4 ) EffectiveArea = 0.028;
+    }
     if (type == kEleGammaAndNeutralHadronIso04) {
       if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.19;
       if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.25;
