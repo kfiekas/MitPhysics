@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.29 2012/05/28 14:24:49 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.30 2012/06/06 14:42:32 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -229,7 +229,8 @@ Bool_t PhotonTools::PassElectronVetoConvRecovery(const Photon *p, const Electron
   for (UInt_t i=0; i<els->GetEntries(); ++i) {
     const Electron *e = els->At(i);
     if (e->SCluster()==p->SCluster() && e->GsfTrk()->NExpectedHitsInner()==0 && ElectronTools::PassConversionFilter(e, conversions, 
-                                                         v, 0, 1e-6, 2.0, kFALSE, kFALSE) ) {
+														    v, 0, 0., 1e-6, kTRUE, kFALSE) ) {
+      //                                                    v, 0, 1e-6, 2.0, kFALSE, kFALSE) ) {
       pass = kFALSE;
     }
   }
