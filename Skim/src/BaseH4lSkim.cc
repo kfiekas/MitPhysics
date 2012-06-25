@@ -54,7 +54,7 @@ bool BaseH4lSkim::SetBestPv()
 
     // Select best Pv for corrected d0; if no Pv passing cuts, the first Pv in the collection will
     // be used
-    if (pv->NTracksFit()     < 9)
+    if(!pv->IsValid())
       continue;
     if (pv->Ndof()           < 4)
       continue;
