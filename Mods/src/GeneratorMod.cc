@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.67 2011/07/06 21:11:33 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.68 2011/10/29 14:11:52 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -120,7 +120,8 @@ void GeneratorMod::Process()
   MCParticleOArr *GenISRPhotons = new MCParticleOArr;
   GenISRPhotons->SetName(fMCISRPhotonsName);
 
-  MCParticleOArr *GenTempMG0    = new MCParticleOArr;
+  MCParticleOArr *GenTempMG0     = new MCParticleOArr;
+  MCParticleOArr *GenTempLeptons = new MCParticleOArr;
 
   Bool_t isOld = kFALSE;
   Int_t sumV[2] = {0, 0}; // W, Z
@@ -171,6 +172,13 @@ void GeneratorMod::Process()
       }
 
       if (!p->IsGenerated()) continue;
+
+      if ((((p->Is(MCParticle::kEl) || p->Is(MCParticle::kMu)) && 
+            !p->HasMother(MCParticle::kTau, kFALSE)) || p->Is(MCParticle::kTau)) && 
+           p->Status() == 3) {
+        GenTempLeptons->Add(p);
+      }
+
 
       if ((((p->Is(MCParticle::kEl) || p->Is(MCParticle::kMu)) && 
             !p->HasMother(MCParticle::kTau, kFALSE)) || p->Is(MCParticle::kTau)) && 
@@ -572,12 +580,53 @@ void GeneratorMod::Process()
       // mass cut for given pid
       if(fPdgIdCut && p->Is(fPdgIdCut) && 
 	 (p->Mass() < fMassMinCut || p->Mass() > fMassMaxCut)) {
+	delete GenTempMG0;
+	delete GenTempLeptons;
 	SkipEvent();
 	return;
       }   
     } // end loop of particles
 
     delete GenTempMG0;
+    if (GetFillHist()) {
+      hDGenAllLeptons[5]->Fill(GenTempLeptons->GetEntries());
+      Double_t theHighMass = 0.0;
+      Double_t theLowMass  = 1000.;
+      if(GenTempLeptons->GetEntries() >= 3){
+        for(unsigned int i=0; i<GenTempLeptons->GetEntries(); i++){
+          const MCParticle *geni = GenTempLeptons->At(i);
+          for(unsigned int j=i+1; j<GenTempLeptons->GetEntries(); j++){
+  	    const MCParticle *genj = GenTempLeptons->At(j);
+  	    CompositeParticle dilepton;
+  	    dilepton.AddDaughter(geni);
+  	    dilepton.AddDaughter(genj);
+            if(geni->AbsPdgId() == genj->AbsPdgId() && geni->PdgId() != genj->PdgId()){
+  	      if(dilepton.Mass() < theLowMass) {theLowMass = dilepton.Mass();}         
+            } // same-flavor, opposite-charge
+  	    if(dilepton.Mass() > theHighMass) {theHighMass = dilepton.Mass();}         
+          } // loop j
+        } // loop i
+      } // at least three leptons
+      hDGenAllLeptons[6]->Fill(TMath::Min(theLowMass,99.999));
+      hDGenAllLeptons[7]->Fill(TMath::Min(theHighMass,99.999));
+    }
+    if(fApplyVGFilter == kTRUE){
+      Double_t theLowMass  = 1000.;
+      for(unsigned int i=0; i<GenTempLeptons->GetEntries(); i++){
+        const MCParticle *geni = GenTempLeptons->At(i);
+        for(unsigned int j=i+1; j<GenTempLeptons->GetEntries(); j++){
+          const MCParticle *genj = GenTempLeptons->At(j);
+          CompositeParticle dilepton;
+          dilepton.AddDaughter(geni);
+          dilepton.AddDaughter(genj);
+          if(geni->AbsPdgId() == genj->AbsPdgId() && geni->PdgId() != genj->PdgId()){
+            if(dilepton.Mass() < theLowMass) {theLowMass = dilepton.Mass();}	     
+          } // same-flavor, opposite-charge
+        } // loop j
+      } // loop i
+      if(theLowMass > 12) {delete GenTempLeptons; SkipEvent(); return;}
+    }
+    delete GenTempLeptons;
 
     // --------------------------------
     // Begin special study about VVjets
@@ -1114,27 +1163,6 @@ void GeneratorMod::Process()
     return;
   }
 
-  if(fApplyVGFilter == kTRUE){
-    Bool_t isHighMass = kFALSE;
-    Bool_t isLowMass  = kFALSE;
-    if(GenLeptons->GetEntries() < 2) {SkipEvent(); return;}
-    for(unsigned int i=0; i<GenLeptons->GetEntries(); i++){
-      const MCParticle *geni = GenLeptons->At(i);
-      for(unsigned int j=i+1; j<GenLeptons->GetEntries(); j++){
-  	const MCParticle *genj = GenLeptons->At(j);
-        if(geni->AbsPdgId() == genj->AbsPdgId() && geni->PdgId() != genj->PdgId()){
-  	  CompositeParticle dilepton;
-  	  dilepton.AddDaughter(geni);
-  	  dilepton.AddDaughter(genj);
-  	  if(dilepton.Mass() >  12) {isHighMass = kTRUE;}
-  	  if(dilepton.Mass() <= 12) {isLowMass  = kTRUE;}
-        } // same-flavor, opposite-charge
-      } // loop j
-    } // loop i
-    if(isHighMass == kTRUE &&
-       isLowMass  == kFALSE) {SkipEvent(); return;}
-  }
-
   // fill histograms if requested
   if (GetFillHist()) {
     // MET
@@ -1580,6 +1608,10 @@ void GeneratorMod::SlaveBegin()
     AddTH1(hDGenAllLeptons[2], "hDGenAllLeptons_2","Eta all leptons;#eta;#",50,0.0,5.0); 
     AddTH1(hDGenAllLeptons[3], "hDGenAllLeptons_3","Phi all leptons;#phi;#",90,0.0,180.0); 
     AddTH1(hDGenAllLeptons[4], "hDGenAllLeptons_4","Pt second lepton;p_{t} [GeV];#",400,0.0,200.0); 
+    AddTH1(hDGenAllLeptons[5], "hDGenAllLeptons_5",
+           "Number of all leptons including taus;N_{leptons};#",10,-0.5,9.5); 
+    AddTH1(hDGenAllLeptons[6], "hDGenAllLeptons_6","MinMass; [GeV];#",100,0.0,100.0); 
+    AddTH1(hDGenAllLeptons[7], "hDGenAllLeptons_7","MaxMass; [GeV];#",100,0.0,100.0); 
 
     // taus
     AddTH1(hDGenTaus[0], "hDGenTaus_0","Number of taus;N_{tau};#",10,-0.5,9.5); 
