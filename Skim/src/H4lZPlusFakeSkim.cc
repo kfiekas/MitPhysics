@@ -139,7 +139,6 @@ void H4lZPlusFakeSkim::Process()
     nFakes++;
   }
 
-  // if(NZCandidates==1 && nFakes>0)
   if(NZCandidates>0 && nFakes>0)
     fSelected++;
   else
