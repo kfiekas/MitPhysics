@@ -1,4 +1,4 @@
-// $Id: PFMetCorrectionTools.cc,v 1.4 2012/06/06 15:33:21 mtouch Exp $
+// $Id: PFMetCorrectionTools.cc,v 1.5 2012/06/21 16:06:08 mtouch Exp $
 
 #include "MitPhysics/Utils/interface/PFMetCorrectionTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -94,8 +94,8 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
     return;
   }
   // printf("im here 1 \n");
-  //  printf("there are %d akt5pfjets and    %d corrJets  and     %d genjets  \n",fPFJet->GetEntries(),fcorrJet->GetEntries(),0);
-  //  printf(" ind         uncorEta      uncorPt        corrEta         corrPt \n");
+  //printf("there are %d akt5pfjets and    %d corrJets  in event %d \n",fPFJet->GetEntries(),fcorrJet->GetEntries(),evt);
+  // printf(" ind         uncorEta      uncorPt          factor     ptSmeared\n");
 
   if(fPFJet->GetEntries() != fcorrJet->GetEntries()) return;
   //  Int_t jetColIdx =0;
@@ -124,9 +124,9 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
       }
 
 
-      //   printf(" jet %i pt is %f       corr jet pt is  %f   \n",i,recojet->Mom().Pt(),corrjet->Mom().Pt());
+      //  printf(" jet %i pt is %f       corr jet pt is  %f   \n",i,recojet->Mom().Pt(),corrjet->Mom().Pt());
       // smearing via association with genjets
-      int match        = -999;
+      Int_t match        = -999;
       Double_t DRmin = 999.;     
       if (fGenJet){
 	for(unsigned int j=0; j< fGenJet->GetEntries(); ++j){
@@ -171,19 +171,24 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
 	ptSmeared  *= 1 + shift;
 	eneSmeared *= 1 + shift;
       }
+//       if (match>-1 && match < (Double_t)(fGenJet->GetEntries()))
+// 	printf("%i       %f    %f    %f      %f       %f        %f        %f          %f         %f \n",i, recojet->Mom().Eta(),recojet->Mom().Pt(),corrjet->Eta(),corrjet->Pt(),fGenJet->At(match)->Mom().Pt(),fGenJet->At(match)->Mom().Eta(),smear,shift,ptSmeared);
+//       else
+//         printf("%i       %f    %f    %f      %f       %f        %f        %f          %f         %f \n",i, recojet->Mom().Eta(),recojet->Mom().Pt(),corrjet->Eta(),corrjet->Pt(),0.,0.,smear,shift,ptSmeared);
     }
     //   printf("jet %i has ptsmeared = %f  \n",i,ptSmeared);
-    
+   
     // JEC scaling to correct for residual jet corrections
     if(scale) {
       Double_t factor=1;
-      //    printf("im here 2 \n");
-      //      printf("%i       %f    %f    %f      %f\n",i, recojet->Mom().Eta(),recojet->Mom().Pt(),corrjet->Eta(),corrjet->Pt());
+      //     printf("im here 2 \n");
+      //printf("%i       %f    %f    %f      %f \n",i, recojet->Mom().Eta(),recojet->Mom().Pt(),corrjet->Eta(),corrjet->Pt(),fGenJet->At(match)->Mom().Pt(),fGenJet->At(match)->Mom().Eta());
       if(TMath::Abs(recojet->Mom().Eta())<1.5) factor = 1.015;
       else if(TMath::Abs(recojet->Mom().Eta())<3) factor = 1.04;
       else factor = 1.15;
       ptSmeared  *= factor;
       eneSmeared *= factor;
+      //printf("%i       %f      %f       %f       %f \n",i, recojet->Mom().Eta(),recojet->Mom().Pt(),factor,ptSmeared);
     }
     //printf("ptSmeared is %d  \n",ptSmeared);
     TLorentzVector thisJetSmeared;
