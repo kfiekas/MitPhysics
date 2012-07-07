@@ -1,4 +1,4 @@
-// $Id: MetTools.cc,v 1.11 2011/09/17 13:55:23 ceballos Exp $
+// $Id: MetTools.cc,v 1.12 2012/04/28 19:10:01 ceballos Exp $
 
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include <TFile.h>
@@ -452,11 +452,19 @@ void MetTools::RemoveParticleInIsoConeFromRecoil( const Particle *p, const PFCan
 
 
 MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, 
-                   const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut, float intRadius) {
+                   const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut, float intRadius, 
+		   const GenericParticle *genP) {
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
   float CHSNumeratorX  =0, CHSNumeratorY  =0, NHSNumeratorX  =0, NHSNumeratorY  =0;
+
+  float trackNumeratorGenPX  =0, trackNumeratorGenPY  =0;
+  // added to the track quantities
+  if (genP) {
+    trackNumeratorGenPX -= genP->Px();
+    trackNumeratorGenPY -= genP->Py();
+  }
 
   // muons Pt
   for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
@@ -533,19 +541,27 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
     }
   }
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
-  fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
-  fCHSMet = mithep::Met(CHSNumeratorX, CHSNumeratorY);
+  fCorrectedTrackMet = mithep::Met(trackNumeratorX+trackNumeratorGenPX, trackNumeratorY+trackNumeratorGenPY);
+  fCHSMet = mithep::Met(CHSNumeratorX+trackNumeratorGenPX, CHSNumeratorY+trackNumeratorGenPY);
   fNHSMet = mithep::Met(NHSNumeratorX, NHSNumeratorY);
 }
 
 
 MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const PFCandidateCol *fPFCandidates, 
 		   const PFJetCol *pfJets,
-                   const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut, float intRadius) {
+                   const Vertex *fVertex, float deltaZCut, float ptCut, float etaCut, float intRadius, 
+		   const GenericParticle *genP) {
 
   float trackNumeratorX  =0, trackNumeratorY  =0;
   float neutralNumeratorX=0, neutralNumeratorY=0;
   float CHSNumeratorX  =0, CHSNumeratorY  =0, NHSNumeratorX  =0, NHSNumeratorY  =0;
+
+  float trackNumeratorGenPX  =0, trackNumeratorGenPY  =0;
+  // added to the track quantities
+  if (genP) {
+    trackNumeratorGenPX -= genP->Px();
+    trackNumeratorGenPY -= genP->Py();
+  }
 
   // muons Pt
   for (UInt_t m = 0; m < fMuons->GetEntries(); ++m) {
@@ -592,7 +608,6 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
       if (inTheJet) break; 
     }
     if (inTheJet) continue;
-
 
     // charged
     if (fPFCandidates->At(i)->HasTrackerTrk() || fPFCandidates->At(i)->HasGsfTrk()){
@@ -642,8 +657,8 @@ MetTools::MetTools(const MuonCol *fMuons, const ElectronCol *fElectrons, const P
     }
   }
   fCorrectedMet = mithep::Met(trackNumeratorX+neutralNumeratorX, trackNumeratorY+neutralNumeratorY);
-  fCorrectedTrackMet = mithep::Met(trackNumeratorX, trackNumeratorY);
-  fCHSMet = mithep::Met(CHSNumeratorX, CHSNumeratorY);
+  fCorrectedTrackMet = mithep::Met(trackNumeratorX+trackNumeratorGenPX, trackNumeratorY+trackNumeratorGenPY);
+  fCHSMet = mithep::Met(CHSNumeratorX+trackNumeratorGenPX, CHSNumeratorY+trackNumeratorGenPY);
   fNHSMet = mithep::Met(NHSNumeratorX, NHSNumeratorY);
 }
 
