@@ -62,6 +62,10 @@ void H4lEleTagProbeSkim::Process()
   LoadBranch(fPrimVtxName);
   LoadBranch(fPfCandidateName);
 
+  pfNoPileUpflag.clear();
+  UInt_t pfnopu_size = makePFnoPUArray();
+  assert(pfnopu_size == fPfCandidates->GetEntries());
+
   SetBestPv();
 
   // Find a tag
@@ -72,7 +76,7 @@ void H4lEleTagProbeSkim::Process()
     if(ele->SCluster()->Et() > 5)
       nProbes++;
 
-    if(!electron2012CutBasedIDMedium(ele))
+    if(!electron2012CutBasedIDMediumForTagProbe(ele))
       continue;
     hasTag = true;
   }

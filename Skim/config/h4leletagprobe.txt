@@ -4,25 +4,22 @@
 # testing
 #local/filefi/025 r11a-del-n02-v1		noskim data                                  -1.0       1.0   -1.0    -
 # Data==================================================================================================================
-t2mit/filefi/028 r12a-del-pr-v1			noskim data                                  -1.0       1.0   -1.0    -
-t2mit/filefi/028 r12b-del-pr-v1			noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/028 r12a-del-pr-v1			noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/028 r12b-del-pr-v1			noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/028 r12a-sel-pr-v1			noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/028 r12b-sel-pr-v1			noskim data                                  -1.0       1.0   -1.0    -
 #
-t2mit/filefi/025 r11a-del-m10-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
-t2mit/filefi/025 r11a-del-pr-v4-bp		noskim data                                  -1.0       1.0   -1.0    -
-t2mit/filefi/025 r11a-del-a05-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
-t2mit/filefi/025 r11a-del-o03-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
-t2mit/filefi/025 r11b-del-pr-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/025 r11a-del-m10-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/025 r11a-del-pr-v4-bp		noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/025 r11a-del-a05-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/025 r11a-del-o03-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
+#t2mit/filefi/025 r11b-del-pr-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/025 r11a-sel-m10-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/025 r11a-sel-pr-v4-bp		noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/025 r11a-sel-a05-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/025 r11a-sel-o03-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/025 r11b-sel-pr-v1-bp		noskim data                                  -1.0       1.0   -1.0    -
 ## MC Background=========================================================================================================
-t2mit/filefi/028 s12-zllm50-v9		        noskim zjets                                 -1.0       1.0   -1.0    ~
-t2mit/filefi/028 s12-zllm50-2-v9		noskim zjets                                 -1.0       1.0   -1.0    ~
-#t2mit/filefi/028 f11-zz2e2m-powheg-v14b-pu	noskim zz                                    -1.0       1.0   -1.0    ~
-#t2mit/filefi/028 f11-zz4e-powheg-v14b-pu	noskim zz                                    -1.0       1.0   -1.0    ~
-#t2mit/filefi/028 f11-ggzz4l-v14b-pu		noskim ggzz                                  -1.0       1.0   -1.0    ~
+#t2mit/filefi/028 s12-zllm50-v9		        noskim zjets                                 -1.0       1.0   -1.0    ~
+#t2mit/filefi/028 s12-zllm50-2-v9		noskim zjets                                 -1.0       1.0   -1.0    ~
 #local/filefi/025 f11-zjets-v14b-pu		noskim Z~#rightarrow~ee                       2321.0    1.15  -1.0    ~

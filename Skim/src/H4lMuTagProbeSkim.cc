@@ -29,7 +29,6 @@ void H4lMuTagProbeSkim::SlaveBegin()
   ReqBranch(fElectronName,        fElectrons);
   ReqBranch(fPrimVtxName,         fPrimVerts);
   ReqBranch(fPfCandidateName,     fPfCandidates);
-  ReqBranch(fTracksName,          fTracks);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -62,7 +61,10 @@ void H4lMuTagProbeSkim::Process()
   LoadBranch(fElectronName);
   LoadBranch(fPrimVtxName);
   LoadBranch(fPfCandidateName);
-  LoadBranch(fTracksName);
+
+  pfNoPileUpflag.clear();
+  UInt_t pfnopu_size = makePFnoPUArray();
+  assert(pfnopu_size == fPfCandidates->GetEntries());
 
   SetBestPv();
 
@@ -71,31 +73,16 @@ void H4lMuTagProbeSkim::Process()
   int nProbes = 0;
   for(UInt_t i=0; i<fMuons->GetEntries(); ++i) {
     const Muon *mu = fMuons->At(i);
-    if(mu->Pt() > 5)
+    if(mu->Pt() > 5 && fabs(mu->Eta()) < 2.4)
       nProbes++;
-    if(!muon2012CutBasedIDTight(mu))
+    if(mu->Pt() < 20)
+      continue;
+    if(fabs(mu->Eta()) > 2.4)
+      continue;
+    if(!muon2012CutBasedIDTightForTagProbe(mu))
       continue;
     hasTag = true;
   }
-
-  for(UInt_t i=0; i<fTracks->GetEntries(); ++i) {
-    const mithep::Track *track = fTracks->At(i);
-    
-    // Check that the track is not associated with a muon.                                                                                                                                                      
-    Bool_t isMuon = kFALSE;
-    for(UInt_t j=0; j<fMuons->GetEntries(); ++j) {
-      if(track == (fMuons->At(j)->TrackerTrk())) isMuon = kTRUE;
-    }
-    if(isMuon)
-      continue;
-    if(track->Pt() < 20)
-      continue;
-    if(fabs(track->Eta()) > 2.4)
-      continue;
-
-    nProbes++;
-  }
-
 
   if(hasTag && nProbes>1)
     fSelected++;

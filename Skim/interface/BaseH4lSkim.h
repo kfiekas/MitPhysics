@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: BaseH4lSkim.h,v 1.2 2012/06/14 13:15:20 dkralph Exp $
+// $Id: BaseH4lSkim.h,v 1.3 2012/06/21 21:37:46 dkralph Exp $
 //
 // BaseH4lSkim
 //
@@ -15,6 +15,8 @@
 #include "MitAna/DataTree/interface/Names.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
 
+using namespace std;
+
 namespace mithep
 {  
   class BaseH4lSkim : public BaseMod
@@ -24,13 +26,16 @@ namespace mithep
 		const char *title = "Skim H4l Base Class");
     ~BaseH4lSkim();	    
 
+    unsigned makePFnoPUArray();
     bool    SetBestPv         ();
     Float_t ComputePfMuonIso  (const Muon *muon, const Double_t dRMax);
     Float_t ComputePfElecIso  (const Electron *electron, const Double_t dRMax);
     bool    PassMuonPreselNoIp(const mithep::Muon *mu);
     bool    PassElecPreselNoIp(const mithep::Electron *ele);
     bool    muon2012CutBasedIDTight(const mithep::Muon *mu);
+    bool    muon2012CutBasedIDTightForTagProbe(const mithep::Muon *mu);
     bool    electron2012CutBasedIDMedium(const mithep::Electron *ele);
+    bool    electron2012CutBasedIDMediumForTagProbe(const mithep::Electron *ele);
   
   protected:
     void    Begin();
@@ -59,6 +64,9 @@ namespace mithep
     const PFCandidateCol         *fPfCandidates;    // particle flow candidates collection handle
     const TrackCol               *fTracks;          // tracks collection handle
     const Vertex                 *fBestPv;          // best primary vertex in the event
+
+    vector<bool> pfNoPileUpflag;               //flag which says whether each pf candidate is in the pf no pileup collection
+
 
     ClassDef(BaseH4lSkim,1)
   };
