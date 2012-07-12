@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.46 2012/06/06 15:05:40 anlevin Exp $
+// $Id: ElectronTools.cc,v 1.47 2012/06/22 20:19:31 anlevin Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1613,9 +1613,9 @@ Bool_t ElectronTools::PassHggLeptonTagID(const Electron* ele) {
   
   if (dist < 0.02) return false;
   if (dcot < 0.02) return false;
-
+  
   int numInnerHits = ele->Trk()->NExpectedHitsInner();
-  if( numInnerHits > 0 ) return false;
+  if( numInnerHits > 1 ) return false;
 
   float coviEtaiEta = ele->CoviEtaiEta();
   if( ele->SCluster()->AbsEta() < 1.5 && coviEtaiEta > 0.01 ) return false;
@@ -1626,6 +1626,26 @@ Bool_t ElectronTools::PassHggLeptonTagID(const Electron* ele) {
 
   if( ele->SCluster()->AbsEta() < 1.5 && ( deltaPhiIn > 0.039 || deltaEtaIn > 0.005 ) ) return false;
   else if ( ele->SCluster()->AbsEta() > 1.5 && ( deltaPhiIn > 0.028 || deltaEtaIn > 0.007 ) ) return false;
+
+  return true;
+}
+
+Bool_t ElectronTools::PassHggLeptonTagID2012(const Electron* ele) {
+  
+  if (TMath::Abs(1./ele->E()-1./ele->Pt())>0.05) return false;
+
+  int numInnerHits = ele->Trk()->NExpectedHitsInner();
+  if( numInnerHits > 1 ) return false;
+
+  float coviEtaiEta = ele->CoviEtaiEta();
+  if( ele->SCluster()->AbsEta() < 1.5 && coviEtaiEta > 0.01 ) return false;
+  else if( ele->SCluster()->AbsEta() > 1.5 && coviEtaiEta > 0.03 ) return false; // h
+
+  Double_t deltaPhiIn   = TMath::Abs(ele->DeltaPhiSuperClusterTrackAtVtx());
+  Double_t deltaEtaIn   = TMath::Abs(ele->DeltaEtaSuperClusterTrackAtVtx());
+
+  if( ele->SCluster()->AbsEta() < 1.5 && ( deltaPhiIn > 0.15 || deltaEtaIn > 0.007 || ele->HadronicOverEm()>0.12) ) return false;   // h
+  else if ( ele->SCluster()->AbsEta() > 1.5 && ( deltaPhiIn > 0.10 || deltaEtaIn > 0.009 || ele->HadronicOverEm()>0.10 ) ) return false;   // h
 
   return true;
 }

@@ -44,6 +44,7 @@ namespace mithep {
         kMVAID_BDTG_WithIPInfo,
         kMVAID_BDTG_IDIsoCombined,
 	kHggLeptonTagId,
+	kHggLeptonTagId2012,
         kMVAID_BDTG_IDHWW2012TrigV0
       };
 
@@ -66,7 +67,8 @@ namespace mithep {
         kVBTFWorkingPoint80Iso,
         kVBTFWorkingPoint70Iso,
         kMVAIso_BDTG_IDIsoCombined,
-        kPFIso_HWW2012TrigV0
+        kPFIso_HWW2012TrigV0,
+	kPFIso_HggLeptonTag2012
       };
 
       enum EElectronEffectiveAreaType {
@@ -100,7 +102,7 @@ namespace mithep {
       enum EElectronEffectiveAreaTarget {
         kEleEANoCorr,
         kEleEAData2011,
-				kEleEAData2012,
+	kEleEAData2012,
         kEleEASummer11MC,
         kEleEAFall11MC
       };
@@ -127,6 +129,7 @@ namespace mithep {
                                                 EElectronEffectiveAreaTarget EffectiveAreaTarget = kEleEAData2011);
 
       static Bool_t       PassHggLeptonTagID(const Electron *el);
+      static Bool_t       PassHggLeptonTagID2012(const Electron *el);
 
     ClassDef(ElectronTools, 0) // Muon tools
   };

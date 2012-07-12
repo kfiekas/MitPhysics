@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.58 2012/05/02 16:33:50 fabstoec Exp $
+// $Id: ElectronIDMod.h,v 1.59 2012/05/19 14:59:19 ceballos Exp $
 //
 // ElectronIDMod
 //
@@ -122,6 +122,7 @@ namespace mithep
       void                SetLH(ElectronLikelihood *l)	         { fLH = l;  	               }
       void                SetVertexName(TString name)            { fVertexName = name;         }
       void                SetIntRadius(Double_t dr)              { fIntRadius = dr;            }
+      void                SetPFNoPileUpName(const char *n)       { fPFNoPileUpName  = n; }  
       void                Setup();
  
       void                SetElectronMVAWeightsSubdet0Pt10To20(TString s)  
@@ -155,6 +156,7 @@ namespace mithep
       TString                   fBeamSpotName;           //name of beamspot collection
       TString                   fTrackName;              //name of track collection
       TString                   fPFCandidatesName;       //name of pfcandidates collection
+      TString                   fPFNoPileUpName;         //name of pfcandidates collection
       TString                   fElectronIDType;         //type of electron ID we impose
       TString                   fElectronIsoType;        //type of electron Isolation we impose
       TString                   fTrigObjectsName;        //name of trigger object collection

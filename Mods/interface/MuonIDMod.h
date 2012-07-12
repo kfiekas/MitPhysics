@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.51 2012/05/14 16:38:01 fabstoec Exp $
+// $Id: MuonIDMod.h,v 1.52 2012/06/15 11:59:00 ceballos Exp $
 //
 // MuonIDMod
 //
@@ -75,7 +75,8 @@ namespace mithep
       void               SetPtMin(Double_t pt)                { fMuonPtMin         = pt;    }
       void               SetTrackIsoCut(Double_t cut)         { fTrackIsolationCut = cut;   }
       void               SetIntRadius(Double_t dr)            { fIntRadius = dr;            }
-
+      void               SetPFNoPileUpName(const char *n)     { fPFNoPileUpName  = n;       } 
+      void               SetPFPileUpName(const char *n)       { fPFPileUpName  = n;         }
       void               SetRhoType(RhoUtilities::RhoType type)
 	{ fTheRhoType = type; };
 
@@ -106,6 +107,7 @@ namespace mithep
         kCustomIso,         	            //"Custom"
         kPFIso,             	            //"PFIso"
         kPFRadialIso,             	    //"PFRadialIso"
+        kPFIsoBetaPUCorrected,              //"PFISo with PUcorrection using delta Beta
 	kPFIsoEffectiveAreaCorrected,       //"PFIso with EffectiveArea Pileup Correction"
         kPFIsoNoL,          	            //"PFIsoNoL"
         kNoIso,                             //"NoIso"
@@ -139,6 +141,8 @@ namespace mithep
       TString            fBeamSpotName;        //name of beamspot collection
       TString            fTrackName;	       //name of track collection
       TString            fPFCandidatesName;    //name of pfcandidates collection
+      TString            fPFNoPileUpName;  //name of pfnpu collection
+      TString            fPFPileUpName;    //name of pfpu collection
       TString            fMuonIDType;          //type of muon id scheme we impose
       TString            fMuonIsoType;         //type of muon isolations scheme we impose
       TString            fMuonClassType;       //type of muon class we impose
@@ -163,6 +167,7 @@ namespace mithep
       const TrackCol    *fTracks;              //!track branch     
       const PFCandidateCol *fPFCandidates;     //!pfcandidate branch
       const PFCandidateCol *fPFNoPileUpCands;  //!pfnpu collection
+      const PFCandidateCol *fPFPileUpCands;    //!pfpu collection
       Double_t           fIntRadius;           //!min IntRadius cut in pf isolation
       MuonCol	         *fNonIsolatedMuons;	//!pointer to old muon collection 
       ElectronCol        *fNonIsolatedElectrons;//!pointer to old electron collection

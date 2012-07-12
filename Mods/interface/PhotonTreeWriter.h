@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.20 2012/06/06 15:33:21 mtouch Exp $
+// $Id: PhotonTreeWriter.h,v 1.21 2012/06/07 14:24:36 mingyang Exp $
 //
 // PhotonTreeWriter
 //
@@ -645,6 +645,9 @@ namespace mithep
     void                SetPFJetName(const char *n)       { fPFJetName = n;              }
     void                SetGenJetName(const char *n)      { fGenJetName = n;             }
     void                SetuncorrPFJetName(const char *n) { funcorrPFJetName = n;        }
+    void                SetPFNoPileUpName(const char *n)  { fPFNoPileUpName  = n;       } 
+    void                SetPFPileUpName(const char *n)    { fPFPileUpName  = n;         }
+
 
     void                SetPFJetsFromBranch(Bool_t b)     { fPFJetsFromBranch = b;       }
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
@@ -653,6 +656,8 @@ namespace mithep
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
     void                SetApplyPFMetCorr(Bool_t b)       { fApplyPFMetCorrections = b;  }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
+
+
 
 
     // set basic Cut variables (FOR PRE-SELECTION)
@@ -675,8 +680,9 @@ namespace mithep
 
     void                SetLeptonTagElectronsName(TString name) { fLeptonTagElectronsName = name; }
     void                SetLeptonTagMuonsName    (TString name) { fLeptonTagMuonsName     = name; }
-
     void                SetFillClusterArrays(Bool_t b)          { fFillClusterArrays = b; }
+
+    void                SetDo2012LepTag(Bool_t b) {                         fDo2012LepTag = b; }
     
   protected:
     void                Process();
@@ -697,6 +703,9 @@ namespace mithep
     TString             fPVName;
     TString             fBeamspotName;
     TString             fPFCandName;
+    TString             fPFNoPileUpName;  //name of pfnpu collection
+    TString             fPFPileUpName;    //name of pfpu collection
+
     TString             fMCParticleName;
     TString             fPileUpName;
     TString             fSuperClusterName;
@@ -741,6 +750,8 @@ namespace mithep
     
     const ElectronCol             *fLeptonTagElectrons;
     const MuonCol                 *fLeptonTagMuons;
+    const PFCandidateCol          *fPFNoPileUpCands;  //!pfnpu collection
+    const PFCandidateCol          *fPFPileUpCands;    //!pfpu collection
 
     // --------------------------------
     Bool_t                         fLoopOnGoodElectrons; //loop over good elecs instead of photons
@@ -763,6 +774,8 @@ namespace mithep
     Bool_t                         fFillClusterArrays;
     Bool_t                         fFillVertexTree;
     
+    Bool_t                         fDo2012LepTag;
+
     TString                        fPhFixDataFile;
     PhotonFix                      fPhfixph;
     PhotonFix                      fPhfixele;

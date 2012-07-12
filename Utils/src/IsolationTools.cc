@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.32 2012/06/06 12:13:46 bendavid Exp $
+// $Id: IsolationTools.cc,v 1.33 2012/06/06 14:42:32 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -474,8 +474,7 @@ Double_t IsolationTools::PFElectronIsolation2012(const Electron *ele, const Vert
 	   //************************************************************
 	   if (passVeto) {
 	     if (dr < dRMax) tmpChargedIso_DR += pf->Pt();
-	   } //pass veto
-	  
+	   } //pass veto	  
 	 }
 	 //Gamma
 	 else if (pf->PFType() == PFCandidate::eGamma) {
@@ -503,9 +502,10 @@ Double_t IsolationTools::PFElectronIsolation2012(const Electron *ele, const Vert
   
   Double_t IsoVar_ChargedIso_DR = tmpChargedIso_DR/ele->Pt();
   Double_t IsoVar_NeutralIso_DR = tmpGammaIso_DR + tmpNeutralHadronIso_DR;
-  // Careful here, we have kEleNeutralIso04 only for now
+  //   Careful here, we have kEleNeutralIso04 only for now            ****added kEleGammaIso03 and kEleNeutralHadronIso03 --heng june 16th 2012
   if(dRMax != 0.4) assert(0);
   double EA = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralIso04, ele->SCluster()->Eta(), EffectiveAreaTarget);
+
   IsoVar_NeutralIso_DR = TMath::Max((IsoVar_NeutralIso_DR - Rho*EA)/ele->Pt(), 0.0);
   
   if(isDebug == kTRUE){
@@ -515,6 +515,117 @@ Double_t IsolationTools::PFElectronIsolation2012(const Electron *ele, const Vert
 
   return (IsoVar_ChargedIso_DR + IsoVar_NeutralIso_DR);
 }
+
+//--------------------------------------------------------------------------------------------------
+
+Double_t IsolationTools::PFElectronIsolation2012LepTag(const Electron *ele, const Vertex *vertex, 
+                                                 const PFCandidateCol *PFCands, 
+                                                 const PileupEnergyDensityCol *PileupEnergyDensity,
+                                                 ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
+                                                 const ElectronCol *goodElectrons,
+                                                 const MuonCol *goodMuons, Double_t dRMax, Bool_t isDebug){
+
+
+
+
+  Double_t tmpChargedIso_DR       = 0;
+  Double_t tmpGammaIso_DR         = 0;
+  Double_t tmpNeutralHadronIso_DR = 0;
+
+  for (UInt_t p=0; p<PFCands->GetEntries();p++) {   
+    const PFCandidate *pf = PFCands->At(p);
+
+    //************************************************************
+    // New Isolation Calculations
+    //************************************************************
+    Double_t dr = MathUtils::DeltaR(ele->Mom(), pf->Mom());
+
+    if (dr < 1.0) {
+      Bool_t IsLeptonFootprint = kFALSE;
+      //************************************************************
+      // Lepton Footprint Removal
+      //************************************************************            
+      for (UInt_t q=0; q < goodElectrons->GetEntries() ; ++q) {
+	//if pf candidate matches an electron passing ID cuts, then veto it
+	if(pf->GsfTrk() && goodElectrons->At(q)->GsfTrk() &&
+	   pf->GsfTrk() == goodElectrons->At(q)->GsfTrk()) IsLeptonFootprint = kTRUE;
+	if(pf->TrackerTrk() && goodElectrons->At(q)->TrackerTrk() &&
+	   pf->TrackerTrk() == goodElectrons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
+	//if pf candidate lies in veto regions of electron passing ID cuts, then veto it
+	if(pf->BestTrk() && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 
+           && MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.015) IsLeptonFootprint = kTRUE;
+	if(pf->PFType() == PFCandidate::eGamma && fabs(goodElectrons->At(q)->SCluster()->Eta()) >= 1.479 &&
+	   MathUtils::DeltaR(goodElectrons->At(q)->Mom(), pf->Mom()) < 0.08) IsLeptonFootprint = kTRUE;
+      }
+      for (UInt_t q=0; q < goodMuons->GetEntries() ; ++q) {
+	//if pf candidate matches an muon passing ID cuts, then veto it
+	if(pf->TrackerTrk() && goodMuons->At(q)->TrackerTrk() &&
+	   pf->TrackerTrk() == goodMuons->At(q)->TrackerTrk()) IsLeptonFootprint = kTRUE;
+	//if pf candidate lies in veto regions of muon passing ID cuts, then veto it
+	if(pf->BestTrk() && MathUtils::DeltaR(goodMuons->At(q)->Mom(), pf->Mom()) < 0.01) IsLeptonFootprint = kTRUE;
+      }
+
+      if (!IsLeptonFootprint) {
+	Bool_t passVeto = kTRUE;
+	//Charged
+	 if(pf->BestTrk()) {	  	   
+	   // CMS DOESN"T WANT THIS
+	   //if (!(fabs(pf->BestTrk()->DzCorrected(*vertex) - ele->BestTrk()->DzCorrected(*vertex)) < 0.2)) passVeto = kFALSE;
+	   //************************************************************
+	   // Veto any PFmuon, or PFEle
+	   if (pf->PFType() == PFCandidate::eElectron || pf->PFType() == PFCandidate::eMuon) passVeto = kFALSE;
+	   //************************************************************
+	   //************************************************************
+	   // Footprint Veto
+	   if (fabs(ele->SCluster()->Eta()) >= 1.479 && dr < 0.015) passVeto = kFALSE;
+	   //************************************************************
+	   if (passVeto) {
+	     if (dr < dRMax) {
+	       printf("PFCand Pt = %f    eta= %f       phi= %f     , dr= %f    charge=%f   \n",pf->Pt(),pf->Eta(),pf->Phi(),dr, pf->Charge());
+	       tmpChargedIso_DR += pf->Pt();
+	     } //pass dr
+	   } //pass veto	  
+	 }
+	 //Gamma
+	 else if (pf->PFType() == PFCandidate::eGamma) {
+	   //************************************************************
+	   // Footprint Veto
+	   if (fabs(ele->SCluster()->Eta()) >= 1.479) {
+             if (dr < 0.08) passVeto = kFALSE;
+	   }
+	   //************************************************************
+	   
+	   if (passVeto) {
+	     if (dr < dRMax) tmpGammaIso_DR += pf->Pt();
+	   }
+	 }
+	 //NeutralHadron
+	 else {
+           if (dr < dRMax) tmpNeutralHadronIso_DR += pf->Pt();
+	 }
+      } //not lepton footprint
+    } //in 1.0 dr cone
+  } //loop over PF candidates
+
+  Double_t Rho = 0;
+  if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
+  
+  Double_t IsoVar_ChargedIso_DR = tmpChargedIso_DR/ele->Pt();
+  Double_t IsoVar_NeutralIso_DR = tmpGammaIso_DR + tmpNeutralHadronIso_DR;
+  // Careful here, we have kEleNeutralIso04 only for now            ****added kEleGammaIso03 and kEleNeutralHadronIso03 --heng june 16th 2012
+  double EA = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso03, ele->SCluster()->Eta(), EffectiveAreaTarget) + ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso03, ele->SCluster()->Eta(), EffectiveAreaTarget) ;
+  IsoVar_NeutralIso_DR = TMath::Max((IsoVar_NeutralIso_DR - Rho*EA)/ele->Pt(), 0.0);
+  
+  if(isDebug == kTRUE){
+    printf("Iso(ch, em, nh), EA, RelIso = (%f, %f, %f), %f, %f\n",tmpChargedIso_DR,tmpGammaIso_DR,tmpNeutralHadronIso_DR,
+           EA,IsoVar_ChargedIso_DR + IsoVar_NeutralIso_DR);
+  }
+
+  return (IsoVar_ChargedIso_DR + IsoVar_NeutralIso_DR);
+}
+
+
+
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
                                Double_t ptMin, Double_t  delta_z, Double_t extRadius,
@@ -553,6 +664,65 @@ Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const Vert
 
   return 1.0;
 }
+
+
+
+//--------------------------------------------------------------------------------------------------
+Double_t IsolationTools::BetaMwithPUCorrection(const PFCandidateCol *PFNoPileUp, const PFCandidateCol *PFPileUp, const Muon *p, Double_t extRadius){
+
+  //Computes the PF Isolation: Summed Transverse Momentum of all PF candidates inside an 
+  //annulus around the particle seed track.  
+
+  Double_t ptSumChHadnoPU =0.;  
+  Double_t etsumNeuHad =0;
+  Double_t ptsumGamma = 0;
+  Double_t ptsumPU= 0;
+  Double_t ptSum= 0;
+  for (UInt_t i=0; i<PFNoPileUp->GetEntries();i++) { 
+    const PFCandidate *pf = PFNoPileUp->At(i);
+    // exclude muon
+    if(pf->TrackerTrk() && p->TrackerTrk() &&
+       pf->TrackerTrk() == p->TrackerTrk()) continue;
+
+    //exclude PFCands outside of cone 0.4
+    Double_t dr1 = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    if (dr1 > extRadius) continue;
+    if (pf->PFType() == PFCandidate::eHadron)  {
+      if (pf->HasTrk())   ptSumChHadnoPU += pf->Pt();
+      else etsumNeuHad += pf->Et();
+    }
+    else if (pf->PFType() == PFCandidate::eGamma) ptsumGamma += pf->Pt(); 
+  }
+
+  for (UInt_t i=0; i<PFPileUp->GetEntries();i++) { 
+    const PFCandidate *pf = PFPileUp->At(i);
+    // exclude muon
+    if(pf->TrackerTrk() && p->TrackerTrk() &&
+       pf->TrackerTrk() == p->TrackerTrk()) continue;
+    //exclude PFCands outside of cone 0.4
+    Double_t dr2 = MathUtils::DeltaR(p->Mom(), pf->Mom());
+    if (dr2 > extRadius) continue;
+    if (pf->HasTrk()) ptsumPU += pf->Pt();
+    if (pf->PFType() == PFCandidate::eHadron && !pf->HasTrk())  etsumNeuHad += pf->Et();
+    else if (pf->PFType() == PFCandidate::eGamma) ptsumGamma += pf->Pt(); 
+  }
+  
+  //   for (UInt_t i=0; i<PFPUCands->GetEntries(); ++i){
+  //     const PFCandidate *pfpu = PFPUCand->At(i);
+  //     ptsumPU += pfpu->Pt();
+  //   }
+  //  printf("ChHad    Gamma     Neu      PU    \n");
+  //  printf("%f       %f       %f        %f     \n",ptSumChHadnoPU,ptsumGamma,etsumNeuHad,ptsumPU);
+  ptSum=ptSumChHadnoPU+ TMath::Max(0.,ptsumGamma+etsumNeuHad - 0.5*ptsumPU);
+  //  printf("isolation is %f \n",ptSum);
+  
+  return ptSum;
+}
+
+
+
+
+
 
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::BetaE(const TrackCol *tracks, const Electron *p, const Vertex *vertex, 

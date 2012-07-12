@@ -38,6 +38,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPVName                 (Names::gkPVBeamSpotBrn),
   fBeamspotName           (Names::gkBeamSpotBrn),
   fPFCandName             (Names::gkPFCandidatesBrn),
+  fPFNoPileUpName         ("PFNoPileUp"),
+  fPFPileUpName           ("PFPileUp"),
   fMCParticleName         (Names::gkMCPartBrn),
   fPileUpName             (Names::gkPileupInfoBrn),  
   fSuperClusterName       ("PFSuperClusters"),
@@ -73,6 +75,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
 
   fLeptonTagElectrons     (0),
   fLeptonTagMuons         (0),
+  fPFNoPileUpCands        (0),
+  fPFPileUpCands          (0),
 
   fLoopOnGoodElectrons    (kFALSE),
   fApplyElectronVeto      (kTRUE),  
@@ -88,6 +92,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fApplyPFMetCorrections  (kFALSE),
   fFillClusterArrays      (kFALSE),
   fFillVertexTree         (kFALSE),
+  fDo2012LepTag           (kFALSE),
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fTupleName              ("hPhotonTree")
@@ -132,12 +137,16 @@ void PhotonTreeWriter::Process()
   LoadEventObject(fPFCandName,         fPFCands);
   LoadEventObject(fSuperClusterName,   fSuperClusters);
   LoadEventObject(fPFMetName,          fPFMet);  
+  LoadEventObject(fPFNoPileUpName,     fPFNoPileUpCands);
+  LoadEventObject(fPFPileUpName,     fPFPileUpCands);
+
   if (fEnableJets){
     LoadEventObject(fPFJetName,        fPFJets);  
     //LoadEventObject(funcorrPFJetName,  funcorrPFJets);
     LoadBranch(funcorrPFJetName);
     //   if(!fIsData) LoadEventObject(fGenJetName,        fGenJets);
   }
+
   // ------------------------------------------------------------  
   // load event based information
   Int_t _numPU      = -1.;        // some sensible default values....
@@ -174,6 +183,7 @@ void PhotonTreeWriter::Process()
 
 
   Double_t _evt = GetEventHeader()->EvtNum();
+
   Double_t _spfMet = fPFMet->At(0)->SumEt();
 
   fDiphotonEvent->leptonTag = -1; // disabled
@@ -746,10 +756,11 @@ void PhotonTreeWriter::Process()
 
       if ( fLeptonTagMuons->GetEntries() > 0 ) {
 
-	// need to have dR > 1 for with respect to both photons
+	// need to have dR > 1 for with respect to both photons ***changed to 0.7 for 2012
 	for(UInt_t iMuon = 0; iMuon <fLeptonTagMuons->GetEntries(); ++iMuon) {
-	  if(MathUtils::DeltaR(fLeptonTagMuons->At(iMuon),phHard) < 1.) continue;
-	  if(MathUtils::DeltaR(fLeptonTagMuons->At(iMuon),phSoft) < 1.) continue;
+
+	  if(MathUtils::DeltaR(fLeptonTagMuons->At(iMuon),phHard) < 1.0) continue;
+	  if(MathUtils::DeltaR(fLeptonTagMuons->At(iMuon),phSoft) < 1.0) continue;
 
 	  fDiphotonEvent->leptonTag = 1;
 
@@ -757,6 +768,7 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> muonEta = fLeptonTagMuons->At(iMuon)->Eta();
 	  fDiphotonEvent-> muDR1   = MathUtils::DeltaR(fLeptonTagMuons->At(iMuon),phHard);
 	  fDiphotonEvent-> muDR2   = MathUtils::DeltaR(fLeptonTagMuons->At(iMuon),phSoft);
+
 	  fDiphotonEvent-> muIso1   = (fLeptonTagMuons->At(iMuon)->IsoR03SumPt() + fLeptonTagMuons->At(iMuon)->IsoR03EmEt() + fLeptonTagMuons->At(iMuon)->IsoR03HadEt() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(iMuon)->Pt();
 	  fDiphotonEvent-> muIso2   = (fLeptonTagMuons->At(iMuon)->IsoR03SumPt() + fLeptonTagMuons->At(iMuon)->IsoR03EmEt() + fLeptonTagMuons->At(iMuon)->IsoR03HadEt() - fPileUpDen->At(0)->RhoRandom() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(iMuon)->Pt();
 	  fDiphotonEvent-> muIso3   = (fLeptonTagMuons->At(iMuon)->IsoR03SumPt() + fLeptonTagMuons->At(iMuon)->IsoR03EmEt() + fLeptonTagMuons->At(iMuon)->IsoR03HadEt() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(iMuon)->Pt();
@@ -766,7 +778,7 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> muChi2  = fLeptonTagMuons->At(iMuon)->GlobalTrk()->Chi2()/fLeptonTagMuons->At(iMuon)->GlobalTrk()->Ndof();
 	  	  
 	  fDiphotonEvent-> muNhits = fLeptonTagMuons->At(iMuon)->BestTrk()->NHits();
-	  fDiphotonEvent-> muNpixhits = fLeptonTagMuons->At(iMuon)->BestTrk()->NPixelHits();
+ 	  fDiphotonEvent-> muNpixhits = fLeptonTagMuons->At(iMuon)->BestTrk()->NPixelHits();
 	  fDiphotonEvent-> muNegs = fLeptonTagMuons->At(iMuon)->NSegments();
 	  fDiphotonEvent-> muNMatch = fLeptonTagMuons->At(iMuon)->NMatches();
 
@@ -775,8 +787,17 @@ void PhotonTreeWriter::Process()
       }
       if ( fDiphotonEvent->leptonTag < 1 && fLeptonTagElectrons->GetEntries() > 0 ) {
 	for(UInt_t iEle = 0; iEle < fLeptonTagElectrons->GetEntries(); ++iEle) {
+
+	  
 	  if(MathUtils::DeltaR(fLeptonTagElectrons->At(iEle),phHard) < 1.) continue;
 	  if(MathUtils::DeltaR(fLeptonTagElectrons->At(iEle),phSoft) < 1.) continue;
+
+	  if(fDo2012LepTag) {
+
+	    if(PhotonTools::ElectronVetoCiC(phHard, fElectrons)<1) continue;
+	    if(PhotonTools::ElectronVetoCiC(phSoft, fElectrons)<1) continue;
+
+	  }
 
 	  // here we also check the mass ....
 	  if ( TMath::Abs( (phHard->Mom()+fLeptonTagElectrons->At(iEle)->Mom()).M()-91.19 ) < 5. ) continue;
@@ -788,7 +809,10 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> eleEta = fLeptonTagElectrons->At(iEle)->Eta();
 	  fDiphotonEvent-> eleSCEta = fLeptonTagElectrons->At(iEle)->SCluster()->Eta();
 	  fDiphotonEvent-> eleIso1 = (fLeptonTagElectrons->At(iEle)->TrackIsolationDr03() + fLeptonTagElectrons->At(iEle)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(iEle)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-	  fDiphotonEvent-> eleIso2 = (fLeptonTagElectrons->At(iEle)->TrackIsolationDr03() + fLeptonTagElectrons->At(iEle)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(iEle)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandom() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+
+	  fDiphotonEvent-> eleIso2 = -99.;
+	  //	  fDiphotonEvent-> eleIso2 = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso03,fLeptonTagElectrons->At(iEle)->SCluster()->Eta(), ElectronTools::kEleEAData2012) + ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso03, fLeptonTagElectrons->At(iEle)->SCluster()->Eta(), ElectronTools::kEleEAData2012) ;
+
 	  fDiphotonEvent-> eleIso3 = (fLeptonTagElectrons->At(iEle)->TrackIsolationDr03() + fLeptonTagElectrons->At(iEle)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(iEle)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
 	  fDiphotonEvent-> eleIso4 = (fLeptonTagElectrons->At(iEle)->TrackIsolationDr03() + fLeptonTagElectrons->At(iEle)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(iEle)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
 	  fDiphotonEvent-> eleDist = fLeptonTagElectrons->At(iEle)->ConvPartnerDist();
@@ -880,7 +904,6 @@ void PhotonTreeWriter::Process()
 
 
 
-    
   return;
 }
 
@@ -894,6 +917,13 @@ void PhotonTreeWriter::SlaveBegin()
     ReqEventObject(fLeptonTagElectronsName,    fLeptonTagElectrons,    false);  
     ReqEventObject(fLeptonTagMuonsName,        fLeptonTagMuons,        false);  
   }
+
+  ReqEventObject(fPFNoPileUpName,     fPFNoPileUpCands,    false);
+  ReqEventObject(fPFPileUpName,     fPFPileUpCands,    false);
+
+
+
+
 
   ReqEventObject(fPhotonBranchName,fPhotons,      fPhotonsFromBranch);
   if (fEnablePFPhotons) ReqEventObject(fPFPhotonName,fPFPhotons,      true);

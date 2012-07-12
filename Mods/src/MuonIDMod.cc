@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.83 2012/05/31 08:56:50 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.84 2012/06/15 11:58:54 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -23,6 +23,8 @@ ClassImp(mithep::MuonIDMod)
   fBeamSpotName(Names::gkBeamSpotBrn),
   fTrackName(Names::gkTrackBrn),
   fPFCandidatesName(Names::gkPFCandidatesBrn),
+  fPFNoPileUpName("PFNoPileUp"),
+  fPFPileUpName("PFPileUp"),
   fMuonIDType("WWMuIdV3"),
   fMuonIsoType("PFIso"),
   fMuonClassType("Global"),  
@@ -47,6 +49,7 @@ ClassImp(mithep::MuonIDMod)
   fTracks(0),
   fPFCandidates(0),
   fPFNoPileUpCands(0),
+  fPFPileUpCands(0),
   fIntRadius(0.0),
   fNonIsolatedMuons(0),
   fNonIsolatedElectrons(0),
@@ -82,9 +85,10 @@ void MuonIDMod::Process()
     ) {
     LoadEventObject(fPileupEnergyDensityName, fPileupEnergyDensity);
   }
-  if(fMuIsoType == kPFRadialIso || fMuIsoType == kIsoDeltaR){
-    // Name is hardcoded, can be changed if someone feels to do it
-    fPFNoPileUpCands = GetObjThisEvt<PFCandidateCol>("PFNoPileUp");    
+  if(fMuIsoType == kPFRadialIso || fMuIsoType == kIsoDeltaR || fMuIsoType == kPFIsoBetaPUCorrected){
+    // Name is hardcoded, can be changed if someone feels to do it *** did it--Heng
+    fPFNoPileUpCands = GetObjThisEvt<PFCandidateCol>(fPFNoPileUpName);    
+    fPFPileUpCands = GetObjThisEvt<PFCandidateCol>(fPFPileUpName);
   }
 
   MuonOArr *CleanMuons = new MuonOArr;
@@ -384,7 +388,7 @@ void MuonIDMod::Process()
 	    }
 	  }
 	}
-	Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius);
+	Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 1.0, 0.1, 0.3, 0.0, fIntRadius);
 	if (totalIso < (mu->Pt()*pfIsoCutValue) )
 	  isocut = kTRUE;
       }
@@ -404,7 +408,24 @@ void MuonIDMod::Process()
           Double_t totalIso =  IsolationTools::PFRadialMuonIsolation(mu, fPFNoPileUpCands, 1.0, 0.3);
           if (totalIso < (mu->Pt()*pfIsoCutValue) )
             isocut = kTRUE;
+      }
+      break;
+    case kPFIsoBetaPUCorrected:
+      {
+	Double_t pfIsoCutValue = 9999;
+	if(fPFIsolationCut > 0){
+	  pfIsoCutValue = fPFIsolationCut;
+	} else {
+	  if (mu->Pt() > 20) {
+	    pfIsoCutValue = 0.2;
+	  } else {
+	    pfIsoCutValue = 0.2;
+	  }
 	}
+	Double_t totalIso =  IsolationTools::BetaMwithPUCorrection(fPFNoPileUpCands, fPFPileUpCands, mu, 0.4);
+	if (totalIso < (mu->Pt()*pfIsoCutValue) )
+	  isocut = kTRUE;
+      }
       break;
     case kPFIsoEffectiveAreaCorrected: 	 
       { 	 
@@ -414,8 +435,8 @@ void MuonIDMod::Process()
 	} else { 	 
 	  pfIsoCutValue = fPFIsolationCut; //leave it like this for now 	 
 	} 	 
-	Double_t EffectiveAreaCorrectedPFIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius) 	 
-	  - Rho * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta()); 	 
+	Double_t EffectiveAreaCorrectedPFIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius)
+	  - Rho * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta());
 	//- fPileupEnergyDensity->At(0)->Rho() * MuonTools::MuonEffectiveArea(MuonTools::kMuNeutralIso03, mu->Eta());  // Fabian: made Rho-type customable 	 
 	isocut = EffectiveAreaCorrectedPFIso < (mu->Pt() * pfIsoCutValue); 	 
 	break; 	 
@@ -586,6 +607,8 @@ void MuonIDMod::SlaveBegin()
     fMuIsoType = kPFIso;
   else if (fMuonIsoType.CompareTo("PFRadialIso") == 0)
     fMuIsoType = kPFRadialIso;
+  else if (fMuonIsoType.CompareTo("PFIsoBetaPUCorrected") == 0)
+    fMuIsoType = kPFIsoBetaPUCorrected;
   else if (fMuonIsoType.CompareTo("PFIsoEffectiveAreaCorrected") == 0) 	 
     fMuIsoType = kPFIsoEffectiveAreaCorrected;
   else if (fMuonIsoType.CompareTo("PFIsoNoL") == 0)
