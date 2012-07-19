@@ -24,6 +24,7 @@ t2mit/filefi/025 r11a-smu-a05-v1-bp     noskim data                             
 t2mit/filefi/025 r11a-smu-o03-v1-bp     noskim data                                  -1.0       1.0   -1.0    -
 t2mit/filefi/025 r11b-smu-pr-v1-bp      noskim data                                  -1.0       1.0   -1.0    -
 # MC =========================================================================================================
+t2mit/filefi/025 f11-wjets-v14b-bp      noskim wjets                                 -1.0       1.0   -1.0    ~
 t2mit/filefi/028 s12-wjets-v9           noskim wjets                                 -1.0       1.0   -1.0    ~
-t2mit/filefi/028 s12-zllm50-v9          noskim zjets                                 -1.0       1.0   -1.0    ~
+t2mit/filefi/025 f11-zjets-v14b-bp      noskim zjets                                 -1.0       1.0   -1.0    ~
 t2mit/filefi/028 s12-zllm50-2-v9        noskim zjets                                 -1.0       1.0   -1.0    ~
