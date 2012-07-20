@@ -76,7 +76,7 @@ Met RecoilTools::pfCone(double iPhi1,double iEta1,
   FourVectorM lVec(0,0,0,0);
   for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
     const PFCandidate *pfcand = iCands->At(i0);
-    if(filter(pfcand,iPhi1,iEta1,-100,-100)) continue;
+    if(filter(pfcand,iPhi1,iEta1,100,100)) continue;
     lVec   += pfcand->Mom(); 
     lSumEt += pfcand->Pt();
   }

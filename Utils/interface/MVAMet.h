@@ -54,6 +54,7 @@ namespace mithep {
 		       MVAMet::MVAType  iType=kBaseline);
         
     Bool_t   IsInitialized() const { return fIsInitialized; }
+    Float_t* getVals();
     Double_t evaluatePhi();
     Double_t evaluateU1();
     Double_t evaluateCovU1();
@@ -84,7 +85,9 @@ namespace mithep {
 			Float_t iNAllJet,
 			Float_t iNPV    );
 
-    Met GetMet( 	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
+    Met GetMet( 	Bool_t iPhi,
+			Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
+			Float_t iPtQ  ,Float_t iPhiQ  ,Float_t iSumEtQ,
 			const PFMet            *iMet  ,
 			const PFCandidateCol   *iCands,
 			const Vertex *iVertex,const VertexCol *iVertices,
@@ -94,7 +97,9 @@ namespace mithep {
 			int iNPV,
 			Bool_t printDebug=false);
 
-    Met GetMet( 	Bool_t iPhi,Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
+    Met GetMet( 	Bool_t iPhi,
+			Float_t iPtVis,Float_t iPhiVis,Float_t iSumEtVis,
+			Float_t iPtQ  ,Float_t iPhiQ  ,Float_t iSumEtQ,
 			const PFMet            *iMet  ,
 			const PFCandidateCol   *iCands,
 			const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
@@ -103,8 +108,8 @@ namespace mithep {
 			Bool_t printDebug=false);
 
     Met GetMet(	        Bool_t iPhi,
-			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
-			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
+			Float_t iPt1,Float_t iPhi1,Float_t iEta1,Float_t iChargedFrac1,
+			Float_t iPt2,Float_t iPhi2,Float_t iEta2,Float_t iChargedFrac2,
 			const PFMet            *iMet  ,
 			const PFCandidateCol   *iCands,
 			const Vertex *iVertex,const VertexCol *iVertices,
@@ -115,8 +120,8 @@ namespace mithep {
 			Bool_t printDebug=false);
 
     Met GetMet(	        Bool_t iPhi,
-			Float_t iPt1,Float_t iPhi1,Float_t iEta1,
-			Float_t iPt2,Float_t iPhi2,Float_t iEta2,
+			Float_t iPt1,Float_t iPhi1,Float_t iEta1,Float_t iChargedFrac1,
+			Float_t iPt2,Float_t iPhi2,Float_t iEta2,Float_t iChargedFrac2,
 			const PFMet            *iMet  ,
 			const PFCandidateCol   *iCands,
 			const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
