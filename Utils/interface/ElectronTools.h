@@ -45,7 +45,8 @@ namespace mithep {
         kMVAID_BDTG_IDIsoCombined,
 	kHggLeptonTagId,
 	kHggLeptonTagId2012,
-        kMVAID_BDTG_IDHWW2012TrigV0
+        kMVAID_BDTG_IDHWW2012TrigV0,
+        kMVAID_BDTG_IDIsoCombinedHWW2012TrigV4
       };
 
       enum EElIsoType {
@@ -68,7 +69,8 @@ namespace mithep {
         kVBTFWorkingPoint70Iso,
         kMVAIso_BDTG_IDIsoCombined,
         kPFIso_HWW2012TrigV0,
-	kPFIso_HggLeptonTag2012
+	kPFIso_HggLeptonTag2012,
+        kMVAIso_BDTG_IDIsoCombinedHWW2012TrigV4
       };
 
       enum EElectronEffectiveAreaType {

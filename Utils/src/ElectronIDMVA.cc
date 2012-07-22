@@ -102,7 +102,10 @@ void ElectronIDMVA::Initialize( std::string methodName,
   } else if (type == kIDEGamma2012TrigV0 || 
              type == kIDEGamma2012NonTrigV0 || 
              type == kIDEGamma2012NonTrigV1 || 
-             type == kIDHWW2012TrigV0) {
+             type == kIDHWW2012TrigV0 ||
+             type == kIDIsoCombinedHWW2012TrigV4
+             
+    ) {
     ExpectedNBins = 6;
   } else if (type == kIsoRingsV0) {
     ExpectedNBins = 4;
@@ -295,6 +298,65 @@ void ElectronIDMVA::Initialize( std::string methodName,
       tmpTMVAReader->AddSpectator( "pt" ,   &fMVAVar_ElePt  );
     }
 
+    if (type == kIDIsoCombinedHWW2012TrigV4) {
+
+            // Pure tracking variables
+      tmpTMVAReader->AddVariable("fbrem",                      &fMVAVar_EleFBrem);
+      tmpTMVAReader->AddVariable("kfchi2",                     &fMVAVar_EleKFTrkChiSqr);
+      tmpTMVAReader->AddVariable("kflayers",                   &fMVAVar_EleKFTrkNLayers);
+      tmpTMVAReader->AddVariable("gsfchi2",                    &fMVAVar_EleGsfTrackChi2OverNdof);
+
+      // Geometrical matchings
+      tmpTMVAReader->AddVariable("deta",                       &fMVAVar_EleDEtaIn);
+      tmpTMVAReader->AddVariable("dphi",                       &fMVAVar_EleDPhiIn);
+      tmpTMVAReader->AddVariable("detacalo",                   &fMVAVar_EledEtaCalo);
+    
+      // Pure ECAL -> shower shapes
+      tmpTMVAReader->AddVariable("see",                        &fMVAVar_EleSigmaIEtaIEta);
+      tmpTMVAReader->AddVariable("spp",                        &fMVAVar_EleSigmaIPhiIPhi);
+      tmpTMVAReader->AddVariable("etawidth",                   &fMVAVar_EleSCEtaWidth);
+      tmpTMVAReader->AddVariable("phiwidth",                   &fMVAVar_EleSCPhiWidth);
+      tmpTMVAReader->AddVariable("OneMinusSeedE1x5OverE5x5",   &fMVAVar_EleOneMinusE1x5OverE5x5);
+      tmpTMVAReader->AddVariable("R9",                         &fMVAVar_EleR9);
+
+      // Energy matching
+      tmpTMVAReader->AddVariable("HoE",                        &fMVAVar_EleHoverE);
+      tmpTMVAReader->AddVariable("EoP",                        &fMVAVar_EleEOverP); 
+      tmpTMVAReader->AddVariable("IoEmIoP",                    &fMVAVar_EleOneOverEMinusOneOverP);
+      tmpTMVAReader->AddVariable("EEleoPout",                  &fMVAVar_EleEEleClusterOverPout);
+      if(i == 2 || i == 5) {
+	tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_ElePreShowerOverRaw);
+      }
+
+      // IP
+      tmpTMVAReader->AddVariable("d0",              &fMVAVar_EleD0);
+      tmpTMVAReader->AddVariable("ip3d",            &fMVAVar_EleIP3d);
+
+      //isolation variables
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p0To0p1",         &fMVAVar_ChargedIso_DR0p0To0p1        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p1To0p2",         &fMVAVar_ChargedIso_DR0p1To0p2        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p2To0p3",         &fMVAVar_ChargedIso_DR0p2To0p3        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p3To0p4",         &fMVAVar_ChargedIso_DR0p3To0p4        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p4To0p5",         &fMVAVar_ChargedIso_DR0p4To0p5        );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p0To0p1",           &fMVAVar_GammaIso_DR0p0To0p1          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p1To0p2",           &fMVAVar_GammaIso_DR0p1To0p2          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p2To0p3",           &fMVAVar_GammaIso_DR0p2To0p3          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p3To0p4",           &fMVAVar_GammaIso_DR0p3To0p4          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p4To0p5",           &fMVAVar_GammaIso_DR0p4To0p5          );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p0To0p1",   &fMVAVar_NeutralHadronIso_DR0p0To0p1  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p1To0p2",   &fMVAVar_NeutralHadronIso_DR0p1To0p2  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p2To0p3",   &fMVAVar_NeutralHadronIso_DR0p2To0p3  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p3To0p4",   &fMVAVar_NeutralHadronIso_DR0p3To0p4  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p4To0p5",   &fMVAVar_NeutralHadronIso_DR0p4To0p5  );
+      tmpTMVAReader->AddVariable( "rho",                           &fMVAVar_Rho );
+
+      //spectators
+      tmpTMVAReader->AddSpectator("eta",            &fMVAVar_EleEta);
+      tmpTMVAReader->AddSpectator("pt",             &fMVAVar_ElePt);
+
+    }
+
+
     tmpTMVAReader->BookMVA(fMethodname , weightsfiles[i] );
     std::cout << "MVABin " << i << " : MethodName = " << fMethodname 
               << " , type == " << type << " , "
@@ -347,7 +409,9 @@ UInt_t ElectronIDMVA::GetMVABin( double eta, double pt) const {
     }
 
     if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
-	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0) {
+	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 ||
+        fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4
+      ) {
       bin = 0;
       if (pt < 20 && fabs(eta) < 0.8) bin = 0;
       if (pt < 20 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
@@ -953,8 +1017,6 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
 }
 
 
-
-
 //--------------------------------------------------------------------------------------------------
 //MVA Includes Isolation with removal of other leptons
 //
@@ -1267,6 +1329,357 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
               << fMVAVar_NeutralHadronIso_DR0p2To0p3 << " "
               << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
               << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "  
+              << std::endl;
+  }
+
+  return mva;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+//MVA Includes Isolation 
+//
+Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex, 
+                                 const VertexCol *primaryVertices,
+                                 const PFCandidateCol *PFCands, 
+                                 const PileupEnergyDensityCol *PileupEnergyDensity,
+                                 ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
+                                 Bool_t printDebug) {
+  
+  if (!fIsInitialized) { 
+    std::cout << "Error: ElectronIDMVA not properly initialized.\n"; 
+    return -9999;
+  }
+
+  Double_t Rho = 0;
+ switch(fTheRhoType) {
+   case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+   case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoLowEta();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandom();
+     break;
+   case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+     Rho = PileupEnergyDensity->At(0)->RhoRandomLowEta();
+     break;
+   case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+     Rho = PileupEnergyDensity->At(0)->RhoKt6PFJets();
+     break;
+   default:
+     // use the old default
+     Rho = PileupEnergyDensity->At(0)->Rho();
+     break;
+ }
+
+  //set all input variables
+  fMVAVar_ElePt = ele->Pt();
+  fMVAVar_EleEta = ele->SCluster()->Eta();
+  fMVAVar_EleSigmaIEtaIEta = ele->CoviEtaiEta() ;
+
+  if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
+      fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+      fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
+      fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 || 
+      fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4  
+    ) {
+    fMVAVar_EleDEtaIn = TMath::Min(fabs(double(ele->DeltaEtaSuperClusterTrackAtVtx())),0.06); ; 
+    fMVAVar_EleDPhiIn = TMath::Min(fabs(double(ele->DeltaPhiSuperClusterTrackAtVtx())),0.6); 
+    fMVAVar_EleFBrem = TMath::Max(double(ele->FBrem()),-1.0); 
+    fMVAVar_EleEOverP = TMath::Min(double(ele->ESuperClusterOverP()), 20.0); 
+    fMVAVar_EleESeedClusterOverPout = TMath::Min(double(ele->ESeedClusterOverPout()),20.0); 
+    fMVAVar_EleEEleClusterOverPout = TMath::Min(double(ele->EEleClusterOverPout()),20.0); 
+    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->P(); 
+    fMVAVar_EleGsfTrackChi2OverNdof = TMath::Min(double( ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof()),200.0);
+    fMVAVar_EledEtaCalo =  TMath::Min(fabs(double(ele->DeltaEtaSeedClusterTrackAtCalo())),0.2);
+    fMVAVar_EleR9 = TMath::Min(double(ele->SCluster()->R9()), 5.0);   
+  } else {
+    fMVAVar_EleDEtaIn = ele->DeltaEtaSuperClusterTrackAtVtx();  
+    fMVAVar_EleDPhiIn = ele->DeltaPhiSuperClusterTrackAtVtx(); 
+    fMVAVar_EleFBrem = ele->FBrem(); 
+    fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
+    fMVAVar_EleESeedClusterOverPout = ele->ESeedClusterOverPout(); 
+    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->BestTrk()->P();
+    fMVAVar_EleGsfTrackChi2OverNdof = ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof();
+    fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
+    fMVAVar_EleR9 = ele->SCluster()->R9();   
+  }
+
+  fMVAVar_EleHoverE = ele->HadronicOverEm(); 
+  fMVAVar_EleD0 = ele->BestTrk()->D0Corrected(*vertex); 
+  fMVAVar_EleDZ = ele->BestTrk()->DzCorrected(*vertex); 
+  if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
+  else {
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ) {
+      fMVAVar_EleSigmaIPhiIPhi = 0;
+    } else {
+      fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
+    }
+  }
+
+  fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
+  fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
+  fMVAVar_EleIP3d = ele->Ip3dPV(); 
+  fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
+  fMVAVar_EledPhiCalo = ele->DeltaPhiSeedClusterTrackAtCalo();
+  fMVAVar_EleSCEtaWidth = ele->SCluster()->EtaWidth();
+  fMVAVar_EleSCPhiWidth = ele->SCluster()->PhiWidth();
+  fMVAVar_EleCovIEtaIPhi = ele->SCluster()->Seed()->CoviEtaiPhi();
+  fMVAVar_ElePreShowerOverRaw = ele->SCluster()->PreshowerEnergy() / ele->SCluster()->RawEnergy();
+
+  //Additional vars
+  if (ele->TrackerTrk()) {
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
+	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 ||
+        fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4  
+      ) {
+      fMVAVar_EleKFTrkChiSqr = TMath::Min(double(ele->TrackerTrk()->RChi2()),10.0);
+    } else {
+      fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
+    }
+    fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
+    fMVAVar_EleKFTrkNLayers = ele->CTFTrkNLayersWithMeasurement();
+  } else {
+    fMVAVar_EleKFTrkChiSqr = 0;
+    fMVAVar_EleKFTrkNHits = -1;
+    fMVAVar_EleKFTrkNLayers = -1;
+  }
+  
+  if( ele->SCluster()->Seed()->E5x5() > 0.0 ) {
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
+	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 ||
+        fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4  
+      ) {
+      fMVAVar_EleE1x5OverE5x5 = TMath::Min(TMath::Max(1 - double(ele->SCluster()->Seed()->E1x5()/ele->SCluster()->Seed()->E5x5()) , -1.0),2.0);
+      fMVAVar_EleOneMinusE1x5OverE5x5 = TMath::Min(TMath::Max(1 - double(ele->SCluster()->Seed()->E1x5()/ele->SCluster()->Seed()->E5x5()) , -1.0),2.0);
+    } else {
+      fMVAVar_EleE1x5OverE5x5 = ele->SCluster()->Seed()->E1x5()/ele->SCluster()->Seed()->E5x5();
+    }
+  } else {
+    fMVAVar_EleE1x5OverE5x5 = -1.0;
+  }
+
+
+  Double_t tmpChargedIso_DR0p0To0p1  = 0;
+  Double_t tmpChargedIso_DR0p1To0p2  = 0;
+  Double_t tmpChargedIso_DR0p2To0p3  = 0;
+  Double_t tmpChargedIso_DR0p3To0p4  = 0;
+  Double_t tmpChargedIso_DR0p4To0p5  = 0;
+  Double_t tmpGammaIso_DR0p0To0p1  = 0;
+  Double_t tmpGammaIso_DR0p1To0p2  = 0;
+  Double_t tmpGammaIso_DR0p2To0p3  = 0;
+  Double_t tmpGammaIso_DR0p3To0p4  = 0;
+  Double_t tmpGammaIso_DR0p4To0p5  = 0;
+  Double_t tmpNeutralHadronIso_DR0p0To0p1  = 0;
+  Double_t tmpNeutralHadronIso_DR0p1To0p2  = 0;
+  Double_t tmpNeutralHadronIso_DR0p2To0p3  = 0;
+  Double_t tmpNeutralHadronIso_DR0p3To0p4  = 0;
+  Double_t tmpNeutralHadronIso_DR0p4To0p5  = 0;
+
+  for (UInt_t p=0; p<PFCands->GetEntries();p++) {   
+    const PFCandidate *pf = PFCands->At(p);
+      
+    //************************************************************
+    // New Isolation Calculations
+    //************************************************************
+    Double_t dr = MathUtils::DeltaR(ele->Mom(), pf->Mom());
+    
+    if (dr < 0.5) {
+      
+      Bool_t passVeto = kTRUE;
+      //Charged
+      if(pf->BestTrk()) {
+        
+        //*************************************************
+        //Use only PFNoPU
+        //*************************************************
+        Bool_t isPFNoPU = kFALSE;
+        if(pf->PFType() == PFCandidate::eHadron) {
+          if(pf->HasTrackerTrk() && 
+             primaryVertices->At(0)->HasTrack(pf->TrackerTrk()) &&
+             primaryVertices->At(0)->TrackWeight(pf->TrackerTrk()) > 0) {
+            isPFNoPU = kTRUE;
+          } else { 
+               
+            Bool_t vertexFound = kFALSE;
+            const Vertex *closestVtx = 0;
+            Double_t dzmin = 10000;
+               
+            // loop over vertices
+            for(UInt_t j = 0; j < primaryVertices->GetEntries(); j++) {
+              const Vertex *vtx = primaryVertices->At(j);
+              assert(vtx);
+                 
+              if(pf->HasTrackerTrk() && 
+                 vtx->HasTrack(pf->TrackerTrk()) &&
+                 vtx->TrackWeight(pf->TrackerTrk()) > 0) {
+                vertexFound = kTRUE;
+                closestVtx = vtx;
+                break;
+              }
+              Double_t dz = fabs(pf->SourceVertex().Z() - vtx->Z());
+              if(dz < dzmin) {
+                closestVtx = vtx;
+                dzmin = dz;
+              }
+            }
+               
+            Bool_t fCheckClosestZVertex = kTRUE; //we use option 1
+            if(fCheckClosestZVertex) {
+              // Fallback: if track is not associated with any vertex,
+              // associate it with the vertex closest in z
+              if(vertexFound || closestVtx != vertex) {
+                isPFNoPU = kFALSE;
+              } else {
+                isPFNoPU = kTRUE;
+              }
+            } else {
+              if(vertexFound && closestVtx != vertex) {
+                isPFNoPU = kFALSE;
+              } else {
+                isPFNoPU = kTRUE;
+              }
+            }
+          } //hadron & trk stuff
+        } else { // hadron
+          //
+          isPFNoPU = kTRUE;
+        }  
+        if (!isPFNoPU) continue;
+
+        //************************************************************
+        // Veto any PFmuon, or PFEle
+        if (pf->PFType() == PFCandidate::eElectron || pf->PFType() == PFCandidate::eMuon) passVeto = kFALSE;
+        //************************************************************
+        //************************************************************
+        // Footprint Veto
+        if (fabs(ele->SCluster()->Eta()) >= 1.479 && dr < 0.015) passVeto = kFALSE;
+        //************************************************************
+        if (passVeto) {
+          if (dr < 0.1) tmpChargedIso_DR0p0To0p1 += pf->Pt();
+          if (dr >= 0.1 && dr < 0.2) tmpChargedIso_DR0p1To0p2 += pf->Pt();
+          if (dr >= 0.2 && dr < 0.3) tmpChargedIso_DR0p2To0p3 += pf->Pt();
+          if (dr >= 0.3 && dr < 0.4) tmpChargedIso_DR0p3To0p4 += pf->Pt();
+          if (dr >= 0.4 && dr < 0.5) tmpChargedIso_DR0p4To0p5 += pf->Pt();
+        } //pass veto
+	  
+      }
+      //Gamma
+      else if (pf->PFType() == PFCandidate::eGamma) {
+        //************************************************************
+        // Footprint Veto
+        if (fabs(ele->SCluster()->Eta()) >= 1.479) {
+          if (dr < 0.08) passVeto = kFALSE;
+        }
+        //************************************************************
+	   
+        if (passVeto) {
+          if (dr < 0.1) tmpGammaIso_DR0p0To0p1 += pf->Pt();
+          if (dr >= 0.1 && dr < 0.2) tmpGammaIso_DR0p1To0p2 += pf->Pt();
+          if (dr >= 0.2 && dr < 0.3) tmpGammaIso_DR0p2To0p3 += pf->Pt();
+          if (dr >= 0.3 && dr < 0.4) tmpGammaIso_DR0p3To0p4 += pf->Pt();
+          if (dr >= 0.4 && dr < 0.5) tmpGammaIso_DR0p4To0p5 += pf->Pt();
+        }
+      }
+      //NeutralHadron
+      else {
+        if (dr < 0.1) tmpNeutralHadronIso_DR0p0To0p1 += pf->Pt();
+        if (dr >= 0.1 && dr < 0.2) tmpNeutralHadronIso_DR0p1To0p2 += pf->Pt();
+        if (dr >= 0.2 && dr < 0.3) tmpNeutralHadronIso_DR0p2To0p3 += pf->Pt();
+        if (dr >= 0.3 && dr < 0.4) tmpNeutralHadronIso_DR0p3To0p4 += pf->Pt();
+        if (dr >= 0.4 && dr < 0.5) tmpNeutralHadronIso_DR0p4To0p5 += pf->Pt();
+      }
+    } //in 1.0 dr cone
+  } //loop over PF candidates
+
+  fMVAVar_ChargedIso_DR0p0To0p1   = tmpChargedIso_DR0p0To0p1/ele->Pt();
+  fMVAVar_ChargedIso_DR0p1To0p2   = tmpChargedIso_DR0p1To0p2/ele->Pt();
+  fMVAVar_ChargedIso_DR0p2To0p3 = tmpChargedIso_DR0p2To0p3/ele->Pt();
+  fMVAVar_ChargedIso_DR0p3To0p4 = tmpChargedIso_DR0p3To0p4/ele->Pt();
+  fMVAVar_ChargedIso_DR0p4To0p5 = tmpChargedIso_DR0p4To0p5/ele->Pt();
+  fMVAVar_GammaIso_DR0p0To0p1 = tmpGammaIso_DR0p0To0p1/ele->Pt();
+  fMVAVar_GammaIso_DR0p1To0p2 = tmpGammaIso_DR0p1To0p2/ele->Pt();
+  fMVAVar_GammaIso_DR0p2To0p3 = tmpGammaIso_DR0p2To0p3/ele->Pt();
+  fMVAVar_GammaIso_DR0p3To0p4 = tmpGammaIso_DR0p3To0p4/ele->Pt();
+  fMVAVar_GammaIso_DR0p4To0p5 = tmpGammaIso_DR0p4To0p5/ele->Pt();
+  fMVAVar_NeutralHadronIso_DR0p0To0p1 = tmpNeutralHadronIso_DR0p0To0p1/ele->Pt();
+  fMVAVar_NeutralHadronIso_DR0p1To0p2 = tmpNeutralHadronIso_DR0p1To0p2/ele->Pt();
+  fMVAVar_NeutralHadronIso_DR0p2To0p3 = tmpNeutralHadronIso_DR0p2To0p3/ele->Pt();
+  fMVAVar_NeutralHadronIso_DR0p3To0p4 = tmpNeutralHadronIso_DR0p3To0p4/ele->Pt();
+  fMVAVar_NeutralHadronIso_DR0p4To0p5 = tmpNeutralHadronIso_DR0p4To0p5/ele->Pt();
+  fMVAVar_Rho = Rho;
+
+  //Do Binding of MVA input variables
+  if (   fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 
+      || fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 
+      || fMVAType == ElectronIDMVA::kIsoRingsV0
+      || fMVAType == ElectronIDMVA::kIDHWW2012TrigV0
+      || fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4
+    ) {
+    bindVariables();
+  }
+
+  Double_t mva = -9999;  
+  TMVA::Reader *reader = 0;
+  
+  reader = fTMVAReader[GetMVABin( fMVAVar_EleEta , fMVAVar_ElePt)];                                              
+  mva = reader->EvaluateMVA( fMethodname );
+
+  if (printDebug == kTRUE) {
+
+    std::cout << "Debug Electron MVA-ID: "
+              << fMVAVar_ElePt<< " " << fMVAVar_EleEta << " " 
+	      << " --> MVABin " << GetMVABin( fMVAVar_EleEta , fMVAVar_ElePt) << " : "	  
+              << " fbrem " <<  fMVAVar_EleFBrem  
+              << " kfchi2 " << fMVAVar_EleKFTrkChiSqr  
+              << " kfhits " << fMVAVar_EleKFTrkNLayers
+              << " kfhitsall " << fMVAVar_EleKFTrkNHits
+              << " gsfchi2 " << fMVAVar_EleGsfTrackChi2OverNdof  
+              << " deta " <<  fMVAVar_EleDEtaIn  
+              << " dphi " << fMVAVar_EleDPhiIn  
+              << " detacalo " << fMVAVar_EledEtaCalo  
+              << " see " << fMVAVar_EleSigmaIEtaIEta  
+              << " spp " << fMVAVar_EleSigmaIPhiIPhi  
+              << " etawidth " << fMVAVar_EleSCEtaWidth  
+              << " phiwidth " << fMVAVar_EleSCPhiWidth  
+              << " e1x5e5x5 " << fMVAVar_EleOneMinusE1x5OverE5x5  
+              << " R9 " << fMVAVar_EleR9  
+              << " HoE " << fMVAVar_EleHoverE  
+              << " EoP " << fMVAVar_EleEOverP  
+              << " IoEmIoP " << fMVAVar_EleOneOverEMinusOneOverP  
+              << " eleEoPout " << fMVAVar_EleEEleClusterOverPout  
+              << " EoPout " << fMVAVar_EleESeedClusterOverPout  
+	      << " PreShowerOverRaw" << fMVAVar_ElePreShowerOverRaw  
+              << " d0 " << fMVAVar_EleD0  
+              << " ip3d " << fMVAVar_EleIP3d  
+              << " eta " << fMVAVar_EleEta  
+              << " pt " << fMVAVar_ElePt
+              << " === : === "
+              << mva << " "    
+              << std::endl;
+    std::cout << "Debug Electron MVA-ISO: "
+              << fMVAVar_ChargedIso_DR0p0To0p1 << " "
+              << fMVAVar_ChargedIso_DR0p1To0p2 << " "
+              << fMVAVar_ChargedIso_DR0p2To0p3 << " "
+              << fMVAVar_ChargedIso_DR0p3To0p4 << " "
+              << fMVAVar_ChargedIso_DR0p4To0p5 << " "
+              << fMVAVar_GammaIso_DR0p0To0p1 << " "
+              << fMVAVar_GammaIso_DR0p1To0p2 << " "
+              << fMVAVar_GammaIso_DR0p2To0p3 << " "
+              << fMVAVar_GammaIso_DR0p3To0p4 << " "
+              << fMVAVar_GammaIso_DR0p4To0p5 << " "
+              << fMVAVar_NeutralHadronIso_DR0p0To0p1 << " "
+              << fMVAVar_NeutralHadronIso_DR0p1To0p2 << " "
+              << fMVAVar_NeutralHadronIso_DR0p2To0p3 << " "
+              << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
+              << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "  
+              << fMVAVar_Rho << " "
               << std::endl;
   }
 

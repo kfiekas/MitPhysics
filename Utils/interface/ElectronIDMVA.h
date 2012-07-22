@@ -39,14 +39,15 @@ namespace mithep {
       enum MVAType {
         kUninitialized = 0,
         kBaseline,           // SigmaIEtaIEta, DEtaIn, DPhiIn, FBrem, SigmaIPhiIPhi, NBrem, OneOverEMinusOneOverP
-        kNoIPInfo,              // kBaseline + EOverP, ESeedClusterOverPout, ESeedClusterOverPIn
-        kWithIPInfo,            // kBaseline + d0 , IP3d, IP3dSig
-        kIDIsoCombined,         // ID variables , PFIso03 , PFIso04
-        kIDEGamma2012TrigV0,    // EGamma certified (Spring 2012) ID-only MVA
-        kIDEGamma2012NonTrigV0, // EGamma certified (Spring 2012) ID-only MVA
-        kIDEGamma2012NonTrigV1, // EGamma certified (Spring 2012) ID-only MVA, "official" version
-        kIsoRingsV0,            // Isolation MVA with IsoRings as input
-        kIDHWW2012TrigV0        // HWW certified (Spring 2012) ID-only MVA
+        kNoIPInfo,                  // kBaseline + EOverP, ESeedClusterOverPout, ESeedClusterOverPIn
+        kWithIPInfo,                // kBaseline + d0 , IP3d, IP3dSig
+        kIDIsoCombined,             // ID variables , PFIso03 , PFIso04
+        kIDEGamma2012TrigV0,        // EGamma certified (Spring 2012) ID-only MVA
+        kIDEGamma2012NonTrigV0,     // EGamma certified (Spring 2012) ID-only MVA
+        kIDEGamma2012NonTrigV1,     // EGamma certified (Spring 2012) ID-only MVA, "official" version
+        kIsoRingsV0,                // Isolation MVA with IsoRings as input
+        kIDHWW2012TrigV0,           // HWW certified (Spring 2012) ID-only MVA
+        kIDIsoCombinedHWW2012TrigV4 // HWW ID+Iso Combined for trig ele
       };
 
 
@@ -85,6 +86,12 @@ namespace mithep {
                         ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
                         const ElectronCol *goodElectrons,
                         const MuonCol *goodMuons,                       
+                        Bool_t printDebug = kFALSE);
+      Double_t MVAValue(const Electron *ele, const Vertex *vertex,
+                        const VertexCol *primaryVertices,
+                        const PFCandidateCol *PFCands,
+                        const PileupEnergyDensityCol *PileupEnergyDensity,
+                        ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
                         Bool_t printDebug = kFALSE);
       Double_t MVAValue(Double_t ElePt , Double_t EleEta,
                         Double_t EleSigmaIEtaIEta,
@@ -220,6 +227,7 @@ namespace mithep {
       Float_t                   fMVAVar_EleKFTrkNHits;
       Float_t                   fMVAVar_EleKFTrkNLayers;
       Float_t                   fMVAVar_EleE1x5OverE5x5;
+      Float_t                   fMVAVar_EleOneMinusE1x5OverE5x5;
 
       Float_t                   fMVAVar_ChargedIso_DR0p0To0p1;
       Float_t                   fMVAVar_ChargedIso_DR0p1To0p2;
@@ -237,6 +245,7 @@ namespace mithep {
       Float_t                   fMVAVar_NeutralHadronIso_DR0p3To0p4;
       Float_t                   fMVAVar_NeutralHadronIso_DR0p4To0p5;
 
+      Float_t                   fMVAVar_Rho;
 
     ClassDef(ElectronIDMVA, 0) // Muon tools
       };
