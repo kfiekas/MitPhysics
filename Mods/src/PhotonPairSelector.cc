@@ -541,6 +541,7 @@ void PhotonPairSelector::Process()
 	
         Met mmet = fMVAMet.GetMet(  false,
 				    0.,0.,0.,
+				    0.,0.,0.,
 				    fPFMet->At(0),
 				    &pfcands,fPV->At(ivtx),fPV, fPileUpDen->At(0)->Rho(),
 				    &pfjets,

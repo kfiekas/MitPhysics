@@ -555,6 +555,7 @@ void PhotonTreeWriter::Process()
       {
         Met mmet = fMVAMet.GetMet(  false,
                                   0.,0.,0.,
+                                  0.,0.,0.,
                                   fPFMet->At(0),
                                   &pfcands,selvtx,fPV, fPileUpDen->At(0)->Rho(),
                                   &pfjets,
@@ -588,6 +589,7 @@ void PhotonTreeWriter::Process()
       if (0) //disable for now for performance reasons
       {
         Met mmet = fMVAMet.GetMet(  false,
+                                  0.,0.,0.,
                                   0.,0.,0.,
                                   fPFMet->At(0),
                                   &pfcands,firstvtx,fPV, fPileUpDen->At(0)->Rho(),
