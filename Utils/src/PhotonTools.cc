@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.30 2012/06/06 14:42:32 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.31 2012/06/22 12:51:20 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -809,3 +809,63 @@ Bool_t  PhotonTools::PassSinglePhotonPreselPFISO(const Photon *p,const ElectronC
   }
   return kFALSE;
 }
+
+
+void PhotonTools::ScalePhotonShowerShapes(Photon* p, PhotonTools::ShowerShapeScales scale) {
+
+  switch(scale) {
+    
+  case kNoShowerShapeScaling:
+    break;
+
+  case k2011ShowerShape:
+    //regression sigmaE
+    if (p->SCluster()->AbsEta()<1.5)
+      PhotonTools::ScalePhotonError(p,1.07);
+    else
+      PhotonTools::ScalePhotonError(p,1.045);
+    
+    //R9
+    if (p->SCluster()->AbsEta()<1.5) p->SetR9(1.0035*p->R9());
+    else  p->SetR9(1.0035*p->R9());
+    //CoviEtaiEta(SigiEtaiEta)
+    if (p->SCluster()->AbsEta()<1.5) p->SetCoviEtaiEta(0.87*p->CoviEtaiEta()+0.0011);
+    else  p->SetCoviEtaiEta(0.99*p->CoviEtaiEta());
+    //EtaWidth
+    if (p->SCluster()->AbsEta()<1.5) p->SetEtaWidth(0.99*p->EtaWidth());
+    else  p->SetEtaWidth(0.99*p->EtaWidth());
+    //PhiWidth
+    if (p->SCluster()->AbsEta()<1.5) p->SetPhiWidth(0.99*p->PhiWidth());
+    else  p->SetPhiWidth(0.99*p->PhiWidth());
+    break;
+    
+  case k2012ShowerShape:
+    //regression sigmaE
+    if (p->SCluster()->AbsEta()<1.5)
+	  p->SetEnergyErrSmeared(1.05*p->EnergyErrSmeared() - 0.005);
+	else
+	  p->SetEnergyErrSmeared(1.01372*p->EnergyErrSmeared() + 0.000156943);
+	
+    //R9
+    if (p->SCluster()->AbsEta()<1.5) p->SetR9(1.0045*p->R9()+0.001);
+    else  p->SetR9(1.0086*p->R9()-0.0007);
+    //CoviEtaiEta(SigiEtaiEta)
+    if (p->SCluster()->AbsEta()<1.5) p->SetCoviEtaiEta(0.891832*p->CoviEtaiEta()+0.0009133);
+    else  p->SetCoviEtaiEta(0.9947*p->CoviEtaiEta()+0.00003);
+    //EtaWidth
+    if (p->SCluster()->AbsEta()<1.5) p->SetEtaWidth(1.04302*p->EtaWidth()- 0.000618);
+    else  p->SetEtaWidth(0.903254*p->EtaWidth()+ 0.001346);
+    //PhiWidth
+    if (p->SCluster()->AbsEta()<1.5) p->SetPhiWidth(1.00002*p->PhiWidth()- 0.000371);
+    else  p->SetPhiWidth(0.99992*p->PhiWidth()+ 4.8e-07);
+    //s4Ratio
+    if (p->SCluster()->AbsEta()<1.5) p->SetS4Ratio(1.01894*p->S4Ratio()-0.01034);
+    else  p->SetS4Ratio(1.04969*p->S4Ratio()-0.03642);
+    break;
+  default:
+    break;
+    
+  }
+  return;
+}
+    

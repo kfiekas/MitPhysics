@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.25 2012/05/29 21:23:17 mingyang Exp $
+// $Id: PhotonPairSelector.h,v 1.26 2012/06/08 01:17:03 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -66,10 +66,13 @@ namespace mithep
       k2011IdMVA = 0,
       k2012IdMVA_globe
     };
-    enum ShowerShape {
-      k2011ShowerShape  = 0,
-      k2012ShowerShape
-    };
+   
+
+    // outsourced to PhotonTools (fab)
+/*     enum ShowerShape { */
+/*       k2011ShowerShape  = 0, */
+/*       k2012ShowerShape */
+/*     }; */
 
     // setting all the input Names
     void                SetInputPhotonsName(const char *n){ fPhotonBranchName= n;        }
@@ -214,8 +217,8 @@ namespace mithep
     IdMVA               fIdType;
 
     // showershape
-    TString             fShowerShapeType;
-    ShowerShape         fSSType;
+    TString                                fShowerShapeType;
+    PhotonTools::ShowerShapeScales         fSSType;
 
     // Basic Pre-Selection kinematics
     Double_t            fPhotonPtMin;          // min pt cut fro PRE-SELECTION!
@@ -305,14 +308,7 @@ namespace mithep
     VertexTools           fVtxTools;
     
     Bool_t                fDoShowerShapeScaling; 
-   
-    Double_t              fMCSigIEtaIEtaScaleEB;
-    Double_t              fMCSigIEtaIEtaShiftEB; 
-    Double_t              fMCSigIEtaIEtaScaleEE;
-    Double_t              fMCSigIEtaIEtaShiftEE; 
-    Double_t              fMCWidthScale;
-    Double_t              fMCWidthShift; 
-    	                  
+       	                  
     Bool_t                fDoMCErrScaling;
     Double_t              fMCErrScaleEB;
     Double_t              fMCErrScaleEE;    

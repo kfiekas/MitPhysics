@@ -82,6 +82,11 @@ namespace mithep {
        kEEhighEtaBad
      };
      
+     enum ShowerShapeScales {
+       kNoShowerShapeScaling = 0,
+       k2011ShowerShape,
+       k2012ShowerShape
+     };
 
     static eScaleCats EScaleCat(const Photon *p);
 
@@ -91,6 +96,9 @@ namespace mithep {
     static void SmearPhotonError(Photon* p, Double_t width);
     static void ScalePhotonR9(Photon *p, Double_t scale);
     static void ScalePhotonError(Photon *p, Double_t scale);
+
+    static void ScalePhotonShowerShapes(Photon *p, ShowerShapeScales scale);
+
 
     static Bool_t       PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol, const Vertex *vtx, double rho, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);
     static Bool_t       PassSinglePhotonPreselPFISO(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);

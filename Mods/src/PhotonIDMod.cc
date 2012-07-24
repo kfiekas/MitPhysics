@@ -1,8 +1,9 @@
 
-// $Id: PhotonIDMod.cc,v 1.30 2012/01/13 15:27:28 fabstoec Exp $
+// $Id: PhotonIDMod.cc,v 1.31 2012/05/27 17:02:19 bendavid Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
+#include "TRandom3.h"
 #include "MitPhysics/Mods/interface/PhotonIDMod.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -14,7 +15,7 @@
 using namespace mithep;
 
 ClassImp(mithep::PhotonIDMod)
-
+  
 //--------------------------------------------------------------------------------------------------
 PhotonIDMod::PhotonIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
@@ -31,7 +32,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fMCParticleName    (Names::gkMCPartBrn),
   fPileUpName        (Names::gkPileupInfoBrn),
   fPFCandsName       ("PFCandidates"),
-
+  
   fPhotonIDType      ("Custom"),
   fPhotonIsoType     ("Custom"),
   fPhotonPtMin       (15.0),
@@ -51,15 +52,15 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fEtaWidthEE        (0.028),
   fAbsEtaMax         (999.99),
   fApplyR9Min        (kFALSE),
-
+  
   fEffAreaEcalEE     (0.089),
   fEffAreaHcalEE     (0.156),
   fEffAreaTrackEE    (0.261),
-
+  
   fEffAreaEcalEB     (0.183),
   fEffAreaHcalEB     (0.062),
   fEffAreaTrackEB    (0.306),
-
+  
   fPhotons(0),
   fTracks(0),
   fBeamspots(0),
@@ -71,29 +72,59 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fMCParticles       (0),
   fPileUp            (0),
   fPFCands           (0),
-
+  
   // MVA ID Stuff
   fbdtCutBarrel      (0.0744), //cuts give the same effiiciency (relative to preselection) with cic
   fbdtCutEndcap      (0.0959), //cuts give the same effiiciency (relative to preselection) with cic  
   fVariableType      (10), //please use 4 which is the correct type
   fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
   fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
-
-
-  fDoMCR9Scaling     (kFALSE),
-  fMCR9ScaleEB       (1.0),
-  fMCR9ScaleEE       (1.0),
-  fDoMCSigIEtaIEtaScaling(kFALSE),
-  fDoMCWidthScaling(kFALSE),
-  fDoMCErrScaling     (kFALSE),
-  fMCErrScaleEB       (1.0),
-  fMCErrScaleEE       (1.0),
-
+  
+  //   fDoMCR9Scaling         (kFALSE),
+  //   fMCR9ScaleEB           (1.0),
+  //   fMCR9ScaleEE           (1.0),
+  //   fDoMCSigIEtaIEtaScaling(kFALSE),
+  //   fDoMCWidthScaling      (kFALSE),
+  
+  fDoMCErrScaling        (kFALSE),
+  fMCErrScaleEB          (1.0),
+  fMCErrScaleEE          (1.0),
+  
   fPhotonsFromBranch(true),
   fPVFromBranch      (true),
   fGoodElectronsFromBranch (kTRUE),
-  fIsData(false)
+  fIsData(false),
   
+  // ------------------------------------------------
+  // added by fab: smearing/scaling options...
+  fDoDataEneCorr                 (false),
+  fDoMCSmear                     (false),
+  
+  fDoShowerShapeScaling          (false),
+  // ------------------------------------------------
+  fDataEnCorr_EBlowEta_hR9central(0.),
+  fDataEnCorr_EBlowEta_hR9gap    (0.),
+  fDataEnCorr_EBlowEta_lR9       (0.),
+  fDataEnCorr_EBhighEta_hR9      (0.),
+  fDataEnCorr_EBhighEta_lR9      (0.),
+  fDataEnCorr_EElowEta_hR9       (0.),
+  fDataEnCorr_EElowEta_lR9       (0.),
+  fDataEnCorr_EEhighEta_hR9      (0.),
+  fDataEnCorr_EEhighEta_lR9      (0.),
+  fRunStart                      (0),
+  fRunEnd                        (0),
+  fMCSmear_EBlowEta_hR9central   (0.),
+  fMCSmear_EBlowEta_hR9gap       (0.),
+  fMCSmear_EBlowEta_lR9          (0.),
+  fMCSmear_EBhighEta_hR9         (0.),
+  fMCSmear_EBhighEta_lR9         (0.),
+  fMCSmear_EElowEta_hR9          (0.),
+  fMCSmear_EElowEta_lR9          (0.),
+  fMCSmear_EEhighEta_hR9         (0.),
+  fMCSmear_EEhighEta_lR9         (0.),
+  
+  fRng                           (new TRandom3())
+    
 {
   // Constructor.
 }
@@ -136,6 +167,15 @@ void PhotonIDMod::Process()
   
   }
   
+
+  // ------------------------------------------------------------
+  // Get Event header for Run info etc.
+  const EventHeader* evtHead   = this->GetEventHeader();
+  unsigned int       evtNum    = evtHead->EvtNum();
+  UInt_t             runNumber = evtHead->RunNum();
+  Float_t            _runNum   = (Float_t) runNumber;
+  Float_t            _lumiSec  = (Float_t) evtHead->LumiSec();
+
   PhotonOArr *GoodPhotons = new PhotonOArr;
   GoodPhotons->SetName(fGoodPhotonsName);
   GoodPhotons->SetOwner(kTRUE);
@@ -160,22 +200,55 @@ void PhotonIDMod::Process()
       else PhotonTools::ScalePhotonError(ph,fMCErrScaleEE);
     }
 
-    if (fDoMCR9Scaling && !fIsData) {
-      if (ph->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonR9(ph,fMCR9ScaleEB);
-      else PhotonTools::ScalePhotonR9(ph,fMCR9ScaleEE);
+    if (fDoShowerShapeScaling && !fIsData) {
+      PhotonTools::ScalePhotonShowerShapes(ph,fSSType);
     }
 
-    if (fDoMCSigIEtaIEtaScaling && !fIsData) {
-      if (ph->SCluster()->AbsEta()<1.5) ph->SetCoviEtaiEta(0.87*ph->CoviEtaiEta() + 0.0011);
-      else ph->SetCoviEtaiEta(0.99*ph->CoviEtaiEta());
-    }
+    // fab: replaced by shower-shape scaling above...
+//     if (fDoMCR9Scaling && !fIsData) {
+//       if (ph->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonR9(ph,fMCR9ScaleEB);
+//       else PhotonTools::ScalePhotonR9(ph,fMCR9ScaleEE);
+//     }
 
-    if (fDoMCWidthScaling && !fIsData) {
-      ph->SetEtaWidth(0.99*ph->EtaWidth());
-      ph->SetPhiWidth(0.99*ph->PhiWidth());
-    }
+//     if (fDoMCSigIEtaIEtaScaling && !fIsData) {
+//       if (ph->SCluster()->AbsEta()<1.5) ph->SetCoviEtaiEta(0.87*ph->CoviEtaiEta() + 0.0011);
+//       else ph->SetCoviEtaiEta(0.99*ph->CoviEtaiEta());
+//     }
 
+//     if (fDoMCWidthScaling && !fIsData) {
+//       ph->SetEtaWidth(0.99*ph->EtaWidth());
+//       ph->SetPhiWidth(0.99*ph->PhiWidth());
+//     }
+
+    PhotonTools::eScaleCats escalecat = PhotonTools::EScaleCat(ph);
+
+    // now we dicide if we either scale (Data) or Smear (MC) the Photons
+    if (fIsData) {
+      if (fDoDataEneCorr) {
+        // starting with scale = 1.
+        double scaleFac = 1.;
+        // checking the run Rangees ...
+        Int_t runRange = FindRunRangeIdx(runNumber);
+        if(runRange > -1) {
+          scaleFac *= GetDataEnCorr(runRange, escalecat);
+        }
+        PhotonTools::ScalePhoton(ph, scaleFac);
+      }
+    }
     
+    if (fDoMCSmear) {
+      double width = GetMCSmearFac(escalecat);
+      if (!fIsData) {
+        // get the seed to do deterministic smearing...
+        UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
+        UInt_t seed     = seedBase + (UInt_t) ph->E() +
+          (UInt_t) (TMath::Abs(10.*ph->SCluster()->Eta()));
+        // get the smearing for MC photons..
+        PhotonTools::SmearPhoton(ph, fRng, width, seed);
+      }
+      PhotonTools::SmearPhotonError(ph, width);
+    }
+
 
     // ---------------------------------------------------------------------
     // check if we use the CiC Selection. If yes, bypass all the below...
@@ -222,21 +295,22 @@ void PhotonIDMod::Process()
     Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
     
     Bool_t passSpikeRemovalFilter = kTRUE;
-
+    
     if (ph->SCluster() && ph->SCluster()->Seed()) {
       if(ph->SCluster()->Seed()->Energy() > 5.0 && 
          ph->SCluster()->Seed()->EMax() / ph->SCluster()->Seed()->E3x3() > 0.95
-        ) {
+	 ) {
         passSpikeRemovalFilter = kFALSE;
       }
     }
-
+    
     // For Now Only use the EMax/E3x3 prescription.
     //if(ph->SCluster()->Seed()->Energy() > 5.0 && 
     //   (1 - (ph->SCluster()->Seed()->E1x3() + ph->SCluster()->Seed()->E3x1() - 2*ph->SCluster()->Seed()->EMax())) > 0.95
     //  ) {
     //  passSpikeRemovalFilter = kFALSE;
     //}
+
     if (fApplySpikeRemoval && !passSpikeRemovalFilter) continue;
     
     if (ph->HadOverEm() >= fHadOverEmMax) 
@@ -298,7 +372,7 @@ void PhotonIDMod::Process()
     case kMITPUCorrected:
       {
 	// compute the PU corrections only if Rho is available
-	// ... otherwise (_tRho = -1.0) it's the std isolation
+	// ... otherwise (_tRho = 0.0) it's the std isolation
 	isocut = kTRUE;
 	Double_t fEffAreaEcal = fEffAreaEcalEB;
 	Double_t fEffAreaHcal = fEffAreaHcalEB;
@@ -310,28 +384,19 @@ void PhotonIDMod::Process()
 	  fEffAreaTrack = fEffAreaTrackEE;
 	}	  
 
-	//std::cout<<"-----------------------------------"<<std::endl;
-	//std::cout<<" MIT phooton Et = "<<ph->Et()<<std::endl;		  
 	Double_t EcalCorrISO =   ph->EcalRecHitIsoDr04();
-	//std::cout<<" ecaliso4    = "<<EcalCorrISO<<std::endl;
 	if(_tRho > -0.5 ) EcalCorrISO -= _tRho * fEffAreaEcal;
-	//std::cout<<" ecaliso4Corr = "<<EcalCorrISO<<"  ("<<2.0+0.006*ph->Pt()<<")"<<std::endl;
 	if ( EcalCorrISO > (2.0+0.006*ph->Pt()) ) isocut = kFALSE; 
 	if ( isocut || true ) {
 	  Double_t HcalCorrISO = ph->HcalTowerSumEtDr04(); 
-	  //std::cout<<" hcaliso4     = "<<HcalCorrISO<<std::endl;
 	  if(_tRho > -0.5 ) HcalCorrISO -= _tRho * fEffAreaHcal;
-	  //std::cout<<" hcaliso4Corr = "<<HcalCorrISO<<"  ("<<2.0+0.0025*ph->Pt()<<")"<<std::endl;
 	  if ( HcalCorrISO > (2.0+0.0025*ph->Pt()) ) isocut = kFALSE;
 	}
 	if ( isocut || true ) {
 	  Double_t TrackCorrISO = IsolationTools::TrackIsolationNoPV(ph, bsp, 0.4, 0.04, 0.0, 0.015, 0.1, TrackQuality::highPurity, fTracks);
-	  //std::cout<<" TrackIso       = "<<TrackCorrISO<<std::endl;	  
 	  if(_tRho > -0.5 )
 	    TrackCorrISO -= _tRho * fEffAreaTrack;
-	  //std::cout<<" TrackIsoCorr   = "<<TrackCorrISO<<"  ("<<1.5 + 0.001*ph->Pt()<<")"<<std::endl;	  
 	  if ( TrackCorrISO > (1.5 + 0.001*ph->Pt()) ) isocut = kFALSE;
-	  //std::cout<<"      passes ? "<<isocut<<std::endl;
 	}
 	break;
       }
@@ -351,7 +416,6 @@ void PhotonIDMod::Process()
 
     if (ph->AbsEta() >= fAbsEtaMax) 
       continue;
-      
     
     // add good electron
     GoodPhotons->AddOwned(ph);
@@ -439,5 +503,84 @@ void PhotonIDMod::SlaveBegin()
     return;
   }
     
+  if      (fShowerShapeType.CompareTo("None")            == 0)
+    fSSType =       PhotonTools::kNoShowerShapeScaling;
+  else if (fShowerShapeType.CompareTo("2011ShowerShape") == 0)
+    fSSType =       PhotonTools::k2011ShowerShape;
+  else if (fShowerShapeType.CompareTo("2012ShowerShape") == 0)
+    fSSType =       PhotonTools::k2012ShowerShape;
+  else {
+    std::cerr<<"shower shape scale "<<fShowerShapeType<<" not implemented."<<std::endl;
+    return;
+  }
   
+}
+
+
+//---------------------------------------------------------------------------------------------------
+Int_t PhotonIDMod::FindRunRangeIdx(UInt_t run)
+{
+  // this routine looks for the idx of the run-range
+  Int_t runRange=-1;
+  for (UInt_t iRun = 0; iRun<fRunStart.size(); ++iRun) {
+    if (run >= fRunStart[iRun] && run <= fRunEnd[iRun]) {
+      runRange = (Int_t) iRun;
+      return runRange;
+    }
+  }
+  return runRange;
+}
+
+//---------------------------------------------------------------------------------------------------
+Double_t PhotonIDMod::GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat)
+{
+  switch (cat) {
+  case PhotonTools::kEBhighEtaGold:
+    return fDataEnCorr_EBhighEta_hR9[runRange];
+  case PhotonTools::kEBhighEtaBad:
+    return fDataEnCorr_EBhighEta_lR9[runRange];
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fDataEnCorr_EBlowEta_hR9central[runRange];
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fDataEnCorr_EBlowEta_hR9gap[runRange];
+  case PhotonTools::kEBlowEtaBad:
+    return fDataEnCorr_EBlowEta_lR9[runRange];
+  case PhotonTools::kEEhighEtaGold:
+    return fDataEnCorr_EEhighEta_hR9[runRange];
+  case PhotonTools::kEEhighEtaBad:
+    return fDataEnCorr_EEhighEta_lR9[runRange];
+  case PhotonTools::kEElowEtaGold:
+    return fDataEnCorr_EElowEta_hR9[runRange];
+  case PhotonTools::kEElowEtaBad:
+    return fDataEnCorr_EElowEta_lR9[runRange];
+  default:
+    return 1.;
+  }
+}
+
+//---------------------------------------------------------------------------------------------------
+Double_t PhotonIDMod::GetMCSmearFac(PhotonTools::eScaleCats cat)
+{
+  switch (cat) {
+  case PhotonTools::kEBhighEtaGold:
+    return fMCSmear_EBhighEta_hR9;
+  case PhotonTools::kEBhighEtaBad:
+    return fMCSmear_EBhighEta_lR9;
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fMCSmear_EBlowEta_hR9central;
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fMCSmear_EBlowEta_hR9gap;
+  case PhotonTools::kEBlowEtaBad:
+    return fMCSmear_EBlowEta_lR9;
+  case PhotonTools::kEEhighEtaGold:
+    return fMCSmear_EEhighEta_hR9;
+  case PhotonTools::kEEhighEtaBad:
+    return fMCSmear_EEhighEta_lR9;
+  case PhotonTools::kEElowEtaGold:
+    return fMCSmear_EElowEta_hR9;
+  case PhotonTools::kEElowEtaBad:
+    return fMCSmear_EElowEta_lR9;
+  default:
+    return 1.;
+  }
 }
