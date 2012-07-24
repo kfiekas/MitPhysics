@@ -1,4 +1,4 @@
-// $Id: runHgg2012.C,v 1.13 2012/06/25 14:54:24 bendavid Exp $
+// $Id: runHgg2012.C,v 1.14 2012/06/26 23:24:57 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -33,8 +33,9 @@ void runHgg2012(const char *fileset    = "0000",
 	    //const char *dataset = "f11--h120gg-gf-v14b-pu",
             //const char *dataset = "r11a-pho-j16-v1",   
             //const char *dataset = "meridiani2012-diphoj-v9",
-	    const char *dataset = "s12-h125gg-gf-v9",
+	    //const char *dataset = "s12-h125gg-gf-v9",
             //const char *dataset = "s12-pj40-2em-v9",
+            const char *dataset = "s12-diphoj-3-v9",
             //const char *dataset = "s12-zllm50-v9",
 	    //const char *dataset = "f11--h121gg-gf-v14b-pu",
 	    //const char *dataset = "r12a-pho-pr-v1",
@@ -42,7 +43,7 @@ void runHgg2012(const char *fileset    = "0000",
             const char *book       = "t2mit/filefi/028",
             const char *catalogDir = "/home/cmsprod/catalog",
             const char *outputName = "hgg",
-            int         nEvents    = 1000)
+            int         nEvents    = 500)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -291,17 +292,19 @@ void runHgg2012(const char *fileset    = "0000",
   photcic->SetPhotonsFromBranch(kFALSE);
   photcic->SetInputPhotonsName(photreg->GetOutputName());
   //2012 ICHEP promptreco 5.3/fb
-  photcic->SetMCSmearFactors(0.0106,0.0108,0.0119,0.0149,0.0240,0.0375,0.0330,0.0607,0.0602);
-  photcic->AddEnCorrPerRun(190450, 190781, 0.9946, 0.9946, 1.0017, 0.9976, 1.0124, 0.9932, 0.9986, 0.9859, 1.0028);
-  photcic->AddEnCorrPerRun(190782, 190949, 1.0079, 1.0079, 1.0149, 0.9850, 1.0000, 1.0056, 1.0110, 0.9932, 1.0099);
-  photcic->AddEnCorrPerRun(190950, 191833, 0.9974, 0.9974, 1.0044, 0.9989, 1.0137, 0.9997, 1.0051, 0.9736, 0.9907);
-  photcic->AddEnCorrPerRun(191834, 193686, 0.9943, 0.9943, 1.0013, 0.9961, 1.0109, 0.9988, 1.0043, 0.9726, 0.9897);
-  photcic->AddEnCorrPerRun(193746, 194210, 0.9950, 0.9950, 1.0020, 0.9948, 1.0096, 1.0004, 1.0059, 0.9875, 1.0043);
-  photcic->AddEnCorrPerRun(194211, 194479, 0.9964, 0.9964, 1.0034, 0.9968, 1.0116, 0.9977, 1.0032, 0.9886, 1.0054);
-  photcic->AddEnCorrPerRun(194480, 195147, 0.9974, 0.9974, 1.0044, 0.9990, 1.0138, 0.9986, 1.0041, 0.9905, 1.0073);
-  photcic->AddEnCorrPerRun(195148, 195350, 0.9979, 0.9979, 1.0050, 0.9992, 1.0139, 1.0018, 1.0072, 0.9937, 1.0105);
-  photcic->AddEnCorrPerRun(195378, 195530, 0.9973, 0.9973, 1.0044, 0.9985, 1.0133, 0.9954, 1.0008, 0.9856, 1.0025);
-  photcic->AddEnCorrPerRun(195531, 196529, 0.9906, 0.9906, 0.9977, 0.9921, 1.0069, 1.0003, 1.0058, 1.0328, 1.0488);
+  photcic->SetMCSmearFactors(0.00825,0.01035,0.0116,0.0222,0.0138,0.0292,0.0275,0.0322,0.0310);
+  photcic->AddEnCorrPerRun(190450, 190781, 0.9944, 0.9944, 1.0006, 0.9948, 1.0083, 0.9881, 0.9956, 0.9878, 0.9991);
+  photcic->AddEnCorrPerRun(190782, 190949, 1.0085, 1.0085, 1.0146, 0.9858, 0.9993, 1.0047, 1.0120, 0.9962, 1.0074);
+  photcic->AddEnCorrPerRun(190950, 191833, 0.9939, 0.9939, 1.0001, 0.9879, 1.0014, 0.9906, 0.9981, 0.9874, 0.9986);
+  photcic->AddEnCorrPerRun(191834, 193686, 0.9916, 0.9916, 0.9978, 0.9855, 0.9990, 0.9907, 0.9982, 0.9893, 1.0005);
+  photcic->AddEnCorrPerRun(193746, 194210, 0.9921, 0.9921, 0.9983, 0.9834, 0.9970, 0.9921, 0.9996, 0.9883, 0.9995);
+  photcic->AddEnCorrPerRun(194211, 194479, 0.9926, 0.9926, 0.9988, 0.9845, 0.9980, 0.9928, 1.0003, 0.9895, 1.0007);
+  photcic->AddEnCorrPerRun(194480, 195147, 0.9927, 0.9927, 0.9989, 0.9862, 0.9998, 0.9954, 1.0028, 0.9891, 1.0003);
+  photcic->AddEnCorrPerRun(195148, 195350, 0.9928, 0.9928, 0.9990, 0.9852, 0.9988, 1.0007, 1.0081, 0.9943, 1.0054);
+  photcic->AddEnCorrPerRun(195351, 195395, 0.9931, 0.9931, 0.9992, 0.9861, 0.9996, 0.9933, 1.0008, 0.9900, 1.0012);
+  photcic->AddEnCorrPerRun(195396, 195530, 0.9932, 0.9932, 0.9994, 0.9861, 0.9996, 0.9951, 1.0025, 0.9869, 0.9982);
+  photcic->AddEnCorrPerRun(195531, 999999, 0.9924, 0.9924, 0.9986, 0.9857, 0.9992, 0.9962, 1.0036, 0.9885, 0.9997);
+  
   
   //  photcic->SetDoMCR9Scaling(kTRUE);
   //  photcic->SetMCR9Scale(1.0035, 1.0035);
@@ -311,6 +314,7 @@ void runHgg2012(const char *fileset    = "0000",
   //photcic->SetMCErrScale(1.07, 1.045); 
   //photcic->SetMCErrScale(1, 1); //ming:scale(sigE/E)
   photcic->SetJetsName(jetCorr->GetOutputName());    
+  //photcic->SetRescaledBeamspotWidth(5.0);
   photcic->SetIsData(isData);
   
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
@@ -323,17 +327,18 @@ void runHgg2012(const char *fileset    = "0000",
   photcicnoeleveto->DoDataEneCorr(kTRUE);
   photcicnoeleveto->SetPhotonsFromBranch(kFALSE);
   photcicnoeleveto->SetInputPhotonsName(photreg->GetOutputName());
-  photcicnoeleveto->SetMCSmearFactors(0.0106,0.0108,0.0119,0.0149,0.0240,0.0375,0.0330,0.0607,0.0602);
-  photcicnoeleveto->AddEnCorrPerRun(190450, 190781, 0.9946, 0.9946, 1.0017, 0.9976, 1.0124, 0.9932, 0.9986, 0.9859, 1.0028);
-  photcicnoeleveto->AddEnCorrPerRun(190782, 190949, 1.0079, 1.0079, 1.0149, 0.9850, 1.0000, 1.0056, 1.0110, 0.9932, 1.0099);
-  photcicnoeleveto->AddEnCorrPerRun(190950, 191833, 0.9974, 0.9974, 1.0044, 0.9989, 1.0137, 0.9997, 1.0051, 0.9736, 0.9907);
-  photcicnoeleveto->AddEnCorrPerRun(191834, 193686, 0.9943, 0.9943, 1.0013, 0.9961, 1.0109, 0.9988, 1.0043, 0.9726, 0.9897);
-  photcicnoeleveto->AddEnCorrPerRun(193746, 194210, 0.9950, 0.9950, 1.0020, 0.9948, 1.0096, 1.0004, 1.0059, 0.9875, 1.0043);
-  photcicnoeleveto->AddEnCorrPerRun(194211, 194479, 0.9964, 0.9964, 1.0034, 0.9968, 1.0116, 0.9977, 1.0032, 0.9886, 1.0054);
-  photcicnoeleveto->AddEnCorrPerRun(194480, 195147, 0.9974, 0.9974, 1.0044, 0.9990, 1.0138, 0.9986, 1.0041, 0.9905, 1.0073);
-  photcicnoeleveto->AddEnCorrPerRun(195148, 195350, 0.9979, 0.9979, 1.0050, 0.9992, 1.0139, 1.0018, 1.0072, 0.9937, 1.0105);
-  photcicnoeleveto->AddEnCorrPerRun(195378, 195530, 0.9973, 0.9973, 1.0044, 0.9985, 1.0133, 0.9954, 1.0008, 0.9856, 1.0025);
-  photcicnoeleveto->AddEnCorrPerRun(195531, 196529, 0.9906, 0.9906, 0.9977, 0.9921, 1.0069, 1.0003, 1.0058, 1.0328, 1.0488); 
+  photcicnoeleveto->SetMCSmearFactors(0.00825,0.01035,0.0116,0.0222,0.0138,0.0292,0.0275,0.0322,0.0310);
+  photcicnoeleveto->AddEnCorrPerRun(190450, 190781, 0.9944, 0.9944, 1.0006, 0.9948, 1.0083, 0.9881, 0.9956, 0.9878, 0.9991);
+  photcicnoeleveto->AddEnCorrPerRun(190782, 190949, 1.0085, 1.0085, 1.0146, 0.9858, 0.9993, 1.0047, 1.0120, 0.9962, 1.0074);
+  photcicnoeleveto->AddEnCorrPerRun(190950, 191833, 0.9939, 0.9939, 1.0001, 0.9879, 1.0014, 0.9906, 0.9981, 0.9874, 0.9986);
+  photcicnoeleveto->AddEnCorrPerRun(191834, 193686, 0.9916, 0.9916, 0.9978, 0.9855, 0.9990, 0.9907, 0.9982, 0.9893, 1.0005);
+  photcicnoeleveto->AddEnCorrPerRun(193746, 194210, 0.9921, 0.9921, 0.9983, 0.9834, 0.9970, 0.9921, 0.9996, 0.9883, 0.9995);
+  photcicnoeleveto->AddEnCorrPerRun(194211, 194479, 0.9926, 0.9926, 0.9988, 0.9845, 0.9980, 0.9928, 1.0003, 0.9895, 1.0007);
+  photcicnoeleveto->AddEnCorrPerRun(194480, 195147, 0.9927, 0.9927, 0.9989, 0.9862, 0.9998, 0.9954, 1.0028, 0.9891, 1.0003);
+  photcicnoeleveto->AddEnCorrPerRun(195148, 195350, 0.9928, 0.9928, 0.9990, 0.9852, 0.9988, 1.0007, 1.0081, 0.9943, 1.0054);
+  photcicnoeleveto->AddEnCorrPerRun(195351, 195395, 0.9931, 0.9931, 0.9992, 0.9861, 0.9996, 0.9933, 1.0008, 0.9900, 1.0012);
+  photcicnoeleveto->AddEnCorrPerRun(195396, 195530, 0.9932, 0.9932, 0.9994, 0.9861, 0.9996, 0.9951, 1.0025, 0.9869, 0.9982);
+  photcicnoeleveto->AddEnCorrPerRun(195531, 999999, 0.9924, 0.9924, 0.9986, 0.9857, 0.9992, 0.9962, 1.0036, 0.9885, 0.9997);
   //photcicnoeleveto->SetDoMCR9Scaling(kTRUE);
   //photcicnoeleveto->SetMCR9Scale(1.0035, 1.0035);
   photcicnoeleveto->SetDoShowerShapeScaling(kTRUE);
@@ -344,6 +349,7 @@ void runHgg2012(const char *fileset    = "0000",
   photcicnoeleveto->SetApplyEleVeto(kFALSE);
   photcicnoeleveto->SetInvertElectronVeto(kFALSE);
   photcicnoeleveto->SetJetsName(jetCorr->GetOutputName());  
+  //photcicnoeleveto->SetRescaledBeamspotWidth(5.0);
   photcicnoeleveto->SetIsData(isData);
   
   
@@ -358,24 +364,27 @@ void runHgg2012(const char *fileset    = "0000",
   photpresel->DoDataEneCorr(kTRUE);
   photpresel->SetPhotonsFromBranch(kFALSE);
   photpresel->SetInputPhotonsName(photreg->GetOutputName());
-  photpresel->SetMCSmearFactors(0.0106,0.0108,0.0119,0.0149,0.0240,0.0375,0.0330,0.0607,0.0602);
-  photpresel->AddEnCorrPerRun(190450, 190781, 0.9946, 0.9946, 1.0017, 0.9976, 1.0124, 0.9932, 0.9986, 0.9859, 1.0028);
-  photpresel->AddEnCorrPerRun(190782, 190949, 1.0079, 1.0079, 1.0149, 0.9850, 1.0000, 1.0056, 1.0110, 0.9932, 1.0099);
-  photpresel->AddEnCorrPerRun(190950, 191833, 0.9974, 0.9974, 1.0044, 0.9989, 1.0137, 0.9997, 1.0051, 0.9736, 0.9907);
-  photpresel->AddEnCorrPerRun(191834, 193686, 0.9943, 0.9943, 1.0013, 0.9961, 1.0109, 0.9988, 1.0043, 0.9726, 0.9897);
-  photpresel->AddEnCorrPerRun(193746, 194210, 0.9950, 0.9950, 1.0020, 0.9948, 1.0096, 1.0004, 1.0059, 0.9875, 1.0043);
-  photpresel->AddEnCorrPerRun(194211, 194479, 0.9964, 0.9964, 1.0034, 0.9968, 1.0116, 0.9977, 1.0032, 0.9886, 1.0054);
-  photpresel->AddEnCorrPerRun(194480, 195147, 0.9974, 0.9974, 1.0044, 0.9990, 1.0138, 0.9986, 1.0041, 0.9905, 1.0073);
-  photpresel->AddEnCorrPerRun(195148, 195350, 0.9979, 0.9979, 1.0050, 0.9992, 1.0139, 1.0018, 1.0072, 0.9937, 1.0105);
-  photpresel->AddEnCorrPerRun(195378, 195530, 0.9973, 0.9973, 1.0044, 0.9985, 1.0133, 0.9954, 1.0008, 0.9856, 1.0025);
-  photpresel->AddEnCorrPerRun(195531, 196529, 0.9906, 0.9906, 0.9977, 0.9921, 1.0069, 1.0003, 1.0058, 1.0328, 1.0488);     
+  photpresel->SetMCSmearFactors(0.00825,0.01035,0.0116,0.0222,0.0138,0.0292,0.0275,0.0322,0.0310);
+  photpresel->AddEnCorrPerRun(190450, 190781, 0.9944, 0.9944, 1.0006, 0.9948, 1.0083, 0.9881, 0.9956, 0.9878, 0.9991);
+  photpresel->AddEnCorrPerRun(190782, 190949, 1.0085, 1.0085, 1.0146, 0.9858, 0.9993, 1.0047, 1.0120, 0.9962, 1.0074);
+  photpresel->AddEnCorrPerRun(190950, 191833, 0.9939, 0.9939, 1.0001, 0.9879, 1.0014, 0.9906, 0.9981, 0.9874, 0.9986);
+  photpresel->AddEnCorrPerRun(191834, 193686, 0.9916, 0.9916, 0.9978, 0.9855, 0.9990, 0.9907, 0.9982, 0.9893, 1.0005);
+  photpresel->AddEnCorrPerRun(193746, 194210, 0.9921, 0.9921, 0.9983, 0.9834, 0.9970, 0.9921, 0.9996, 0.9883, 0.9995);
+  photpresel->AddEnCorrPerRun(194211, 194479, 0.9926, 0.9926, 0.9988, 0.9845, 0.9980, 0.9928, 1.0003, 0.9895, 1.0007);
+  photpresel->AddEnCorrPerRun(194480, 195147, 0.9927, 0.9927, 0.9989, 0.9862, 0.9998, 0.9954, 1.0028, 0.9891, 1.0003);
+  photpresel->AddEnCorrPerRun(195148, 195350, 0.9928, 0.9928, 0.9990, 0.9852, 0.9988, 1.0007, 1.0081, 0.9943, 1.0054);
+  photpresel->AddEnCorrPerRun(195351, 195395, 0.9931, 0.9931, 0.9992, 0.9861, 0.9996, 0.9933, 1.0008, 0.9900, 1.0012);
+  photpresel->AddEnCorrPerRun(195396, 195530, 0.9932, 0.9932, 0.9994, 0.9861, 0.9996, 0.9951, 1.0025, 0.9869, 0.9982);
+  photpresel->AddEnCorrPerRun(195531, 999999, 0.9924, 0.9924, 0.9986, 0.9857, 0.9992, 0.9962, 1.0036, 0.9885, 0.9997);
+  
   //photcicnoeleveto->SetDoMCR9Scaling(kTRUE);
   photpresel->SetDoShowerShapeScaling(kTRUE);
   photpresel->SetShowerShapeType("2012ShowerShape");
   //photpresel->SetDoMCErrScaling(kTRUE);
   //photpresel->SetMCErrScale(1.07, 1.045); 
   //photpresel->SetMCErrScale(1, 1); 
-  photpresel->SetJetsName(jetCorr->GetOutputName());  
+  photpresel->SetJetsName(jetCorr->GetOutputName()); 
+  //photpresel->SetRescaledBeamspotWidth(5.0);
   photpresel->SetIsData(isData);
 
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
@@ -389,17 +398,18 @@ void runHgg2012(const char *fileset    = "0000",
   photpreselinverteleveto->DoDataEneCorr(kTRUE);
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
-  photpreselinverteleveto->SetMCSmearFactors(0.0106,0.0108,0.0119,0.0149,0.0240,0.0375,0.0330,0.0607,0.0602);
-  photpreselinverteleveto->AddEnCorrPerRun(190450, 190781, 0.9946, 0.9946, 1.0017, 0.9976, 1.0124, 0.9932, 0.9986, 0.9859, 1.0028);
-  photpreselinverteleveto->AddEnCorrPerRun(190782, 190949, 1.0079, 1.0079, 1.0149, 0.9850, 1.0000, 1.0056, 1.0110, 0.9932, 1.0099);
-  photpreselinverteleveto->AddEnCorrPerRun(190950, 191833, 0.9974, 0.9974, 1.0044, 0.9989, 1.0137, 0.9997, 1.0051, 0.9736, 0.9907);
-  photpreselinverteleveto->AddEnCorrPerRun(191834, 193686, 0.9943, 0.9943, 1.0013, 0.9961, 1.0109, 0.9988, 1.0043, 0.9726, 0.9897);
-  photpreselinverteleveto->AddEnCorrPerRun(193746, 194210, 0.9950, 0.9950, 1.0020, 0.9948, 1.0096, 1.0004, 1.0059, 0.9875, 1.0043);
-  photpreselinverteleveto->AddEnCorrPerRun(194211, 194479, 0.9964, 0.9964, 1.0034, 0.9968, 1.0116, 0.9977, 1.0032, 0.9886, 1.0054);
-  photpreselinverteleveto->AddEnCorrPerRun(194480, 195147, 0.9974, 0.9974, 1.0044, 0.9990, 1.0138, 0.9986, 1.0041, 0.9905, 1.0073);
-  photpreselinverteleveto->AddEnCorrPerRun(195148, 195350, 0.9979, 0.9979, 1.0050, 0.9992, 1.0139, 1.0018, 1.0072, 0.9937, 1.0105);
-  photpreselinverteleveto->AddEnCorrPerRun(195378, 195530, 0.9973, 0.9973, 1.0044, 0.9985, 1.0133, 0.9954, 1.0008, 0.9856, 1.0025);
-  photpreselinverteleveto->AddEnCorrPerRun(195531, 196529, 0.9906, 0.9906, 0.9977, 0.9921, 1.0069, 1.0003, 1.0058, 1.0328, 1.0488);     
+  photpreselinverteleveto->SetMCSmearFactors(0.00825,0.01035,0.0116,0.0222,0.0138,0.0292,0.0275,0.0322,0.0310);
+  photpreselinverteleveto->AddEnCorrPerRun(190450, 190781, 0.9944, 0.9944, 1.0006, 0.9948, 1.0083, 0.9881, 0.9956, 0.9878, 0.9991);
+  photpreselinverteleveto->AddEnCorrPerRun(190782, 190949, 1.0085, 1.0085, 1.0146, 0.9858, 0.9993, 1.0047, 1.0120, 0.9962, 1.0074);
+  photpreselinverteleveto->AddEnCorrPerRun(190950, 191833, 0.9939, 0.9939, 1.0001, 0.9879, 1.0014, 0.9906, 0.9981, 0.9874, 0.9986);
+  photpreselinverteleveto->AddEnCorrPerRun(191834, 193686, 0.9916, 0.9916, 0.9978, 0.9855, 0.9990, 0.9907, 0.9982, 0.9893, 1.0005);
+  photpreselinverteleveto->AddEnCorrPerRun(193746, 194210, 0.9921, 0.9921, 0.9983, 0.9834, 0.9970, 0.9921, 0.9996, 0.9883, 0.9995);
+  photpreselinverteleveto->AddEnCorrPerRun(194211, 194479, 0.9926, 0.9926, 0.9988, 0.9845, 0.9980, 0.9928, 1.0003, 0.9895, 1.0007);
+  photpreselinverteleveto->AddEnCorrPerRun(194480, 195147, 0.9927, 0.9927, 0.9989, 0.9862, 0.9998, 0.9954, 1.0028, 0.9891, 1.0003);
+  photpreselinverteleveto->AddEnCorrPerRun(195148, 195350, 0.9928, 0.9928, 0.9990, 0.9852, 0.9988, 1.0007, 1.0081, 0.9943, 1.0054);
+  photpreselinverteleveto->AddEnCorrPerRun(195351, 195395, 0.9931, 0.9931, 0.9992, 0.9861, 0.9996, 0.9933, 1.0008, 0.9900, 1.0012);
+  photpreselinverteleveto->AddEnCorrPerRun(195396, 195530, 0.9932, 0.9932, 0.9994, 0.9861, 0.9996, 0.9951, 1.0025, 0.9869, 0.9982);
+  photpreselinverteleveto->AddEnCorrPerRun(195531, 999999, 0.9924, 0.9924, 0.9986, 0.9857, 0.9992, 0.9962, 1.0036, 0.9885, 0.9997);
    photpreselinverteleveto->SetShowerShapeType("2012ShowerShape");
    photpreselinverteleveto->SetDoShowerShapeScaling(kTRUE);  
    //photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
@@ -408,6 +418,7 @@ void runHgg2012(const char *fileset    = "0000",
    photpreselinverteleveto->SetApplyEleVeto(kFALSE);
    photpreselinverteleveto->SetInvertElectronVeto(kFALSE);
    photpreselinverteleveto->SetJetsName(jetCorr->GetOutputName());  
+   //photpreselinverteleveto->SetRescaledBeamspotWidth(5.0);   
    photpreselinverteleveto->SetIsData(isData);  
    
    PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
@@ -422,6 +433,9 @@ void runHgg2012(const char *fileset    = "0000",
    photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
    photpreselnosmear->SetJetsName(jetCorr->GetOutputName());  
    photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");  
+   photpreselnosmear->SetLeadingPtMin(30.);
+   photpreselnosmear->SetTrailingPtMin(22.);
+   //photpreselnosmear->SetRescaledBeamspotWidth(5.0);      
    photpreselnosmear->SetIsData(isData);  
    
    
@@ -504,6 +518,7 @@ void runHgg2012(const char *fileset    = "0000",
   phottreesingle->SetEnableJets(kTRUE);
   phottreesingle->SetPFJetsFromBranch(kFALSE);
   phottreesingle->SetPFJetName(jetCorr->GetOutputName());      
+  phottreesingle->SetBeamspotWidth(5.0);
   phottreesingle->SetIsData(isData);
   if (is25) phottreesingle->SetEnablePFPhotons(kFALSE);  
   
@@ -515,6 +530,7 @@ void runHgg2012(const char *fileset    = "0000",
   phottreesingleinvert->SetPFJetsFromBranch(kFALSE);
   phottreesingleinvert->SetPFJetName(pubJetOpen->GetOutputName());
   phottreesingleinvert->SetApplyElectronVeto(kFALSE);
+  phottreesingleinvert->SetBeamspotWidth(5.0);
   phottreesingleinvert->SetIsData(isData);  
   if (is25) phottreesingleinvert->SetEnablePFPhotons(kFALSE);    
   
@@ -558,7 +574,7 @@ void runHgg2012(const char *fileset    = "0000",
   //jetCorr          ->Add(photcicnoeleveto);  
   jetCorr          ->Add(photpresel);  
   jetCorr          ->Add(photpreselinverteleveto);  
-  //jetCorr          ->Add(photpreselnosmear);  
+  jetCorr          ->Add(photpreselnosmear);  
 
   photcic         ->Add(phottreecic);
   photcicnoeleveto         ->Add(phottreecicnoeleveto);

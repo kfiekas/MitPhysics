@@ -1,4 +1,4 @@
-// $Id: runHgg2011.C,v 1.3 2012/05/28 09:48:23 mingyang Exp $
+// $Id: runHgg2011.C,v 1.4 2012/06/08 01:18:27 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -272,8 +272,7 @@ void runHgg2011(const char *fileset    = "0000",
   photcic->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
   photcic->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   photcic->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);
-  photcic->SetDoMCErrScaling(kTRUE);
-  photcic->SetMCErrScale(1.07, 1.045);    
+  //photcic->SetMCR9Scale(1.0048, 1.00492);
   photcic->SetJetsName(jetCorr->GetOutputName());    
   photcic->SetIsData(isData);
   photcic->SetDoShowerShapeScaling(kTRUE); 
@@ -295,10 +294,7 @@ void runHgg2011(const char *fileset    = "0000",
   photcicnoeleveto->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
   photcicnoeleveto->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   photcicnoeleveto->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086);
-  photcicnoeleveto->SetDoMCR9Scaling(kTRUE);
-  photcicnoeleveto->SetMCR9Scale(1.0048, 1.00492);
-  photcicnoeleveto->SetDoMCErrScaling(kTRUE);
-  photcicnoeleveto->SetMCErrScale(1.07, 1.045);    
+//  photcicnoeleveto->SetMCR9Scale(1.0048, 1.00492);
   photcicnoeleveto->SetApplyEleVeto(kFALSE);
   photcicnoeleveto->SetInvertElectronVeto(kTRUE);
   photcicnoeleveto->SetJetsName(jetCorr->GetOutputName());  
@@ -330,14 +326,6 @@ void runHgg2011(const char *fileset    = "0000",
   photpresel->AddEnCorrPerRun(175830,177139,0.9958,0.9958,1.0021,0.9944,1.0073,0.9968,1.0017,0.9933,1.004);
   photpresel->AddEnCorrPerRun(177140,178421,0.9962,0.9962,1.0025,0.9946,1.0075,0.9960,1.0010,0.9944,1.005);
   photpresel->AddEnCorrPerRun(178424,180252,0.9961,0.9961,1.0024,0.9942,1.0071,0.9921,0.9970,0.9953,1.0059); 
-  photpresel->SetDoMCR9Scaling(kTRUE);
-  photpresel->SetMCR9Scale(1.0035, 1.0035);  
-  photpresel->SetDoMCSigIEtaIEtaScaling(kTRUE);
-  photpresel->SetDoMCWidthScaling(kTRUE);  
-  photpresel->SetMCSigIEtaIEtaScale(0.87,0.0011,0.99,0);
-  photpresel->SetMCWidthScale(0.99,0);
-  photpresel->SetDoMCErrScaling(kTRUE);
-  photpresel->SetMCErrScale(1.07, 1.045);    
   photpresel->SetJetsName(jetCorr->GetOutputName());  
   photpresel->SetIsData(isData);
   photpresel->SetDoShowerShapeScaling(kTRUE); 
@@ -360,14 +348,6 @@ void runHgg2011(const char *fileset    = "0000",
   photpreselinverteleveto->AddEnCorrPerRun(175860,177139,0.9911,0.9911,0.9977,0.9990,1.0109,0.9922,0.9973,0.9967,1.0077);
   photpreselinverteleveto->AddEnCorrPerRun(177140,178421,0.9910,0.9910,0.9975,0.9987,1.0105,0.9921,0.9972,0.9975,1.0085);
   photpreselinverteleveto->AddEnCorrPerRun(178424,999999,0.9903,0.9903,0.9969,0.9976,1.0095,0.9889,0.9940,0.9976,1.0086); 
-  photpreselinverteleveto->SetDoMCR9Scaling(kTRUE);
-  photpreselinverteleveto->SetMCR9Scale(1.0035, 1.0035);
-  photpreselinverteleveto->SetDoMCSigIEtaIEtaScaling(kTRUE);
-  photpreselinverteleveto->SetDoMCWidthScaling(kTRUE);  
-  photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
-  photpreselinverteleveto->SetMCSigIEtaIEtaScale(0.87,0.0011,0.99,0);
-  photpreselinverteleveto->SetMCWidthScale(0.99,0);
-  photpreselinverteleveto->SetMCErrScale(1.07, 1.045);    
   photpreselinverteleveto->SetApplyEleVeto(kFALSE);
   photpreselinverteleveto->SetInvertElectronVeto(kTRUE);
   photpreselinverteleveto->SetJetsName(jetCorr->GetOutputName());  
