@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.26 2012/06/08 01:17:03 mingyang Exp $
+// $Id: PhotonPairSelector.h,v 1.27 2012/07/24 11:41:22 fabstoec Exp $
 //
 // PhotonPairSelector
 //
@@ -171,11 +171,9 @@ namespace mithep
     void                SetBdtCutEndcap(Float_t x)        { fbdtCutEndcap = x; }
  
     void                SetDoShowerShapeScaling(Bool_t b)  { fDoShowerShapeScaling = b; }
-    void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
-    void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
     
     void                SetJetsName(const char *n)       { fJetsName = n;              }    
-    
+        
   protected:
     void                Process();
     void                SlaveBegin();

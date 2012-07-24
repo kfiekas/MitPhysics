@@ -24,136 +24,135 @@ using namespace mithep;
 ClassImp(mithep::PhotonPairSelector)
   
 //--------------------------------------------------------------------------------------------------
-  PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
-    // Base Module...
-    BaseMod                        (name,title),
-    // define all the Branches to load
-    fPhotonBranchName              (Names::gkPhotonBrn),
-    fElectronName                  (Names::gkElectronBrn),
-    fGoodElectronName              (Names::gkElectronBrn),
-    fConversionName                (Names::gkMvfConversionBrn),
-    fPFConversionName              ("PFPhotonConversions"),  
-    fTrackBranchName               (Names::gkTrackBrn),
-    fPileUpDenName                 (Names::gkPileupEnergyDensityBrn),
-    fPVName                        (Names::gkPVBeamSpotBrn),
-    fBeamspotName                  (Names::gkBeamSpotBrn),
-    fPFCandName                    (Names::gkPFCandidatesBrn),
-    // MC specific stuff...
-    fMCParticleName                (Names::gkMCPartBrn),
-    fPileUpName                    (Names::gkPileupInfoBrn),
-    fJetsName                      (Names::gkPFJetBrn),
-    fPFMetName                     ("PFMet"),    
-    fGoodPhotonsName               (ModNames::gkGoodPhotonsName),
-    fChosenVtxName                 ("HggChosenVtx"),
-    // ----------------------------------------
-    // Selection Types
-    fPhotonSelType                 ("NoSelection"),
-    fVertexSelType                 ("StdSelection"),
-    fPhSelType                     (kNoPhSelection),
-    fVtxSelType                    (kStdVtxSelection),
-    //-----------------------------------------
-    // Id Types
-    fIdMVAType                     ("2011IdMVA"),
-    fIdType                        (k2011IdMVA),
-    //-----------------------------------------
-    // preselection Type
-    fShowerShapeType               ("2011ShowerShape"),
-    fSSType                        (PhotonTools::k2011ShowerShape),
-    // ----------------------------------------
-    fPhotonPtMin                   (20.0),
-    fPhotonEtaMax                  (2.5),
-    fLeadingPtMin                  (100.0/3.0),
-    fTrailingPtMin                 (100.0/4.0),
-    fIsData                        (false),
-    fPhotonsFromBranch             (true),
-    fPVFromBranch                  (true),
-    fGoodElectronsFromBranch       (kTRUE),
-    fUseSingleLegConversions       (kFALSE),
-    // ----------------------------------------
-    // collections....
-    fPhotons                       (0),
-    fElectrons                     (0),
-    fConversions                   (0),
-    fPFConversions                 (0),
-    fTracks                        (0),
-    fPileUpDen                     (0),
-    fPV                            (0),
-    fBeamspot                      (0),
-    fPFCands                       (0),
-    fMCParticles                   (0),
-    fPileUp                        (0),
-    fJets                          (0),
-    fPFMet                         (0),
-    // ---------------------------------------
-    fDataEnCorr_EBlowEta_hR9central(0.),
-    fDataEnCorr_EBlowEta_hR9gap    (0.),
-    fDataEnCorr_EBlowEta_lR9       (0.),
-    fDataEnCorr_EBhighEta_hR9      (0.),
-    fDataEnCorr_EBhighEta_lR9      (0.),
-    fDataEnCorr_EElowEta_hR9       (0.),
-    fDataEnCorr_EElowEta_lR9       (0.),
-    fDataEnCorr_EEhighEta_hR9      (0.),
-    fDataEnCorr_EEhighEta_lR9      (0.),
-    fRunStart                      (0),
-    fRunEnd                        (0),
-    fMCSmear_EBlowEta_hR9central   (0.),
-    fMCSmear_EBlowEta_hR9gap       (0.),
-    fMCSmear_EBlowEta_lR9          (0.),
-    fMCSmear_EBhighEta_hR9         (0.),
-    fMCSmear_EBhighEta_lR9         (0.),
-    fMCSmear_EElowEta_hR9          (0.),
-    fMCSmear_EElowEta_lR9          (0.),
-    fMCSmear_EEhighEta_hR9         (0.),
-    fMCSmear_EEhighEta_lR9         (0.),
-    // ---------------------------------------
-    fRng                           (new TRandom3()),
-    fPhFixString                   ("4_2"),
-    fEtaCorrections                (0),
-    // ---------------------------------------
-    fDoDataEneCorr                 (true),
-    fDoMCSmear                     (true),
-    fDoVtxSelection                (true),
-    fApplyEleVeto                  (true),
-    fInvertElectronVeto            (kFALSE),
-    //MVA
-    fVariableType_2011             (10), 
-    fEndcapWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
-				    TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
-				    TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
-				    TString("weights.xml")),
-    fBarrelWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
-				    TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
-				    TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
-				    TString("weights.xml")),
-    fVariableType_2012_globe       (1201),
-    //fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
-    //TString("/src/MitPhysics/data/")+
-    //				  TString("TMVA_EEpf_BDT_globe.")+
-    //				  TString("weights.xml")),
-    //fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
-    //				  TString("/src/MitPhysics/data/")+
-    //				  TString("TMVA_EBpf_BDT_globe.")+
-    //				  TString("weights.xml")),
-    //fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
-    //				  TString("/src/MitPhysics/data/")+
-    //				  TString("2012ICHEP_PhotonID_Endcap_BDT.")+
-    //				  TString("weights.xml")),
-    fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
-				    TString("/src/MitPhysics/data/")+
-				    TString("2012ICHEP_PhotonID_Endcap_BDT.")+
-				    TString("weights_PSCorr.xml")),
-    fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
-				    TString("/src/MitPhysics/data/")+
-				    TString("2012ICHEP_PhotonID_Barrel_BDT.")+
-				    TString("weights.xml")),
-    fbdtCutBarrel                  (0.0744), //cuts give same eff (relative to presel) with cic
-    fbdtCutEndcap                  (0.0959), //cuts give same eff (relative to presel) with cic
-    fDoShowerShapeScaling          (kFALSE),
-    //
-    fDoMCErrScaling                (kFALSE),
-    fMCErrScaleEB                  (1.0),
-    fMCErrScaleEE                  (1.0),
-    fRelativePtCuts                (kFALSE)
+PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
+  // Base Module...
+  BaseMod                        (name,title),
+  // define all the Branches to load
+  fPhotonBranchName              (Names::gkPhotonBrn),
+  fElectronName                  (Names::gkElectronBrn),
+  fGoodElectronName              (Names::gkElectronBrn),
+  fConversionName                (Names::gkMvfConversionBrn),
+  fPFConversionName              ("PFPhotonConversions"),  
+  fTrackBranchName               (Names::gkTrackBrn),
+  fPileUpDenName                 (Names::gkPileupEnergyDensityBrn),
+  fPVName                        (Names::gkPVBeamSpotBrn),
+  fBeamspotName                  (Names::gkBeamSpotBrn),
+  fPFCandName                    (Names::gkPFCandidatesBrn),
+  // MC specific stuff...
+  fMCParticleName                (Names::gkMCPartBrn),
+  fPileUpName                    (Names::gkPileupInfoBrn),
+  fJetsName                      (Names::gkPFJetBrn),
+  fPFMetName                     ("PFMet"),    
+  fGoodPhotonsName               (ModNames::gkGoodPhotonsName),
+  fChosenVtxName                 ("HggChosenVtx"),
+  // ----------------------------------------
+  // Selection Types
+  fPhotonSelType                 ("NoSelection"),
+  fVertexSelType                 ("StdSelection"),
+  fPhSelType                     (kNoPhSelection),
+  fVtxSelType                    (kStdVtxSelection),
+  //-----------------------------------------
+  // Id Types
+  fIdMVAType                     ("2011IdMVA"),
+  fIdType                        (k2011IdMVA),
+  //-----------------------------------------
+  // preselection Type
+  fShowerShapeType               ("2011ShowerShape"),
+  fSSType                        (PhotonTools::k2011ShowerShape),
+  // ----------------------------------------
+  fPhotonPtMin                   (20.0),
+  fPhotonEtaMax                  (2.5),
+  fLeadingPtMin                  (100.0/3.0),
+  fTrailingPtMin                 (100.0/4.0),
+  fIsData                        (false),
+  fPhotonsFromBranch             (true),
+  fPVFromBranch                  (true),
+  fGoodElectronsFromBranch       (kTRUE),
+  fUseSingleLegConversions       (kFALSE),
+  // ----------------------------------------
+  // collections....
+  fPhotons                       (0),
+  fElectrons                     (0),
+  fConversions                   (0),
+  fPFConversions                 (0),
+  fTracks                        (0),
+  fPileUpDen                     (0),
+  fPV                            (0),
+  fBeamspot                      (0),
+  fPFCands                       (0),
+  fMCParticles                   (0),
+  fPileUp                        (0),
+  fJets                          (0),
+  fPFMet                         (0),
+  // ---------------------------------------
+  fDataEnCorr_EBlowEta_hR9central(0.),
+  fDataEnCorr_EBlowEta_hR9gap    (0.),
+  fDataEnCorr_EBlowEta_lR9       (0.),
+  fDataEnCorr_EBhighEta_hR9      (0.),
+  fDataEnCorr_EBhighEta_lR9      (0.),
+  fDataEnCorr_EElowEta_hR9       (0.),
+  fDataEnCorr_EElowEta_lR9       (0.),
+  fDataEnCorr_EEhighEta_hR9      (0.),
+  fDataEnCorr_EEhighEta_lR9      (0.),
+  fRunStart                      (0),
+  fRunEnd                        (0),
+  fMCSmear_EBlowEta_hR9central   (0.),
+  fMCSmear_EBlowEta_hR9gap       (0.),
+  fMCSmear_EBlowEta_lR9          (0.),
+  fMCSmear_EBhighEta_hR9         (0.),
+  fMCSmear_EBhighEta_lR9         (0.),
+  fMCSmear_EElowEta_hR9          (0.),
+  fMCSmear_EElowEta_lR9          (0.),
+  fMCSmear_EEhighEta_hR9         (0.),
+  fMCSmear_EEhighEta_lR9         (0.),
+  // ---------------------------------------
+  fRng                           (new TRandom3()),
+  fPhFixString                   ("4_2"),
+  fEtaCorrections                (0),
+  // ---------------------------------------
+  fDoDataEneCorr                 (true),
+  fDoMCSmear                     (true),
+  fDoVtxSelection                (true),
+  fApplyEleVeto                  (true),
+  fInvertElectronVeto            (kFALSE),
+  //MVA
+  fVariableType_2011             (10), 
+  fEndcapWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
+				  TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
+				  TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
+				  TString("weights.xml")),
+  fBarrelWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
+				  TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
+				  TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
+				  TString("weights.xml")),
+  fVariableType_2012_globe       (1201),
+  //fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+  //TString("/src/MitPhysics/data/")+
+  //				  TString("TMVA_EEpf_BDT_globe.")+
+  //				  TString("weights.xml")),
+  //fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+  //				  TString("/src/MitPhysics/data/")+
+  //				  TString("TMVA_EBpf_BDT_globe.")+
+  //				  TString("weights.xml")),
+  //fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+  //				  TString("/src/MitPhysics/data/")+
+  //				  TString("2012ICHEP_PhotonID_Endcap_BDT.")+
+  //				  TString("weights.xml")),
+  fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+  				  TString("/src/MitPhysics/data/")+
+  				  TString("2012ICHEP_PhotonID_Endcap_BDT.")+
+  				  TString("weights_PSCorr.xml")),
+  fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+				  TString("/src/MitPhysics/data/")+
+				  TString("2012ICHEP_PhotonID_Barrel_BDT.")+
+				  TString("weights.xml")),
+  fbdtCutBarrel                  (0.0744), //cuts give same eff (relative to presel) with cic
+  fbdtCutEndcap                  (0.0959), //cuts give same eff (relative to presel) with cic
+  fDoShowerShapeScaling          (kFALSE),
+  //
+  fMCErrScaleEB                  (1.0),
+  fMCErrScaleEE                  (1.0),
+  fRelativePtCuts                (kFALSE)
 {
   // Constructor.
 }
@@ -382,6 +381,10 @@ void PhotonPairSelector::Process()
           scaleFac1 *= GetDataEnCorr(runRange, escalecat1);
           scaleFac2 *= GetDataEnCorr(runRange, escalecat2);
         }
+        else {
+	  printf("Error: Run Range not found for data energy scale correction\n");
+	  assert(0);
+	}
         PhotonTools::ScalePhoton(fixPh1st[iPair], scaleFac1);
         PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
       }
@@ -552,10 +555,12 @@ void PhotonPairSelector::Process()
     fixPh2nd[iPair]->SetPV(theVtx[iPair]);
     fixPh1st[iPair]->SetVtxProb(vtxProb);
     fixPh2nd[iPair]->SetVtxProb(vtxProb);
-
+        
+    ThreeVector vtxpos = theVtx[iPair]->Position();
+    
     // fix the kinematics for both events
-    FourVectorM newMom1st = fixPh1st[iPair]->MomVtx(theVtx[iPair]->Position());
-    FourVectorM newMom2nd = fixPh2nd[iPair]->MomVtx(theVtx[iPair]->Position());
+    FourVectorM newMom1st = fixPh1st[iPair]->MomVtx(vtxpos);
+    FourVectorM newMom2nd = fixPh2nd[iPair]->MomVtx(vtxpos);
     fixPh1st[iPair]->SetMom(newMom1st.X(), newMom1st.Y(), newMom1st.Z(), newMom1st.E());
     fixPh2nd[iPair]->SetMom(newMom2nd.X(), newMom2nd.Y(), newMom2nd.Z(), newMom2nd.E());
 

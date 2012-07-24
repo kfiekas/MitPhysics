@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.21 2012/06/07 14:24:36 mingyang Exp $
+// $Id: PhotonTreeWriter.h,v 1.22 2012/07/12 17:04:56 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -78,7 +78,7 @@ namespace mithep
   class PhotonTreeWriterPhoton
   {
     public:  
-    void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol, const PFCandidateCol* candCol, Double_t _tRho, Bool_t fillclusterarrays, const ElectronCol* els=0, Bool_t applyElectronVeto=kTRUE);
+    void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol, const PFCandidateCol* candCol, Double_t _tRho, Bool_t fillclusterarrays, const ElectronCol* els, const DecayParticleCol *convs, const BaseVertex *bs, Bool_t applyElectronVeto=kTRUE);
       Float_t Ecor()    const { return ecor;    };
       Float_t Ecorerr() const { return ecorerr; };
       Float_t Ecorele()    const { return ecorele;    };
@@ -125,7 +125,8 @@ namespace mithep
       Float_t trackiso2;
       Float_t combiso1;
       Float_t combiso2;
-
+      Bool_t passeleveto;
+      
       //quantities from seed basic cluster      
       Float_t eseed;
       Float_t etaseed;
@@ -497,6 +498,7 @@ namespace mithep
       Float_t genHiggsZ;
       Float_t genmass;
       Float_t gencostheta;
+      Float_t genz;
       Float_t bsX;
       Float_t bsY;
       Float_t bsZ;
@@ -684,6 +686,9 @@ namespace mithep
 
     void                SetDo2012LepTag(Bool_t b) {                         fDo2012LepTag = b; }
     
+    void                SetBeamspotWidth(Double_t x)            { fBeamspotWidth = x; }
+    
+    
   protected:
     void                Process();
     void                SlaveBegin();
@@ -779,6 +784,8 @@ namespace mithep
     TString                        fPhFixDataFile;
     PhotonFix                      fPhfixph;
     PhotonFix                      fPhfixele;
+    
+    Double_t                       fBeamspotWidth;
 
     // --------------------------------
     // validation Tuple

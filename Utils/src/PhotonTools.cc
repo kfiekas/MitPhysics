@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.31 2012/06/22 12:51:20 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.32 2012/07/24 11:41:21 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -839,13 +839,7 @@ void PhotonTools::ScalePhotonShowerShapes(Photon* p, PhotonTools::ShowerShapeSca
     else  p->SetPhiWidth(0.99*p->PhiWidth());
     break;
     
-  case k2012ShowerShape:
-    //regression sigmaE
-    if (p->SCluster()->AbsEta()<1.5)
-	  p->SetEnergyErrSmeared(1.05*p->EnergyErrSmeared() - 0.005);
-	else
-	  p->SetEnergyErrSmeared(1.01372*p->EnergyErrSmeared() + 0.000156943);
-	
+  case k2012ShowerShape:	
     //R9
     if (p->SCluster()->AbsEta()<1.5) p->SetR9(1.0045*p->R9()+0.001);
     else  p->SetR9(1.0086*p->R9()-0.0007);

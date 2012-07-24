@@ -95,6 +95,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fDo2012LepTag           (kFALSE),
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
+  fBeamspotWidth          (5.8),
   fTupleName              ("hPhotonTree")
 {
   // Constructor
@@ -137,8 +138,8 @@ void PhotonTreeWriter::Process()
   LoadEventObject(fPFCandName,         fPFCands);
   LoadEventObject(fSuperClusterName,   fSuperClusters);
   LoadEventObject(fPFMetName,          fPFMet);  
-  LoadEventObject(fPFNoPileUpName,     fPFNoPileUpCands);
-  LoadEventObject(fPFPileUpName,     fPFPileUpCands);
+//   LoadEventObject(fPFNoPileUpName,     fPFNoPileUpCands);
+//   LoadEventObject(fPFPileUpName,     fPFPileUpCands);
 
   if (fEnableJets){
     LoadEventObject(fPFJetName,        fPFJets);  
@@ -181,6 +182,11 @@ void PhotonTreeWriter::Process()
   if (!fIsData)
     FindHiggsPtAndZ(_pth, _decayZ, _genmass);
 
+  
+  fDiphotonEvent->genz = -999.;
+  if (!fIsData) {
+    fDiphotonEvent->genz = fMCParticles->At(0)->DecayVertex().Z();
+  }
 
   Double_t _evt = GetEventHeader()->EvtNum();
 
@@ -511,7 +517,7 @@ void PhotonTreeWriter::Process()
       _costheta = ThreeVector(phHard->Mom()).Unit().Dot(ThreeVector(phSoft->Mom()).Unit());
       _evtcat = PhotonTools::DiphotonR9EtaPtCat(phHard,phSoft);
       
-      const Double_t dz = sqrt(2.0)*5.8;
+      const Double_t dz = sqrt(2.0)*fBeamspotWidth;
       Double_t deltamvtx = _mass*VertexTools::DeltaMassVtx(phHard->CaloPos().X(),
 							   phHard->CaloPos().Y(),
 							   phHard->CaloPos().Z(),
@@ -684,8 +690,8 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->costhetaele =  _costhetaele;    
     fDiphotonEvent->evtcat = _evtcat;
 
-    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fApplyElectronVeto);
-    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fApplyElectronVeto);
+    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto);
+    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto);
     
     Float_t ph1ecor    = fDiphotonEvent->photons[0].Ecor();
     Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
@@ -900,7 +906,7 @@ void PhotonTreeWriter::Process()
     }
     
     fSinglePhoton->SetVars(ph,conv,ele,pfsc,phgen,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,
-			   fElectrons,fApplyElectronVeto);
+			   fElectrons,fConversions,bsp,fApplyElectronVeto);
     hCiCTupleSingle->Fill();
   }
 
@@ -920,8 +926,8 @@ void PhotonTreeWriter::SlaveBegin()
     ReqEventObject(fLeptonTagMuonsName,        fLeptonTagMuons,        false);  
   }
 
-  ReqEventObject(fPFNoPileUpName,     fPFNoPileUpCands,    false);
-  ReqEventObject(fPFPileUpName,     fPFPileUpCands,    false);
+//   ReqEventObject(fPFNoPileUpName,     fPFNoPileUpCands,    false);
+//   ReqEventObject(fPFPileUpName,     fPFPileUpCands,    false);
 
 
 
@@ -1156,7 +1162,7 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
 					    const PFCandidateCol* fPFCands,
 					    Double_t rho,
 					    Bool_t fillclusterarrays, 
-					    const ElectronCol* els, Bool_t applyElectronVeto) {
+					    const ElectronCol* els, const DecayParticleCol *convs, const BaseVertex *bs, Bool_t applyElectronVeto) {
   
   const SuperCluster *s = 0;
   if (p)
@@ -1218,6 +1224,7 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
     ecalisodr04 = p->EcalRecHitIsoDr04();        
     trkisohollowdr04 = p->HollowConeTrkIsoDr04();
     
+    passeleveto = PhotonTools::PassElectronVetoConvRecovery(p, els, convs, bs);  
     
     const Vertex *vtx = vtxCol->At(0);
     if (p->HasPV()) vtx = p->PV();
