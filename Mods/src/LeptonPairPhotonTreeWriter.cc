@@ -480,9 +480,9 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("photonmass",&fLeptonPairPhotonEvent->photonmass,"F");
   ZgllTuple->Branch("photonphi",&fLeptonPairPhotonEvent->photonphi,"F");
  
-  ZgllTuple->Branch("NPu",&fLeptonPairPhotonEvent->NPu,"O");
-  ZgllTuple->Branch("NPuPlus",&fLeptonPairPhotonEvent->NPuPlus,"O");
-  ZgllTuple->Branch("NPuMinus",&fLeptonPairPhotonEvent->NPuMinus,"O");
+  ZgllTuple->Branch("NPu",&fLeptonPairPhotonEvent->NPu,"I");
+  ZgllTuple->Branch("NPuPlus",&fLeptonPairPhotonEvent->NPuPlus,"I");
+  ZgllTuple->Branch("NPuMinus",&fLeptonPairPhotonEvent->NPuMinus,"I");
  
   //Initialize Electron MVA
   eleIDMVA = new mithep::ElectronIDMVA();

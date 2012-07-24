@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonMvaMod.h,v 1.1 2011/12/11 00:03:04 bendavid Exp $
+// $Id: PhotonMvaMod.h,v 1.2 2012/06/17 23:12:56 bendavid Exp $
 //
 // PhotonMvaMod
 //
@@ -82,6 +82,10 @@ namespace mithep
 
     void                SetRegressionVersion(UInt_t v)     { fRegressionVersion = v; }
     void                SetRegressionWeights(TString f)    { fRegWeights = f; }
+
+
+    void                SetMinNumPhotons ( UInt_t i ) { fMinNumPhotons = i;}
+    void                SetDoPreselection( Bool_t b ) { fDoPreselection = b;}
     
   protected:
     void                Process();
@@ -140,8 +144,10 @@ namespace mithep
     // --------------------------------
     bool fApplyEleVeto;
     UInt_t fRegressionVersion;
-    
-    
+
+    UInt_t fMinNumPhotons;
+    Bool_t fDoPreselection;
+
     ClassDef(PhotonMvaMod, 1) // Photon identification module
   };
 }

@@ -72,7 +72,10 @@ PhotonMvaMod::PhotonMvaMod(const char *name, const char *title) :
   // ---------------------------------------
   fApplyEleVeto      (true),
   //MVA
-  fRegressionVersion(2)
+  fRegressionVersion (2),
+  fMinNumPhotons     (2),
+  fDoPreselection    (kTRUE)
+
 {
   // Constructor.
 }
@@ -96,7 +99,7 @@ void PhotonMvaMod::Process()
   // add to event for other modules to use
   AddObjThisEvt(GoodPhotons);  
   
-  if (fPhotons->GetEntries()<2) return;
+  if ( fPhotons->GetEntries() < fMinNumPhotons ) return;
   
   LoadEventObject(fPVName,             fPV);    
   LoadEventObject(fPileUpDenName,      fPileUpDen);    
@@ -109,19 +112,21 @@ void PhotonMvaMod::Process()
   for (UInt_t i=0; i<fPhotons->GetEntries(); ++i) {    
     const Photon *ph = fPhotons->At(i);
 
-    if(ph->SCluster()->AbsEta()>= fPhotonEtaMax || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566)) continue;
-    if(ph->Et()                <  fPhotonPtMin)     continue;
-    if(ph->HadOverEm()         >  0.15)     continue;
-    if(ph->IsEB()) {
-      if(ph->CoviEtaiEta() > 0.015) continue;      
-    } else {
-      if(ph->CoviEtaiEta() > 0.035) continue;
-    }    
-        
+    if( fDoPreselection ) {
+      if(ph->SCluster()->AbsEta()>= fPhotonEtaMax || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566)) continue;
+      if(ph->Et()                <  fPhotonPtMin)     continue;
+      if(ph->HadOverEm()         >  0.15)             continue;
+      if(ph->IsEB()) {
+	if(ph->CoviEtaiEta() > 0.015)                 continue;      
+      } else {
+	if(ph->CoviEtaiEta() > 0.035)                 continue;
+      }    
+    }
+    
     preselPh->Add(ph);
   }
-
-  if (preselPh->GetEntries()<2) return;
+  
+  if ( preselPh->GetEntries() < fMinNumPhotons ) return;
 
   // Sorry... need the second loop here in order to sort & assign the right Categories..
   //preselPh->Sort();
