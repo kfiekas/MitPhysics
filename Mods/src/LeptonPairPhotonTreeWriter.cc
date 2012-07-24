@@ -58,7 +58,6 @@ ClassImp(mithep::LeptonPairPhotonTreeWriter)
     fIsData                 (false),
     fElectronMuonFlag	    (1), // 1 if for electrons, 2 if for muons
 
-    fDoBlinding             (false),
 
     fPhotonsFromBranch      (kTRUE),  
     fPVFromBranch           (kTRUE),
@@ -190,7 +189,7 @@ void LeptonPairPhotonTreeWriter::Process()
   Int_t _numPU      = -1.;        // some sensible default values....
   Int_t _numPUminus = -1.;        // some sensible default values....
   Int_t _numPUplus  = -1.; 
-    
+  
   if (!fIsData){  
     for (UInt_t i=0; i<fPileUp->GetEntries(); ++i) {
       const PileupInfo *puinfo = fPileUp->At(i);
@@ -336,9 +335,8 @@ void LeptonPairPhotonTreeWriter::Process()
 
       }
     }//Set Blinding Range
-    if ( fDoBlinding && !fIsData &&  (fLeptonPairPhotonEvent->Meeg < 110 || fLeptonPairPhotonEvent->Meeg > 140) ){
-      ZgllTuple->Fill();
-    }
+
+    ZgllTuple->Fill();
     
   }
 
@@ -395,9 +393,9 @@ void LeptonPairPhotonTreeWriter::Process()
 
       }
     }
-    if ( fDoBlinding && !fIsData && (fLeptonPairPhotonEvent->Mmmg < 110 || fLeptonPairPhotonEvent->Mmmg > 140) ){
-      ZgllTuple->Fill();
-    }
+    
+    ZgllTuple->Fill();
+    
   }//ElectronsMuons
   
 }

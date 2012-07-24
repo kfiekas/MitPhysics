@@ -137,9 +137,6 @@ namespace mithep
     // The following flag configures LeptonPairPhotonTreeWriter to select either dielectron or dimuon events
     void		SetAreElectronsOrMuons (Int_t i)    { fElectronMuonFlag = i;} 
 
-    void                SetDoBlinding ( Bool_t f )          { fDoBlinding = f; }
-
-
   protected:
     void                Process();
     void                SlaveBegin();
@@ -161,8 +158,6 @@ namespace mithep
     // Dielectron or dimuon flag
     Int_t		fElectronMuonFlag;    
     
-    Bool_t              fDoBlinding;
-
     // Determines whether the input comes from a branch or not
     Bool_t              fPhotonsFromBranch;
     Bool_t              fPVFromBranch;
