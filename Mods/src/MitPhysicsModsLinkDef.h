@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.35 2012/05/29 16:57:11 bendavid Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.36 2012/06/06 15:12:12 mingyang Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -32,6 +32,7 @@
 #include "MitPhysics/Mods/interface/TrackingPurityFilterMod.h"
 #include "MitPhysics/Mods/interface/MVASystematicsMod.h"
 #include "MitPhysics/Mods/interface/SeparatePileUpMod.h"
+#include "MitPhysics/Mods/interface/LeptonPairPhotonTreeWriter.h"
 #endif
 
 #ifdef __CINT__
@@ -78,4 +79,6 @@
 #pragma link C++ class mithep::TrackingPurityFilterMod+;
 #pragma link C++ class mithep::MVASystematicsMod+;
 #pragma link C++ class mithep::SeparatePileUpMod+;
+#pragma link C++ class mithep::LeptonPairPhotonTreeWriter+;
+#pragma link C++ class mithep::LeptonPairPhotonEvent+;
 #endif
