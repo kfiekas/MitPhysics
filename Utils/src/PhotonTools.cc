@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.32 2012/07/24 11:41:21 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.33 2012/07/24 15:46:37 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -228,9 +228,11 @@ Bool_t PhotonTools::PassElectronVetoConvRecovery(const Photon *p, const Electron
   Bool_t pass = kTRUE;
   for (UInt_t i=0; i<els->GetEntries(); ++i) {
     const Electron *e = els->At(i);
+
+    // HACVK to match CMSSW bug...
     if (e->SCluster()==p->SCluster() && e->GsfTrk()->NExpectedHitsInner()==0 && ElectronTools::PassConversionFilter(e, conversions, 
 														    v, 0, 0., 1e-6, kTRUE, kFALSE) ) {
-      //                                                    v, 0, 1e-6, 2.0, kFALSE, kFALSE) ) {
+      //                                                         v, 0, 1e-6, 2.0, kFALSE, kFALSE) ) {
       pass = kFALSE;
     }
   }
@@ -389,9 +391,8 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
 
     if(print)
       std::cout<< "   c "<<i+1<<"  pt = "<<c->Pt()<<std::endl;
-
-    if(c->Pt()   < 1. )    continue; // is this refittedPirMomentum?
-
+    
+    if (c->Pt()   < 1. )                        continue; // is this refittedPairMomentum?
     if (c->NDaughters()==2 && c->Prob() < 1e-6) continue;
 
     //ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
@@ -771,6 +772,8 @@ Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *e
 }
 
 Bool_t  PhotonTools::PassSinglePhotonPreselPFISO(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto, Bool_t invertElectronVeto) {
+
+
   float ScEta=p->SCluster()->Eta();
   float Et=p->Et();
   float R9=p->R9();
@@ -779,16 +782,17 @@ Bool_t  PhotonTools::PassSinglePhotonPreselPFISO(const Photon *p,const ElectronC
   float EcalIsoDr03=p->EcalRecHitIsoDr03();
   float HcalIsoDr03=p->HcalTowerSumEtDr03();
   float TrkIsoHollowDr03=p->HollowConeTrkIsoDr03();
+
   float NewEcalIso=EcalIsoDr03-0.012*Et;
   float NewHcalIso=HcalIsoDr03-0.005*Et;
   float NewTrkIsoHollowDr03=TrkIsoHollowDr03-0.002*Et;
+
+
   Bool_t IsBarrel=kFALSE;
   Bool_t IsEndcap=kFALSE;
   Bool_t PassEleVetoRaw = PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, bs);  
   Bool_t PassEleVeto = (!applyElectronVeto && !invertElectronVeto) || (applyElectronVeto && !invertElectronVeto && PassEleVetoRaw) || (!applyElectronVeto && invertElectronVeto && !PassEleVetoRaw);
- 
   float ChargedIso_selvtx_DR002To0p02=IsolationTools::PFChargedIsolation(p,vtx, 0.2, 0.,fPFCands);
-
   if(fabs(ScEta)<1.4442){IsBarrel=kTRUE;}
   if(fabs(ScEta)>1.566 && fabs(ScEta)<2.5){IsEndcap=kTRUE;}
   if((!IsBarrel) && (!IsEndcap)){
@@ -810,6 +814,25 @@ Bool_t  PhotonTools::PassSinglePhotonPreselPFISO(const Photon *p,const ElectronC
   return kFALSE;
 }
 
+bool PhotonTools::PassVgamma2011Selection(const Photon* ph, double rho) {
+
+  bool isEB = (ph->SCluster()->AbsEta()<1.5);
+  
+  if (ph->HasPixelSeed())                                           return false;  // ? is this what we want ?
+  if (ph->HadOverEm()            > 0.05)                            return false;
+  if (ph->CoviEtaiEta()          > (isEB ? 0.011 : 0.03) )          return false;
+  if (ph->HollowConeTrkIsoDr04() > ( 2.0 + 0.001 *ph->Pt() + 
+				     (isEB ? 0.0167 : 0.032)*rho )) return false; 
+  if (ph->EcalRecHitIsoDr04()    > ( 4.2 + 0.006 *ph->Pt() + 
+				     (isEB ? 0.183  : 0.090)*rho )) return false; 
+  if (ph->HcalTowerSumEtDr04()   > ( 2.2 + 0.0025*ph->Pt() + 
+				     (isEB ? 0.062  : 0.180)*rho )) return false; 
+
+  // spike cleaning...
+  if ( ph->CoviEtaiEta() < 0.001 /* add SigIPhiIPhi */ )            return false;
+
+  return true;
+}
 
 void PhotonTools::ScalePhotonShowerShapes(Photon* p, PhotonTools::ShowerShapeScales scale) {
 

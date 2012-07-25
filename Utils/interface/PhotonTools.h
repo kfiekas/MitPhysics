@@ -147,7 +147,9 @@ namespace mithep {
 				      const VertexCol*   vtxCol,
 				      double rho, double ptmin,
 				      std::vector<double>* kin = NULL);                                 
-                                 
+    
+    static bool PassVgamma2011Selection(const Photon* ph, double rho);
+
     static const MCParticle *MatchMC(const Particle *ph, const MCParticleCol *c, Bool_t matchElectrons = kFALSE);
     ClassDef(PhotonTools, 0) // Muon tools
       };

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.26 2012/05/27 17:02:19 bendavid Exp $
+// $Id: PhotonIDMod.h,v 1.27 2012/07/24 11:41:22 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -166,12 +166,13 @@ namespace mithep
         kTight,             //"Tight"
         kLoose,             //"Loose"
         kLooseEM,           //"LooseEM"
-	kBaseLineCiC,        //"2011" Hgg BaseLine CiC
-	kBaseLineCiCPF,        //"2012" Hgg BaseLine CiC
-	kMITMVAId,          // MingMing MVA ID
-	kMITPhSelection,    //MIT loose preselection (for mva)
+	kBaseLineCiC,         //"2011" Hgg BaseLine CiC
+	kBaseLineCiCPF,       //"2012" Hgg BaseLine CiC
+	kMITMVAId,            // MingMing MVA ID
+	kMITPhSelection,      //MIT loose preselection (for mva)
 	kMITPFPhSelection,    //MIT loose preselection (for mva)
-        kCustomId           //"Custom"
+	kVgamma2011Selection, // Vgamma 2011 Photon ID
+        kCustomId             //"Custom"
       };
 
       enum EPhIsoType {

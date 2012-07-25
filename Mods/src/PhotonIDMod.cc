@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.31 2012/05/27 17:02:19 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.32 2012/07/24 11:41:21 fabstoec Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -183,7 +183,6 @@ void PhotonIDMod::Process()
   for (UInt_t i=0; i<fPhotons->GetEntries(); ++i) {    
     // need to cpoy the photon in order to be able to scale R9 etc.
     Photon *ph = new Photon(*fPhotons->At(i));        
-
     
     if (fFiduciality == kTRUE &&
         (ph->SCluster()->AbsEta()>=2.5 || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566) ) ) 
@@ -219,7 +218,7 @@ void PhotonIDMod::Process()
 //       ph->SetEtaWidth(0.99*ph->EtaWidth());
 //       ph->SetPhiWidth(0.99*ph->PhiWidth());
 //     }
-
+    
     PhotonTools::eScaleCats escalecat = PhotonTools::EScaleCat(ph);
 
     // now we dicide if we either scale (Data) or Smear (MC) the Photons
@@ -248,7 +247,14 @@ void PhotonIDMod::Process()
       }
       PhotonTools::SmearPhotonError(ph, width);
     }
-
+    
+    // ---------------------------------------------------------------------
+    // check if we use the Vgamma2011 Selection. If yes, bypass all the below...
+    if( fPhIdType == kVgamma2011Selection ) {
+      if( PhotonTools::PassVgamma2011Selection(ph, _tRho) )
+	GoodPhotons->AddOwned(ph);
+      continue; // go to next Photons
+    }
 
     // ---------------------------------------------------------------------
     // check if we use the CiC Selection. If yes, bypass all the below...
@@ -479,6 +485,10 @@ void PhotonIDMod::SlaveBegin()
   }
   else if (fPhotonIDType.CompareTo("MITPFSelection") == 0)  {
     fPhIdType = kMITPFPhSelection;
+    fPhotonIsoType = "NoIso";    
+  }
+  else if (fPhotonIDType.CompareTo("Vgamma2011Selection") == 0)  {
+    fPhIdType = kVgamma2011Selection;
     fPhotonIsoType = "NoIso";    
   }
   else {
