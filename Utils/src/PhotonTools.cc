@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.33 2012/07/24 15:46:37 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.34 2012/07/25 15:00:41 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -829,7 +829,8 @@ bool PhotonTools::PassVgamma2011Selection(const Photon* ph, double rho) {
 				     (isEB ? 0.062  : 0.180)*rho )) return false; 
 
   // spike cleaning...
-  if ( ph->CoviEtaiEta() < 0.001 /* add SigIPhiIPhi */ )            return false;
+  if ( ph->CoviEtaiEta() < 0.001 && TMath::Sqrt(TMath::Abs(ph->SCluster()->Seed()->CoviPhiiPhi())) < 0.001)
+    return false;
 
   return true;
 }
