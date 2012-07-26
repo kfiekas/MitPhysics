@@ -1382,8 +1382,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
       fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
       fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
-      fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 || 
-      fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4  
+      fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 
     ) {
     fMVAVar_EleDEtaIn = TMath::Min(fabs(double(ele->DeltaEtaSuperClusterTrackAtVtx())),0.06); ; 
     fMVAVar_EleDPhiIn = TMath::Min(fabs(double(ele->DeltaPhiSuperClusterTrackAtVtx())),0.6); 
@@ -1395,7 +1394,20 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
     fMVAVar_EleGsfTrackChi2OverNdof = TMath::Min(double( ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof()),200.0);
     fMVAVar_EledEtaCalo =  TMath::Min(fabs(double(ele->DeltaEtaSeedClusterTrackAtCalo())),0.2);
     fMVAVar_EleR9 = TMath::Min(double(ele->SCluster()->R9()), 5.0);   
-  } else {
+  }
+  else if (fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4) {
+    fMVAVar_EleDEtaIn = TMath::Min(fabs(double(ele->DeltaEtaSuperClusterTrackAtVtx())),0.06); ; 
+    fMVAVar_EleDPhiIn = TMath::Min(fabs(double(ele->DeltaPhiSuperClusterTrackAtVtx())),0.6); 
+    fMVAVar_EleFBrem = TMath::Max(double(ele->FBrem()),-1.0); 
+    fMVAVar_EleEOverP = TMath::Min(double(ele->ESuperClusterOverP()), 20.0); 
+    fMVAVar_EleESeedClusterOverPout = TMath::Min(double(ele->ESeedClusterOverPout()),20.0); 
+    fMVAVar_EleEEleClusterOverPout = TMath::Min(double(ele->EEleClusterOverPout()),20.0); 
+    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->PIn(); 
+    fMVAVar_EleGsfTrackChi2OverNdof = TMath::Min(double( ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof()),200.0);
+    fMVAVar_EledEtaCalo =  TMath::Min(fabs(double(ele->DeltaEtaSeedClusterTrackAtCalo())),0.2);
+    fMVAVar_EleR9 = TMath::Min(double(ele->SCluster()->R9()), 5.0);   
+  }
+  else {
     fMVAVar_EleDEtaIn = ele->DeltaEtaSuperClusterTrackAtVtx();  
     fMVAVar_EleDPhiIn = ele->DeltaPhiSuperClusterTrackAtVtx(); 
     fMVAVar_EleFBrem = ele->FBrem(); 
