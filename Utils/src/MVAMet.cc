@@ -403,12 +403,13 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   for(unsigned int i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     Double_t pPt = fRecoilTools->fJetIDMVA->correctedPt(pJet,iJetCorrector,iPUEnergyDensity);
+    //if(pPt < 0) continue;
     if(!JetTools::passPFLooseId(pJet)) continue;
     if(f42 && pPt > 1.) lNAllJet++;
     if(!f42)            lNAllJet++;
     if(pPt  > 30)  lNJet++;
-    if(lPt0 < pPt) {lPt0 = pPt; lLead = pJet; continue;}    
-    if(lPt1 < pPt) {lPt1 = pPt; l2nd  = pJet; continue;}
+    if(lPt0 < pPt) {lPt1 = lPt0; lPt0 = pPt;   l2nd  = lLead; lLead = pJet; continue;}    
+    if(lPt1 < pPt) {lPt1 = pPt;  l2nd  = pJet; continue;}
   }
 
   fSumEt    = lPFRec.SumEt();
@@ -542,9 +543,9 @@ Met MVAMet::GetMet(	Bool_t iPhi,
     if(!JetTools::passPFLooseId(pJet)) continue;
     if(f42 && pPt > 1.) lNAllJet++;
     if(!f42)            lNAllJet++;
-    if(pPt  > 30)  lNJet++;
-    if(lPt0 < pPt) {lPt0 = pPt; lLead = pJet; continue;}    
-    if(lPt1 < pPt) {lPt1 = pPt; l2nd  = pJet; continue;}
+    if(pPt  > 30.)  lNJet++;
+    if(lPt0 < pPt) {lPt1 = lPt0; lPt0  = pPt; l2nd  = lLead; lLead = pJet; continue;}    
+    if(lPt1 < pPt) {lPt1 = pPt;  l2nd  = pJet; continue;}
   }
   
   fSumEt    = lPFRec.SumEt();
@@ -728,8 +729,8 @@ Met MVAMet::GetMet(	bool iPhi,
     if(f42 && pPt > 1.) lNAllJet++;
     if(!f42)            lNAllJet++;
     if(pPt  > 30.)  lNJet++;
-    if(lPt0 < pPt) {lPt0 = pPt; lLead = pJet; continue;}    
-    if(lPt1 < pPt) {lPt1 = pPt; l2nd  = pJet; continue;}
+    if(lPt0 < pPt) {lPt1 = lPt0; lPt0 = pPt; l2nd = lLead; lLead = pJet; continue;}    
+    if(lPt1 < pPt) {lPt1 = pPt;  l2nd  = pJet; continue;}
   }
   
   fSumEt   = lPFRec.SumEt();
@@ -890,8 +891,8 @@ Met MVAMet::GetMet(	Bool_t iPhi,
     if(f42 && pPt > 1.) lNAllJet++;
     if(!f42)            lNAllJet++;
     if(pPt  > 30.)  lNJet++;
-    if(lPt0 < pPt) {lPt0 = pPt; lLead = pJet; continue;}    
-    if(lPt1 < pPt) {lPt1 = pPt; l2nd  = pJet; continue;}
+    if(lPt0 < pPt) {lPt1 = lPt0; lPt0  = pPt; l2nd  = lLead; lPt1 = l2nd->Pt(); lLead = pJet; continue;}        
+    if(lPt1 < pPt) {lPt1 = pPt;  l2nd  = pJet; continue;}
   }
   fSumEt   = lPFRec.SumEt();
   fU       = lPFRec.Pt();

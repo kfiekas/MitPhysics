@@ -91,12 +91,13 @@ Met RecoilTools::trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Dou
   double trkSumEt = 0; 
   for(UInt_t i0=0; i0<iCands->GetEntries(); i0++) {
     const PFCandidate *pfcand = iCands->At(i0);
-    if( (pfcand->HasTrackerTrk() && (fabs(pfcand->TrackerTrk()->DzCorrected(*iVertex))< iDZCut)) ||
-	(pfcand->HasGsfTrk()     && (fabs(pfcand->GsfTrk()->DzCorrected(*iVertex))    < iDZCut)) ) {
-      trkMetx  -= pfcand->Px();
-      trkMety  -= pfcand->Py();
-      trkSumEt += pfcand->Pt();
-    }
+    double lDZ = 999;
+    if(pfcand->HasTrackerTrk())  lDZ =  fabs(pfcand->TrackerTrk()->DzCorrected(*iVertex));//
+    //else if(pfcand->HasGsfTrk()) lDZ =  fabs(pfcand->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) > iDZCut) continue;
+    trkMetx  -= pfcand->Px();
+    trkMety  -= pfcand->Py();
+    trkSumEt += pfcand->Pt();
   }
   Met lMet(trkMetx,trkMety);
   lMet.SetSumEt(trkSumEt);
@@ -140,6 +141,7 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,
 			  int iSign) { 
   FourVectorM lVec(0,0,0,0);
   double lPt = fJetIDMVA->correctedPt(iJet,iJetCorrector,iPUEnergyDensity);
+  //if(lPt < 0) lPt = 0.;
   //if(iJet->RawMom().Pt() < 10) lPt = TMath::Max(iJet->RawMom().Pt()-iJet->JetArea()*iPUEnergyDensity->At(0)->Rho(),0.);
   lPt *= (iJet->NeutralEmEnergy()/iJet->RawMom().E() + iJet->NeutralHadronEnergy()/iJet->RawMom().E());
   lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
@@ -188,6 +190,7 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
   int lNPass = 0;
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
+    if(!JetTools::passPFLooseId(pJet))                                              continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue; 
     if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                 continue;
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
@@ -218,7 +221,7 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                             continue;
-   if(!fJetIDMVA->passPt(pJet))                                           continue; 
+    if(!fJetIDMVA->passPt(pJet))                                           continue; 
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices))                          continue;
     addNeut(pJet,lVec,lSumEt,iRho);
   }
@@ -251,7 +254,6 @@ Met RecoilTools::NoPURecoil(Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_
     const PFJet *pJet = iJets->At(i0);
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue; 
     if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
-    //std::cout << " ======> " <<  fJetIDMVA->correctedPt(pJet,iJetCorrector,iPileupEnergyDensity) << " ---" << fJetIDMVA->MVAValue(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << " -- " << (pJet->NeutralEmEnergy()/pJet->RawMom().E() + pJet->NeutralHadronEnergy()/pJet->RawMom().E()) << std::endl;
     if(iJetCorrector != 0 && iPileupEnergyDensity != 0) if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     if(iJetCorrector == 0 || iPileupEnergyDensity == 0) if(!fJetIDMVA->pass(pJet,iVertex,iVertices)) continue;
     if(iJetCorrector != 0 && iPileupEnergyDensity != 0) addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
@@ -459,6 +461,7 @@ Met RecoilTools::PUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJet
     if(!JetTools::passPFLooseId(pJet))                                             continue;
     if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue; //Quick cleaning
+    //std::cout << " ======> " <<  fJetIDMVA->correctedPt(pJet,iJetCorrector,iPileupEnergyDensity) << " ---" << fJetIDMVA->MVAValue(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << " -- " << (pJet->NeutralEmEnergy()/pJet->RawMom().E() + pJet->NeutralHadronEnergy()/pJet->RawMom().E()) << std::endl;
     if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
   }
