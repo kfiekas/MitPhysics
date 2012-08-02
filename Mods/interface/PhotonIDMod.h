@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.27 2012/07/24 11:41:22 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.28 2012/07/25 15:00:42 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -161,6 +161,8 @@ namespace mithep
     void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
     void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
 
+    void                SetIdMVAType(const char *type)    { fIdMVATypeName        = type;    } 
+
       enum EPhIdType {
         kIdUndef = 0,       //not defined
         kTight,             //"Tight"
@@ -171,7 +173,9 @@ namespace mithep
 	kMITMVAId,            // MingMing MVA ID
 	kMITPhSelection,      //MIT loose preselection (for mva)
 	kMITPFPhSelection,    //MIT loose preselection (for mva)
+	kMITPFPhSelection_NoTrigger,    //MIT loose preselection (for mva, no Trigger)
 	kVgamma2011Selection, // Vgamma 2011 Photon ID
+	kTrivialSelection,    // only pt & eta cuts
         kCustomId             //"Custom"
       };
 
@@ -244,10 +248,17 @@ namespace mithep
 
       Double_t fbdtCutBarrel;
       Double_t fbdtCutEndcap;
+
+      // ----------------------------------------------------------------
+      // these guys should go away.... (let MVATools handle this)   (fab)
       int                         fVariableType;
       TString                     fEndcapWeights;
       TString                     fBarrelWeights;
+      // ----------------------------------------------------------------
       MVATools                    fTool;
+      TString                     fIdMVATypeName;
+      MVATools::IdMVAType         fIdMVAType;
+      // ----------------------------------------------------------------
 
       Bool_t fDoMCR9Scaling;
       Double_t fMCR9ScaleEB;

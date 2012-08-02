@@ -52,9 +52,9 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fPhSelType                     (kNoPhSelection),
   fVtxSelType                    (kStdVtxSelection),
   //-----------------------------------------
-  // Id Types
+  // Id Types fab: shouldn't we have kNone as default ???
   fIdMVAType                     ("2011IdMVA"),
-  fIdType                        (k2011IdMVA),
+  fIdType                        (MVATools::k2011IdMVA),
   //-----------------------------------------
   // preselection Type
   fShowerShapeType               ("2011ShowerShape"),
@@ -115,8 +115,10 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fDoVtxSelection                (true),
   fApplyEleVeto                  (true),
   fInvertElectronVeto            (kFALSE),
-  //MVA
+  // ------------------------------------------------------------------
+  // this block should eventually be deleted... 
   fVariableType_2011             (10), 
+
   fEndcapWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
 				  TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
 				  TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
@@ -146,8 +148,13 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
 				  TString("/src/MitPhysics/data/")+
 				  TString("2012ICHEP_PhotonID_Barrel_BDT.")+
 				  TString("weights.xml")),
+  // --------------------------------------------------------------------------
+
   fbdtCutBarrel                  (0.0744), //cuts give same eff (relative to presel) with cic
   fbdtCutEndcap                  (0.0959), //cuts give same eff (relative to presel) with cic
+
+  // --------------------------------------------------------------------------
+
   fDoShowerShapeScaling          (kFALSE),
   //
   fMCErrScaleEB                  (1.0),
@@ -238,30 +245,33 @@ void PhotonPairSelector::Process()
     if (ph->SCluster()->AbsEta()>= fPhotonEtaMax ||
         (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566))
       continue;
+
     if (ph->Et()                <  fPhotonPtMin)
       continue;
+
     if (ph->HadOverEm()         >  0.15)
       continue;
 
     if (ph->IsEB()) {
-      if (ph->CoviEtaiEta()     > 0.015)
+      if (ph->CoviEtaiEta()     >  0.015)
         continue;
     }
     else {
-      if (ph->CoviEtaiEta()     > 0.035)
+      if (ph->CoviEtaiEta()     >  0.035)
         continue;
     }
+
     // photon passes the preselection
     ph->Mark();        // mark for later skimming
     preselPh->Add(ph);
   }
-
+  
   if (preselPh->GetEntries()<2) {
     this->SkipEvent();
     delete preselPh;
     return;
   }
-
+  
   //fill conversion collection for vertex selection, adding single leg conversions if needed
   //note that momentum of single leg conversions needs to be recomputed from the track
   //as it is not filled properly
@@ -287,7 +297,7 @@ void PhotonPairSelector::Process()
     for (UInt_t iconv=0; iconv<fConversions->GetEntries(); ++iconv) {
       const DecayParticle *c = fConversions->At(iconv);
       vtxconversions.Add(c);
-    }    
+    }
   }
   
 
@@ -389,7 +399,7 @@ void PhotonPairSelector::Process()
         PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
       }
     }
-
+    
     if (fDoMCSmear) {
       double width1 = GetMCSmearFac(escalecat1);
       double width2 = GetMCSmearFac(escalecat2);
@@ -407,34 +417,34 @@ void PhotonPairSelector::Process()
       PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
       PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
     }
-
+    
     //probability that selected vertex is the correct one
     Double_t vtxProb = 1.0;
-
+    
     // store the vertex for this pair
     switch (fVtxSelType) {
-
+      
     case kStdVtxSelection:
       theVtx[iPair] = fPV->At(0);
       break;
-
+      
     case kCiCVtxSelection:
       theVtx[iPair] = fVtxTools.findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV,
                                                     &vtxconversions,kFALSE,vtxProb);
       break;
-
+      
     case kCiCMVAVtxSelection:
       theVtx[iPair] = fVtxTools.findVtxBasicRanking(fixPh1st[iPair],fixPh2nd[iPair], bsp, fPV,
                                                     &vtxconversions,kTRUE,vtxProb);
       break;
-
+      
     case kMITVtxSelection:
       // need PFCandidate Collection
       theVtx[iPair] = VertexTools::BestVtx(fPFCands, fPV, bsp,
                                            mithep::FourVector((fixPh1st[iPair]->Mom()+
                                                                fixPh2nd[iPair]->Mom())));
       break;
-
+      
     case kMetSigVtxSelection: {
       // need PFCandidate Collection, otherwise use 0
       if( !fJets || !fPFCands ) {
@@ -514,7 +524,7 @@ void PhotonPairSelector::Process()
 	  sumptsq += pfc->Pt()*pfc->Pt();
 	}
 	
-	if (sumptsq<10.0) metsig = -99;
+	if ( sumptsq < 10.0 ) metsig = -99;
 	
         if (metsig<minsig && metsig>0.) {
           minsig = metsig;
@@ -549,7 +559,7 @@ void PhotonPairSelector::Process()
     default:
       theVtx[iPair] = fPV->At(0);
     }
-
+    
     //set PV ref in photons
     fixPh1st[iPair]->SetPV(theVtx[iPair]);
     fixPh2nd[iPair]->SetPV(theVtx[iPair]);
@@ -574,32 +584,46 @@ void PhotonPairSelector::Process()
       trailptcut = fLeadingPtMin;
     }
 
-
+    
     if (fRelativePtCuts) {
       leadptcut = leadptcut*pairmass;
       trailptcut = trailptcut*pairmass;
     }
-
+    
     
     //compute id bdt values
-    Double_t bdt1;
-    Double_t bdt2;
-
-    switch (fIdType) {
-    case k2011IdMVA:
-      bdt1 = fTool.GetMVAbdtValue_2011(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho,fElectrons,fApplyEleVeto);
-      bdt2 = fTool.GetMVAbdtValue_2011(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho,fElectrons,fApplyEleVeto);
-      fixPh1st[iPair]->SetIdMva(bdt1);
-      fixPh2nd[iPair]->SetIdMva(bdt2);
-      break;
-      
-    case k2012IdMVA_globe:
-      bdt1 = fTool.GetMVAbdtValue_2012_globe(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
-      bdt2 = fTool.GetMVAbdtValue_2012_globe(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
-      fixPh1st[iPair]->SetIdMva(bdt1);
-      fixPh2nd[iPair]->SetIdMva(bdt2);
-      break;
+    Double_t bdt1 = -99.;
+    Double_t bdt2 = -99.;
+    // ---------------------------------------------------------------------------------------------------------------
+    // using new interface letting the MVATools handle the type... (fab)
+    if( fIdType != MVATools::kNone ) {    // not strictly needed, but cold spped up things slightly if no MVA is needed...
+      bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
+      bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
     }
+    fixPh1st[iPair]->SetIdMva(bdt1);
+    fixPh2nd[iPair]->SetIdMva(bdt2);
+    // ---------------------------------------------------------------------------------------------------------------
+    // superseedded by above code... (fab)
+    //     switch (fIdType) {
+    //     case MVATools::k2011IdMVA:
+    //       bdt1 = fTool.GetMVAbdtValue_2011(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho,fElectrons,fApplyEleVeto);
+    //       bdt2 = fTool.GetMVAbdtValue_2011(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho,fElectrons,fApplyEleVeto);
+    //       fixPh1st[iPair]->SetIdMva(bdt1);
+    //       fixPh2nd[iPair]->SetIdMva(bdt2);
+    //       break;
+    
+    //     case MVATools::k2012IdMVA_globe:
+    //       bdt1 = fTool.GetMVAbdtValue_2012_globe(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
+    //       bdt2 = fTool.GetMVAbdtValue_2012_globe(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
+    //       fixPh1st[iPair]->SetIdMva(bdt1);
+    //       fixPh2nd[iPair]->SetIdMva(bdt2);
+    //       break;
+    
+    //     default:
+    //       fixPh1st[iPair]->SetIdMva(-99.);
+    //       fixPh2nd[iPair]->SetIdMva(-99.);
+    //     }
+    // ---------------------------------------------------------------------------------------------------------------    
 
     //printf("applying id\n");
 
@@ -652,17 +676,27 @@ void PhotonPairSelector::Process()
       // --------------------------------------------------------------------
       // MVA selection
     case kMVAPhSelection://MVA
+
       pass1 = fixPh1st[iPair]->Pt()>leadptcut                                              &&
 	PhotonTools::PassSinglePhotonPresel(fixPh1st[iPair],fElectrons,fConversions,bsp,
 					    fTracks,theVtx[iPair],rho,fApplyEleVeto)       &&
-	fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho,
-			       fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
+	( ( fixPh1st[iPair]->SCluster()->AbsEta() < 1.5 && fixPh1st[iPair]->IdMva() > fbdtCutBarrel )
+	  || ( fixPh1st[iPair]->IdMva() > fbdtCutEndcap ) );
+	  
+	// we've already compyted the MVA varible above, not needed to redo...
+// 	fTool.PassMVASelection(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho,
+// 			       fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
+
+
       if (pass1)
 	pass2 = fixPh2nd[iPair]->Pt() > trailptcut                                         &&
 	  PhotonTools::PassSinglePhotonPresel(fixPh2nd[iPair],fElectrons,fConversions,bsp,
 					      fTracks,theVtx[iPair],rho,fApplyEleVeto)     &&
-	  fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho,
-				 fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
+	( ( fixPh2nd[iPair]->SCluster()->AbsEta() < 1.5 && fixPh2nd[iPair]->IdMva() > fbdtCutBarrel )
+	  || ( fixPh2nd[iPair]->IdMva() > fbdtCutEndcap ) );
+
+// 	  fTool.PassMVASelection(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho,
+// 				 fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyEleVeto);
 
       break;
 
@@ -688,30 +722,36 @@ void PhotonPairSelector::Process()
       // loose preselection for mva
       pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
 	PhotonTools::PassSinglePhotonPreselPFISO(fixPh1st[iPair],fElectrons,fConversions,bsp,
-					    fTracks,theVtx[iPair],rho,fPFCands,fApplyEleVeto,
-					    fInvertElectronVeto);
+						 fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+						 fInvertElectronVeto);      
+
       if (pass1)
 	pass2 = fixPh2nd[iPair]->Pt() > trailptcut &&
 	  PhotonTools::PassSinglePhotonPreselPFISO(fixPh2nd[iPair],fElectrons,fConversions,bsp,
-					      fTracks,theVtx[iPair],rho,fPFCands,fApplyEleVeto,
-					      fInvertElectronVeto);
-
+						   fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+						   fInvertElectronVeto);           
+      
+      pass1 = pass1 && PhotonTools::PassCiCPFIsoSelection(fixPh1st[iPair], theVtx[iPair], fPFCands,
+							  fPV, rho2012, leadptcut);
+      if (pass1)
+        pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
+							    fPV, rho2012, trailptcut);
       break;      
     default:
       pass1 = true;
       pass2 = true;
     }
-
+    
     //match to good electrons if requested
-//     if (fInvertElectronVeto) {
-//       pass1 &= !PhotonTools::PassElectronVeto(fixPh1st[iPair],fGoodElectrons);
-//       pass2 &= !PhotonTools::PassElectronVeto(fixPh2nd[iPair],fGoodElectrons);
-//     }
+    //     if (fInvertElectronVeto) {
+    //       pass1 &= !PhotonTools::PassElectronVeto(fixPh1st[iPair],fGoodElectrons);
+    //       pass2 &= !PhotonTools::PassElectronVeto(fixPh2nd[iPair],fGoodElectrons);
+    //     }
     // finally, if both Photons pass the selections, add the pair to the passing pairs
     if (pass1 && pass2)
       passPairs.push_back(iPair);
   }
-
+  
 
   // ---------------------------------------------------------------
   // ... we're almost done, stay focused...
@@ -792,6 +832,7 @@ void PhotonPairSelector::SlaveBegin()
     //ReqBranch(fPileUpName,            fPileUp);
     ReqBranch(fMCParticleName,        fMCParticles);
   }
+
   // determine photon selection type
   if      (fPhotonSelType.CompareTo("CiCSelection") == 0)
     fPhSelType =       kCiCPhSelection;
@@ -834,9 +875,15 @@ void PhotonPairSelector::SlaveBegin()
   }
   
   if      (fIdMVAType.CompareTo("2011IdMVA") == 0)
-    fIdType =       k2011IdMVA;
+    fIdType =       MVATools::k2011IdMVA;
   else if (fIdMVAType.CompareTo("2012IdMVA_globe") == 0)
-    fIdType =       k2012IdMVA_globe;
+    fIdType =       MVATools::k2012IdMVA_globe;
+  else if (fIdMVAType.CompareTo("2012IdMVA") == 0)
+    fIdType =       MVATools::k2012IdMVA;
+  else if (fIdMVAType.CompareTo("2011IdMVA_HZg") == 0)
+    fIdType =       MVATools::k2011IdMVA_HZg;
+  else if (fIdMVAType.CompareTo("None") == 0)
+    fIdType =       MVATools::kNone;
   else {
     std::cerr<<" Id MVA "<<fIdMVAType<<" not implemented."<<std::endl;
     return;
@@ -861,16 +908,21 @@ void PhotonPairSelector::SlaveBegin()
 
   printf("initialize photon pair selector\n");
 
-  switch (fIdType) {
-  case k2011IdMVA:
-    fTool.InitializeMVA(fVariableType_2011,fEndcapWeights_2011,fBarrelWeights_2011);
-    break;
+  // ----------------------------------------------------------------
+  // anopther replace block (fab):
+  //   delegate the choice of the weight files to the MVATools...
+  fTool.InitializeMVA(fIdType);
+
+//   switch (fIdType) {
+//   case k2011IdMVA:
+//     fTool.InitializeMVA(fVariableType_2011,fEndcapWeights_2011,fBarrelWeights_2011);
+//     break;
     
-  case k2012IdMVA_globe:
-    fTool.InitializeMVA(fVariableType_2012_globe,fEndcapWeights_2012_globe,fBarrelWeights_2012_globe); 
-    break;
-  }
-  
+//   case k2012IdMVA_globe:
+//     fTool.InitializeMVA(fVariableType_2012_globe,fEndcapWeights_2012_globe,fBarrelWeights_2012_globe); 
+//     break;
+//   }
+  // ----------------------------------------------------------------
   
   if (fVtxSelType==kMetSigVtxSelection) {
     //fMVAMet.Initialize();

@@ -27,6 +27,7 @@
 #include "MitAna/DataTree/interface/GenJetCol.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/Muon.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "TDataMember.h"
 #include "TFile.h"
 #include <TNtuple.h>
@@ -37,7 +38,7 @@
 
 using namespace mithep;
 mithep::ElectronIDMVA *eleIDMVA; // The electron MVA 
-MVATools fTool; // The electron MVA tools
+//MVATools fTool; // The electron MVA tools
 
 ClassImp(mithep::LeptonPairPhotonTreeWriter)
   ClassImp(mithep::LeptonPairPhotonEvent)
@@ -56,8 +57,8 @@ ClassImp(mithep::LeptonPairPhotonTreeWriter)
     fPileUpName             (Names::gkPileupInfoBrn),
   
     fIsData                 (false),
+    fDoMCCheck              (false),
     fElectronMuonFlag	    (1), // 1 if for electrons, 2 if for muons
-
 
     fPhotonsFromBranch      (kTRUE),  
     fPVFromBranch           (kTRUE),
@@ -79,28 +80,30 @@ ClassImp(mithep::LeptonPairPhotonTreeWriter)
     fPileUpDen              (NULL),
     fPileUp                 (0),
   
-    fTupleName              ("h2LepPhotonTree"),
+    fMCParticles            (0),
+
+    fTupleName              ("h2LepPhotonTree")
   
     //Photon MVA Variables
-    fVariableType_2011             (10),
-    fEndcapWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
-				    TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
-				    TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
-				    TString("weights.xml")),
-    fBarrelWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
-				    TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
-				    TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
-				    TString("weights.xml")),
-    //2012 Photon MVA Variables not currently used
-    fVariableType_2012_globe       (1201),
-    fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
-				    TString("/src/MitPhysics/data/")+
-				    TString("TMVA_EEpf_BDT_globe.")+
-				    TString("weights.xml")),
-    fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
-				    TString("/src/MitPhysics/data/")+
-				    TString("TMVA_EBpf_BDT_globe.")+
-				    TString("weights.xml"))
+//     fVariableType_2011             (10),
+//     fEndcapWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
+// 				    TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
+// 				    TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
+// 				    TString("weights.xml")),
+//     fBarrelWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
+// 				    TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
+// 				    TString("Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
+// 				    TString("weights.xml")),
+//     //2012 Photon MVA Variables not currently used
+//     fVariableType_2012_globe       (1201),
+//     fEndcapWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+// 				    TString("/src/MitPhysics/data/")+
+// 				    TString("TMVA_EEpf_BDT_globe.")+
+// 				    TString("weights.xml")),
+//     fBarrelWeights_2012_globe      (gSystem->Getenv("CMSSW_BASE")+
+// 				    TString("/src/MitPhysics/data/")+
+// 				    TString("TMVA_EBpf_BDT_globe.")+
+// 				    TString("weights.xml"))
 
 {
   // Constructor
@@ -128,10 +131,12 @@ void LeptonPairPhotonTreeWriter::Process()
 
   if (!fIsData){
     LoadBranch(fPileUpName);
+    LoadBranch(Names::gkMCPartBrn);
   }
 
   //Initialize all tree leaf entries to -99
   fLeptonPairPhotonEvent->Meeg = -99.;
+  fLeptonPairPhotonEvent->Mee  = -99.;
   fLeptonPairPhotonEvent->ele1MVA = -99.;
   fLeptonPairPhotonEvent->ele2MVA = -99.;
   
@@ -156,6 +161,7 @@ void LeptonPairPhotonTreeWriter::Process()
   fLeptonPairPhotonEvent->ele2phi = -99.;
 
   fLeptonPairPhotonEvent->Mmmg = -99;
+  fLeptonPairPhotonEvent->Mmm  = -99;
   fLeptonPairPhotonEvent->m1E = -99;
   fLeptonPairPhotonEvent->m1Pt = -99;
   fLeptonPairPhotonEvent->m1Mass = -99;
@@ -175,6 +181,7 @@ void LeptonPairPhotonTreeWriter::Process()
   fLeptonPairPhotonEvent->m2Phi = -99;
   fLeptonPairPhotonEvent->m2Charge = -99;
 
+  fLeptonPairPhotonEvent->photonisgen = -99.;
   fLeptonPairPhotonEvent->photonidmva = -99.;
   fLeptonPairPhotonEvent->photonenergy = -99.;
   fLeptonPairPhotonEvent->photonpx = -99.;
@@ -207,16 +214,18 @@ void LeptonPairPhotonTreeWriter::Process()
   if (fElectronMuonFlag == 1){
     if (fGoodElectrons->GetEntries() > 1 && fPhotons->GetEntries() > 0){
       
-      const Photon *pho;
-      pho = 0;
-      pho = fPhotons->At(0);
+      const Photon *pho = fPhotons->At(0);
+      
+      // check if the photon has a MC match (if asked for)
+      if( fDoMCCheck )
+	fLeptonPairPhotonEvent->photonisgen = ( PhotonTools::MatchMC(pho, fMCParticles, false) ? 1. : 0. );
       
       //Compute Photon MVA Value and photon quantities
       Float_t rho = -99.;
       if (fPileUpDen->GetEntries() > 0)
 	rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
       
-      fLeptonPairPhotonEvent->photonidmva = fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
+      fLeptonPairPhotonEvent->photonidmva = pho->IdMva(); //fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
       fLeptonPairPhotonEvent->photonenergy = pho->E();
       fLeptonPairPhotonEvent->photonpx = pho->Px();
       fLeptonPairPhotonEvent->photonpy = pho->Py();
@@ -259,6 +268,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	fLeptonPairPhotonEvent->ele2phi = ele2->Phi();
 
 	fLeptonPairPhotonEvent->Meeg = (ele1->Mom() + ele2->Mom() + pho->Mom()).M();
+	fLeptonPairPhotonEvent->Mee  = (ele1->Mom() + ele2->Mom()).M();
 
 	//Compute Electron MVA Values
 	double _fbrem = max(double(ele1->FBrem()),-1.0);
@@ -344,15 +354,18 @@ void LeptonPairPhotonTreeWriter::Process()
   if (fElectronMuonFlag == 2){
     if (fGoodMuons->GetEntries()>1 && fPhotons->GetEntries() > 0){
       //Takes first (highest Pt) photon
-      const Photon *pho;
-      pho = 0;
-      pho = fPhotons->At(0);
+      const Photon* pho = fPhotons->At(0);
+
+      // check if the photon has a MC match (if asked for)
+      if( fDoMCCheck )
+	fLeptonPairPhotonEvent->photonisgen = ( PhotonTools::MatchMC(pho, fMCParticles, false) ? 1. : 0. );
+
       //Photon MVA again
       Float_t rho = -99.;
       if (fPileUpDen->GetEntries() > 0)
 	rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
 
-      fLeptonPairPhotonEvent->photonidmva = fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
+      fLeptonPairPhotonEvent->photonidmva = pho->IdMva(); //fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
       fLeptonPairPhotonEvent->photonenergy = pho->E();
       fLeptonPairPhotonEvent->photonpx = pho->Px();
       fLeptonPairPhotonEvent->photonpy = pho->Py();
@@ -371,6 +384,7 @@ void LeptonPairPhotonTreeWriter::Process()
  
       if(muona->Charge() != muonb->Charge()){  
 	fLeptonPairPhotonEvent->Mmmg = (pho->Mom()+muona->Mom()+muonb->Mom()).M();
+	fLeptonPairPhotonEvent->Mmm  = (muona->Mom()+muonb->Mom()).M();
  
 	fLeptonPairPhotonEvent->m1E = muona->E();
 	fLeptonPairPhotonEvent->m1Pt = muona->Pt();
@@ -417,6 +431,7 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ReqEventObject(fGoodMuonName,    fGoodMuons,    fGoodMuonsFromBranch); 
   if (!fIsData){
     ReqBranch(fPileUpName,         fPileUp);
+    ReqBranch(Names::gkMCPartBrn,  fMCParticles);
   }
  
   fLeptonPairPhotonEvent = new LeptonPairPhotonEvent;//Declares all tree leaves  
@@ -424,6 +439,7 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->SetAutoSave(300e9);
   
   ZgllTuple->Branch("Meeg",&fLeptonPairPhotonEvent->Meeg,"F");
+  ZgllTuple->Branch("Mee",&fLeptonPairPhotonEvent->Mee,"F");
   ZgllTuple->Branch("ele1MVA",&fLeptonPairPhotonEvent->ele1MVA,"F");
   ZgllTuple->Branch("ele2MVA",&fLeptonPairPhotonEvent->ele2MVA,"F");
   
@@ -448,6 +464,7 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("ele2phi",&fLeptonPairPhotonEvent->ele2phi,"F");
 
   ZgllTuple->Branch("Mmmg",&fLeptonPairPhotonEvent->Mmmg,"F");
+  ZgllTuple->Branch("Mmm",&fLeptonPairPhotonEvent->Mmm,"F");
   ZgllTuple->Branch("m1E",&fLeptonPairPhotonEvent->m1E,"F");
   ZgllTuple->Branch("m1Pt",&fLeptonPairPhotonEvent->m1Pt,"F");
   ZgllTuple->Branch("m1Mass",&fLeptonPairPhotonEvent->m1Mass,"F");
@@ -467,6 +484,7 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("m2Phi",&fLeptonPairPhotonEvent->m2Phi,"F");
   ZgllTuple->Branch("m2Charge",&fLeptonPairPhotonEvent->m2Charge,"F");
 
+  ZgllTuple->Branch("photonisgen",&fLeptonPairPhotonEvent->photonisgen,"F");
   ZgllTuple->Branch("photonidmva",&fLeptonPairPhotonEvent->photonidmva,"F");
   ZgllTuple->Branch("photonr9",&fLeptonPairPhotonEvent->photonr9,"F");
   ZgllTuple->Branch("photonenergy",&fLeptonPairPhotonEvent->photonenergy,"F");
@@ -495,7 +513,8 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   eleIDMVA->Initialize( "ElectronIDMVA",
                         mithep::ElectronIDMVA::kIDEGamma2012NonTrigV0,
                         kTRUE, weightFiles);
-  fTool.InitializeMVA(fVariableType_2011,fEndcapWeights_2011,fBarrelWeights_2011);
+
+  //fTool.InitializeMVA(fVariableType_2011,fEndcapWeights_2011,fBarrelWeights_2011);
   
   //Add Output Tree
   AddOutput(ZgllTuple);

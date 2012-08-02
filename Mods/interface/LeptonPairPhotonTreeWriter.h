@@ -43,6 +43,8 @@ namespace mithep
     public:
     Float_t Meeg;// 3-body mass with two electrons
     Float_t Mmmg;// 3-body mass with two muons
+    Float_t Mee;// 2-body mass with two electrons
+    Float_t Mmm;// 2-body mass with two muons
     Float_t ele1MVA;// Electron 1 MVA Value
     Float_t ele1charge;// Electron 1 Charge
     Float_t ele1energy;// Electron 1 Energy
@@ -65,6 +67,7 @@ namespace mithep
     Float_t ele2mass;// Electron 2 Mass
     Float_t ele2phi;// Electron 2 Phi
 
+    Float_t photonisgen;// Photon MVA Value
     Float_t photonidmva;// Photon MVA Value
     Float_t photonenergy;// Photon Energy
     Float_t photonpx;// Photon Px
@@ -130,8 +133,10 @@ namespace mithep
     void                SetPUInfoName(const char *n)      { fPileUpName = n;             }
 
     // is Data Or Not?
-    void                SetIsData (Bool_t b)                 { fIsData = b; }
+    void                SetIsData (Bool_t b)                 { fIsData    = b; }
     
+    void                SetDoMCCheck (Bool_t b)              { fDoMCCheck = b; }
+
     void                SetTupleName(const char* c)          { fTupleName = c; }
     
     // The following flag configures LeptonPairPhotonTreeWriter to select either dielectron or dimuon events
@@ -154,6 +159,7 @@ namespace mithep
 
     // Is it Data or MC?
     Bool_t              fIsData;
+    Bool_t              fDoMCCheck;
     
     // Dielectron or dimuon flag
     Int_t		fElectronMuonFlag;    
@@ -178,19 +184,21 @@ namespace mithep
     const PileupEnergyDensityCol  *fPileUpDen;
     const PileupInfoCol           *fPileUp;
 
+    const MCParticleCol*           fMCParticles;
+
     // --------------------------------
     TString                        fTupleName;
     LeptonPairPhotonEvent*         fLeptonPairPhotonEvent;
     TTree*                         ZgllTuple;
     
     //Photon MVA initialization variables
-    int                   fVariableType_2011;
-    TString               fEndcapWeights_2011;
-    TString               fBarrelWeights_2011;
-    int                   fVariableType_2012_globe;
-    TString               fEndcapWeights_2012_globe;
-    TString               fBarrelWeights_2012_globe;
-    MVATools              fTool;
+/*     int                   fVariableType_2011; */
+/*     TString               fEndcapWeights_2011; */
+/*     TString               fBarrelWeights_2011; */
+/*     int                   fVariableType_2012_globe; */
+/*     TString               fEndcapWeights_2012_globe; */
+/*     TString               fBarrelWeights_2012_globe; */
+    //MVATools              fTool;
     ClassDef(LeptonPairPhotonTreeWriter, 1) // Lepton Pair + Photon identification module
   };
 

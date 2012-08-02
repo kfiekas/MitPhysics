@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.27 2012/07/24 11:41:22 fabstoec Exp $
+// $Id: PhotonPairSelector.h,v 1.28 2012/07/24 15:46:36 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -62,10 +62,12 @@ namespace mithep
       kCiCMVAVtxSelection,
       kMetSigVtxSelection
     };
-    enum IdMVA {
-      k2011IdMVA = 0,
-      k2012IdMVA_globe
-    };
+
+    // outsourced to MVATools (IdMVAType)  (fab)
+/*     enum IdMVA { */
+/*       k2011IdMVA = 0, */
+/*       k2012IdMVA_globe */
+/*     }; */
    
 
     // outsourced to PhotonTools (fab)
@@ -212,7 +214,8 @@ namespace mithep
 
     // Id Type
     TString             fIdMVAType;
-    IdMVA               fIdType;
+    MVATools::IdMVAType fIdType;
+    //IdMVA               fIdType;
 
     // showershape
     TString                                fShowerShapeType;

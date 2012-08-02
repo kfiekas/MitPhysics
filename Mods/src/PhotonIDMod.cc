@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.32 2012/07/24 11:41:21 fabstoec Exp $
+// $Id: PhotonIDMod.cc,v 1.33 2012/07/25 15:00:42 fabstoec Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -76,10 +76,17 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   // MVA ID Stuff
   fbdtCutBarrel      (0.0744), //cuts give the same effiiciency (relative to preselection) with cic
   fbdtCutEndcap      (0.0959), //cuts give the same effiiciency (relative to preselection) with cic  
-  fVariableType      (10), //please use 4 which is the correct type
+
+  // ------------------------------------------------------------------------------
+  // this stuff should go away ..... (fab)
+  fVariableType       (10), //please use 4 which is the correct type
   fEndcapWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
   fBarrelWeights      (gSystem->Getenv("CMSSW_BASE")+TString("/src/MitPhysics/data/TMVAClassificationPhotonID_Barrel_PassPreSel_Variable_10_BDTnCuts2000_BDT.weights.xml")),
-  
+  // ------------------------------------------------------------------------------  
+
+  fIdMVATypeName     ("2011IdMVA"),
+  fIdMVAType         (MVATools::k2011IdMVA),
+
   //   fDoMCR9Scaling         (kFALSE),
   //   fMCR9ScaleEB           (1.0),
   //   fMCR9ScaleEE           (1.0),
@@ -198,7 +205,7 @@ void PhotonIDMod::Process()
       if (ph->SCluster()->AbsEta()<1.5) PhotonTools::ScalePhotonError(ph,fMCErrScaleEB);
       else PhotonTools::ScalePhotonError(ph,fMCErrScaleEE);
     }
-
+    
     if (fDoShowerShapeScaling && !fIsData) {
       PhotonTools::ScalePhotonShowerShapes(ph,fSSType);
     }
@@ -249,9 +256,22 @@ void PhotonIDMod::Process()
     }
     
     // ---------------------------------------------------------------------
+    // set the photonIdMVA value of requested...
+    double idMvaVal = fTool.GetMVAbdtValue(ph,fPV->At(0),fTracks, fPV, _tRho, fPFCands, fElectrons, fApplyElectronVeto);
+    ph->SetIdMva(idMvaVal);
+
+    // ---------------------------------------------------------------------
+    // check if we use the Vgamma2011 Selection. If yes, bypass all the below...
+    if( fPhIdType == kTrivialSelection ) {
+      if( ph->Pt() > fPhotonPtMin && ph->SCluster()->AbsEta() <= fAbsEtaMax )
+	GoodPhotons->AddOwned(ph);
+      continue; // go to next Photons
+    }
+    
+    // ---------------------------------------------------------------------
     // check if we use the Vgamma2011 Selection. If yes, bypass all the below...
     if( fPhIdType == kVgamma2011Selection ) {
-      if( PhotonTools::PassVgamma2011Selection(ph, _tRho) )
+      if( ph->Pt() > fPhotonPtMin && ph->SCluster()->AbsEta() <= fAbsEtaMax && PhotonTools::PassVgamma2011Selection(ph, _tRho) )
 	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }
@@ -286,19 +306,31 @@ void PhotonIDMod::Process()
       }
       continue;
     }    
+
+    //loose photon preselection for subsequent mva
+    if(fPhIdType == kMITPFPhSelection_NoTrigger ) {
+      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPreselPFISO_NoTrigger(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) ) {
+        GoodPhotons->AddOwned(ph);
+      }
+      continue;
+    }    
+
+    
+    Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
     
     // add MingMings MVA ID on single Photon level
     if(fPhIdType == kMITMVAId ) {
-      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _tRho ,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto) ) {
+      // we compute the bdt val already before, so use it ...
+      //if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _tRho ,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto) ) {
+	
+      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && ( ( isbarrel && ph->IdMva() >  fbdtCutBarrel ) || ( ph->IdMva() >  fbdtCutEndcap ) ) )	  
 	GoodPhotons->AddOwned(ph);
-      }
+      
       continue;
     }  // go to next Photon
-
+    
     if (ph->Pt() <= fPhotonPtMin) 
       continue;    // add good electron
-
-    Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
     
     Bool_t passSpikeRemovalFilter = kTRUE;
     
@@ -477,7 +509,8 @@ void PhotonIDMod::SlaveBegin()
   else if (fPhotonIDType.CompareTo("MITMVAId") == 0) {
     fPhIdType = kMITMVAId;
     fPhotonIsoType = "NoIso";
-    fTool.InitializeMVA(fVariableType,fEndcapWeights,fBarrelWeights);
+    // this is now a 'generic' MVAId: set the MVAType using 'SetIdMVAType(const char*)'  (fab)
+    //fTool.InitializeMVA(fVariableType,fEndcapWeights,fBarrelWeights);   // moved down for after we know which MVA type to load...
   }
   else if (fPhotonIDType.CompareTo("MITSelection") == 0)  {
     fPhIdType = kMITPhSelection;
@@ -487,8 +520,16 @@ void PhotonIDMod::SlaveBegin()
     fPhIdType = kMITPFPhSelection;
     fPhotonIsoType = "NoIso";    
   }
+  else if (fPhotonIDType.CompareTo("MITPFSelection_NoTrigger") == 0)  {
+    fPhIdType = kMITPFPhSelection_NoTrigger;
+    fPhotonIsoType = "NoIso";
+  }
   else if (fPhotonIDType.CompareTo("Vgamma2011Selection") == 0)  {
     fPhIdType = kVgamma2011Selection;
+    fPhotonIsoType = "NoIso";    
+  }
+  else if (fPhotonIDType.CompareTo("TrivialSelection") == 0)  {
+    fPhIdType = kTrivialSelection;
     fPhotonIsoType = "NoIso";    
   }
   else {
@@ -512,7 +553,7 @@ void PhotonIDMod::SlaveBegin()
               fPhotonIsoType.Data());
     return;
   }
-    
+  
   if      (fShowerShapeType.CompareTo("None")            == 0)
     fSSType =       PhotonTools::kNoShowerShapeScaling;
   else if (fShowerShapeType.CompareTo("2011ShowerShape") == 0)
@@ -524,6 +565,26 @@ void PhotonIDMod::SlaveBegin()
     return;
   }
   
+  if      (fIdMVATypeName.CompareTo("2011IdMVA") == 0)
+    fIdMVAType =       MVATools::k2011IdMVA;
+  else if (fIdMVATypeName.CompareTo("2012IdMVA_globe") == 0)
+    fIdMVAType =       MVATools::k2012IdMVA_globe;
+  else if (fIdMVATypeName.CompareTo("2012IdMVA") == 0)
+    fIdMVAType =       MVATools::k2012IdMVA;
+  else if (fIdMVATypeName.CompareTo("2011IdMVA_HZg") == 0)
+    fIdMVAType =       MVATools::k2011IdMVA_HZg;
+  else if (fIdMVATypeName.CompareTo("None") == 0)
+    fIdMVAType =       MVATools::kNone;
+  else {
+    std::cerr<<" Id MVA "<<fIdMVATypeName<<" not implemented."<<std::endl;
+    return;
+  }
+
+  // ------------------------------------------------------------------------------------
+  // we fill ALWAYS the bdt varible with some value... so initialize the BDT if not set to 'None' (will be handeled by MVATools)   (fab)
+  fTool.InitializeMVA(fIdMVAType);
+  // ------------------------------------------------------------------------------------
+
 }
 
 

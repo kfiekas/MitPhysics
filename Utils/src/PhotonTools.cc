@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.34 2012/07/25 15:00:41 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.35 2012/07/25 15:42:59 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -770,6 +770,45 @@ Bool_t  PhotonTools::PassSinglePhotonPresel(const Photon *p,const ElectronCol *e
   }
   return kFALSE;
 }
+
+
+Bool_t  PhotonTools::PassSinglePhotonPreselPFISO_NoTrigger(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto, Bool_t invertElectronVeto) {
+  
+  float ScEta=p->SCluster()->Eta();
+  float Et=p->Et();
+  float R9=p->R9();
+  float HoE=p->HadOverEm();
+  float CovIEtaIEta=p->CoviEtaiEta();
+  float EcalIsoDr03=p->EcalRecHitIsoDr03();
+  float HcalIsoDr03=p->HcalTowerSumEtDr03();
+  float TrkIsoHollowDr03=p->HollowConeTrkIsoDr03();
+
+  float NewEcalIso=EcalIsoDr03-0.012*Et;
+  float NewHcalIso=HcalIsoDr03-0.005*Et;
+  float NewTrkIsoHollowDr03=TrkIsoHollowDr03-0.002*Et;
+
+
+  Bool_t IsBarrel=kFALSE;
+  Bool_t IsEndcap=kFALSE;
+  Bool_t PassEleVetoRaw = PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, bs);  
+  Bool_t PassEleVeto = (!applyElectronVeto && !invertElectronVeto) || (applyElectronVeto && !invertElectronVeto && PassEleVetoRaw) || (!applyElectronVeto && invertElectronVeto && !PassEleVetoRaw);
+  float ChargedIso_selvtx_DR002To0p02=IsolationTools::PFChargedIsolation(p,vtx, 0.2, 0.,fPFCands);
+  if(fabs(ScEta)<1.4442){IsBarrel=kTRUE;}
+  if(fabs(ScEta)>1.566 && fabs(ScEta)<2.5){IsEndcap=kTRUE;}
+  if((!IsBarrel) && (!IsEndcap)){
+    return kFALSE;
+  }
+  if(!PassEleVeto){
+    return kFALSE;
+  }
+  if( ((IsBarrel && CovIEtaIEta<0.02) || (IsEndcap && CovIEtaIEta<0.06)) && ChargedIso_selvtx_DR002To0p02<4) {
+    return kTRUE;
+  }
+
+  return kFALSE;
+}
+
+
 
 Bool_t  PhotonTools::PassSinglePhotonPreselPFISO(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto, Bool_t invertElectronVeto) {
 
