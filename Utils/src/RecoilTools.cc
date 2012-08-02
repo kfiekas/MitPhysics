@@ -93,7 +93,7 @@ Met RecoilTools::trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Dou
     const PFCandidate *pfcand = iCands->At(i0);
     double lDZ = 999;
     if(pfcand->HasTrackerTrk())  lDZ =  fabs(pfcand->TrackerTrk()->DzCorrected(*iVertex));//
-    //else if(pfcand->HasGsfTrk()) lDZ =  fabs(pfcand->GsfTrk()    ->DzCorrected(*iVertex));
+    else if(pfcand->HasGsfTrk()) lDZ =  fabs(pfcand->GsfTrk()    ->DzCorrected(*iVertex));
     if( fabs(lDZ) > iDZCut) continue;
     trkMetx  -= pfcand->Px();
     trkMety  -= pfcand->Py();
@@ -191,7 +191,7 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
   for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
     const PFJet *pJet = iJets->At(i0);
     if(!JetTools::passPFLooseId(pJet))                                              continue;
-    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue; 
+    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue;
     if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                 continue;
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
@@ -324,7 +324,7 @@ Met RecoilTools::PUCMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJe
     if(!JetTools::passPFLooseId(pJet))                                             continue;
     if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
     if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
-    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue; //Quick cleaning==> if not done already
+    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity,-1);
   }
   Met lMet(lVec.Px(),lVec.Py());
@@ -460,8 +460,7 @@ Met RecoilTools::PUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJet
     const PFJet *pJet = iJets->At(i0);
     if(!JetTools::passPFLooseId(pJet))                                             continue;
     if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                continue;
-    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue; //Quick cleaning
-    //std::cout << " ======> " <<  fJetIDMVA->correctedPt(pJet,iJetCorrector,iPileupEnergyDensity) << " ---" << fJetIDMVA->MVAValue(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity) << " -- " << (pJet->NeutralEmEnergy()/pJet->RawMom().E() + pJet->NeutralHadronEnergy()/pJet->RawMom().E()) << std::endl;
+    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                      continue;    
     if(fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
   }

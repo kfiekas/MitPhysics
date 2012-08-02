@@ -704,7 +704,7 @@ Met MVAMet::GetMet(	bool iPhi,
   Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis       ,lPhiVis       ,lSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);    
   Met lPUMet = fRecoilTools->PUMet      (                                       iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);    
 
-  //Met lNPRec1 = fRecoilTools->NoPUMet (iJets,iCands,iVertex,iVertices,iRho,iPhi1,iEta1,iPhi2,iEta2);    
+  //Met lNPRec1 = fRecoilTools->NoPUMet (iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,0,0,0,0);
   //std::cout << " ====> PF => " << lPFRec.Pt() << " -- " << lPFRec1.Pt() << std::endl;
   //std::cout << " ====> TK => " << lTKRec.Pt() << " -- " << lTKRec1.Pt() << std::endl;
   //std::cout << " ====> NP =>  " << lNPRec.Pt() << " -- " << lNPRec1.Pt() << std::endl;
