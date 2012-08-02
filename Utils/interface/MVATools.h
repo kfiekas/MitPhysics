@@ -72,8 +72,9 @@ namespace mithep {
     
     IdMVAType fMVAType;
     std::vector<float> mvaVars;
-    std::map<std::string,float*> mvaVarMapEB;
-    std::map<std::string,float*> mvaVarMapEE;
+    std::vector<std::string> varNames;
+    std::map<std::string,unsigned int> mvaVarMapEB;
+    std::map<std::string,unsigned int> mvaVarMapEE;
     
     // -------------------------------------------------
     // fab: these guys should all go away...

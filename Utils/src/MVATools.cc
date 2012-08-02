@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.16 2012/06/13 10:51:10 mingyang Exp $
+// $Id: MVATools.cc,v 1.17 2012/08/02 12:30:55 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -89,11 +89,47 @@ void MVATools::InitializeMVA(MVATools::IdMVAType type) {
   TString BarrelWeights;
   TString EndcapWeights;
 
-  std::vector<std::string> varNames;  // tmp vector to push_back variable names
   varNames.resize(0);
   
   switch (type) {
     
+  case k2011IdMVA_HZg:
+
+    EndcapWeights =  (gSystem->Getenv("CMSSW_BASE")+
+		      TString("/src/MitPhysics/data/")+
+		      TString("PhotonId_lowPt_EE_BDTG.")+
+		      TString("weights.xml"));
+    BarrelWeights =  (gSystem->Getenv("CMSSW_BASE")+
+		      TString("/src/MitPhysics/data/")+
+		      TString("PhotonId_lowPt_EB_BDTG.")+
+		      TString("weights.xml"));
+
+
+    varNames.push_back("sigieie");
+    varNames.push_back("covieip");
+    varNames.push_back("s4r"    );
+    varNames.push_back("r9"     );
+    varNames.push_back("sigeta" );
+    varNames.push_back("sigphi" );
+    varNames.push_back("pfgios" );
+    varNames.push_back("pfciso" );
+    varNames.push_back("rho"    );
+    varNames.push_back("sceta"  );
+    varNames.push_back("rawe"   );
+
+    mvaVars.resize(varNames.size());
+
+    std::cout<<"  Adding stuff here.... "<<std::endl;
+
+    for( unsigned int iV = 0; iV < mvaVars.size(); ++iV) {      
+      mvaVarMapEB.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
+      mvaVarMapEE.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
+    }
+    
+    std::cout<<"  ... done "<<std::endl;
+
+    break;
+
   case k2011IdMVA:
 
     EndcapWeights =  (gSystem->Getenv("CMSSW_BASE")+
@@ -121,8 +157,8 @@ void MVATools::InitializeMVA(MVATools::IdMVAType type) {
     varNames.push_back("PhiWidth"   );
 
     for( unsigned int iV = 0; iV < mvaVars.size(); ++iV) {      
-      mvaVarMapEB.insert(  std::pair<std::string,float*>(varNames[iV], &(mvaVars[iV]))  );
-      mvaVarMapEE.insert(  std::pair<std::string,float*>(varNames[iV], &(mvaVars[iV]))  );
+      mvaVarMapEB.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
+      mvaVarMapEE.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
     }
     
     break;
@@ -154,12 +190,12 @@ void MVATools::InitializeMVA(MVATools::IdMVAType type) {
     varNames.push_back("ph.idmva_PsEffWidthSigmaRR"   );
 
     for( unsigned int iV = 0; iV < mvaVars.size() - 1; ++iV) {
-      mvaVarMapEB.insert(  std::pair<std::string,float*>(varNames[iV], &(mvaVars[iV]))  );
-      mvaVarMapEE.insert(  std::pair<std::string,float*>(varNames[iV], &(mvaVars[iV]))  );
+      mvaVarMapEB.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
+      mvaVarMapEE.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
     }
     
     // pre-shower only used for Endcaps
-    mvaVarMapEE.insert( std::pair<std::string,float*> ( varNames[mvaVars.size() - 1], &(mvaVars[mvaVars.size() - 1]) ) );
+    mvaVarMapEE.insert( std::pair<std::string,unsigned int> ( varNames[mvaVars.size() - 1], mvaVars.size() - 1) );
 
     break;
     
@@ -171,11 +207,15 @@ void MVATools::InitializeMVA(MVATools::IdMVAType type) {
 
 
   // looping over both maps and adding Vars to BDT readers
-  for(std::map<std::string,float*>::const_iterator it = mvaVarMapEB.begin(); it != mvaVarMapEB.end(); ++it)
-    fReaderBarrel -> AddVariable( (it->first).c_str(), it->second);  
-  for(std::map<std::string,float*>::const_iterator it = mvaVarMapEE.begin(); it != mvaVarMapEE.end(); ++it)
-    fReaderEndcap -> AddVariable( (it->first).c_str(), it->second);
-  
+  for( unsigned int iV = 0; iV < varNames.size(); ++iV ){
+    std::map<std::string,unsigned int>::const_iterator it = mvaVarMapEB.find(varNames[iV]);
+    if ( it != mvaVarMapEB.end() )
+      fReaderBarrel -> AddVariable( (it->first).c_str(), &(mvaVars[it->second]));
+    it = mvaVarMapEE.find(varNames[iV]);
+    if ( it != mvaVarMapEE.end() )
+      fReaderEndcap -> AddVariable( (it->first).c_str(), &(mvaVars[it->second]));
+  }
+
   fReaderEndcap->BookMVA("BDT method",EndcapWeights);
   fReaderBarrel->BookMVA("BDT method",BarrelWeights);
   
@@ -427,14 +467,14 @@ Double_t MVATools::GetMVAbdtValue(const Photon* p, const Vertex* vtx, const Trac
   // check if it's a Barrel or EE photon
   bool isBarrel = ( p->SCluster()->AbsEta() < 1.5 );
 
-  std::map<std::string,float*>* theVars = ( isBarrel ? &mvaVarMapEB : &mvaVarMapEB );  
-
+  std::map<std::string,unsigned int>* theVars = ( isBarrel ? &mvaVarMapEB : &mvaVarMapEB );  
+  
   // loop over all the variables in the map... and keep count (to make sure we have filled all variables)
   unsigned int varCounter = 0;
-  for( std::map<std::string,float*>::const_iterator iV = theVars->begin(); iV != theVars->end(); ++iV ) {
-
+  for( std::map<std::string,unsigned int>::const_iterator iV = theVars->begin(); iV != theVars->end(); ++iV ) {
+    
     TString theVarName  = TString(iV->first);  
-    float* theVarValue = iV->second;           // pointer to the variable...
+    float* theVarValue  = &(mvaVars[iV->second]);           // pointer to the variable...
     
     if( 
        !theVarName.CompareTo("HoE") 
@@ -442,17 +482,17 @@ Double_t MVATools::GetMVAbdtValue(const Photon* p, const Vertex* vtx, const Trac
       (*theVarValue) = p->HadOverEm();
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("covIEtaIEta") || !theVarName.CompareTo("ph.sigietaieta")
+	       !theVarName.CompareTo("covIEtaIEta") || !theVarName.CompareTo("ph.sigietaieta") || !theVarName.CompareTo("sigieie") 
 	       ) {
       (*theVarValue) = p->CoviEtaiEta();
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("R9") || !theVarName.CompareTo("ph.r9")
+	       !theVarName.CompareTo("R9") || !theVarName.CompareTo("ph.r9") || !theVarName.CompareTo("r9")
 	       ) {
       (*theVarValue) = p->R9();
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("ScEta") || !theVarName.CompareTo("ph.sceta")
+	       !theVarName.CompareTo("ScEta") || !theVarName.CompareTo("ph.sceta") || !theVarName.CompareTo("sceta")
 	       ) {
       (*theVarValue) = p->SCluster()->Eta();
       varCounter++;
@@ -502,33 +542,33 @@ Double_t MVATools::GetMVAbdtValue(const Photon* p, const Vertex* vtx, const Trac
       (*theVarValue) = vtxCol->GetEntries();
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("EtaWidth") || !!theVarName.CompareTo("ph.scetawidth")
+	       !theVarName.CompareTo("EtaWidth") || !theVarName.CompareTo("ph.scetawidth") || !theVarName.CompareTo("sigeta")
 	       ) {
       (*theVarValue) = p->EtaWidth();
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("PhiWidth") || !!theVarName.CompareTo("ph.scphiwidth")
+	       !theVarName.CompareTo("PhiWidth") || !theVarName.CompareTo("ph.scphiwidth") || !theVarName.CompareTo("sigphi")
 	       ) {
       (*theVarValue) = p->PhiWidth();
       varCounter++;
 
     } else if (
-	       !theVarName.CompareTo("ph.idmva_CoviEtaiPhi")
+	       !theVarName.CompareTo("ph.idmva_CoviEtaiPhi") || !theVarName.CompareTo("covieip")
 	       ) {
       (*theVarValue) = p->SCluster()->Seed()->CoviEtaiPhi();
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("ph.idmva_s4ratio")
+	       !theVarName.CompareTo("ph.idmva_s4ratio") || !theVarName.CompareTo("s4r") 
 	       ) {
       (*theVarValue) = p->S4Ratio();
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("ph.idmva_GammaIso")
+	       !theVarName.CompareTo("ph.idmva_GammaIso") || !theVarName.CompareTo("pfgiso") 
 	       ) {
       (*theVarValue) = IsolationTools::PFGammaIsolation(p,0.3,0,fPFCands);
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("ph.idmva_ChargedIso_selvtx")
+	       !theVarName.CompareTo("ph.idmva_ChargedIso_selvtx") || !theVarName.CompareTo("pfciso") 
 	       ) {
       (*theVarValue) = IsolationTools::PFChargedIsolation(p,vtx,0.3,0,fPFCands);
       varCounter++;
@@ -542,6 +582,11 @@ Double_t MVATools::GetMVAbdtValue(const Photon* p, const Vertex* vtx, const Trac
 	       !theVarName.CompareTo("ph.idmva_PsEffWidthSigmaRR")
 	       ) {
       (*theVarValue) = p->EffSigmaRR();
+      varCounter++;
+    } else if (
+	       !theVarName.CompareTo("rawe")
+	       ) {
+      (*theVarValue) = p->SCluster()->RawEnergy();
       varCounter++;
     } else {
       // a variable is not know... copmplain!
