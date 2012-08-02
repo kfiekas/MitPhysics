@@ -1,4 +1,4 @@
-// $Id: runHgg2011.C,v 1.4 2012/06/08 01:18:27 mingyang Exp $
+// $Id: runHgg2011.C,v 1.5 2012/07/24 15:47:05 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -24,6 +24,7 @@
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "MitPhysics/Mods/interface/PhotonMvaMod.h"
 #include "MitPhysics/Mods/interface/MVASystematicsMod.h"
+#include "MitPhysics/Utils/interface/RhoUtilities.h"
 
 #endif
 
@@ -277,6 +278,7 @@ void runHgg2011(const char *fileset    = "0000",
   photcic->SetIsData(isData);
   photcic->SetDoShowerShapeScaling(kTRUE); 
   photcic->SetShowerShapeType("2011ShowerShape");
+  photcic->SetRhoType(RhoUtilities::DEFAULT);
 
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
   photcicnoeleveto->SetOutputName("GoodPhotonsCICNoEleVeto");
@@ -301,7 +303,8 @@ void runHgg2011(const char *fileset    = "0000",
   photcicnoeleveto->SetIsData(isData);
   photcicnoeleveto->SetDoShowerShapeScaling(kTRUE); 
   photcicnoeleveto->SetShowerShapeType("2011ShowerShape");
-  
+  photcicnoeleveto->SetRhoType(RhoUtilities::DEFAULT);  
+
   PhotonPairSelector         *photpresel = new PhotonPairSelector("PhotonPairSelectorPresel");
   photpresel->SetOutputName("GoodPhotonsPresel");
   photpresel->SetPhotonSelType("MITSelection");
@@ -330,6 +333,7 @@ void runHgg2011(const char *fileset    = "0000",
   photpresel->SetIsData(isData);
   photpresel->SetDoShowerShapeScaling(kTRUE); 
   photpresel->SetShowerShapeType("2011ShowerShape");
+  photpresel->SetRhoType(RhoUtilities::DEFAULT);
 
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputName("GoodPhotonsPreselInvertEleVeto");
@@ -354,7 +358,8 @@ void runHgg2011(const char *fileset    = "0000",
   photpreselinverteleveto->SetIsData(isData);  
   photpreselinverteleveto->SetDoShowerShapeScaling(kTRUE); 
   photpreselinverteleveto->SetShowerShapeType("2011ShowerShape");
-  
+  photpreselinverteleveto->SetRhoType(RhoUtilities::DEFAULT);  
+
   PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
   photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
   photpreselnosmear->SetPhotonSelType("MITSelection");
@@ -367,7 +372,8 @@ void runHgg2011(const char *fileset    = "0000",
   photpreselnosmear->SetIsData(isData);  
   photpreselnosmear->SetDoShowerShapeScaling(kTRUE); 
   photpreselnosmear->SetShowerShapeType("2011ShowerShape");
-  
+  photpreselnosmear->SetRhoType(RhoUtilities::DEFAULT);    
+
   PhotonTreeWriter *phottreecic = new PhotonTreeWriter("PhotonTreeWriterCiC");
   phottreecic->SetPhotonsFromBranch(kFALSE);
   phottreecic->SetInputPhotonsName(photcic->GetOutputName());

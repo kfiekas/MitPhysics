@@ -159,7 +159,10 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   //
   fMCErrScaleEB                  (1.0),
   fMCErrScaleEE                  (1.0),
-  fRelativePtCuts                (kFALSE)
+  fRelativePtCuts                (kFALSE),
+
+  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS)
+
 {
   // Constructor.
 }
@@ -223,6 +226,28 @@ void PhotonPairSelector::Process()
   if (fPileUpDen->At(0)->RhoKt6PFJets()>0.) rho2012 = fPileUpDen->At(0)->RhoKt6PFJets();
   else rho2012 = fPileUpDen->At(0)->Rho();
   const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));
+
+  Float_t theRho = rho;
+  switch (fRhoType) {
+  case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+    theRho = rho2012;
+    break;
+  case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:       
+    theRho = ( fPileUpDen->GetEntries() ? fPileUpDen->At(0)->RhoLowEta(): rho );
+    break;
+  case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+    theRho = ( fPileUpDen->GetEntries() ? fPileUpDen->At(0)->Rho() : rho );
+    break;    
+  case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+    theRho = ( fPileUpDen->GetEntries() ? fPileUpDen->At(0)->RhoRandomLowEta() : rho );
+    break;    
+  case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:       
+    theRho = ( fPileUpDen->GetEntries() ? fPileUpDen->At(0)->RhoRandom() : rho );
+    break;
+  default:
+    theRho = rho;
+  }
+    
 
   // ------------------------------------------------------------
   // Get Event header for Run info etc.
@@ -597,8 +622,8 @@ void PhotonPairSelector::Process()
     // ---------------------------------------------------------------------------------------------------------------
     // using new interface letting the MVATools handle the type... (fab)
     if( fIdType != MVATools::kNone ) {    // not strictly needed, but cold spped up things slightly if no MVA is needed...
-      bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
-      bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,rho2012,fPFCands,fElectrons,fApplyEleVeto);
+      bdt1 = fTool.GetMVAbdtValue(fixPh1st[iPair],theVtx[iPair],fTracks,fPV,theRho,fPFCands,fElectrons,fApplyEleVeto);
+      bdt2 = fTool.GetMVAbdtValue(fixPh2nd[iPair],theVtx[iPair],fTracks,fPV,theRho,fPFCands,fElectrons,fApplyEleVeto);
     }
     fixPh1st[iPair]->SetIdMva(bdt1);
     fixPh2nd[iPair]->SetIdMva(bdt2);

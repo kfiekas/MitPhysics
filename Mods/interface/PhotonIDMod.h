@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.28 2012/07/25 15:00:42 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.29 2012/08/02 12:30:55 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -27,6 +27,7 @@
 
 #include "MitPhysics/Utils/interface/MVATools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
+#include "MitPhysics/Utils/interface/RhoUtilities.h"
 
 class TRandom3;
 
@@ -162,6 +163,8 @@ namespace mithep
     void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
 
     void                SetIdMVAType(const char *type)    { fIdMVATypeName        = type;    } 
+
+    void                SetRhoType(RhoUtilities::RhoType type) { fRhoType = type ; }
 
       enum EPhIdType {
         kIdUndef = 0,       //not defined
@@ -312,6 +315,7 @@ namespace mithep
 
       TRandom3* fRng;
 
+      RhoUtilities::RhoType fRhoType;
 
     ClassDef(PhotonIDMod, 1) // Photon identification module
   };

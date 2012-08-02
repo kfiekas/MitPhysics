@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.28 2012/07/24 15:46:36 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.29 2012/08/02 12:30:55 fabstoec Exp $
 //
 // PhotonPairSelector
 //
@@ -32,6 +32,8 @@
 #include "MitPhysics/Utils/interface/VertexTools.h"
 
 #include "MitPhysics/Utils/interface/MVAMet.h"
+#include "MitPhysics/Utils/interface/RhoUtilities.h"
+
 
 class TNtuple;
 class TRandom3;
@@ -176,6 +178,8 @@ namespace mithep
     
     void                SetJetsName(const char *n)       { fJetsName = n;              }    
         
+    void                SetRhoType(RhoUtilities::RhoType type) { fRhoType = type ; }
+
   protected:
     void                Process();
     void                SlaveBegin();
@@ -319,6 +323,8 @@ namespace mithep
     
     MVAMet                fMVAMet;
     
+    RhoUtilities::RhoType fRhoType;
+
     ClassDef(PhotonPairSelector, 1) // Photon identification module
   };
 }

@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.33 2012/07/25 15:00:42 fabstoec Exp $
+// $Id: PhotonIDMod.cc,v 1.34 2012/08/02 12:30:55 fabstoec Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -130,8 +130,10 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fMCSmear_EEhighEta_hR9         (0.),
   fMCSmear_EEhighEta_lR9         (0.),
   
-  fRng                           (new TRandom3())
-    
+  fRng                           (new TRandom3()),
+
+  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS)
+
 {
   // Constructor.
 }
@@ -174,6 +176,27 @@ void PhotonIDMod::Process()
   
   }
   
+  Float_t theRho = _tRho;
+    switch (fRhoType) {
+  case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+    theRho = rho2012;
+    break;
+  case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:       
+    theRho = ( fPileUpDen->GetEntries() ? fPileUpDen->At(0)->RhoLowEta(): _tRho);
+    break;
+  case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+    theRho = ( fPileUpDen->GetEntries() ? fPileUpDen->At(0)->Rho() : _tRho);
+    break;    
+  case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+    theRho = ( fPileUpDen->GetEntries() ? fPileUpDen->At(0)->RhoRandomLowEta() : _tRho);
+    break;    
+  case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:       
+    theRho = ( fPileUpDen->GetEntries() ? fPileUpDen->At(0)->RhoRandom() : _tRho);
+    break;
+  default:
+    theRho = _tRho;
+  }
+
 
   // ------------------------------------------------------------
   // Get Event header for Run info etc.
@@ -257,7 +280,7 @@ void PhotonIDMod::Process()
     
     // ---------------------------------------------------------------------
     // set the photonIdMVA value of requested...
-    double idMvaVal = fTool.GetMVAbdtValue(ph,fPV->At(0),fTracks, fPV, _tRho, fPFCands, fElectrons, fApplyElectronVeto);
+    double idMvaVal = fTool.GetMVAbdtValue(ph,fPV->At(0),fTracks, fPV, theRho, fPFCands, fElectrons, fApplyElectronVeto);
     ph->SetIdMva(idMvaVal);
 
     // ---------------------------------------------------------------------
@@ -321,7 +344,7 @@ void PhotonIDMod::Process()
     // add MingMings MVA ID on single Photon level
     if(fPhIdType == kMITMVAId ) {
       // we compute the bdt val already before, so use it ...
-      //if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _tRho ,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto) ) {
+      //if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _t_TRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto) ) {
 	
       if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && ( ( isbarrel && ph->IdMva() >  fbdtCutBarrel ) || ( ph->IdMva() >  fbdtCutEndcap ) ) )	  
 	GoodPhotons->AddOwned(ph);
