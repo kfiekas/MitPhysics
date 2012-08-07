@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.126 2012/07/12 17:04:56 fabstoec Exp $
+// $Id: ElectronIDMod.cc,v 1.127 2012/07/22 20:33:27 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -142,6 +142,7 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     delete tempMuons;
   }
   else if(idType == ElectronTools::kMVAID_BDTG_IDIsoCombinedHWW2012TrigV4) {
+
     MVAValue = fElectronIDMVA->MVAValue(el, vertex, fVertices, PFCands, 
                                         PileupEnergyDensity, ElectronTools::kEleEANoCorr, 
                                         isDebug);
@@ -201,12 +202,12 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     else if (MVABin == 4) MVACut = 0.850;
     else if (MVABin == 5) MVACut = 0.920;
   } else if (idType == ElectronTools::kMVAID_BDTG_IDIsoCombinedHWW2012TrigV4) {
-    if      (MVABin == 0) MVACut = 0.123;
-    else if (MVABin == 1) MVACut = 0.219;
-    else if (MVABin == 2) MVACut = 0.509;
-    else if (MVABin == 3) MVACut = 0.935;
-    else if (MVABin == 4) MVACut = 0.889;
-    else if (MVABin == 5) MVACut = 0.871;
+    if      (MVABin == 0) MVACut = 0.124;
+    else if (MVABin == 1) MVACut = 0.220;
+    else if (MVABin == 2) MVACut = 0.523;
+    else if (MVABin == 3) MVACut = 0.936;
+    else if (MVABin == 4) MVACut = 0.888;
+    else if (MVABin == 5) MVACut = 0.869;
   }
 
   if(isDebug == kTRUE){
@@ -529,6 +530,7 @@ void ElectronIDMod::Process()
      fElIsoType == ElectronTools::kCombinedRelativeConeAreaCorrected || 
      fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombined || 
      fElIdType  == ElectronTools::kMVAID_BDTG_IDHWW2012TrigV0  || 
+     fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombinedHWW2012TrigV4 ||
      fElIsoType == ElectronTools::kPFIso_HWW2012TrigV0      || 
      fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012
     ) {
@@ -838,7 +840,6 @@ void ElectronIDMod::Setup()
               fElectronIsoType.Data());
     return;
   }
-
 
   //If we use MVA ID, need to load MVA weights
   if (fElIdType == ElectronTools::kMVAID_BDTG_NoIPInfo) {
