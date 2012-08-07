@@ -1345,34 +1345,34 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
                                  const PileupEnergyDensityCol *PileupEnergyDensity,
                                  ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
                                  Bool_t printDebug) {
-  
+
   if (!fIsInitialized) { 
     std::cout << "Error: ElectronIDMVA not properly initialized.\n"; 
     return -9999;
   }
 
   Double_t Rho = 0;
- switch(fTheRhoType) {
-   case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
-     Rho = PileupEnergyDensity->At(0)->Rho();
-     break;
-   case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
-     Rho = PileupEnergyDensity->At(0)->RhoLowEta();
-     break;
-   case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
-     Rho = PileupEnergyDensity->At(0)->RhoRandom();
-     break;
-   case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
-     Rho = PileupEnergyDensity->At(0)->RhoRandomLowEta();
-     break;
-   case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
-     Rho = PileupEnergyDensity->At(0)->RhoKt6PFJets();
-     break;
-   default:
-     // use the old default
-     Rho = PileupEnergyDensity->At(0)->Rho();
-     break;
- }
+  switch(fTheRhoType) {
+    case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
+      Rho = PileupEnergyDensity->At(0)->Rho();
+      break;
+    case RhoUtilities::MIT_RHO_VORONOI_LOW_ETA:
+      Rho = PileupEnergyDensity->At(0)->RhoLowEta();
+      break;
+    case RhoUtilities::MIT_RHO_RANDOM_HIGH_ETA:
+      Rho = PileupEnergyDensity->At(0)->RhoRandom();
+      break;
+    case RhoUtilities::MIT_RHO_RANDOM_LOW_ETA:
+      Rho = PileupEnergyDensity->At(0)->RhoRandomLowEta();
+      break;
+    case RhoUtilities::CMS_RHO_RHOKT6PFJETS:
+      Rho = PileupEnergyDensity->At(0)->RhoKt6PFJets();
+      break;
+    default:
+      // use the old default
+      Rho = PileupEnergyDensity->At(0)->Rho();
+      break;
+  }
 
   //set all input variables
   fMVAVar_ElePt = ele->Pt();
@@ -1397,14 +1397,14 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   }
   else if (fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4) {
     fMVAVar_EleDEtaIn = TMath::Min(fabs(double(ele->DeltaEtaSuperClusterTrackAtVtx())),0.06); ; 
-    fMVAVar_EleDPhiIn = TMath::Min(fabs(double(ele->DeltaPhiSuperClusterTrackAtVtx())),0.6); 
+    fMVAVar_EleDPhiIn = ele->DeltaPhiSuperClusterTrackAtVtx();
     fMVAVar_EleFBrem = TMath::Max(double(ele->FBrem()),-1.0); 
     fMVAVar_EleEOverP = TMath::Min(double(ele->ESuperClusterOverP()), 20.0); 
     fMVAVar_EleESeedClusterOverPout = TMath::Min(double(ele->ESeedClusterOverPout()),20.0); 
     fMVAVar_EleEEleClusterOverPout = TMath::Min(double(ele->EEleClusterOverPout()),20.0); 
     fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->PIn(); 
     fMVAVar_EleGsfTrackChi2OverNdof = TMath::Min(double( ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof()),200.0);
-    fMVAVar_EledEtaCalo =  TMath::Min(fabs(double(ele->DeltaEtaSeedClusterTrackAtCalo())),0.2);
+    fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
     fMVAVar_EleR9 = TMath::Min(double(ele->SCluster()->R9()), 5.0);   
   }
   else {
@@ -1586,7 +1586,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
       else if (pf->PFType() == PFCandidate::eGamma) {
         //************************************************************
         // Footprint Veto
-        if (fabs(ele->SCluster()->Eta()) >= 1.479) {
+        if (fabs(ele->SCluster()->Eta()) > 1.479) {
           if (dr < 0.08) passVeto = kFALSE;
         }
         //************************************************************
@@ -1632,7 +1632,6 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
       || fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 
       || fMVAType == ElectronIDMVA::kIsoRingsV0
       || fMVAType == ElectronIDMVA::kIDHWW2012TrigV0
-      || fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4
     ) {
     bindVariables();
   }
