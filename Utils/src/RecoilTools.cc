@@ -91,7 +91,7 @@ Met RecoilTools::trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Dou
   double trkSumEt = 0; 
   for(UInt_t i0=0; i0<iCands->GetEntries(); i0++) {
     const PFCandidate *pfcand = iCands->At(i0);
-    double lDZ = 999;
+    double lDZ = -999;
     if(pfcand->HasTrackerTrk())  lDZ =  fabs(pfcand->TrackerTrk()->DzCorrected(*iVertex));//
     else if(pfcand->HasGsfTrk()) lDZ =  fabs(pfcand->GsfTrk()    ->DzCorrected(*iVertex));
     if( fabs(lDZ) > iDZCut) continue;
@@ -179,11 +179,10 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
   FourVectorM lVec        (0,0,0,0); double lSumEt          = 0; 
   for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
     const PFCandidate *pPF = iCands->At(i0);
-    const Track* pTrack = pPF->TrackerTrk();
-    if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
-    if(pTrack        ==  0                           ) continue;
-    if(	 !((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) > iDZCut) continue;
     lSumEt   += pPF->Pt();  
     lVec     -= pPF->Mom();
   }
@@ -194,6 +193,8 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJ
     if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue;
     if(!fJetIDMVA->passPt(pJet,iJetCorrector,iPileupEnergyDensity))                 continue;
     if(!fJetIDMVA->pass(pJet,iVertex,iVertices,iJetCorrector,iPileupEnergyDensity)) continue;
+    double pDPhi1 = fabs(pJet->Phi() - iPhi1); if(pDPhi1 > 2.*TMath::Pi()-pDPhi1) pDPhi1 = 2.*TMath::Pi()-pDPhi1;
+    double pDPhi2 = fabs(pJet->Phi() - iPhi2); if(pDPhi2 > 2.*TMath::Pi()-pDPhi2) pDPhi2 = 2.*TMath::Pi()-pDPhi2;
     addNeut(pJet,lVec,lSumEt,iJetCorrector,iPileupEnergyDensity);
     lNPass++;
   }
@@ -210,11 +211,10 @@ Met RecoilTools::NoPUMet( const PFJetCol       *iJets,
   FourVectorM lVec        (0,0,0,0); double lSumEt          = 0; 
   for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
     const PFCandidate *pPF = iCands->At(i0);
-    const Track* pTrack = pPF->TrackerTrk();
-    if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
-    if(pTrack        ==  0                           ) continue;
-    if(	 !((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) > iDZCut) continue;
     lVec     -= pPF->Mom();
     lSumEt   += pPF->Pt();  
   }
@@ -241,11 +241,10 @@ Met RecoilTools::NoPURecoil(Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_
   for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
     const PFCandidate *pPF = iCands->At(i0);
     if(!filter(pPF,iPhi1,iEta1,iPhi2,iEta2)) continue;
-    const Track* pTrack = pPF->TrackerTrk();
-    if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
-    if(pTrack        ==  0                           ) continue;
-    if(	 !((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) > iDZCut) continue;
     lSumEt   += pPF->Pt();  
     lVec     -= pPF->Mom();
   }
@@ -314,8 +313,10 @@ Met RecoilTools::PUCMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJe
 	pPF->PFType() == PFCandidate::eHadronHF      ))
       {lVec -= pPF->Mom(); lSumEt += pPF->Pt();}
     if(pTrack        ==  0                           ) continue;
-    if(	 !((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) > iDZCut) continue;
     lVec     -= pPF->Mom();
     lSumEt   += pPF->Pt();
   }
@@ -350,8 +351,10 @@ Met RecoilTools::PUCMet( const PFJetCol       *iJets,const PFCandidateCol *iCand
 	pPF->PFType() == PFCandidate::eHadronHF      ))
       {lVec -= pPF->Mom(); lSumEt += pPF->Pt();}
     if(pTrack        ==  0                           ) continue;
-    if(	 !((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) > iDZCut) continue;
     lVec     -= pPF->Mom();
     lSumEt   += pPF->Pt();
   }
@@ -389,8 +392,10 @@ Met RecoilTools::PUCRecoil( Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_
 	pPF->PFType() == PFCandidate::eHadronHF      ))
       {lVec -= pPF->Mom(); lSumEt += pPF->Pt();}
     if(pTrack        ==  0                           ) continue;
-    if(	 !((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) > iDZCut) continue;
     lVec     -= pPF->Mom();
     lSumEt   += pPF->Pt();
   }
@@ -451,8 +456,10 @@ Met RecoilTools::PUMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJet
     const Track* pTrack = pPF->TrackerTrk();
     if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
     if(pTrack        ==  0                           ) continue;
-    if(	  ((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) < iDZCut) continue;
     lVec     -= pPF->Mom();
     lSumEt   += pPF->Pt();
   }
@@ -481,8 +488,10 @@ Met RecoilTools::PUMet( const PFJetCol       *iJets,
     const Track* pTrack = pPF->TrackerTrk();
     if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
     if(pTrack        ==  0                           ) continue;
-    if(	  ((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) < iDZCut) continue;
     lVec     -= pPF->Mom();
     lSumEt   += pPF->Pt();
   }
@@ -513,8 +522,10 @@ Met RecoilTools::PUMet( Double_t iPhi1,Double_t iEta1,Double_t iPhi2,Double_t iE
     const Track* pTrack = pPF->TrackerTrk();
     if(pPF->GsfTrk()) pTrack = pPF->GsfTrk();
     if(pTrack        ==  0                           ) continue;
-    if(	  ((pPF->HasTrackerTrk() && (fabs(pPF->TrackerTrk()->DzCorrected(*iVertex))<iDZCut)) ||
-	   (pPF->HasGsfTrk()     && (fabs(pPF->GsfTrk()->DzCorrected(*iVertex))    <iDZCut)))) continue; 
+    double lDZ = 999;
+    if(pPF->HasTrackerTrk())  lDZ =  fabs(pPF->TrackerTrk()->DzCorrected(*iVertex));//
+    else if(pPF->HasGsfTrk()) lDZ =  fabs(pPF->GsfTrk()    ->DzCorrected(*iVertex));
+    if( fabs(lDZ) < iDZCut) continue;
     lVec     -= pPF->Mom();
     lSumEt   += pPF->Pt();
   }

@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.21 2012/05/03 12:02:26 fabstoec Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.22 2012/07/03 08:55:59 pharris Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -13,6 +13,7 @@
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/RecoilTools.h"
 #include "MitPhysics/Utils/interface/JetTools.h"
+#include "MitPhysics/Utils/interface/MetLeptonTools.h"
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/VertexMVA.h"
 #include "MitPhysics/Utils/interface/PUReweighting.h"
@@ -49,6 +50,7 @@
 #pragma link C++ class mithep::ElectronTools;
 #pragma link C++ class mithep::PhotonTools;
 #pragma link C++ class mithep::JetTools;
+#pragma link C++ class mithep::MetLeptonTools;
 #pragma link C++ class mithep::MetTools;
 #pragma link C++ class mithep::RecoilTools;
 #pragma link C++ enum mithep::ElectronTools::EElIdType;

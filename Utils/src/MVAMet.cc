@@ -1,4 +1,5 @@
 #include "MitPhysics/Utils/interface/MVAMet.h"
+#include "MitPhysics/Utils/interface/MetLeptonTools.h"
 #include "MitPhysics/Utils/interface/JetTools.h"
 #include "MitPhysics/Utils/interface/RecoilTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -6,6 +7,7 @@
 #include <TRandom3.h>
 #include "CondFormats/EgammaObjects/interface/GBRForest.h"
 #include "Cintex/Cintex.h"
+#include <utility>
 
 ClassImp(mithep::MVAMet)
 
@@ -526,7 +528,6 @@ Met MVAMet::GetMet(	Bool_t iPhi,
     if(lPV->Position().Rho() > 2.)        continue;
     lNPV++;
   }
-
   Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(iPtQ  ,iPhiQ  ,iSumEtQ  ,      iCands,iVertex); 
   Met lNPRec = fRecoilTools->NoPURecoil (iPtQ  ,iPhiQ  ,iSumEtQ  ,iJets,iCands,iVertex,iVertices,iRho);  
@@ -983,5 +984,89 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   }
 
   return lMet;
+}
+//--------------------------------------------------------------------------------------------------
+Met MVAMet::GetMet(const MuonCol        *iMuons,const ElectronCol *iElectrons,const PFTauCol *iTaus,
+		   const PFCandidateCol *iCands,const PFJetCol  *iJets,const Vertex *iPV,const VertexCol *iVertices,const PFMetCol *iPFMet,
+		   FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol* iPUEnergyDensity) {
+  const Vertex *lPV = iPV; if(iPV == 0 && iVertices->GetEntries() > 0) lPV = iVertices->At(0); 
+  FourVectorM lTotVec(0,0,0,0); double lTotSumEt = 0;
+  FourVectorM lVisVec(0,0,0,0); double lVisSumEt = 0;
+  std::vector<std::pair<FourVectorM,FourVectorM> > lDecay; std::vector<int> lId;
+  fNMuons = 0;
+  for(UInt_t i0 = 0; i0 < iMuons->GetEntries(); i0++) {
+    const Muon *pMu = iMuons->At(i0);
+    if(!MetLeptonTools::looseMuId(pMu,iCands,lPV,iVertices)) continue;
+    std::pair<FourVectorM,FourVectorM> pVec(pMu->Mom(),pMu->Mom());
+    lDecay  .push_back(pVec);
+    lId     .push_back(0);
+    fNMuons++;
+  }
+  fNElectrons=0;
+  for(UInt_t i0 = 0; i0 < iElectrons->GetEntries(); i0++) {
+    const Electron *pElectron = iElectrons->At(i0);
+    if(!MetLeptonTools::looseEleId(pElectron,iPUEnergyDensity,iCands,lPV,iVertices)) continue;
+    std::pair<FourVectorM,FourVectorM> pVec(pElectron->Mom(),pElectron->Mom());
+    lDecay  .push_back(pVec);
+    lId     .push_back(1);
+    fNElectrons++;
+  }
+  fNTaus = 0;
+  for(UInt_t i0 = 0; i0 < iTaus->GetEntries(); i0++) {
+    const PFTau *pTau = iTaus->At(i0);
+    if(!MetLeptonTools::looseTauId(pTau)) continue;
+    FourVectorM pVis(0,0,0,0); pVis.SetCoordinates(pTau->Pt()*MetLeptonTools::vis(pTau),pTau->Eta(),pTau->Phi(),pTau->Mass()*MetLeptonTools::vis(pTau));
+    std::cout << "===>vis: " << MetLeptonTools::vis(pTau) << std::endl;
+    std::pair<FourVectorM,FourVectorM> pVec(pTau->Mom(),pVis);
+    lDecay  .push_back(pVec);
+    lId     .push_back(2);
+    fNTaus++;
+  }
+  std::vector<std::pair<FourVectorM,FourVectorM> > lFinalDecay;
+  std::vector<int>                                 lFinalId;
+  for(unsigned int i0 = 0; i0 < lDecay.size(); i0++) { 
+    bool pAdd = true;
+    for(unsigned int i1 = 0; i1 < lDecay.size(); i1++) { 
+      if(i0 == i1) continue;
+      if(MathUtils::DeltaR(lDecay[i0].first,lDecay[i1].first) < 0.5)                                                     pAdd = false;
+      if(!pAdd  &&   lId[i0] != 2 && lId[i1] == 2)                                                                       pAdd = true;
+      if(!pAdd  &&  ((lId[i0] != 2 && lId[i1] != 2) || (lId[i0] == 2 && lId[i1] == 2))
+	        &&                  lDecay[i0].first.pt() >  lDecay[i1].first.pt())                                     pAdd = true;
+      if(MathUtils::DeltaR(lDecay[i0].first,lDecay[i1].first) < 0.5 && lDecay[i0].first.pt() == lDecay[i1].first.pt()) { pAdd = true;
+	for(unsigned int i2 = 0; i2 < lFinalDecay.size(); i2++) if(fabs(lFinalDecay[i2].first.pt() - lDecay[i0].first.pt()) < 0.1) pAdd = false; 
+      }
+      if(!pAdd) break;
+      //if(!pAdd && lId[i2] == 2 && lId[i1] != 2) pAdd = true;
+    }
+    if(pAdd) lFinalDecay.push_back(lDecay[i0]);
+    if(pAdd) lFinalId   .push_back(lId   [i0]);
+  }
+  for(unsigned int i0 = 0; i0 < lFinalDecay.size(); i0++) { 
+    lTotVec   += lFinalDecay[i0].first;
+    lVisVec   += lFinalDecay[i0].second;
+    lTotSumEt += lFinalDecay[i0].first.pt();
+    lVisSumEt += lFinalDecay[i0].second.pt();
+  }
+  PFJetOArr *lCleanJets = new PFJetOArr();
+  for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
+    const PFJet *pJet = iJets->At(i0);
+    bool pClean = false;
+    for(unsigned int i1 = 0; i1 < lFinalDecay.size(); i1++) {
+      if(MathUtils::DeltaR(pJet->Mom(),lFinalDecay[i1].first) < 0.5) pClean = true;
+    }
+    if(!pClean) lCleanJets->Add(pJet);
+  }
+  for(unsigned int i0 = 0; i0 < lFinalDecay.size(); i0++) std::cout << "----> " << lFinalDecay[i0].first.pt() << " -- " << lFinalDecay[i0].first.phi() << " -- " << lFinalDecay[i0].first.eta() << " -- " << lFinalId[i0] << " -- " << MathUtils::DeltaR(lFinalDecay[i0].first,lFinalDecay[0].first)<< std::endl;
+  std::cout << "===> " << fNMuons << " -- " << fNTaus << " -- " << fNElectrons << " -- " << lTotVec.Pt()  << " -- " << lTotSumEt << " -- " << lVisSumEt<< std::endl;
+  Met lMVAMet = GetMet(  false,
+			 lTotVec.Pt(),lTotVec.Phi(),lTotSumEt,
+			 lVisVec.Pt(),lVisVec.Phi(),lVisSumEt,
+			 iPFMet->At(0),
+			 iCands,lPV,iVertices,
+			 lCleanJets,
+			 iJetCorrector,
+			 iPUEnergyDensity,
+			 int(iVertices->GetEntries()),true);  
+  return lMVAMet;
 }
 

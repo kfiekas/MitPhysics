@@ -12,6 +12,9 @@
 #include "MitAna/DataTree/interface/PFJetFwd.h"
 #include "MitAna/DataTree/interface/VertexFwd.h"
 #include "MitAna/DataTree/interface/TrackFwd.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
+#include "MitAna/DataTree/interface/PFTauCol.h"
+#include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/Met.h"
 #include "MitAna/DataTree/interface/PFMet.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"
@@ -129,6 +132,10 @@ namespace mithep {
 			int iNPV,
 			Bool_t printDebug=false);
 
+    Met GetMet(        const MuonCol        *iMuons,const ElectronCol *iElectrons,const PFTauCol *iTaus,
+		       const PFCandidateCol *iCands,const PFJetCol  *iJets,const Vertex *iPV,const VertexCol *iVertices,const PFMetCol *iPFMet,
+		       FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol* iPUEnergyDensity);
+
     TMatrixD*   GetMetCovariance() { return fCov;         }
     Float_t     GetSignificance () { return fSignificance;}
     Float_t     GetUncertainty  () { return fUncertainty;}
@@ -182,6 +189,10 @@ namespace mithep {
     Float_t   fSignificance;
     Float_t   fUncertainty;
     TMatrixD *fCov;
+
+    Int_t     fNMuons;
+    Int_t     fNElectrons;
+    Int_t     fNTaus;
 
     //TMVA::Reader* fPhiReader;
     //TMVA::Reader* fU1Reader;
