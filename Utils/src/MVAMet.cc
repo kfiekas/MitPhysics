@@ -1016,7 +1016,6 @@ Met MVAMet::GetMet(const MuonCol        *iMuons,const ElectronCol *iElectrons,co
     const PFTau *pTau = iTaus->At(i0);
     if(!MetLeptonTools::looseTauId(pTau)) continue;
     FourVectorM pVis(0,0,0,0); pVis.SetCoordinates(pTau->Pt()*MetLeptonTools::vis(pTau),pTau->Eta(),pTau->Phi(),pTau->Mass()*MetLeptonTools::vis(pTau));
-    std::cout << "===>vis: " << MetLeptonTools::vis(pTau) << std::endl;
     std::pair<FourVectorM,FourVectorM> pVec(pTau->Mom(),pVis);
     lDecay  .push_back(pVec);
     lId     .push_back(2);
@@ -1056,8 +1055,7 @@ Met MVAMet::GetMet(const MuonCol        *iMuons,const ElectronCol *iElectrons,co
     }
     if(!pClean) lCleanJets->Add(pJet);
   }
-  for(unsigned int i0 = 0; i0 < lFinalDecay.size(); i0++) std::cout << "----> " << lFinalDecay[i0].first.pt() << " -- " << lFinalDecay[i0].first.phi() << " -- " << lFinalDecay[i0].first.eta() << " -- " << lFinalId[i0] << " -- " << MathUtils::DeltaR(lFinalDecay[i0].first,lFinalDecay[0].first)<< std::endl;
-  std::cout << "===> " << fNMuons << " -- " << fNTaus << " -- " << fNElectrons << " -- " << lTotVec.Pt()  << " -- " << lTotSumEt << " -- " << lVisSumEt<< std::endl;
+  //for(unsigned int i0 = 0; i0 < lFinalDecay.size(); i0++) std::cout << "----> " << lFinalDecay[i0].first.pt() << " -- " << lFinalDecay[i0].first.phi() << " -- " << lFinalDecay[i0].first.eta() << " -- " << lFinalId[i0] << " -- " << MathUtils::DeltaR(lFinalDecay[i0].first,lFinalDecay[0].first)<< std::endl;
   Met lMVAMet = GetMet(  false,
 			 lTotVec.Pt(),lTotVec.Phi(),lTotSumEt,
 			 lVisVec.Pt(),lVisVec.Phi(),lVisSumEt,
@@ -1066,7 +1064,7 @@ Met MVAMet::GetMet(const MuonCol        *iMuons,const ElectronCol *iElectrons,co
 			 lCleanJets,
 			 iJetCorrector,
 			 iPUEnergyDensity,
-			 int(iVertices->GetEntries()),true);  
+			 int(iVertices->GetEntries()));//,true);  
   return lMVAMet;
 }
 
