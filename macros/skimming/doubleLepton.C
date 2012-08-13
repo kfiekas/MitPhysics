@@ -1,4 +1,4 @@
-// $Id: doubleLepton.C,v 1.10 2012/04/18 14:34:09 ceballos Exp $
+// $Id: doubleLepton.C,v 1.11 2012/08/10 19:09:37 ceballos Exp $
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "MitAna/DataUtil/interface/Debug.h"
@@ -79,7 +79,7 @@ void doubleLepton(const char *catalogDir   = "~/scratch0/catalog",
   DilepSelMod *selMod = new DilepSelMod;
   selMod->SetCleanLeptonsName(merger->GetOutputName());
   selMod->SetMinPt(0.0);
-  selMod->SetMinDilMass(5.0);
+  selMod->SetMinDilMass(0.1);
   selMod->SetFillHist(kFALSE);
   merger->Add(selMod);
 
