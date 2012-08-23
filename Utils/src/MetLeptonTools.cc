@@ -17,15 +17,16 @@ bool MetLeptonTools::looseTauId(const PFTau *iTau) {
 }
 bool MetLeptonTools::looseEleId(const Electron *iElectron,const PileupEnergyDensityCol* iPUEnergyDensity,
 				const PFCandidateCol *iCands,const Vertex *iPV,const VertexCol *iVertices) {
+  if(iElectron->SCluster()  == 0)    return false;  
   if(iElectron->Pt()         < 9.5)  return false;
   if(fabs(iElectron->Eta())  > 2.5)  return false;
   if(fabs(iElectron->Eta()) > 1.4442 && fabs(iElectron->Eta()) < 1.566) return false;
   //if(!fEleTools->PassSpikeRemovalFilter(iElectron)) return false;
-  //if(isConversion(iElectron))       return false;                                                                                                                                        
-  //if(iElectron->BestTrk()->D0Corrected(*iPV)     > 0.04 )    return false;                                                                                                               
-  //if(iElectron->BestTrk()->DzCorrected(*iPV)     > 0.2  )    return false;                                                                                                                
-  //if(!passEleMVA(iElectron ,iPUEnergyDensity,iCands,iPV)                             )    return false;                                                                                    
-  //if(isoDeltaBeta(iElectron,                 iCands,iPV,iVertices) > 0.30)    return false;                                                                                                
+  //if(isConversion(iElectron))       return false;                                                                                                                        
+  //if(iElectron->BestTrk()->D0Corrected(*iPV)     > 0.04 )    return false;                                                                                                
+  //if(iElectron->BestTrk()->DzCorrected(*iPV)     > 0.2  )    return false;                                                                                               
+  //if(!passEleMVA(iElectron ,iPUEnergyDensity,iCands,iPV)                             )    return false;                                                                  
+  //if(isoDeltaBeta(iElectron,                 iCands,iPV,iVertices) > 0.30)    return false;                                                                          
   //return true;                                                                                                                                                                                    
   
   if(iElectron->GsfTrk() == 0) return false;
