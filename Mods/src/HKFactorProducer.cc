@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.14 2011/07/26 15:01:21 sixie Exp $
+// $Id: HKFactorProducer.cc,v 1.15 2011/11/27 06:17:45 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -24,8 +24,9 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
   fEmbedWeightName(Names::gkEmbedWeightBrn),
   fIsData(kFALSE),
   fMakePDFNtuple(kFALSE),
-  fDoHiggsPtReweighting(kFALSE),
-  fPt_histo(0),
+  fDoHiggsMhReweighting(kFALSE),
+  fMh(0),
+  fWidth(0),
   fMCEventInfo(0),
   fEmbedWeight(0),
   fOutputFile(0),
@@ -37,8 +38,6 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
 //--------------------------------------------------------------------------------------------------
 HKFactorProducer::~HKFactorProducer()
 {
-  // Destructor
-  delete fPt_histo;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -55,50 +54,42 @@ void HKFactorProducer::Process()
     LoadBranch(fMCEvInfoName);
 
     // only accept the exact process id
-    if (fProcessID == fMCEventInfo->ProcessId()) { 
+    if (fMh > 0 && fWidth > 0) { 
 
-      Double_t ptH = -1.0;
+      Double_t mH  = -1.0;
       for (UInt_t i=0; i<GenBosons->GetEntries(); ++i) {
 	if(GenBosons->At(i)->PdgId() == MCParticle::kH) {
-    	  ptH = GenBosons->At(i)->Pt();
+	  mH  = GenBosons->At(i)->Mass();
     	  break;
 	}
       }
 
-      if(ptH >= 0) {
-	// calculate bin size
-	Double_t binsize = (fPt_histo->GetXaxis()->GetXmax()-fPt_histo->GetXaxis()->GetXmin())/fPt_histo->GetNbinsX();
-	Int_t bin = 0;
-	// underflow protection: use underflow entry
-	if(ptH >= fPt_histo->GetXaxis()->GetXmin()){
-	  bin = Int_t((ptH-fPt_histo->GetXaxis()->GetXmin())/binsize) + 1;
-	}
-	// overflow protection: use overflow entry
-	if(bin > fPt_histo->GetNbinsX()) bin=fPt_histo->GetNbinsX()+1;
-	theWeight = fPt_histo->GetBinContent(bin);
+      if(mH >= 0) {
+	Int_t BWflag = 0;
+	Int_t MTop = 172.5;
+	theWeight = fWeightAlgo.getweight(fMh,fWidth,MTop,mH,BWflag);
 
-	if (0) {
-          cout << "Bin Size: " << binsize << ", Higgs Pt: " << ptH
-               << ", Bin: "<< bin  << ", KFactor: "<< fPt_histo->GetBinContent(bin) << endl;
+	if (theWeight > 3.0) {
+          cout << "MHweights: " << fMh << " " << fWidth << " " << mH << " " << theWeight << endl;
 	}
 
 	if (GetFillHist()) {
           hDHKFactor[0]->Fill(0.5);
-          hDHKFactor[1]->Fill(TMath::Min(ptH,499.999));
-          hDHKFactor[2]->Fill(TMath::Min(ptH,499.999),theWeight);
-          hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
+          hDHKFactor[1]->Fill(TMath::Min(mH,1999.999));
+          hDHKFactor[2]->Fill(TMath::Min(mH,1999.999),theWeight);
+          hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,5.999),-3.999));
 	}
       }
     } 
     else if (fProcessID == 999){ // for MCatNLO we care about positive or negative weights
       theWeight = fMCEventInfo->Weight();
-      if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
+      if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,5.999),-3.999));
       theWeight = theWeight/fabs(theWeight);
       if (GetFillHist()) hDHKFactor[0]->Fill(0.5,theWeight);
     }
     else if (fProcessID == 998){ // for other samples we care about the actual weights
       theWeight = fMCEventInfo->Weight();
-      if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
+      if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,5.999),-3.999));
       if (GetFillHist()) hDHKFactor[0]->Fill(0.5,theWeight);
     }
     else {
@@ -122,7 +113,7 @@ void HKFactorProducer::Process()
   else if (fProcessID == 997){ // for tau embedding samples
     LoadBranch(fEmbedWeightName);
     theWeight = fEmbedWeight->At(fEmbedWeight->GetEntries()-1)->Weight();
-    if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,3.999),-3.999));
+    if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,5.999),-3.999));
     if (GetFillHist()) hDHKFactor[0]->Fill(0.5,theWeight);
   }
 
@@ -142,19 +133,12 @@ void HKFactorProducer::SlaveBegin()
     ReqBranch(fEmbedWeightName, fEmbedWeight);
   }
 
-  if (fDoHiggsPtReweighting) {
-    if (!fPt_histo) {
-      Info("SlaveBegin", "Using %s as input data file", fInputFileName.Data());
-      fPt_histo = new  HWWKfactorList("KFactorList", fInputFileName);
-    }
-  }
-
   if (GetFillHist()) {
     char sb[1024];
     sprintf(sb,"hDHKFactor_%d", 0);  hDHKFactor[0]  = new TH1D(sb,sb,1,0,1); 
-    sprintf(sb,"hDHKFactor_%d", 1);  hDHKFactor[1]  = new TH1D(sb,sb,500,0.,500.); 
-    sprintf(sb,"hDHKFactor_%d", 2);  hDHKFactor[2]  = new TH1D(sb,sb,500,0.,500.); 
-    sprintf(sb,"hDHKFactor_%d", 3);  hDHKFactor[3]  = new TH1D(sb,sb,400,-4.0,4.0); 
+    sprintf(sb,"hDHKFactor_%d", 1);  hDHKFactor[1]  = new TH1D(sb,sb,1000,0.,2000.); 
+    sprintf(sb,"hDHKFactor_%d", 2);  hDHKFactor[2]  = new TH1D(sb,sb,1000,0.,2000.); 
+    sprintf(sb,"hDHKFactor_%d", 3);  hDHKFactor[3]  = new TH1D(sb,sb,500,-4.0,6.0); 
     sprintf(sb,"hDHKFactor_%d", 4);  hDHKFactor[4]  = new TH1D(sb,sb,1000,-0.5,999.5); 
     for(Int_t i=0; i<5; i++) AddOutput(hDHKFactor[i]);
   }

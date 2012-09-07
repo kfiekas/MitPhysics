@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: HKFactorProducer.h,v 1.7 2011/07/26 15:01:20 sixie Exp $
+// $Id: HKFactorProducer.h,v 1.8 2011/11/27 06:17:45 ceballos Exp $
 //
 // HKFactorProducer
 //
@@ -15,6 +15,7 @@
 #include "MitAna/DataTree/interface/MCEventInfo.h"
 #include "MitAna/DataTree/interface/EmbedWeightCol.h"
 #include "MitPhysics/Mods/interface/HWWKFactorList.h"
+#include "MitPhysics/Mods/interface/PwhgWrapper.h"
 
 class TH1D;
 class TH2D;
@@ -35,8 +36,10 @@ namespace mithep
       void               SetEmbedWeightName(const char *s) { fEmbedWeightName      = s; }
       void               SetIsData(Bool_t b)               { fIsData               = b; }	 
       void               SetMakePDFNtuple(Bool_t b)        { fMakePDFNtuple        = b; }	 
-      void               SetDoHiggsPtReweighting(Bool_t b) { fDoHiggsPtReweighting = b; }	 
+      void               SetDoHiggsMhReweighting(Bool_t b) { fDoHiggsMhReweighting = b; }	 
       void               SetOutputName(const char *f)      { fOutputName           = f; }
+      void               SetMh(Double_t x)                 { fMh                   = x; }	 
+      void               SetWidth(Double_t x)              { fWidth                = x; }	 
 
     protected:
       void               Process();
@@ -50,8 +53,9 @@ namespace mithep
       TString            fEmbedWeightName;      //tau embedding weight branch name
       Bool_t             fIsData;               //=true then it does nothing (def=0)
       Bool_t             fMakePDFNtuple;        //=true then it does nothing (def=0)
-      Bool_t             fDoHiggsPtReweighting; //=true then it does reweighting
-      HWWKfactorList    *fPt_histo;             //!histogram with weights read from input file
+      Bool_t             fDoHiggsMhReweighting; //=true then it does reweighting
+      Double_t           fMh;                   //fixed Higgs mass
+      Double_t           fWidth;                //fixed Higgs width
       const MCEventInfo *fMCEventInfo;          //!event info branch pointer
       const EmbedWeightCol *fEmbedWeight;       //!tau embedding weight branch pointer
       TH1D              *hDHKFactor[10];        //!output histograms
@@ -60,6 +64,7 @@ namespace mithep
 
       float              fTreeVariables[8];     //Ntuple variables
       TTree             *fTree;                 //ntuple tree
+      pwhegwrapper       fWeightAlgo;           //Higgs reweighting algorithm
 
     ClassDef(HKFactorProducer, 1) // Module to produce k factors
   };
