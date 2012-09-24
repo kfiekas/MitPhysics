@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.15 2011/11/27 06:17:45 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.16 2012/09/07 10:07:55 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -27,6 +27,7 @@ HKFactorProducer::HKFactorProducer(const char *name, const char *title) :
   fDoHiggsMhReweighting(kFALSE),
   fMh(0),
   fWidth(0),
+  fBWflag(0),
   fMCEventInfo(0),
   fEmbedWeight(0),
   fOutputFile(0),
@@ -65,12 +66,12 @@ void HKFactorProducer::Process()
       }
 
       if(mH >= 0) {
-	Int_t BWflag = 0;
 	Int_t MTop = 172.5;
-	theWeight = fWeightAlgo.getweight(fMh,fWidth,MTop,mH,BWflag);
+	theWeight = fWeightAlgo.getweight(fMh,fWidth,MTop,mH,fBWflag);
 
 	if (theWeight > 3.0) {
-          cout << "MHweights: " << fMh << " " << fWidth << " " << mH << " " << theWeight << endl;
+          cout << "MHweights: " << fMh << " " << fWidth  << " " << MTop      << " " 
+	                        << mH  << " " << fBWflag << " " << theWeight << endl;
 	}
 
 	if (GetFillHist()) {
@@ -80,7 +81,7 @@ void HKFactorProducer::Process()
           hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,5.999),-3.999));
 	}
       }
-    } 
+    }
     else if (fProcessID == 999){ // for MCatNLO we care about positive or negative weights
       theWeight = fMCEventInfo->Weight();
       if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,5.999),-3.999));
