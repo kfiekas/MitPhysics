@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.16 2012/09/07 10:07:55 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.17 2012/09/24 09:22:03 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -55,7 +55,7 @@ void HKFactorProducer::Process()
     LoadBranch(fMCEvInfoName);
 
     // only accept the exact process id
-    if (fMh > 0 && fWidth > 0) { 
+    if (fMh > 0 && fWidth > 0 && fBWflag >=0) { 
 
       Double_t mH  = -1.0;
       for (UInt_t i=0; i<GenBosons->GetEntries(); ++i) {
@@ -66,7 +66,7 @@ void HKFactorProducer::Process()
       }
 
       if(mH >= 0) {
-	Int_t MTop = 172.5;
+	Double_t MTop = 172.5;
 	theWeight = fWeightAlgo.getweight(fMh,fWidth,MTop,mH,fBWflag);
 
 	if (theWeight > 3.0) {
