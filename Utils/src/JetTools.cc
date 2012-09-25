@@ -1,6 +1,8 @@
 #include "MitPhysics/Utils/interface/JetTools.h"
 #include <algorithm>
 #include <vector>
+#include "TMatrixDSym.h"
+#include "TMatrixDSymEigen.h"
 
 ClassImp(mithep::JetTools)
 
@@ -590,7 +592,44 @@ Bool_t  JetTools::passPFLooseId(const PFJet *iJet) {
   //if(fabs(iJet->Eta())                               > 4.99) return false;
   return true;
 }
-
+//Jet Width Variables
+double JetTools::W(const PFJet *iJet,int iPFType,int iType) { 
+  double lPtD    = 0;
+  double lSumPt  = 0; 
+  double lSumPt2 = 0;
+  TMatrixDSym lCovMatrix(2); lCovMatrix = 0.;
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) { 
+    const PFCandidate *pCand = iJet->PFCand(i0);
+    if(iPFType != -1 && pCand->PFType() != iPFType) continue;
+    double pDEta = iJet->Eta() - pCand->Eta(); 
+    double pDPhi = fabs(iJet->Phi()-pCand->Phi()); if(pDPhi > 2.*TMath::Pi() - pDPhi) pDPhi =  2.*TMath::Pi() - pDPhi;
+    lCovMatrix(0,0) += pCand->Pt()*pCand->Pt()*pDEta*pDEta;
+    lCovMatrix(0,1) += pCand->Pt()*pCand->Pt()*pDEta*pDPhi;
+    lCovMatrix(1,1) += pCand->Pt()*pCand->Pt()*pDPhi*pDPhi;
+    lPtD            += pCand->Pt()*pCand->Pt();
+    lSumPt          += pCand->Pt();
+    lSumPt2         += pCand->Pt()*pCand->Pt();
+  }
+  lCovMatrix(0,0) /= lSumPt2;
+  lCovMatrix(0,1) /= lSumPt2;
+  lCovMatrix(1,1) /= lSumPt2;
+  lCovMatrix(1,0)  = lCovMatrix(0,1);
+  lPtD             = sqrt(lPtD);
+  lPtD            /= lSumPt;
+  double lEtaW     = sqrt(lCovMatrix(0,0));
+  double lPhiW     = sqrt(lCovMatrix(1,1));
+  double lJetW     = 0.5*(lEtaW+lPhiW);
+  TVectorD lEigVals(2); lEigVals = TMatrixDSymEigen(lCovMatrix).GetEigenValues();
+  double lMajW     = sqrt(fabs(lEigVals(0)));
+  double lMinW     = sqrt(fabs(lEigVals(1)));
+  
+  if(iType == 1) return lMajW;
+  if(iType == 2) return lMinW;
+  if(iType == 3) return lEtaW;  
+  if(iType == 4) return lPhiW;  
+  if(iType == 5) return lJetW;  
+  return lPtD; //ptRMS
+}
 /*
 double JetTools::genFrac(const PFJet *iJet) { 
   double lTrueFrac = 0;

@@ -1,18 +1,25 @@
 #include "MitPhysics/Utils/interface/MetLeptonTools.h"
 #include <algorithm>
 #include <vector>
+#include "TString.h"
 
 using namespace mithep;
 
 ClassImp(mithep::MetLeptonTools)
 
-bool MetLeptonTools::looseTauId(const PFTau *iTau) {
-  if(iTau->Pt() < 19)                                  return false;
-  if(fabs(iTau->Eta()) > fabs(2.3) )                   return false;
-  if(!iTau->DiscriminationByDecayModeFinding())        return false;
-  if(!iTau->DiscriminationByLooseElectronRejection())  return false;
-  if(!iTau->DiscriminationByLooseMuonRejection())      return false;
-  if(!iTau->DiscriminationByVLooseIsolation()   )      return false;
+MetLeptonTools::MetLeptonTools() { 
+  fTauIsoMVA = new TauIsoMVA();
+  fTauIsoMVA->Initialize(TString(getenv("CMSSW_BASE")+std::string("/src/MitPhysics/data/SXIsoMVA_BDTG.weights.xml")));
+}
+
+bool MetLeptonTools::looseTauId(const PFTau *iTau,const PileupEnergyDensityCol* iPUEnergyDensity) {
+  if(iTau->Pt() < 19)                                                 return false;
+  if(fabs(iTau->Eta()) > fabs(2.3) )                                  return false;
+  if(!iTau->DiscriminationByDecayModeFinding())                       return false;
+  if(!iTau->DiscriminationByLooseElectronRejection())                 return false;
+  if(!iTau->DiscriminationByLooseMuonRejection())                     return false;
+  //if(!iTau->DiscriminationByVLooseIsolation()   )                   return false;
+  if(fTauIsoMVA->MVAValue(iTau,iPUEnergyDensity->At(0)->Rho()) < 0.7) return false;
   return true;
 }
 bool MetLeptonTools::looseEleId(const Electron *iElectron,const PileupEnergyDensityCol* iPUEnergyDensity,

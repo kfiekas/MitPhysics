@@ -15,6 +15,7 @@
 #include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
+#include "MitPhysics/Utils/interface/TauIsoMVA.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 #include <TVector3.h>
@@ -23,9 +24,10 @@
 namespace mithep {
   class MetLeptonTools {
   public:
-    MetLeptonTools() {}
+    MetLeptonTools();
     virtual ~MetLeptonTools() {}
-    static bool    looseTauId(const PFTau *iTau);
+    TauIsoMVA     *fTauIsoMVA; 
+    bool           looseTauId(const PFTau *iTau,const PileupEnergyDensityCol* iPUEnergyDensity);
     static bool    looseEleId(const Electron *iElectron,const PileupEnergyDensityCol* iPUEnergyDensity,
 			      const PFCandidateCol *iCands,const Vertex *iPV,const VertexCol *iVertices);
     static bool    looseMuId(const Muon *iMu,const PFCandidateCol *iCands,const Vertex *iPV,const VertexCol *iVertices);

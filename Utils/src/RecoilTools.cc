@@ -6,9 +6,10 @@ ClassImp(mithep::RecoilTools)
 
 using namespace mithep;
 
-RecoilTools::RecoilTools(TString iJetLowPtMVAFile,TString iJetHighPtMVAFile,TString iCutFile) { 
+RecoilTools::RecoilTools(TString iJetLowPtMVAFile,TString iJetHighPtMVAFile,TString iCutFile,bool i42) { 
   fJetIDMVA = new JetIDMVA();
   fJetIDMVA->Initialize( JetIDMVA::kMET,iJetLowPtMVAFile,iJetHighPtMVAFile,JetIDMVA::kBaseline,iCutFile);
+  f42       = i42;
 }
 //--------------------------------------------------------------------------------------------------
 RecoilTools::~RecoilTools() { 
@@ -67,6 +68,42 @@ Met RecoilTools::pfRecoil(double iPhi1,double iEta1,double iPhi2,double iEta2,
   }
   Met lPFMet(lVec.Px(),lVec.Py()); 
   lPFMet.SetSumEt(lSumEt);
+  return lPFMet;
+
+}
+//--------------------------------------------------------------------------------------------------                                                                                                 
+void RecoilTools::addType1(FourVectorM &iVec,Double_t &iSumEt,
+                           const PFJetCol *iJets,FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol *iPUEnergyDensity,
+                           double iPhi1,double iEta1,double iPhi2,double iEta2) {
+  for(UInt_t i0 = 0; i0 < iJets->GetEntries(); i0++) {
+    const PFJet *pJet = iJets->At(i0);
+    if(!JetTools::passPFLooseId(pJet))                                              continue;
+    if(!filter(pJet,iPhi1,iEta1,iPhi2,iEta2))                                       continue;
+    if(fJetIDMVA->correctedPt(pJet,iJetCorrector,iPUEnergyDensity) < 10)            continue;
+    double lPt = fJetIDMVA->correctedPt(pJet,iJetCorrector,iPUEnergyDensity,RhoUtilities::DEFAULT,100);
+    FourVectorM pVec(0,0,0,0);
+    pVec.SetPt(lPt); pVec.SetEta(pJet->Eta()); pVec.SetPhi(pJet->Phi()); pVec.SetM(pJet->Mass());
+    iVec   -= pVec;
+    iSumEt += pVec.Pt();
+  }
+}
+//--------------------------------------------------------------------------------------------------
+Met RecoilTools::pfRecoilType1(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
+                               const PFCandidateCol *iCands,const PFJetCol *iJets,
+                               FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol *iPUEnergyDensity,
+                               double iPhi1,double iEta1,double iPhi2,double iEta2) {
+  double lSumEt = 0;
+  FourVectorM lVec(0,0,0,0);
+  for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) {
+    lVec -= iCands->At(i0)->Mom();
+    lSumEt += iCands->At(i0)->Pt();
+  }
+  addType1(lVec,lSumEt,iJets,iJetCorrector,iPUEnergyDensity,iPhi1,iEta1,iPhi2,iEta2);
+  Met lPFMet(lVec.Px(),lVec.Py());
+  lPFMet.SetSumEt(lSumEt);
+  lPFMet.SetMex  (lPFMet.Mex()+iVisPt*cos(iVisPhi));
+  lPFMet.SetMey  (lPFMet.Mey()+iVisPt*sin(iVisPhi));
+  lPFMet.SetSumEt(lPFMet.SumEt()-iVisSumEt);
   return lPFMet;
 }
 //--------------------------------------------------------------------------------------------------
@@ -140,10 +177,10 @@ void RecoilTools::addNeut(const PFJet *iJet,FourVectorM &iVec,Double_t &iSumEt,
 			  FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol *iPUEnergyDensity,
 			  int iSign) { 
   FourVectorM lVec(0,0,0,0);
-  double lPt = fJetIDMVA->correctedPt(iJet,iJetCorrector,iPUEnergyDensity);
-  //if(lPt < 0) lPt = 0.;
-  //if(iJet->RawMom().Pt() < 10) lPt = TMath::Max(iJet->RawMom().Pt()-iJet->JetArea()*iPUEnergyDensity->At(0)->Rho(),0.);
-  lPt *= (iJet->NeutralEmEnergy()/iJet->RawMom().E() + iJet->NeutralHadronEnergy()/iJet->RawMom().E());
+  double lPt    = fJetIDMVA->correctedPt(iJet,iJetCorrector,iPUEnergyDensity);
+  double lFrac  = (iJet->NeutralEmEnergy()/iJet->RawMom().E() + iJet->NeutralHadronEnergy()/iJet->RawMom().E());
+  if(fabs(iJet->Eta()) > 2.5 && !f42) lFrac = 1.;
+  lPt *= lFrac;
   lVec.SetPt(lPt); lVec.SetEta(iJet->Eta()); lVec.SetPhi(iJet->Phi()); lVec.SetM(iJet->Mass());
   if(iSign > 0) iVec -= lVec;
   if(iSign < 0) iVec += lVec;

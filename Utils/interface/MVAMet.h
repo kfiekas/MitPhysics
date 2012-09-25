@@ -25,6 +25,7 @@
 #include "MitCommon/MathTools/interface/MathUtils.h"
 
 #include "MitPhysics/Utils/interface/RecoilTools.h"
+#include "MitPhysics/Utils/interface/MetLeptonTools.h"
 #include "CondFormats/EgammaObjects/interface/GBRForest.h"
 
 class TRandom3;
@@ -194,6 +195,7 @@ namespace mithep {
     Int_t     fNElectrons;
     Int_t     fNTaus;
 
+    MetLeptonTools *fMetLeptonTools;
     //TMVA::Reader* fPhiReader;
     //TMVA::Reader* fU1Reader;
     ClassDef(MVAMet,0)

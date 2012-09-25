@@ -177,6 +177,23 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
     fReader->AddSpectator( "jetPt"    , &fJPt1      );  
     fReader->AddSpectator( "jetEta"   , &fJEta1     );
   }
+  if (fType == kQGP) {
+    fReader->AddVariable( "nvtx"      , &fNVtx       ); 
+    fReader->AddVariable( "jetPt"     , &fJPt1       );  
+    fReader->AddVariable( "jetEta"    , &fJEta1      );
+    fReader->AddVariable( "jetPhi"    , &fJPhi1      );             
+    fReader->AddVariable( "beta"      , &fBeta      );
+    fReader->AddVariable( "betaStar"  , &fBetaStar  );
+    fReader->AddVariable( "nParticles", &fNNeutrals );
+    fReader->AddVariable( "nCharged"  , &fNCharged  );
+    fReader->AddVariable( "dRMean"    , &fDRMean    );
+    fReader->AddVariable( "ptD"       , &fPtD       );
+    fReader->AddVariable( "frac01"    , &fFrac01    );
+    fReader->AddVariable( "frac02"    , &fFrac02    );
+    fReader->AddVariable( "frac03"    , &fFrac03    );
+    fReader->AddVariable( "frac04"    , &fFrac04    );
+    fReader->AddVariable( "frac05"    , &fFrac05    );
+  }
 
   fLowPtReader->BookMVA(fLowPtMethodName  , iLowPtWeights );
   fReader->BookMVA(fHighPtMethodName , iHighPtWeights );
@@ -443,9 +460,78 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, const Verte
 
   return lMVA;
 }
+//--------------------------------------------------------------------------------------------------
+Double_t* JetIDMVA::QGValue(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices, //Vertex here is the PV
+			    FactorizedJetCorrector *iJetCorrector,
+			    const PileupEnergyDensityCol *iPileupEnergyDensity,
+			    Bool_t printDebug) {
+
+  Double_t *lId = new double[3]; 
+  lId[0] = -2; 
+  lId[1] = -2;
+  lId[2] = -2;
+  if (!fIsInitialized) { 
+    std::cout << "Error: JetIDMVA not properly initialized.\n"; 
+    return lId;
+  }
+  if(!JetTools::passPFLooseId(iJet)) return lId;
+
+  fJPt1       = correctedPt(iJet,iJetCorrector,iPileupEnergyDensity);
+  if(fJPt1 < 20) return lId;
+
+  //set all input variables
+  fNVtx       = iVertices->GetEntries();
+  fJEta1      = iJet->RawMom().Eta();
+  fJPhi1      = iJet->RawMom().Phi();
+  fJD01       = JetTools::impactParameter(iJet,iVertex);  
+  fJDZ1       = JetTools::impactParameter(iJet,iVertex,true);
+  fBeta       = JetTools::Beta(iJet,iVertex,fDZCut);
+  fBetaStar   = JetTools::betaStar(iJet,iVertex,iVertices,fDZCut);
+  fNCharged   = iJet->ChargedMultiplicity();
+  fNNeutrals  = iJet->NeutralMultiplicity();
+  fNParticles = fNCharged+fNNeutrals;
+  fPtD        = JetTools::W(iJet,-1,0);  
+
+  fDRMean    = JetTools::dRMean(iJet,-1);
+  fDR2Mean   = JetTools::dR2Mean(iJet,-1);
+  fFrac01    = JetTools::frac  (iJet,0.1,0. ,-1);
+  fFrac02    = JetTools::frac  (iJet,0.2,0.1,-1);
+  fFrac03    = JetTools::frac  (iJet,0.3,0.2,-1);
+  fFrac04    = JetTools::frac  (iJet,0.4,0.3,-1);
+  fFrac05    = JetTools::frac  (iJet,0.5,0.4,-1);
+
+  double lMVA = 0;
+  lId[0] = fReader->EvaluateMulticlass( fHighPtMethodName )[0];
+  lId[1] = fReader->EvaluateMulticlass( fHighPtMethodName )[1];
+  lId[2] = fReader->EvaluateMulticlass( fHighPtMethodName )[2];
+  if (printDebug == kTRUE) {
+    std::cout << "Debug Jet MVA: "
+	      << fNVtx      << " "
+	      << fJPt1      << " "
+	      << fJEta1     << " "
+	      << fJPhi1     << " "
+	      << fJD01      << " "
+	      << fJDZ1      << " "
+	      << fBeta      << " "
+	      << fBetaStar  << " "
+	      << fNCharged  << " "
+	      << fNNeutrals << " "
+	      << fDRMean    << " "
+	      << fFrac01    << " "
+	      << fFrac02    << " "
+	      << fFrac03    << " "
+	      << fFrac04    << " "
+	      << fFrac05    << " "
+	      << fDRMean    
+              << " === : === "
+              << lMVA << " "    
+              << std::endl;
+  }
+  return lId;
+}
 Double_t JetIDMVA::correctedPt(const PFJet *iJet, FactorizedJetCorrector *iJetCorrector,
                                const PileupEnergyDensityCol *iPUEnergyDensity,
-			       RhoUtilities::RhoType type) { 
+			       RhoUtilities::RhoType type,int iId) { 
   Double_t Rho = 0.0;
   switch(type) {
   case RhoUtilities::MIT_RHO_VORONOI_HIGH_ETA:
@@ -477,6 +563,23 @@ Double_t JetIDMVA::correctedPt(const PFJet *iJet, FactorizedJetCorrector *iJetCo
   iJetCorrector->setRho   (Rho);
   iJetCorrector->setJetA  (iJet->JetArea());
   iJetCorrector->setJetEMF(-99.0);     
-  Double_t correction = iJetCorrector->getCorrection();
+  Double_t correction = 1.;
+  if(iId < 0 || iId == 100) correction = iJetCorrector->getCorrection();
+  std::vector<float> lCorrections; if(iId != -1 && iId != 100) lCorrections = iJetCorrector->getSubCorrections();
+  if(iId > -1 && iId < int(lCorrections.size())) correction = lCorrections[iId];
+  if(iId == 100) {
+    iJetCorrector->setJetEta(rawMom.Eta());
+    iJetCorrector->setJetPt (rawMom.Pt());
+    iJetCorrector->setJetPhi(rawMom.Phi());
+    iJetCorrector->setJetE  (rawMom.E());
+    iJetCorrector->setRho   (Rho);
+    iJetCorrector->setJetA  (iJet->JetArea());
+    iJetCorrector->setJetEMF(-99.0);
+    lCorrections = iJetCorrector->getSubCorrections();
+    double correction2 = 1;
+    correction2 *= lCorrections[0];
+    correction = correction-correction2;
+  }
+
   return rawMom.Pt()*correction;
 }

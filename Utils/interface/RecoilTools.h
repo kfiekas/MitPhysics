@@ -31,11 +31,20 @@ namespace mithep {
     public:
     RecoilTools(TString iJetLowPtMVAFile ="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
 		TString iJetHighPtMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
-		TString iCutFile         ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py");
+		TString iCutFile         ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py",bool i42=false);
     ~RecoilTools();
     JetIDMVA *fJetIDMVA;
 
     Met pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,const PFCandidateCol *iCands);
+    void addType1(FourVectorM &iVec,Double_t &iSumEt,
+                  const PFJetCol *iJets,FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol *iPUEnergyDensity,
+                  double iPhi1,double iEta1,double iPhi2,double iEta2);
+
+    Met pfRecoilType1(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
+                      const PFCandidateCol *iCands,const PFJetCol *iJets,
+                      FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol *iPUEnergyDensity,
+                      double iPhi1,double iEta1,double iPhi2,double iEta2);
+
     //Candidate filtered
     Met pfRecoil(double iPhi1,double iEta1,double iPhi2,double iEta2,const PFCandidateCol *iCands);
     Met pfCone  (double iPhi1,double iEta1,const PFCandidateCol *iCands);
@@ -166,7 +175,8 @@ namespace mithep {
 		 const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
 		 Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		 Double_t iDZCut=0.1);
-      
+    
+    bool f42;
     ClassDef(RecoilTools, 0) // Recoil tools
   };
 }

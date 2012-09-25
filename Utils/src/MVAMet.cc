@@ -47,7 +47,8 @@ MVAMet::MVAMet() :
   fPhiReader(0),
   fU1Reader(0),
   fCovU1Reader(0),
-  fCovU2Reader(0) { }
+  fCovU2Reader(0),
+  fMetLeptonTools(0) { }
 //--------------------------------------------------------------------------------------------------
 MVAMet::~MVAMet()
 {
@@ -126,10 +127,10 @@ void MVAMet::Initialize(TString iJetLowPtFile,
 			MVAMet::MVAType     iType) { 
   
   fIsInitialized = kTRUE;
-  fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile);
   fType          = iType;
   f42            = iU1Weights.Contains("42");
   if(f42) fRecoilTools->fJetIDMVA->fJetPtMin = 1.;
+  fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile,f42);
 
   ROOT::Cintex::Cintex::Enable();   
   
@@ -153,6 +154,9 @@ void MVAMet::Initialize(TString iJetLowPtFile,
   fPhiVals = new Float_t[23];
   fU1Vals  = new Float_t[25];
   fCovVals = new Float_t[26];
+
+
+  fMetLeptonTools = new MetLeptonTools();
 }
 //--------------------------------------------------------------------------------------------------
 Float_t* MVAMet::getVals() { 
@@ -267,7 +271,9 @@ Double_t MVAMet::evaluateCovU1() {
   fCovVals[23] =  fNJet    ;
   fCovVals[24] =  fUPhiMVA ;
   fCovVals[25] =  fUMVA    ;
-  return fCovU1Reader->GetResponse(fCovVals);
+  double lCovU1 = fCovU1Reader->GetResponse(fCovVals);
+  if(!f42) lCovU1 = lCovU1*lCovU1*fUMVA*fUMVA; 
+  return lCovU1;
 }
 //--------------------------------------------------------------------------------------------------
 Double_t MVAMet::evaluateCovU2() {
@@ -297,7 +303,9 @@ Double_t MVAMet::evaluateCovU2() {
   fCovVals[23] =  fNJet    ;
   fCovVals[24] =  fUPhiMVA ;
   fCovVals[25] =  fUMVA    ;
-  return fCovU2Reader->GetResponse(fCovVals);
+  double lCovU2 = fCovU2Reader->GetResponse(fCovVals);
+  if(!f42) lCovU2 = lCovU2*lCovU2*fUMVA*fUMVA; 
+  return lCovU2;
 }
 //-------------------------------------------------------------------------------------------------- 
 Double_t MVAMet::MVAValue(  Bool_t iPhi, 
@@ -1014,7 +1022,7 @@ Met MVAMet::GetMet(const MuonCol        *iMuons,const ElectronCol *iElectrons,co
   fNTaus = 0;
   for(UInt_t i0 = 0; i0 < iTaus->GetEntries(); i0++) {
     const PFTau *pTau = iTaus->At(i0);
-    if(!MetLeptonTools::looseTauId(pTau)) continue;
+    if(!fMetLeptonTools->looseTauId(pTau,iPUEnergyDensity)) continue;
     FourVectorM pVis(0,0,0,0); pVis.SetCoordinates(pTau->Pt()*MetLeptonTools::vis(pTau),pTau->Eta(),pTau->Phi(),pTau->Mass()*MetLeptonTools::vis(pTau));
     std::pair<FourVectorM,FourVectorM> pVec(pTau->Mom(),pVis);
     lDecay  .push_back(pVec);

@@ -39,7 +39,8 @@ namespace mithep {
         kBaseline = 0,
 	k42       = 1,
 	k52       = 2,
-	kCut      = 3
+	kCut      = 3,
+	kQGP      = 4
       };
 
       enum CutType {
@@ -54,7 +55,7 @@ namespace mithep {
 			  TString           iHighPtWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
 			  JetIDMVA::MVAType iType=kBaseline,
 			  TString           iCutFileName  ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py");
-      
+    
       Bool_t   IsInitialized() const { return fIsInitialized; }
       Double_t MVAValue(    
 			Float_t iNPV    ,
@@ -96,6 +97,11 @@ namespace mithep {
 			const PileupEnergyDensityCol *iPileupEnergyDensity,
 			Bool_t printDebug=false);
 
+      Double_t* QGValue(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices, //Vertex here is the PV
+			FactorizedJetCorrector *iJetCorrector,
+			const PileupEnergyDensityCol *iPileupEnergyDensity,
+			Bool_t printDebug);
+
       //Corrected Jets
       Double_t MVAValue(const PFJet *iJet,const Vertex *iVertex,const VertexCol *iVertices,
 			Bool_t printDebug=false);
@@ -103,7 +109,7 @@ namespace mithep {
 
       double  correctedPt(const PFJet *iJet, FactorizedJetCorrector *iJetCorrector,
 			  const PileupEnergyDensityCol *iPUEnergyDensity,
-		          RhoUtilities::RhoType type = RhoUtilities::DEFAULT);
+		          RhoUtilities::RhoType type = RhoUtilities::DEFAULT,int iId=-1);
 
       Float_t                  fJetPtMin;
       Float_t                  fDZCut;
@@ -130,7 +136,9 @@ namespace mithep {
       Float_t fBetaStar ;
       Float_t fNCharged ;
       Float_t fNNeutrals;
+      Float_t fNParticles;
       Float_t fDRMean   ;
+      Float_t fPtD      ;
       Float_t fFrac01   ;
       Float_t fFrac02   ;
       Float_t fFrac03   ;
