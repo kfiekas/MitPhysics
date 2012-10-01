@@ -41,10 +41,12 @@ namespace mithep
     class LeptonPairPhotonEvent
   {
     public:
-    Float_t Meeg;// 3-body mass with two electrons
-    Float_t Mmmg;// 3-body mass with two muons
-    Float_t Mee;// 2-body mass with two electrons
-    Float_t Mmm;// 2-body mass with two muons
+    Float_t electronZmass;
+    Float_t mllg;// 3-body mass
+    Bool_t muonZgVeto;
+    Float_t muonZmass;
+    Int_t year;   
+
     Float_t ele1MVA;// Electron 1 MVA Value
     Float_t ele1charge;// Electron 1 Charge
     Float_t ele1energy;// Electron 1 Energy
@@ -55,7 +57,17 @@ namespace mithep
     Float_t ele1eta;// Electron 1 Eta
     Float_t ele1mass;// Electron 1 Mass
     Float_t ele1phi;// Electron 1 Phi
-   
+    Float_t ele1dEtaIn;
+    Float_t ele1dPhiIn;
+    Float_t ele1sigmaIEtaIEta;
+    Float_t ele1HadOverEm;
+    Float_t ele1D0;
+    Float_t ele1DZ;
+    Float_t ele1OneOverEMinusOneOverP;
+    Float_t ele1PFIsoOverPt;
+    Bool_t  ele1Conversion;
+    Float_t ele1missinghits;
+
     Float_t ele2MVA;// Electron 2 MVA Value
     Float_t ele2charge;// Electron 2 Charge
     Float_t ele2energy;// Electron 2 Energy
@@ -66,8 +78,28 @@ namespace mithep
     Float_t ele2eta;// Electron 2 Eta
     Float_t ele2mass;// Electron 2 Mass
     Float_t ele2phi;// Electron 2 Phi
+    Float_t ele2dEtaIn;
+    Float_t ele2dPhiIn;
+    Float_t ele2sigmaIEtaIEta;
+    Float_t ele2HadOverEm;
+    Float_t ele2D0;
+    Float_t ele2DZ;
+    Float_t ele2OneOverEMinusOneOverP;
+    Float_t ele2PFIsoOverPt;
+    Bool_t  ele2Conversion;
+    Float_t ele2missinghits;
 
-    Float_t photonisgen;// Photon MVA Value
+    Float_t chargediso_ele1;
+    Float_t gammaiso_ele1;
+    Float_t neutraliso_ele1;
+    Float_t rho_ele1;
+    Float_t effectivearea_ele1;
+    Float_t chargediso_ele2;
+    Float_t gammaiso_ele2;
+    Float_t neutraliso_ele2;
+    Float_t rho_ele2;
+    Float_t effectivearea_ele2;
+
     Float_t photonidmva;// Photon MVA Value
     Float_t photonenergy;// Photon Energy
     Float_t photonpx;// Photon Px
@@ -98,11 +130,21 @@ namespace mithep
     Float_t m2Phi;// Muon 2 Phi
     Float_t m2Charge;// Muon 2 Charge
 
-    Int_t NPu; //Number of Pileup events
-    Int_t NPuPlus;//Number of Pileup events in next signal readout
-    Int_t NPuMinus;//Number of Pileup events in previous signal readout
-   
+    Float_t NPu; //Number of Pileup events
+    Float_t NPuPlus;//Number of Pileup events in next signal readout
+    Float_t NPuMinus;//Number of Pileup events in previous signal readout
+    Float_t photonmatchmc;   
 
+    Float_t costheta_lm_electrons;
+    Float_t costheta_lp_electrons;
+    Float_t phi_electrons;
+    Float_t cosTheta_electrons;
+    Float_t cosThetaG_electrons;
+    Float_t costheta_lm_muons;
+    Float_t costheta_lp_muons;
+    Float_t phi_muons;
+    Float_t cosTheta_muons;
+    Float_t cosThetaG_muons;
   };
 
   class LeptonPairPhotonTreeWriter : public BaseMod
@@ -131,38 +173,33 @@ namespace mithep
     void 		SetGoodMuonName(TString name) { fGoodMuonName = name; }
     void 		SetGoodMuonsFromBranch(Bool_t b) { fGoodMuonsFromBranch = b; }
     void                SetPUInfoName(const char *n)      { fPileUpName = n;             }
+    void                SetApplyElectronVeto(Bool_t b)   { fApplyElectronVeto = b;     }
 
     // is Data Or Not?
-    void                SetIsData (Bool_t b)                 { fIsData    = b; }
+    void                SetIsData (Bool_t b)                 { fIsData = b; }
     
-    void                SetDoMCCheck (Bool_t b)              { fDoMCCheck = b; }
-
     void                SetTupleName(const char* c)          { fTupleName = c; }
-    
-    // The following flag configures LeptonPairPhotonTreeWriter to select either dielectron or dimuon events
-    void		SetAreElectronsOrMuons (Int_t i)    { fElectronMuonFlag = i;} 
+    void		SetYear(Float_t y)		     {YEAR = y;} 
 
   protected:
     void                Process();
     void                SlaveBegin();
-
     // Names for the input Collections
     TString             fPhotonBranchName;
     TString             fGoodElectronName;
     TString		fGoodMuonName;
     TString             fPVName;
-    TString             fVertexName;
     TString             fPFCandName;
     TString             fTrackName;
     TString             fPileUpDenName; 
     TString             fPileUpName;
+    TString 		fMCParticleName;
+    TString	    	fConversionName;
+    TString             fBeamSpotName;
 
     // Is it Data or MC?
     Bool_t              fIsData;
-    Bool_t              fDoMCCheck;
-    
-    // Dielectron or dimuon flag
-    Int_t		fElectronMuonFlag;    
+    Float_t 		YEAR; 
     
     // Determines whether the input comes from a branch or not
     Bool_t              fPhotonsFromBranch;
@@ -172,33 +209,32 @@ namespace mithep
     Bool_t		fPFCandsFromBranch;
     Bool_t		fTracksFromBranch;
     Bool_t		fPileUpDenFromBranch;
-
+    Bool_t		fApplyElectronVeto;
     //Collection Names
     const PhotonCol               *fPhotons;
     const ElectronCol             *fGoodElectrons;    
     const VertexCol               *fPV;
     const MuonCol		  *fGoodMuons;
-    const VertexCol               *fVertices;
     const PFCandidateCol	  *fPFCands;
     const TrackCol		  *fTracks;
     const PileupEnergyDensityCol  *fPileUpDen;
     const PileupInfoCol           *fPileUp;
+    const MCParticleCol		  *fMCParticles;
+    const DecayParticleCol	  *fConversions;    
+    const BeamSpotCol             *fBeamSpot;
 
-    const MCParticleCol*           fMCParticles;
-
-    // --------------------------------
+// --------------------------------
     TString                        fTupleName;
     LeptonPairPhotonEvent*         fLeptonPairPhotonEvent;
     TTree*                         ZgllTuple;
-    
     //Photon MVA initialization variables
-/*     int                   fVariableType_2011; */
-/*     TString               fEndcapWeights_2011; */
-/*     TString               fBarrelWeights_2011; */
-/*     int                   fVariableType_2012_globe; */
-/*     TString               fEndcapWeights_2012_globe; */
-/*     TString               fBarrelWeights_2012_globe; */
-    //MVATools              fTool;
+    int                   fVariableType_2011;
+    TString               fEndcapWeights_2011;
+    TString               fBarrelWeights_2011;
+    int                   fVariableType_2012_globe;
+    TString               fEndcapWeights_2012_globe;
+    TString               fBarrelWeights_2012_globe;
+    MVATools              fTool;
     ClassDef(LeptonPairPhotonTreeWriter, 1) // Lepton Pair + Photon identification module
   };
 
