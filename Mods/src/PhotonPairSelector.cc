@@ -756,12 +756,8 @@ void PhotonPairSelector::Process()
 						   fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
 						   fInvertElectronVeto);           
       
-      pass1 = pass1 && PhotonTools::PassCiCPFIsoSelection(fixPh1st[iPair], theVtx[iPair], fPFCands,
-							  fPV, rho2012, leadptcut);
-      if (pass1)
-        pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
-							    fPV, rho2012, trailptcut);
       break;      
+
     default:
       pass1 = true;
       pass2 = true;
