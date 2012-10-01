@@ -129,8 +129,8 @@ void MVAMet::Initialize(TString iJetLowPtFile,
   fIsInitialized = kTRUE;
   fType          = iType;
   f42            = iU1Weights.Contains("42");
-  if(f42) fRecoilTools->fJetIDMVA->fJetPtMin = 1.;
   fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile,f42);
+  if(f42) fRecoilTools->fJetIDMVA->fJetPtMin = 1.;
 
   ROOT::Cintex::Cintex::Enable();   
   
