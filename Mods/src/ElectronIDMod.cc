@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.127 2012/07/22 20:33:27 sixie Exp $
+// $Id: ElectronIDMod.cc,v 1.128 2012/08/07 15:04:59 sixie Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -155,6 +155,7 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
   Int_t MVABin = -1;
   if(idType == ElectronTools::kMVAID_BDTG_IDHWW2012TrigV0
      || idType == ElectronTools::kMVAID_BDTG_IDIsoCombinedHWW2012TrigV4
+     || idType == ElectronTools::kHggLeptonTagId2012HCP
     ) {
      if (el->Pt() <  20 && eta <  0.800 		     ) MVABin = 0;
      if (el->Pt() <  20 && eta >= 0.800 && fabs(eta) < 1.479 ) MVABin = 1;
@@ -208,7 +209,15 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     else if (MVABin == 3) MVACut = 0.936;
     else if (MVABin == 4) MVACut = 0.888;
     else if (MVABin == 5) MVACut = 0.869;
+  } else if (idType == ElectronTools::kHggLeptonTagId2012HCP) {
+    if      (MVABin == 0) MVACut = 0.9;
+    else if (MVABin == 1) MVACut = 0.9;
+    else if (MVABin == 2) MVACut = 0.9;
+    else if (MVABin == 3) MVACut = 0.9;
+    else if (MVABin == 4) MVACut = 0.9;
+    else if (MVABin == 5) MVACut = 0.9;
   }
+
 
   if(isDebug == kTRUE){
     printf("PassElMVAID(%d): %d, pt, eta = %f, %f, rho = %f(%f) : MVA = %f, bin: %d\n",
@@ -220,14 +229,45 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
   return kFALSE;
 }
 
+Double_t ElectronIDMod::EvaluateMVAID(const Electron *el, ElectronTools::EElIdType idType, 
+                                    const Vertex *vertex, const PFCandidateCol *PFCands,
+                                    const PileupEnergyDensityCol *PileupEnergyDensity) const
+{ 
+  Bool_t isDebug = kFALSE;
+  Double_t MVAValue = 0;
+  if     (idType == ElectronTools::kMVAID_BDTG_IDIsoCombined) {
+    MVAValue = fElectronIDMVA->MVAValue(el, vertex, PFCands, PileupEnergyDensity, fIntRadius);
+  } 
+  else if(idType == ElectronTools::kMVAID_BDTG_IDHWW2012TrigV0) {
+    ElectronOArr *tempElectrons = new  ElectronOArr;
+    MuonOArr     *tempMuons     = new  MuonOArr;
+    MVAValue = fElectronIDMVA->MVAValue(el, vertex, PFCands, PileupEnergyDensity, ElectronTools::kEleEANoCorr, 
+                                        tempElectrons, tempMuons, isDebug);
+    delete tempElectrons;
+    delete tempMuons;
+  }
+  else if(idType == ElectronTools::kMVAID_BDTG_IDIsoCombinedHWW2012TrigV4) {
+
+    MVAValue = fElectronIDMVA->MVAValue(el, vertex, fVertices, PFCands, 
+                                        PileupEnergyDensity, ElectronTools::kEleEANoCorr, 
+                                        isDebug);
+  }
+  else {
+    MVAValue = fElectronIDMVA->MVAValue(el, vertex);
+  }
+
+  return MVAValue;
+  
+}
+
 //--------------------------------------------------------------------------------------------------
 Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType idType, 
                                 const Vertex *vertex) const
 {
-
+  
   Bool_t idcut = kFALSE;
   switch (idType) {
-    case ElectronTools::kTight:
+  case ElectronTools::kTight:
       idcut = ele->PassTightID();
       break;
     case ElectronTools::kLoose:
@@ -272,6 +312,13 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       break;
     case ElectronTools::kHggLeptonTagId2012:
       idcut = ElectronTools::PassHggLeptonTagID2012(ele);
+      break;
+    case ElectronTools::kHggLeptonTagId2012HCP:
+    {
+      idcut = PassMVAID(ele, ElectronTools::kHggLeptonTagId2012HCP, 
+                                   vertex, fPFCandidates, fPileupEnergyDensity);
+  
+    }
       break;
     case ElectronTools::kMVAID_BDTG_NoIPInfo:
     {
@@ -484,6 +531,32 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       if (IsoOverPt < IsoCut ) isocut = kTRUE;
     }
       break;
+      case ElectronTools::kPFIso_HggLeptonTag2012HCP:
+    {
+     
+      Bool_t isDebug = kFALSE;
+      if(isDebug == kTRUE){
+        printf("PFIso_HggLeptonTag2012HCP: %d, pt, eta = %f, %f, rho = %f(%f) : ",
+           GetEventHeader()->EvtNum(),ele->Pt(), ele->Eta(),
+	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets());
+      }
+      ElectronOArr *tempIsoElectrons = new  ElectronOArr;
+      MuonOArr     *tempIsoMuons     = new  MuonOArr;
+      Double_t IsoOverPt = IsolationTools::PFElectronIsolation2012LepTag(ele, vertex, fPFNoPileUpCands,fPileupEnergyDensity, ElectronTools::kEleEAData2012, tempIsoElectrons, tempIsoMuons, 0.3, isDebug);
+      delete tempIsoElectrons;
+      delete tempIsoMuons;
+      Double_t eta = ele->SCluster()->AbsEta();
+      Double_t IsoCut = -1;
+      if (ele->Pt() <  20 && eta <  0.800		 ) IsoCut = 0.150;
+      if (ele->Pt() <  20 && eta >= 0.800 && eta < 1.479 ) IsoCut = 0.150;
+      //if (ele->Pt() <  20 && eta >= 1.479		 ) IsoCut = 0.10;
+      if (ele->Pt() <  20 && eta >= 1.479		 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta <  0.800		 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta >= 0.800 && eta < 1.479 ) IsoCut = 0.150;
+      if (ele->Pt() >= 20 && eta >= 1.479		 ) IsoCut = 0.150;
+      if (IsoOverPt < IsoCut ) isocut = kTRUE;
+    }
+      break;
     case ElectronTools::kMVAIso_BDTG_IDIsoCombinedHWW2012TrigV4:
     {
       if (fabs(ele->SCluster()->Eta()) < 1.479) {
@@ -526,20 +599,26 @@ void ElectronIDMod::Process()
   LoadEventObject(fBeamSpotName, fBeamSpot);
   LoadEventObject(fTrackName, fTracks);
   LoadEventObject(fPFCandidatesName, fPFCandidates);
+
   if(fElIsoType == ElectronTools::kTrackJuraSliding || 
      fElIsoType == ElectronTools::kCombinedRelativeConeAreaCorrected || 
      fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombined || 
      fElIdType  == ElectronTools::kMVAID_BDTG_IDHWW2012TrigV0  || 
      fElIsoType == ElectronTools::kMVAIso_BDTG_IDIsoCombinedHWW2012TrigV4 ||
      fElIsoType == ElectronTools::kPFIso_HWW2012TrigV0      || 
-     fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012
-    ) {
+     fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012 ||
+     fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012HCP
+     ) {
     LoadEventObject(fPileupEnergyDensityName, fPileupEnergyDensity);
   }
-  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
-  if(fElIsoType == ElectronTools::kPFIso_HWW2012TrigV0 || fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012) {
+  assert(fPileupEnergyDensity);
+ 
+  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
+  
+  if(fElIsoType == ElectronTools::kPFIso_HWW2012TrigV0 || fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012 || fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012HCP) {
     // Name is hardcoded, can be changed if someone feels to do it
+  
     fPFNoPileUpCands = GetObjThisEvt<PFCandidateCol>(fPFNoPileUpName);
   }
 
@@ -551,6 +630,11 @@ void ElectronIDMod::Process()
   
   ElectronOArr *GoodElectrons = new ElectronOArr;
   GoodElectrons->SetName(fGoodElectronsName);
+
+  Double_t MVAValue = -100;
+  Double_t MVAValueMax = -99;
+  int NElectronMVAValueMax = 0;
+  int NPass = 0;
 
   for (UInt_t i=0; i<fElectrons->GetEntries() && fVertices->GetEntries() > 0 ; ++i) {
     const Electron *e = fElectrons->At(i);        
@@ -567,7 +651,7 @@ void ElectronIDMod::Process()
     if (e->AbsEta() > fElectronEtaMax) 
       continue;
 
-    if (fApplyEcalFiducial && ( (e->SCluster()->AbsEta()>1.4442 && e->SCluster()->AbsEta()<1.5666) || e->SCluster()->AbsEta()>2.5 )) {
+    if (fApplyEcalFiducial && ( (e->SCluster()->AbsEta()>1.4442 && e->SCluster()->AbsEta()<1.566) || e->SCluster()->AbsEta()>2.5 )) {
       continue;
     }
     
@@ -584,7 +668,7 @@ void ElectronIDMod::Process()
     Bool_t spikecut = ElectronTools::PassSpikeRemovalFilter(e);
     if (fApplySpikeRemoval && !spikecut)
       continue;
-
+  
     //apply Isolation Cut
     Double_t Rho = 0.0;
     if( fElIsoType == ElectronTools::kTrackJuraSliding
@@ -613,10 +697,25 @@ void ElectronIDMod::Process()
 	break;
       }
     }
-    Bool_t isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0), Rho, fElIdType);
+  
+    Bool_t isocut = kFALSE;
+    if(fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012HCP){
+      Double_t distVtx = 999.0;
+      Int_t closestVtx = 0;
+      for(UInt_t nv=0; nv<fVertices->GetEntries(); nv++){
+	double dz = TMath::Abs(e->GsfTrk()->DzCorrected(*fVertices->At(nv)));
+	if(dz < distVtx) {
+	  distVtx    = dz;
+	  closestVtx = nv;
+	}
+      }
+      isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(closestVtx), Rho, fElIdType);
+    }else{
+      isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0), Rho, fElIdType);
+    }
     if (!isocut)
       continue;
-
+    
     // apply conversion filters
     Bool_t passConvVetoType1 = kFALSE;
     if (fApplyConvFilterType1) {
@@ -640,7 +739,7 @@ void ElectronIDMod::Process()
     }
     
     if (passConvVetoType2 == kFALSE) continue;
-
+  
     // apply NExpectedHitsInner Cut
     if(fInvertNExpectedHitsInnerCut == kFALSE && fNExpectedHitsInnerCut < 999 && 
        e->CorrectedNExpectedHitsInner() > fNExpectedHitsInnerCut) continue;
@@ -657,19 +756,39 @@ void ElectronIDMod::Process()
       if (!passD0cut)
         continue;
     }
-
+    
     // apply dz cut
     if (fApplyDZCut) {
       Bool_t passDZcut = ElectronTools::PassDZCut(e, fVertices, fDZCut, fWhichVertex);
       if (!passDZcut)
         continue;
     }
-
+    
     //apply id cut
-    Bool_t idcut = PassIDCut(e, fElIdType, fVertices->At(0));
+    Bool_t idcut = kFALSE;
+    if(fElIdType == ElectronTools::kHggLeptonTagId2012HCP){
+      Double_t distVtx = 999.0;
+      Int_t closestVtx = 0;
+      for(UInt_t nv=0; nv<fVertices->GetEntries(); nv++){
+	double dz = TMath::Abs(e->GsfTrk()->DzCorrected(*fVertices->At(nv)));
+	if(dz < distVtx) {
+	  distVtx    = dz;
+	  closestVtx = nv;
+	}
+      }
+      idcut = PassIDCut(e, fElIdType, fVertices->At(closestVtx));
+
+      MVAValue = EvaluateMVAID(e, ElectronTools::kHggLeptonTagId2012HCP, fVertices->At(closestVtx), fPFCandidates, fPileupEnergyDensity);
+      if(MVAValue>MVAValueMax){
+	MVAValueMax = MVAValue;
+	NElectronMVAValueMax = i;
+      }
+    }else{
+      idcut = PassIDCut(e, fElIdType, fVertices->At(0));
+    }
     if (!idcut) 
       continue;
-
+    
     // apply charge filter
     if(fChargeFilter == kTRUE) {
       Bool_t passChargeFilter = ElectronTools::PassChargeFilter(e);
@@ -685,9 +804,17 @@ void ElectronIDMod::Process()
     }
 
     // add good electron
-    GoodElectrons->Add(e);
+    if(fElIdType!=ElectronTools::kHggLeptonTagId2012HCP){
+      GoodElectrons->Add(e);
+    }
+
+    NPass = NPass+1;
   }
 
+  if((fElIdType==ElectronTools::kHggLeptonTagId2012HCP) && (NPass>0)){
+    GoodElectrons->Add(fElectrons->At(NElectronMVAValueMax));
+  }
+  
   // sort according to pt
   GoodElectrons->Sort();
 
@@ -716,10 +843,11 @@ void ElectronIDMod::SlaveBegin()
       || fElectronIsoType.CompareTo("PFIso_HggLeptonTag2012") == 0
       || fElectronIDType.CompareTo("MVA_BDTG_IDIsoCombinedHWW2012TrigV4") == 0
       || fElectronIsoType.CompareTo("MVA_BDTG_IDIsoCombinedHWW2012TrigV4") == 0
-    ) {
+      || fElectronIsoType.CompareTo("PFIso_HggLeptonTag2012HCP") == 0
+      ) {
     ReqEventObject(fPileupEnergyDensityName, fPileupEnergyDensity, kTRUE);
   }
-
+  
   if(fCombinedIdCut == kTRUE) {
     fElectronIDType  	  = "NoId";
     fElectronIsoType 	  = "NoIso";
@@ -782,6 +910,8 @@ void ElectronIDMod::Setup()
     fElIdType = ElectronTools::kHggLeptonTagId;
   else if (fElectronIDType.CompareTo("Hgg_LeptonTag_2012Id") == 0)
     fElIdType = ElectronTools::kHggLeptonTagId2012;
+  else if (fElectronIDType.CompareTo("Hgg_LeptonTag_2012IdHCP") == 0)
+    fElIdType = ElectronTools::kHggLeptonTagId2012HCP;
   else if (fElectronIDType.CompareTo("MVA_BDTG_IDIsoCombinedHWW2012TrigV4") == 0)
     fElIdType = ElectronTools::kMVAID_BDTG_IDIsoCombinedHWW2012TrigV4; 
 
@@ -826,8 +956,10 @@ void ElectronIDMod::Setup()
     fElIsoType = ElectronTools::kMVAIso_BDTG_IDIsoCombined;
   else if (fElectronIsoType.CompareTo("PFIso_HWW2012TrigV0") == 0)
     fElIsoType = ElectronTools::kPFIso_HWW2012TrigV0;
-   else if (fElectronIsoType.CompareTo("PFIso_HggLeptonTag2012") == 0)
+  else if (fElectronIsoType.CompareTo("PFIso_HggLeptonTag2012") == 0)
     fElIsoType = ElectronTools::kPFIso_HggLeptonTag2012;
+  else if (fElectronIsoType.CompareTo("PFIso_HggLeptonTag2012HCP") == 0)
+    fElIsoType = ElectronTools::kPFIso_HggLeptonTag2012HCP;
   else if (fElectronIsoType.CompareTo("MVA_BDTG_IDIsoCombinedHWW2012TrigV4") == 0 )
     fElIsoType = ElectronTools::kMVAIso_BDTG_IDIsoCombinedHWW2012TrigV4;
   else if (fElectronIsoType.CompareTo("Custom") == 0 ) {
@@ -906,6 +1038,19 @@ void ElectronIDMod::Setup()
 			       fTheRhoType);
   }
 
+  if (fElIdType == ElectronTools::kHggLeptonTagId2012HCP) {
+    fElectronIDMVA = new ElectronIDMVA();
+    fElectronIDMVA->Initialize("BDTG method",
+                               fElectronMVAWeights_Subdet0Pt10To20,
+                               fElectronMVAWeights_Subdet1Pt10To20,
+                               fElectronMVAWeights_Subdet2Pt10To20,
+                               fElectronMVAWeights_Subdet0Pt20ToInf,
+                               fElectronMVAWeights_Subdet1Pt20ToInf,
+                               fElectronMVAWeights_Subdet2Pt20ToInf,
+                               ElectronIDMVA::kIDEGamma2012NonTrigV0,
+			       fTheRhoType);
+  }
+  
 }
 
 //--------------------------------------------------------------------------------------------------

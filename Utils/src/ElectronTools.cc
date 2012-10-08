@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.47 2012/06/22 20:19:31 anlevin Exp $
+// $Id: ElectronTools.cc,v 1.48 2012/07/12 17:05:49 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1649,3 +1649,4 @@ Bool_t ElectronTools::PassHggLeptonTagID2012(const Electron* ele) {
 
   return true;
 }
+

@@ -45,6 +45,7 @@ namespace mithep {
         kMVAID_BDTG_IDIsoCombined,
 	kHggLeptonTagId,
 	kHggLeptonTagId2012,
+	kHggLeptonTagId2012HCP,
         kMVAID_BDTG_IDHWW2012TrigV0,
         kMVAID_BDTG_IDIsoCombinedHWW2012TrigV4
       };
@@ -70,6 +71,7 @@ namespace mithep {
         kMVAIso_BDTG_IDIsoCombined,
         kPFIso_HWW2012TrigV0,
 	kPFIso_HggLeptonTag2012,
+	kPFIso_HggLeptonTag2012HCP,
         kMVAIso_BDTG_IDIsoCombinedHWW2012TrigV4
       };
 
@@ -132,7 +134,7 @@ namespace mithep {
 
       static Bool_t       PassHggLeptonTagID(const Electron *el);
       static Bool_t       PassHggLeptonTagID2012(const Electron *el);
-
+    
     ClassDef(ElectronTools, 0) // Muon tools
   };
 }

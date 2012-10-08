@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.59 2012/05/19 14:59:19 ceballos Exp $
+// $Id: ElectronIDMod.h,v 1.60 2012/07/12 17:04:56 fabstoec Exp $
 //
 // ElectronIDMod
 //
@@ -65,6 +65,9 @@ namespace mithep
       Bool_t              GetChargeFilter()           	  const { return fChargeFilter; 	  }
       Bool_t              PassLikelihoodID(const Electron *ele) const;
       Bool_t              PassMVAID(const Electron *el, ElectronTools::EElIdType idType, 
+                                    const Vertex *vertex, const PFCandidateCol *PFCands,
+                                    const PileupEnergyDensityCol *PileupEnergyDensity) const;
+      Double_t            EvaluateMVAID(const Electron *el, ElectronTools::EElIdType idType, 
                                     const Vertex *vertex, const PFCandidateCol *PFCands,
                                     const PileupEnergyDensityCol *PileupEnergyDensity) const;
       Bool_t              PassIDCut(const Electron *el, ElectronTools::EElIdType idType, 
