@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.35 2012/07/25 15:42:59 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.36 2012/08/02 12:30:55 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -30,6 +30,32 @@ PhotonTools::eScaleCats PhotonTools::EScaleCat(const Photon *p)
       else return kEBlowEtaGoldGap;
     }
     else return kEBlowEtaBad;
+  }
+  else if (p->SCluster()->AbsEta()<1.5) {
+    if (p->R9()>0.94) return kEBhighEtaGold;
+    else return kEBhighEtaBad;    
+  }
+  else if (p->SCluster()->AbsEta()<2.0) {
+    if (p->R9()>0.94) return kEElowEtaGold;
+    else return kEElowEtaBad;    
+  }
+  else {
+    if (p->R9()>0.94) return kEEhighEtaGold;
+    else return kEEhighEtaBad;    
+  }  
+  
+}
+
+PhotonTools::eScaleCats PhotonTools::EScaleCatHCP(const Photon *p)
+{
+  if (p->SCluster()->AbsEta()<1.0) {
+    Int_t ieta = p->SCluster()->Seed()->IEta();
+    Int_t iphi = p->SCluster()->Seed()->IPhi();      
+    Bool_t central = ( ((std::abs(ieta)-1)/5+1 >= 2 && (std::abs(ieta)-1)/5+1 < 5) || ((std::abs(ieta)-1)/5+1 >= 7 && (std::abs(ieta)-1)/5+1 < 9  ) || ((std::abs(ieta)-1)/5+1 >= 11 && (std::abs(ieta)-1)/5+1 < 13) || ((std::abs(ieta)-1)/5+1 >= 15 && (std::abs(ieta)-1)/5+1 < 17) ) && (iphi %20) > 5 && (iphi%20) <16;
+    if(p->R9()>0.94 && central) return kEBlowEtaGoldCenter;
+    else if(p->R9()>0.94 && (!central)) return kEBlowEtaGoldGap;
+    else if(p->R9()<=0.94 && central) return kEBlowEtaBadCenter;
+    else return kEBlowEtaBadGap;
   }
   else if (p->SCluster()->AbsEta()<1.5) {
     if (p->R9()>0.94) return kEBhighEtaGold;

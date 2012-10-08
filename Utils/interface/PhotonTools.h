@@ -74,6 +74,8 @@ namespace mithep {
        kEBlowEtaGoldCenter = 0,
        kEBlowEtaGoldGap,
        kEBlowEtaBad,
+       kEBlowEtaBadCenter,
+       kEBlowEtaBadGap,
        kEBhighEtaGold,
        kEBhighEtaBad,
        kEElowEtaGold,
@@ -81,7 +83,7 @@ namespace mithep {
        kEEhighEtaGold,
        kEEhighEtaBad
      };
-     
+       
      enum ShowerShapeScales {
        kNoShowerShapeScaling = 0,
        k2011ShowerShape,
@@ -89,6 +91,7 @@ namespace mithep {
      };
 
     static eScaleCats EScaleCat(const Photon *p);
+    static eScaleCats EScaleCatHCP(const Photon *p);
 
     // Methods for scaling/smearing Photons
     static void ScalePhoton(Photon* p, Double_t scale);
