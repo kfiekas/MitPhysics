@@ -88,6 +88,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fDataEnCorr_EBlowEta_hR9central(0.),
   fDataEnCorr_EBlowEta_hR9gap    (0.),
   fDataEnCorr_EBlowEta_lR9       (0.),
+  fDataEnCorr_EBlowEta_lR9central(0.),
+  fDataEnCorr_EBlowEta_lR9gap    (0.),
   fDataEnCorr_EBhighEta_hR9      (0.),
   fDataEnCorr_EBhighEta_lR9      (0.),
   fDataEnCorr_EElowEta_hR9       (0.),
@@ -99,6 +101,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCSmear_EBlowEta_hR9central   (0.),
   fMCSmear_EBlowEta_hR9gap       (0.),
   fMCSmear_EBlowEta_lR9          (0.),
+  fMCSmear_EBlowEta_lR9central   (0.),
+  fMCSmear_EBlowEta_lR9gap       (0.),
   fMCSmear_EBhighEta_hR9         (0.),
   fMCSmear_EBhighEta_lR9         (0.),
   fMCSmear_EElowEta_hR9          (0.),
@@ -118,7 +122,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // ------------------------------------------------------------------
   // this block should eventually be deleted... 
   fVariableType_2011             (10), 
-
+  
   fEndcapWeights_2011            (gSystem->Getenv("CMSSW_BASE")+
 				  TString("/src/MitPhysics/data/TMVAClassificationPhotonID_")+
 				  TString("Endcap_PassPreSel_Variable_10_BDTnCuts2000_BDT.")+
@@ -149,20 +153,30 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
 				  TString("2012ICHEP_PhotonID_Barrel_BDT.")+
 				  TString("weights.xml")),
   // --------------------------------------------------------------------------
-
+  
   fbdtCutBarrel                  (0.0744), //cuts give same eff (relative to presel) with cic
   fbdtCutEndcap                  (0.0959), //cuts give same eff (relative to presel) with cic
-
+  
   // --------------------------------------------------------------------------
-
+  
   fDoShowerShapeScaling          (kFALSE),
   //
   fMCErrScaleEB                  (1.0),
   fMCErrScaleEE                  (1.0),
   fRelativePtCuts                (kFALSE),
-
-  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS)
-
+  
+  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS),
+  
+  // ---------------------------------------------------------------------------
+  fApplyLeptonTag                (kFALSE),
+  fLeptonTagElectronsName ("HggLeptonTagElectrons"),
+  fLeptonTagMuonsName     ("HggLeptonTagMuons"),
+  fLeptonTagElectrons     (0),
+  fLeptonTagMuons         (0),
+  
+  // ------------------------------------------------------
+  f2012HCP                (kFALSE)
+  
 {
   // Constructor.
 }
@@ -179,6 +193,12 @@ void PhotonPairSelector::Process()
   // ------------------------------------------------------------
   // Process entries of the tree.
   LoadEventObject(fPhotonBranchName,   fPhotons);
+
+  // lepton tag collections
+  if( fApplyLeptonTag ) {
+    LoadEventObject(fLeptonTagElectronsName, fLeptonTagElectrons);
+    LoadEventObject(fLeptonTagMuonsName,     fLeptonTagMuons);
+  }
 
   // -----------------------------------------------------------
   // Output Photon Collection. It will ALWAYS contain either 0 or 2 photons
@@ -398,8 +418,16 @@ void PhotonPairSelector::Process()
       PhotonTools::ScalePhotonShowerShapes(fixPh2nd[iPair],fSSType);
     }
     
-    PhotonTools::eScaleCats escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
-    PhotonTools::eScaleCats escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);
+    PhotonTools::eScaleCats escalecat1;
+    PhotonTools::eScaleCats escalecat2;
+
+    if(f2012HCP){
+      escalecat1 = PhotonTools::EScaleCatHCP(fixPh1st[iPair]);
+      escalecat2 = PhotonTools::EScaleCatHCP(fixPh2nd[iPair]);
+    }else{
+      escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
+      escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);
+    }
     
     // now we dicide if we either scale (Data) or Smear (MC) the Photons
     if (fIsData) {
@@ -407,14 +435,20 @@ void PhotonPairSelector::Process()
         // starting with scale = 1.
         double scaleFac1 = 1.;
         double scaleFac2 = 1.;
-
+	
         //eta-dependent corrections
 	
         // checking the run Rangees ...
         Int_t runRange = FindRunRangeIdx(runNumber);
+
         if(runRange > -1) {
-          scaleFac1 *= GetDataEnCorr(runRange, escalecat1);
-          scaleFac2 *= GetDataEnCorr(runRange, escalecat2);
+	  if(f2012HCP){
+	    scaleFac1 *= GetDataEnCorrHCP(runRange, escalecat1);
+	    scaleFac2 *= GetDataEnCorrHCP(runRange, escalecat2);
+	  }else{
+	    scaleFac1 *= GetDataEnCorr(runRange, escalecat1);
+	    scaleFac2 *= GetDataEnCorr(runRange, escalecat2);
+	  }
         }
         else {
 	  printf("Error: Run Range not found for data energy scale correction\n");
@@ -425,9 +459,17 @@ void PhotonPairSelector::Process()
       }
     }
     
+    double width1;
+    double width2;
+
     if (fDoMCSmear) {
-      double width1 = GetMCSmearFac(escalecat1);
-      double width2 = GetMCSmearFac(escalecat2);
+      if(f2012HCP){
+	width1 = GetMCSmearFacHCP(escalecat1);
+	width2 = GetMCSmearFacHCP(escalecat2);
+      }else {
+	width1 = GetMCSmearFac(escalecat1);
+	width2 = GetMCSmearFac(escalecat2);
+      }
       if (!fIsData) {
         // get the seed to do deterministic smearing...
         UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
@@ -441,6 +483,31 @@ void PhotonPairSelector::Process()
       }
       PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
       PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
+    }
+
+    // lepton tag for this pair -- ming
+    int leptag = -1;
+    if(fApplyLeptonTag){
+      int leptag = 0;
+      if ( fLeptonTagMuons->GetEntries() > 0 ) {
+	if( (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh1st[iPair]) >= 1.0) && 
+	    (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh2nd[iPair]) >= 1.0) && 
+	    ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
+	    ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120)) ){
+	  leptag = 1;
+	}
+      } else if( fLeptonTagElectrons->GetEntries() > 0 ){
+	if( (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh1st[iPair]) >= 1) &&
+	    (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh2nd[iPair]) >= 1) &&
+	    (PhotonTools::ElectronVetoCiC(fixPh1st[iPair],fLeptonTagElectrons) >= 1) &&
+	    (PhotonTools::ElectronVetoCiC(fixPh2nd[iPair],fLeptonTagElectrons) >= 1) &&
+	    (TMath::Abs( (fixPh1st[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
+	    (TMath::Abs( (fixPh2nd[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
+	    ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
+	    ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120)) ){
+	  leptag = 2;
+	}
+      }
     }
     
     //probability that selected vertex is the correct one
@@ -583,6 +650,33 @@ void PhotonPairSelector::Process()
       break;      
     default:
       theVtx[iPair] = fPV->At(0);
+    }
+    
+    if(leptag == 1){
+      Double_t distVtx = 999.0;
+      Int_t closestVtx = 0;
+      for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
+	double dz = TMath::Abs(fLeptonTagMuons->At(0)->BestTrk()->DzCorrected(*fPV->At(nv)));
+	if(dz < distVtx) {
+	  distVtx    = dz;
+	  closestVtx = nv;
+	}
+      }
+      theVtx[iPair] = fPV->At(closestVtx);
+      vtxProb = 1;
+    }
+    if(leptag == 2){
+      Double_t distVtx = 999.0;
+      Int_t closestVtx = 0;
+      for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
+	double dz = TMath::Abs(fLeptonTagElectrons->At(0)->GsfTrk()->DzCorrected(*fPV->At(nv)));
+	if(dz < distVtx) {
+	  distVtx    = dz;
+	  closestVtx = nv;
+	}
+      }
+      theVtx[iPair] = fPV->At(closestVtx);
+      vtxProb = 1;
     }
     
     //set PV ref in photons
@@ -836,6 +930,11 @@ void PhotonPairSelector::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here, we just request the
   // photon collection branch.
 
+  if( fApplyLeptonTag ) {
+    ReqEventObject(fLeptonTagElectronsName,    fLeptonTagElectrons,    false);  
+    ReqEventObject(fLeptonTagMuonsName,        fLeptonTagMuons,        false);  
+  }
+
   // load all branches
   ReqEventObject(fPhotonBranchName,   fPhotons,      fPhotonsFromBranch);
   ReqEventObject(fTrackBranchName,    fTracks,       true);
@@ -1046,6 +1145,63 @@ Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat)
     return fMCSmear_EBlowEta_hR9gap;
   case PhotonTools::kEBlowEtaBad:
     return fMCSmear_EBlowEta_lR9;
+  case PhotonTools::kEEhighEtaGold:
+    return fMCSmear_EEhighEta_hR9;
+  case PhotonTools::kEEhighEtaBad:
+    return fMCSmear_EEhighEta_lR9;
+  case PhotonTools::kEElowEtaGold:
+    return fMCSmear_EElowEta_hR9;
+  case PhotonTools::kEElowEtaBad:
+    return fMCSmear_EElowEta_lR9;
+  default:
+    return 1.;
+  }
+}
+
+Double_t PhotonPairSelector::GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat)
+{
+  switch (cat) {
+  case PhotonTools::kEBhighEtaGold:
+    return fDataEnCorr_EBhighEta_hR9[runRange];
+  case PhotonTools::kEBhighEtaBad:
+    return fDataEnCorr_EBhighEta_lR9[runRange];
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fDataEnCorr_EBlowEta_hR9central[runRange];
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fDataEnCorr_EBlowEta_hR9gap[runRange];
+  case PhotonTools::kEBlowEtaBadCenter:
+    return fDataEnCorr_EBlowEta_lR9central[runRange];
+  case PhotonTools::kEBlowEtaBadGap:
+    return fDataEnCorr_EBlowEta_lR9gap[runRange];
+  case PhotonTools::kEEhighEtaGold:
+    return fDataEnCorr_EEhighEta_hR9[runRange];
+  case PhotonTools::kEEhighEtaBad:
+    return fDataEnCorr_EEhighEta_lR9[runRange];
+  case PhotonTools::kEElowEtaGold:
+    return fDataEnCorr_EElowEta_hR9[runRange];
+  case PhotonTools::kEElowEtaBad:
+    return fDataEnCorr_EElowEta_lR9[runRange];
+  default:
+    return 1.;
+  }
+}
+
+//---------------------------------------------------------------------------------------------------
+Double_t PhotonPairSelector::GetMCSmearFacHCP(PhotonTools::eScaleCats cat)
+{
+  switch (cat) {
+  case PhotonTools::kEBhighEtaGold:
+    return fMCSmear_EBhighEta_hR9;
+  case PhotonTools::kEBhighEtaBad:
+    return fMCSmear_EBhighEta_lR9;
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fMCSmear_EBlowEta_hR9central;
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fMCSmear_EBlowEta_hR9gap;
+  case PhotonTools::kEBlowEtaBadCenter:
+    return fMCSmear_EBlowEta_lR9central;
+  case PhotonTools::kEBlowEtaBadGap:
+    return fMCSmear_EBlowEta_lR9gap;
   case PhotonTools::kEEhighEtaGold:
     return fMCSmear_EEhighEta_hR9;
   case PhotonTools::kEEhighEtaBad:
