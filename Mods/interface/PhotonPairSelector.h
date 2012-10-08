@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.29 2012/08/02 12:30:55 fabstoec Exp $
+// $Id: PhotonPairSelector.h,v 1.30 2012/08/02 12:59:31 fabstoec Exp $
 //
 // PhotonPairSelector
 //
@@ -114,7 +114,10 @@ namespace mithep
     void                SetTrailingPtMin(Double_t pt)     { fTrailingPtMin = pt;         }
 
     // is Data Or Not?
-    void                SetIsData (Bool_t b) { fIsData = b;};
+    void                SetIsData (Bool_t b) { fIsData = b;}
+
+    void                Set2012HCP (Bool_t b) { f2012HCP = b;};
+
     
     // methods to set the MC smearing/energy correction values
     void                AddEnCorrPerRun( UInt_t sRun, UInt_t eRun,
@@ -161,6 +164,54 @@ namespace mithep
       fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
     };
 
+
+    void                AddEnCorrPerRun2012HCP( UInt_t sRun, UInt_t eRun,
+						Double_t corr_EBlowEta_hR9central,
+						Double_t corr_EBlowEta_hR9gap,
+						Double_t corr_EBlowEta_lR9central,
+						Double_t corr_EBlowEta_lR9gap,
+						Double_t corr_EBhighEta_hR9,
+						Double_t corr_EBhighEta_lR9,                                         
+						Double_t corr_EElowEta_hR9,
+						Double_t corr_EElowEta_lR9,
+						Double_t corr_EEhighEta_hR9,
+						Double_t corr_EEhighEta_lR9) {
+      fDataEnCorr_EBlowEta_hR9central.push_back(corr_EBlowEta_hR9central);
+      fDataEnCorr_EBlowEta_hR9gap.push_back(corr_EBlowEta_hR9gap);
+      fDataEnCorr_EBlowEta_lR9central.push_back(corr_EBlowEta_lR9central);
+      fDataEnCorr_EBlowEta_lR9gap.push_back(corr_EBlowEta_lR9gap);
+      fDataEnCorr_EBhighEta_hR9.push_back(corr_EBhighEta_hR9);
+      fDataEnCorr_EBhighEta_lR9.push_back(corr_EBhighEta_lR9);      
+      fDataEnCorr_EElowEta_hR9.push_back(corr_EElowEta_hR9);
+      fDataEnCorr_EElowEta_lR9.push_back(corr_EElowEta_lR9);      
+      fDataEnCorr_EEhighEta_hR9.push_back(corr_EEhighEta_hR9);
+      fDataEnCorr_EEhighEta_lR9.push_back(corr_EEhighEta_lR9);       
+      fRunStart.push_back         (sRun);
+      fRunEnd.push_back           (eRun);
+    };
+    
+    void SetMCSmearFactors2012HCP(Double_t _EBlowEta_hR9central,
+				  Double_t _EBlowEta_hR9gap, 
+				  Double_t _EBlowEta_lR9central,
+				  Double_t _EBlowEta_lR9gap,
+				  Double_t _EBhighEta_hR9, 
+				  Double_t _EBhighEta_lR9,
+				  Double_t _EElowEta_hR9, 
+				  Double_t _EElowEta_lR9,
+				  Double_t _EEhighEta_hR9,
+				  Double_t _EEhighEta_lR9) {
+      fMCSmear_EBlowEta_hR9central = _EBlowEta_hR9central;
+      fMCSmear_EBlowEta_hR9gap = _EBlowEta_hR9gap;
+      fMCSmear_EBlowEta_lR9central = _EBlowEta_lR9central;
+      fMCSmear_EBlowEta_lR9gap = _EBlowEta_lR9gap;
+      fMCSmear_EBhighEta_hR9 = _EBhighEta_hR9;
+      fMCSmear_EBhighEta_lR9 = _EBhighEta_lR9;      
+      fMCSmear_EElowEta_hR9 = _EElowEta_hR9;
+      fMCSmear_EElowEta_lR9 = _EElowEta_lR9;
+      fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
+      fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
+    };
+        
     void                SetApplyEleVeto(bool a)            { fApplyEleVeto  = a; }
     void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b;     }          
     void                DoDataEneCorr(bool a)           { fDoDataEneCorr = a; }
@@ -180,6 +231,11 @@ namespace mithep
         
     void                SetRhoType(RhoUtilities::RhoType type) { fRhoType = type ; }
 
+    void                SetApplyLeptonTag(bool a)            {  fApplyLeptonTag = a; }
+
+    void                SetLeptonTagElectronsName(TString name) { fLeptonTagElectronsName = name; }
+    void                SetLeptonTagMuonsName    (TString name) { fLeptonTagMuonsName     = name; }
+
   protected:
     void                Process();
     void                SlaveBegin();
@@ -189,6 +245,8 @@ namespace mithep
     Int_t               FindRunRangeIdx(UInt_t run);
     Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat);
     Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat);
+    Double_t            GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat);
+    Double_t            GetMCSmearFacHCP(PhotonTools::eScaleCats cat);
     Float_t             GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonTools::CiCBaseLineCats cat2);
 
     // Names for the input Collections
@@ -209,6 +267,9 @@ namespace mithep
     
     TString             fGoodPhotonsName;      //name of exported "good photon" collection
     TString             fChosenVtxName;        //name of exported "chosen Vtx"  collection
+
+    TString             fLeptonTagElectronsName;
+    TString             fLeptonTagMuonsName;
     
     // Selection Types
     TString             fPhotonSelType;
@@ -241,6 +302,8 @@ namespace mithep
     Bool_t              fGoodElectronsFromBranch;
     Bool_t              fUseSingleLegConversions;
 
+    Bool_t              f2012HCP;
+
     const PhotonCol              *fPhotons;
     const ElectronCol            *fElectrons;
     const ElectronCol            *fGoodElectrons;    
@@ -255,12 +318,15 @@ namespace mithep
     const PileupInfoCol          *fPileUp;    
     const JetCol                 *fJets;
     const PFMetCol               *fPFMet;
-    
+    const ElectronCol            *fLeptonTagElectrons;
+    const MuonCol                *fLeptonTagMuons;
     
     // Vectroes to hols smeraring/correction factors
     std::vector<Double_t> fDataEnCorr_EBlowEta_hR9central;
     std::vector<Double_t> fDataEnCorr_EBlowEta_hR9gap;
     std::vector<Double_t> fDataEnCorr_EBlowEta_lR9;
+    std::vector<Double_t> fDataEnCorr_EBlowEta_lR9central;
+    std::vector<Double_t> fDataEnCorr_EBlowEta_lR9gap;
     std::vector<Double_t> fDataEnCorr_EBhighEta_hR9;
     std::vector<Double_t> fDataEnCorr_EBhighEta_lR9;    
     std::vector<Double_t> fDataEnCorr_EElowEta_hR9;
@@ -274,6 +340,8 @@ namespace mithep
     Double_t              fMCSmear_EBlowEta_hR9central;
     Double_t              fMCSmear_EBlowEta_hR9gap;
     Double_t              fMCSmear_EBlowEta_lR9;
+    Double_t              fMCSmear_EBlowEta_lR9central;
+    Double_t              fMCSmear_EBlowEta_lR9gap;
     Double_t              fMCSmear_EBhighEta_hR9;
     Double_t              fMCSmear_EBhighEta_lR9;    
     Double_t              fMCSmear_EElowEta_hR9;
@@ -298,7 +366,10 @@ namespace mithep
     bool                  fDoVtxSelection;
     bool                  fApplyEleVeto;
     Bool_t                fInvertElectronVeto; //=true (invert ele veto, for cic sel only atm)
-   
+    
+    // --------------------------------
+    bool                  fApplyLeptonTag;   
+
     //MVA
     int                   fVariableType_2011;
     TString               fEndcapWeights_2011;
