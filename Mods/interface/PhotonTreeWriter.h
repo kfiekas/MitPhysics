@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.22 2012/07/12 17:04:56 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.23 2012/07/24 15:46:36 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -30,7 +30,7 @@
 #include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVAMet.h"
-
+#include "MitPhysics/Utils/interface/MVAVBF.h"
 
 class TNtuple;
 class TRandom3;
@@ -568,7 +568,11 @@ namespace mithep
       
       Double_t spfMet;
 
+      // ----------- VBF TAG STUFF -------------
+      Int_t vbfTag;
+      Float_t vbfbdt;
 
+      // ----------------------------------------
       UChar_t  ismc;
       
       //corrected quantities from PhotonFix corrections
@@ -655,6 +659,7 @@ namespace mithep
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
     void                SetApplyJetId(Bool_t b)           { fApplyJetId = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
+    void                SetApplyVBFTag(Bool_t b)          { fApplyVBFTag = b;            }
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
     void                SetApplyPFMetCorr(Bool_t b)       { fApplyPFMetCorrections = b;  }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
@@ -687,7 +692,6 @@ namespace mithep
     void                SetDo2012LepTag(Bool_t b) {                         fDo2012LepTag = b; }
     
     void                SetBeamspotWidth(Double_t x)            { fBeamspotWidth = x; }
-    
     
   protected:
     void                Process();
@@ -773,6 +777,7 @@ namespace mithep
     Bool_t                         fApplyJetId;
 
     Bool_t                         fApplyLeptonTag;
+    Bool_t                         fApplyVBFTag;
     Bool_t                         fApplyBTag;
     Bool_t                         fApplyPFMetCorrections;
 
@@ -788,6 +793,18 @@ namespace mithep
     Double_t                       fBeamspotWidth;
 
     // --------------------------------
+    // variables for vbf
+    float jet1pt_vbf;
+    float jet2pt_vbf;
+    float deltajeteta_vbf;
+    float dijetmass_vbf;
+    float zeppenfeld_vbf;
+    float dphidijetgg_vbf;
+    float diphoptOverdiphomass_vbf;
+    float pho1ptOverdiphomass_vbf;
+    float pho2ptOverdiphomass_vbf; 
+
+    // --------------------------------
     // validation Tuple
     TString                        fTupleName;
     PhotonTreeWriterDiphotonEvent* fDiphotonEvent;
@@ -800,8 +817,9 @@ namespace mithep
     
     MVAMet                         fMVAMet;
     JetIDMVA                       fJetId;
+    MVAVBF                         fMVAVBF;   
     
     ClassDef(PhotonTreeWriter, 1) // Photon identification module
-  };
+      };
 }
 #endif
