@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.11 2012/05/28 14:24:49 bendavid Exp $
+// $Id: VertexTools.cc,v 1.12 2012/06/10 21:22:09 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -612,19 +612,19 @@ Double_t VertexTools::DeltaMassVtx(Double_t xp1, Double_t yp1, Double_t zp1,
 
 std::pair<double,double> VertexTools::VtxZFromConversion(const Photon *p, const DecayParticle *c, const BaseVertex *bsp) {
   
-  const double dzpxb = 0.016;
-  const double dztib = 0.331;
-  const double dztob = 1.564;
-  const double dzpxf = 0.082;
-  const double dztid = 0.321;
-  const double dztec = 0.815;
+  const double dzpxb = 0.011;
+  const double dztib = 0.301;
+  const double dztob = 1.603;
+  const double dzpxf = 0.057;
+  const double dztid = 0.316;
+  const double dztec = 1.026;
   
-  const double dzpxbsingle = 0.036;
-  const double dztibsingle = 0.456;
-  const double dztobsingle = 0.362;
-  const double dzpxfsingle = 0.130;
-  const double dztidsingle = 0.465;
-  const double dztecsingle = 1.018;  
+  const double dzpxbsingle = 0.007;
+  const double dztibsingle = 0.472;
+  const double dztobsingle = 0.540;
+  const double dzpxfsingle = 0.039;
+  const double dztidsingle = 0.349;
+  const double dztecsingle = 1.022;  
   
   
   double zconv = -99.;
@@ -650,13 +650,13 @@ std::pair<double,double> VertexTools::VtxZFromConversion(const Photon *p, const 
   else if (c->NDaughters()==1) {
     if( p->SCluster()->AbsEta()<1.5 ) {
       double rho = c->Position().Rho();
-      if     ( rho < 15. ) { dzconv = dzpxbsingle; zconv = zconvsc; }
+      if     ( rho < 15. ) { dzconv = dzpxbsingle; zconv = zconvtrk; }
       else if( rho < 60. ) { dzconv = dztibsingle; zconv = zconvsc; }
       else                 { dzconv = dztobsingle; zconv = zconvsc; }
     } else {
       double z = c->Position().Z();
-      if     ( TMath::Abs(z) < 50. )   { dzconv = dzpxfsingle; zconv = zconvsc; }
-      else if( TMath::Abs(z) < 100.)   { dzconv = dztidsingle; zconv = zconvsc; }
+      if     ( TMath::Abs(z) < 50. )   { dzconv = dzpxfsingle; zconv = zconvtrk; }
+      else if( TMath::Abs(z) < 100.)   { dzconv = dztidsingle; zconv = zconvtrk; }
       else                             { dzconv = dztecsingle; zconv = zconvsc;  }
     }  
   }

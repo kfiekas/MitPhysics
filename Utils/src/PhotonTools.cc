@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.36 2012/08/02 12:30:55 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.37 2012/10/08 17:37:40 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -418,60 +418,16 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
     if(print)
       std::cout<< "   c "<<i+1<<"  pt = "<<c->Pt()<<std::endl;
     
-    if (c->Pt()   < 1. )                        continue; // is this refittedPairMomentum?
+    if (c->Pt()   < 10. )                       continue; // is this refittedPairMomentum?
     if (c->NDaughters()==2 && c->Prob() < 1e-6) continue;
 
-    //ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();
-    //ThreeVector dirconvsc = p->CaloPos() - c->Position();
-
-    double convPhi = c->Phi();
-    double convEta = c->Eta();
+    ThreeVector dirconvsc = ThreeVector(p->SCluster()->Point()) - c->Position();      
+    Double_t dR = MathUtils::DeltaR(dirconvsc,c->Mom());  
     
-    const ThreeVector wrong(0,0,0);
-    double Zvertex = c->DzCorrected(wrong);
-    // ------------------ FROM GLOBE ----------------------
-    //---Definitions for ECAL
-    const float R_ECAL           = 136.5;
-    const float Z_Endcap         = 328.0;
-    const float etaBarrelEndcap  = 1.479; 
-    
-    //---ETA correction
-    float Theta = 0.0  ; 
-    float ZEcal = R_ECAL*sinh(convEta)+Zvertex;
-    
-    if(ZEcal != 0.0) Theta = TMath::ATan(R_ECAL/ZEcal);
-    if(Theta<0.0) Theta = Theta+M_PI;
-    double fEta = - TMath::Log(TMath::Tan(0.5*Theta));
-    
-    if( fabs(fEta) > etaBarrelEndcap ) {
-      float Zend = Z_Endcap ;
-      if(convEta<0.0 )  Zend = -Zend ;
-      float Zlen = Zend - Zvertex ;
-      float RR = Zlen/TMath::SinH(convEta); 
-      Theta = TMath::ATan(RR/Zend);
-      if(Theta<0.0) Theta = Theta+M_PI;
-      fEta = -TMath::Log(TMath::Tan(0.5*Theta));	      
-    } 
-    // ---------------------------------------------------
-
-    if(print) {
-      std::cout<<"          eta bare = "<<convEta<<std::endl;
-      std::cout<<"          eta new  = "<<fEta<<std::endl;
-      std::cout<<"          phi      = "<<convPhi<<std::endl;
-    }
-
-    convEta = fEta;
-    
-    Double_t dphi = TMath::Abs(phPhi - convPhi);
-    if(dphi > M_PI) dphi = 2.*M_PI-dphi;
-    //Double_t deta = c->Eta()-dirconvsc.Eta();
-    Double_t deta = TMath::Abs(convEta-phEta);
-    Double_t dR = TMath::Sqrt(dphi*dphi+deta*deta);
-    //if(dphi < minDphi && TMath::Abs(deta)<minDeta) {
     if(dR < minDR) {
       minDR = dR;
-      minDphi = dphi;
-      minDeta = TMath::Abs(deta);
+      //minDphi = dphi;
+      //minDeta = TMath::Abs(deta);
       match = c;
 
       if(print)
