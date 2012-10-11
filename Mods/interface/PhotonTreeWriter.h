@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.23 2012/07/24 15:46:36 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.24 2012/10/09 15:40:14 mingyang Exp $
 //
 // PhotonTreeWriter
 //
@@ -22,6 +22,7 @@
 #include "MitAna/DataTree/interface/DecayParticleCol.h"
 #include "MitAna/DataTree/interface/PileupInfoCol.h"
 #include "MitAna/DataTree/interface/MCParticleCol.h"
+#include "MitAna/DataTree/interface/MCEventInfo.h"
 #include "MitAna/DataTree/interface/SuperClusterCol.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"
 #include "MitAna/DataTree/interface/JetCol.h"
@@ -574,6 +575,7 @@ namespace mithep
 
       // ----------------------------------------
       UChar_t  ismc;
+      Int_t mcprocid;
       
       //corrected quantities from PhotonFix corrections
       Float_t masscor;
@@ -716,6 +718,8 @@ namespace mithep
     TString             fPFPileUpName;    //name of pfpu collection
 
     TString             fMCParticleName;
+    TString             fMCEventInfoName;
+    
     TString             fPileUpName;
     TString             fSuperClusterName;
     TString             fPFMetName;
@@ -750,6 +754,7 @@ namespace mithep
     const BeamSpotCol             *fBeamspot;
     const PFCandidateCol          *fPFCands;
     const MCParticleCol           *fMCParticles;
+    const MCEventInfo             *fMCEventInfo;
     const PileupInfoCol           *fPileUp;    
     const SuperClusterCol         *fSuperClusters;   
     const PFMetCol                *fPFMet;

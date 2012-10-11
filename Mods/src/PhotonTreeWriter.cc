@@ -41,6 +41,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPFNoPileUpName         ("PFNoPileUp"),
   fPFPileUpName           ("PFPileUp"),
   fMCParticleName         (Names::gkMCPartBrn),
+  fMCEventInfoName        (Names::gkMCEvtInfoBrn),
   fPileUpName             (Names::gkPileupInfoBrn),  
   fSuperClusterName       ("PFSuperClusters"),
   fPFMetName              ("PFMet"),
@@ -67,6 +68,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fBeamspot               (0),
   fPFCands                (0),
   fMCParticles            (0),
+  fMCEventInfo            (0),
   fPileUp                 (0),
   fSuperClusters          (0),
   fPFJets                 (0),
@@ -163,6 +165,7 @@ void PhotonTreeWriter::Process()
     
   if( !fIsData ) {
     LoadBranch(fMCParticleName);
+    LoadBranch(fMCEventInfoName);
     LoadBranch(fPileUpName);
     if (fEnableJets) LoadEventObject(fGenJetName,        fGenJets);
   }  else fGenJets = NULL;
@@ -187,6 +190,11 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->genz = -999.;
   if (!fIsData) {
     fDiphotonEvent->genz = fMCParticles->At(0)->DecayVertex().Z();
+  }
+  
+  fDiphotonEvent->mcprocid = -999;
+  if (!fIsData) {
+    fDiphotonEvent->mcprocid = fMCEventInfo->ProcessId();
   }
 
   Double_t _evt = GetEventHeader()->EvtNum();
