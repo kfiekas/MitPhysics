@@ -68,7 +68,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fPhotonsFromBranch             (true),
   fPVFromBranch                  (true),
   fGoodElectronsFromBranch       (kTRUE),
-  fUseSingleLegConversions       (kFALSE),
+  fUseSingleLegConversions       (kTRUE),
   // ----------------------------------------
   // collections....
   fPhotons                       (0),
@@ -652,6 +652,7 @@ void PhotonPairSelector::Process()
       theVtx[iPair] = fPV->At(0);
     }
     
+    /*
     if(leptag == 1){
       Double_t distVtx = 999.0;
       Int_t closestVtx = 0;
@@ -678,7 +679,8 @@ void PhotonPairSelector::Process()
       theVtx[iPair] = fPV->At(closestVtx);
       vtxProb = 1;
     }
-    
+    */    
+
     //set PV ref in photons
     fixPh1st[iPair]->SetPV(theVtx[iPair]);
     fixPh2nd[iPair]->SetPV(theVtx[iPair]);
