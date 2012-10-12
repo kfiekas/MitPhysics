@@ -971,6 +971,7 @@ void PhotonTreeWriter::SlaveBegin()
   if (!fIsData) {
     ReqBranch(fPileUpName,         fPileUp);
     ReqBranch(fMCParticleName,     fMCParticles);
+    ReqBranch(fMCEventInfoName,    fMCEventInfo);
     if (fEnableJets) ReqEventObject(fGenJetName, fGenJets, true);
   }
   if (fIsData) {
