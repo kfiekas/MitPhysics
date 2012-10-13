@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.17 2012/08/02 12:30:55 fabstoec Exp $
+// $Id: MVATools.cc,v 1.18 2012/08/02 13:57:32 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -467,7 +467,7 @@ Double_t MVATools::GetMVAbdtValue(const Photon* p, const Vertex* vtx, const Trac
   // check if it's a Barrel or EE photon
   bool isBarrel = ( p->SCluster()->AbsEta() < 1.5 );
 
-  std::map<std::string,unsigned int>* theVars = ( isBarrel ? &mvaVarMapEB : &mvaVarMapEB );  
+  std::map<std::string,unsigned int>* theVars = ( isBarrel ? &mvaVarMapEB : &mvaVarMapEE );  
   
   // loop over all the variables in the map... and keep count (to make sure we have filled all variables)
   unsigned int varCounter = 0;
