@@ -770,8 +770,8 @@ void PhotonTreeWriter::Process()
 	// need to have dR > 1 for with respect to both photons ***changed to 0.7 for 2012
 	if( (MathUtils::DeltaR(fLeptonTagMuons->At(0),phHard) >= 1.0) && 
 	    (MathUtils::DeltaR(fLeptonTagMuons->At(0),phSoft) >= 1.0) && 
-	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45/120)) && 
-	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30/120)) ){
+	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
+	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.)) ){
 	  
 	  fDiphotonEvent->leptonTag = 1;
 
@@ -801,8 +801,8 @@ void PhotonTreeWriter::Process()
 	    (PhotonTools::ElectronVetoCiC(phSoft,fLeptonTagElectrons) >= 1) &&
 	    (TMath::Abs( (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
 	    (TMath::Abs( (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
-	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45/120)) && 
-	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30/120)) ){
+	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
+	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.)) ){
 	  
 	  fDiphotonEvent->leptonTag = 2;
 
@@ -845,7 +845,7 @@ void PhotonTreeWriter::Process()
       pho1ptOverdiphomass_vbf = phHard->Pt()/fDiphotonEvent->mass;
       pho2ptOverdiphomass_vbf = phSoft->Pt()/fDiphotonEvent->mass;
       
-      if(jet1 && jet2 && (pho1ptOverdiphomass_vbf > 40/120) && (pho2ptOverdiphomass_vbf > 30/120) && (jet1pt_vbf > 30) && (jet2pt_vbf > 20) && (dijetmass_vbf > 250)){
+      if(jet1 && jet2 && (pho1ptOverdiphomass_vbf > 40./120.) && (pho2ptOverdiphomass_vbf > 30./120.) && (jet1pt_vbf > 30) && (jet2pt_vbf > 20) && (dijetmass_vbf > 250)){
 	fDiphotonEvent->vbfbdt = fMVAVBF.GetMVAbdtValue(jet1pt_vbf,jet2pt_vbf,deltajeteta_vbf,dijetmass_vbf,zeppenfeld_vbf,dphidijetgg_vbf,diphoptOverdiphomass_vbf,pho1ptOverdiphomass_vbf,pho2ptOverdiphomass_vbf);
 	
 	if((fDiphotonEvent->vbfbdt>=0.985) && (fDiphotonEvent->vbfbdt<=1)){
