@@ -837,10 +837,10 @@ void PhotonTreeWriter::Process()
       fDiphotonEvent->vbfTag = 0;
       jet1pt_vbf = fDiphotonEvent->jet1pt;
       jet2pt_vbf = fDiphotonEvent->jet2pt;
-      deltajeteta_vbf = abs(fDiphotonEvent->jet1eta - fDiphotonEvent->jet2eta);
+      deltajeteta_vbf = TMath::Abs(fDiphotonEvent->jet1eta - fDiphotonEvent->jet2eta);
       dijetmass_vbf = fDiphotonEvent->dijetmass;
-      zeppenfeld_vbf = abs(fDiphotonEvent->zeppenfeld);
-      dphidijetgg_vbf = abs(fDiphotonEvent->dphidijetgg);
+      zeppenfeld_vbf = TMath::Abs(fDiphotonEvent->zeppenfeld);
+      dphidijetgg_vbf = TMath::Abs(fDiphotonEvent->dphidijetgg);
       diphoptOverdiphomass_vbf = fDiphotonEvent->ptgg/fDiphotonEvent->mass;
       pho1ptOverdiphomass_vbf = phHard->Pt()/fDiphotonEvent->mass;
       pho2ptOverdiphomass_vbf = phSoft->Pt()/fDiphotonEvent->mass;
@@ -856,7 +856,7 @@ void PhotonTreeWriter::Process()
 	}
       }
     }
-    
+    //printf("vbfbdt:%f\n",fDiphotonEvent->vbfbdt);
     if (fWriteDiphotonTree)
       hCiCTuple->Fill();  
     
