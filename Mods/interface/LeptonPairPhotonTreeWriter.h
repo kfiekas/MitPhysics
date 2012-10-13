@@ -31,6 +31,7 @@
 #include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVAMet.h"
+#include "MitPhysics/Utils/interface/ElectronEnergyRegression.h"
 
 class TNtuple;
 class TRandom3;
@@ -46,6 +47,9 @@ namespace mithep
     Bool_t muonZgVeto;
     Float_t muonZmass;
     Int_t year;   
+    UInt_t run;
+    UInt_t lumi;
+    UInt_t event;
 
     Float_t ele1MVA;// Electron 1 MVA Value
     Float_t ele1charge;// Electron 1 Charge
@@ -67,6 +71,12 @@ namespace mithep
     Float_t ele1PFIsoOverPt;
     Bool_t  ele1Conversion;
     Float_t ele1missinghits;
+    Float_t ele1RegressionEnergyV0;
+    Float_t ele1RegressionEnergyV1;
+    Float_t ele1RegressionEnergyV2;
+    Float_t ele1RegressionEnergyErrorV0;
+    Float_t ele1RegressionEnergyErrorV1;
+    Float_t ele1RegressionEnergyErrorV2;
 
     Float_t ele2MVA;// Electron 2 MVA Value
     Float_t ele2charge;// Electron 2 Charge
@@ -88,6 +98,12 @@ namespace mithep
     Float_t ele2PFIsoOverPt;
     Bool_t  ele2Conversion;
     Float_t ele2missinghits;
+    Float_t ele2RegressionEnergyV0;
+    Float_t ele2RegressionEnergyV1;
+    Float_t ele2RegressionEnergyV2;
+    Float_t ele2RegressionEnergyErrorV0;
+    Float_t ele2RegressionEnergyErrorV1;
+    Float_t ele2RegressionEnergyErrorV2;
 
     Float_t chargediso_ele1;
     Float_t gammaiso_ele1;
@@ -110,6 +126,7 @@ namespace mithep
     Float_t photonmass;// Photon Mass??? photon->Mass() 
     Float_t photonphi;// Photon Phi
     Float_t photonr9;// Photon R9
+    Float_t photonenergyerror;// Photon Energy Error
 
     Float_t m1E;// Muon 1 Energy
     Float_t m1Pt;// Muon 1 Pt
@@ -120,6 +137,7 @@ namespace mithep
     Float_t m1Eta;// Muon 1 Eta
     Float_t m1Phi;// Muon 1 Phi
     Float_t m1Charge;// Muon 1 Charge
+    Float_t m1PtErr; // Muon 1 Pt Error
     Float_t m2E;// Muon 2 Energy
     Float_t m2Pt;// Muon 2 Pt
     Float_t m2Mass;// Muon 2 Mass
@@ -129,6 +147,7 @@ namespace mithep
     Float_t m2Eta;// Muon 2 Eta
     Float_t m2Phi;// Muon 2 Phi
     Float_t m2Charge;// Muon 2 Charge
+    Float_t m2PtErr; // Muon 1 Pt Error
 
     Float_t NPu; //Number of Pileup events
     Float_t NPuPlus;//Number of Pileup events in next signal readout
@@ -235,6 +254,10 @@ namespace mithep
     TString               fEndcapWeights_2012_globe;
     TString               fBarrelWeights_2012_globe;
     MVATools              fTool;
+    ElectronEnergyRegression *eleRegressionEvaluator_V0;
+    ElectronEnergyRegression *eleRegressionEvaluator_V1;
+    ElectronEnergyRegression *eleRegressionEvaluator_V2;
+
     ClassDef(LeptonPairPhotonTreeWriter, 1) // Lepton Pair + Photon identification module
   };
 
