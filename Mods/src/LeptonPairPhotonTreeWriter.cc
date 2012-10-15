@@ -1213,6 +1213,11 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple = new TTree(fTupleName.Data(),fTupleName.Data());//Declares tree name  
   ZgllTuple->SetAutoSave(300e9);
   
+
+  ZgllTuple->Branch("run",&fLeptonPairPhotonEvent->run,"run/i");
+  ZgllTuple->Branch("lumi",&fLeptonPairPhotonEvent->lumi,"lumi/i");
+  ZgllTuple->Branch("event",&fLeptonPairPhotonEvent->event,"event/i");
+
   ZgllTuple->Branch("electronZmass",&fLeptonPairPhotonEvent->electronZmass,"electronZmass/F");
   ZgllTuple->Branch("mllg",&fLeptonPairPhotonEvent->mllg,"mllg/F");
   ZgllTuple->Branch("ele1MVA",&fLeptonPairPhotonEvent->ele1MVA,"ele1MVA/F");
