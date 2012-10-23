@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.33 2012/06/06 14:42:32 fabstoec Exp $
+// $Id: IsolationTools.cc,v 1.34 2012/07/12 17:05:49 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -1270,6 +1270,7 @@ Double_t IsolationTools::PFGammaIsolation(const mithep::Photon *p,
     if (!isbarrel && dR<0.07) continue;
     if (dR<intRadius) continue;
     if (dR>extRadius) continue;
+    if (pfc->HasSCluster() && pfc->SCluster()==p->SCluster()) continue;
     
     iso += pfc->Pt();
     
