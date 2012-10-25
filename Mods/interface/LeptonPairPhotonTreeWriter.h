@@ -199,6 +199,25 @@ namespace mithep
     
     void                SetTupleName(const char* c)          { fTupleName = c; }
     void		SetYear(Float_t y)		     {YEAR = y;} 
+    void		SetVerbose(bool b)		     {verbose = b;} 
+
+    // wrappers to keep things readable
+    void fillEle1Variables(const mithep::Electron * ele1);  
+    void fillEle2Variables(const mithep::Electron * ele2);  
+    void resetTreeVariables();
+    void regressEle1(const mithep::Electron              *ele1,
+		     const mithep::PileupEnergyDensityCol *fPileUpDen,
+		     const mithep::VertexCol              *fPV   );    
+    void regressEle2(const mithep::Electron              *ele2,
+		     const mithep::PileupEnergyDensityCol *fPileUpDen,
+		     const mithep::VertexCol              *fPV   );    
+
+    struct PhotonPtComparison { 
+      bool operator()( const Photon* const  &l1,  const Photon* const &l2 ) { 
+	if( l1->Pt() > l2->Pt() ) return true;
+	else return false;
+      }
+    };
 
   protected:
     void                Process();
@@ -257,6 +276,8 @@ namespace mithep
     ElectronEnergyRegression *eleRegressionEvaluator_V0;
     ElectronEnergyRegression *eleRegressionEvaluator_V1;
     ElectronEnergyRegression *eleRegressionEvaluator_V2;
+
+    bool verbose;
 
     ClassDef(LeptonPairPhotonTreeWriter, 1) // Lepton Pair + Photon identification module
   };

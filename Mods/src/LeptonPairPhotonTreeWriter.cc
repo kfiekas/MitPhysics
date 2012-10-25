@@ -50,7 +50,11 @@ ClassImp(mithep::LeptonPairPhotonTreeWriter)
     fPhotonBranchName       (Names::gkPhotonBrn),
     fGoodElectronName       (Names::gkElectronBrn),  
     fGoodMuonName	    (Names::gkMuonBrn),
-    fPVName                 (Names::gkPVBeamSpotBrn), 
+
+    // KH for sync
+    //    fPVName                 (Names::gkPVBeamSpotBrn), 
+    fPVName                 (Names::gkPVBrn), 
+
     fPFCandName		    (Names::gkPFCandidatesBrn),
     fTrackName              (Names::gkTrackBrn),
     fPileUpDenName          (Names::gkPileupEnergyDensityBrn),
@@ -83,7 +87,9 @@ ClassImp(mithep::LeptonPairPhotonTreeWriter)
     fMCParticles            (0),
     fConversions	    (0),
     fBeamSpot               (0),
-    fTupleName              ("h2LepPhotonTree")
+    fTupleName              ("h2LepPhotonTree"),
+
+    verbose                 (false)
   
     //Photon MVA Variables
 //    fVariableType_2011             (10),
@@ -116,28 +122,39 @@ LeptonPairPhotonTreeWriter::~LeptonPairPhotonTreeWriter()
 }
 
 //--------------------------------------------------------------------------------------------------
-void LeptonPairPhotonTreeWriter::Process()
+void LeptonPairPhotonTreeWriter::fillEle1Variables(const mithep::Electron * ele1)  
+//--------------------------------------------------------------------------------------------------
 {
-  // ------------------------------------------------------------  
-  // Process entries of the tree. 
-  LoadEventObject(fPhotonBranchName,   fPhotons);
-  LoadEventObject(fGoodElectronName,   fGoodElectrons);
-  LoadEventObject(fPVName,             fPV);
-  LoadEventObject(fPFCandName,         fPFCands);
-  LoadEventObject(fTrackName,          fTracks);
-  LoadEventObject(fPileUpDenName,      fPileUpDen);
-  LoadEventObject(fGoodMuonName,       fGoodMuons);
-  LoadEventObject(fConversionName,     fConversions);
-  LoadEventObject(fBeamSpotName,       fBeamSpot);  
-  if (!fIsData){
-    LoadBranch(fPileUpName);
-    LoadBranch(fMCParticleName);
-  }
-  //Initialize all tree leaf entries to -99.;
-  fLeptonPairPhotonEvent->run = GetEventHeader()->RunNum();
-  fLeptonPairPhotonEvent->lumi = GetEventHeader()->LumiSec();
-  fLeptonPairPhotonEvent->event = GetEventHeader()->EvtNum();
+  fLeptonPairPhotonEvent->ele1charge = ele1->Charge();
+  fLeptonPairPhotonEvent->ele1energy = ele1->E();
+  fLeptonPairPhotonEvent->ele1px = ele1->Px();
+  fLeptonPairPhotonEvent->ele1py = ele1->Py();
+  fLeptonPairPhotonEvent->ele1pz = ele1->Pz();
+  fLeptonPairPhotonEvent->ele1pt = ele1->Pt();
+  fLeptonPairPhotonEvent->ele1eta = ele1->Eta();
+  fLeptonPairPhotonEvent->ele1mass = ele1->Mass();
+  fLeptonPairPhotonEvent->ele1phi = ele1->Phi();
+}
 
+//--------------------------------------------------------------------------------------------------
+void LeptonPairPhotonTreeWriter::fillEle2Variables(const mithep::Electron * ele2)  
+//--------------------------------------------------------------------------------------------------
+{
+  fLeptonPairPhotonEvent->ele2charge = ele2->Charge();
+  fLeptonPairPhotonEvent->ele2energy = ele2->E();
+  fLeptonPairPhotonEvent->ele2px = ele2->Px();
+  fLeptonPairPhotonEvent->ele2py = ele2->Py();
+  fLeptonPairPhotonEvent->ele2pz = ele2->Pz();
+  fLeptonPairPhotonEvent->ele2pt = ele2->Pt();
+  fLeptonPairPhotonEvent->ele2eta = ele2->Eta();
+  fLeptonPairPhotonEvent->ele2mass = ele2->Mass();
+  fLeptonPairPhotonEvent->ele2phi = ele2->Phi();
+}
+
+//--------------------------------------------------------------------------------------------------
+void LeptonPairPhotonTreeWriter::resetTreeVariables()  
+//--------------------------------------------------------------------------------------------------
+{
   fLeptonPairPhotonEvent->electronZmass = -99.;
   fLeptonPairPhotonEvent->mllg = -99.;
   fLeptonPairPhotonEvent->ele1MVA = -99.;
@@ -257,6 +274,548 @@ void LeptonPairPhotonTreeWriter::Process()
   fLeptonPairPhotonEvent->phi_muons = -99.;
   fLeptonPairPhotonEvent->cosTheta_muons = -99.;
   fLeptonPairPhotonEvent->cosThetaG_muons = -99.;
+}
+
+//--------------------------------------------------------------------------------------------------
+void LeptonPairPhotonTreeWriter::regressEle1(const mithep::Electron               *ele1,
+					     const mithep::PileupEnergyDensityCol *fPileUpDen,
+					     const mithep::VertexCol              *fPV   )  
+//--------------------------------------------------------------------------------------------------
+{
+  double ele1spp = ((!isnan(float(ele1->SCluster()->Seed()->CoviPhiiPhi()))) ? sqrt(ele1->SCluster()->Seed()->CoviPhiiPhi()) : 0.0);
+  double ele1sep;
+  if (ele1->CoviEtaiEta()*ele1spp > 0) {
+    ele1sep = ele1->SCluster()->Seed()->CoviEtaiPhi()/(ele1->CoviEtaiEta()*ele1spp);
+  } else if (ele1->SCluster()->Seed()->CoviEtaiPhi()) {
+    ele1sep = 1.0; 
+  } else {
+    ele1sep = -1.0; 
+  }
+  
+  fLeptonPairPhotonEvent->ele1RegressionEnergyV0 = 
+    eleRegressionEvaluator_V0->regressionValueNoTrkVar(
+						       ele1->SCluster()->RawEnergy(),
+						       ele1->SCluster()->Eta(),
+						       ele1->SCluster()->Phi(),
+						       ele1->SCluster()->R9(),
+						       ele1->SCluster()->EtaWidth(),
+						       ele1->SCluster()->PhiWidth(),
+						       ele1->NumberOfClusters(),
+						       ele1->HadronicOverEm(),
+						       fPileUpDen->At(0)->RhoKt6PFJets(),       
+						       fPV->GetEntries(),   
+						       ele1->SCluster()->Seed()->Eta(),
+						       ele1->SCluster()->Seed()->Phi(),
+						       ele1->SCluster()->Seed()->Energy(),
+						       ele1->SCluster()->Seed()->E3x3(),
+						       ele1->SCluster()->Seed()->E5x5(),
+						       ele1->CoviEtaiEta(),
+						       ele1spp,
+						       ele1sep,
+						       ele1->SCluster()->Seed()->EMax(),
+						       ele1->SCluster()->Seed()->E2nd(),
+						       ele1->SCluster()->Seed()->ETop(),
+						       ele1->SCluster()->Seed()->EBottom(),
+						       ele1->SCluster()->Seed()->ELeft(),
+						       ele1->SCluster()->Seed()->ERight(),
+						       ele1->SCluster()->Seed()->E2x5Max(),
+						       ele1->SCluster()->Seed()->E2x5Top(),
+						       ele1->SCluster()->Seed()->E2x5Bottom(),
+						       ele1->SCluster()->Seed()->E2x5Left(),
+						       ele1->SCluster()->Seed()->E2x5Right(),
+						       ele1->SCluster()->Seed()->IEta(),
+						       ele1->SCluster()->Seed()->IPhi(),
+						       ele1->SCluster()->Seed()->EtaCry(),
+						       ele1->SCluster()->Seed()->PhiCry(),
+						       ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy(), 
+						       false );
+  
+  fLeptonPairPhotonEvent->ele1RegressionEnergyV1 = 
+    eleRegressionEvaluator_V1->regressionValueWithTrkVarV1(
+							   ele1->SCluster()->RawEnergy(),
+							   ele1->SCluster()->Eta(),
+							   ele1->SCluster()->Phi(),
+							   ele1->SCluster()->R9(),
+							   ele1->SCluster()->EtaWidth(),
+							   ele1->SCluster()->PhiWidth(),
+							   ele1->NumberOfClusters(),
+							   ele1->HadronicOverEm(),
+							   fPileUpDen->At(0)->RhoKt6PFJets(),       
+							   fPV->GetEntries(),   
+							   ele1->SCluster()->Seed()->Eta(),
+							   ele1->SCluster()->Seed()->Phi(),
+							   ele1->SCluster()->Seed()->Energy(),
+							   ele1->SCluster()->Seed()->E3x3(),
+							   ele1->SCluster()->Seed()->E5x5(),
+							   ele1->CoviEtaiEta(),
+							   ele1spp,
+							   ele1sep,
+							   ele1->SCluster()->Seed()->EMax(),
+							   ele1->SCluster()->Seed()->E2nd(),
+							   ele1->SCluster()->Seed()->ETop(),
+							   ele1->SCluster()->Seed()->EBottom(),
+							   ele1->SCluster()->Seed()->ELeft(),
+							   ele1->SCluster()->Seed()->ERight(),
+							   ele1->SCluster()->Seed()->E2x5Max(),
+							   ele1->SCluster()->Seed()->E2x5Top(),
+							   ele1->SCluster()->Seed()->E2x5Bottom(),
+							   ele1->SCluster()->Seed()->E2x5Left(),
+							   ele1->SCluster()->Seed()->E2x5Right(),
+							   ele1->SCluster()->Seed()->IEta(),
+							   ele1->SCluster()->Seed()->IPhi(),
+							   ele1->SCluster()->Seed()->EtaCry(),
+							   ele1->SCluster()->Seed()->PhiCry(),
+							   ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy(), 
+							   ele1->PIn(),
+							   ele1->FBrem(),
+							   ele1->Charge(),
+							   ele1->ESuperClusterOverP(),
+							   fmin(ele1->TrackMomentumError(),500.0),
+							   false );
+  
+  
+  std::vector<double> inputvarsEle1;
+  inputvarsEle1.push_back(ele1->SCluster()->RawEnergy());
+  inputvarsEle1.push_back(ele1->SCluster()->Eta());
+  inputvarsEle1.push_back(ele1->SCluster()->Phi());
+  inputvarsEle1.push_back(ele1->SCluster()->R9());
+  inputvarsEle1.push_back(ele1->SCluster()->EtaWidth());
+  inputvarsEle1.push_back(ele1->SCluster()->PhiWidth());
+  inputvarsEle1.push_back(ele1->NumberOfClusters());
+  inputvarsEle1.push_back(ele1->HadronicOverEm());
+  inputvarsEle1.push_back(fPileUpDen->At(0)->RhoKt6PFJets());       
+  inputvarsEle1.push_back(fPV->GetEntries());   
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->Eta());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->Phi());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->Energy());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->E3x3());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->E5x5());
+  inputvarsEle1.push_back(ele1->CoviEtaiEta());
+  inputvarsEle1.push_back(ele1spp);
+  inputvarsEle1.push_back(ele1sep);
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->EMax());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2nd());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->ETop());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->EBottom());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->ELeft());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->ERight());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Max());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Top());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Bottom());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Left());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Right());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->IEta());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->IPhi());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->EtaCry());
+  inputvarsEle1.push_back(ele1->SCluster()->Seed()->PhiCry());
+  inputvarsEle1.push_back(ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy()); 
+  inputvarsEle1.push_back(ele1->PIn());
+  inputvarsEle1.push_back(ele1->FBrem());
+  inputvarsEle1.push_back(ele1->Charge());
+  inputvarsEle1.push_back(ele1->ESuperClusterOverP());
+  inputvarsEle1.push_back(fmin(ele1->TrackMomentumError(),500.0));
+  inputvarsEle1.push_back(fmin(fabs(ele1->DeltaEtaSuperClusterTrackAtVtx()), 0.6));
+  inputvarsEle1.push_back(ele1->DeltaPhiSuperClusterTrackAtVtx());
+  inputvarsEle1.push_back(fmin(ele1->DeltaEtaSeedClusterTrackAtCalo(), 0.2));
+  inputvarsEle1.push_back(ele1->DeltaPhiSeedClusterTrackAtCalo());
+  inputvarsEle1.push_back(fmin(ele1->BestTrk()->Chi2() / ele1->BestTrk()->Ndof(),200));
+  inputvarsEle1.push_back(ele1->CTFTrkNLayersWithMeasurement());
+  inputvarsEle1.push_back(fmin(ele1->EEleClusterOverPout(),20.0));
+  fLeptonPairPhotonEvent->ele1RegressionEnergyV2 = 
+    eleRegressionEvaluator_V2->regressionValueWithTrkVarV2(
+							   inputvarsEle1,      
+							   false );
+	  
+
+  fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV0 = 
+    eleRegressionEvaluator_V0->regressionUncertaintyNoTrkVar(
+							     ele1->SCluster()->RawEnergy(),
+							     ele1->SCluster()->Eta(),
+							     ele1->SCluster()->Phi(),
+							     ele1->SCluster()->R9(),
+							     ele1->SCluster()->EtaWidth(),
+							     ele1->SCluster()->PhiWidth(),
+							     ele1->NumberOfClusters(),
+							     ele1->HadronicOverEm(),
+							     fPileUpDen->At(0)->RhoKt6PFJets(),       
+							     fPV->GetEntries(),   
+							     ele1->SCluster()->Seed()->Eta(),
+							     ele1->SCluster()->Seed()->Phi(),
+							     ele1->SCluster()->Seed()->Energy(),
+							     ele1->SCluster()->Seed()->E3x3(),
+							     ele1->SCluster()->Seed()->E5x5(),
+							     ele1->CoviEtaiEta(),
+							     ele1spp,
+							     ele1sep,
+							     ele1->SCluster()->Seed()->EMax(),
+							     ele1->SCluster()->Seed()->E2nd(),
+							     ele1->SCluster()->Seed()->ETop(),
+							     ele1->SCluster()->Seed()->EBottom(),
+							     ele1->SCluster()->Seed()->ELeft(),
+							     ele1->SCluster()->Seed()->ERight(),
+							     ele1->SCluster()->Seed()->E2x5Max(),
+							     ele1->SCluster()->Seed()->E2x5Top(),
+							     ele1->SCluster()->Seed()->E2x5Bottom(),
+							     ele1->SCluster()->Seed()->E2x5Left(),
+							     ele1->SCluster()->Seed()->E2x5Right(),
+							     ele1->SCluster()->Seed()->IEta(),
+							     ele1->SCluster()->Seed()->IPhi(),
+							     ele1->SCluster()->Seed()->EtaCry(),
+							     ele1->SCluster()->Seed()->PhiCry(),
+							     ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy(), 
+							     false );
+
+  fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV1 = 
+    eleRegressionEvaluator_V1->regressionUncertaintyWithTrkVarV1(
+								 ele1->SCluster()->RawEnergy(),
+								 ele1->SCluster()->Eta(),
+								 ele1->SCluster()->Phi(),
+								 ele1->SCluster()->R9(),
+								 ele1->SCluster()->EtaWidth(),
+								 ele1->SCluster()->PhiWidth(),
+								 ele1->NumberOfClusters(),
+								 ele1->HadronicOverEm(),
+								 fPileUpDen->At(0)->RhoKt6PFJets(),       
+								 fPV->GetEntries(),   
+								 ele1->SCluster()->Seed()->Eta(),
+								 ele1->SCluster()->Seed()->Phi(),
+								 ele1->SCluster()->Seed()->Energy(),
+								 ele1->SCluster()->Seed()->E3x3(),
+								 ele1->SCluster()->Seed()->E5x5(),
+								 ele1->CoviEtaiEta(),
+								 ele1spp,
+								 ele1sep,
+								 ele1->SCluster()->Seed()->EMax(),
+								 ele1->SCluster()->Seed()->E2nd(),
+								 ele1->SCluster()->Seed()->ETop(),
+								 ele1->SCluster()->Seed()->EBottom(),
+								 ele1->SCluster()->Seed()->ELeft(),
+								 ele1->SCluster()->Seed()->ERight(),
+								 ele1->SCluster()->Seed()->E2x5Max(),
+								 ele1->SCluster()->Seed()->E2x5Top(),
+								 ele1->SCluster()->Seed()->E2x5Bottom(),
+								 ele1->SCluster()->Seed()->E2x5Left(),
+								 ele1->SCluster()->Seed()->E2x5Right(),
+								 ele1->SCluster()->Seed()->IEta(),
+								 ele1->SCluster()->Seed()->IPhi(),
+								 ele1->SCluster()->Seed()->EtaCry(),
+								 ele1->SCluster()->Seed()->PhiCry(),
+								 ele1->SCluster()->PreshowerEnergy()/ele1->SCluster()->RawEnergy(), 
+								 ele1->PIn(),
+								 ele1->FBrem(),
+								 ele1->Charge(),
+								 ele1->ESuperClusterOverP(),
+								 fmin(ele1->TrackMomentumError(),500.0),
+								 false );
+	  
+  fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV2 
+    = eleRegressionEvaluator_V2->regressionUncertaintyWithTrkVarV2(
+								   inputvarsEle1,
+								   false );
+}
+
+
+//--------------------------------------------------------------------------------------------------
+void LeptonPairPhotonTreeWriter::regressEle2(const mithep::Electron               *ele2,
+					     const mithep::PileupEnergyDensityCol *fPileUpDen,
+					     const mithep::VertexCol              *fPV   )  
+//--------------------------------------------------------------------------------------------------
+{
+  double ele2spp = ((!isnan(float(ele2->SCluster()->Seed()->CoviPhiiPhi()))) ? sqrt(ele2->SCluster()->Seed()->CoviPhiiPhi()) : 0.0);
+  double ele2sep;
+  if (ele2->CoviEtaiEta()*ele2spp > 0) {
+    ele2sep = ele2->SCluster()->Seed()->CoviEtaiPhi()/(ele2->CoviEtaiEta()*ele2spp);
+  } else if (ele2->SCluster()->Seed()->CoviEtaiPhi()) {
+    ele2sep = 1.0; 
+  } else {
+    ele2sep = -1.0; 
+  }
+
+  fLeptonPairPhotonEvent->ele2RegressionEnergyV0 = 
+    eleRegressionEvaluator_V0->regressionValueNoTrkVar(
+						       ele2->SCluster()->RawEnergy(),
+						       ele2->SCluster()->Eta(),
+						       ele2->SCluster()->Phi(),
+						       ele2->SCluster()->R9(),
+						       ele2->SCluster()->EtaWidth(),
+						       ele2->SCluster()->PhiWidth(),
+						       ele2->NumberOfClusters(),
+						       ele2->HadronicOverEm(),
+						       fPileUpDen->At(0)->RhoKt6PFJets(),       
+						       fPV->GetEntries(),   
+						       ele2->SCluster()->Seed()->Eta(),
+						       ele2->SCluster()->Seed()->Phi(),
+						       ele2->SCluster()->Seed()->Energy(),
+						       ele2->SCluster()->Seed()->E3x3(),
+						       ele2->SCluster()->Seed()->E5x5(),
+						       ele2->CoviEtaiEta(),
+						       ele2spp,
+						       ele2sep,
+						       ele2->SCluster()->Seed()->EMax(),
+						       ele2->SCluster()->Seed()->E2nd(),
+						       ele2->SCluster()->Seed()->ETop(),
+						       ele2->SCluster()->Seed()->EBottom(),
+						       ele2->SCluster()->Seed()->ELeft(),
+						       ele2->SCluster()->Seed()->ERight(),
+						       ele2->SCluster()->Seed()->E2x5Max(),
+						       ele2->SCluster()->Seed()->E2x5Top(),
+						       ele2->SCluster()->Seed()->E2x5Bottom(),
+						       ele2->SCluster()->Seed()->E2x5Left(),
+						       ele2->SCluster()->Seed()->E2x5Right(),
+						       ele2->SCluster()->Seed()->IEta(),
+						       ele2->SCluster()->Seed()->IPhi(),
+						       ele2->SCluster()->Seed()->EtaCry(),
+						       ele2->SCluster()->Seed()->PhiCry(),
+						       ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy(), 
+						       false );
+
+  fLeptonPairPhotonEvent->ele2RegressionEnergyV1 = 
+    eleRegressionEvaluator_V1->regressionValueWithTrkVarV1(
+							   ele2->SCluster()->RawEnergy(),
+							   ele2->SCluster()->Eta(),
+							   ele2->SCluster()->Phi(),
+							   ele2->SCluster()->R9(),
+							   ele2->SCluster()->EtaWidth(),
+							   ele2->SCluster()->PhiWidth(),
+							   ele2->NumberOfClusters(),
+							   ele2->HadronicOverEm(),
+							   fPileUpDen->At(0)->RhoKt6PFJets(),       
+							   fPV->GetEntries(),   
+							   ele2->SCluster()->Seed()->Eta(),
+							   ele2->SCluster()->Seed()->Phi(),
+							   ele2->SCluster()->Seed()->Energy(),
+							   ele2->SCluster()->Seed()->E3x3(),
+							   ele2->SCluster()->Seed()->E5x5(),
+							   ele2->CoviEtaiEta(),
+							   ele2spp,
+							   ele2sep,
+							   ele2->SCluster()->Seed()->EMax(),
+							   ele2->SCluster()->Seed()->E2nd(),
+							   ele2->SCluster()->Seed()->ETop(),
+							   ele2->SCluster()->Seed()->EBottom(),
+							   ele2->SCluster()->Seed()->ELeft(),
+							   ele2->SCluster()->Seed()->ERight(),
+							   ele2->SCluster()->Seed()->E2x5Max(),
+							   ele2->SCluster()->Seed()->E2x5Top(),
+							   ele2->SCluster()->Seed()->E2x5Bottom(),
+							   ele2->SCluster()->Seed()->E2x5Left(),
+							   ele2->SCluster()->Seed()->E2x5Right(),
+							   ele2->SCluster()->Seed()->IEta(),
+							   ele2->SCluster()->Seed()->IPhi(),
+							   ele2->SCluster()->Seed()->EtaCry(),
+							   ele2->SCluster()->Seed()->PhiCry(),
+							   ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy(), 
+							   ele2->PIn(),
+							   ele2->FBrem(),
+							   ele2->Charge(),
+							   ele2->ESuperClusterOverP(),
+							   fmin(ele2->TrackMomentumError(),500.0),
+							   false );
+
+  std::vector<double> inputvarsEle2;
+  inputvarsEle2.push_back(ele2->SCluster()->RawEnergy());
+  inputvarsEle2.push_back(ele2->SCluster()->Eta());
+  inputvarsEle2.push_back(ele2->SCluster()->Phi());
+  inputvarsEle2.push_back(ele2->SCluster()->R9());
+  inputvarsEle2.push_back(ele2->SCluster()->EtaWidth());
+  inputvarsEle2.push_back(ele2->SCluster()->PhiWidth());
+  inputvarsEle2.push_back(ele2->NumberOfClusters());
+  inputvarsEle2.push_back(ele2->HadronicOverEm());
+  inputvarsEle2.push_back(fPileUpDen->At(0)->RhoKt6PFJets());       
+  inputvarsEle2.push_back(fPV->GetEntries());   
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->Eta());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->Phi());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->Energy());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->E3x3());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->E5x5());
+  inputvarsEle2.push_back(ele2->CoviEtaiEta());
+  inputvarsEle2.push_back(ele2spp);
+  inputvarsEle2.push_back(ele2sep);
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->EMax());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2nd());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->ETop());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->EBottom());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->ELeft());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->ERight());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Max());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Top());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Bottom());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Left());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Right());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->IEta());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->IPhi());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->EtaCry());
+  inputvarsEle2.push_back(ele2->SCluster()->Seed()->PhiCry());
+  inputvarsEle2.push_back(ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy()); 
+  inputvarsEle2.push_back(ele2->PIn());
+  inputvarsEle2.push_back(ele2->FBrem());
+  inputvarsEle2.push_back(ele2->Charge());
+  inputvarsEle2.push_back(ele2->ESuperClusterOverP());
+  inputvarsEle2.push_back(fmin(ele2->TrackMomentumError(),500.0));
+  inputvarsEle2.push_back(fmin(fabs(ele2->DeltaEtaSuperClusterTrackAtVtx()), 0.6));
+  inputvarsEle2.push_back(ele2->DeltaPhiSuperClusterTrackAtVtx());
+  inputvarsEle2.push_back(fmin(ele2->DeltaEtaSeedClusterTrackAtCalo(), 0.2));
+  inputvarsEle2.push_back(ele2->DeltaPhiSeedClusterTrackAtCalo());
+  inputvarsEle2.push_back(fmin(ele2->BestTrk()->Chi2() / ele2->BestTrk()->Ndof(),200));
+  inputvarsEle2.push_back(ele2->CTFTrkNLayersWithMeasurement());
+  inputvarsEle2.push_back(fmin(ele2->EEleClusterOverPout(),20.0));
+  fLeptonPairPhotonEvent->ele2RegressionEnergyV2 = 
+    eleRegressionEvaluator_V2->regressionValueWithTrkVarV2(
+							   inputvarsEle2,         
+							   false );
+  
+
+  fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV0 = 
+    eleRegressionEvaluator_V0->regressionUncertaintyNoTrkVar(
+							     ele2->SCluster()->RawEnergy(),
+							     ele2->SCluster()->Eta(),
+							     ele2->SCluster()->Phi(),
+							     ele2->SCluster()->R9(),
+							     ele2->SCluster()->EtaWidth(),
+							     ele2->SCluster()->PhiWidth(),
+							     ele2->NumberOfClusters(),
+							     ele2->HadronicOverEm(),
+							     fPileUpDen->At(0)->RhoKt6PFJets(),       
+							     fPV->GetEntries(),   
+							     ele2->SCluster()->Seed()->Eta(),
+							     ele2->SCluster()->Seed()->Phi(),
+							     ele2->SCluster()->Seed()->Energy(),
+							     ele2->SCluster()->Seed()->E3x3(),
+							     ele2->SCluster()->Seed()->E5x5(),
+							     ele2->CoviEtaiEta(),
+							     ele2spp,
+							     ele2sep,
+							     ele2->SCluster()->Seed()->EMax(),
+							     ele2->SCluster()->Seed()->E2nd(),
+							     ele2->SCluster()->Seed()->ETop(),
+							     ele2->SCluster()->Seed()->EBottom(),
+							     ele2->SCluster()->Seed()->ELeft(),
+							     ele2->SCluster()->Seed()->ERight(),
+							     ele2->SCluster()->Seed()->E2x5Max(),
+							     ele2->SCluster()->Seed()->E2x5Top(),
+							     ele2->SCluster()->Seed()->E2x5Bottom(),
+							     ele2->SCluster()->Seed()->E2x5Left(),
+							     ele2->SCluster()->Seed()->E2x5Right(),
+							     ele2->SCluster()->Seed()->IEta(),
+							     ele2->SCluster()->Seed()->IPhi(),
+							     ele2->SCluster()->Seed()->EtaCry(),
+							     ele2->SCluster()->Seed()->PhiCry(),
+							     ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy(), 
+							     false );
+
+  fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV1 = 
+    eleRegressionEvaluator_V1->regressionUncertaintyWithTrkVarV1(
+								 ele2->SCluster()->RawEnergy(),
+								 ele2->SCluster()->Eta(),
+								 ele2->SCluster()->Phi(),
+								 ele2->SCluster()->R9(),
+								 ele2->SCluster()->EtaWidth(),
+								 ele2->SCluster()->PhiWidth(),
+								 ele2->NumberOfClusters(),
+								 ele2->HadronicOverEm(),
+								 fPileUpDen->At(0)->RhoKt6PFJets(),       
+								 fPV->GetEntries(),   
+								 ele2->SCluster()->Seed()->Eta(),
+								 ele2->SCluster()->Seed()->Phi(),
+								 ele2->SCluster()->Seed()->Energy(),
+								 ele2->SCluster()->Seed()->E3x3(),
+								 ele2->SCluster()->Seed()->E5x5(),
+								 ele2->CoviEtaiEta(),
+								 ele2spp,
+								 ele2sep,
+								 ele2->SCluster()->Seed()->EMax(),
+								 ele2->SCluster()->Seed()->E2nd(),
+								 ele2->SCluster()->Seed()->ETop(),
+								 ele2->SCluster()->Seed()->EBottom(),
+								 ele2->SCluster()->Seed()->ELeft(),
+								 ele2->SCluster()->Seed()->ERight(),
+								 ele2->SCluster()->Seed()->E2x5Max(),
+								 ele2->SCluster()->Seed()->E2x5Top(),
+								 ele2->SCluster()->Seed()->E2x5Bottom(),
+								 ele2->SCluster()->Seed()->E2x5Left(),
+								 ele2->SCluster()->Seed()->E2x5Right(),
+								 ele2->SCluster()->Seed()->IEta(),
+								 ele2->SCluster()->Seed()->IPhi(),
+								 ele2->SCluster()->Seed()->EtaCry(),
+								 ele2->SCluster()->Seed()->PhiCry(),
+								 ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy(), 
+								 ele2->PIn(),
+								 ele2->FBrem(),
+								 ele2->Charge(),
+								 ele2->ESuperClusterOverP(),
+								 fmin(ele2->TrackMomentumError(),500.0),
+								 false );
+
+  fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV2 = 
+    eleRegressionEvaluator_V2->regressionUncertaintyWithTrkVarV2(
+								 inputvarsEle2,
+								 false );
+  
+}
+
+//--------------------------------------------------------------------------------------------------
+void LeptonPairPhotonTreeWriter::Process()
+//--------------------------------------------------------------------------------------------------
+{
+  bool store_event = false;
+
+  // Process entries of the tree. 
+  LoadEventObject(fPhotonBranchName,   fPhotons);
+  LoadEventObject(fGoodElectronName,   fGoodElectrons);
+  LoadEventObject(fPVName,             fPV);
+  LoadEventObject(fPFCandName,         fPFCands);
+  LoadEventObject(fTrackName,          fTracks);
+  LoadEventObject(fPileUpDenName,      fPileUpDen);
+  LoadEventObject(fGoodMuonName,       fGoodMuons);
+  LoadEventObject(fConversionName,     fConversions);
+  LoadEventObject(fBeamSpotName,       fBeamSpot);  
+  if (!fIsData){
+    LoadBranch(fPileUpName);
+    LoadBranch(fMCParticleName);
+  }
+
+
+  //Initialize all tree leaf entries to -99.;
+  resetTreeVariables();
+  fLeptonPairPhotonEvent->run = GetEventHeader()->RunNum();
+  fLeptonPairPhotonEvent->lumi = GetEventHeader()->LumiSec();
+  fLeptonPairPhotonEvent->event = GetEventHeader()->EvtNum();
+
+
+
+  // ************************************************************
+  // KH check for good PV
+  // ************************************************************
+  const mithep::Vertex *bestPV = 0;
+  const UInt_t   fMinNTracksFit = 0;
+  const Double_t fMinNdof       = 4;
+  const Double_t fMaxAbsZ       = 24;
+  const Double_t fMaxRho        = 2;
+
+  bool pv_found=false;
+  for( unsigned i=0; i<fPV->GetEntries(); i++ ) {
+    const mithep::Vertex * pv = fPV->At(i);
+    if(!pv->IsValid())                                continue;
+    if(pv->Ndof()	          < fMinNdof)	      continue;
+    if(fabs(pv->Z()) > fMaxAbsZ)	              continue;
+    if(pv->Position().Rho()   > fMaxRho)	      continue;
+    
+    if( !pv_found ) { 
+      bestPV = pv;
+      pv_found = true;
+      //      cout << "\t ^^^ this PV selected ... ^^^ " << endl;
+    }
+  }
+  if(!pv_found)
+    return;
+  else if( verbose ) { 
+    cout << "pass VTX" << endl;
+    cout <<"-----------> best PV <----------------" << endl;
+    cout << "X: " << bestPV->X() << "\t"
+	 << "Y: " << bestPV->Y() << "\t"
+	 << "Z: " << bestPV->Z() << endl;
+  }	
+  // ************************************************************  
 
   Int_t _numPU      = -99.;        // some sensible default values....
   Int_t _numPUminus = -99.;        // some sensible default values....
@@ -275,12 +834,21 @@ void LeptonPairPhotonTreeWriter::Process()
   fLeptonPairPhotonEvent->NPuMinus = (float) _numPUminus;
   fLeptonPairPhotonEvent->NPuPlus  = (float) _numPUplus;
 
-  //This for loop computes dielectron quantities
+  // *******************************************************************************************
+  //
+  // Here we go ...
+  //
+  // *******************************************************************************************
   if ((fGoodElectrons->GetEntries() > 1) || (fGoodMuons->GetEntries() > 1)){
-    Bool_t electronZgfilled; 
-    electronZgfilled = kFALSE;
+    
+    if( verbose )    cout << "goodEle: " << fGoodElectrons->GetEntries() << "\t"
+			  << "goodMu: " << fGoodMuons->GetEntries() << "\t"
+			  << "gamma: " << fPhotons->GetEntries() << endl;
+    
+    //
+    // first deal w/ PFnoPU
+    //
     vector<bool> pfNoPileUpflag;
-
     for(UInt_t i = 0; i < fPFCands->GetEntries(); i++) {
       const PFCandidate *pf = fPFCands->At(i);
       assert(pf);
@@ -308,7 +876,6 @@ void LeptonPairPhotonTreeWriter::Process()
               dzmin = dz;
             }
           }
-
           if(vertexFound || closestVtx != fPV->At(0)) {
             pfNoPileUpflag.push_back(0);
           }
@@ -320,875 +887,476 @@ void LeptonPairPhotonTreeWriter::Process()
         pfNoPileUpflag.push_back(1);
       }
     }
+    
 
-
-
-    //Compute Dielectron Quantities
-    if (fGoodElectrons->GetEntries() > 1){
-      bool photonpass = false;
-      UInt_t photonindex = 0;
-      vector<bool> electronpass;
-      for (UInt_t j = 0; j < fGoodElectrons->GetEntries();++j){
-        const Electron *test;
-        test = fGoodElectrons->At(j);
-        if (test->Pt() > 7 && fabs(test->Eta()) < 2.5){
-          if (ZGTools::electronCutBasedIDLoose(test, fPV->At(0),fConversions,YEAR)){
-            if ((YEAR == 2011 && ZGTools::electronPFIso04(test,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2011, pfNoPileUpflag,YEAR)) || (YEAR == 2012 && ZGTools::electronPFIso04(test,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2012, pfNoPileUpflag,YEAR))){
-              electronpass.push_back(1);
-            }
-            else electronpass.push_back(0);
-          }
-          else electronpass.push_back(0);
-        }
-        else electronpass.push_back(0);
-
+    // --------------------------------------------------------------------
+    // Photons :: just make a list of those passing ID/Iso here
+    //            additional selection after dileptons ...
+    // --------------------------------------------------------------------
+    vector<mithep::Photon const *>  selected_photons;
+    if (fPhotons->GetEntries() >= 1 ){
+      for (UInt_t i = 0; i < fPhotons->GetEntries(); ++i){
+	const Photon *tmppho = fPhotons->At(i);	
+	if( verbose ) 
+	  cout << "gamma :: pt: " << tmppho->Pt() << "\teta: " << tmppho->Eta() << "(" << tmppho->SCluster()->Eta() << ")";
+	if (tmppho->Pt() > 10 && 
+	    (fabs(tmppho->SCluster()->Eta()) < 1.4442 || fabs(tmppho->SCluster()->Eta()) > 1.566) && fabs(tmppho->SCluster()->Eta()) < 2.5)
+	  {
+	    if( verbose ) cout << "\tpresel";
+	    if (ZGTools::photonCutBasedMedium2012ID(tmppho, bestPV, fPFCands, fPileUpDen, fGoodElectrons, fConversions,fPV) ){
+	      if( verbose )cout << "\tID";
+	      if (ZGTools::photonCutBasedMedium2012Isolation(tmppho, fPV, fPFCands, fPileUpDen, pfNoPileUpflag) ){
+		if( verbose ) cout << "\tIso";
+		selected_photons.push_back(tmppho);
+	      }
+	    }
+	  }
+	if( verbose ) cout << endl;
       }
-      const Electron *ele1;
-      const Electron *ele2;
-      ele1 = 0;
-      ele2 = 0;
+    }
+    // sort selected photons with decreasing pt
+    sort( selected_photons.begin(), selected_photons.end(), PhotonPtComparison() );
+    const Photon *pho; // this will be the selected Zg photon, assigned below    
+
+    // --------------------------------------------------------------------
+    //
+    // Dielectrons
+    //
+    // --------------------------------------------------------------------
+    Bool_t electronZgfilled = kFALSE;  // to check if we pass both channels ... 
+    const Electron *ele1=0, *ele2=0; // these will be the selected Z eles, assigned below
+    if (fGoodElectrons->GetEntries() > 1){
+      vector<bool> electronpass, electronpassID;
+      for (UInt_t j = 0; j < fGoodElectrons->GetEntries();++j){
+        const Electron *tmpele = fGoodElectrons->At(j);
+	if( verbose ) cout << "ele :: pt: " << tmpele->Pt() << "\teta: " << tmpele->Eta();
+        if (tmpele->Pt() > 7 && fabs(tmpele->Eta()) < 2.5){
+	  if( verbose )cout << "\tpreSel";
+	  bool ele_is_clean=true;
+	  for (UInt_t k = 0; k < fGoodMuons->GetEntries(); ++k){
+	    if (fabs(fGoodMuons->At(k)->Eta()) < 2.4 && fGoodMuons->At(k)->IsGlobalMuon() &&
+		mithep::MathUtils::DeltaR(tmpele->Phi(),tmpele->Eta(), 
+					  fGoodMuons->At(k)->Phi(), fGoodMuons->At(k)->Eta()) < 0.05) {
+	      ele_is_clean = false;
+	      break;
+	    }
+	  }
+	  if( ele_is_clean ) { if( verbose )cout << "\tclean"; }
+          if (ZGTools::electronCutBasedIDLoose(tmpele, bestPV,fConversions,YEAR)){
+	    if( verbose )cout << "\tID";
+            if ((YEAR == 2011 && 
+		 ZGTools::electronPFIso04(tmpele,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2011, pfNoPileUpflag,YEAR)) || 
+		(YEAR == 2012 && 
+		 ZGTools::electronPFIso04(tmpele,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2012, pfNoPileUpflag,YEAR)) )
+	      {
+		if( verbose ) cout << "\tIso";
+		electronpass.push_back(1);
+	      }
+	    else  electronpass.push_back(0);
+	    electronpassID.push_back(1);
+	  } // ID & clean
+	  else { electronpass.push_back(0); electronpassID.push_back(0); }
+	} // presel
+	else {electronpass.push_back(0); electronpassID.push_back(0);}
+	if( verbose )cout << endl;
+      } // loop over electons
+      
       Float_t zdifference = 999;
       UInt_t electron1 = 0;
       UInt_t electron2 = 1;
-	
+      int nIDPairEL=0, nIDIsoPairEL=0;	
       for (UInt_t j = 0; j < fGoodElectrons->GetEntries(); ++j){
         for (UInt_t k = 0; k < j; ++k){    
           if (j == k) continue;
           ele1 = fGoodElectrons->At(j);
           ele2 = fGoodElectrons->At(k);
-          if (ele1->Charge() != ele2->Charge() && electronpass[j] && electronpass[k]){ 
-            if (fabs(91.19 - (ele1->Mom() + ele2->Mom()).M()) < zdifference){
-              zdifference = fabs(91.19 - (ele1->Mom() + ele2->Mom()).M());
-              electron1 = k;
-              electron2 = j;
-            }
-          }	
-        }
+	  // KH : no charge here for resync, moved to Z selection
+	  //	  if (ele1->Charge() != ele2->Charge() && electronpassID[j] && electronpassID[k]){ 
+	  if (electronpassID[j] && electronpassID[k]){ 
+	    nIDPairEL++;
+
+	    if (electronpass[j] && electronpass[k] && fabs(91.19 - (ele1->Mom() + ele2->Mom()).M()) < zdifference){
+	      zdifference = fabs(91.19 - (ele1->Mom() + ele2->Mom()).M());
+	      electron1 = k;
+	      electron2 = j;
+	      nIDIsoPairEL++;
+	    }
+	  }	
+	}
       }
- 	
-      ele1 = fGoodElectrons->At(electron1);
-      ele2 = fGoodElectrons->At(electron2); 
-      if (ele1->Charge() != ele2->Charge() && electronpass[electron1] && electronpass[electron2]){
-        Bool_t cleaning = kTRUE;
-        for (UInt_t i = 0; i < fGoodMuons->GetEntries(); ++i){
-          if (fabs(fGoodMuons->At(i)->Eta()) < 2.4 && fGoodMuons->At(i)->IsGlobalMuon() &&
-              mithep::MathUtils::DeltaR(ele1->Phi(),ele1->Eta(), fGoodMuons->At(i)->Phi(), fGoodMuons->At(i)->Eta()) < 0.05) cleaning = kFALSE;
+      if( nIDPairEL >= 1 &&  verbose ){cout << "PASSID :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;}
+      if( nIDIsoPairEL >= 1 && verbose ){cout << "PASSIDISO :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;}
+      
+
+      // 
+      // now make the ee and eeg systems ...
+      // 
+      if( nIDPairEL >= 1 && nIDIsoPairEL >= 1 ) {
 	
-          if (fabs(fGoodMuons->At(i)->Eta()) < 2.4 && fGoodMuons->At(i)->IsGlobalMuon() &&
-              mithep::MathUtils::DeltaR(ele2->Phi(),ele2->Eta(), fGoodMuons->At(i)->Phi(), fGoodMuons->At(i)->Eta()) < 0.05) cleaning = kFALSE;
-        }
-        if (cleaning){	
-
-
-          fLeptonPairPhotonEvent->ele1charge = ele1->Charge();
-          fLeptonPairPhotonEvent->ele1energy = ele1->E();
-          fLeptonPairPhotonEvent->ele1px = ele1->Px();
-          fLeptonPairPhotonEvent->ele1py = ele1->Py();
-          fLeptonPairPhotonEvent->ele1pz = ele1->Pz();
-          fLeptonPairPhotonEvent->ele1pt = ele1->Pt();
-          fLeptonPairPhotonEvent->ele1eta = ele1->Eta();
-          fLeptonPairPhotonEvent->ele1mass = ele1->Mass();
-          fLeptonPairPhotonEvent->ele1phi = ele1->Phi();
-
-          fLeptonPairPhotonEvent->ele2charge = ele2->Charge();
-          fLeptonPairPhotonEvent->ele2energy = ele2->E();
-          fLeptonPairPhotonEvent->ele2px = ele2->Px();
-          fLeptonPairPhotonEvent->ele2py = ele2->Py();
-          fLeptonPairPhotonEvent->ele2pz = ele2->Pz();
-          fLeptonPairPhotonEvent->ele2pt = ele2->Pt();
-          fLeptonPairPhotonEvent->ele2eta = ele2->Eta();
-          fLeptonPairPhotonEvent->ele2mass = ele2->Mass();
-          fLeptonPairPhotonEvent->ele2phi = ele2->Phi();
-
-          //******************************************************
-          //ElectronRegression Evaluation
-          //******************************************************
-          double ele1spp = ((!isnan(float(ele1->SCluster()->Seed()->CoviPhiiPhi()))) ? sqrt(ele1->SCluster()->Seed()->CoviPhiiPhi()) : 0.0);
-          double ele2spp = ((!isnan(float(ele2->SCluster()->Seed()->CoviPhiiPhi()))) ? sqrt(ele2->SCluster()->Seed()->CoviPhiiPhi()) : 0.0);
-          double ele1sep;
-          if (ele1->CoviEtaiEta()*ele1spp > 0) {
-            ele1sep = ele1->SCluster()->Seed()->CoviEtaiPhi()/(ele1->CoviEtaiEta()*ele1spp);
-          } else if (ele1->SCluster()->Seed()->CoviEtaiPhi()) {
-            ele1sep = 1.0; 
-          } else {
-            ele1sep = -1.0; 
-          }
-          double ele2sep;
-          if (ele2->CoviEtaiEta()*ele2spp > 0) {
-            ele2sep = ele2->SCluster()->Seed()->CoviEtaiPhi()/(ele2->CoviEtaiEta()*ele2spp);
-          } else if (ele2->SCluster()->Seed()->CoviEtaiPhi()) {
-            ele2sep = 1.0; 
-          } else {
-            ele2sep = -1.0; 
-          }
-
-          fLeptonPairPhotonEvent->ele1RegressionEnergyV0 = eleRegressionEvaluator_V0->regressionValueNoTrkVar(
-            ele1->SCluster()->RawEnergy(),
-            ele1->SCluster()->Eta(),
-            ele1->SCluster()->Phi(),
-            ele1->SCluster()->R9(),
-            ele1->SCluster()->EtaWidth(),
-            ele1->SCluster()->PhiWidth(),
-            ele1->NumberOfClusters(),
-            ele1->HadronicOverEm(),
-            fPileUpDen->At(0)->RhoKt6PFJets(),       
-            fPV->GetEntries(),   
-            ele1->SCluster()->Seed()->Eta(),
-            ele1->SCluster()->Seed()->Phi(),
-            ele1->SCluster()->Seed()->Energy(),
-            ele1->SCluster()->Seed()->E3x3(),
-            ele1->SCluster()->Seed()->E5x5(),
-            ele1->CoviEtaiEta(),
-            ele1spp,
-            ele1sep,
-            ele1->SCluster()->Seed()->EMax(),
-            ele1->SCluster()->Seed()->E2nd(),
-            ele1->SCluster()->Seed()->ETop(),
-            ele1->SCluster()->Seed()->EBottom(),
-            ele1->SCluster()->Seed()->ELeft(),
-            ele1->SCluster()->Seed()->ERight(),
-            ele1->SCluster()->Seed()->E2x5Max(),
-            ele1->SCluster()->Seed()->E2x5Top(),
-            ele1->SCluster()->Seed()->E2x5Bottom(),
-            ele1->SCluster()->Seed()->E2x5Left(),
-            ele1->SCluster()->Seed()->E2x5Right(),
-            ele1->SCluster()->Seed()->IEta(),
-            ele1->SCluster()->Seed()->IPhi(),
-            ele1->SCluster()->Seed()->EtaCry(),
-            ele1->SCluster()->Seed()->PhiCry(),
-            ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy(), 
-            false );
-
-          fLeptonPairPhotonEvent->ele1RegressionEnergyV1 = eleRegressionEvaluator_V1->regressionValueWithTrkVarV1(
-            ele1->SCluster()->RawEnergy(),
-            ele1->SCluster()->Eta(),
-            ele1->SCluster()->Phi(),
-            ele1->SCluster()->R9(),
-            ele1->SCluster()->EtaWidth(),
-            ele1->SCluster()->PhiWidth(),
-            ele1->NumberOfClusters(),
-            ele1->HadronicOverEm(),
-            fPileUpDen->At(0)->RhoKt6PFJets(),       
-            fPV->GetEntries(),   
-            ele1->SCluster()->Seed()->Eta(),
-            ele1->SCluster()->Seed()->Phi(),
-            ele1->SCluster()->Seed()->Energy(),
-            ele1->SCluster()->Seed()->E3x3(),
-            ele1->SCluster()->Seed()->E5x5(),
-            ele1->CoviEtaiEta(),
-            ele1spp,
-            ele1sep,
-            ele1->SCluster()->Seed()->EMax(),
-            ele1->SCluster()->Seed()->E2nd(),
-            ele1->SCluster()->Seed()->ETop(),
-            ele1->SCluster()->Seed()->EBottom(),
-            ele1->SCluster()->Seed()->ELeft(),
-            ele1->SCluster()->Seed()->ERight(),
-            ele1->SCluster()->Seed()->E2x5Max(),
-            ele1->SCluster()->Seed()->E2x5Top(),
-            ele1->SCluster()->Seed()->E2x5Bottom(),
-            ele1->SCluster()->Seed()->E2x5Left(),
-            ele1->SCluster()->Seed()->E2x5Right(),
-            ele1->SCluster()->Seed()->IEta(),
-            ele1->SCluster()->Seed()->IPhi(),
-            ele1->SCluster()->Seed()->EtaCry(),
-            ele1->SCluster()->Seed()->PhiCry(),
-            ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy(), 
-            ele1->PIn(),
-            ele1->FBrem(),
-            ele1->Charge(),
-            ele1->ESuperClusterOverP(),
-            fmin(ele1->TrackMomentumError(),500.0),
-            false );
-
-        
-          std::vector<double> inputvarsEle1;
-          inputvarsEle1.push_back(ele1->SCluster()->RawEnergy());
-          inputvarsEle1.push_back(ele1->SCluster()->Eta());
-          inputvarsEle1.push_back(ele1->SCluster()->Phi());
-          inputvarsEle1.push_back(ele1->SCluster()->R9());
-          inputvarsEle1.push_back(ele1->SCluster()->EtaWidth());
-          inputvarsEle1.push_back(ele1->SCluster()->PhiWidth());
-          inputvarsEle1.push_back(ele1->NumberOfClusters());
-          inputvarsEle1.push_back(ele1->HadronicOverEm());
-          inputvarsEle1.push_back(fPileUpDen->At(0)->RhoKt6PFJets());       
-          inputvarsEle1.push_back(fPV->GetEntries());   
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->Eta());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->Phi());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->Energy());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->E3x3());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->E5x5());
-          inputvarsEle1.push_back(ele1->CoviEtaiEta());
-          inputvarsEle1.push_back(ele1spp);
-          inputvarsEle1.push_back(ele1sep);
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->EMax());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2nd());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->ETop());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->EBottom());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->ELeft());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->ERight());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Max());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Top());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Bottom());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Left());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->E2x5Right());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->IEta());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->IPhi());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->EtaCry());
-          inputvarsEle1.push_back(ele1->SCluster()->Seed()->PhiCry());
-          inputvarsEle1.push_back(ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy()); 
-          inputvarsEle1.push_back(ele1->PIn());
-          inputvarsEle1.push_back(ele1->FBrem());
-          inputvarsEle1.push_back(ele1->Charge());
-          inputvarsEle1.push_back(ele1->ESuperClusterOverP());
-          inputvarsEle1.push_back(fmin(ele1->TrackMomentumError(),500.0));
-          inputvarsEle1.push_back(fmin(fabs(ele1->DeltaEtaSuperClusterTrackAtVtx()), 0.6));
-          inputvarsEle1.push_back(ele1->DeltaPhiSuperClusterTrackAtVtx());
-          inputvarsEle1.push_back(fmin(ele1->DeltaEtaSeedClusterTrackAtCalo(), 0.2));
-          inputvarsEle1.push_back(ele1->DeltaPhiSeedClusterTrackAtCalo());
-          inputvarsEle1.push_back(fmin(ele1->BestTrk()->Chi2() / ele1->BestTrk()->Ndof(),200));
-          inputvarsEle1.push_back(ele1->CTFTrkNLayersWithMeasurement());
-          inputvarsEle1.push_back(fmin(ele1->EEleClusterOverPout(),20.0));
-          fLeptonPairPhotonEvent->ele1RegressionEnergyV2 = eleRegressionEvaluator_V2->regressionValueWithTrkVarV2(
-            inputvarsEle1,      
-            false );
-
-
-          fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV0 = eleRegressionEvaluator_V0->regressionUncertaintyNoTrkVar(
-            ele1->SCluster()->RawEnergy(),
-            ele1->SCluster()->Eta(),
-            ele1->SCluster()->Phi(),
-            ele1->SCluster()->R9(),
-            ele1->SCluster()->EtaWidth(),
-            ele1->SCluster()->PhiWidth(),
-            ele1->NumberOfClusters(),
-            ele1->HadronicOverEm(),
-            fPileUpDen->At(0)->RhoKt6PFJets(),       
-            fPV->GetEntries(),   
-            ele1->SCluster()->Seed()->Eta(),
-            ele1->SCluster()->Seed()->Phi(),
-            ele1->SCluster()->Seed()->Energy(),
-            ele1->SCluster()->Seed()->E3x3(),
-            ele1->SCluster()->Seed()->E5x5(),
-            ele1->CoviEtaiEta(),
-            ele1spp,
-            ele1sep,
-            ele1->SCluster()->Seed()->EMax(),
-            ele1->SCluster()->Seed()->E2nd(),
-            ele1->SCluster()->Seed()->ETop(),
-            ele1->SCluster()->Seed()->EBottom(),
-            ele1->SCluster()->Seed()->ELeft(),
-            ele1->SCluster()->Seed()->ERight(),
-            ele1->SCluster()->Seed()->E2x5Max(),
-            ele1->SCluster()->Seed()->E2x5Top(),
-            ele1->SCluster()->Seed()->E2x5Bottom(),
-            ele1->SCluster()->Seed()->E2x5Left(),
-            ele1->SCluster()->Seed()->E2x5Right(),
-            ele1->SCluster()->Seed()->IEta(),
-            ele1->SCluster()->Seed()->IPhi(),
-            ele1->SCluster()->Seed()->EtaCry(),
-            ele1->SCluster()->Seed()->PhiCry(),
-            ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy(), 
-            false );
-
-          fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV1 = eleRegressionEvaluator_V1->regressionUncertaintyWithTrkVarV1(
-            ele1->SCluster()->RawEnergy(),
-            ele1->SCluster()->Eta(),
-            ele1->SCluster()->Phi(),
-            ele1->SCluster()->R9(),
-            ele1->SCluster()->EtaWidth(),
-            ele1->SCluster()->PhiWidth(),
-            ele1->NumberOfClusters(),
-            ele1->HadronicOverEm(),
-            fPileUpDen->At(0)->RhoKt6PFJets(),       
-            fPV->GetEntries(),   
-            ele1->SCluster()->Seed()->Eta(),
-            ele1->SCluster()->Seed()->Phi(),
-            ele1->SCluster()->Seed()->Energy(),
-            ele1->SCluster()->Seed()->E3x3(),
-            ele1->SCluster()->Seed()->E5x5(),
-            ele1->CoviEtaiEta(),
-            ele1spp,
-            ele1sep,
-            ele1->SCluster()->Seed()->EMax(),
-            ele1->SCluster()->Seed()->E2nd(),
-            ele1->SCluster()->Seed()->ETop(),
-            ele1->SCluster()->Seed()->EBottom(),
-            ele1->SCluster()->Seed()->ELeft(),
-            ele1->SCluster()->Seed()->ERight(),
-            ele1->SCluster()->Seed()->E2x5Max(),
-            ele1->SCluster()->Seed()->E2x5Top(),
-            ele1->SCluster()->Seed()->E2x5Bottom(),
-            ele1->SCluster()->Seed()->E2x5Left(),
-            ele1->SCluster()->Seed()->E2x5Right(),
-            ele1->SCluster()->Seed()->IEta(),
-            ele1->SCluster()->Seed()->IPhi(),
-            ele1->SCluster()->Seed()->EtaCry(),
-            ele1->SCluster()->Seed()->PhiCry(),
-            ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy(), 
-            ele1->PIn(),
-            ele1->FBrem(),
-            ele1->Charge(),
-            ele1->ESuperClusterOverP(),
-            fmin(ele1->TrackMomentumError(),500.0),
-            false );
-
-          fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV2 = eleRegressionEvaluator_V2->regressionUncertaintyWithTrkVarV2(
-            inputvarsEle1,
-            false );
-
-
-
-
-
-
-          fLeptonPairPhotonEvent->ele2RegressionEnergyV0 = eleRegressionEvaluator_V0->regressionValueNoTrkVar(
-            ele2->SCluster()->RawEnergy(),
-            ele2->SCluster()->Eta(),
-            ele2->SCluster()->Phi(),
-            ele2->SCluster()->R9(),
-            ele2->SCluster()->EtaWidth(),
-            ele2->SCluster()->PhiWidth(),
-            ele2->NumberOfClusters(),
-            ele2->HadronicOverEm(),
-            fPileUpDen->At(0)->RhoKt6PFJets(),       
-            fPV->GetEntries(),   
-            ele2->SCluster()->Seed()->Eta(),
-            ele2->SCluster()->Seed()->Phi(),
-            ele2->SCluster()->Seed()->Energy(),
-            ele2->SCluster()->Seed()->E3x3(),
-            ele2->SCluster()->Seed()->E5x5(),
-            ele2->CoviEtaiEta(),
-            ele2spp,
-            ele2sep,
-            ele2->SCluster()->Seed()->EMax(),
-            ele2->SCluster()->Seed()->E2nd(),
-            ele2->SCluster()->Seed()->ETop(),
-            ele2->SCluster()->Seed()->EBottom(),
-            ele2->SCluster()->Seed()->ELeft(),
-            ele2->SCluster()->Seed()->ERight(),
-            ele2->SCluster()->Seed()->E2x5Max(),
-            ele2->SCluster()->Seed()->E2x5Top(),
-            ele2->SCluster()->Seed()->E2x5Bottom(),
-            ele2->SCluster()->Seed()->E2x5Left(),
-            ele2->SCluster()->Seed()->E2x5Right(),
-            ele2->SCluster()->Seed()->IEta(),
-            ele2->SCluster()->Seed()->IPhi(),
-            ele2->SCluster()->Seed()->EtaCry(),
-            ele2->SCluster()->Seed()->PhiCry(),
-            ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy(), 
-            false );
-
-          fLeptonPairPhotonEvent->ele2RegressionEnergyV1 = eleRegressionEvaluator_V1->regressionValueWithTrkVarV1(
-            ele2->SCluster()->RawEnergy(),
-            ele2->SCluster()->Eta(),
-            ele2->SCluster()->Phi(),
-            ele2->SCluster()->R9(),
-            ele2->SCluster()->EtaWidth(),
-            ele2->SCluster()->PhiWidth(),
-            ele2->NumberOfClusters(),
-            ele2->HadronicOverEm(),
-            fPileUpDen->At(0)->RhoKt6PFJets(),       
-            fPV->GetEntries(),   
-            ele2->SCluster()->Seed()->Eta(),
-            ele2->SCluster()->Seed()->Phi(),
-            ele2->SCluster()->Seed()->Energy(),
-            ele2->SCluster()->Seed()->E3x3(),
-            ele2->SCluster()->Seed()->E5x5(),
-            ele2->CoviEtaiEta(),
-            ele2spp,
-            ele2sep,
-            ele2->SCluster()->Seed()->EMax(),
-            ele2->SCluster()->Seed()->E2nd(),
-            ele2->SCluster()->Seed()->ETop(),
-            ele2->SCluster()->Seed()->EBottom(),
-            ele2->SCluster()->Seed()->ELeft(),
-            ele2->SCluster()->Seed()->ERight(),
-            ele2->SCluster()->Seed()->E2x5Max(),
-            ele2->SCluster()->Seed()->E2x5Top(),
-            ele2->SCluster()->Seed()->E2x5Bottom(),
-            ele2->SCluster()->Seed()->E2x5Left(),
-            ele2->SCluster()->Seed()->E2x5Right(),
-            ele2->SCluster()->Seed()->IEta(),
-            ele2->SCluster()->Seed()->IPhi(),
-            ele2->SCluster()->Seed()->EtaCry(),
-            ele2->SCluster()->Seed()->PhiCry(),
-            ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy(), 
-            ele2->PIn(),
-            ele2->FBrem(),
-            ele2->Charge(),
-            ele2->ESuperClusterOverP(),
-            fmin(ele2->TrackMomentumError(),500.0),
-            false );
-
-          std::vector<double> inputvarsEle2;
-          inputvarsEle2.push_back(ele2->SCluster()->RawEnergy());
-          inputvarsEle2.push_back(ele2->SCluster()->Eta());
-          inputvarsEle2.push_back(ele2->SCluster()->Phi());
-          inputvarsEle2.push_back(ele2->SCluster()->R9());
-          inputvarsEle2.push_back(ele2->SCluster()->EtaWidth());
-          inputvarsEle2.push_back(ele2->SCluster()->PhiWidth());
-          inputvarsEle2.push_back(ele2->NumberOfClusters());
-          inputvarsEle2.push_back(ele2->HadronicOverEm());
-          inputvarsEle2.push_back(fPileUpDen->At(0)->RhoKt6PFJets());       
-          inputvarsEle2.push_back(fPV->GetEntries());   
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->Eta());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->Phi());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->Energy());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->E3x3());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->E5x5());
-          inputvarsEle2.push_back(ele2->CoviEtaiEta());
-          inputvarsEle2.push_back(ele2spp);
-          inputvarsEle2.push_back(ele2sep);
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->EMax());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2nd());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->ETop());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->EBottom());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->ELeft());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->ERight());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Max());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Top());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Bottom());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Left());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->E2x5Right());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->IEta());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->IPhi());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->EtaCry());
-          inputvarsEle2.push_back(ele2->SCluster()->Seed()->PhiCry());
-          inputvarsEle2.push_back(ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy()); 
-          inputvarsEle2.push_back(ele2->PIn());
-          inputvarsEle2.push_back(ele2->FBrem());
-          inputvarsEle2.push_back(ele2->Charge());
-          inputvarsEle2.push_back(ele2->ESuperClusterOverP());
-          inputvarsEle2.push_back(fmin(ele2->TrackMomentumError(),500.0));
-          inputvarsEle2.push_back(fmin(fabs(ele2->DeltaEtaSuperClusterTrackAtVtx()), 0.6));
-          inputvarsEle2.push_back(ele2->DeltaPhiSuperClusterTrackAtVtx());
-          inputvarsEle2.push_back(fmin(ele2->DeltaEtaSeedClusterTrackAtCalo(), 0.2));
-          inputvarsEle2.push_back(ele2->DeltaPhiSeedClusterTrackAtCalo());
-          inputvarsEle2.push_back(fmin(ele2->BestTrk()->Chi2() / ele2->BestTrk()->Ndof(),200));
-          inputvarsEle2.push_back(ele2->CTFTrkNLayersWithMeasurement());
-          inputvarsEle2.push_back(fmin(ele2->EEleClusterOverPout(),20.0));
-          fLeptonPairPhotonEvent->ele2RegressionEnergyV2 = eleRegressionEvaluator_V2->regressionValueWithTrkVarV2(
-            inputvarsEle2,         
-            false );
-
-
-          fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV0 = eleRegressionEvaluator_V0->regressionUncertaintyNoTrkVar(
-            ele2->SCluster()->RawEnergy(),
-            ele2->SCluster()->Eta(),
-            ele2->SCluster()->Phi(),
-            ele2->SCluster()->R9(),
-            ele2->SCluster()->EtaWidth(),
-            ele2->SCluster()->PhiWidth(),
-            ele2->NumberOfClusters(),
-            ele2->HadronicOverEm(),
-            fPileUpDen->At(0)->RhoKt6PFJets(),       
-            fPV->GetEntries(),   
-            ele2->SCluster()->Seed()->Eta(),
-            ele2->SCluster()->Seed()->Phi(),
-            ele2->SCluster()->Seed()->Energy(),
-            ele2->SCluster()->Seed()->E3x3(),
-            ele2->SCluster()->Seed()->E5x5(),
-            ele2->CoviEtaiEta(),
-            ele2spp,
-            ele2sep,
-            ele2->SCluster()->Seed()->EMax(),
-            ele2->SCluster()->Seed()->E2nd(),
-            ele2->SCluster()->Seed()->ETop(),
-            ele2->SCluster()->Seed()->EBottom(),
-            ele2->SCluster()->Seed()->ELeft(),
-            ele2->SCluster()->Seed()->ERight(),
-            ele2->SCluster()->Seed()->E2x5Max(),
-            ele2->SCluster()->Seed()->E2x5Top(),
-            ele2->SCluster()->Seed()->E2x5Bottom(),
-            ele2->SCluster()->Seed()->E2x5Left(),
-            ele2->SCluster()->Seed()->E2x5Right(),
-            ele2->SCluster()->Seed()->IEta(),
-            ele2->SCluster()->Seed()->IPhi(),
-            ele2->SCluster()->Seed()->EtaCry(),
-            ele2->SCluster()->Seed()->PhiCry(),
-            ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy(), 
-            false );
-
-          fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV1 = eleRegressionEvaluator_V1->regressionUncertaintyWithTrkVarV1(
-            ele2->SCluster()->RawEnergy(),
-            ele2->SCluster()->Eta(),
-            ele2->SCluster()->Phi(),
-            ele2->SCluster()->R9(),
-            ele2->SCluster()->EtaWidth(),
-            ele2->SCluster()->PhiWidth(),
-            ele2->NumberOfClusters(),
-            ele2->HadronicOverEm(),
-            fPileUpDen->At(0)->RhoKt6PFJets(),       
-            fPV->GetEntries(),   
-            ele2->SCluster()->Seed()->Eta(),
-            ele2->SCluster()->Seed()->Phi(),
-            ele2->SCluster()->Seed()->Energy(),
-            ele2->SCluster()->Seed()->E3x3(),
-            ele2->SCluster()->Seed()->E5x5(),
-            ele2->CoviEtaiEta(),
-            ele2spp,
-            ele2sep,
-            ele2->SCluster()->Seed()->EMax(),
-            ele2->SCluster()->Seed()->E2nd(),
-            ele2->SCluster()->Seed()->ETop(),
-            ele2->SCluster()->Seed()->EBottom(),
-            ele2->SCluster()->Seed()->ELeft(),
-            ele2->SCluster()->Seed()->ERight(),
-            ele2->SCluster()->Seed()->E2x5Max(),
-            ele2->SCluster()->Seed()->E2x5Top(),
-            ele2->SCluster()->Seed()->E2x5Bottom(),
-            ele2->SCluster()->Seed()->E2x5Left(),
-            ele2->SCluster()->Seed()->E2x5Right(),
-            ele2->SCluster()->Seed()->IEta(),
-            ele2->SCluster()->Seed()->IPhi(),
-            ele2->SCluster()->Seed()->EtaCry(),
-            ele2->SCluster()->Seed()->PhiCry(),
-            ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy(), 
-            ele2->PIn(),
-            ele2->FBrem(),
-            ele2->Charge(),
-            ele2->ESuperClusterOverP(),
-            fmin(ele2->TrackMomentumError(),500.0),
-            false );
-
-          fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV2 = eleRegressionEvaluator_V2->regressionUncertaintyWithTrkVarV2(
-            inputvarsEle2,
-            false );
-        
-
-
-
-          //**************************************************************************************
-          //Find the Photon
-          //Si : Currently we're selecting the first photon that passes all cuts - not sure if this is 
-          //     intended...
-          //**************************************************************************************
-          if (fPhotons->GetEntries() >= 1 ) {
-            for (UInt_t i = 0; i < fPhotons->GetEntries(); ++i) {
-              const Photon *pho;
-              pho = fPhotons->At(i);	
-              if (pho->Pt() > 10 && (fabs(pho->SCluster()->Eta()) < 1.4442 || (fabs(pho->SCluster()->Eta()) > 1.566 && fabs(pho->SCluster()->Eta()) < 2.5))
-                  && ZGTools::photonCutBasedLoose2012ID(pho, fPV->At(0), fPFCands, fPileUpDen, fGoodElectrons, fConversions,fPV)
-                  && ZGTools::photonCutBasedLoose2012Isolation(pho, fPV, fPFCands, fPileUpDen,pfNoPileUpflag)
-                  && mithep::MathUtils::DeltaR(ele1->Phi(),ele1->Eta(), pho->Phi(), pho->Eta() ) > 0.4
-                  && mithep::MathUtils::DeltaR(ele2->Phi(),ele2->Eta(), pho->Phi(), pho->Eta() ) > 0.4
-                ) {
-                photonpass = true;
-                photonindex = i;
-                break;
-              }
-            }
+	ele1 = fGoodElectrons->At(electron1);
+	ele2 = fGoodElectrons->At(electron2); 
+	float best_mll = (ele1->Mom() + ele2->Mom()).M();
+	if( best_mll > 50. && (ele1->Mom().Pt() > 20 || ele2->Mom().Pt() > 20. ) && 
+	    ele1->Charge() != ele2->Charge()  ) { // KH , charge here for resync
+	  
+	  if( verbose ) cout << "GOODZ :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;	  
+ 
+	  for (UInt_t i = 0; i < selected_photons.size(); ++i) {
+	    const Photon *tmppho = selected_photons[i];	
+	    float best_mllg = (ele1->Mom() + ele2->Mom() + tmppho->Mom()).M();
+	    if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/best_mllg) > 15./110. ) 
+	      { 
+		if( verbose ) cout << "PASSPHOTON :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
 		
-            if (photonpass){
-              const Photon *pho;
-              pho = fPhotons->At(photonindex);
-              const MCParticle *phgen = NULL;
-              if (!fIsData){
-                phgen = PhotonTools::MatchMC(pho,fMCParticles,!fApplyElectronVeto);
-                // 	cout << "It went into Photon Tools phgen loop." << endl;
-              }
-     			
-              if (phgen != NULL){
-                fLeptonPairPhotonEvent->photonmatchmc = 1;
-                //	cout << "photonmatchmc written to be kTRUE" << endl;	
-              }
-              else fLeptonPairPhotonEvent->photonmatchmc = 0;	
+		if( mithep::MathUtils::DeltaR(ele1->Phi(),ele1->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 && 
+		    mithep::MathUtils::DeltaR(ele2->Phi(),ele2->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 ) {
+		  if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		  if( best_mllg > 115 ) { 
+		    if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		    if( best_mllg < 180 ) { 
+		      if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		      store_event = true;		  
+		      pho = tmppho;
+		      break;
+		    } // m(llg)<180
+		  } // m(llg)>115
+		} // dR(l,g)
+	      } // pho kinematics
+	  } // loop over phos
+	  
+	} // goodZ
+      } // good dielectron pair
+    } // >1 electrons
 
-              //Compute Photon MVA Value and photon quantities
-              //	Float_t rho = -99.;
-              //	if (fPileUpDen->GetEntries() > 0) rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
-//      			fLeptonPairPhotonEvent->photonidmva = fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
-              fLeptonPairPhotonEvent->photonenergy = pho->E();
-              fLeptonPairPhotonEvent->photonpx = pho->Px();
-              fLeptonPairPhotonEvent->photonpy = pho->Py();
-              fLeptonPairPhotonEvent->photonpz = pho->Pz();
-              fLeptonPairPhotonEvent->photonpt = pho->Pt();
-              fLeptonPairPhotonEvent->photoneta = pho->Eta();
-              fLeptonPairPhotonEvent->photonmass = pho->Mass();
-              fLeptonPairPhotonEvent->photonphi = pho->Phi();
-              fLeptonPairPhotonEvent->photonr9 = pho->R9();	
-              fLeptonPairPhotonEvent->photonenergyerror = pho->EnergyErr();
-            }
-          }
+    //Compute Photon MVA Value and photon quantities
+    //	Float_t rho = -99.;
+    //	if (fPileUpDen->GetEntries() > 0) rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
+    //      			fLeptonPairPhotonEvent->photonidmva = fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
+    if( store_event ) { 
 
+      electronZgfilled = kTRUE;
 
-          if (photonpass) {
-            const Photon *pho;
-            pho = fPhotons->At(photonindex);
-            fLeptonPairPhotonEvent->mllg = (ele1->Mom() + ele2->Mom() + pho->Mom()).M();
-            electronZgfilled = kTRUE;
-            ZGLabVectors l;
-            ZGAngles b;
-	
-            l.vecg.SetPxPyPzE(pho->Px(),pho->Py(),pho->Pz(),pho->E());
-            l.veclp.SetPxPyPzE(ele1->Px(),ele1->Py(),ele1->Pz(),ele1->E());
-            l.veclm.SetPxPyPzE(ele2->Px(),ele2->Py(),ele2->Pz(),ele2->E());
-            l.vecz = (l.veclp+l.veclm);
-            l.veczg = (l.vecg+l.veclp+l.veclm);
-
-            b = ZGTools::getZGAngles(l,kFALSE);
-
-            fLeptonPairPhotonEvent->costheta_lm_electrons = b.costheta_lm;
-            fLeptonPairPhotonEvent->costheta_lp_electrons = b.costheta_lp;
-            fLeptonPairPhotonEvent->phi_electrons = b.phi;
-            fLeptonPairPhotonEvent->cosTheta_electrons = b.cosTheta;
-	
-          }
-          fLeptonPairPhotonEvent->electronZmass = (ele1->Mom() + ele2->Mom()).M();
-
-          fLeptonPairPhotonEvent->ele1dEtaIn = TMath::Abs(ele1->DeltaEtaSuperClusterTrackAtVtx());
-          fLeptonPairPhotonEvent->ele1dPhiIn = TMath::Abs(ele1->DeltaPhiSuperClusterTrackAtVtx());
-          fLeptonPairPhotonEvent->ele1sigmaIEtaIEta = ele1->CoviEtaiEta();
-          fLeptonPairPhotonEvent->ele1HadOverEm = ele1->HadronicOverEm();
-          fLeptonPairPhotonEvent->ele1D0 = fabs(ele1->BestTrk()->D0Corrected(*fPV->At(0)));
-          fLeptonPairPhotonEvent->ele1DZ = fabs(ele1->BestTrk()->DzCorrected(*fPV->At(0)));
-          fLeptonPairPhotonEvent->ele1OneOverEMinusOneOverP = fabs((1 - ele1->ESuperClusterOverP())/(ele1->EcalEnergy()));
-          const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamSpot->At(0));
-          fLeptonPairPhotonEvent->ele1Conversion = mithep::ElectronTools::PassConversionFilter(ele1,fConversions,bsp, 0, 1e-6, 2.0, kTRUE, kFALSE, 7);
-          fLeptonPairPhotonEvent->ele1missinghits = ele1->CorrectedNExpectedHitsInner();
-
-          fLeptonPairPhotonEvent->ele2dEtaIn = TMath::Abs(ele2->DeltaEtaSuperClusterTrackAtVtx());
-          fLeptonPairPhotonEvent->ele2dPhiIn = TMath::Abs(ele2->DeltaPhiSuperClusterTrackAtVtx());
-          fLeptonPairPhotonEvent->ele2sigmaIEtaIEta = ele2->CoviEtaiEta();
-          fLeptonPairPhotonEvent->ele2HadOverEm = ele2->HadronicOverEm();
-          fLeptonPairPhotonEvent->ele2D0 = fabs(ele2->BestTrk()->D0Corrected(*fPV->At(0)));
-          fLeptonPairPhotonEvent->ele2DZ = fabs(ele2->BestTrk()->DzCorrected(*fPV->At(0)));
-          fLeptonPairPhotonEvent->ele2OneOverEMinusOneOverP = fabs((1 - ele2->ESuperClusterOverP())/(ele2->EcalEnergy()));
-          fLeptonPairPhotonEvent->ele2Conversion = mithep::ElectronTools::PassConversionFilter(ele2,fConversions,bsp, 0, 1e-6, 2.0, kTRUE, kFALSE,7);
-          fLeptonPairPhotonEvent->ele2missinghits = ele2->CorrectedNExpectedHitsInner();
-	
-          //Compute Electron MVA Values
-          //double _fbrem = max(double(ele1->FBrem()),-1.0);
-          //double _kftrk_chisq = (ele1->HasTrackerTrk()) ? ele1->TrackerTrk()->Chi2() / ele1->TrackerTrk()->Ndof() : 0;
-          //double _kftrk_nhits = (ele1->HasTrackerTrk()) ? (Float_t)ele1->TrackerTrk()->NHits() : -1; 
-          //double _gsftrk_chisq = (Double_t)min(double(ele1->BestTrk()->Chi2() / ele1->BestTrk()->Ndof()),200.0);
-          //double seedE1x5OverE = ele1->SCluster()->Seed()->E1x5() / ele1->SCluster()->Seed()->Energy();
-          //double seedE5x5OverE = ele1->SCluster()->Seed()->E5x5() / ele1->SCluster()->Seed()->Energy();
-          //double _e1x5e5x5 = min(max(1 - double(seedE1x5OverE/seedE5x5OverE),-1.0),2.0);
-          //double _r9 = min(double(ele1->SCluster()->R9()),5.0);
-          //double _e_o_p = min(double(ele1->ESuperClusterOverP()), 20.0);
-          //double _eseed_o_pout = min(double(ele1->ESeedClusterOverPout()),20.0);
-          //double _IoEmIoP =  (Double_t)(1 - ele1->ESuperClusterOverP())/(ele1->SCluster()->Et()*TMath::CosH(ele1->SCluster()->Eta()));
-          //double _epreoraw = (Float_t)ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy();
-  
-          //fLeptonPairPhotonEvent->ele1MVA = eleIDMVA->MVAValue_IDNonTrig(ele1->Pt(),
-          //							       ele1->SCluster()->Eta(),
-          //								       _fbrem,
-          //								       _kftrk_chisq,
-          //							       _kftrk_nhits,
-          //							       _gsftrk_chisq,
-          //							       fabs(ele1->DeltaEtaSuperClusterTrackAtVtx()),
-          //							       fabs(ele1->DeltaPhiSuperClusterTrackAtVtx()),
-          //							       fabs(ele1->DeltaEtaSeedClusterTrackAtCalo()),
-          //							       ele1->CoviEtaiEta(),
-          //							       sqrt(ele1->SCluster()->Seed()->CoviPhiiPhi()),
-          //							       ele1->SCluster()->EtaWidth(), 
-          //							       ele1->SCluster()->PhiWidth(),
-          //							       _e1x5e5x5,
-          //							       _r9,
-          //							       ele1->HadronicOverEm(),
-          //							       _e_o_p,
-          //							       _IoEmIoP,
-          //							       _eseed_o_pout,
-          //							       _epreoraw,
-          //							       kFALSE );
-
-
-          //double _fbrem_2 = max(double(ele2->FBrem()),-1.0);
-          //double _kftrk_chisq_2 = (ele2->HasTrackerTrk()) ? ele2->TrackerTrk()->Chi2() / ele2->TrackerTrk()->Ndof() : 0;
-          //double _kftrk_nhits_2 = (ele2->HasTrackerTrk()) ? (Float_t)ele2->TrackerTrk()->NHits() : -1; 
-          //double _gsftrk_chisq_2 = (Double_t)min(double(ele2->BestTrk()->Chi2() / ele2->BestTrk()->Ndof()),200.0);
-          //double seedE1x5OverE_2 = ele2->SCluster()->Seed()->E1x5() / ele2->SCluster()->Seed()->Energy();
-          //double seedE5x5OverE_2 = ele2->SCluster()->Seed()->E5x5() / ele2->SCluster()->Seed()->Energy();
-          //double _e1x5e5x5_2 = min(max(1 - double(seedE1x5OverE_2/seedE5x5OverE_2),-1.0),2.0);
-          //double _r9_2 = min(double(ele2->SCluster()->R9()),5.0);
-          //double _e_o_p_2 = min(double(ele2->ESuperClusterOverP()), 20.0);
-          //double _eseed_o_pout_2 = min(double(ele2->ESeedClusterOverPout()),20.0);
-          //double _IoEmIoP_2 =  (Double_t)(1 - ele2->ESuperClusterOverP())/(ele2->SCluster()->Et()*TMath::CosH(ele2->SCluster()->Eta()));
-          //double _epreoraw_2 = (Float_t)ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy();
-  
-  
-          //fLeptonPairPhotonEvent->ele2MVA = eleIDMVA->MVAValue_IDNonTrig(ele2->Pt(),
-          //							       ele2->SCluster()->Eta(),
-          //							       _fbrem_2,
-          //							       _kftrk_chisq_2,
-          //							       _kftrk_nhits_2,
-          //							       _gsftrk_chisq_2,
-          //							       fabs(ele2->DeltaEtaSuperClusterTrackAtVtx()),
-          //							       fabs(ele2->DeltaPhiSuperClusterTrackAtVtx()),
-          //							       fabs(ele2->DeltaEtaSeedClusterTrackAtCalo()),
-          //							       ele2->CoviEtaiEta(),
-          //							       sqrt(ele2->SCluster()->Seed()->CoviPhiiPhi()),
-          //							       ele2->SCluster()->EtaWidth(), 
-          //							       ele2->SCluster()->PhiWidth(),
-          //							       _e1x5e5x5_2,
-          //							       _r9_2,
-          //							       ele2->HadronicOverEm(),
-          //							       _e_o_p_2,
-          //							       _IoEmIoP_2,
-          //							       _eseed_o_pout_2,
-          //							       _epreoraw_2,
-          //							       kFALSE );
-   			
-        }  
+      fLeptonPairPhotonEvent->photonenergy = pho->E();
+      fLeptonPairPhotonEvent->photonpx = pho->Px();
+      fLeptonPairPhotonEvent->photonpy = pho->Py();
+      fLeptonPairPhotonEvent->photonpz = pho->Pz();
+      fLeptonPairPhotonEvent->photonpt = pho->Pt();
+      fLeptonPairPhotonEvent->photoneta = pho->Eta();
+      fLeptonPairPhotonEvent->photonmass = pho->Mass();
+      fLeptonPairPhotonEvent->photonphi = pho->Phi();
+      fLeptonPairPhotonEvent->photonr9 = pho->R9();	
+      fLeptonPairPhotonEvent->photonenergyerror = pho->EnergyErr();
+      // check if pho matched
+      const MCParticle *phgen = NULL;
+      if (!fIsData){
+	phgen = PhotonTools::MatchMC(pho,fMCParticles,!fApplyElectronVeto);
+	// 	cout << "It went into Photon Tools phgen loop." << endl;
+	    }
+      if (phgen != NULL){
+	fLeptonPairPhotonEvent->photonmatchmc = 1;
+	//	cout << "photonmatchmc written to be kTRUE" << endl;	
       }
-    }
-   
-    if (fGoodMuons->GetEntries() > 1){
-      bool photonpass = false;
-      UInt_t photonindex = 0;
-      vector<bool> muonpass;
+      else fLeptonPairPhotonEvent->photonmatchmc = 0;	
+
+     
+      fillEle1Variables(ele1);
+      fillEle2Variables(ele2);
+      regressEle1(ele1,fPileUpDen,fPV);
+      regressEle2(ele2,fPileUpDen,fPV);
+      
+      fLeptonPairPhotonEvent->mllg = (ele1->Mom() + ele2->Mom() + pho->Mom()).M();
+      ZGLabVectors l;
+      ZGAngles b;
+      
+      l.vecg.SetPxPyPzE(pho->Px(),pho->Py(),pho->Pz(),pho->E());
+      l.veclp.SetPxPyPzE(ele1->Px(),ele1->Py(),ele1->Pz(),ele1->E());
+      l.veclm.SetPxPyPzE(ele2->Px(),ele2->Py(),ele2->Pz(),ele2->E());
+      l.vecz = (l.veclp+l.veclm);
+      l.veczg = (l.vecg+l.veclp+l.veclm);
+      
+      b = ZGTools::getZGAngles(l,kFALSE);
+      
+      fLeptonPairPhotonEvent->costheta_lm_electrons = b.costheta_lm;
+      fLeptonPairPhotonEvent->costheta_lp_electrons = b.costheta_lp;
+      fLeptonPairPhotonEvent->phi_electrons = b.phi;
+      fLeptonPairPhotonEvent->cosTheta_electrons = b.cosTheta;
+      
+      fLeptonPairPhotonEvent->electronZmass = (ele1->Mom() + ele2->Mom()).M();
+      
+      fLeptonPairPhotonEvent->ele1dEtaIn = TMath::Abs(ele1->DeltaEtaSuperClusterTrackAtVtx());
+      fLeptonPairPhotonEvent->ele1dPhiIn = TMath::Abs(ele1->DeltaPhiSuperClusterTrackAtVtx());
+      fLeptonPairPhotonEvent->ele1sigmaIEtaIEta = ele1->CoviEtaiEta();
+      fLeptonPairPhotonEvent->ele1HadOverEm = ele1->HadronicOverEm();
+      fLeptonPairPhotonEvent->ele1D0 = fabs(ele1->BestTrk()->D0Corrected(*fPV->At(0)));
+      fLeptonPairPhotonEvent->ele1DZ = fabs(ele1->BestTrk()->DzCorrected(*fPV->At(0)));
+      fLeptonPairPhotonEvent->ele1OneOverEMinusOneOverP = fabs((1 - ele1->ESuperClusterOverP())/(ele1->EcalEnergy()));
+      const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamSpot->At(0));
+      fLeptonPairPhotonEvent->ele1Conversion = mithep::ElectronTools::PassConversionFilter(ele1,fConversions,bsp, 0, 1e-6, 2.0, kTRUE, kFALSE, 7);
+      fLeptonPairPhotonEvent->ele1missinghits = ele1->CorrectedNExpectedHitsInner();
+      
+      fLeptonPairPhotonEvent->ele2dEtaIn = TMath::Abs(ele2->DeltaEtaSuperClusterTrackAtVtx());
+      fLeptonPairPhotonEvent->ele2dPhiIn = TMath::Abs(ele2->DeltaPhiSuperClusterTrackAtVtx());
+      fLeptonPairPhotonEvent->ele2sigmaIEtaIEta = ele2->CoviEtaiEta();
+      fLeptonPairPhotonEvent->ele2HadOverEm = ele2->HadronicOverEm();
+      fLeptonPairPhotonEvent->ele2D0 = fabs(ele2->BestTrk()->D0Corrected(*fPV->At(0)));
+      fLeptonPairPhotonEvent->ele2DZ = fabs(ele2->BestTrk()->DzCorrected(*fPV->At(0)));
+      fLeptonPairPhotonEvent->ele2OneOverEMinusOneOverP = fabs((1 - ele2->ESuperClusterOverP())/(ele2->EcalEnergy()));
+      fLeptonPairPhotonEvent->ele2Conversion = mithep::ElectronTools::PassConversionFilter(ele2,fConversions,bsp, 0, 1e-6, 2.0, kTRUE, kFALSE,7);
+      fLeptonPairPhotonEvent->ele2missinghits = ele2->CorrectedNExpectedHitsInner();
+      
+      //Compute Electron MVA Values
+      //double _fbrem = max(double(ele1->FBrem()),-1.0);
+      //double _kftrk_chisq = (ele1->HasTrackerTrk()) ? ele1->TrackerTrk()->Chi2() / ele1->TrackerTrk()->Ndof() : 0;
+      //double _kftrk_nhits = (ele1->HasTrackerTrk()) ? (Float_t)ele1->TrackerTrk()->NHits() : -1; 
+      //double _gsftrk_chisq = (Double_t)min(double(ele1->BestTrk()->Chi2() / ele1->BestTrk()->Ndof()),200.0);
+      //double seedE1x5OverE = ele1->SCluster()->Seed()->E1x5() / ele1->SCluster()->Seed()->Energy();
+      //double seedE5x5OverE = ele1->SCluster()->Seed()->E5x5() / ele1->SCluster()->Seed()->Energy();
+      //double _e1x5e5x5 = min(max(1 - double(seedE1x5OverE/seedE5x5OverE),-1.0),2.0);
+      //double _r9 = min(double(ele1->SCluster()->R9()),5.0);
+      //double _e_o_p = min(double(ele1->ESuperClusterOverP()), 20.0);
+      //double _eseed_o_pout = min(double(ele1->ESeedClusterOverPout()),20.0);
+      //double _IoEmIoP =  (Double_t)(1 - ele1->ESuperClusterOverP())/(ele1->SCluster()->Et()*TMath::CosH(ele1->SCluster()->Eta()));
+      //double _epreoraw = (Float_t)ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy();
+	    
+      //fLeptonPairPhotonEvent->ele1MVA = eleIDMVA->MVAValue_IDNonTrig(ele1->Pt(),
+      //							       ele1->SCluster()->Eta(),
+      //								       _fbrem,
+      //								       _kftrk_chisq,
+      //							       _kftrk_nhits,
+      //							       _gsftrk_chisq,
+      //							       fabs(ele1->DeltaEtaSuperClusterTrackAtVtx()),
+      //							       fabs(ele1->DeltaPhiSuperClusterTrackAtVtx()),
+      //							       fabs(ele1->DeltaEtaSeedClusterTrackAtCalo()),
+      //							       ele1->CoviEtaiEta(),
+      //							       sqrt(ele1->SCluster()->Seed()->CoviPhiiPhi()),
+      //							       ele1->SCluster()->EtaWidth(), 
+      //							       ele1->SCluster()->PhiWidth(),
+      //							       _e1x5e5x5,
+      //							       _r9,
+      //							       ele1->HadronicOverEm(),
+      //							       _e_o_p,
+      //							       _IoEmIoP,
+      //							       _eseed_o_pout,
+      //							       _epreoraw,
+      //							       kFALSE );
+	    
+	    
+      //double _fbrem_2 = max(double(ele2->FBrem()),-1.0);
+      //double _kftrk_chisq_2 = (ele2->HasTrackerTrk()) ? ele2->TrackerTrk()->Chi2() / ele2->TrackerTrk()->Ndof() : 0;
+      //double _kftrk_nhits_2 = (ele2->HasTrackerTrk()) ? (Float_t)ele2->TrackerTrk()->NHits() : -1; 
+      //double _gsftrk_chisq_2 = (Double_t)min(double(ele2->BestTrk()->Chi2() / ele2->BestTrk()->Ndof()),200.0);
+      //double seedE1x5OverE_2 = ele2->SCluster()->Seed()->E1x5() / ele2->SCluster()->Seed()->Energy();
+      //double seedE5x5OverE_2 = ele2->SCluster()->Seed()->E5x5() / ele2->SCluster()->Seed()->Energy();
+      //double _e1x5e5x5_2 = min(max(1 - double(seedE1x5OverE_2/seedE5x5OverE_2),-1.0),2.0);
+      //double _r9_2 = min(double(ele2->SCluster()->R9()),5.0);
+      //double _e_o_p_2 = min(double(ele2->ESuperClusterOverP()), 20.0);
+      //double _eseed_o_pout_2 = min(double(ele2->ESeedClusterOverPout()),20.0);
+      //double _IoEmIoP_2 =  (Double_t)(1 - ele2->ESuperClusterOverP())/(ele2->SCluster()->Et()*TMath::CosH(ele2->SCluster()->Eta()));
+      //double _epreoraw_2 = (Float_t)ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy();
+	    
+	    
+      //fLeptonPairPhotonEvent->ele2MVA = eleIDMVA->MVAValue_IDNonTrig(ele2->Pt(),
+      //							       ele2->SCluster()->Eta(),
+      //							       _fbrem_2,
+      //							       _kftrk_chisq_2,
+      //							       _kftrk_nhits_2,
+      //							       _gsftrk_chisq_2,
+      //							       fabs(ele2->DeltaEtaSuperClusterTrackAtVtx()),
+      //							       fabs(ele2->DeltaPhiSuperClusterTrackAtVtx()),
+      //							       fabs(ele2->DeltaEtaSeedClusterTrackAtCalo()),
+      //							       ele2->CoviEtaiEta(),
+      //							       sqrt(ele2->SCluster()->Seed()->CoviPhiiPhi()),
+      //							       ele2->SCluster()->EtaWidth(), 
+      //							       ele2->SCluster()->PhiWidth(),
+      //							       _e1x5e5x5_2,
+      //							       _r9_2,
+      //							       ele2->HadronicOverEm(),
+      //							       _e_o_p_2,
+      //							       _IoEmIoP_2,
+      //							       _eseed_o_pout_2,
+      //							       _epreoraw_2,
+      //							       kFALSE );
+	    
+    } // store event
+
+
+    // --------------------------------------------------------------------
+    //
+    // Dimuons
+    //
+    // --------------------------------------------------------------------
+    const Muon *muona=0, *muonb=0; // these will be the selected Z muons, assigned below
+    if (fGoodMuons->GetEntries() > 1) {
+      vector<bool> muonpass, muonpassID;
       for (UInt_t j = 0; j < fGoodMuons->GetEntries();++j){
-        const Muon *test;
-        test = fGoodMuons->At(j);
-        if (test->Pt() > 10 && fabs(test->Eta()) < 2.4 && test->IsGlobalMuon() == true){
-          if (ZGTools::muonIDPOGTightSelection(YEAR,test, fPV->At(0),fPFCands)){
-            if ((YEAR == 2011 && ZGTools::muonPFIso04(test,fPV->At(0),fPFCands,fPileUpDen, mithep::MuonTools::kMuEAData2011, pfNoPileUpflag,YEAR)) || (YEAR == 2012 && ZGTools::muonPFIso04(test,fPV->At(0),fPFCands,fPileUpDen, mithep::MuonTools::kMuEAData2012, pfNoPileUpflag,YEAR))){
-              muonpass.push_back(1);
-            }
-            else muonpass.push_back(0);
-          }
-          else muonpass.push_back(0);
-        }
-        else muonpass.push_back(0);
+        const Muon *tmpmu  = fGoodMuons->At(j);
+	if( verbose ) cout << "mu :: pt: " << tmpmu->Pt() << "\teta: " << tmpmu->Eta();
+        if (tmpmu->Pt() > 10 && fabs(tmpmu->Eta()) < 2.4 && tmpmu->IsGlobalMuon() == true){
+	  if( verbose ) cout << "\tpresel";
+	  if (ZGTools::muonIDPOGTightSelection(YEAR,tmpmu,bestPV,fPFCands)){
+	    if( verbose )cout << "\tID";
+            if ((YEAR == 2011 && ZGTools::muonPFIso04(tmpmu,fPV->At(0),fPFCands,fPileUpDen, mithep::MuonTools::kMuEAData2011, pfNoPileUpflag,YEAR)) || 
+		(YEAR == 2012 && ZGTools::muonPFIso04(tmpmu,fPV->At(0),fPFCands,fPileUpDen, mithep::MuonTools::kMuEAData2012, pfNoPileUpflag,YEAR))){
+	      muonpass.push_back(1);
+	      if( verbose ) cout << "\tIso";
+	    } else muonpass.push_back(0);
+	    muonpassID.push_back(1);
+	  }
+	  else { 
+	    muonpass.push_back(0);
+	    muonpassID.push_back(0);
+	  }
+	}
+	else { 
+	  muonpass.push_back(0);
+	  muonpassID.push_back(0);
+	}
+	if( verbose ) cout << endl;
+      } // loop over muons
+      
 
-      }
-      const Muon *muona;
-      const Muon *muonb;
-      muona = 0;
-      muonb = 0;
       Float_t zdifference = 999;
       UInt_t muon1 = 0;
       UInt_t muon2 = 1;
 
+      int nIDPairMU=0, nIDIsoPairMU=0;
       for (UInt_t j = 0; j < fGoodMuons->GetEntries(); ++j){
         for (UInt_t k = 0; k < j; ++k){
           if (j == k) continue;
           muona = fGoodMuons->At(j);
           muonb = fGoodMuons->At(k);
-          if (muona->Charge() != muonb->Charge() && muonpass[j] && muonpass[k]){
-            if (fabs(91.19 - (muona->Mom() + muonb->Mom()).M()) < zdifference){
-              zdifference = fabs(91.19 - (muona->Mom() + muonb->Mom()).M());
-              muon1 = k;
-              muon2 = j;
-            }
-          }
-        }
+	  if (muonpassID[j] && muonpassID[k]){ // KH, no charge here in resync muona->Charge() != muonb->Charge() && 
+	    nIDPairMU++;
+	  }
+	  if (muonpass[j] && muonpass[k]){ // KH, no charge here in resync muona->Charge() != muonb->Charge() && 
+	    nIDIsoPairMU++;
+	    if (fabs(91.19 - (muona->Mom() + muonb->Mom()).M()) < zdifference){
+	      zdifference = fabs(91.19 - (muona->Mom() + muonb->Mom()).M());
+	      muon1 = k;
+	      muon2 = j;
+	    }
+	  }
+	}
       }
+      
+      if( nIDPairMU >= 1 ) { if( verbose ) cout << "PASSID :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
+      if( nIDIsoPairMU >= 1 ) { if( verbose ) cout << "PASSIDISO :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
 
-      muona = fGoodMuons->At(muon1);
-      muonb = fGoodMuons->At(muon2);
-      if (muona->Charge() != muonb->Charge() && muonpass[muon1] && muonpass[muon2]){
+
+      // 
+      // now make the mm and mmg systems ...
+      //       
+      if( nIDPairMU >= 1 && nIDIsoPairMU >= 1 ) {
+	muona = fGoodMuons->At(muon1);
+	muonb = fGoodMuons->At(muon2);
+	if( verbose ) cout << "best m(mm): " << (muona->Mom() + muonb->Mom()).M() << endl;
+	float best_mll = (muona->Mom() + muonb->Mom()).M();
 	
+	if( best_mll > 50. && (muona->Mom().Pt() > 20 || muonb->Mom().Pt() > 20. ) && 
+	    muona->Charge() != muonb->Charge()  ) { // KH , charge here for resync
+	  
+	  if( verbose ) cout << "GOODZ :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+	  
+	  for (UInt_t i = 0; i < selected_photons.size(); ++i) {
+	    const Photon *tmppho = selected_photons[i];	
+	    float best_mllg = (muona->Mom() + muonb->Mom() + tmppho->Mom()).M();
+	    if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/best_mllg) > 15./110. ) {  // KH , add scaled pT cut
+	      if( verbose ) cout << "PASSPHOTON :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() 
+				 << "\t" << tmppho->Mom().Pt() << "\t" << tmppho->Mom().Eta() << endl;
+	      if( mithep::MathUtils::DeltaR(muona->Phi(),muona->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 && 
+		  mithep::MathUtils::DeltaR(muonb->Phi(),muonb->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 ) {
+		if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		if( best_mllg > 115 ) { 
+		  if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		  if( best_mllg < 180 ) { 
+		    if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		    store_event = true;		  
+		    pho = tmppho;
+		    break;
+		  } // m(llg)<180
+		} // m(llg)>115
+	      } // dR(l,g)
+	    } // pho kinematics
+	  } // loop over phos
+	  
+	} // goodZ
+      } // good dimuon pair
+    } // >1 muons
 
 
-        //**************************************************************************************
-        //Find the Photon
-        //Si : Currently we're selecting the first photon that passes all cuts - not sure if this is 
-        //     intended...
-        //**************************************************************************************
-        if (fPhotons->GetEntries() >= 1 ) {
-          for (UInt_t i = 0; i < fPhotons->GetEntries(); ++i) {
-            const Photon *pho;
-            pho = fPhotons->At(i);	
-            if (pho->Pt() > 10 && (fabs(pho->SCluster()->Eta()) < 1.4442 || (fabs(pho->SCluster()->Eta()) > 1.566 && fabs(pho->SCluster()->Eta()) < 2.5))
-                && ZGTools::photonCutBasedLoose2012ID(pho, fPV->At(0), fPFCands, fPileUpDen, fGoodElectrons, fConversions,fPV)
-                && ZGTools::photonCutBasedLoose2012Isolation(pho, fPV, fPFCands, fPileUpDen,pfNoPileUpflag)
-                && mithep::MathUtils::DeltaR(muona->Phi(),muona->Eta(), pho->Phi(), pho->Eta() ) > 0.4
-                && mithep::MathUtils::DeltaR(muonb->Phi(),muonb->Eta(), pho->Phi(), pho->Eta() ) > 0.4
-              ) {
-              photonpass = true;
-              photonindex = i;
-              break;
-            }
-          }
-		
-          if (photonpass){
-            const Photon *pho;
-            pho = fPhotons->At(photonindex);
-            const MCParticle *phgen = NULL;
-            if (!fIsData){
-              phgen = PhotonTools::MatchMC(pho,fMCParticles,!fApplyElectronVeto);
-              // 	cout << "It went into Photon Tools phgen loop." << endl;
-            }
-     			
-            if (phgen != NULL){
-              fLeptonPairPhotonEvent->photonmatchmc = 1;
-              //	cout << "photonmatchmc written to be kTRUE" << endl;	
-            }
-            else fLeptonPairPhotonEvent->photonmatchmc = 0;	
 
-            //Compute Photon MVA Value and photon quantities
-            //	Float_t rho = -99.;
-            //	if (fPileUpDen->GetEntries() > 0) rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
-//      			fLeptonPairPhotonEvent->photonidmva = fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
-            fLeptonPairPhotonEvent->photonenergy = pho->E();
-            fLeptonPairPhotonEvent->photonpx = pho->Px();
-            fLeptonPairPhotonEvent->photonpy = pho->Py();
-            fLeptonPairPhotonEvent->photonpz = pho->Pz();
-            fLeptonPairPhotonEvent->photonpt = pho->Pt();
-            fLeptonPairPhotonEvent->photoneta = pho->Eta();
-            fLeptonPairPhotonEvent->photonmass = pho->Mass();
-            fLeptonPairPhotonEvent->photonphi = pho->Phi();
-            fLeptonPairPhotonEvent->photonr9 = pho->R9();	
-            fLeptonPairPhotonEvent->photonenergyerror = pho->EnergyErr();
-          }
-        }
-
-
-        if (photonpass){
-          const Photon *pho;
-          pho = fPhotons->At(photonindex);
-          fLeptonPairPhotonEvent->mllg = (pho->Mom()+muona->Mom()+muonb->Mom()).M();
-          if (electronZgfilled == kTRUE) fLeptonPairPhotonEvent->muonZgVeto = kTRUE;
-          ZGLabVectors l;
-          ZGAngles b;
-
-          l.vecg.SetPxPyPzE(pho->Px(),pho->Py(),pho->Pz(),pho->E());
-          l.veclp.SetPxPyPzE(muona->Px(),muona->Py(),muona->Pz(),muona->E());
-          l.veclm.SetPxPyPzE(muonb->Px(),muonb->Py(),muonb->Pz(),muonb->E());
-          l.vecz = (l.veclp+l.veclm);
-          l.veczg = (l.vecg+l.veclp+l.veclm);
-
-          b = ZGTools::getZGAngles(l,kFALSE);
-
-          fLeptonPairPhotonEvent->costheta_lm_muons = b.costheta_lm;
-          fLeptonPairPhotonEvent->costheta_lp_muons = b.costheta_lp;
-          fLeptonPairPhotonEvent->phi_muons = b.phi;
-          fLeptonPairPhotonEvent->cosTheta_muons = b.cosTheta;
-        }
-	
-
-	fLeptonPairPhotonEvent->muonZmass = (muona->Mom() + muonb->Mom()).M();
-	fLeptonPairPhotonEvent->m1E = muona->E();
-        fLeptonPairPhotonEvent->m1Pt = muona->Pt();
-        fLeptonPairPhotonEvent->m1Mass = muona->Mass();
-        fLeptonPairPhotonEvent->m1Px = muona->Px();
-        fLeptonPairPhotonEvent->m1Py = muona->Py();
-        fLeptonPairPhotonEvent->m1Pz = muona->Pz();
-        fLeptonPairPhotonEvent->m1Eta = muona->Eta();
-        fLeptonPairPhotonEvent->m1Phi = muona->Phi();
-        fLeptonPairPhotonEvent->m1Charge = muona->Charge();
-        if (muona->TrackerTrk()) fLeptonPairPhotonEvent->m1PtErr = muona->TrackerTrk()->PtErr();
-        else fLeptonPairPhotonEvent->m1PtErr = muona->BestTrk()->PtErr();
-        fLeptonPairPhotonEvent->m2E = muonb->E();
-        fLeptonPairPhotonEvent->m2Pt = muonb->Pt();
-        fLeptonPairPhotonEvent->m2Mass = muonb->Mass();
-        fLeptonPairPhotonEvent->m2Px = muonb->Px();
-        fLeptonPairPhotonEvent->m2Py = muonb->Py();
-        fLeptonPairPhotonEvent->m2Pz = muonb->Pz();
-        fLeptonPairPhotonEvent->m2Eta = muonb->Eta();
-        fLeptonPairPhotonEvent->m2Phi = muonb->Phi();
-        fLeptonPairPhotonEvent->m2Charge = muonb->Charge();
-        if (muonb->TrackerTrk()) fLeptonPairPhotonEvent->m2PtErr = muonb->TrackerTrk()->PtErr();
-        else fLeptonPairPhotonEvent->m2PtErr = muonb->BestTrk()->PtErr();
+    if( store_event ) { 
+      fLeptonPairPhotonEvent->photonenergy = pho->E();
+      fLeptonPairPhotonEvent->photonpx = pho->Px();
+      fLeptonPairPhotonEvent->photonpy = pho->Py();
+      fLeptonPairPhotonEvent->photonpz = pho->Pz();
+      fLeptonPairPhotonEvent->photonpt = pho->Pt();
+      fLeptonPairPhotonEvent->photoneta = pho->Eta();
+      fLeptonPairPhotonEvent->photonmass = pho->Mass();
+      fLeptonPairPhotonEvent->photonphi = pho->Phi();
+      fLeptonPairPhotonEvent->photonr9 = pho->R9();	
+      fLeptonPairPhotonEvent->photonenergyerror = pho->EnergyErr();
+      // check if pho matched
+      const MCParticle *phgen = NULL;
+      if (!fIsData){
+	phgen = PhotonTools::MatchMC(pho,fMCParticles,!fApplyElectronVeto);
+	// 	cout << "It went into Photon Tools phgen loop." << endl;
+	    }
+      if (phgen != NULL){
+	fLeptonPairPhotonEvent->photonmatchmc = 1;
+	//	cout << "photonmatchmc written to be kTRUE" << endl;	
       }
-    }   
+      else fLeptonPairPhotonEvent->photonmatchmc = 0;	
+      
 
-    ZgllTuple->Fill();
+      fLeptonPairPhotonEvent->mllg = (pho->Mom()+muona->Mom()+muonb->Mom()).M();
+      if (electronZgfilled == kTRUE) fLeptonPairPhotonEvent->muonZgVeto = kTRUE;
+
+      ZGLabVectors l;
+      ZGAngles b;
+      l.vecg.SetPxPyPzE(pho->Px(),pho->Py(),pho->Pz(),pho->E());
+      l.veclp.SetPxPyPzE(muona->Px(),muona->Py(),muona->Pz(),muona->E());
+      l.veclm.SetPxPyPzE(muonb->Px(),muonb->Py(),muonb->Pz(),muonb->E());
+      l.vecz = (l.veclp+l.veclm);
+      l.veczg = (l.vecg+l.veclp+l.veclm);
+      
+      b = ZGTools::getZGAngles(l,kFALSE);
+      
+      fLeptonPairPhotonEvent->costheta_lm_muons = b.costheta_lm;
+      fLeptonPairPhotonEvent->costheta_lp_muons = b.costheta_lp;
+      fLeptonPairPhotonEvent->phi_muons = b.phi;
+      fLeptonPairPhotonEvent->cosTheta_muons = b.cosTheta;
+
+      fLeptonPairPhotonEvent->muonZmass = (muona->Mom() + muonb->Mom()).M();
+      fLeptonPairPhotonEvent->m1E = muona->E();
+      fLeptonPairPhotonEvent->m1Pt = muona->Pt();
+      fLeptonPairPhotonEvent->m1Mass = muona->Mass();
+      fLeptonPairPhotonEvent->m1Px = muona->Px();
+      fLeptonPairPhotonEvent->m1Py = muona->Py();
+      fLeptonPairPhotonEvent->m1Pz = muona->Pz();
+      fLeptonPairPhotonEvent->m1Eta = muona->Eta();
+      fLeptonPairPhotonEvent->m1Phi = muona->Phi();
+      fLeptonPairPhotonEvent->m1Charge = muona->Charge();
+      if (muona->TrackerTrk()) fLeptonPairPhotonEvent->m1PtErr = muona->TrackerTrk()->PtErr();
+      else fLeptonPairPhotonEvent->m1PtErr = muona->BestTrk()->PtErr();
+      fLeptonPairPhotonEvent->m2E = muonb->E();
+      fLeptonPairPhotonEvent->m2Pt = muonb->Pt();
+      fLeptonPairPhotonEvent->m2Mass = muonb->Mass();
+      fLeptonPairPhotonEvent->m2Px = muonb->Px();
+      fLeptonPairPhotonEvent->m2Py = muonb->Py();
+      fLeptonPairPhotonEvent->m2Pz = muonb->Pz();
+      fLeptonPairPhotonEvent->m2Eta = muonb->Eta();
+      fLeptonPairPhotonEvent->m2Phi = muonb->Phi();
+      fLeptonPairPhotonEvent->m2Charge = muonb->Charge();
+      if (muonb->TrackerTrk()) fLeptonPairPhotonEvent->m2PtErr = muonb->TrackerTrk()->PtErr();
+      else fLeptonPairPhotonEvent->m2PtErr = muonb->BestTrk()->PtErr();
+    } // store event   
+
+    if( store_event ) ZgllTuple->Fill();
   }
 }
+
+
 //--------------------------------------------------------------------------------------------------
 void LeptonPairPhotonTreeWriter::SlaveBegin()
 {
