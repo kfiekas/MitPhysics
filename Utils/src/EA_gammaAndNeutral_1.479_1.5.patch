@@ -1,0 +1,19 @@
+--- MitPhysics/Utils/src/MuonTools.cc	28 May 2012 06:43:33 -0000	1.29
++++ MitPhysics/Utils/src/MuonTools.cc	25 Oct 2012 20:55:35 -0000
+@@ -722,8 +722,14 @@
+     }
+     if (type == kMuGammaAndNeutralHadronIso04){
+       if (fabs(Eta) >= 0.0 && fabs(Eta) < 1.0 )   EffectiveArea = 0.674;
+-      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.565;
+-      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.442;
++
++      //      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.479 ) EffectiveArea = 0.565;
++      //      if (fabs(Eta) >= 1.479 && fabs(Eta) < 2.0 ) EffectiveArea = 0.442;
++      // KH fix
++      if (fabs(Eta) >= 1.0 && fabs(Eta) < 1.5 ) EffectiveArea = 0.565;
++      if (fabs(Eta) >= 1.5 && fabs(Eta) < 2.0 ) EffectiveArea = 0.442;
++
++
+       if (fabs(Eta) >= 2.0 && fabs(Eta) < 2.2 )   EffectiveArea = 0.515;
+       if (fabs(Eta) >= 2.2 && fabs(Eta) < 2.3 )   EffectiveArea = 0.821;
+       if (fabs(Eta) >= 2.3 )  		      EffectiveArea = 0.660;
