@@ -60,7 +60,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   // ----------------------------------------
   // flag for synchronization, adds vertex variables
   // should be on for synching trees
-  fDoSynching             (kTRUE),
+  fDoSynching             (kFALSE),
 
   // ----------------------------------------
   // collections....
