@@ -70,10 +70,13 @@ namespace mithep {
     // ----------------------------------------------------------
     // Methods (added by Fabian) on the EPS BaseLine Analysis
     const Vertex* findVtxBasicRanking(const Photon*           ph1, 
-					     const Photon*           ph2, 
-					     const BaseVertex*       bsp,
-					     const VertexCol*        vtcs,
-					     const DecayParticleCol* conv, Bool_t useMva, Double_t &vtxProb);
+				      const Photon*           ph2, 
+				      const BaseVertex*       bsp,
+				      const VertexCol*        vtcs,
+				      const DecayParticleCol* conv, Bool_t useMva, Double_t &vtxProb,
+				      std::vector<int>   * debugInds = NULL ,
+				      std::vector<double>* debugVals = NULL ,
+				      std::vector<int>   * debugConv = NULL );
     // ----------------------------------------------------------
 
     

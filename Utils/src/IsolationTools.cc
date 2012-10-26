@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.34 2012/07/12 17:05:49 fabstoec Exp $
+// $Id: IsolationTools.cc,v 1.35 2012/10/23 23:32:59 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -519,11 +519,11 @@ Double_t IsolationTools::PFElectronIsolation2012(const Electron *ele, const Vert
 //--------------------------------------------------------------------------------------------------
 
 Double_t IsolationTools::PFElectronIsolation2012LepTag(const Electron *ele, const Vertex *vertex, 
-                                                 const PFCandidateCol *PFCands, 
-                                                 const PileupEnergyDensityCol *PileupEnergyDensity,
-                                                 ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
-                                                 const ElectronCol *goodElectrons,
-                                                 const MuonCol *goodMuons, Double_t dRMax, Bool_t isDebug){
+						       const PFCandidateCol *PFCands, 
+						       const PileupEnergyDensityCol *PileupEnergyDensity,
+						       ElectronTools::EElectronEffectiveAreaTarget EffectiveAreaTarget,
+						       const ElectronCol *goodElectrons,
+						       const MuonCol *goodMuons, Double_t dRMax, Bool_t isDebug){
 
 
 
@@ -581,7 +581,7 @@ Double_t IsolationTools::PFElectronIsolation2012LepTag(const Electron *ele, cons
 	   //************************************************************
 	   if (passVeto) {
 	     if (dr < dRMax) {
-	       printf("PFCand Pt = %f    eta= %f       phi= %f     , dr= %f    charge=%f   \n",pf->Pt(),pf->Eta(),pf->Phi(),dr, pf->Charge());
+	       if ( false ) printf("PFCand Pt = %f    eta= %f       phi= %f     , dr= %f    charge=%f   \n",pf->Pt(),pf->Eta(),pf->Phi(),dr, pf->Charge());
 	       tmpChargedIso_DR += pf->Pt();
 	     } //pass dr
 	   } //pass veto	  

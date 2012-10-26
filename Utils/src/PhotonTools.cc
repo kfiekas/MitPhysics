@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.37 2012/10/08 17:37:40 mingyang Exp $
+// $Id: PhotonTools.cc,v 1.38 2012/10/10 23:17:05 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -394,12 +394,15 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
 						       Double_t dPhiMin,
 						       Double_t dEtaMin,
 						       Double_t dRMin,
-						       bool print) {
+						       bool     print,
+						       int*                 numLegs,
+						       int*                 convIdx) {
   
   // if there are no conversons, return
   if ( !p || !conversions)  return NULL;
 
   const DecayParticle *match = NULL;
+  int                  matchIdx = -1;
 
   double minDeta = 999.;
   double minDphi = 999.;
@@ -407,16 +410,16 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
 
   double phPhi = p->SCluster()->Phi();
   double phEta = p->SCluster()->Eta();
-
+  
   if(print)
     std::cout<<"  --- conv match photon eta = "<<phEta<<"  phi = "<<phPhi<<std::endl;  
-
+  
 
   for (UInt_t i=0; i<conversions->GetEntries(); ++i) {
     const DecayParticle *c = conversions->At(i);
-
+    
     if(print)
-      std::cout<< "   c "<<i+1<<"  pt = "<<c->Pt()<<std::endl;
+      std::cout<< "   c "<<i+1<<"  pt = "<<c->Pt()<<"  with Nlegs = "<<c->NDaughters()<<"   "<<c->Position().X()<<"   "<<c->Position().Y()<<"   "<<c->Position().Z()<<"   "<<std::endl;
     
     if (c->Pt()   < 10. )                       continue; // is this refittedPairMomentum?
     if (c->NDaughters()==2 && c->Prob() < 1e-6) continue;
@@ -426,21 +429,30 @@ const DecayParticle *PhotonTools::MatchedCiCConversion(const Photon *p, const De
     
     if(dR < minDR) {
       minDR = dR;
-      //minDphi = dphi;
-      //minDeta = TMath::Abs(deta);
+//       minDphi = dphi;
+//       minDeta = TMath::Abs(deta);
       match = c;
+      matchIdx = (int) i;
 
-      if(print)
-	std::cout<<" conv "<<i+1<<" matches with dPhi = "<<minDphi<<"   dEta = "<<minDeta<<std::endl;
-
+      if(print) {
+	//std::cout<<" conv "<<i+1<<" matches with dPhi = "<<minDphi<<"   dEta = "<<minDeta<<std::endl;
+	std::cout<<" conv "<<i+1<<" matches with dR   = "<<minDR<<std::endl;
+      }
     } 
   }
   
   //if(minDphi < dPhiMin && minDeta < dEtaMin)
-  if(minDR < dRMin)
+  if( minDR < dRMin && match ) {
+    if ( numLegs ) (*numLegs) = match->NDaughters();
+    if ( convIdx ) (*convIdx) = matchIdx;
+    if(print)
+      std::cout<<"    best conversion is chosen"<<std::endl;
     return match;
-  else 
+  } else {
+    if(print)
+      std::cout<<"    NO conversion is chosen"<<std::endl;
     return NULL;
+  }
 }
 
 bool PhotonTools::PassCiCSelection(const Photon* ph, const Vertex* vtx, 
@@ -593,8 +605,7 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
   
   // cut on Et instead of Pt???    
   Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
-    
-  
+      
   
   // compute all relevant observables first
   double ecalIso3 = IsolationTools::PFGammaIsolation(ph, 0.3, 0.0, pfCol);

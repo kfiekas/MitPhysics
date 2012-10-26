@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.18 2012/08/02 13:57:32 fabstoec Exp $
+// $Id: MVATools.cc,v 1.19 2012/10/13 20:42:20 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -561,6 +561,7 @@ Double_t MVATools::GetMVAbdtValue(const Photon* p, const Vertex* vtx, const Trac
 	       !theVarName.CompareTo("ph.idmva_s4ratio") || !theVarName.CompareTo("s4r") 
 	       ) {
       (*theVarValue) = p->S4Ratio();
+      //(*theVarValue) = p->SCluster()->Seed()->E2x2()/p->E55();
       varCounter++;
     } else if (
 	       !theVarName.CompareTo("ph.idmva_GammaIso") || !theVarName.CompareTo("pfgiso") 

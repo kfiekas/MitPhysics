@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.24 2012/10/09 15:40:14 mingyang Exp $
+// $Id: PhotonTreeWriter.h,v 1.25 2012/10/11 13:08:23 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -32,6 +32,10 @@
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVAMet.h"
 #include "MitPhysics/Utils/interface/MVAVBF.h"
+
+#include "MitPhysics/Utils/interface/VertexTools.h"
+#include "MitPhysics/Utils/interface/ElectronIDMVA.h"
+
 
 class TNtuple;
 class TRandom3;
@@ -79,7 +83,7 @@ namespace mithep
   class PhotonTreeWriterPhoton
   {
     public:  
-    void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol, const PFCandidateCol* candCol, Double_t _tRho, Bool_t fillclusterarrays, const ElectronCol* els, const DecayParticleCol *convs, const BaseVertex *bs, Bool_t applyElectronVeto=kTRUE);
+    void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol, const PFCandidateCol* candCol, Double_t _tRho, Bool_t fillclusterarrays, const ElectronCol* els, const DecayParticleCol *convs, const BaseVertex *bs, Bool_t applyElectronVeto=kTRUE, const Vertex* realVtx = NULL);
       Float_t Ecor()    const { return ecor;    };
       Float_t Ecorerr() const { return ecorerr; };
       Float_t Ecorele()    const { return ecorele;    };
@@ -360,6 +364,7 @@ namespace mithep
     Float_t idmva_s4ratio;
     Float_t idmva_GammaIso;
     Float_t idmva_ChargedIso_selvtx;
+    Float_t idmva_ChargedIso_0p2_selvtx;
     Float_t idmva_ChargedIso_worstvtx;
     Float_t idmva_PsEffWidthSigmaRR;
     
@@ -457,6 +462,40 @@ namespace mithep
       Float_t btagJet2Eta;
       // ----------- LEPTON TAG STUFF -------------
       Int_t leptonTag;
+      // ----------- VEERTEX SYNCHING STUFF -------
+
+      Int_t vtxInd1;
+      Int_t vtxInd2;
+      Int_t vtxInd3;
+	
+      Float_t vtxBestPtbal  ;
+      Float_t vtxBestPtasym ;
+      Float_t vtxBestSumpt2 ;
+      Float_t vtxBestP2Conv ;
+      
+      Float_t vtxMva1Z      ;
+      Float_t vtxMva2Z      ;
+      Float_t vtxMva3Z      ;
+
+      Float_t vtxMva1 ;
+      Float_t vtxMva2 ;
+      Float_t vtxMva3 ;
+      
+      Int_t vtxNleg1 ;
+      Int_t vtxNleg2 ;
+      Int_t vtxConvIdx1 ;
+      Int_t vtxConvIdx2 ;
+      Int_t vtxNconv ;
+
+      Float_t vtxConv1Z    ;
+      Float_t vtxConv1DZ   ;
+      Float_t vtxConv1Prob ;
+
+      Float_t vtxConv2Z    ;
+      Float_t vtxConv2DZ   ;
+      Float_t vtxConv2Prob ;
+
+
       // ---------- MUON STUFF --------------------
       Float_t muonPt;
       Float_t muonEta;
@@ -491,6 +530,7 @@ namespace mithep
       Float_t eleMass1;
       Float_t eleMass2;
       Int_t eleNinnerHits;     
+      Float_t eleIdMva;
       // -----------------------------------------
       Float_t rho;
       Float_t rho25;
@@ -694,6 +734,24 @@ namespace mithep
     void                SetDo2012LepTag(Bool_t b) {                         fDo2012LepTag = b; }
     
     void                SetBeamspotWidth(Double_t x)            { fBeamspotWidth = x; }
+
+      void                SetElectronMVAWeightsSubdet0Pt10To20(TString s)  
+                          { fElectronMVAWeights_Subdet0Pt10To20  = s; }
+      void                SetElectronMVAWeightsSubdet1Pt10To20(TString s)  
+                          { fElectronMVAWeights_Subdet1Pt10To20  = s; }
+      void                SetElectronMVAWeightsSubdet2Pt10To20(TString s)  
+                          { fElectronMVAWeights_Subdet2Pt10To20  = s; }
+      void                SetElectronMVAWeightsSubdet0Pt20ToInf(TString s) 
+                          { fElectronMVAWeights_Subdet0Pt20ToInf = s; }
+      void                SetElectronMVAWeightsSubdet1Pt20ToInf(TString s) 
+                          { fElectronMVAWeights_Subdet1Pt20ToInf = s; }
+      void                SetElectronMVAWeightsSubdet2Pt20ToInf(TString s) 
+                          { fElectronMVAWeights_Subdet2Pt20ToInf = s; }
+
+      void                SetRhoType(RhoUtilities::RhoType type) { fTheRhoType = type; };
+
+
+
     
   protected:
     void                Process();
@@ -709,6 +767,7 @@ namespace mithep
     TString             fElectronName;
     TString             fGoodElectronName;
     TString             fConversionName;
+    TString             fPFConversionName;
     TString             fTrackBranchName;
     TString             fPileUpDenName;    
     TString             fPVName;
@@ -743,11 +802,14 @@ namespace mithep
     Bool_t              fGoodElectronsFromBranch;
     Bool_t              fPFJetsFromBranch;
 
+    Bool_t              fDoSynching;
+
     const PhotonCol               *fPhotons;
     const PhotonCol               *fPFPhotons;
     const ElectronCol             *fElectrons;
     const ElectronCol             *fGoodElectrons;    
     const DecayParticleCol        *fConversions;
+    const DecayParticleCol        *fPFConversions;
     const TrackCol                *fTracks;
     const PileupEnergyDensityCol  *fPileUpDen;
     const VertexCol               *fPV;
@@ -824,6 +886,18 @@ namespace mithep
     JetIDMVA                       fJetId;
     MVAVBF                         fMVAVBF;   
     
+    VertexTools           fVtxTools;
+
+    ElectronIDMVA                 *fElectronIDMVA;
+    TString                   fElectronMVAWeights_Subdet0Pt10To20;
+    TString                   fElectronMVAWeights_Subdet1Pt10To20;
+    TString                   fElectronMVAWeights_Subdet2Pt10To20;
+    TString                   fElectronMVAWeights_Subdet0Pt20ToInf;
+    TString                   fElectronMVAWeights_Subdet1Pt20ToInf;
+    TString                   fElectronMVAWeights_Subdet2Pt20ToInf;
+
+    RhoUtilities::RhoType    fTheRhoType;
+
     ClassDef(PhotonTreeWriter, 1) // Photon identification module
       };
 }

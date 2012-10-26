@@ -332,6 +332,8 @@ void PhotonPairSelector::Process()
       const DecayParticle *c = fPFConversions->At(iconv);
       if (c->NDaughters()!=1) continue;
       
+      //std::cout<<"  conv"<<iconv<<" mom = "<<c->Mom().X()<<"   "<<c->Mom().Y()<<"   "<<c->Mom().Z()<<"   "<<std::endl;
+
       DecayParticle *conv = new DecayParticle(*c);
       const Track *trk = static_cast<const StableParticle*>(conv->Daughter(0))->Trk();
       conv->SetMom(trk->Px(), trk->Py(), trk->Pz(), trk->P());
@@ -364,16 +366,16 @@ void PhotonPairSelector::Process()
   unsigned int numPairs = 0;
   if (preselPh->GetEntries() > 0)
     numPairs = (preselPh->GetEntries()-1)*preselPh->GetEntries()/2;
-
+  
   // ... and create all possible pairs of pre-selected photons
   std::vector<unsigned int>                 idx1st;
   std::vector<unsigned int>                 idx2nd;
   std::vector<PhotonTools::CiCBaseLineCats> cat1st;
   std::vector<PhotonTools::CiCBaseLineCats> cat2nd;
-
+  
   // ... this will be used to store whether a given pair passes the cuts
   std::vector<bool> pairPasses;
-
+  
   if (numPairs > 0) {
     for (unsigned int i1st = 0; i1st <preselPh->GetEntries() - 1; ++i1st) {
       for (unsigned int i2nd = i1st + 1; i2nd <preselPh->GetEntries(); ++i2nd) {
@@ -393,7 +395,7 @@ void PhotonPairSelector::Process()
   std::vector<const Vertex*> theVtx; // holds the 'chosen' Vtx for each Pair
   std::vector<Photon*> fixPh1st;     // holds the 1st Photon for each Pair
   std::vector<Photon*> fixPh2nd;     // holds the 2nd photon for each Pair
-
+  
   theVtx.reserve(numPairs);
   fixPh1st.reserve(numPairs);
   fixPh2nd.reserve(numPairs);

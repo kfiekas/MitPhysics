@@ -33,6 +33,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fElectronName           (Names::gkElectronBrn),
   fGoodElectronName       (Names::gkElectronBrn),  
   fConversionName         (Names::gkMvfConversionBrn),  
+  fPFConversionName              ("PFPhotonConversions"),  
   fTrackBranchName        (Names::gkTrackBrn),
   fPileUpDenName          (Names::gkPileupEnergyDensityBrn),
   fPVName                 (Names::gkPVBeamSpotBrn),
@@ -57,11 +58,17 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fGoodElectronsFromBranch(kTRUE),
   fPFJetsFromBranch       (kTRUE),
   // ----------------------------------------
+  // flag for synchronization, adds vertex variables
+  // should be on for synching trees
+  fDoSynching             (kTRUE),
+
+  // ----------------------------------------
   // collections....
   fPhotons                (0),
   fPFPhotons              (0),
   fElectrons              (0),
   fConversions            (0),
+  fPFConversions                 (0),
   fTracks                 (0),
   fPileUpDen              (0),
   fPV                     (0),
@@ -99,6 +106,16 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fBeamspotWidth          (5.8),
+
+  fElectronIDMVA(0),
+  fElectronMVAWeights_Subdet0Pt10To20(""),
+  fElectronMVAWeights_Subdet1Pt10To20(""),
+  fElectronMVAWeights_Subdet2Pt10To20(""),
+  fElectronMVAWeights_Subdet0Pt20ToInf(""),
+  fElectronMVAWeights_Subdet1Pt20ToInf(""),
+  fElectronMVAWeights_Subdet2Pt20ToInf(""),
+  fTheRhoType(RhoUtilities::DEFAULT),
+
   fTupleName              ("hPhotonTree")
 {
   // Constructor
@@ -134,6 +151,7 @@ void PhotonTreeWriter::Process()
   if (fEnablePFPhotons) LoadEventObject(fPFPhotonName,   fPFPhotons);
   LoadEventObject(fElectronName,       fElectrons);
   LoadEventObject(fConversionName,     fConversions);
+  if ( fDoSynching ) LoadEventObject(fPFConversionName,     fPFConversions);
   LoadEventObject(fTrackBranchName,    fTracks);
   LoadEventObject(fPileUpDenName,      fPileUpDen);
   LoadEventObject(fPVName,             fPV);    
@@ -202,6 +220,27 @@ void PhotonTreeWriter::Process()
   Double_t _spfMet = fPFMet->At(0)->SumEt();
 
   fDiphotonEvent->leptonTag = -1; // disabled
+
+  // ====================================================
+  // Vtx synching stuff...
+  fDiphotonEvent->vtxInd1 = -1;
+  fDiphotonEvent->vtxInd2 = -1;
+  fDiphotonEvent->vtxInd3 = -1;
+
+  fDiphotonEvent->vtxBestPtbal  = -1.;
+  fDiphotonEvent->vtxBestPtasym = -1.;
+  fDiphotonEvent->vtxBestSumpt2 = -1.;
+  fDiphotonEvent->vtxBestP2Conv = -1.;
+
+  fDiphotonEvent->vtxMva1 = -1.;
+  fDiphotonEvent->vtxMva2 = -1.;
+  fDiphotonEvent->vtxMva3 = -1.;
+
+  fDiphotonEvent->vtxNleg1 = -1;
+  fDiphotonEvent->vtxNleg2 = -1;
+  fDiphotonEvent->vtxNconv = -1;
+  // ====================================================
+
 
   fDiphotonEvent->rho = fPileUpDen->At(0)->RhoKt6PFJets();
   fDiphotonEvent->rho25 = fPileUpDen->At(0)->RhoRandomLowEta();
@@ -508,6 +547,9 @@ void PhotonTreeWriter::Process()
     Double_t _phigg = -99.;    
     Double_t _costheta = -99.;
     PhotonTools::DiphotonR9EtaPtCats _evtcat = PhotonTools::kOctCat0;
+
+    const Vertex* realVtx = NULL;
+
     if (phHard && phSoft) {
       _dphiMetgg = MathUtils::DeltaPhi((phHard->Mom()+phSoft->Mom()).Phi(),fPFMet->At(0)->Phi());
       _cosdphiMetgg = TMath::Cos(_dphiMetgg);
@@ -533,10 +575,103 @@ void PhotonTreeWriter::Process()
 							   fDiphotonEvent->vtxZ,
 							   dz);
       fDiphotonEvent->deltamvtx = deltamvtx;
-            
+      
       _masserrwrongvtx        = TMath::Sqrt(_masserr*_masserr + deltamvtx*deltamvtx);
       _masserrsmearedwrongvtx = TMath::Sqrt(_masserrsmeared*_masserrsmeared + deltamvtx*deltamvtx);
-            
+      
+
+
+      // =================================================================================
+      // this is for synching the Vtx stuff
+      if (  fDoSynching ) {
+	//fill conversion collection for vertex selection, adding single leg conversions if needed
+	//note that momentum of single leg conversions needs to be recomputed from the track
+	//as it is not filled properly
+	DecayParticleOArr vtxconversions;
+	if ( true ) {
+	  vtxconversions.SetOwner(kTRUE);
+	  for (UInt_t iconv=0; iconv<fConversions->GetEntries(); ++iconv) {
+	    DecayParticle *conv = new DecayParticle(*fConversions->At(iconv));
+	    vtxconversions.AddOwned(conv);
+	  }
+	  
+	  for (UInt_t iconv=0; iconv<fPFConversions->GetEntries(); ++iconv) {
+	    const DecayParticle *c = fPFConversions->At(iconv);
+	    if (c->NDaughters()!=1) continue;
+	    
+	    DecayParticle *conv = new DecayParticle(*c);
+	    const Track *trk = static_cast<const StableParticle*>(conv->Daughter(0))->Trk();
+	    conv->SetMom(trk->Px(), trk->Py(), trk->Pz(), trk->P());
+	    vtxconversions.AddOwned(conv);
+	  }    
+	}
+	else {
+	  for (UInt_t iconv=0; iconv<fConversions->GetEntries(); ++iconv) {
+	    const DecayParticle *c = fConversions->At(iconv);
+	    vtxconversions.Add(c);
+	  }
+	}
+	
+	
+	const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));
+	double tmpVtxProb = 0.;
+	
+	std::vector<int>    debugInds;  // this hold the Vtx indices for the first three guys
+	std::vector<double> debugVals;  // this holds hte mva input/output for the best ranked
+	std::vector<int>    debugConv;  // this holds number of legs for frist and second photon (0 if no conversion) and total number of conversions
+	
+		
+	realVtx = fVtxTools.findVtxBasicRanking(phHard, phSoft, bsp, fPV,
+						&vtxconversions,kTRUE,tmpVtxProb,
+						&debugInds, &debugVals, &debugConv
+						);
+	
+	fDiphotonEvent->vtxInd1 = debugInds[0];
+	fDiphotonEvent->vtxInd2 = debugInds[1];
+	fDiphotonEvent->vtxInd3 = debugInds[2];
+	
+	fDiphotonEvent->vtxConv1Z    = debugVals[0];
+	fDiphotonEvent->vtxConv1DZ   = debugVals[1];
+	fDiphotonEvent->vtxConv1Prob = debugVals[2];
+
+	fDiphotonEvent->vtxConv2Z    = debugVals[3];
+	fDiphotonEvent->vtxConv2DZ   = debugVals[4];
+	fDiphotonEvent->vtxConv2Prob = debugVals[5];
+
+
+	fDiphotonEvent->vtxBestPtbal  = debugVals[6];
+	fDiphotonEvent->vtxBestPtasym = debugVals[7];
+	fDiphotonEvent->vtxBestSumpt2 = debugVals[8];
+	fDiphotonEvent->vtxBestP2Conv = debugVals[9];
+	
+	fDiphotonEvent->vtxMva1Z      = debugVals[10];
+	fDiphotonEvent->vtxMva2Z      = debugVals[11];
+	fDiphotonEvent->vtxMva3Z      = debugVals[12];
+
+	fDiphotonEvent->vtxMva1 = debugVals[13];
+	fDiphotonEvent->vtxMva2 = debugVals[14];
+	fDiphotonEvent->vtxMva3 = debugVals[15];
+	
+	fDiphotonEvent->vtxNleg1    = debugConv[0];
+	fDiphotonEvent->vtxNleg2    = debugConv[1];
+	fDiphotonEvent->vtxConvIdx1 = debugConv[2];
+	fDiphotonEvent->vtxConvIdx2 = debugConv[3];
+	
+	fDiphotonEvent->vtxNconv = debugConv[4];
+
+	if( false ) {
+	  printf("---------------------------------------------------------------------\n");
+	  printf("FINAL\nvtx %i: ptbal = %5f, ptasym = %5f, logsumpt2 = %5f, limpulltoconv = %5f, nconv = %i, mva = %5f\n",fDiphotonEvent->vtxInd1,fDiphotonEvent->vtxBestPtbal,fDiphotonEvent->vtxBestPtasym,fDiphotonEvent->vtxBestSumpt2,fDiphotonEvent->vtxBestP2Conv,fDiphotonEvent->vtxNconv,fDiphotonEvent->vtxMva1);
+	  printf("---------------------------------------------------------------------\n");
+	}
+      }
+      
+      
+      // end of Vtx synching stuff ...
+      // =================================================================================
+
+
+
       if (jet1 && jet2) {
         fDiphotonEvent->zeppenfeld = TMath::Abs(_etagg - 0.5*(jet1->Eta()+jet2->Eta()));
         fDiphotonEvent->dphidijetgg = MathUtils::DeltaPhi( (jet1->Mom()+jet2->Mom()).Phi(), _phigg );
@@ -560,79 +695,79 @@ void PhotonTreeWriter::Process()
       if (!fLoopOnGoodElectrons && phHard->HasPV()) {
         selvtx = phHard->PV();
       }
-     
-      if (0) //disable for now for performance reasons
-      {
-        Met mmet = fMVAMet.GetMet(  false,
-                                  0.,0.,0.,
-                                  0.,0.,0.,
-                                  fPFMet->At(0),
-                                  &pfcands,selvtx,fPV, fPileUpDen->At(0)->Rho(),
-                                  &pfjets,
-                                  int(fPV->GetEntries()),
-                                  kFALSE);      
-                                  
-        TMatrixD *metcov = fMVAMet.GetMetCovariance();
-        
-        ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
-                            mmet.Py() - phHard->Py() - phSoft->Py(),
-                            0.);
-        
-        ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
-        mcov(0,0) = (*metcov)(0,0);
-        mcov(0,1) = (*metcov)(0,1);
-        mcov(1,0) = (*metcov)(1,0);
-        mcov(1,1) = (*metcov)(1,1);
-        ROOT::Math::SVector<double,2> vmet;
-        vmet(0) = fullmet.X();
-        vmet(1) = fullmet.Y();
-        mcov.Invert();
-        Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
-                                  
-        fDiphotonEvent->mvametsel = fullmet.Rho();
-        fDiphotonEvent->mvametselphi = fullmet.Phi();
-        fDiphotonEvent->mvametselx = fullmet.X();
-        fDiphotonEvent->mvametsely = fullmet.Y();
-        fDiphotonEvent->mvametselsig = metsig;
-      }
       
       if (0) //disable for now for performance reasons
-      {
-        Met mmet = fMVAMet.GetMet(  false,
-                                  0.,0.,0.,
-                                  0.,0.,0.,
-                                  fPFMet->At(0),
-                                  &pfcands,firstvtx,fPV, fPileUpDen->At(0)->Rho(),
-                                  &pfjets,
-                                  int(fPV->GetEntries()),
-                                  kFALSE);      
+	{
+	  Met mmet = fMVAMet.GetMet(  false,
+				      0.,0.,0.,
+				      0.,0.,0.,
+				      fPFMet->At(0),
+				      &pfcands,selvtx,fPV, fPileUpDen->At(0)->Rho(),
+				      &pfjets,
+				      int(fPV->GetEntries()),
+				      kFALSE);      
                                   
-        TMatrixD *metcov = fMVAMet.GetMetCovariance();
-        
-        ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
-                            mmet.Py() - phHard->Py() - phSoft->Py(),
-                            0.);
-        
-        ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
-        mcov(0,0) = (*metcov)(0,0);
-        mcov(0,1) = (*metcov)(0,1);
-        mcov(1,0) = (*metcov)(1,0);
-        mcov(1,1) = (*metcov)(1,1);
-        ROOT::Math::SVector<double,2> vmet;
-        vmet(0) = fullmet.X();
-        vmet(1) = fullmet.Y();
-        mcov.Invert();
-        Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
+	  TMatrixD *metcov = fMVAMet.GetMetCovariance();
+	  
+	  ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
+			      mmet.Py() - phHard->Py() - phSoft->Py(),
+			      0.);
+	  
+	  ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
+	  mcov(0,0) = (*metcov)(0,0);
+	  mcov(0,1) = (*metcov)(0,1);
+	  mcov(1,0) = (*metcov)(1,0);
+	  mcov(1,1) = (*metcov)(1,1);
+	  ROOT::Math::SVector<double,2> vmet;
+	  vmet(0) = fullmet.X();
+	  vmet(1) = fullmet.Y();
+	  mcov.Invert();
+	  Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
                                   
-        fDiphotonEvent->mvametfirst = fullmet.Rho();
-        fDiphotonEvent->mvametfirstphi = fullmet.Phi();
-        fDiphotonEvent->mvametfirstx = fullmet.X();
-        fDiphotonEvent->mvametfirsty = fullmet.Y();
-        fDiphotonEvent->mvametfirstsig = metsig;
-      }      
+	  fDiphotonEvent->mvametsel = fullmet.Rho();
+	  fDiphotonEvent->mvametselphi = fullmet.Phi();
+	  fDiphotonEvent->mvametselx = fullmet.X();
+	  fDiphotonEvent->mvametsely = fullmet.Y();
+	  fDiphotonEvent->mvametselsig = metsig;
+	}
+      
+      if (0) //disable for now for performance reasons
+	{
+	  Met mmet = fMVAMet.GetMet(  false,
+				      0.,0.,0.,
+				      0.,0.,0.,
+				      fPFMet->At(0),
+				      &pfcands,firstvtx,fPV, fPileUpDen->At(0)->Rho(),
+				      &pfjets,
+				      int(fPV->GetEntries()),
+				      kFALSE);      
+	  
+	  TMatrixD *metcov = fMVAMet.GetMetCovariance();
+	  
+	  ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
+			      mmet.Py() - phHard->Py() - phSoft->Py(),
+			      0.);
+	  
+	  ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
+	  mcov(0,0) = (*metcov)(0,0);
+	  mcov(0,1) = (*metcov)(0,1);
+	  mcov(1,0) = (*metcov)(1,0);
+	  mcov(1,1) = (*metcov)(1,1);
+	  ROOT::Math::SVector<double,2> vmet;
+	  vmet(0) = fullmet.X();
+	  vmet(1) = fullmet.Y();
+	  mcov.Invert();
+	  Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
+	  
+	  fDiphotonEvent->mvametfirst = fullmet.Rho();
+	  fDiphotonEvent->mvametfirstphi = fullmet.Phi();
+	  fDiphotonEvent->mvametfirstx = fullmet.X();
+	  fDiphotonEvent->mvametfirsty = fullmet.Y();
+	  fDiphotonEvent->mvametfirstsig = metsig;
+	}      
       
     }
-
+    
 
     fDiphotonEvent->corrpfmet = -99.;
     fDiphotonEvent->corrpfmetphi = -99.;
@@ -694,8 +829,8 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->costhetaele =  _costhetaele;    
     fDiphotonEvent->evtcat = _evtcat;
 
-    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto);
-    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto);
+    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto,realVtx);
+    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto,realVtx);
     
     Float_t ph1ecor    = fDiphotonEvent->photons[0].Ecor();
     Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
@@ -720,7 +855,7 @@ void PhotonTreeWriter::Process()
     
     //printf("r9 = %5f, photon sigieie = %5f, seed sigieie = %5f\n",phHard->R9(),
     //       phHard->CoviEtaiEta(),sqrt(phHard->SCluster()->Seed()->CoviEtaiEta()));
-
+    
     // MuonStuff
     fDiphotonEvent-> muonPt  = -99.;
     fDiphotonEvent-> muonEta  = -99.;
@@ -757,6 +892,8 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent-> eleMass2 = -99.;
     fDiphotonEvent-> eleNinnerHits = -99;     
     
+    fDiphotonEvent-> eleIdMva = -99.;
+
     if( fApplyLeptonTag ) {
       // perform lepton tagging
       // the diphoton event record will have one more entry; i.e. leptonTag
@@ -812,6 +949,20 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> eleIso1 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
 
 	  fDiphotonEvent-> eleIso2 = -99.;
+
+	  if ( fDoSynching ) {
+	    Double_t distVtx = 999.0;
+	    Int_t closestVtx = 0;
+	    for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
+	      double dz = TMath::Abs(fLeptonTagElectrons->At(0)->GsfTrk()->DzCorrected(*fPV->At(nv)));
+	      if(dz < distVtx) {
+		distVtx    = dz;
+		closestVtx = nv;
+	      }
+	    }
+	    fDiphotonEvent-> eleIdMva = fElectronIDMVA->MVAValue(fLeptonTagElectrons->At(0), fPV->At(closestVtx));
+	  }
+
 	  //	  fDiphotonEvent-> eleIso2 = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso03,fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) + ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso03, fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) ;
 
 	  fDiphotonEvent-> eleIso3 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
@@ -947,10 +1098,6 @@ void PhotonTreeWriter::SlaveBegin()
 //   ReqEventObject(fPFNoPileUpName,     fPFNoPileUpCands,    false);
 //   ReqEventObject(fPFPileUpName,     fPFPileUpCands,    false);
 
-
-
-
-
   ReqEventObject(fPhotonBranchName,fPhotons,      fPhotonsFromBranch);
   if (fEnablePFPhotons) ReqEventObject(fPFPhotonName,fPFPhotons,      true);
   ReqEventObject(fTrackBranchName, fTracks,       true);
@@ -959,6 +1106,7 @@ void PhotonTreeWriter::SlaveBegin()
   ReqEventObject(fPileUpDenName,   fPileUpDen,    true);
   ReqEventObject(fPVName,          fPV,           fPVFromBranch);
   ReqEventObject(fConversionName,  fConversions,  true);
+  if ( fDoSynching ) ReqEventObject(fPFConversionName,     fPFConversions,  true);
   ReqEventObject(fBeamspotName,    fBeamspot,     true);
   ReqEventObject(fPFCandName,      fPFCands,      true);
   ReqEventObject(fSuperClusterName,fSuperClusters,true);
@@ -1014,6 +1162,22 @@ void PhotonTreeWriter::SlaveBegin()
 
   fMVAVBF.InitializeMVA();
                       
+
+  if( fDoSynching ) {
+    fVtxTools.InitP(2);
+    fElectronIDMVA = new ElectronIDMVA();
+    fElectronIDMVA->Initialize("BDTG method",
+                               fElectronMVAWeights_Subdet0Pt10To20,
+                               fElectronMVAWeights_Subdet1Pt10To20,
+                               fElectronMVAWeights_Subdet2Pt10To20,
+                               fElectronMVAWeights_Subdet0Pt20ToInf,
+                               fElectronMVAWeights_Subdet1Pt20ToInf,
+                               fElectronMVAWeights_Subdet2Pt20ToInf,
+                               ElectronIDMVA::kIDEGamma2012NonTrigV1,
+			       fTheRhoType);
+  }
+
+
   fDiphotonEvent = new PhotonTreeWriterDiphotonEvent;
   fSinglePhoton  = new PhotonTreeWriterPhoton<16>;
   
@@ -1184,7 +1348,7 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
 					    const PFCandidateCol* fPFCands,
 					    Double_t rho,
 					    Bool_t fillclusterarrays, 
-					    const ElectronCol* els, const DecayParticleCol *convs, const BaseVertex *bs, Bool_t applyElectronVeto) {
+					    const ElectronCol* els, const DecayParticleCol *convs, const BaseVertex *bs, Bool_t applyElectronVeto, const Vertex* realVtx) {
   
   const SuperCluster *s = 0;
   if (p)
@@ -1249,23 +1413,24 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
     passeleveto = PhotonTools::PassElectronVetoConvRecovery(p, els, convs, bs);  
     
     const Vertex *vtx = vtxCol->At(0);
-    if (p->HasPV()) vtx = p->PV();
-    
+    if (p->HasPV()) vtx = p->PV();    
+    if ( realVtx ) vtx = realVtx;
+
     UInt_t wVtxInd = 0;
     
     trackiso1 = IsolationTools::CiCTrackIsolation(p,vtx, 0.3, 0.02, 0.0, 0.0, 0.1, 1.0,
-  						      trackCol, NULL, NULL,
-  						      (!applyElectronVeto ? els : NULL) );
-  	//Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
-      
+						  trackCol, NULL, NULL,
+						  (!applyElectronVeto ? els : NULL) );
+    //Question Ming:whyfPV->At(0) instead of selected vertex using ranking method?
+    
     // track iso worst vtx
     trackiso2 = IsolationTools::CiCTrackIsolation(p,vtx, 0.4, 0.02, 0.0, 0.0, 0.1, 1.0,
-  						      trackCol, &wVtxInd,vtxCol,
-  						      (!applyElectronVeto ? els : NULL) );
+						  trackCol, &wVtxInd,vtxCol,
+						  (!applyElectronVeto ? els : NULL) );
     combiso1 = ecalisodr03+hcalisodr04+trackiso1 - 0.17*rho;
     combiso2 = ecalisodr04+hcalisodr04+trackiso2 - 0.52*rho;  
-
-
+    
+    
     // -----------------------------------------------------
     // PF-CiC4 Debug Stuff
     std::vector<double> debugVals;
@@ -1298,6 +1463,7 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
     idmva_s4ratio=p->S4Ratio();
     idmva_GammaIso=IsolationTools::PFGammaIsolation(p,0.3,0,fPFCands);
     idmva_ChargedIso_selvtx=IsolationTools::PFChargedIsolation(p,vtx,0.3,0.,fPFCands);
+    idmva_ChargedIso_0p2_selvtx=IsolationTools::PFChargedIsolation(p,vtx,0.2,0.,fPFCands);
     idmva_ChargedIso_worstvtx=IsolationTools::PFChargedIsolation(p,vtx,0.3,0.,fPFCands,&wVtxInd,vtxCol);
     idmva_PsEffWidthSigmaRR=p->EffSigmaRR();
   }

@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.130 2012/10/11 08:48:15 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.131 2012/10/26 17:40:17 mingyang Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -209,15 +209,15 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     else if (MVABin == 4) MVACut = 0.889;
     else if (MVABin == 5) MVACut = 0.871;
   } else if (idType == ElectronTools::kHggLeptonTagId2012HCP) {
-    if      (MVABin == 0) MVACut = 0.9;
-    else if (MVABin == 1) MVACut = 0.9;
-    else if (MVABin == 2) MVACut = 0.9;
-    else if (MVABin == 3) MVACut = 0.9;
-    else if (MVABin == 4) MVACut = 0.9;
-    else if (MVABin == 5) MVACut = 0.9;
+    if      (MVABin == 0) MVACut = -100.8;
+    else if (MVABin == 1) MVACut = -100.8;
+    else if (MVABin == 2) MVACut = -100.8;
+    else if (MVABin == 3) MVACut = -100.8;
+    else if (MVABin == 4) MVACut = -100.8;
+    else if (MVABin == 5) MVACut = -100.8;
   }
 
-  if(isDebug == kTRUE){
+  if(isDebug == kTRUE || true ){
     printf("PassElMVAID(%d): %d, pt, eta = %f, %f, rho = %f(%f) : MVA = %f, bin: %d\n",
            (MVAValue > MVACut),GetEventHeader()->EvtNum(),el->Pt(), eta,
 	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets(),MVAValue,MVABin);
@@ -311,10 +311,10 @@ Bool_t ElectronIDMod::PassIDCut(const Electron *ele, ElectronTools::EElIdType id
       idcut = ElectronTools::PassHggLeptonTagID2012(ele);
       break;
     case ElectronTools::kHggLeptonTagId2012HCP:
-    {
-      idcut = PassMVAID(ele, ElectronTools::kHggLeptonTagId2012HCP, 
-                                   vertex, fPFCandidates, fPileupEnergyDensity);  
-    }
+      {
+	idcut = PassMVAID(ele, ElectronTools::kHggLeptonTagId2012HCP, 
+			  vertex, fPFCandidates, fPileupEnergyDensity);  
+      }
       break;
     case ElectronTools::kMVAID_BDTG_NoIPInfo:
     {
@@ -501,19 +501,19 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       if (ele->Pt() >= 20 && eta >= 1.479		 ) IsoCut = 0.150;
       if (IsoOverPt < IsoCut ) isocut = kTRUE;
     }
-      break;
-    case ElectronTools::kPFIso_HggLeptonTag2012:
+    break;
+  case ElectronTools::kPFIso_HggLeptonTag2012:
     {
       Bool_t isDebug = kFALSE;
       if(isDebug == kTRUE){
         printf("PFIso_HggLeptonTag2012: %d, pt, eta = %f, %f, rho = %f(%f) : ",
-           GetEventHeader()->EvtNum(),ele->Pt(), ele->Eta(),
-	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets());
+	       GetEventHeader()->EvtNum(),ele->Pt(), ele->Eta(),
+	       fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets());
       }
       ElectronOArr *tempIsoElectrons = new  ElectronOArr;
       MuonOArr     *tempIsoMuons     = new  MuonOArr;
       Double_t IsoOverPt = IsolationTools::PFElectronIsolation2012LepTag(ele, vertex, fPFNoPileUpCands, 
-       fPileupEnergyDensity, ElectronTools::kEleEAData2012, tempIsoElectrons, tempIsoMuons, 0.3, isDebug);
+									 fPileupEnergyDensity, ElectronTools::kEleEAData2012, tempIsoElectrons, tempIsoMuons, 0.3, isDebug);
       delete tempIsoElectrons;
       delete tempIsoMuons;
       Double_t eta = ele->SCluster()->AbsEta();
@@ -526,10 +526,10 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       if (ele->Pt() >= 20 && eta >= 1.479		 ) IsoCut = 0.150;
       if (IsoOverPt < IsoCut ) isocut = kTRUE;
     }
-      break;
-      case ElectronTools::kPFIso_HggLeptonTag2012HCP:
+    break;
+  case ElectronTools::kPFIso_HggLeptonTag2012HCP:
     {
-     
+      
       Bool_t isDebug = kFALSE;
       if(isDebug == kTRUE){
         printf("PFIso_HggLeptonTag2012HCP: %d, pt, eta = %f, %f, rho = %f(%f) : ",
@@ -769,9 +769,11 @@ void ElectronIDMod::Process()
 	  closestVtx = nv;
 	}
       }
-      idcut = PassIDCut(e, fElIdType, fVertices->At(closestVtx));
 
       MVAValue = EvaluateMVAID(e, ElectronTools::kHggLeptonTagId2012HCP, fVertices->At(closestVtx), fPFCandidates, fPileupEnergyDensity);
+
+      idcut = PassIDCut(e, fElIdType, fVertices->At(closestVtx));
+
       if(MVAValue>MVAValueMax){
 	MVAValueMax = MVAValue;
 	NElectronMVAValueMax = i;
@@ -781,6 +783,7 @@ void ElectronIDMod::Process()
     }
     if (!idcut) 
       continue;
+
 
     // apply charge filter
     if(fChargeFilter == kTRUE) {

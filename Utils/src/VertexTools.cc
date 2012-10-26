@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.12 2012/06/10 21:22:09 bendavid Exp $
+// $Id: VertexTools.cc,v 1.13 2012/10/10 23:17:05 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -306,7 +306,10 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
 					       const Photon*           ph2, 
 					       const BaseVertex*       bsp,
 					       const VertexCol*        vtcs,
-					       const DecayParticleCol* conv, Bool_t useMva, Double_t &vtxProb) {
+					       const DecayParticleCol* conv, Bool_t useMva, Double_t &vtxProb,
+					       std::vector<int>   * debugInds,
+					       std::vector<double>* debugVals,
+					       std::vector<int>   * debugConv) {
   
   //if (useMva) printf("using mva vertex selection\n");
   
@@ -319,12 +322,12 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   UInt_t bestidxmva = 0;
   
   // using asd much as possible 'Globe' naming schemes...
-  int*    ptbal_rank  = new int   [vtcs->GetEntries()];
-  int*    ptasym_rank = new int   [vtcs->GetEntries()];
-  int*    total_rank  = new int   [vtcs->GetEntries()];
-  double* ptbal       = new double[vtcs->GetEntries()];
-  double* ptasym      = new double[vtcs->GetEntries()];
-  double* sumpt2      = new double[vtcs->GetEntries()];  
+  int*    ptbal_rank    = new int   [vtcs->GetEntries()];
+  int*    ptasym_rank   = new int   [vtcs->GetEntries()];
+  int*    total_rank    = new int   [vtcs->GetEntries()];
+  double* ptbal         = new double[vtcs->GetEntries()];
+  double* ptasym        = new double[vtcs->GetEntries()];
+  double* sumpt2        = new double[vtcs->GetEntries()];  
   double* limPullToConv = new double[vtcs->GetEntries()];  
   double* mvaval        = new double[vtcs->GetEntries()];  
 
@@ -424,8 +427,23 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   
   // check if there's a conversion among the pre-selected photons
   // ...this will return NULL in case conv==NULL
-  const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, conv, 0.1, 0.1, 0.1);
-  const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, conv, 0.1, 0.1, 0.1);
+
+  int numLegs1 = -1;
+  int numLegs2 = -1;
+  int convIdx1 = -1;
+  int convIdx2 = -1;
+  const DecayParticle* conv1 = PhotonTools::MatchedCiCConversion(ph1, conv, 0.1, 0.1, 0.1, false, &numLegs1, &convIdx1);
+  const DecayParticle* conv2 = PhotonTools::MatchedCiCConversion(ph2, conv, 0.1, 0.1, 0.1, false, &numLegs2, &convIdx2);
+  
+
+  if ( debugConv ) {
+    debugConv->push_back( conv1 ? numLegs1 : 0 );
+    debugConv->push_back( conv2 ? numLegs2 : 0 );
+    debugConv->push_back( conv1 ? convIdx1 : -1 );
+    debugConv->push_back( conv2 ? convIdx2 : -1 );
+
+    debugConv->push_back( conv->GetEntries() );
+  } 
   
   double zconv  = 0.;
   double dzconv = 0.;
@@ -444,6 +462,18 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
     
     zconv = z1;
     dzconv = dz1;
+
+    if( debugVals ) {
+      debugVals->push_back(z1);
+      debugVals->push_back(dz1);
+      debugVals->push_back(conv1->Prob());
+    }
+  } else {
+    if( debugVals ) {
+      debugVals->push_back(-99.);
+      debugVals->push_back(-99.);
+      debugVals->push_back(-99.);
+    }
   }
 
   if (conv2) {
@@ -453,13 +483,28 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
     
     zconv = z2;
     dzconv = dz2;
-  }  
-  
+
+    if( debugVals ) {
+      debugVals->push_back(z2);
+      debugVals->push_back(dz2);
+      debugVals->push_back(conv2->Prob());
+    }
+  } else {
+    if( debugVals ) {
+      debugVals->push_back(-99.);
+      debugVals->push_back(-99.);
+      debugVals->push_back(-99.);
+    }
+  }
+
   if (conv1 && conv2) {
     zconv  = ( 1./(1./dz1/dz1 + 1./dz2/dz2 )*(z1/dz1/dz1 + z2/dz2/dz2) ) ;  // weighted average
     dzconv = TMath::Sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
   }
   
+
+
+
   //--------------------------------------------------------------------
   // start doing the Conversion acrobatics... 'copied' from the Globe...
   if(conv1 || conv2) {
@@ -485,7 +530,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   }
   // END of Conversion Acrobatics
   //--------------------------------------------------------------------
-
+  
   //final loop to compute mva values
   double mvamax = -1e6;
   for(unsigned int iVtx =0; iVtx < numVertices; ++iVtx) {    
@@ -524,7 +569,7 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
   FourVectorM newMomFst = ph1->MomVtx(vtcs->At(bestidxmva)->Position());
   FourVectorM newMomSec = ph2->MomVtx(vtcs->At(bestidxmva)->Position());
   FourVectorM higgsMom = newMomFst+newMomSec;   
-
+  
   fMvaPEvtVars[0] = higgsMom.Pt();
   fMvaPEvtVars[1] = numVertices;
   fMvaPEvtVars[2] = mvaval[bestidxmva];
@@ -543,6 +588,29 @@ const Vertex* VertexTools::findVtxBasicRanking(const Photon*           ph1,
 //   printf("e1 = %5f, sige1 = %5f\n",ph1->E(),ph1->EnergyErr());
 //   printf("e2 = %5f, sige2 = %5f\n",ph2->E(),ph2->EnergyErr());
   
+  // assign the debug value to vectors if present
+  if ( debugInds && debugVals ) {
+    debugInds->push_back(bestidxmva);
+    debugInds->push_back(mvaidx1);		    
+    debugInds->push_back(mvaidx2);
+
+    debugVals->push_back(ptbal[bestidxmva]);
+    debugVals->push_back(ptasym[bestidxmva]);
+    debugVals->push_back(sumpt2[bestidxmva]);
+    debugVals->push_back(limPullToConv[bestidxmva]);
+
+    debugVals->push_back(vtcs->At(bestidxmva)->Z());
+    debugVals->push_back(vtcs->At(mvaidx1)->Z());
+    debugVals->push_back(vtcs->At(mvaidx2)->Z());
+
+    debugVals->push_back(mvaval[bestidxmva]);
+    debugVals->push_back(mvaval[mvaidx1]);
+    debugVals->push_back(mvaval[mvaidx2]);
+    
+
+
+  }
+
   // delete the auxiliary dynamic arrays
   delete[] ptbal_rank  ;
   delete[] ptasym_rank ;

@@ -127,7 +127,8 @@ namespace mithep {
     
     static const DecayParticle *MatchedCiCConversion(const Photon *p, const DecayParticleCol *conversions, 
 						     Double_t dPhiMin=0.1, Double_t dEtaMin=0.1,Double_t dRMin=0.1, 
-						     bool print = false);
+						     bool print   = false,
+						     int* numLegs = NULL, int* convIdx = NULL);  // for debugging
 
                                                      
     static const Electron *MatchedElectron(const Photon *p, const ElectronCol *els);
