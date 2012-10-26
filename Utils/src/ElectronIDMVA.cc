@@ -941,7 +941,7 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
   fMVAVar_EleESeedClusterOverPout = ele->ESeedClusterOverPout(); 
   if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
-  else fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
+  else fMVAVar_EleSigmaIPhiIPhi = 0;
   fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
   fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->BestTrk()->P(); 
   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
@@ -953,9 +953,11 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
   if (ele->TrackerTrk()) {
     fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
     fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
+    fMVAVar_EleKFTrkNLayers = ele->CTFTrkNLayersWithMeasurement();
   } else {
     fMVAVar_EleKFTrkChiSqr = -1;
     fMVAVar_EleKFTrkNHits = 0;
+    fMVAVar_EleKFTrkNLayers = 0;
   }
   fMVAVar_EleGsfTrackChi2OverNdof = ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof();
   fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
