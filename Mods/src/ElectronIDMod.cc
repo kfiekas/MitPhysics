@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.129 2012/10/08 17:17:27 mingyang Exp $
+// $Id: ElectronIDMod.cc,v 1.130 2012/10/11 08:48:15 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1040,7 +1040,7 @@ void ElectronIDMod::Setup()
                                fElectronMVAWeights_Subdet0Pt20ToInf,
                                fElectronMVAWeights_Subdet1Pt20ToInf,
                                fElectronMVAWeights_Subdet2Pt20ToInf,
-                               ElectronIDMVA::kIDEGamma2012NonTrigV0,
+                               ElectronIDMVA::kIDEGamma2012NonTrigV1,
 			       fTheRhoType);
   }
   
