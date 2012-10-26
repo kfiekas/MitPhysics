@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.25 2012/10/11 13:08:23 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.26 2012/10/26 19:23:05 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -748,8 +748,7 @@ namespace mithep
       void                SetElectronMVAWeightsSubdet2Pt20ToInf(TString s) 
                           { fElectronMVAWeights_Subdet2Pt20ToInf = s; }
 
-      void                SetRhoType(RhoUtilities::RhoType type) { fTheRhoType = type; };
-
+      void                SetDoSynching(bool b) {fDoSynching = b;}
 
 
     
