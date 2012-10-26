@@ -927,49 +927,167 @@ Double_t ElectronIDMVA::MVAValue(const Electron *ele, const Vertex *vertex,
     return -9999;
   }
 
-  fMVAVar_ElePt = ele->Pt();
-  fMVAVar_EleEta = ele->Eta();
-
   //set all input variables
-  fMVAVar_EleSigmaIEtaIEta = ele->CoviEtaiEta() ; 
-  fMVAVar_EleDEtaIn = ele->DeltaEtaSuperClusterTrackAtVtx(); 
-  fMVAVar_EleDPhiIn = ele->DeltaPhiSuperClusterTrackAtVtx(); 
+  fMVAVar_ElePt = ele->Pt();
+  fMVAVar_EleEta = ele->SCluster()->Eta();
+  fMVAVar_EleSigmaIEtaIEta = ele->CoviEtaiEta() ;
+
+  if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
+      fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+      fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
+      fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 
+    ) {
+    fMVAVar_EleDEtaIn = TMath::Min(fabs(double(ele->DeltaEtaSuperClusterTrackAtVtx())),0.06); ; 
+    fMVAVar_EleDPhiIn = TMath::Min(fabs(double(ele->DeltaPhiSuperClusterTrackAtVtx())),0.6); 
+    fMVAVar_EleFBrem = TMath::Max(double(ele->FBrem()),-1.0); 
+    fMVAVar_EleEOverP = TMath::Min(double(ele->ESuperClusterOverP()), 20.0); 
+    fMVAVar_EleESeedClusterOverPout = TMath::Min(double(ele->ESeedClusterOverPout()),20.0); 
+    fMVAVar_EleEEleClusterOverPout = TMath::Min(double(ele->EEleClusterOverPout()),20.0); 
+    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->P(); 
+    fMVAVar_EleGsfTrackChi2OverNdof = TMath::Min(double( ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof()),200.0);
+    fMVAVar_EledEtaCalo =  TMath::Min(fabs(double(ele->DeltaEtaSeedClusterTrackAtCalo())),0.2);
+    fMVAVar_EleR9 = TMath::Min(double(ele->SCluster()->R9()), 5.0);   
+  }
+  else if (fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4) {
+    fMVAVar_EleDEtaIn = TMath::Min(fabs(double(ele->DeltaEtaSuperClusterTrackAtVtx())),0.06); ; 
+    fMVAVar_EleDPhiIn = ele->DeltaPhiSuperClusterTrackAtVtx();
+    fMVAVar_EleFBrem = TMath::Max(double(ele->FBrem()),-1.0); 
+    fMVAVar_EleEOverP = TMath::Min(double(ele->ESuperClusterOverP()), 20.0); 
+    fMVAVar_EleESeedClusterOverPout = TMath::Min(double(ele->ESeedClusterOverPout()),20.0); 
+    fMVAVar_EleEEleClusterOverPout = TMath::Min(double(ele->EEleClusterOverPout()),20.0); 
+    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->PIn(); 
+    fMVAVar_EleGsfTrackChi2OverNdof = TMath::Min(double( ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof()),200.0);
+    fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
+    fMVAVar_EleR9 = TMath::Min(double(ele->SCluster()->R9()), 5.0);   
+  }
+  else {
+    fMVAVar_EleDEtaIn = ele->DeltaEtaSuperClusterTrackAtVtx();  
+    fMVAVar_EleDPhiIn = ele->DeltaPhiSuperClusterTrackAtVtx(); 
+    fMVAVar_EleFBrem = ele->FBrem(); 
+    fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
+    fMVAVar_EleESeedClusterOverPout = ele->ESeedClusterOverPout(); 
+    fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->BestTrk()->P();
+    fMVAVar_EleGsfTrackChi2OverNdof = ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof();
+    fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
+    fMVAVar_EleR9 = ele->SCluster()->R9();   
+  }
+
   fMVAVar_EleHoverE = ele->HadronicOverEm(); 
   fMVAVar_EleD0 = ele->BestTrk()->D0Corrected(*vertex); 
   fMVAVar_EleDZ = ele->BestTrk()->DzCorrected(*vertex); 
-  fMVAVar_EleFBrem = ele->FBrem(); 
-  fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
-  fMVAVar_EleESeedClusterOverPout = ele->ESeedClusterOverPout(); 
   if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
-  else fMVAVar_EleSigmaIPhiIPhi = 0;
+  else {
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ) {
+      fMVAVar_EleSigmaIPhiIPhi = 0;
+    } else {
+      fMVAVar_EleSigmaIPhiIPhi = ele->CoviEtaiEta();
+    }
+  }
+
   fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
-  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->BestTrk()->P(); 
   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
   fMVAVar_EleIP3d = ele->Ip3dPV(); 
   fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
+  fMVAVar_EledPhiCalo = ele->DeltaPhiSeedClusterTrackAtCalo();
+  fMVAVar_EleSCEtaWidth = ele->SCluster()->EtaWidth();
+  fMVAVar_EleSCPhiWidth = ele->SCluster()->PhiWidth();
+  fMVAVar_EleCovIEtaIPhi = ele->SCluster()->Seed()->CoviEtaiPhi();
+  fMVAVar_ElePreShowerOverRaw = ele->SCluster()->PreshowerEnergy() / ele->SCluster()->RawEnergy();
 
-
-  fMVAVar_EleEEleClusterOverPout = ele->EEleClusterOverPout();
+  //Additional vars
   if (ele->TrackerTrk()) {
-    fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
+	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 ||
+        fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4  
+      ) {
+      fMVAVar_EleKFTrkChiSqr = TMath::Min(double(ele->TrackerTrk()->RChi2()),10.0);
+    } else {
+      fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
+    }
     fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
     fMVAVar_EleKFTrkNLayers = ele->CTFTrkNLayersWithMeasurement();
   } else {
-    fMVAVar_EleKFTrkChiSqr = -1;
-    fMVAVar_EleKFTrkNHits = 0;
-    fMVAVar_EleKFTrkNLayers = 0;
+    fMVAVar_EleKFTrkChiSqr = 0;
+    fMVAVar_EleKFTrkNHits = -1;
+    fMVAVar_EleKFTrkNLayers = -1;
   }
-  fMVAVar_EleGsfTrackChi2OverNdof = ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof();
-  fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
-  fMVAVar_EleSCEtaWidth = ele->SCluster()->EtaWidth();
-  fMVAVar_EleSCPhiWidth = ele->SCluster()->PhiWidth();
-  fMVAVar_EleE1x5OverE5x5 = ele->SCluster()->Seed()->E1x5() / ele->SCluster()->Seed()->E5x5();
-  fMVAVar_EleR9 = ele->SCluster()->R9();
-  fMVAVar_EleHoverE = ele->HadronicOverEm(); 
-  fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
-  fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->BestTrk()->P(); 
-  fMVAVar_EleR9 = ele->SCluster()->R9();
-  fMVAVar_ElePreShowerOverRaw = ele->SCluster()->PreshowerEnergy() / ele->SCluster()->RawEnergy();
+  
+  if( ele->SCluster()->Seed()->E5x5() > 0.0 ) {
+    if (fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 || 
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 ||
+        fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 ||
+	fMVAType == ElectronIDMVA::kIDHWW2012TrigV0 ||
+        fMVAType == ElectronIDMVA::kIDIsoCombinedHWW2012TrigV4  
+      ) {
+      fMVAVar_EleE1x5OverE5x5 = TMath::Min(TMath::Max(1 - double(ele->SCluster()->Seed()->E1x5()/ele->SCluster()->Seed()->E5x5()) , -1.0),2.0);
+      fMVAVar_EleOneMinusE1x5OverE5x5 = TMath::Min(TMath::Max(1 - double(ele->SCluster()->Seed()->E1x5()/ele->SCluster()->Seed()->E5x5()) , -1.0),2.0);
+    } else {
+      fMVAVar_EleE1x5OverE5x5 = ele->SCluster()->Seed()->E1x5()/ele->SCluster()->Seed()->E5x5();
+    }
+  } else {
+    fMVAVar_EleE1x5OverE5x5 = -1.0;
+  }
+
+  //Do Binding of MVA input variables
+  if (   fMVAType == ElectronIDMVA::kIDEGamma2012TrigV0 
+      || fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV0 
+      || fMVAType == ElectronIDMVA::kIDEGamma2012NonTrigV1 
+      || fMVAType == ElectronIDMVA::kIsoRingsV0
+      || fMVAType == ElectronIDMVA::kIDHWW2012TrigV0
+    ) {
+    bindVariables();
+  }
+
+
+  //***********************************************************************
+  // Si [Oct 26 , 2012]
+  // Code Below was used for the 2011 HWW analysis
+  // But we deprecate it now 
+  //***********************************************************************
+//   fMVAVar_ElePt = ele->Pt();
+//   fMVAVar_EleEta = ele->Eta();
+
+//   //set all input variables
+//   fMVAVar_EleSigmaIEtaIEta = ele->CoviEtaiEta() ; 
+//   fMVAVar_EleDEtaIn = ele->DeltaEtaSuperClusterTrackAtVtx(); 
+//   fMVAVar_EleDPhiIn = ele->DeltaPhiSuperClusterTrackAtVtx(); 
+//   fMVAVar_EleHoverE = ele->HadronicOverEm(); 
+//   fMVAVar_EleD0 = ele->BestTrk()->D0Corrected(*vertex); 
+//   fMVAVar_EleDZ = ele->BestTrk()->DzCorrected(*vertex); 
+//   fMVAVar_EleFBrem = ele->FBrem(); 
+//   fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
+//   fMVAVar_EleESeedClusterOverPout = ele->ESeedClusterOverPout(); 
+//   if (!TMath::IsNaN(ele->SCluster()->Seed()->CoviPhiiPhi())) fMVAVar_EleSigmaIPhiIPhi = TMath::Sqrt(ele->SCluster()->Seed()->CoviPhiiPhi()); 
+//   else fMVAVar_EleSigmaIPhiIPhi = 0;
+//   fMVAVar_EleNBrem = ele->NumberOfClusters() - 1; 
+//   fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->BestTrk()->P(); 
+//   fMVAVar_EleESeedClusterOverPIn = ele->ESeedClusterOverPIn(); 
+//   fMVAVar_EleIP3d = ele->Ip3dPV(); 
+//   fMVAVar_EleIP3dSig = ele->Ip3dPVSignificance(); 
+
+//   fMVAVar_EleEEleClusterOverPout = ele->EEleClusterOverPout();
+//   if (ele->TrackerTrk()) {
+//     fMVAVar_EleKFTrkChiSqr = ele->TrackerTrk()->RChi2();
+//     fMVAVar_EleKFTrkNHits = ele->TrackerTrk()->NHits();
+//     fMVAVar_EleKFTrkNLayers = ele->CTFTrkNLayersWithMeasurement();
+//   } else {
+//     fMVAVar_EleKFTrkChiSqr = -1;
+//     fMVAVar_EleKFTrkNHits = 0;
+//     fMVAVar_EleKFTrkNLayers = 0;
+//   }
+//   fMVAVar_EleGsfTrackChi2OverNdof = ele->BestTrk()->Chi2() / ele->BestTrk()->Ndof();
+//   fMVAVar_EledEtaCalo =  ele->DeltaEtaSeedClusterTrackAtCalo();
+//   fMVAVar_EleSCEtaWidth = ele->SCluster()->EtaWidth();
+//   fMVAVar_EleSCPhiWidth = ele->SCluster()->PhiWidth();
+//   fMVAVar_EleE1x5OverE5x5 = ele->SCluster()->Seed()->E1x5() / ele->SCluster()->Seed()->E5x5();
+//   fMVAVar_EleR9 = ele->SCluster()->R9();
+//   fMVAVar_EleHoverE = ele->HadronicOverEm(); 
+//   fMVAVar_EleEOverP = ele->ESuperClusterOverP(); 
+//   fMVAVar_EleOneOverEMinusOneOverP = (1.0/(ele->EcalEnergy())) - 1.0 / ele->BestTrk()->P(); 
+//   fMVAVar_EleR9 = ele->SCluster()->R9();
+//   fMVAVar_ElePreShowerOverRaw = ele->SCluster()->PreshowerEnergy() / ele->SCluster()->RawEnergy();
     
 
   Double_t mva = -9999;  
