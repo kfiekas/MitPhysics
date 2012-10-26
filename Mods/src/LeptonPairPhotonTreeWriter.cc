@@ -757,7 +757,7 @@ void LeptonPairPhotonTreeWriter::regressEle2(const mithep::Electron             
 void LeptonPairPhotonTreeWriter::Process()
 //--------------------------------------------------------------------------------------------------
 {
-  bool store_event = false;
+  bool store_event_ele = false, store_event_mu = false;
 
   // Process entries of the tree. 
   LoadEventObject(fPhotonBranchName,   fPhotons);
@@ -1003,19 +1003,21 @@ void LeptonPairPhotonTreeWriter::Process()
  
 	  for (UInt_t i = 0; i < selected_photons.size(); ++i) {
 	    const Photon *tmppho = selected_photons[i];	
-	    float best_mllg = (ele1->Mom() + ele2->Mom() + tmppho->Mom()).M();
-	    if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/best_mllg) > 15./110. ) 
+	    float mllg = (ele1->Mom() + ele2->Mom() + tmppho->Mom()).M();
+	    if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/mllg) > 15./110. ) 
 	      { 
 		if( verbose ) cout << "PASSPHOTON :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
 		
 		if( mithep::MathUtils::DeltaR(ele1->Phi(),ele1->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 && 
 		    mithep::MathUtils::DeltaR(ele2->Phi(),ele2->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 ) {
-		  if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		  if( best_mllg > 115 ) { 
+		  if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() 
+				    << "\t" << GetEventHeader()->EvtNum() 
+				    << "\tmllg: " << mllg << endl;
+		  if( mllg > 115 ) { 
 		    if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		    if( best_mllg < 180 ) { 
+		    if( mllg < 180 ) { 
 		      if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		      store_event = true;		  
+		      store_event_ele = true;		  
 		      pho = tmppho;
 		      break;
 		    } // m(llg)<180
@@ -1032,7 +1034,8 @@ void LeptonPairPhotonTreeWriter::Process()
     //	Float_t rho = -99.;
     //	if (fPileUpDen->GetEntries() > 0) rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
     //      			fLeptonPairPhotonEvent->photonidmva = fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
-    if( store_event ) { 
+    if( store_event_ele ) { 
+      cout << "storing electron event ..." << endl;
 
       electronZgfilled = kTRUE;
 
@@ -1057,13 +1060,17 @@ void LeptonPairPhotonTreeWriter::Process()
 	//	cout << "photonmatchmc written to be kTRUE" << endl;	
       }
       else fLeptonPairPhotonEvent->photonmatchmc = 0;	
-
+      cout << "past pho ... " << endl;
      
       fillEle1Variables(ele1);
+      cout << "past ele1 ... " << endl;
       fillEle2Variables(ele2);
+      cout << "past ele2 ... " << endl;
       regressEle1(ele1,fPileUpDen,fPV);
+      cout << "past regress ele1 ... " << endl;
       regressEle2(ele2,fPileUpDen,fPV);
-      
+      cout << "past regress ele2 ... " << endl;
+
       fLeptonPairPhotonEvent->mllg = (ele1->Mom() + ele2->Mom() + pho->Mom()).M();
       ZGLabVectors l;
       ZGAngles b;
@@ -1080,29 +1087,31 @@ void LeptonPairPhotonTreeWriter::Process()
       fLeptonPairPhotonEvent->costheta_lp_electrons = b.costheta_lp;
       fLeptonPairPhotonEvent->phi_electrons = b.phi;
       fLeptonPairPhotonEvent->cosTheta_electrons = b.cosTheta;
-      
+      cout << "past angles ..." << endl;
+
       fLeptonPairPhotonEvent->electronZmass = (ele1->Mom() + ele2->Mom()).M();
       
       fLeptonPairPhotonEvent->ele1dEtaIn = TMath::Abs(ele1->DeltaEtaSuperClusterTrackAtVtx());
       fLeptonPairPhotonEvent->ele1dPhiIn = TMath::Abs(ele1->DeltaPhiSuperClusterTrackAtVtx());
       fLeptonPairPhotonEvent->ele1sigmaIEtaIEta = ele1->CoviEtaiEta();
       fLeptonPairPhotonEvent->ele1HadOverEm = ele1->HadronicOverEm();
-      fLeptonPairPhotonEvent->ele1D0 = fabs(ele1->BestTrk()->D0Corrected(*fPV->At(0)));
-      fLeptonPairPhotonEvent->ele1DZ = fabs(ele1->BestTrk()->DzCorrected(*fPV->At(0)));
+      fLeptonPairPhotonEvent->ele1D0 = fabs(ele1->BestTrk()->D0Corrected(*bestPV));
+      fLeptonPairPhotonEvent->ele1DZ = fabs(ele1->BestTrk()->DzCorrected(*bestPV));
       fLeptonPairPhotonEvent->ele1OneOverEMinusOneOverP = fabs((1 - ele1->ESuperClusterOverP())/(ele1->EcalEnergy()));
-      const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamSpot->At(0));
-      fLeptonPairPhotonEvent->ele1Conversion = mithep::ElectronTools::PassConversionFilter(ele1,fConversions,bsp, 0, 1e-6, 2.0, kTRUE, kFALSE, 7);
+      fLeptonPairPhotonEvent->ele1Conversion = mithep::ElectronTools::PassConversionFilter(ele1,fConversions,bestPV, 0, 1e-6, 2.0, kTRUE, kFALSE, 7);
       fLeptonPairPhotonEvent->ele1missinghits = ele1->CorrectedNExpectedHitsInner();
-      
+      cout << "past more ele1 ..." << endl;
+
       fLeptonPairPhotonEvent->ele2dEtaIn = TMath::Abs(ele2->DeltaEtaSuperClusterTrackAtVtx());
       fLeptonPairPhotonEvent->ele2dPhiIn = TMath::Abs(ele2->DeltaPhiSuperClusterTrackAtVtx());
       fLeptonPairPhotonEvent->ele2sigmaIEtaIEta = ele2->CoviEtaiEta();
       fLeptonPairPhotonEvent->ele2HadOverEm = ele2->HadronicOverEm();
-      fLeptonPairPhotonEvent->ele2D0 = fabs(ele2->BestTrk()->D0Corrected(*fPV->At(0)));
-      fLeptonPairPhotonEvent->ele2DZ = fabs(ele2->BestTrk()->DzCorrected(*fPV->At(0)));
+      fLeptonPairPhotonEvent->ele2D0 = fabs(ele2->BestTrk()->D0Corrected(*bestPV));
+      fLeptonPairPhotonEvent->ele2DZ = fabs(ele2->BestTrk()->DzCorrected(*bestPV));
       fLeptonPairPhotonEvent->ele2OneOverEMinusOneOverP = fabs((1 - ele2->ESuperClusterOverP())/(ele2->EcalEnergy()));
-      fLeptonPairPhotonEvent->ele2Conversion = mithep::ElectronTools::PassConversionFilter(ele2,fConversions,bsp, 0, 1e-6, 2.0, kTRUE, kFALSE,7);
+      fLeptonPairPhotonEvent->ele2Conversion = mithep::ElectronTools::PassConversionFilter(ele2,fConversions,bestPV, 0, 1e-6, 2.0, kTRUE, kFALSE,7);
       fLeptonPairPhotonEvent->ele2missinghits = ele2->CorrectedNExpectedHitsInner();
+      cout << "past more ele2 ..." << endl;
       
       //Compute Electron MVA Values
       //double _fbrem = max(double(ele1->FBrem()),-1.0);
@@ -1259,18 +1268,20 @@ void LeptonPairPhotonTreeWriter::Process()
 	  
 	  for (UInt_t i = 0; i < selected_photons.size(); ++i) {
 	    const Photon *tmppho = selected_photons[i];	
-	    float best_mllg = (muona->Mom() + muonb->Mom() + tmppho->Mom()).M();
-	    if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/best_mllg) > 15./110. ) {  // KH , add scaled pT cut
+	    float mllg = (muona->Mom() + muonb->Mom() + tmppho->Mom()).M();
+	    if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/mllg) > 15./110. ) {  // KH , add scaled pT cut
 	      if( verbose ) cout << "PASSPHOTON :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() 
 				 << "\t" << tmppho->Mom().Pt() << "\t" << tmppho->Mom().Eta() << endl;
 	      if( mithep::MathUtils::DeltaR(muona->Phi(),muona->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 && 
 		  mithep::MathUtils::DeltaR(muonb->Phi(),muonb->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 ) {
-		if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		if( best_mllg > 115 ) { 
+		if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() 
+				  << "\t" << GetEventHeader()->EvtNum() 
+				  << "\tmllg: " << mllg << endl;
+		if( mllg > 115 ) { 
 		  if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		  if( best_mllg < 180 ) { 
+		  if( mllg < 180 ) { 
 		    if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		    store_event = true;		  
+		    store_event_mu = true;		  
 		    pho = tmppho;
 		    break;
 		  } // m(llg)<180
@@ -1285,7 +1296,7 @@ void LeptonPairPhotonTreeWriter::Process()
 
 
 
-    if( store_event ) { 
+    if( store_event_mu ) { 
       fLeptonPairPhotonEvent->photonenergy = pho->E();
       fLeptonPairPhotonEvent->photonpx = pho->Px();
       fLeptonPairPhotonEvent->photonpy = pho->Py();
@@ -1352,7 +1363,7 @@ void LeptonPairPhotonTreeWriter::Process()
       else fLeptonPairPhotonEvent->m2PtErr = muonb->BestTrk()->PtErr();
     } // store event   
 
-    if( store_event ) ZgllTuple->Fill();
+    if( store_event_ele || store_event_mu ) ZgllTuple->Fill();
   }
 }
 
