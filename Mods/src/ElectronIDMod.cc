@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.132 2012/10/26 19:23:05 fabstoec Exp $
+// $Id: ElectronIDMod.cc,v 1.133 2012/10/27 13:41:33 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -209,19 +209,19 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     else if (MVABin == 4) MVACut = 0.889;
     else if (MVABin == 5) MVACut = 0.871;
   } else if (idType == ElectronTools::kHggLeptonTagId2012HCP) {
-    if      (MVABin == 0) MVACut = -100.8;
-    else if (MVABin == 1) MVACut = -100.8;
-    else if (MVABin == 2) MVACut = -100.8;
-    else if (MVABin == 3) MVACut = -100.8;
-    else if (MVABin == 4) MVACut = -100.8;
-    else if (MVABin == 5) MVACut = -100.8;
+    if      (MVABin == 0) MVACut = 0.9;
+    else if (MVABin == 1) MVACut = 0.9;
+    else if (MVABin == 2) MVACut = 0.9;
+    else if (MVABin == 3) MVACut = 0.9;
+    else if (MVABin == 4) MVACut = 0.9;
+    else if (MVABin == 5) MVACut = 0.9;
   }
 
-  if(isDebug == kTRUE){
-    printf("PassElMVAID(%d): %d, pt, eta = %f, %f, rho = %f(%f) : MVA = %f, bin: %d\n",
-           (MVAValue > MVACut),GetEventHeader()->EvtNum(),el->Pt(), eta,
-	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets(),MVAValue,MVABin);
-  }
+  //if(isDebug == kTRUE || true ){
+  //  printf("PassElMVAID(%d): %d, pt, eta = %f, %f, rho = %f(%f) : MVA = %f, bin: %d\n",
+  //         (MVAValue > MVACut),GetEventHeader()->EvtNum(),el->Pt(), eta,
+  //	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets(),MVAValue,MVABin);
+  //}
 
   if (MVAValue > MVACut) return kTRUE;
   return kFALSE;
