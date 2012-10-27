@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.131 2012/10/26 17:40:17 mingyang Exp $
+// $Id: ElectronIDMod.cc,v 1.132 2012/10/26 19:23:05 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -217,7 +217,7 @@ Bool_t ElectronIDMod::PassMVAID(const Electron *el, ElectronTools::EElIdType idT
     else if (MVABin == 5) MVACut = -100.8;
   }
 
-  if(isDebug == kTRUE || true ){
+  if(isDebug == kTRUE){
     printf("PassElMVAID(%d): %d, pt, eta = %f, %f, rho = %f(%f) : MVA = %f, bin: %d\n",
            (MVAValue > MVACut),GetEventHeader()->EvtNum(),el->Pt(), eta,
 	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets(),MVAValue,MVABin);
