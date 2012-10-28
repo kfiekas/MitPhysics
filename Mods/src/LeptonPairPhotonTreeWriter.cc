@@ -42,7 +42,8 @@ using namespace mithep;
 //mithep::ElectronIDMVA *eleIDMVA; // The electron MVA 
 //MVATools fTool; // The electron MVA tools
 ClassImp(mithep::LeptonPairPhotonTreeWriter)
-  ClassImp(mithep::LeptonPairPhotonEvent)
+ClassImp(mithep::LeptonPairPhotonEvent)
+
 //--------------------------------------------------------------------------------------------------
   LeptonPairPhotonTreeWriter::LeptonPairPhotonTreeWriter(const char *name, const char *title) : 
     BaseMod                 (name,title),
@@ -942,9 +943,9 @@ void LeptonPairPhotonTreeWriter::Process()
 	    }
 	  }
 	  if( ele_is_clean ) { if( verbose )cout << "\tclean"; }
-          if (ZGTools::electronCutBasedIDLoose(tmpele, bestPV,fConversions,YEAR)){
+          if( ele_is_clean && tmpele->Pt() > 10 && ZGTools::electronCutBasedIDLoose(tmpele, bestPV,fConversions,YEAR)){
 	    if( verbose )cout << "\tID";
-            if ((YEAR == 2011 && 
+            if( (YEAR == 2011 && 
 		 ZGTools::electronPFIso04(tmpele,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2011, pfNoPileUpflag,YEAR)) || 
 		(YEAR == 2012 && 
 		 ZGTools::electronPFIso04(tmpele,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2012, pfNoPileUpflag,YEAR)) )
@@ -961,31 +962,27 @@ void LeptonPairPhotonTreeWriter::Process()
 	if( verbose )cout << endl;
       } // loop over electons
       
-      Float_t zdifference = 999;
-      UInt_t electron1 = 0;
-      UInt_t electron2 = 1;
+
       int nIDPairEL=0, nIDIsoPairEL=0;	
       for (UInt_t j = 0; j < fGoodElectrons->GetEntries(); ++j){
         for (UInt_t k = 0; k < j; ++k){    
           if (j == k) continue;
-          ele1 = fGoodElectrons->At(j);
-          ele2 = fGoodElectrons->At(k);
 	  // KH : no charge here for resync, moved to Z selection
 	  //	  if (ele1->Charge() != ele2->Charge() && electronpassID[j] && electronpassID[k]){ 
 	  if (electronpassID[j] && electronpassID[k]){ 
 	    nIDPairEL++;
-
-	    if (electronpass[j] && electronpass[k] && fabs(91.19 - (ele1->Mom() + ele2->Mom()).M()) < zdifference){
-	      zdifference = fabs(91.19 - (ele1->Mom() + ele2->Mom()).M());
-	      electron1 = k;
-	      electron2 = j;
+	    
+	    if (electronpass[j] && electronpass[k] ) { 
 	      nIDIsoPairEL++;
+	      
 	    }
-	  }	
+	  }
 	}
       }
-      if( nIDPairEL >= 1 &&  verbose ){cout << "PASSID :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;}
-      if( nIDIsoPairEL >= 1 && verbose ){cout << "PASSIDISO :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;}
+      if( nIDPairEL >= 1 &&  verbose ){cout << "PASSID :: " << GetEventHeader()->RunNum() 
+					    << "\t" << GetEventHeader()->EvtNum() << endl;}
+      if( nIDIsoPairEL >= 1 && verbose ){cout << "PASSIDISO :: " << GetEventHeader()->RunNum() 
+					      << "\t" << GetEventHeader()->EvtNum() << endl;}
       
 
       // 
@@ -993,12 +990,41 @@ void LeptonPairPhotonTreeWriter::Process()
       // 
       if( nIDPairEL >= 1 && nIDIsoPairEL >= 1 ) {
 	
-	ele1 = fGoodElectrons->At(electron1);
-	ele2 = fGoodElectrons->At(electron2); 
-	float best_mll = (ele1->Mom() + ele2->Mom()).M();
-	if( best_mll > 50. && (ele1->Mom().Pt() > 20 || ele2->Mom().Pt() > 20. ) && 
-	    ele1->Charge() != ele2->Charge()  ) { // KH , charge here for resync
-	  
+	// find the e-pair that guves the best Z mass ...
+	bool found_Z=false;
+	Float_t zdifference = 999;
+	UInt_t electron1,electron2;
+	for( unsigned j=0; j<fGoodElectrons->GetEntries(); j++ ) {
+	  if(!electronpass[j]) continue;
+	  ele1 = fGoodElectrons->At(j);
+	  for( unsigned  k=j+1; k<fGoodElectrons->GetEntries(); k++ ) {
+	    if(!electronpass[k]) continue;
+	    ele2 = fGoodElectrons->At(k);
+
+	    float tmp_mll = (ele1->Mom() + ele2->Mom()).M();	    
+	    cout << "j,k:"  << j<< ","<<k << "\ttmp_mll: " << tmp_mll << endl;
+	    if( tmp_mll < 50. 
+		|| (ele1->Mom().Pt() < 10 || ele2->Mom().Pt() < 10. )  
+		|| (ele1->Mom().Pt() < 20 && ele2->Mom().Pt() < 20. )  
+		|| (ele1->Charge() == ele2->Charge())  ) { // KH , charge here for resync
+	      continue;
+	    }
+
+	    if( fabs(91.19 - tmp_mll) < zdifference){
+	      found_Z = true;
+	      zdifference = fabs(91.19 - tmp_mll);
+	      electron1 = k;
+	      electron2 = j;
+	    }
+	  }
+	}
+	
+	if( found_Z ) {  
+
+	  ele1 = fGoodElectrons->At(electron1);
+	  ele2 = fGoodElectrons->At(electron2); 
+	  float best_mll = (ele1->Mom() + ele2->Mom()).M();
+  
 	  if( verbose ) cout << "GOODZ :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;	  
  
 	  for (UInt_t i = 0; i < selected_photons.size(); ++i) {
@@ -1188,7 +1214,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	    
     } // store event
 
-
+    /*
     // --------------------------------------------------------------------
     //
     // Dimuons
@@ -1223,11 +1249,11 @@ void LeptonPairPhotonTreeWriter::Process()
 	if( verbose ) cout << endl;
       } // loop over muons
       
-
+      
       Float_t zdifference = 999;
       UInt_t muon1 = 0;
       UInt_t muon2 = 1;
-
+      
       int nIDPairMU=0, nIDIsoPairMU=0;
       for (UInt_t j = 0; j < fGoodMuons->GetEntries(); ++j){
         for (UInt_t k = 0; k < j; ++k){
@@ -1248,8 +1274,8 @@ void LeptonPairPhotonTreeWriter::Process()
 	}
       }
       
-      if( nIDPairMU >= 1 ) { if( verbose ) cout << "PASSID :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
-      if( nIDIsoPairMU >= 1 ) { if( verbose ) cout << "PASSIDISO :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
+      if( nIDPairMU >= 1 &&  verbose ){ cout << "PASSID :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
+      if( nIDIsoPairMU >= 1 &&  verbose ){ cout << "PASSIDISO :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
 
 
       // 
@@ -1362,6 +1388,7 @@ void LeptonPairPhotonTreeWriter::Process()
       if (muonb->TrackerTrk()) fLeptonPairPhotonEvent->m2PtErr = muonb->TrackerTrk()->PtErr();
       else fLeptonPairPhotonEvent->m2PtErr = muonb->BestTrk()->PtErr();
     } // store event   
+    */
 
     if( store_event_ele || store_event_mu ) ZgllTuple->Fill();
   }
