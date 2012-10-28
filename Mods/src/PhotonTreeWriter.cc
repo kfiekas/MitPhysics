@@ -288,6 +288,10 @@ void PhotonTreeWriter::Process()
   const Jet *jet2 = 0;
   const Jet *jetcentral = 0;
 
+  fDiphotonEvent->jetleadNoIDpt   = -99.;
+  fDiphotonEvent->jetleadNoIDeta  = -99.;
+  fDiphotonEvent->jetleadNoIDphi  = -99.;
+  fDiphotonEvent->jetleadNoIDmass = -99.;
   fDiphotonEvent->jet1pt   = -99.;
   fDiphotonEvent->jet1eta  = -99.;
   fDiphotonEvent->jet1phi  = -99.;
@@ -461,6 +465,17 @@ void PhotonTreeWriter::Process()
       }
     }
     
+    for(UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet){
+      const Jet *jet = fPFJets->At(ijet);
+      if (MathUtils::DeltaR(jet,p1)>0.5 && MathUtils::DeltaR(jet,p2)>0.5) {
+	fDiphotonEvent->jetleadNoIDpt   = jet->Pt();
+	fDiphotonEvent->jetleadNoIDeta  = jet->Eta();
+	fDiphotonEvent->jetleadNoIDphi  = jet->Phi();
+	fDiphotonEvent->jetleadNoIDmass = jet->Mass();
+	break;
+      }
+    }
+
     if (jet1) {
       fDiphotonEvent->jet1pt   = jet1->Pt();
       fDiphotonEvent->jet1eta  = jet1->Eta();
