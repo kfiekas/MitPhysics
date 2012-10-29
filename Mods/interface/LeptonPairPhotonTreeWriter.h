@@ -200,6 +200,8 @@ namespace mithep
     void                SetTupleName(const char* c)          { fTupleName = c; }
     void		SetYear(Float_t y)		     {YEAR = y;} 
     void		SetVerbose(bool b)		     {verbose = b;} 
+    void		SetDoElectronChannel(bool b)	     {_do_ElectronChannel = b;}
+    void		SetDoMuonChannel(bool b)	     {_do_MuonChannel = b;} 
 
     // wrappers to keep things readable
     void fillEle1Variables(const mithep::Electron * ele1);  
@@ -278,6 +280,7 @@ namespace mithep
     ElectronEnergyRegression *eleRegressionEvaluator_V2;
 
     bool verbose;
+    bool _do_ElectronChannel, _do_MuonChannel;
 
     ClassDef(LeptonPairPhotonTreeWriter, 1) // Lepton Pair + Photon identification module
   };

@@ -90,7 +90,9 @@ ClassImp(mithep::LeptonPairPhotonEvent)
     fBeamSpot               (0),
     fTupleName              ("h2LepPhotonTree"),
 
-    verbose                 (false)
+    verbose                 (false),
+    _do_ElectronChannel     (true),
+    _do_MuonChannel         (true)
   
     //Photon MVA Variables
 //    fVariableType_2011             (10),
@@ -758,6 +760,7 @@ void LeptonPairPhotonTreeWriter::regressEle2(const mithep::Electron             
 void LeptonPairPhotonTreeWriter::Process()
 //--------------------------------------------------------------------------------------------------
 {
+  Bool_t electronZgfilled = kFALSE;  // needed if we pass both channels ... 
   bool store_event_ele = false, store_event_mu = false;
 
   // Process entries of the tree. 
@@ -922,120 +925,330 @@ void LeptonPairPhotonTreeWriter::Process()
     // --------------------------------------------------------------------
     //
     // Dielectrons
+    if( _do_ElectronChannel ) { 
     //
     // --------------------------------------------------------------------
-    Bool_t electronZgfilled = kFALSE;  // to check if we pass both channels ... 
-    const Electron *ele1=0, *ele2=0; // these will be the selected Z eles, assigned below
-    if (fGoodElectrons->GetEntries() > 1){
-      vector<bool> electronpass, electronpassID;
-      for (UInt_t j = 0; j < fGoodElectrons->GetEntries();++j){
-        const Electron *tmpele = fGoodElectrons->At(j);
-	if( verbose ) cout << "ele :: pt: " << tmpele->Pt() << "\teta: " << tmpele->Eta();
-        if (tmpele->Pt() > 7 && fabs(tmpele->SCluster()->Eta()) < 2.5  ){ //
-	  if( verbose )cout << "\tpreSel";
-	  bool ele_is_clean=true;
-	  for (UInt_t k = 0; k < fGoodMuons->GetEntries(); ++k){
-	    if (fabs(fGoodMuons->At(k)->Eta()) < 2.4 && fGoodMuons->At(k)->IsGlobalMuon() &&
-		mithep::MathUtils::DeltaR(tmpele->Phi(),tmpele->Eta(), 
-					  fGoodMuons->At(k)->Phi(), fGoodMuons->At(k)->Eta()) < 0.05) {
-	      ele_is_clean = false;
-	      break;
-	    }
-	  }
-	  if( ele_is_clean ) { if( verbose )cout << "\tclean"; }
-          if( ele_is_clean && tmpele->Pt() > 10 && ZGTools::electronCutBasedIDLoose(tmpele, bestPV,fConversions,YEAR)){
-	    if( verbose )cout << "\tID";
-            if( (YEAR == 2011 && 
-		 ZGTools::electronPFIso04(tmpele,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2011, pfNoPileUpflag,YEAR)) || 
-		(YEAR == 2012 && 
-		 ZGTools::electronPFIso04(tmpele,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2012, pfNoPileUpflag,YEAR)) )
-	      {
-		if( verbose ) cout << "\tIso";
-		electronpass.push_back(1);
+      const Electron *ele1=0, *ele2=0; // these will be the selected Z eles, assigned below
+      if (fGoodElectrons->GetEntries() > 1){
+	vector<bool> electronpass, electronpassID;
+	for (UInt_t j = 0; j < fGoodElectrons->GetEntries();++j){
+	  const Electron *tmpele = fGoodElectrons->At(j);
+	  if( verbose ) cout << "ele :: pt: " << tmpele->Pt() << "\teta: " << tmpele->Eta();
+	  if (tmpele->Pt() > 7 && fabs(tmpele->SCluster()->Eta()) < 2.5  ){ //
+	    if( verbose )cout << "\tpreSel";
+	    bool ele_is_clean=true;
+	    for (UInt_t k = 0; k < fGoodMuons->GetEntries(); ++k){
+	      if (fabs(fGoodMuons->At(k)->Eta()) < 2.4 && fGoodMuons->At(k)->IsGlobalMuon() &&
+		  mithep::MathUtils::DeltaR(tmpele->Phi(),tmpele->Eta(), 
+					    fGoodMuons->At(k)->Phi(), fGoodMuons->At(k)->Eta()) < 0.05) {
+		ele_is_clean = false;
+		break;
 	      }
-	    else  electronpass.push_back(0);
-	    electronpassID.push_back(1);
-	  } // ID & clean
-	  else { electronpass.push_back(0); electronpassID.push_back(0); }
-	} // presel
-	else {electronpass.push_back(0); electronpassID.push_back(0);}
-	if( verbose )cout << endl;
-      } // loop over electons
+	    }
+	    if( ele_is_clean ) { if( verbose )cout << "\tclean"; }
+	    if( ele_is_clean && tmpele->Pt() > 10 && ZGTools::electronCutBasedIDLoose(tmpele, bestPV,fConversions,YEAR)){
+	      if( verbose )cout << "\tID";
+	      if( (YEAR == 2011 && 
+		   ZGTools::electronPFIso04(tmpele,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2011, pfNoPileUpflag,YEAR)) || 
+		  (YEAR == 2012 && 
+		   ZGTools::electronPFIso04(tmpele,fPV->At(0),fPFCands,fPileUpDen, mithep::ElectronTools::kEleEAData2012, pfNoPileUpflag,YEAR)) )
+		{
+		  if( verbose ) cout << "\tIso";
+		  electronpass.push_back(1);
+		}
+	      else  electronpass.push_back(0);
+	      electronpassID.push_back(1);
+	    } // ID & clean
+	    else { electronpass.push_back(0); electronpassID.push_back(0); }
+	  } // presel
+	  else {electronpass.push_back(0); electronpassID.push_back(0);}
+	  if( verbose )cout << endl;
+	} // loop over electons
       
 
-      int nIDPairEL=0, nIDIsoPairEL=0;	
-      for (UInt_t j = 0; j < fGoodElectrons->GetEntries(); ++j){
-        for (UInt_t k = 0; k < j; ++k){    
-          if (j == k) continue;
-	  // KH : no charge here for resync, moved to Z selection
-	  //	  if (ele1->Charge() != ele2->Charge() && electronpassID[j] && electronpassID[k]){ 
-	  if (electronpassID[j] && electronpassID[k]){ 
-	    nIDPairEL++;
+	int nIDPairEL=0, nIDIsoPairEL=0;	
+	for (UInt_t j = 0; j < fGoodElectrons->GetEntries(); ++j){
+	  for (UInt_t k = 0; k < j; ++k){    
+	    if (j == k) continue;
+	    // KH : no charge here for resync, moved to Z selection
+	    //	  if (ele1->Charge() != ele2->Charge() && electronpassID[j] && electronpassID[k]){ 
+	    if (electronpassID[j] && electronpassID[k]){ 
+	      nIDPairEL++;
 	    
-	    if (electronpass[j] && electronpass[k] ) { 
-	      nIDIsoPairEL++;
+	      if (electronpass[j] && electronpass[k] ) { 
+		nIDIsoPairEL++;
 	      
+	      }
 	    }
 	  }
 	}
-      }
-      if( nIDPairEL >= 1 &&  verbose ){cout << "PASSID :: " << GetEventHeader()->RunNum() 
-					    << "\t" << GetEventHeader()->EvtNum() << endl;}
-      if( nIDIsoPairEL >= 1 && verbose ){cout << "PASSIDISO :: " << GetEventHeader()->RunNum() 
+	if( nIDPairEL >= 1 &&  verbose ){cout << "PASSID :: " << GetEventHeader()->RunNum() 
 					      << "\t" << GetEventHeader()->EvtNum() << endl;}
+	if( nIDIsoPairEL >= 1 && verbose ){cout << "PASSIDISO :: " << GetEventHeader()->RunNum() 
+						<< "\t" << GetEventHeader()->EvtNum() << endl;}
       
 
-      // 
-      // now make the ee and eeg systems ...
-      // 
-      if( nIDPairEL >= 1 && nIDIsoPairEL >= 1 ) {
+	// 
+	// now make the ee and eeg systems ...
+	// 
+	if( nIDPairEL >= 1 && nIDIsoPairEL >= 1 ) {
 	
-	// find the e-pair that guves the best Z mass ...
-	bool found_Z=false;
-	Float_t zdifference = 999;
-	UInt_t electron1,electron2;
-	for( unsigned j=0; j<fGoodElectrons->GetEntries(); j++ ) {
-	  if(!electronpass[j]) continue;
-	  ele1 = fGoodElectrons->At(j);
-	  for( unsigned  k=j+1; k<fGoodElectrons->GetEntries(); k++ ) {
-	    if(!electronpass[k]) continue;
-	    ele2 = fGoodElectrons->At(k);
+	  // find the e-pair that guves the best Z mass ...
+	  bool found_Z=false;
+	  Float_t zdifference = 999;
+	  UInt_t electron1,electron2;
+	  for( unsigned j=0; j<fGoodElectrons->GetEntries(); j++ ) {
+	    if(!electronpass[j]) continue;
+	    ele1 = fGoodElectrons->At(j);
+	    for( unsigned  k=j+1; k<fGoodElectrons->GetEntries(); k++ ) {
+	      if(!electronpass[k]) continue;
+	      ele2 = fGoodElectrons->At(k);
 
-	    float tmp_mll = (ele1->Mom() + ele2->Mom()).M();	    
-	    cout << "j,k:"  << j<< ","<<k << "\ttmp_mll: " << tmp_mll << endl;
-	    if( tmp_mll < 50. 
-		|| (ele1->Mom().Pt() < 10 || ele2->Mom().Pt() < 10. )  
-		|| (ele1->Mom().Pt() < 20 && ele2->Mom().Pt() < 20. )  
-		|| (ele1->Charge() == ele2->Charge())  ) { // KH , charge here for resync
-	      continue;
+	      float tmp_mll = (ele1->Mom() + ele2->Mom()).M();	    
+	      cout << "j,k:"  << j<< ","<<k << "\ttmp_mll: " << tmp_mll << endl;
+	      if( tmp_mll < 50. 
+		  || (ele1->Mom().Pt() < 10 || ele2->Mom().Pt() < 10. )  
+		  || (ele1->Mom().Pt() < 20 && ele2->Mom().Pt() < 20. )  
+		  || (ele1->Charge() == ele2->Charge())  ) { // KH , charge here for resync
+		continue;
+	      }
+
+	      if( fabs(91.19 - tmp_mll) < zdifference){
+		found_Z = true;
+		zdifference = fabs(91.19 - tmp_mll);
+		electron1 = k;
+		electron2 = j;
+	      }
 	    }
+	  }
+	
+	  if( found_Z ) {  
 
-	    if( fabs(91.19 - tmp_mll) < zdifference){
-	      found_Z = true;
-	      zdifference = fabs(91.19 - tmp_mll);
-	      electron1 = k;
-	      electron2 = j;
+	    ele1 = fGoodElectrons->At(electron1);
+	    ele2 = fGoodElectrons->At(electron2); 
+	    float best_mll = (ele1->Mom() + ele2->Mom()).M();
+  
+	    if( verbose ) cout << "GOODZ :: run " << GetEventHeader()->RunNum() 
+			       << "\t" << GetEventHeader()->EvtNum() 
+			       << "\t" << best_mll
+			       << endl;	  
+ 
+	    for (UInt_t i = 0; i < selected_photons.size(); ++i) {
+	      const Photon *tmppho = selected_photons[i];	
+	      float mllg = (ele1->Mom() + ele2->Mom() + tmppho->Mom()).M();
+	      if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/mllg) > 15./110. ) 
+		{ 
+		  if( verbose ) cout << "PASSPHOTON :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		
+		  if( mithep::MathUtils::DeltaR(ele1->Phi(),ele1->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 && 
+		      mithep::MathUtils::DeltaR(ele2->Phi(),ele2->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 ) {
+		    if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() 
+				      << "\t" << GetEventHeader()->EvtNum() 
+				      << "\tmllg: " << mllg << endl;
+		    if( mllg > 115 ) { 
+		      if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		      if( mllg < 180 ) { 
+			if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+			store_event_ele = true;		  
+			pho = tmppho;
+			break;
+		      } // m(llg)<180
+		    } // m(llg)>115
+		  } // dR(l,g)
+		} // pho kinematics
+	    } // loop over phos
+	  
+	  } // goodZ
+	} // good dielectron pair
+      } // >1 electrons
+
+      //Compute Photon MVA Value and photon quantities
+      //	Float_t rho = -99.;
+      //	if (fPileUpDen->GetEntries() > 0) rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
+      //      			fLeptonPairPhotonEvent->photonidmva = fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
+      if( store_event_ele ) { 
+	if( verbose ) cout << "storing electron event ..." << endl;
+
+	electronZgfilled = kTRUE;
+
+	fLeptonPairPhotonEvent->photonenergy = pho->E();
+	fLeptonPairPhotonEvent->photonpx = pho->Px();
+	fLeptonPairPhotonEvent->photonpy = pho->Py();
+	fLeptonPairPhotonEvent->photonpz = pho->Pz();
+	fLeptonPairPhotonEvent->photonpt = pho->Pt();
+	fLeptonPairPhotonEvent->photoneta = pho->Eta();
+	fLeptonPairPhotonEvent->photonmass = pho->Mass();
+	fLeptonPairPhotonEvent->photonphi = pho->Phi();
+	fLeptonPairPhotonEvent->photonr9 = pho->R9();	
+	fLeptonPairPhotonEvent->photonenergyerror = pho->EnergyErr();
+	// check if pho matched
+	const MCParticle *phgen = NULL;
+	if (!fIsData){
+	  phgen = PhotonTools::MatchMC(pho,fMCParticles,!fApplyElectronVeto);
+	  // 	cout << "It went into Photon Tools phgen loop." << endl;
+	}
+	if (phgen != NULL){
+	  fLeptonPairPhotonEvent->photonmatchmc = 1;
+	  //	cout << "photonmatchmc written to be kTRUE" << endl;	
+	}
+	else fLeptonPairPhotonEvent->photonmatchmc = 0;	
+     
+	fillEle1Variables(ele1);
+	fillEle2Variables(ele2);
+	regressEle1(ele1,fPileUpDen,fPV);
+	regressEle2(ele2,fPileUpDen,fPV);
+
+	fLeptonPairPhotonEvent->mllg = (ele1->Mom() + ele2->Mom() + pho->Mom()).M();
+	ZGLabVectors l;
+	ZGAngles b;
+      
+	l.vecg.SetPxPyPzE(pho->Px(),pho->Py(),pho->Pz(),pho->E());
+	l.veclp.SetPxPyPzE(ele1->Px(),ele1->Py(),ele1->Pz(),ele1->E());
+	l.veclm.SetPxPyPzE(ele2->Px(),ele2->Py(),ele2->Pz(),ele2->E());
+	l.vecz = (l.veclp+l.veclm);
+	l.veczg = (l.vecg+l.veclp+l.veclm);
+      
+	b = ZGTools::getZGAngles(l,kFALSE);
+      
+	fLeptonPairPhotonEvent->costheta_lm_electrons = b.costheta_lm;
+	fLeptonPairPhotonEvent->costheta_lp_electrons = b.costheta_lp;
+	fLeptonPairPhotonEvent->phi_electrons = b.phi;
+	fLeptonPairPhotonEvent->cosTheta_electrons = b.cosTheta;
+
+	fLeptonPairPhotonEvent->electronZmass = (ele1->Mom() + ele2->Mom()).M();
+      
+	fLeptonPairPhotonEvent->ele1dEtaIn = TMath::Abs(ele1->DeltaEtaSuperClusterTrackAtVtx());
+	fLeptonPairPhotonEvent->ele1dPhiIn = TMath::Abs(ele1->DeltaPhiSuperClusterTrackAtVtx());
+	fLeptonPairPhotonEvent->ele1sigmaIEtaIEta = ele1->CoviEtaiEta();
+	fLeptonPairPhotonEvent->ele1HadOverEm = ele1->HadronicOverEm();
+	fLeptonPairPhotonEvent->ele1D0 = fabs(ele1->BestTrk()->D0Corrected(*bestPV));
+	fLeptonPairPhotonEvent->ele1DZ = fabs(ele1->BestTrk()->DzCorrected(*bestPV));
+	fLeptonPairPhotonEvent->ele1OneOverEMinusOneOverP = fabs((1 - ele1->ESuperClusterOverP())/(ele1->EcalEnergy()));
+	fLeptonPairPhotonEvent->ele1Conversion = mithep::ElectronTools::PassConversionFilter(ele1,fConversions,bestPV, 0, 1e-6, 2.0, kTRUE, kFALSE, 7);
+	fLeptonPairPhotonEvent->ele1missinghits = ele1->CorrectedNExpectedHitsInner();
+
+	fLeptonPairPhotonEvent->ele2dEtaIn = TMath::Abs(ele2->DeltaEtaSuperClusterTrackAtVtx());
+	fLeptonPairPhotonEvent->ele2dPhiIn = TMath::Abs(ele2->DeltaPhiSuperClusterTrackAtVtx());
+	fLeptonPairPhotonEvent->ele2sigmaIEtaIEta = ele2->CoviEtaiEta();
+	fLeptonPairPhotonEvent->ele2HadOverEm = ele2->HadronicOverEm();
+	fLeptonPairPhotonEvent->ele2D0 = fabs(ele2->BestTrk()->D0Corrected(*bestPV));
+	fLeptonPairPhotonEvent->ele2DZ = fabs(ele2->BestTrk()->DzCorrected(*bestPV));
+	fLeptonPairPhotonEvent->ele2OneOverEMinusOneOverP = fabs((1 - ele2->ESuperClusterOverP())/(ele2->EcalEnergy()));
+	fLeptonPairPhotonEvent->ele2Conversion = mithep::ElectronTools::PassConversionFilter(ele2,fConversions,bestPV, 0, 1e-6, 2.0, kTRUE, kFALSE,7);
+	fLeptonPairPhotonEvent->ele2missinghits = ele2->CorrectedNExpectedHitsInner();
+
+      } // store event
+    } // doElectronChannel
+
+    // --------------------------------------------------------------------
+    //
+    // Dimuons
+    if( _do_MuonChannel ) { 
+    //
+    // --------------------------------------------------------------------
+      const Muon *muona=0, *muonb=0; // these will be the selected Z muons, assigned below
+      if (fGoodMuons->GetEntries() > 1) {
+	vector<bool> muonpass, muonpassID;
+	for (UInt_t j = 0; j < fGoodMuons->GetEntries();++j){
+	  const Muon *tmpmu  = fGoodMuons->At(j);
+	  if( verbose ) cout << "mu :: pt: " << tmpmu->Pt() << "\teta: " << tmpmu->Eta();
+	  if (tmpmu->Pt() > 10 && fabs(tmpmu->Eta()) < 2.4 && tmpmu->IsGlobalMuon() == true){
+	    if( verbose ) cout << "\tpresel";
+	    if (ZGTools::muonIDPOGTightSelection(YEAR,tmpmu,bestPV,fPFCands)){
+	      if( verbose )cout << "\tID";
+	      if ((YEAR == 2011 && ZGTools::muonPFIso04(tmpmu,fPV->At(0),fPFCands,fPileUpDen, mithep::MuonTools::kMuEAData2011, pfNoPileUpflag,YEAR)) || 
+		  (YEAR == 2012 && ZGTools::muonPFIso04(tmpmu,fPV->At(0),fPFCands,fPileUpDen, mithep::MuonTools::kMuEAData2012, pfNoPileUpflag,YEAR))){
+		muonpass.push_back(1);
+		if( verbose ) cout << "\tIso";
+	      } else muonpass.push_back(0);
+	      muonpassID.push_back(1);
+	    }
+	    else { 
+	      muonpass.push_back(0);
+	      muonpassID.push_back(0);
+	    }
+	  }
+	  else { 
+	    muonpass.push_back(0);
+	    muonpassID.push_back(0);
+	  }
+	  if( verbose ) cout << endl;
+	} // loop over muons
+      
+     
+	
+	int nIDPairMU=0, nIDIsoPairMU=0;
+	for (UInt_t j = 0; j < fGoodMuons->GetEntries(); ++j){
+	  for (UInt_t k = 0; k < j; ++k){
+	    if (j == k) continue;
+	    muona = fGoodMuons->At(j);
+	    muonb = fGoodMuons->At(k);
+	    if (muonpassID[j] && muonpassID[k]){ // KH, no charge here in resync muona->Charge() != muonb->Charge() && 
+	      nIDPairMU++;
+	      if (muonpass[j] && muonpass[k]){ // KH, no charge here in resync muona->Charge() != muonb->Charge() && 
+		nIDIsoPairMU++;
+	      }
 	    }
 	  }
 	}
-	
-	if( found_Z ) {  
+      
+	if( nIDPairMU >= 1 &&  verbose ){ cout << "PASSID :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
+	if( nIDIsoPairMU >= 1 &&  verbose ){ cout << "PASSIDISO :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
 
-	  ele1 = fGoodElectrons->At(electron1);
-	  ele2 = fGoodElectrons->At(electron2); 
-	  float best_mll = (ele1->Mom() + ele2->Mom()).M();
-  
-	  if( verbose ) cout << "GOODZ :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;	  
- 
-	  for (UInt_t i = 0; i < selected_photons.size(); ++i) {
-	    const Photon *tmppho = selected_photons[i];	
-	    float mllg = (ele1->Mom() + ele2->Mom() + tmppho->Mom()).M();
-	    if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/mllg) > 15./110. ) 
-	      { 
-		if( verbose ) cout << "PASSPHOTON :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		
-		if( mithep::MathUtils::DeltaR(ele1->Phi(),ele1->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 && 
-		    mithep::MathUtils::DeltaR(ele2->Phi(),ele2->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 ) {
+
+	// 
+	// now make the mm and mmg systems ...
+	//       
+	if( nIDPairMU >= 1 && nIDIsoPairMU >= 1 ) {
+
+
+	  // find the mu-pair that guves the best Z mass ...
+	  bool found_Z=false;
+	  Float_t zdifference = 999;
+	  UInt_t mindex1,mindex2;
+	  for( unsigned j=0; j<fGoodMuons->GetEntries(); j++ ) {
+	    if(!muonpass[j]) continue;
+	    muona = fGoodMuons->At(j);
+	    for( unsigned  k=j+1; k<fGoodMuons->GetEntries(); k++ ) {
+	      if(!muonpass[k]) continue;
+	      muonb = fGoodMuons->At(k);
+
+	      float tmp_mll = (muona->Mom() + muonb->Mom()).M();	    
+	      if( verbose ) cout << "j,k:"  << j<< ","<<k << "\ttmp_mll: " << tmp_mll << endl;
+	      if( tmp_mll < 50. 
+		  || (muona->Mom().Pt() < 10 || muonb->Mom().Pt() < 10. )  
+		  || (muona->Mom().Pt() < 20 && muonb->Mom().Pt() < 20. )  
+		  || (muona->Charge() == muonb->Charge())  ) { // KH , charge here for resync
+		continue;
+	      }
+
+	      if( fabs(91.19 - tmp_mll) < zdifference){
+		found_Z = true;
+		zdifference = fabs(91.19 - tmp_mll);
+		mindex1 = k;
+		mindex2 = j;
+	      }
+	    }
+	  }
+	
+	  if( found_Z ) {  
+
+	    muona = fGoodMuons->At(mindex1);
+	    muonb = fGoodMuons->At(mindex2);
+	    float best_mll = (muona->Mom() + muonb->Mom()).M();
+	    if( verbose ) cout << "GOODZ :: run " << GetEventHeader()->RunNum() 
+			       << "\t" << GetEventHeader()->EvtNum() 
+			       << "\t" << best_mll
+			       << endl;	  
+	    
+	    for (UInt_t i = 0; i < selected_photons.size(); ++i) {
+	      const Photon *tmppho = selected_photons[i];	
+	      float mllg = (muona->Mom() + muonb->Mom() + tmppho->Mom()).M();
+	      if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/mllg) > 15./110. ) {  // KH , add scaled pT cut
+		if( verbose ) cout << "PASSPHOTON :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() 
+				   << "\t" << tmppho->Mom().Pt() << "\t" << tmppho->Mom().Eta() << endl;
+		if( mithep::MathUtils::DeltaR(muona->Phi(),muona->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 && 
+		    mithep::MathUtils::DeltaR(muonb->Phi(),muonb->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 ) {
 		  if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() 
 				    << "\t" << GetEventHeader()->EvtNum() 
 				    << "\tmllg: " << mllg << endl;
@@ -1043,352 +1256,88 @@ void LeptonPairPhotonTreeWriter::Process()
 		    if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
 		    if( mllg < 180 ) { 
 		      if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		      store_event_ele = true;		  
+		      store_event_mu = true;		  
 		      pho = tmppho;
 		      break;
 		    } // m(llg)<180
 		  } // m(llg)>115
 		} // dR(l,g)
 	      } // pho kinematics
-	  } // loop over phos
+	    } // loop over phos
 	  
-	} // goodZ
-      } // good dielectron pair
-    } // >1 electrons
+	  } // goodZ
+	} // good dimuon pair
+      } // >1 muons
 
-    //Compute Photon MVA Value and photon quantities
-    //	Float_t rho = -99.;
-    //	if (fPileUpDen->GetEntries() > 0) rho = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
-    //      			fLeptonPairPhotonEvent->photonidmva = fTool.GetMVAbdtValue_2011(pho,fPV->At(0),fTracks,fPV,rho,fGoodElectrons,kTRUE);
-    if( store_event_ele ) { 
-      cout << "storing electron event ..." << endl;
 
-      electronZgfilled = kTRUE;
 
-      fLeptonPairPhotonEvent->photonenergy = pho->E();
-      fLeptonPairPhotonEvent->photonpx = pho->Px();
-      fLeptonPairPhotonEvent->photonpy = pho->Py();
-      fLeptonPairPhotonEvent->photonpz = pho->Pz();
-      fLeptonPairPhotonEvent->photonpt = pho->Pt();
-      fLeptonPairPhotonEvent->photoneta = pho->Eta();
-      fLeptonPairPhotonEvent->photonmass = pho->Mass();
-      fLeptonPairPhotonEvent->photonphi = pho->Phi();
-      fLeptonPairPhotonEvent->photonr9 = pho->R9();	
-      fLeptonPairPhotonEvent->photonenergyerror = pho->EnergyErr();
-      // check if pho matched
-      const MCParticle *phgen = NULL;
-      if (!fIsData){
-	phgen = PhotonTools::MatchMC(pho,fMCParticles,!fApplyElectronVeto);
-	// 	cout << "It went into Photon Tools phgen loop." << endl;
-	    }
-      if (phgen != NULL){
-	fLeptonPairPhotonEvent->photonmatchmc = 1;
-	//	cout << "photonmatchmc written to be kTRUE" << endl;	
-      }
-      else fLeptonPairPhotonEvent->photonmatchmc = 0;	
-      cout << "past pho ... " << endl;
-     
-      fillEle1Variables(ele1);
-      cout << "past ele1 ... " << endl;
-      fillEle2Variables(ele2);
-      cout << "past ele2 ... " << endl;
-      regressEle1(ele1,fPileUpDen,fPV);
-      cout << "past regress ele1 ... " << endl;
-      regressEle2(ele2,fPileUpDen,fPV);
-      cout << "past regress ele2 ... " << endl;
-
-      fLeptonPairPhotonEvent->mllg = (ele1->Mom() + ele2->Mom() + pho->Mom()).M();
-      ZGLabVectors l;
-      ZGAngles b;
-      
-      l.vecg.SetPxPyPzE(pho->Px(),pho->Py(),pho->Pz(),pho->E());
-      l.veclp.SetPxPyPzE(ele1->Px(),ele1->Py(),ele1->Pz(),ele1->E());
-      l.veclm.SetPxPyPzE(ele2->Px(),ele2->Py(),ele2->Pz(),ele2->E());
-      l.vecz = (l.veclp+l.veclm);
-      l.veczg = (l.vecg+l.veclp+l.veclm);
-      
-      b = ZGTools::getZGAngles(l,kFALSE);
-      
-      fLeptonPairPhotonEvent->costheta_lm_electrons = b.costheta_lm;
-      fLeptonPairPhotonEvent->costheta_lp_electrons = b.costheta_lp;
-      fLeptonPairPhotonEvent->phi_electrons = b.phi;
-      fLeptonPairPhotonEvent->cosTheta_electrons = b.cosTheta;
-      cout << "past angles ..." << endl;
-
-      fLeptonPairPhotonEvent->electronZmass = (ele1->Mom() + ele2->Mom()).M();
-      
-      fLeptonPairPhotonEvent->ele1dEtaIn = TMath::Abs(ele1->DeltaEtaSuperClusterTrackAtVtx());
-      fLeptonPairPhotonEvent->ele1dPhiIn = TMath::Abs(ele1->DeltaPhiSuperClusterTrackAtVtx());
-      fLeptonPairPhotonEvent->ele1sigmaIEtaIEta = ele1->CoviEtaiEta();
-      fLeptonPairPhotonEvent->ele1HadOverEm = ele1->HadronicOverEm();
-      fLeptonPairPhotonEvent->ele1D0 = fabs(ele1->BestTrk()->D0Corrected(*bestPV));
-      fLeptonPairPhotonEvent->ele1DZ = fabs(ele1->BestTrk()->DzCorrected(*bestPV));
-      fLeptonPairPhotonEvent->ele1OneOverEMinusOneOverP = fabs((1 - ele1->ESuperClusterOverP())/(ele1->EcalEnergy()));
-      fLeptonPairPhotonEvent->ele1Conversion = mithep::ElectronTools::PassConversionFilter(ele1,fConversions,bestPV, 0, 1e-6, 2.0, kTRUE, kFALSE, 7);
-      fLeptonPairPhotonEvent->ele1missinghits = ele1->CorrectedNExpectedHitsInner();
-      cout << "past more ele1 ..." << endl;
-
-      fLeptonPairPhotonEvent->ele2dEtaIn = TMath::Abs(ele2->DeltaEtaSuperClusterTrackAtVtx());
-      fLeptonPairPhotonEvent->ele2dPhiIn = TMath::Abs(ele2->DeltaPhiSuperClusterTrackAtVtx());
-      fLeptonPairPhotonEvent->ele2sigmaIEtaIEta = ele2->CoviEtaiEta();
-      fLeptonPairPhotonEvent->ele2HadOverEm = ele2->HadronicOverEm();
-      fLeptonPairPhotonEvent->ele2D0 = fabs(ele2->BestTrk()->D0Corrected(*bestPV));
-      fLeptonPairPhotonEvent->ele2DZ = fabs(ele2->BestTrk()->DzCorrected(*bestPV));
-      fLeptonPairPhotonEvent->ele2OneOverEMinusOneOverP = fabs((1 - ele2->ESuperClusterOverP())/(ele2->EcalEnergy()));
-      fLeptonPairPhotonEvent->ele2Conversion = mithep::ElectronTools::PassConversionFilter(ele2,fConversions,bestPV, 0, 1e-6, 2.0, kTRUE, kFALSE,7);
-      fLeptonPairPhotonEvent->ele2missinghits = ele2->CorrectedNExpectedHitsInner();
-      cout << "past more ele2 ..." << endl;
-      
-      //Compute Electron MVA Values
-      //double _fbrem = max(double(ele1->FBrem()),-1.0);
-      //double _kftrk_chisq = (ele1->HasTrackerTrk()) ? ele1->TrackerTrk()->Chi2() / ele1->TrackerTrk()->Ndof() : 0;
-      //double _kftrk_nhits = (ele1->HasTrackerTrk()) ? (Float_t)ele1->TrackerTrk()->NHits() : -1; 
-      //double _gsftrk_chisq = (Double_t)min(double(ele1->BestTrk()->Chi2() / ele1->BestTrk()->Ndof()),200.0);
-      //double seedE1x5OverE = ele1->SCluster()->Seed()->E1x5() / ele1->SCluster()->Seed()->Energy();
-      //double seedE5x5OverE = ele1->SCluster()->Seed()->E5x5() / ele1->SCluster()->Seed()->Energy();
-      //double _e1x5e5x5 = min(max(1 - double(seedE1x5OverE/seedE5x5OverE),-1.0),2.0);
-      //double _r9 = min(double(ele1->SCluster()->R9()),5.0);
-      //double _e_o_p = min(double(ele1->ESuperClusterOverP()), 20.0);
-      //double _eseed_o_pout = min(double(ele1->ESeedClusterOverPout()),20.0);
-      //double _IoEmIoP =  (Double_t)(1 - ele1->ESuperClusterOverP())/(ele1->SCluster()->Et()*TMath::CosH(ele1->SCluster()->Eta()));
-      //double _epreoraw = (Float_t)ele1->SCluster()->PreshowerEnergy() / ele1->SCluster()->RawEnergy();
-	    
-      //fLeptonPairPhotonEvent->ele1MVA = eleIDMVA->MVAValue_IDNonTrig(ele1->Pt(),
-      //							       ele1->SCluster()->Eta(),
-      //								       _fbrem,
-      //								       _kftrk_chisq,
-      //							       _kftrk_nhits,
-      //							       _gsftrk_chisq,
-      //							       fabs(ele1->DeltaEtaSuperClusterTrackAtVtx()),
-      //							       fabs(ele1->DeltaPhiSuperClusterTrackAtVtx()),
-      //							       fabs(ele1->DeltaEtaSeedClusterTrackAtCalo()),
-      //							       ele1->CoviEtaiEta(),
-      //							       sqrt(ele1->SCluster()->Seed()->CoviPhiiPhi()),
-      //							       ele1->SCluster()->EtaWidth(), 
-      //							       ele1->SCluster()->PhiWidth(),
-      //							       _e1x5e5x5,
-      //							       _r9,
-      //							       ele1->HadronicOverEm(),
-      //							       _e_o_p,
-      //							       _IoEmIoP,
-      //							       _eseed_o_pout,
-      //							       _epreoraw,
-      //							       kFALSE );
-	    
-	    
-      //double _fbrem_2 = max(double(ele2->FBrem()),-1.0);
-      //double _kftrk_chisq_2 = (ele2->HasTrackerTrk()) ? ele2->TrackerTrk()->Chi2() / ele2->TrackerTrk()->Ndof() : 0;
-      //double _kftrk_nhits_2 = (ele2->HasTrackerTrk()) ? (Float_t)ele2->TrackerTrk()->NHits() : -1; 
-      //double _gsftrk_chisq_2 = (Double_t)min(double(ele2->BestTrk()->Chi2() / ele2->BestTrk()->Ndof()),200.0);
-      //double seedE1x5OverE_2 = ele2->SCluster()->Seed()->E1x5() / ele2->SCluster()->Seed()->Energy();
-      //double seedE5x5OverE_2 = ele2->SCluster()->Seed()->E5x5() / ele2->SCluster()->Seed()->Energy();
-      //double _e1x5e5x5_2 = min(max(1 - double(seedE1x5OverE_2/seedE5x5OverE_2),-1.0),2.0);
-      //double _r9_2 = min(double(ele2->SCluster()->R9()),5.0);
-      //double _e_o_p_2 = min(double(ele2->ESuperClusterOverP()), 20.0);
-      //double _eseed_o_pout_2 = min(double(ele2->ESeedClusterOverPout()),20.0);
-      //double _IoEmIoP_2 =  (Double_t)(1 - ele2->ESuperClusterOverP())/(ele2->SCluster()->Et()*TMath::CosH(ele2->SCluster()->Eta()));
-      //double _epreoraw_2 = (Float_t)ele2->SCluster()->PreshowerEnergy() / ele2->SCluster()->RawEnergy();
-	    
-	    
-      //fLeptonPairPhotonEvent->ele2MVA = eleIDMVA->MVAValue_IDNonTrig(ele2->Pt(),
-      //							       ele2->SCluster()->Eta(),
-      //							       _fbrem_2,
-      //							       _kftrk_chisq_2,
-      //							       _kftrk_nhits_2,
-      //							       _gsftrk_chisq_2,
-      //							       fabs(ele2->DeltaEtaSuperClusterTrackAtVtx()),
-      //							       fabs(ele2->DeltaPhiSuperClusterTrackAtVtx()),
-      //							       fabs(ele2->DeltaEtaSeedClusterTrackAtCalo()),
-      //							       ele2->CoviEtaiEta(),
-      //							       sqrt(ele2->SCluster()->Seed()->CoviPhiiPhi()),
-      //							       ele2->SCluster()->EtaWidth(), 
-      //							       ele2->SCluster()->PhiWidth(),
-      //							       _e1x5e5x5_2,
-      //							       _r9_2,
-      //							       ele2->HadronicOverEm(),
-      //							       _e_o_p_2,
-      //							       _IoEmIoP_2,
-      //							       _eseed_o_pout_2,
-      //							       _epreoraw_2,
-      //							       kFALSE );
-	    
-    } // store event
-
-    /*
-    // --------------------------------------------------------------------
-    //
-    // Dimuons
-    //
-    // --------------------------------------------------------------------
-    const Muon *muona=0, *muonb=0; // these will be the selected Z muons, assigned below
-    if (fGoodMuons->GetEntries() > 1) {
-      vector<bool> muonpass, muonpassID;
-      for (UInt_t j = 0; j < fGoodMuons->GetEntries();++j){
-        const Muon *tmpmu  = fGoodMuons->At(j);
-	if( verbose ) cout << "mu :: pt: " << tmpmu->Pt() << "\teta: " << tmpmu->Eta();
-        if (tmpmu->Pt() > 10 && fabs(tmpmu->Eta()) < 2.4 && tmpmu->IsGlobalMuon() == true){
-	  if( verbose ) cout << "\tpresel";
-	  if (ZGTools::muonIDPOGTightSelection(YEAR,tmpmu,bestPV,fPFCands)){
-	    if( verbose )cout << "\tID";
-            if ((YEAR == 2011 && ZGTools::muonPFIso04(tmpmu,fPV->At(0),fPFCands,fPileUpDen, mithep::MuonTools::kMuEAData2011, pfNoPileUpflag,YEAR)) || 
-		(YEAR == 2012 && ZGTools::muonPFIso04(tmpmu,fPV->At(0),fPFCands,fPileUpDen, mithep::MuonTools::kMuEAData2012, pfNoPileUpflag,YEAR))){
-	      muonpass.push_back(1);
-	      if( verbose ) cout << "\tIso";
-	    } else muonpass.push_back(0);
-	    muonpassID.push_back(1);
-	  }
-	  else { 
-	    muonpass.push_back(0);
-	    muonpassID.push_back(0);
-	  }
+      if( store_event_mu ) { 
+	fLeptonPairPhotonEvent->photonenergy = pho->E();
+	fLeptonPairPhotonEvent->photonpx = pho->Px();
+	fLeptonPairPhotonEvent->photonpy = pho->Py();
+	fLeptonPairPhotonEvent->photonpz = pho->Pz();
+	fLeptonPairPhotonEvent->photonpt = pho->Pt();
+	fLeptonPairPhotonEvent->photoneta = pho->Eta();
+	fLeptonPairPhotonEvent->photonmass = pho->Mass();
+	fLeptonPairPhotonEvent->photonphi = pho->Phi();
+	fLeptonPairPhotonEvent->photonr9 = pho->R9();	
+	fLeptonPairPhotonEvent->photonenergyerror = pho->EnergyErr();
+	// check if pho matched
+	const MCParticle *phgen = NULL;
+	if (!fIsData){
+	  phgen = PhotonTools::MatchMC(pho,fMCParticles,!fApplyElectronVeto);
+	  // 	cout << "It went into Photon Tools phgen loop." << endl;
 	}
-	else { 
-	  muonpass.push_back(0);
-	  muonpassID.push_back(0);
+	if (phgen != NULL){
+	  fLeptonPairPhotonEvent->photonmatchmc = 1;
+	  //	cout << "photonmatchmc written to be kTRUE" << endl;	
 	}
-	if( verbose ) cout << endl;
-      } // loop over muons
-      
-      
-      Float_t zdifference = 999;
-      UInt_t muon1 = 0;
-      UInt_t muon2 = 1;
-      
-      int nIDPairMU=0, nIDIsoPairMU=0;
-      for (UInt_t j = 0; j < fGoodMuons->GetEntries(); ++j){
-        for (UInt_t k = 0; k < j; ++k){
-          if (j == k) continue;
-          muona = fGoodMuons->At(j);
-          muonb = fGoodMuons->At(k);
-	  if (muonpassID[j] && muonpassID[k]){ // KH, no charge here in resync muona->Charge() != muonb->Charge() && 
-	    nIDPairMU++;
-	  }
-	  if (muonpass[j] && muonpass[k]){ // KH, no charge here in resync muona->Charge() != muonb->Charge() && 
-	    nIDIsoPairMU++;
-	    if (fabs(91.19 - (muona->Mom() + muonb->Mom()).M()) < zdifference){
-	      zdifference = fabs(91.19 - (muona->Mom() + muonb->Mom()).M());
-	      muon1 = k;
-	      muon2 = j;
-	    }
-	  }
-	}
-      }
-      
-      if( nIDPairMU >= 1 &&  verbose ){ cout << "PASSID :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
-      if( nIDIsoPairMU >= 1 &&  verbose ){ cout << "PASSIDISO :: " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl; }
-
-
-      // 
-      // now make the mm and mmg systems ...
-      //       
-      if( nIDPairMU >= 1 && nIDIsoPairMU >= 1 ) {
-	muona = fGoodMuons->At(muon1);
-	muonb = fGoodMuons->At(muon2);
-	if( verbose ) cout << "best m(mm): " << (muona->Mom() + muonb->Mom()).M() << endl;
-	float best_mll = (muona->Mom() + muonb->Mom()).M();
-	
-	if( best_mll > 50. && (muona->Mom().Pt() > 20 || muonb->Mom().Pt() > 20. ) && 
-	    muona->Charge() != muonb->Charge()  ) { // KH , charge here for resync
-	  
-	  if( verbose ) cout << "GOODZ :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-	  
-	  for (UInt_t i = 0; i < selected_photons.size(); ++i) {
-	    const Photon *tmppho = selected_photons[i];	
-	    float mllg = (muona->Mom() + muonb->Mom() + tmppho->Mom()).M();
-	    if( tmppho->Mom().Pt() > 15 && (tmppho->Mom().Pt()/mllg) > 15./110. ) {  // KH , add scaled pT cut
-	      if( verbose ) cout << "PASSPHOTON :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() 
-				 << "\t" << tmppho->Mom().Pt() << "\t" << tmppho->Mom().Eta() << endl;
-	      if( mithep::MathUtils::DeltaR(muona->Phi(),muona->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 && 
-		  mithep::MathUtils::DeltaR(muonb->Phi(),muonb->Eta(), tmppho->Phi(), tmppho->Eta()) > 0.4 ) {
-		if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() 
-				  << "\t" << GetEventHeader()->EvtNum() 
-				  << "\tmllg: " << mllg << endl;
-		if( mllg > 115 ) { 
-		  if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		  if( mllg < 180 ) { 
-		    if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		    store_event_mu = true;		  
-		    pho = tmppho;
-		    break;
-		  } // m(llg)<180
-		} // m(llg)>115
-	      } // dR(l,g)
-	    } // pho kinematics
-	  } // loop over phos
-	  
-	} // goodZ
-      } // good dimuon pair
-    } // >1 muons
-
-
-
-    if( store_event_mu ) { 
-      fLeptonPairPhotonEvent->photonenergy = pho->E();
-      fLeptonPairPhotonEvent->photonpx = pho->Px();
-      fLeptonPairPhotonEvent->photonpy = pho->Py();
-      fLeptonPairPhotonEvent->photonpz = pho->Pz();
-      fLeptonPairPhotonEvent->photonpt = pho->Pt();
-      fLeptonPairPhotonEvent->photoneta = pho->Eta();
-      fLeptonPairPhotonEvent->photonmass = pho->Mass();
-      fLeptonPairPhotonEvent->photonphi = pho->Phi();
-      fLeptonPairPhotonEvent->photonr9 = pho->R9();	
-      fLeptonPairPhotonEvent->photonenergyerror = pho->EnergyErr();
-      // check if pho matched
-      const MCParticle *phgen = NULL;
-      if (!fIsData){
-	phgen = PhotonTools::MatchMC(pho,fMCParticles,!fApplyElectronVeto);
-	// 	cout << "It went into Photon Tools phgen loop." << endl;
-	    }
-      if (phgen != NULL){
-	fLeptonPairPhotonEvent->photonmatchmc = 1;
-	//	cout << "photonmatchmc written to be kTRUE" << endl;	
-      }
-      else fLeptonPairPhotonEvent->photonmatchmc = 0;	
+	else fLeptonPairPhotonEvent->photonmatchmc = 0;	
       
 
-      fLeptonPairPhotonEvent->mllg = (pho->Mom()+muona->Mom()+muonb->Mom()).M();
-      if (electronZgfilled == kTRUE) fLeptonPairPhotonEvent->muonZgVeto = kTRUE;
+	fLeptonPairPhotonEvent->mllg = (pho->Mom()+muona->Mom()+muonb->Mom()).M();
+	if (electronZgfilled == kTRUE) fLeptonPairPhotonEvent->muonZgVeto = kTRUE;
 
-      ZGLabVectors l;
-      ZGAngles b;
-      l.vecg.SetPxPyPzE(pho->Px(),pho->Py(),pho->Pz(),pho->E());
-      l.veclp.SetPxPyPzE(muona->Px(),muona->Py(),muona->Pz(),muona->E());
-      l.veclm.SetPxPyPzE(muonb->Px(),muonb->Py(),muonb->Pz(),muonb->E());
-      l.vecz = (l.veclp+l.veclm);
-      l.veczg = (l.vecg+l.veclp+l.veclm);
+	ZGLabVectors l;
+	ZGAngles b;
+	l.vecg.SetPxPyPzE(pho->Px(),pho->Py(),pho->Pz(),pho->E());
+	l.veclp.SetPxPyPzE(muona->Px(),muona->Py(),muona->Pz(),muona->E());
+	l.veclm.SetPxPyPzE(muonb->Px(),muonb->Py(),muonb->Pz(),muonb->E());
+	l.vecz = (l.veclp+l.veclm);
+	l.veczg = (l.vecg+l.veclp+l.veclm);
       
-      b = ZGTools::getZGAngles(l,kFALSE);
+	b = ZGTools::getZGAngles(l,kFALSE);
       
-      fLeptonPairPhotonEvent->costheta_lm_muons = b.costheta_lm;
-      fLeptonPairPhotonEvent->costheta_lp_muons = b.costheta_lp;
-      fLeptonPairPhotonEvent->phi_muons = b.phi;
-      fLeptonPairPhotonEvent->cosTheta_muons = b.cosTheta;
+	fLeptonPairPhotonEvent->costheta_lm_muons = b.costheta_lm;
+	fLeptonPairPhotonEvent->costheta_lp_muons = b.costheta_lp;
+	fLeptonPairPhotonEvent->phi_muons = b.phi;
+	fLeptonPairPhotonEvent->cosTheta_muons = b.cosTheta;
 
-      fLeptonPairPhotonEvent->muonZmass = (muona->Mom() + muonb->Mom()).M();
-      fLeptonPairPhotonEvent->m1E = muona->E();
-      fLeptonPairPhotonEvent->m1Pt = muona->Pt();
-      fLeptonPairPhotonEvent->m1Mass = muona->Mass();
-      fLeptonPairPhotonEvent->m1Px = muona->Px();
-      fLeptonPairPhotonEvent->m1Py = muona->Py();
-      fLeptonPairPhotonEvent->m1Pz = muona->Pz();
-      fLeptonPairPhotonEvent->m1Eta = muona->Eta();
-      fLeptonPairPhotonEvent->m1Phi = muona->Phi();
-      fLeptonPairPhotonEvent->m1Charge = muona->Charge();
-      if (muona->TrackerTrk()) fLeptonPairPhotonEvent->m1PtErr = muona->TrackerTrk()->PtErr();
-      else fLeptonPairPhotonEvent->m1PtErr = muona->BestTrk()->PtErr();
-      fLeptonPairPhotonEvent->m2E = muonb->E();
-      fLeptonPairPhotonEvent->m2Pt = muonb->Pt();
-      fLeptonPairPhotonEvent->m2Mass = muonb->Mass();
-      fLeptonPairPhotonEvent->m2Px = muonb->Px();
-      fLeptonPairPhotonEvent->m2Py = muonb->Py();
-      fLeptonPairPhotonEvent->m2Pz = muonb->Pz();
-      fLeptonPairPhotonEvent->m2Eta = muonb->Eta();
-      fLeptonPairPhotonEvent->m2Phi = muonb->Phi();
-      fLeptonPairPhotonEvent->m2Charge = muonb->Charge();
-      if (muonb->TrackerTrk()) fLeptonPairPhotonEvent->m2PtErr = muonb->TrackerTrk()->PtErr();
-      else fLeptonPairPhotonEvent->m2PtErr = muonb->BestTrk()->PtErr();
-    } // store event   
-    */
+	fLeptonPairPhotonEvent->muonZmass = (muona->Mom() + muonb->Mom()).M();
+	fLeptonPairPhotonEvent->m1E = muona->E();
+	fLeptonPairPhotonEvent->m1Pt = muona->Pt();
+	fLeptonPairPhotonEvent->m1Mass = muona->Mass();
+	fLeptonPairPhotonEvent->m1Px = muona->Px();
+	fLeptonPairPhotonEvent->m1Py = muona->Py();
+	fLeptonPairPhotonEvent->m1Pz = muona->Pz();
+	fLeptonPairPhotonEvent->m1Eta = muona->Eta();
+	fLeptonPairPhotonEvent->m1Phi = muona->Phi();
+	fLeptonPairPhotonEvent->m1Charge = muona->Charge();
+	if (muona->TrackerTrk()) fLeptonPairPhotonEvent->m1PtErr = muona->TrackerTrk()->PtErr();
+	else fLeptonPairPhotonEvent->m1PtErr = muona->BestTrk()->PtErr();
+	fLeptonPairPhotonEvent->m2E = muonb->E();
+	fLeptonPairPhotonEvent->m2Pt = muonb->Pt();
+	fLeptonPairPhotonEvent->m2Mass = muonb->Mass();
+	fLeptonPairPhotonEvent->m2Px = muonb->Px();
+	fLeptonPairPhotonEvent->m2Py = muonb->Py();
+	fLeptonPairPhotonEvent->m2Pz = muonb->Pz();
+	fLeptonPairPhotonEvent->m2Eta = muonb->Eta();
+	fLeptonPairPhotonEvent->m2Phi = muonb->Phi();
+	fLeptonPairPhotonEvent->m2Charge = muonb->Charge();
+	if (muonb->TrackerTrk()) fLeptonPairPhotonEvent->m2PtErr = muonb->TrackerTrk()->PtErr();
+	else fLeptonPairPhotonEvent->m2PtErr = muonb->BestTrk()->PtErr();
+      } // store event   
+    } // doMuonChannel
 
     if( store_event_ele || store_event_mu ) ZgllTuple->Fill();
   }
