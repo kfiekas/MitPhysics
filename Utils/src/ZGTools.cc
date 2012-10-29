@@ -11,6 +11,7 @@
 // arVix:1108.2274v1 [hep-ph], 10 Aug 2011
 //
 // ======================================================================================================
+#include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensity.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
@@ -45,6 +46,9 @@
 #include <string>
 #include <iostream>
 #include <vector>
+
+
+
 using namespace std;
 
 ClassImp(mithep::ZGTools)
@@ -257,7 +261,25 @@ bool ZGTools::electronCutBasedIDLoose(   const mithep::Electron *ele,
 
 
   float ooemoop = fabs(1 - ele->ESuperClusterOverP())/(ele->SCluster()->Et()*TMath::CosH(ele->SCluster()->Eta()));
-
+  pass =  EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::LOOSE,
+				      (fabs(ele->Eta())<1.566),//             (ele->IsEB()||ele->IsEBEtaGap()), 
+				      ele->Pt(),
+				      ele->SCluster()->Eta(),
+				      ele->DeltaEtaSuperClusterTrackAtVtx(),
+				      ele->DeltaPhiSuperClusterTrackAtVtx(),
+				      ele->CoviEtaiEta(),
+				      ele->HadronicOverEm(),
+				      ooemoop,
+				      ele->BestTrk()->D0Corrected(*vtx),
+				      ele->BestTrk()->DzCorrected(*vtx),
+				      0.,//const float iso_ch, 
+				      0.,//const float iso_em, 
+				      0.,//const float iso_nh, 
+				      !mithep::ElectronTools::PassConversionFilter(ele, conversions, vtx, 0, 1e-6, 2.0, kTRUE, kFALSE),
+				      ele->CorrectedNExpectedHitsInner(),
+				      0.
+				      );
+  /*
   pass =  ZGTools::PassWP(2,
                  (fabs(ele->Eta())<1.566),//             (ele->IsEB()||ele->IsEBEtaGap()), 
                   ele->Pt(),
@@ -278,6 +300,10 @@ bool ZGTools::electronCutBasedIDLoose(   const mithep::Electron *ele,
 		//const double rho,
 		 year
                  );
+  */
+  
+  if( (fabs(ele->SCluster()->Eta()) <= 1.566 && fabs(ele->SCluster()->Eta()) >= 1.4442) )
+      pass = false;
 
   return pass;
 
@@ -703,8 +729,8 @@ bool ZGTools::photonCutBasedLoose2012Isolation(const mithep::Photon * ph,
   isolations = photonPFIso03( ph, vtxArr, fPFCandidates, fPUEnergyDensity, PFnoPUflag);
 
 
-//  double rho = fPUEnergyDensity->At(0)->RhoKt6PFJets();
-  double rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25();  
+  double rho = fPUEnergyDensity->At(0)->RhoKt6PFJets();
+  //  double rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25();  
   double fChargedIso = max(isolations[0] - rho*photonEffectiveEra_Ch(ph->SCluster()->Eta()), 0.);
   double fGammaIso   = max(isolations[1] - rho*photonEffectiveEra_Ga(ph->SCluster()->Eta()), 0.);
   double fNeutralIso = max(isolations[2] - rho*photonEffectiveEra_Nh(ph->SCluster()->Eta()), 0.);
@@ -727,6 +753,84 @@ pass=false;}
 
   return pass;
 }
+
+
+bool ZGTools::photonCutBasedMedium2012ID(const mithep::Photon *pho,
+                                          const mithep::Vertex * vtx,
+                                          const mithep::PFCandidateCol * fPFCandidates,
+                                          const mithep::PileupEnergyDensityCol * fPUEnergyDensity,
+                                          const mithep::ElectronCol * fElectrons,
+                                          const mithep::DecayParticleCol * fConversions,
+                                          const mithep::VertexCol * fVertexes )
+//--------------------------------------------------------------------------------------------------
+{
+  bool pass=true;
+
+  //
+  // kinematics 
+  //
+  if( pho->Pt() < 10. )                            pass=false;
+  if(fabs(pho->SCluster()->Eta())>2.5 ||
+     ( fabs(pho->SCluster()->Eta())>1.4442 &&
+       fabs(pho->SCluster()->Eta())<1.566 )  )     pass=false;
+  if( !pass ) {
+    return false;
+  }
+
+  //
+  // ID
+  //
+  if( !PhotonTools::PassElectronVetoConvRecovery(pho, fElectrons, fConversions, vtx ) ) pass = false;
+  if( pho->HadOverEmTow()  > 0.05 )                   pass=false;
+  bool isEB = (pho->SCluster()->AbsEta()<1.5);
+  if( pho->CoviEtaiEta() > (isEB ? 0.011 : 0.033) ) pass=false;
+
+  return pass;
+}
+
+bool ZGTools::photonCutBasedMedium2012Isolation(const mithep::Photon * ph,
+                                                 const mithep::VertexCol * vtxArr,
+                                                 //const mithep::Vertex * vtx,
+                                                 const mithep::PFCandidateCol * fPFCandidates,
+                                                 const mithep::PileupEnergyDensityCol * fPUEnergyDensity,
+						vector<bool> PFnoPUflag)
+//-------------------------------------------------------------------------------------------------------
+{
+
+  bool pass=true;
+
+  //  photonPFIso03( ctrl, ph, vtx, fPFCandidates, fPUEnergyDensity); 
+  vector<double> isolations;
+  isolations = photonPFIso03( ph, vtxArr, fPFCandidates, fPUEnergyDensity, PFnoPUflag);
+
+
+  double rho = fPUEnergyDensity->At(0)->RhoKt6PFJets();
+  //  double rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25();  
+  double fChargedIso = max(isolations[0] - rho*photonEffectiveEra_Ch(ph->SCluster()->Eta()), 0.);
+  double fGammaIso   = max(isolations[1] - rho*photonEffectiveEra_Ga(ph->SCluster()->Eta()), 0.);
+  double fNeutralIso = max(isolations[2] - rho*photonEffectiveEra_Nh(ph->SCluster()->Eta()), 0.);
+  //cout << rho << endl;
+  bool isEB = (ph->SCluster()->AbsEta()<1.5);
+  if(isEB) {
+    if( fChargedIso > 1.5 )                    {// cout << "eb, fail ch ..." << endl; 
+      pass=false;}
+    if( fNeutralIso > (1.0 + 0.04*ph->Pt())  ) {// cout << "eb, fail nh ..." << (3.5 + 0.04*ph->Pt())<< endl; 
+      pass=false;}
+    if( fGammaIso > (0.7 + 0.005*ph->Pt())  )  {// cout << "eb, fail ga ..." << (1.3 + 0.005*ph->Pt()) << endl; 
+      pass=false;}
+  } else {
+    if( fChargedIso > 1.2 )                    {// cout << "ee, fail ch ..." << endl; 
+      pass=false;}
+    if( fNeutralIso > (1.5 + 0.04*ph->Pt())  ) {// cout << "ee, fail nh ..." << (1.5 + 0.04*ph->Pt()) << endl; 
+      pass=false;}
+    if( fGammaIso > (1.0 + 0.005*ph->Pt())  )  {// cout << "ee, fail ga ..." << (1.0 + 0.005*ph->Pt()) << endl; 
+      pass=false;}
+  }
+
+  return pass;
+}
+
+
 
 float ZGTools::photonEffectiveEra_Ga( float eta ) {
   if( fabs(eta)<=1.0 )          return 0.148;
@@ -996,51 +1100,51 @@ bool ZGTools::muonPFIso04(const mithep::Muon * mu,
       //        fNeutralHadronIso += pf->Pt();
       //       }
       //      else if( pf->Pt() > 0.5 ) {
-      if( pf->Pt() > 0.5 ) {
+      if( pf->Pt() > 0.5 && dr > 0.01) {
         fNeutralHadronIso += pf->Pt();
       }
     }
   }
 
   double rho=0;
-if (y == 2011){
-  if( (EffectiveAreaVersion == mithep::MuonTools::kMuEAFall11MC) ||
-      (EffectiveAreaVersion == mithep::MuonTools::kMuEAData2011) ) {
-    if (!(std::isnan(fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25()) ||
-          std::isinf(fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25())))
-      rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25();
-    //rho = fPUEnergyDensity->At(0)->Rho();
-    // !!!!!!!!!!!!! TMP HACK FOR SYNC !!!!!!!!!!!!!!!!!!!!!
-    EffectiveAreaVersion  = mithep::MuonTools::kMuEAData2011;
-    // !!!!!!!!!!!!! TMP HACK FOR SYNC !!!!!!!!!!!!!!!!!!!!!
-  } else {
-    if (!(std::isnan(fPUEnergyDensity->At(0)->RhoKt6PFJetsCentralNeutral()) ||
-          std::isinf(fPUEnergyDensity->At(0)->RhoKt6PFJetsCentralNeutral())))
-      rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsCentralNeutral();
-    // !!!!!!!!!!!!! TMP HACK FOR SYNC !!!!!!!!!!!!!!!!!!!!!
-    EffectiveAreaVersion  = mithep::MuonTools::kMuEAData2012;
-    // !!!!!!!!!!!!! TMP HACK FOR SYNC !!!!!!!!!!!!!!!!!!!!!
+  if (y == 2011){
+    if( (EffectiveAreaVersion == mithep::MuonTools::kMuEAFall11MC) ||
+	(EffectiveAreaVersion == mithep::MuonTools::kMuEAData2011) ) {
+      if (!(std::isnan(fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25()) ||
+	    std::isinf(fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25())))
+	rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25();
+      //rho = fPUEnergyDensity->At(0)->Rho();
+      // !!!!!!!!!!!!! TMP HACK FOR SYNC !!!!!!!!!!!!!!!!!!!!!
+      EffectiveAreaVersion  = mithep::MuonTools::kMuEAData2011;
+      // !!!!!!!!!!!!! TMP HACK FOR SYNC !!!!!!!!!!!!!!!!!!!!!
+    } else {
+      if (!(std::isnan(fPUEnergyDensity->At(0)->RhoKt6PFJetsCentralNeutral()) ||
+	    std::isinf(fPUEnergyDensity->At(0)->RhoKt6PFJetsCentralNeutral())))
+	rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsCentralNeutral();
+      // !!!!!!!!!!!!! TMP HACK FOR SYNC !!!!!!!!!!!!!!!!!!!!!
+      EffectiveAreaVersion  = mithep::MuonTools::kMuEAData2012;
+      // !!!!!!!!!!!!! TMP HACK FOR SYNC !!!!!!!!!!!!!!!!!!!!!
+    }
   }
-}
-if (y == 2012){
-      rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsCentralNeutral();
+  if (y == 2012){
+    rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsCentralNeutral();
     EffectiveAreaVersion  = mithep::MuonTools::kMuEAData2012;
-
-
-}
-//  TLorentzVector  tmpvec;
-//  tmpvec.SetPtEtaPhiM(mu->Pt(),mu->Eta(),mu->Phi(),mu->Mass());
-//  for( int p=0; p<photonsToVeto.size(); p++ ) {
-//    const mithep::PFCandidate * pf  = photonsToVeto[p];
-//    TLorentzVector pfvec;
-//    pfvec.SetPtEtaPhiM(pf->Pt(),pf->Eta(),pf->Phi(),0.);
-//    tmpvec += pfvec;
-//  }
+    
+    
+  }
+  //  TLorentzVector  tmpvec;
+  //  tmpvec.SetPtEtaPhiM(mu->Pt(),mu->Eta(),mu->Phi(),mu->Mass());
+  //  for( int p=0; p<photonsToVeto.size(); p++ ) {
+  //    const mithep::PFCandidate * pf  = photonsToVeto[p];
+  //    TLorentzVector pfvec;
+  //    pfvec.SetPtEtaPhiM(pf->Pt(),pf->Eta(),pf->Phi(),0.);
+  //    tmpvec += pfvec;
+  //  }
   mithep::MuonTools muT;
   double pfIso = fChargedIso + fmax(0.0,(fGammaIso + fNeutralHadronIso
-                                        -rho*muT.MuonEffectiveArea(muT.kMuGammaAndNeutralHadronIso04,
-                                                                   //tmpvec.Eta(),EffectiveAreaVersion)));
-                                                                   mu->Eta(),EffectiveAreaVersion)));
+					 -rho*muT.MuonEffectiveArea(muT.kMuGammaAndNeutralHadronIso04,
+								    //tmpvec.Eta(),EffectiveAreaVersion)));
+								    mu->Eta(),EffectiveAreaVersion)));
   bool pass = false;
   if( (pfIso/mu->Pt()) < 0.12 ) pass = true;
   return pass;

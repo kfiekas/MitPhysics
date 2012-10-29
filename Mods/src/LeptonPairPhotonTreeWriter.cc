@@ -931,7 +931,7 @@ void LeptonPairPhotonTreeWriter::Process()
       for (UInt_t j = 0; j < fGoodElectrons->GetEntries();++j){
         const Electron *tmpele = fGoodElectrons->At(j);
 	if( verbose ) cout << "ele :: pt: " << tmpele->Pt() << "\teta: " << tmpele->Eta();
-        if (tmpele->Pt() > 7 && fabs(tmpele->Eta()) < 2.5){
+        if (tmpele->Pt() > 7 && fabs(tmpele->SCluster()->Eta()) < 2.5  ){ //
 	  if( verbose )cout << "\tpreSel";
 	  bool ele_is_clean=true;
 	  for (UInt_t k = 0; k < fGoodMuons->GetEntries(); ++k){
