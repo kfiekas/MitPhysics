@@ -33,6 +33,8 @@
 #include "MitPhysics/Utils/interface/MVAMet.h"
 #include "MitPhysics/Utils/interface/ElectronEnergyRegression.h"
 
+#include "MitPhysics/Utils/interface/rochcor.h"
+
 class TNtuple;
 class TRandom3;
 
@@ -44,6 +46,7 @@ namespace mithep
     public:
     Float_t electronZmass;
     Float_t mllg;// 3-body mass
+    Float_t mllgCorr;// 3-body mass
     Bool_t muonZgVeto;
     Float_t muonZmass;
     Int_t year;   
@@ -78,6 +81,14 @@ namespace mithep
     Float_t ele1RegressionEnergyErrorV1;
     Float_t ele1RegressionEnergyErrorV2;
 
+    // scale/res corrected
+    Float_t ele1energyCorr;// Electron 1 Energy
+    Float_t ele1pxCorr;// Electron 1 Px
+    Float_t ele1pyCorr;// Electron 1 Py
+    Float_t ele1pzCorr;// Electron 1 Pz
+    Float_t ele1ptCorr;// Electron 1 Pt
+
+
     Float_t ele2MVA;// Electron 2 MVA Value
     Float_t ele2charge;// Electron 2 Charge
     Float_t ele2energy;// Electron 2 Energy
@@ -105,6 +116,13 @@ namespace mithep
     Float_t ele2RegressionEnergyErrorV1;
     Float_t ele2RegressionEnergyErrorV2;
 
+    // scale/res corrected
+    Float_t ele2energyCorr;// Electron 1 Energy
+    Float_t ele2pxCorr;// Electron 1 Px
+    Float_t ele2pyCorr;// Electron 1 Py
+    Float_t ele2pzCorr;// Electron 1 Pz
+    Float_t ele2ptCorr;// Electron 1 Pt
+
     Float_t chargediso_ele1;
     Float_t gammaiso_ele1;
     Float_t neutraliso_ele1;
@@ -128,6 +146,12 @@ namespace mithep
     Float_t photonr9;// Photon R9
     Float_t photonenergyerror;// Photon Energy Error
 
+    Float_t photonenergyCorr;// Photon Energy
+    Float_t photonpxCorr;// Photon Px
+    Float_t photonpyCorr;// Photon Py
+    Float_t photonpzCorr;// Photon Pz
+    Float_t photonptCorr;// Photon Pt
+
     Float_t m1E;// Muon 1 Energy
     Float_t m1Pt;// Muon 1 Pt
     Float_t m1Mass;// Muon 1 Mass
@@ -138,6 +162,12 @@ namespace mithep
     Float_t m1Phi;// Muon 1 Phi
     Float_t m1Charge;// Muon 1 Charge
     Float_t m1PtErr; // Muon 1 Pt Error
+    Float_t m1ECorr;// Muon 1 Energy
+    Float_t m1PtCorr;// Muon 1 Pt
+    Float_t m1PxCorr;// Muon 1 Px
+    Float_t m1PyCorr;// Muon 1 Py
+    Float_t m1PzCorr;// Muon 1 Pz
+
     Float_t m2E;// Muon 2 Energy
     Float_t m2Pt;// Muon 2 Pt
     Float_t m2Mass;// Muon 2 Mass
@@ -148,6 +178,11 @@ namespace mithep
     Float_t m2Phi;// Muon 2 Phi
     Float_t m2Charge;// Muon 2 Charge
     Float_t m2PtErr; // Muon 1 Pt Error
+    Float_t m2ECorr;// Muon 1 Energy
+    Float_t m2PtCorr;// Muon 1 Pt
+    Float_t m2PxCorr;// Muon 1 Px
+    Float_t m2PyCorr;// Muon 1 Py
+    Float_t m2PzCorr;// Muon 1 Pz
 
     Float_t NPu; //Number of Pileup events
     Float_t NPuPlus;//Number of Pileup events in next signal readout
@@ -281,6 +316,9 @@ namespace mithep
 
     bool verbose;
     bool _do_ElectronChannel, _do_MuonChannel;
+
+    TRandom3 rand;
+    rochcor * rmcor;
 
     ClassDef(LeptonPairPhotonTreeWriter, 1) // Lepton Pair + Photon identification module
   };

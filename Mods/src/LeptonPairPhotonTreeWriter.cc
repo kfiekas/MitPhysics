@@ -31,12 +31,16 @@
 #include "MitAna/DataTree/interface/Muon.h"
 #include "TDataMember.h"
 #include "TFile.h"
+#include "TLorentzVector.h"
 #include <TNtuple.h>
 #include <TRandom3.h>
 #include <TSystem.h>
 #include <iostream>
 #include <vector>
 #include <fstream>
+
+#include "UserCode/sixie/HiggsAna/Utils/LeptonScaleCorrections.hh"
+
 
 using namespace mithep;
 //mithep::ElectronIDMVA *eleIDMVA; // The electron MVA 
@@ -117,6 +121,7 @@ ClassImp(mithep::LeptonPairPhotonEvent)
 
 {
   // Constructor
+  rmcor = new rochcor();
 }
 
 LeptonPairPhotonTreeWriter::~LeptonPairPhotonTreeWriter()
@@ -137,6 +142,8 @@ void LeptonPairPhotonTreeWriter::fillEle1Variables(const mithep::Electron * ele1
   fLeptonPairPhotonEvent->ele1eta = ele1->Eta();
   fLeptonPairPhotonEvent->ele1mass = ele1->Mass();
   fLeptonPairPhotonEvent->ele1phi = ele1->Phi();
+   								    
+
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -178,6 +185,11 @@ void LeptonPairPhotonTreeWriter::resetTreeVariables()
   fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV0 = -99.;
   fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV1 = -99.;
   fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV2 = -99.;
+  fLeptonPairPhotonEvent->ele1energyCorr = -99.;
+  fLeptonPairPhotonEvent->ele1pxCorr = -99.;
+  fLeptonPairPhotonEvent->ele1pyCorr = -99.;
+  fLeptonPairPhotonEvent->ele1pzCorr = -99.;
+  fLeptonPairPhotonEvent->ele1ptCorr = -99.;
 
   fLeptonPairPhotonEvent->ele2charge = -99.;
   fLeptonPairPhotonEvent->ele2energy = -99.;
@@ -194,6 +206,11 @@ void LeptonPairPhotonTreeWriter::resetTreeVariables()
   fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV0 = -99.;
   fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV1 = -99.;
   fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV2 = -99.;
+  fLeptonPairPhotonEvent->ele2energyCorr = -99.;
+  fLeptonPairPhotonEvent->ele2pxCorr = -99.;
+  fLeptonPairPhotonEvent->ele2pyCorr = -99.;
+  fLeptonPairPhotonEvent->ele2pzCorr = -99.;
+  fLeptonPairPhotonEvent->ele2ptCorr = -99.;
 
   fLeptonPairPhotonEvent->ele1dEtaIn = -99.;
   fLeptonPairPhotonEvent->ele1dPhiIn = -99.;
@@ -228,6 +245,12 @@ void LeptonPairPhotonTreeWriter::resetTreeVariables()
   fLeptonPairPhotonEvent->m1Phi = -99.;
   fLeptonPairPhotonEvent->m1Charge = -99.;
   fLeptonPairPhotonEvent->m1PtErr = -99.;
+  fLeptonPairPhotonEvent->m1ECorr = -99.;
+  fLeptonPairPhotonEvent->m1PtCorr = -99.;
+  fLeptonPairPhotonEvent->m1PxCorr = -99.; 
+  fLeptonPairPhotonEvent->m1PyCorr = -99.;
+  fLeptonPairPhotonEvent->m1PzCorr = -99.;
+
   fLeptonPairPhotonEvent->m2E = -99.;
   fLeptonPairPhotonEvent->m2Pt = -99.;
   fLeptonPairPhotonEvent->m2Mass = -99.;
@@ -238,6 +261,11 @@ void LeptonPairPhotonTreeWriter::resetTreeVariables()
   fLeptonPairPhotonEvent->m2Phi = -99.;
   fLeptonPairPhotonEvent->m2Charge = -99.;
   fLeptonPairPhotonEvent->m2PtErr = -99.;
+  fLeptonPairPhotonEvent->m2ECorr = -99.;
+  fLeptonPairPhotonEvent->m2PtCorr = -99.;
+  fLeptonPairPhotonEvent->m2PxCorr = -99.; 
+  fLeptonPairPhotonEvent->m2PyCorr = -99.;
+  fLeptonPairPhotonEvent->m2PzCorr = -99.;
 
   fLeptonPairPhotonEvent->photonidmva = -99.;
   fLeptonPairPhotonEvent->photonenergy = -99.;
@@ -1070,6 +1098,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	if( verbose ) cout << "storing electron event ..." << endl;
 
 	electronZgfilled = kTRUE;
+	fLeptonPairPhotonEvent->mllg = (ele1->Mom() + ele2->Mom() + pho->Mom()).M();
 
 	fLeptonPairPhotonEvent->photonenergy = pho->E();
 	fLeptonPairPhotonEvent->photonpx = pho->Px();
@@ -1092,13 +1121,109 @@ void LeptonPairPhotonTreeWriter::Process()
 	  //	cout << "photonmatchmc written to be kTRUE" << endl;	
 	}
 	else fLeptonPairPhotonEvent->photonmatchmc = 0;	
-     
+
+
+	//
+	// photon phosphor corrections not applied right now ...
+	//
+	TLorentzVector gcorr;
+	gcorr.SetPtEtaPhiM(fLeptonPairPhotonEvent->photonpt,
+			   fLeptonPairPhotonEvent->photoneta,
+			   fLeptonPairPhotonEvent->photonphi,
+			   fLeptonPairPhotonEvent->photonmass);
+	if( phgen != NULL ) {  // also means it's MC ...
+	  float xMC = (pho->E()/phgen->E())-1;
+	  std::pair<float,float> mcScaleRes 
+	    = ZGTools::getPhosphorScaleRes(YEAR, true, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
+	  std::pair<float,float> dataScaleRes 
+	    = ZGTools::getPhosphorScaleRes(YEAR, false, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
+	  float rData_over_rMC = dataScaleRes.second/mcScaleRes.second;
+	  float sMC = mcScaleRes.first;
+	  float xCorrSmear = rData_over_rMC*(xMC-0.01*sMC);
+	  float eCorr = (1+xCorrSmear)*phgen->E();
+	  assert(eCorr>0);
+	  float sf = eCorr/pho->E();
+	  gcorr.SetE(eCorr);
+	  gcorr.SetPx(sf*pho->Px());
+	  gcorr.SetPy(sf*pho->Py());
+	  gcorr.SetPz(sf*pho->Pz());
+	}
+	if( fIsData ) { 
+	  std::pair<float,float> dataScaleRes 
+	    = ZGTools::getPhosphorScaleRes(YEAR, false, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
+	  float eCorr = pho->E()/(1.+dataScaleRes.first);
+	  float sf = eCorr/pho->E();
+	  gcorr.SetE(eCorr);
+	  gcorr.SetPx(sf*pho->Px());
+	  gcorr.SetPy(sf*pho->Py());
+	  gcorr.SetPz(sf*pho->Pz());
+	}
+	fLeptonPairPhotonEvent->photonenergyCorr = gcorr.E();
+	fLeptonPairPhotonEvent->photonpxCorr = gcorr.Px();
+	fLeptonPairPhotonEvent->photonpyCorr = gcorr.Py();
+	fLeptonPairPhotonEvent->photonpzCorr = gcorr.Pz();
+	fLeptonPairPhotonEvent->photonptCorr = gcorr.Pt();	
+	//
+
+
+     	//
+	// electron scale/res corrections
+	//
 	fillEle1Variables(ele1);
 	fillEle2Variables(ele2);
 	regressEle1(ele1,fPileUpDen,fPV);
 	regressEle2(ele2,fPileUpDen,fPV);
 
-	fLeptonPairPhotonEvent->mllg = (ele1->Mom() + ele2->Mom() + pho->Mom()).M();
+	char tmpbuf[256];
+	if( YEAR == 2011 ) sprintf( tmpbuf, "2011");
+	else sprintf(tmpbuf, "HCP2012");
+	string erastr( tmpbuf);
+
+	float ele1CorrFactor = correctedElectronEnergy( ele1->E(),
+							ele1->SCluster()->Eta(),
+							ele1->SCluster()->R9(),
+							GetEventHeader()->RunNum(), 
+							0, 
+							erastr,
+							!(fIsData),
+							&rand) / ele1->E();
+	fLeptonPairPhotonEvent->ele1energyCorr = ele1CorrFactor*fLeptonPairPhotonEvent->ele1energy;
+	fLeptonPairPhotonEvent->ele1pxCorr     = ele1CorrFactor*fLeptonPairPhotonEvent->ele1px;
+	fLeptonPairPhotonEvent->ele1pyCorr     = ele1CorrFactor*fLeptonPairPhotonEvent->ele1py;
+	fLeptonPairPhotonEvent->ele1pzCorr     = ele1CorrFactor*fLeptonPairPhotonEvent->ele1pz;
+	fLeptonPairPhotonEvent->ele1ptCorr     = ele1CorrFactor*fLeptonPairPhotonEvent->ele1pt;
+
+	float ele2CorrFactor = correctedElectronEnergy( ele2->E(),
+							ele2->SCluster()->Eta(),
+							ele2->SCluster()->R9(),
+							GetEventHeader()->RunNum(), 
+							0, 
+							erastr,
+							!(fIsData),
+							&rand) / ele2->E();
+	fLeptonPairPhotonEvent->ele2energyCorr = ele2CorrFactor*fLeptonPairPhotonEvent->ele2energy;
+	fLeptonPairPhotonEvent->ele2pxCorr     = ele2CorrFactor*fLeptonPairPhotonEvent->ele2px;
+	fLeptonPairPhotonEvent->ele2pyCorr     = ele2CorrFactor*fLeptonPairPhotonEvent->ele2py;
+	fLeptonPairPhotonEvent->ele2pzCorr     = ele2CorrFactor*fLeptonPairPhotonEvent->ele2pz;
+	fLeptonPairPhotonEvent->ele2ptCorr     = ele2CorrFactor*fLeptonPairPhotonEvent->ele2pt;
+	//
+	//
+	//
+
+
+
+	TLorentzVector e1corr, e2corr;
+	e1corr.SetPxPyPzE(fLeptonPairPhotonEvent->ele1pxCorr,
+			  fLeptonPairPhotonEvent->ele1pyCorr,
+			  fLeptonPairPhotonEvent->ele1pzCorr,
+			  fLeptonPairPhotonEvent->ele1energyCorr);
+	e2corr.SetPxPyPzE(fLeptonPairPhotonEvent->ele2pxCorr,
+			  fLeptonPairPhotonEvent->ele2pyCorr,
+			  fLeptonPairPhotonEvent->ele2pzCorr,
+			  fLeptonPairPhotonEvent->ele2energyCorr);
+
+	fLeptonPairPhotonEvent->mllgCorr = (e1corr + e2corr + gcorr).M();
+
 	ZGLabVectors l;
 	ZGAngles b;
       
@@ -1272,6 +1397,9 @@ void LeptonPairPhotonTreeWriter::Process()
 
 
       if( store_event_mu ) { 
+
+	fLeptonPairPhotonEvent->mllg = (pho->Mom()+muona->Mom()+muonb->Mom()).M();
+
 	fLeptonPairPhotonEvent->photonenergy = pho->E();
 	fLeptonPairPhotonEvent->photonpx = pho->Px();
 	fLeptonPairPhotonEvent->photonpy = pho->Py();
@@ -1295,7 +1423,48 @@ void LeptonPairPhotonTreeWriter::Process()
 	else fLeptonPairPhotonEvent->photonmatchmc = 0;	
       
 
-	fLeptonPairPhotonEvent->mllg = (pho->Mom()+muona->Mom()+muonb->Mom()).M();
+	//
+	// photon phosphor corrections not applied right now ...
+	//
+	TLorentzVector gcorr;
+	gcorr.SetPtEtaPhiM(fLeptonPairPhotonEvent->photonpt,
+			   fLeptonPairPhotonEvent->photoneta,
+			   fLeptonPairPhotonEvent->photonphi,
+			   fLeptonPairPhotonEvent->photonmass);
+	if( phgen != NULL ) {  // also means it's MC ...
+	  float xMC = (pho->E()/phgen->E())-1;
+	  std::pair<float,float> mcScaleRes 
+	    = ZGTools::getPhosphorScaleRes(YEAR, true, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
+	  std::pair<float,float> dataScaleRes 
+	    = ZGTools::getPhosphorScaleRes(YEAR, false, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
+	  float rData_over_rMC = dataScaleRes.second/mcScaleRes.second;
+	  float sMC = mcScaleRes.first;
+	  float xCorrSmear = rData_over_rMC*(xMC-0.01*sMC);
+	  float eCorr = (1+xCorrSmear)*phgen->E();
+	  assert(eCorr>0);
+	  float sf = eCorr/pho->E();
+	  gcorr.SetE(eCorr);
+	  gcorr.SetPx(sf*pho->Px());
+	  gcorr.SetPy(sf*pho->Py());
+	  gcorr.SetPz(sf*pho->Pz());
+	}
+	if( fIsData ) { 
+	  std::pair<float,float> dataScaleRes 
+	    = ZGTools::getPhosphorScaleRes(YEAR, false, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
+	  float eCorr = pho->E()/(1.+dataScaleRes.first);
+	  float sf = eCorr/pho->E();
+	  gcorr.SetE(eCorr);
+	  gcorr.SetPx(sf*pho->Px());
+	  gcorr.SetPy(sf*pho->Py());
+	  gcorr.SetPz(sf*pho->Pz());
+	}
+	fLeptonPairPhotonEvent->photonenergyCorr = gcorr.E();
+	fLeptonPairPhotonEvent->photonpxCorr = gcorr.Px();
+	fLeptonPairPhotonEvent->photonpyCorr = gcorr.Py();
+	fLeptonPairPhotonEvent->photonpzCorr = gcorr.Pz();
+	fLeptonPairPhotonEvent->photonptCorr = gcorr.Pt();	
+	//
+
 	if (electronZgfilled == kTRUE) fLeptonPairPhotonEvent->muonZgVeto = kTRUE;
 
 	ZGLabVectors l;
@@ -1336,6 +1505,37 @@ void LeptonPairPhotonTreeWriter::Process()
 	fLeptonPairPhotonEvent->m2Charge = muonb->Charge();
 	if (muonb->TrackerTrk()) fLeptonPairPhotonEvent->m2PtErr = muonb->TrackerTrk()->PtErr();
 	else fLeptonPairPhotonEvent->m2PtErr = muonb->BestTrk()->PtErr();
+
+	//
+	// scale/res corrections
+	//
+	TLorentzVector m1corr, m2corr;
+	m1corr.SetPtEtaPhiM(muona->Pt(),muona->Eta(),muona->Phi(),muona->Mass());
+	m2corr.SetPtEtaPhiM(muonb->Pt(),muonb->Eta(),muonb->Phi(),muonb->Mass());
+	if(fIsData) { 
+	  rmcor->momcor_data(m1corr, muona->Charge(), 0, 0); 
+	  rmcor->momcor_data(m2corr, muonb->Charge(), 0, 0); 
+	} else { 
+	  rmcor->momcor_mc(m1corr, muona->Charge(), 0, 0); 
+	  rmcor->momcor_mc(m2corr, muonb->Charge(), 0, 0); 
+	}
+	fLeptonPairPhotonEvent->m1ECorr  = m1corr.E();
+	fLeptonPairPhotonEvent->m1PtCorr = m1corr.Pt();
+	fLeptonPairPhotonEvent->m1PxCorr = m1corr.Px();
+	fLeptonPairPhotonEvent->m1PyCorr = m1corr.Py();
+	fLeptonPairPhotonEvent->m1PzCorr = m1corr.Pz();
+	fLeptonPairPhotonEvent->m2ECorr  = m2corr.E();
+	fLeptonPairPhotonEvent->m2PtCorr = m2corr.Pt();
+	fLeptonPairPhotonEvent->m2PxCorr = m2corr.Px();
+	fLeptonPairPhotonEvent->m2PyCorr = m2corr.Py();
+	fLeptonPairPhotonEvent->m2PzCorr = m2corr.Pz();
+
+
+	fLeptonPairPhotonEvent->mllgCorr = (m1corr+m2corr+gcorr).M();
+	//
+	//
+	//
+
       } // store event   
     } // doMuonChannel
 
@@ -1375,6 +1575,7 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
 
   ZgllTuple->Branch("electronZmass",&fLeptonPairPhotonEvent->electronZmass,"electronZmass/F");
   ZgllTuple->Branch("mllg",&fLeptonPairPhotonEvent->mllg,"mllg/F");
+  ZgllTuple->Branch("mllgCorr",&fLeptonPairPhotonEvent->mllgCorr,"mllgCorr/F");
   ZgllTuple->Branch("ele1MVA",&fLeptonPairPhotonEvent->ele1MVA,"ele1MVA/F");
   ZgllTuple->Branch("ele2MVA",&fLeptonPairPhotonEvent->ele2MVA,"ele2MVA/F");
   
@@ -1394,6 +1595,14 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("ele1RegressionEnergyErrorV1",&fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV1,"ele1RegressionEnergyErrorV1/F");
   ZgllTuple->Branch("ele1RegressionEnergyErrorV2",&fLeptonPairPhotonEvent->ele1RegressionEnergyErrorV2,"ele1RegressionEnergyErrorV2/F");
 
+  // scale/res corrected 
+  ZgllTuple->Branch("ele1energyCorr",&fLeptonPairPhotonEvent->ele1energyCorr,"ele1energyCorr/F");
+  ZgllTuple->Branch("ele1pxCorr",&fLeptonPairPhotonEvent->ele1pxCorr,"ele1pxCorr/F");
+  ZgllTuple->Branch("ele1pyCorr",&fLeptonPairPhotonEvent->ele1pyCorr,"ele1pyCorr/F");
+  ZgllTuple->Branch("ele1pzCorr",&fLeptonPairPhotonEvent->ele1pzCorr,"ele1pzCorr/F");
+  ZgllTuple->Branch("ele1ptCorr",&fLeptonPairPhotonEvent->ele1ptCorr,"ele1ptCorr/F");
+
+
   ZgllTuple->Branch("ele2charge",&fLeptonPairPhotonEvent->ele2charge,"ele2charge/F");
   ZgllTuple->Branch("ele2energy",&fLeptonPairPhotonEvent->ele2energy,"ele2energy/F");
   ZgllTuple->Branch("ele2px",&fLeptonPairPhotonEvent->ele2px,"ele2px/F");
@@ -1409,6 +1618,13 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("ele2RegressionEnergyErrorV0",&fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV0,"ele2RegressionEnergyErrorV0/F");
   ZgllTuple->Branch("ele2RegressionEnergyErrorV1",&fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV1,"ele2RegressionEnergyErrorV1/F");
   ZgllTuple->Branch("ele2RegressionEnergyErrorV2",&fLeptonPairPhotonEvent->ele2RegressionEnergyErrorV2,"ele2RegressionEnergyErrorV2/F");
+
+  // scale/res corrected 
+  ZgllTuple->Branch("ele2energyCorr",&fLeptonPairPhotonEvent->ele2energyCorr,"ele2energyCorr/F");
+  ZgllTuple->Branch("ele2pxCorr",&fLeptonPairPhotonEvent->ele2pxCorr,"ele2pxCorr/F");
+  ZgllTuple->Branch("ele2pyCorr",&fLeptonPairPhotonEvent->ele2pyCorr,"ele2pyCorr/F");
+  ZgllTuple->Branch("ele2pzCorr",&fLeptonPairPhotonEvent->ele2pzCorr,"ele2pzCorr/F");
+  ZgllTuple->Branch("ele2ptCorr",&fLeptonPairPhotonEvent->ele2ptCorr,"ele2ptCorr/F");
 
   ZgllTuple->Branch("ele1dEtaIn",&fLeptonPairPhotonEvent->ele1dEtaIn,"ele1dEtaIn/F");
   ZgllTuple->Branch("ele1dPhiIn",&fLeptonPairPhotonEvent->ele1dPhiIn,"ele1dPhiIn/F");
@@ -1477,6 +1693,18 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("m2Charge",&fLeptonPairPhotonEvent->m2Charge,"m2Charge/F");
   ZgllTuple->Branch("m2PtErr",&fLeptonPairPhotonEvent->m2PtErr,"m2PtErr/F");
 
+  ZgllTuple->Branch("m1ECorr",&fLeptonPairPhotonEvent->m1ECorr,"m1ECorr/F");
+  ZgllTuple->Branch("m1PtCorr",&fLeptonPairPhotonEvent->m1PtCorr,"m1PtCorr/F");
+  ZgllTuple->Branch("m1PxCorr",&fLeptonPairPhotonEvent->m1PxCorr,"m1PxCorr/F");
+  ZgllTuple->Branch("m1PyCorr",&fLeptonPairPhotonEvent->m1PyCorr,"m1PyCorr/F");
+  ZgllTuple->Branch("m1PzCorr",&fLeptonPairPhotonEvent->m1PzCorr,"m1PzCorr/F");
+
+  ZgllTuple->Branch("m2ECorr",&fLeptonPairPhotonEvent->m2ECorr,"m2ECorr/F");
+  ZgllTuple->Branch("m2PtCorr",&fLeptonPairPhotonEvent->m2PtCorr,"m2PtCorr/F");
+  ZgllTuple->Branch("m2PxCorr",&fLeptonPairPhotonEvent->m2PxCorr,"m2PxCorr/F");
+  ZgllTuple->Branch("m2PyCorr",&fLeptonPairPhotonEvent->m2PyCorr,"m2PyCorr/F");
+  ZgllTuple->Branch("m2PzCorr",&fLeptonPairPhotonEvent->m2PzCorr,"m2PzCorr/F");
+
   ZgllTuple->Branch("photonidmva",&fLeptonPairPhotonEvent->photonidmva,"photonidmva/F");
   ZgllTuple->Branch("photonr9",&fLeptonPairPhotonEvent->photonr9,"photonr9/F");
   ZgllTuple->Branch("photonenergy",&fLeptonPairPhotonEvent->photonenergy,"photonenergy/F");
@@ -1489,6 +1717,12 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("photonphi",&fLeptonPairPhotonEvent->photonphi,"photonphi/F");
   ZgllTuple->Branch("photonenergyerror",&fLeptonPairPhotonEvent->photonenergyerror,"photonenergyerror/F");
  
+  ZgllTuple->Branch("photonenergyCorr",&fLeptonPairPhotonEvent->photonenergyCorr,"photonenergyCorr/F");
+  ZgllTuple->Branch("photonpxCorr",&fLeptonPairPhotonEvent->photonpxCorr,"photonpxCorr/F");
+  ZgllTuple->Branch("photonpyCorr",&fLeptonPairPhotonEvent->photonpyCorr,"photonpyCorr/F");
+  ZgllTuple->Branch("photonpzCorr",&fLeptonPairPhotonEvent->photonpzCorr,"photonpzCorr/F");
+  ZgllTuple->Branch("photonptCorr",&fLeptonPairPhotonEvent->photonptCorr,"photonptCorr/F");
+
   ZgllTuple->Branch("NPu",&fLeptonPairPhotonEvent->NPu,"NPu/F");
   ZgllTuple->Branch("NPuPlus",&fLeptonPairPhotonEvent->NPuPlus,"NPuPlus/F");
   ZgllTuple->Branch("NPuMinus",&fLeptonPairPhotonEvent->NPuMinus,"NPuMinus/F");
@@ -1528,5 +1762,6 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
 
   //Add Output Tree
   AddOutput(ZgllTuple);
+
 }
 
