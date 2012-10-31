@@ -46,6 +46,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <assert.h>
 
 
 
@@ -259,8 +260,10 @@ bool ZGTools::electronCutBasedIDLoose(   const mithep::Electron *ele,
 
   bool pass=true;
 
+  // KH, replace w/ EG definition
+  //  float ooemoop = fabs(1 - ele->ESuperClusterOverP())/(ele->SCluster()->Et()*TMath::CosH(ele->SCluster()->Eta()));
+  float ooemoop       = (1.0/ele->EcalEnergy() - ele->ESuperClusterOverP()/ele->EcalEnergy());
 
-  float ooemoop = fabs(1 - ele->ESuperClusterOverP())/(ele->SCluster()->Et()*TMath::CosH(ele->SCluster()->Eta()));
   pass =  EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::LOOSE,
 				      (fabs(ele->Eta())<1.566),//             (ele->IsEB()||ele->IsEBEtaGap()), 
 				      ele->Pt(),
@@ -1148,4 +1151,86 @@ bool ZGTools::muonPFIso04(const mithep::Muon * mu,
   bool pass = false;
   if( (pfIso/mu->Pt()) < 0.12 ) pass = true;
   return pass;
+}
+
+//--------------------------------------------------------------------------------------------------
+// KH implementation of phosphor corrections.  NB: r9 dependence is not yet provieded
+// so it's a no-op ATM
+//
+std::pair<float,float> ZGTools::getPhosphorScaleRes(unsigned year, 
+						    bool isMC,
+						    double scEta, 
+						    double pt, 
+						    double r9) 
+//--------------------------------------------------------------------------------------------------
+{
+  
+  
+  bool isEB = (fabs(scEta)<=1.4442); 
+  int ptbin=-1;
+  if     ( pt >10. && pt<= 12.  ) ptbin=0;
+  else if( pt >12. && pt<= 15.  ) ptbin=1;
+  else if( pt >15. && pt<= 20.  ) ptbin=2;
+  else if( pt >20. && pt<= 999. ) ptbin=3;
+  
+  assert(ptbin>=0 );
+
+  if( year == 2011 ) {
+    if( isMC ) { 
+      if( isEB ) { 
+	if( ptbin==0 )      return std::pair<float,float> (1.43,5.71);
+	else if( ptbin==1 ) return std::pair<float,float> (1.29,5.16);
+	else if( ptbin==2 ) return std::pair<float,float> (0.86,4.15);
+	else                return std::pair<float,float> (0.42,2.68);
+      } else { // isEE 
+	if( ptbin==0 )      return std::pair<float,float> (2.90,7.64);
+	else if( ptbin==1 ) return std::pair<float,float> (1.91,6.12);
+	else if( ptbin==2 ) return std::pair<float,float> (1.83,5.15);
+	else                return std::pair<float,float> (0.87,3.44);
+      } // isEE
+    } else { // isData
+      if( isEB ) { 
+	if( ptbin==0 )      return std::pair<float,float> (-0.13,6.03);
+	else if( ptbin==1 ) return std::pair<float,float> (0.41,5.16);
+	else if( ptbin==2 ) return std::pair<float,float> (0.01,4.10);
+	else                return std::pair<float,float> (0.42,2.88);
+      } else { // isEE 
+	if( ptbin==0 )      return std::pair<float,float> (1.95,7.60);
+	else if( ptbin==1 ) return std::pair<float,float> (0.86,6.79);
+	else if( ptbin==2 ) return std::pair<float,float> (0.65,6.05);
+	else                return std::pair<float,float> (0.28,4.34);
+      } // isEE
+    } // isData
+
+
+  } else if ( year == 2012 ) { 
+    if( isMC ) { 
+      if( isEB ) { 
+	if( ptbin==0 )      return std::pair<float,float> (0.85,4.00);
+	else if( ptbin==1 ) return std::pair<float,float> (0.36,4.32);
+	else if( ptbin==2 ) return std::pair<float,float> (0.48,3.36);
+	else                return std::pair<float,float> (0.30,1.92);
+      } else { // isEE
+	if( ptbin==0 )      return std::pair<float,float> (1.57,6.68);
+	else if( ptbin==1 ) return std::pair<float,float> (1.79,5.59);
+	else if( ptbin==2 ) return std::pair<float,float> (0.96,4.61);
+	else                return std::pair<float,float> (0.60,3.02);
+      }
+    } else { //isData
+      if( isEB ) { 
+	if( ptbin==0 )      return std::pair<float,float> (-0.18,5.27);
+	else if( ptbin==1 ) return std::pair<float,float> (-0.22,5.07);
+	else if( ptbin==2 ) return std::pair<float,float> (0.01,4.84);
+	else                return std::pair<float,float> (0.47,2.49);
+      } else { // isEE
+	if( ptbin==0 )      return std::pair<float,float> (-1.24,10.94);
+	else if( ptbin==1 ) return std::pair<float,float> (-1.47,8.08);
+	else if( ptbin==2 ) return std::pair<float,float> (-0.69,5.37);
+	else                return std::pair<float,float> (1.12,5.45);
+      } // isEE
+    } // isData
+  } // 2012
+
+  return std::pair<float,float> (0.,0.);
+
 }
