@@ -1040,7 +1040,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	      ele2 = fGoodElectrons->At(k);
 
 	      float tmp_mll = (ele1->Mom() + ele2->Mom()).M();	    
-	      cout << "j,k:"  << j<< ","<<k << "\ttmp_mll: " << tmp_mll << endl;
+	      if( verbose) cout << "j,k:"  << j<< ","<<k << "\ttmp_mll: " << tmp_mll << endl;
 	      if( tmp_mll < 50. 
 		  || (ele1->Mom().Pt() < 10 || ele2->Mom().Pt() < 10. )  
 		  || (ele1->Mom().Pt() < 20 && ele2->Mom().Pt() < 20. )  
