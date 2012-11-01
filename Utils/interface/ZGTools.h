@@ -35,7 +35,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
-
+#include <utility> // for std::pair 
 namespace mithep
 {
 
@@ -99,6 +99,21 @@ class ZGTools
                                                  	const mithep::PileupEnergyDensityCol * fPUEnergyDensity,
 							vector<bool> PFnoPUflag);
 
+	static bool photonCutBasedMedium2012ID(	const mithep::Photon *pho,
+                                          	const mithep::Vertex * vtx,
+                                          	const mithep::PFCandidateCol * fPFCandidates,
+                                          	const mithep::PileupEnergyDensityCol * fPUEnergyDensity,
+                                          	const mithep::ElectronCol * fElectrons,
+                                          	const mithep::DecayParticleCol * fConversions,
+                                          	const mithep::VertexCol * fVertexes );
+
+
+	static bool photonCutBasedMedium2012Isolation(	const mithep::Photon * ph,
+                                                 	const mithep::VertexCol * vtxArr,
+                                                 	const mithep::PFCandidateCol * fPFCandidates,
+                                                 	const mithep::PileupEnergyDensityCol * fPUEnergyDensity,
+							vector<bool> PFnoPUflag);
+
 	static float photonEffectiveEra_Ga( float eta ); 
 
 	static float photonEffectiveEra_Nh( float eta );
@@ -123,6 +138,12 @@ class ZGTools
                     		mithep::MuonTools::EMuonEffectiveAreaTarget EffectiveAreaVersion,
 				vector<bool> PFnoPUflag,
 				float y);
+
+	static std::pair<float,float> getPhosphorScaleRes(unsigned year, 
+							  bool isMC,
+							  double scEta, 
+							  double pt, 
+							  double r9); 
 
 ClassDef(ZGTools,0)
 };
