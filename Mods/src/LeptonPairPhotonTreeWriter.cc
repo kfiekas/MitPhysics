@@ -39,8 +39,14 @@
 #include <vector>
 #include <fstream>
 
-#include "UserCode/sixie/HiggsAna/Utils/LeptonScaleCorrections.hh"
-
+//
+// correction header is passed in as a define so as not to make 
+// others checkout Si's UserCode. Set the env var using this syntax : 
+//     export ELECTRON_CORRECTIONS_HEADER='\"UserCode/sixie/HiggsAna/Utils/LeptonScaleCorrections.hh\"'
+// proper quoting is important ...
+#if xELECTRON_CORRECTIONS_HEADER != x 
+#include ELECTRON_CORRECTIONS_HEADER
+#endif
 
 using namespace mithep;
 //mithep::ElectronIDMVA *eleIDMVA; // The electron MVA 
@@ -167,6 +173,7 @@ void LeptonPairPhotonTreeWriter::resetTreeVariables()
 {
   fLeptonPairPhotonEvent->electronZmass = -99.;
   fLeptonPairPhotonEvent->mllg = -99.;
+  fLeptonPairPhotonEvent->mllgCorr = -99.;
   fLeptonPairPhotonEvent->ele1MVA = -99.;
   fLeptonPairPhotonEvent->ele2MVA = -99.;
   
@@ -1166,14 +1173,15 @@ void LeptonPairPhotonTreeWriter::Process()
 	//
 
 
-     	//
-	// electron scale/res corrections
-	//
 	fillEle1Variables(ele1);
 	fillEle2Variables(ele2);
 	regressEle1(ele1,fPileUpDen,fPV);
 	regressEle2(ele2,fPileUpDen,fPV);
 
+     	//
+	// electron scale/res corrections
+	//
+#if xELECTRON_CORRECTIONS_HEADER != x 
 	char tmpbuf[256];
 	if( YEAR == 2011 ) sprintf( tmpbuf, "2011");
 	else sprintf(tmpbuf, "HCP2012");
@@ -1223,6 +1231,7 @@ void LeptonPairPhotonTreeWriter::Process()
 			  fLeptonPairPhotonEvent->ele2energyCorr);
 
 	fLeptonPairPhotonEvent->mllgCorr = (e1corr + e2corr + gcorr).M();
+#endif // electron corrections
 
 	ZGLabVectors l;
 	ZGAngles b;
@@ -1764,4 +1773,5 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   AddOutput(ZgllTuple);
 
 }
+
 
