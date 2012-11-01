@@ -1,3 +1,4 @@
+<flags CPPDEFINES="ELECTRON_CORRECTIONS_HEADER=${ELECTRON_CORRECTIONS_HEADER}">
 <use   name="MitCommon/MathTools"/>
 <use   name="MitAna/TreeMod"/>
 <use   name="MitPhysics/Init"/>
