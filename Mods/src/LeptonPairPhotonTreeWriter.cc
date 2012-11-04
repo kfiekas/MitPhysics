@@ -39,20 +39,27 @@
 #include <vector>
 #include <fstream>
 
-//
-// correction header is passed in as a define so as not to make 
-// others checkout Si's UserCode. Set the env var using this syntax : 
-//     export ELECTRON_CORRECTIONS_HEADER='\"UserCode/sixie/HiggsAna/Utils/LeptonScaleCorrections.hh\"'
-// proper quoting is important ...
-#if xELECTRON_CORRECTIONS_HEADER != x 
-#include ELECTRON_CORRECTIONS_HEADER
-#endif
 
 using namespace mithep;
 //mithep::ElectronIDMVA *eleIDMVA; // The electron MVA 
 //MVATools fTool; // The electron MVA tools
 ClassImp(mithep::LeptonPairPhotonTreeWriter)
 ClassImp(mithep::LeptonPairPhotonEvent)
+
+//
+// correction header is passed in as a define so as not to make 
+// others checkout Si's UserCode. Set the env var using this syntax : 
+//     export ELECTRON_CORRECTIONS_HEADER='\"UserCode/sixie/HiggsAna/Utils/LeptonScaleCorrections.hh\"'
+// proper quoting is important ...
+#ifdef ELECTRON_CORRECTIONS_HEADER
+#include ELECTRON_CORRECTIONS_HEADER
+#endif
+
+
+#ifdef PHOSPHOR_CORRECTIONS_SRC
+//ClassImp(zgamma::PhosphorCorrectionFunctor)
+#include PHOSPHOR_CORRECTIONS_SRC
+#endif
 
 //--------------------------------------------------------------------------------------------------
   LeptonPairPhotonTreeWriter::LeptonPairPhotonTreeWriter(const char *name, const char *title) : 
@@ -102,7 +109,8 @@ ClassImp(mithep::LeptonPairPhotonEvent)
 
     verbose                 (false),
     _do_ElectronChannel     (true),
-    _do_MuonChannel         (true)
+    _do_MuonChannel         (true),
+    phosphorDataFile        ("PHOSPHOR_NUMBERS_EXPFIT.txt")
   
     //Photon MVA Variables
 //    fVariableType_2011             (10),
@@ -128,6 +136,9 @@ ClassImp(mithep::LeptonPairPhotonEvent)
 {
   // Constructor
   rmcor = new rochcor();
+#ifdef PHOSPHOR_CORRECTIONS_HEADER
+  phosphor = new PhosphorCorrectionFunctor(phosphorDataFile.Data(), true);
+#endif
 }
 
 LeptonPairPhotonTreeWriter::~LeptonPairPhotonTreeWriter()
@@ -1138,7 +1149,13 @@ void LeptonPairPhotonTreeWriter::Process()
 			   fLeptonPairPhotonEvent->photoneta,
 			   fLeptonPairPhotonEvent->photonphi,
 			   fLeptonPairPhotonEvent->photonmass);
-	if( phgen != NULL ) {  // also means it's MC ...
+	if( phgen != NULL ) {  // this also means it's MC ...
+
+          float eCorr = 0;
+#ifdef PHOSPHOR_CORRECTIONS_HEADER
+	  eCorr = phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta(),phgen->E());
+#endif
+	  /*
 	  float xMC = (pho->E()/phgen->E())-1;
 	  std::pair<float,float> mcScaleRes 
 	    = ZGTools::getPhosphorScaleRes(YEAR, true, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
@@ -1148,7 +1165,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	  float sMC = mcScaleRes.first;
 	  float xCorrSmear = rData_over_rMC*(xMC-0.01*sMC);
 	  float eCorr = (1+xCorrSmear)*phgen->E();
-	  assert(eCorr>0);
+	  */
 	  float sf = eCorr/pho->E();
 	  gcorr.SetE(eCorr);
 	  gcorr.SetPx(sf*pho->Px());
@@ -1156,9 +1173,15 @@ void LeptonPairPhotonTreeWriter::Process()
 	  gcorr.SetPz(sf*pho->Pz());
 	}
 	if( fIsData ) { 
+	  float eCorr = 0;
+#ifdef PHOSPHOR_CORRECTIONS_HEADER
+	  phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta());
+#endif
+	  /*
 	  std::pair<float,float> dataScaleRes 
 	    = ZGTools::getPhosphorScaleRes(YEAR, false, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
 	  float eCorr = pho->E()/(1.+dataScaleRes.first);
+	  */
 	  float sf = eCorr/pho->E();
 	  gcorr.SetE(eCorr);
 	  gcorr.SetPx(sf*pho->Px());

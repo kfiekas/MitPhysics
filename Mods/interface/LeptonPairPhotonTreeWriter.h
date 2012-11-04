@@ -6,6 +6,7 @@
 // Authors: A. Hess & K. Singh
 //--------------------------------------------------------------------------------------------------
 
+
 #ifndef MITPHYSICS_MODS_LEPTONPAIRPHOTONTREEWRITER_H
 #define MITPHYSICS_MODS_LEPTONPAIRPHOTONTREEWRITER_H
 
@@ -35,8 +36,22 @@
 
 #include "MitPhysics/Utils/interface/rochcor.h"
 
+
+
+//
+// correction header is passed in as a define so as not to make 
+// others checkout UserCode. Set the env var using this syntax : 
+//     export PHOSPHOR_CORRECTIONS_HEADER='\"MyPhosphorDir/PhosphorCorrectorFunctor.hh\"'
+// proper quoting is important ...
+#ifdef PHOSPHOR_CORRECTIONS_HEADER
+#include PHOSPHOR_CORRECTIONS_HEADER
+using namespace zgamma;
+#endif
+
+
 class TNtuple;
 class TRandom3;
+
 
 namespace mithep 
 {
@@ -238,6 +253,8 @@ namespace mithep
     void		SetDoElectronChannel(bool b)	     {_do_ElectronChannel = b;}
     void		SetDoMuonChannel(bool b)	     {_do_MuonChannel = b;} 
 
+    void                SetPhosphorDataFile(TString s)       {phosphorDataFile = s;}
+
     // wrappers to keep things readable
     void fillEle1Variables(const mithep::Electron * ele1);  
     void fillEle2Variables(const mithep::Electron * ele2);  
@@ -320,8 +337,15 @@ namespace mithep
     TRandom3 rand;
     rochcor * rmcor;
 
+    TString phosphorDataFile;
+#ifdef PHOSPHOR_CORRECTIONS_HEADER
+    PhosphorCorrectionFunctor* phosphor;
+#endif
+
     ClassDef(LeptonPairPhotonTreeWriter, 1) // Lepton Pair + Photon identification module
   };
 
+
 }
 #endif
+
