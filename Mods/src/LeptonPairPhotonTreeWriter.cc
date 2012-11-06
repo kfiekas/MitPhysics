@@ -1091,15 +1091,21 @@ void LeptonPairPhotonTreeWriter::Process()
 		    if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() 
 				      << "\t" << GetEventHeader()->EvtNum() 
 				      << "\tmllg: " << mllg << endl;
-		    if( mllg > 115 ) { 
-		      if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		      if( mllg < 180 ) { 
-			if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-			store_event_ele = true;		  
-			pho = tmppho;
-			break;
-		      } // m(llg)<180
-		    } // m(llg)>115
+
+		    //store events without making mllg cut
+		    if (mllg > 40) {
+		      store_event_ele = true;
+		      pho = tmppho;
+
+		      if( mllg > 115 ) { 
+			if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+			if( mllg < 180 ) { 
+			  if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+			} // m(llg)<180
+		      } // m(llg)>115
+		      break;
+		    } //m(llg) > 40
+
 		  } // dR(l,g)
 		} // pho kinematics
 	    } // loop over phos
@@ -1175,7 +1181,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	if( fIsData ) { 
 	  float eCorr = 0;
 #ifdef PHOSPHOR_CORRECTIONS_HEADER
-	  phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta());
+	  eCorr = phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta());
 #endif
 	  /*
 	  std::pair<float,float> dataScaleRes 
@@ -1409,15 +1415,22 @@ void LeptonPairPhotonTreeWriter::Process()
 		  if( verbose )cout << "PASS_DR_LEP_PHO :: run " << GetEventHeader()->RunNum() 
 				    << "\t" << GetEventHeader()->EvtNum() 
 				    << "\tmllg: " << mllg << endl;
-		  if( mllg > 115 ) { 
-		    if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		    if( mllg < 180 ) { 
-		      if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
-		      store_event_mu = true;		  
-		      pho = tmppho;
-		      break;
-		    } // m(llg)<180
-		  } // m(llg)>115
+
+		  //store event before mllg cut
+		  if (mllg > 40) {
+		    store_event_mu = true;
+		    pho = tmppho;
+		    
+		    if( mllg > 115 ) { 
+		      if( verbose ) cout << "MLLG 115 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		      if( mllg < 180 ) { 
+			if( verbose ) cout << "MLLG 180 :: run " << GetEventHeader()->RunNum() << "\t" << GetEventHeader()->EvtNum() << endl;
+		      } // m(llg)<180
+		    } // m(llg)>115
+
+		    break;
+		  } //m(llg) > 40
+
 		} // dR(l,g)
 	      } // pho kinematics
 	    } // loop over phos
@@ -1464,6 +1477,12 @@ void LeptonPairPhotonTreeWriter::Process()
 			   fLeptonPairPhotonEvent->photonphi,
 			   fLeptonPairPhotonEvent->photonmass);
 	if( phgen != NULL ) {  // also means it's MC ...
+
+          float eCorr = 0;
+#ifdef PHOSPHOR_CORRECTIONS_HEADER
+	  eCorr = phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta(),phgen->E());
+#endif
+	  /*
 	  float xMC = (pho->E()/phgen->E())-1;
 	  std::pair<float,float> mcScaleRes 
 	    = ZGTools::getPhosphorScaleRes(YEAR, true, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
@@ -1474,6 +1493,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	  float xCorrSmear = rData_over_rMC*(xMC-0.01*sMC);
 	  float eCorr = (1+xCorrSmear)*phgen->E();
 	  assert(eCorr>0);
+	  */
 	  float sf = eCorr/pho->E();
 	  gcorr.SetE(eCorr);
 	  gcorr.SetPx(sf*pho->Px());
@@ -1481,9 +1501,15 @@ void LeptonPairPhotonTreeWriter::Process()
 	  gcorr.SetPz(sf*pho->Pz());
 	}
 	if( fIsData ) { 
+	  float eCorr = 0;
+#ifdef PHOSPHOR_CORRECTIONS_HEADER
+	  eCorr = phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta());
+#endif
+	  /*
 	  std::pair<float,float> dataScaleRes 
 	    = ZGTools::getPhosphorScaleRes(YEAR, false, pho->SCluster()->Eta(), pho->Pt(), pho->R9());
 	  float eCorr = pho->E()/(1.+dataScaleRes.first);
+	  */
 	  float sf = eCorr/pho->E();
 	  gcorr.SetE(eCorr);
 	  gcorr.SetPx(sf*pho->Px());
@@ -1781,6 +1807,14 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   eleRegressionEvaluator_V1 = new ElectronEnergyRegression();
   eleRegressionEvaluator_V2 = new ElectronEnergyRegression();
 
+  //For MIT T2
+//   eleRegressionEvaluator_V0->initialize ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V00.root",
+//                                          ElectronEnergyRegression::kNoTrkVar);
+//   eleRegressionEvaluator_V1->initialize   ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V01.root",
+//                                            ElectronEnergyRegression::kWithTrkVar);
+//   eleRegressionEvaluator_V2->initialize   ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V02.root",
+//                                            ElectronEnergyRegression::kWithTrkVar);
+  //For AFS
   eleRegressionEvaluator_V0->initialize ("/afs/cern.ch/user/s/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V00.root",
                                          ElectronEnergyRegression::kNoTrkVar);
   eleRegressionEvaluator_V1->initialize   ("/afs/cern.ch/user/s/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V01.root",
