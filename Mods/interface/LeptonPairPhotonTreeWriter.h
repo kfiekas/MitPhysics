@@ -77,6 +77,7 @@ namespace mithep
     Float_t ele1pz;// Electron 1 Pz
     Float_t ele1pt;// Electron 1 Pt
     Float_t ele1eta;// Electron 1 Eta
+    Float_t ele1SCeta;// Electron 1 SC Eta
     Float_t ele1mass;// Electron 1 Mass
     Float_t ele1phi;// Electron 1 Phi
     Float_t ele1dEtaIn;
@@ -112,6 +113,7 @@ namespace mithep
     Float_t ele2pz;// Electron 2 Pz
     Float_t ele2pt;// Electron 2 Pt
     Float_t ele2eta;// Electron 2 Eta
+    Float_t ele2SCeta;// Electron 2 SC Eta
     Float_t ele2mass;// Electron 2 Mass
     Float_t ele2phi;// Electron 2 Phi
     Float_t ele2dEtaIn;
@@ -156,6 +158,7 @@ namespace mithep
     Float_t photonpz;// Photon Pz
     Float_t photonpt;// Photon Pt
     Float_t photoneta;// Photon Eta
+    Float_t photonSCeta;// Photon SC Eta
     Float_t photonmass;// Photon Mass??? photon->Mass() 
     Float_t photonphi;// Photon Phi
     Float_t photonr9;// Photon R9

@@ -159,7 +159,7 @@ void LeptonPairPhotonTreeWriter::fillEle1Variables(const mithep::Electron * ele1
   fLeptonPairPhotonEvent->ele1eta = ele1->Eta();
   fLeptonPairPhotonEvent->ele1mass = ele1->Mass();
   fLeptonPairPhotonEvent->ele1phi = ele1->Phi();
-   								    
+  fLeptonPairPhotonEvent->ele1SCeta = ele1->SCluster()->Eta();   								    
 
 }
 
@@ -176,6 +176,7 @@ void LeptonPairPhotonTreeWriter::fillEle2Variables(const mithep::Electron * ele2
   fLeptonPairPhotonEvent->ele2eta = ele2->Eta();
   fLeptonPairPhotonEvent->ele2mass = ele2->Mass();
   fLeptonPairPhotonEvent->ele2phi = ele2->Phi();
+  fLeptonPairPhotonEvent->ele2SCeta = ele2->SCluster()->Eta();   								    
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -292,6 +293,7 @@ void LeptonPairPhotonTreeWriter::resetTreeVariables()
   fLeptonPairPhotonEvent->photonpz = -99.;
   fLeptonPairPhotonEvent->photonpt = -99.;
   fLeptonPairPhotonEvent->photoneta = -99.;
+  fLeptonPairPhotonEvent->photonSCeta = -99.;
   fLeptonPairPhotonEvent->photonmass = -99.;
   fLeptonPairPhotonEvent->ele2phi = -99.;
   fLeptonPairPhotonEvent->photonr9 = -99.;
@@ -1130,6 +1132,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	fLeptonPairPhotonEvent->photonpz = pho->Pz();
 	fLeptonPairPhotonEvent->photonpt = pho->Pt();
 	fLeptonPairPhotonEvent->photoneta = pho->Eta();
+	fLeptonPairPhotonEvent->photonSCeta = pho->SCluster()->Eta();
 	fLeptonPairPhotonEvent->photonmass = pho->Mass();
 	fLeptonPairPhotonEvent->photonphi = pho->Phi();
 	fLeptonPairPhotonEvent->photonr9 = pho->R9();	
@@ -1451,6 +1454,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	fLeptonPairPhotonEvent->photonpz = pho->Pz();
 	fLeptonPairPhotonEvent->photonpt = pho->Pt();
 	fLeptonPairPhotonEvent->photoneta = pho->Eta();
+	fLeptonPairPhotonEvent->photonSCeta = pho->SCluster()->Eta();
 	fLeptonPairPhotonEvent->photonmass = pho->Mass();
 	fLeptonPairPhotonEvent->photonphi = pho->Phi();
 	fLeptonPairPhotonEvent->photonr9 = pho->R9();	
@@ -1644,6 +1648,7 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("ele1pz",&fLeptonPairPhotonEvent->ele1pz,"ele1pz/F");
   ZgllTuple->Branch("ele1pt",&fLeptonPairPhotonEvent->ele1pt,"ele1pt/F");
   ZgllTuple->Branch("ele1eta",&fLeptonPairPhotonEvent->ele1eta,"ele1eta/F");
+  ZgllTuple->Branch("ele1SCeta",&fLeptonPairPhotonEvent->ele1SCeta,"ele1SCeta/F");
   ZgllTuple->Branch("ele1mass",&fLeptonPairPhotonEvent->ele1mass,"ele1mass/F");
   ZgllTuple->Branch("ele1phi",&fLeptonPairPhotonEvent->ele1phi,"ele1phi/F");
   ZgllTuple->Branch("ele1RegressionEnergyV0",&fLeptonPairPhotonEvent->ele1RegressionEnergyV0,"ele1RegressionEnergyV0/F");
@@ -1668,6 +1673,7 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("ele2pz",&fLeptonPairPhotonEvent->ele2pz,"ele2pz/F");
   ZgllTuple->Branch("ele2pt",&fLeptonPairPhotonEvent->ele2pt,"ele2pt/F");
   ZgllTuple->Branch("ele2eta",&fLeptonPairPhotonEvent->ele2eta,"ele2eta/F");
+  ZgllTuple->Branch("ele2SCeta",&fLeptonPairPhotonEvent->ele2SCeta,"ele2SCeta/F");
   ZgllTuple->Branch("ele2mass",&fLeptonPairPhotonEvent->ele2mass,"ele2mass/F");
   ZgllTuple->Branch("ele2phi",&fLeptonPairPhotonEvent->ele2phi,"ele2phi/F");
   ZgllTuple->Branch("ele2RegressionEnergyV0",&fLeptonPairPhotonEvent->ele2RegressionEnergyV0,"ele2RegressionEnergyV0/F");
@@ -1771,6 +1777,7 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("photonpz",&fLeptonPairPhotonEvent->photonpz,"photonpz/F");
   ZgllTuple->Branch("photonpt",&fLeptonPairPhotonEvent->photonpt,"photonpt/F");
   ZgllTuple->Branch("photoneta",&fLeptonPairPhotonEvent->photoneta,"photoneta/F");
+  ZgllTuple->Branch("photonSCeta",&fLeptonPairPhotonEvent->photonSCeta,"photonSCeta/F");
   ZgllTuple->Branch("photonmass",&fLeptonPairPhotonEvent->photonmass,"photonmass/F");
   ZgllTuple->Branch("photonphi",&fLeptonPairPhotonEvent->photonphi,"photonphi/F");
   ZgllTuple->Branch("photonenergyerror",&fLeptonPairPhotonEvent->photonenergyerror,"photonenergyerror/F");
