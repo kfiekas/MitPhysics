@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.26 2012/10/26 19:23:05 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.27 2012/10/26 19:42:48 fabstoec Exp $
 //
 // PhotonTreeWriter
 //
@@ -622,7 +622,13 @@ namespace mithep
       Float_t masscorerr;
       Float_t masscorele;
       Float_t masscoreleerr;
-      
+
+      //jet quantities for met phi cut
+      Float_t jetleadNoIDpt;
+      Float_t jetleadNoIDeta;
+      Float_t jetleadNoIDphi;
+      Float_t jetleadNoIDmass;
+
       //jet quantities
       Float_t jet1pt;
       Float_t jet1eta;
