@@ -112,7 +112,8 @@ class ZGTools
                                                  	const mithep::VertexCol * vtxArr,
                                                  	const mithep::PFCandidateCol * fPFCandidates,
                                                  	const mithep::PileupEnergyDensityCol * fPUEnergyDensity,
-							vector<bool> PFnoPUflag);
+							vector<bool> PFnoPUflag, 
+							float year );
 
 	static float photonEffectiveEra_Ga( float eta ); 
 
