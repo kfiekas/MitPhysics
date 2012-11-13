@@ -136,9 +136,6 @@ ClassImp(mithep::LeptonPairPhotonEvent)
 {
   // Constructor
   rmcor = new rochcor();
-#ifdef PHOSPHOR_CORRECTIONS_HEADER
-  phosphor = new PhosphorCorrectionFunctor(phosphorDataFile.Data(), true);
-#endif
 }
 
 LeptonPairPhotonTreeWriter::~LeptonPairPhotonTreeWriter()
@@ -951,8 +948,15 @@ void LeptonPairPhotonTreeWriter::Process()
 	const Photon *tmppho = fPhotons->At(i);	
 	if( verbose ) 
 	  cout << "gamma :: pt: " << tmppho->Pt() << "\teta: " << tmppho->Eta() << "(" << tmppho->SCluster()->Eta() << ")";
-	if (tmppho->Pt() > 10 && 
-	    (fabs(tmppho->SCluster()->Eta()) < 1.4442 || fabs(tmppho->SCluster()->Eta()) > 1.566) && fabs(tmppho->SCluster()->Eta()) < 2.5)
+	if ( tmppho->Pt() > 10 
+	     && 
+	    (fabs(tmppho->SCluster()->Eta()) < 1.4442 || fabs(tmppho->SCluster()->Eta()) > 1.566) 
+	     && 
+	     fabs(tmppho->SCluster()->Eta()) < 2.5
+	     &&
+	     //spike cleaning        
+	     !(tmppho->SCluster()->Eta() > -1.81 && tmppho->SCluster()->Eta() < -1.72 && tmppho->SCluster()->Phi() > 1.35 && tmppho->SCluster()->Phi() < 1.39)
+	     )
 	  {
 	    if( verbose ) cout << "\tpresel";
 	    if (ZGTools::photonCutBasedMedium2012ID(tmppho, bestPV, fPFCands, fPileUpDen, fGoodElectrons, fConversions,fPV) ){
@@ -1162,7 +1166,7 @@ void LeptonPairPhotonTreeWriter::Process()
 
           float eCorr = 0;
 #ifdef PHOSPHOR_CORRECTIONS_HEADER
-	  eCorr = phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta(),phgen->E());
+	  eCorr = phosphor->GetCorrEnergy(pho->R9(),int(YEAR),pho->Pt(),pho->SCluster()->Eta(),phgen->E());
 #endif
 	  /*
 	  float xMC = (pho->E()/phgen->E())-1;
@@ -1184,7 +1188,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	if( fIsData ) { 
 	  float eCorr = 0;
 #ifdef PHOSPHOR_CORRECTIONS_HEADER
-	  eCorr = phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta());
+	  eCorr = phosphor->GetCorrEnergy(pho->R9(),int(YEAR),pho->Pt(),pho->SCluster()->Eta());
 #endif
 	  /*
 	  std::pair<float,float> dataScaleRes 
@@ -1484,7 +1488,7 @@ void LeptonPairPhotonTreeWriter::Process()
 
           float eCorr = 0;
 #ifdef PHOSPHOR_CORRECTIONS_HEADER
-	  eCorr = phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta(),phgen->E());
+	  eCorr = phosphor->GetCorrEnergy(pho->R9(),int(YEAR),pho->Pt(),pho->SCluster()->Eta(),phgen->E());
 #endif
 	  /*
 	  float xMC = (pho->E()/phgen->E())-1;
@@ -1507,7 +1511,7 @@ void LeptonPairPhotonTreeWriter::Process()
 	if( fIsData ) { 
 	  float eCorr = 0;
 #ifdef PHOSPHOR_CORRECTIONS_HEADER
-	  eCorr = phosphor->GetCorrEnergy(pho->R9(),YEAR,pho->Pt(),pho->SCluster()->Eta());
+	  eCorr = phosphor->GetCorrEnergy(pho->R9(),int(YEAR),pho->Pt(),pho->SCluster()->Eta());
 #endif
 	  /*
 	  std::pair<float,float> dataScaleRes 
@@ -1625,6 +1629,64 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   }
   ReqEventObject(fConversionName,  fConversions,  true);
   ReqEventObject(fBeamSpotName,    fBeamSpot,     true);
+
+
+  //*******************************************
+  //Set up Phosphor
+  //*******************************************
+#ifdef PHOSPHOR_CORRECTIONS_HEADER
+  phosphor = new PhosphorCorrectionFunctor(phosphorDataFile.Data(), true);
+#endif
+
+
+  //*******************************************
+  //Set up Electron MVA
+  //*******************************************
+  //eleIDMVA = new mithep::ElectronIDMVA();
+
+  // vector<string> weightFiles;
+  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml");
+  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml");
+  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml");
+  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml");
+  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml");
+  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml");
+  // eleIDMVA->Initialize( "ElectronIDMVA",
+  //                      mithep::ElectronIDMVA::kIDEGamma2012NonTrigV0,
+  //                      kTRUE, weightFiles);
+  //fTool.InitializeMVA(fVariableType_2011,fEndcapWeights_2011,fBarrelWeights_2011);
+  
+
+
+  //*******************************************
+  //Set up Electron Regression Evalatuator
+  //*******************************************
+  eleRegressionEvaluator_V0 = new ElectronEnergyRegression();
+  eleRegressionEvaluator_V1 = new ElectronEnergyRegression();
+  eleRegressionEvaluator_V2 = new ElectronEnergyRegression();
+
+  //For MIT T2
+//   eleRegressionEvaluator_V0->initialize ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V00.root",
+//                                          ElectronEnergyRegression::kNoTrkVar);
+//   eleRegressionEvaluator_V1->initialize   ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V01.root",
+//                                            ElectronEnergyRegression::kWithTrkVar);
+//   eleRegressionEvaluator_V2->initialize   ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V02.root",
+//                                            ElectronEnergyRegression::kWithTrkVar);
+  //For AFS
+  eleRegressionEvaluator_V0->initialize ("/afs/cern.ch/user/s/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V00.root",
+                                         ElectronEnergyRegression::kNoTrkVar);
+  eleRegressionEvaluator_V1->initialize   ("/afs/cern.ch/user/s/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V01.root",
+                                           ElectronEnergyRegression::kWithTrkVar);
+  eleRegressionEvaluator_V2->initialize   ("/afs/cern.ch/user/s/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V02.root",
+                                           ElectronEnergyRegression::kWithTrkVar);
+  assert(eleRegressionEvaluator_V0->isInitialized());
+  assert(eleRegressionEvaluator_V1->isInitialized());
+  assert(eleRegressionEvaluator_V2->isInitialized());
+
+
+  //*******************************************
+  //Set up output ntuple
+  //*******************************************
 
   fLeptonPairPhotonEvent = new LeptonPairPhotonEvent;//Declares all tree leaves  
   ZgllTuple = new TTree(fTupleName.Data(),fTupleName.Data());//Declares tree name  
@@ -1793,44 +1855,6 @@ void LeptonPairPhotonTreeWriter::SlaveBegin()
   ZgllTuple->Branch("NPuMinus",&fLeptonPairPhotonEvent->NPuMinus,"NPuMinus/F");
  
   ZgllTuple->Branch("photonmatchmc",&fLeptonPairPhotonEvent->photonmatchmc,"photonmatchmc/F");
-  //Initialize Electron MVA
-  //eleIDMVA = new mithep::ElectronIDMVA();
-
-  // vector<string> weightFiles;
-  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml");
-  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml");
-  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml");
-  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml");
-  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml");
-  // weightFiles.push_back("/home/ksingh/cms/cmssw/026/CMSSW_5_2_3/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml");
-  // eleIDMVA->Initialize( "ElectronIDMVA",
-  //                      mithep::ElectronIDMVA::kIDEGamma2012NonTrigV0,
-  //                      kTRUE, weightFiles);
-  //fTool.InitializeMVA(fVariableType_2011,fEndcapWeights_2011,fBarrelWeights_2011);
-  
-
-  //Set up Electron Regression Evalatuator
-  eleRegressionEvaluator_V0 = new ElectronEnergyRegression();
-  eleRegressionEvaluator_V1 = new ElectronEnergyRegression();
-  eleRegressionEvaluator_V2 = new ElectronEnergyRegression();
-
-  //For MIT T2
-//   eleRegressionEvaluator_V0->initialize ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V00.root",
-//                                          ElectronEnergyRegression::kNoTrkVar);
-//   eleRegressionEvaluator_V1->initialize   ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V01.root",
-//                                            ElectronEnergyRegression::kWithTrkVar);
-//   eleRegressionEvaluator_V2->initialize   ("/net/hisrv0001/home/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V02.root",
-//                                            ElectronEnergyRegression::kWithTrkVar);
-  //For AFS
-  eleRegressionEvaluator_V0->initialize ("/afs/cern.ch/user/s/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V00.root",
-                                         ElectronEnergyRegression::kNoTrkVar);
-  eleRegressionEvaluator_V1->initialize   ("/afs/cern.ch/user/s/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V01.root",
-                                           ElectronEnergyRegression::kWithTrkVar);
-  eleRegressionEvaluator_V2->initialize   ("/afs/cern.ch/user/s/sixie/CMSSW_analysis/src/MitPhysics/data/ElectronRegressionWeights/weightFile_V02.root",
-                                           ElectronEnergyRegression::kWithTrkVar);
-  assert(eleRegressionEvaluator_V0->isInitialized());
-  assert(eleRegressionEvaluator_V1->isInitialized());
-  assert(eleRegressionEvaluator_V2->isInitialized());
 
 
   //Add Output Tree
