@@ -796,7 +796,8 @@ bool ZGTools::photonCutBasedMedium2012Isolation(const mithep::Photon * ph,
                                                  //const mithep::Vertex * vtx,
                                                  const mithep::PFCandidateCol * fPFCandidates,
                                                  const mithep::PileupEnergyDensityCol * fPUEnergyDensity,
-						vector<bool> PFnoPUflag)
+						vector<bool> PFnoPUflag,
+						float year)
 //-------------------------------------------------------------------------------------------------------
 {
 
@@ -805,28 +806,41 @@ bool ZGTools::photonCutBasedMedium2012Isolation(const mithep::Photon * ph,
   //  photonPFIso03( ctrl, ph, vtx, fPFCandidates, fPUEnergyDensity); 
   vector<double> isolations;
   isolations = photonPFIso03( ph, vtxArr, fPFCandidates, fPUEnergyDensity, PFnoPUflag);
+  //cout << "isolations: " << isolations[0] << " " << isolations[1] << " " << isolations[2] << "\n";
 
+  double rho = 0;
 
-  double rho = fPUEnergyDensity->At(0)->RhoKt6PFJets();
-  //  double rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25();  
+  if (year == 2011) {
+    if (!(std::isnan(fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25()) ||
+          std::isinf(fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25())))
+      rho = fPUEnergyDensity->At(0)->RhoKt6PFJetsForIso25();
+  }
+  if (year == 2012) {
+    rho = fPUEnergyDensity->At(0)->RhoKt6PFJets();
+  }
+
   double fChargedIso = max(isolations[0] - rho*photonEffectiveEra_Ch(ph->SCluster()->Eta()), 0.);
   double fGammaIso   = max(isolations[1] - rho*photonEffectiveEra_Ga(ph->SCluster()->Eta()), 0.);
   double fNeutralIso = max(isolations[2] - rho*photonEffectiveEra_Nh(ph->SCluster()->Eta()), 0.);
   //cout << rho << endl;
   bool isEB = (ph->SCluster()->AbsEta()<1.5);
+
+  //cout << "debug : ph iso: " << fChargedIso << " " << fGammaIso << " " << fNeutralIso << "\n";
+  //cout << "ph iso corr: " << rho*photonEffectiveEra_Ch(ph->SCluster()->Eta()) << " " << rho*photonEffectiveEra_Ga(ph->SCluster()->Eta()) << " " << rho*photonEffectiveEra_Nh(ph->SCluster()->Eta()) << "\n";
+
   if(isEB) {
-    if( fChargedIso > 1.5 )                    {// cout << "eb, fail ch ..." << endl; 
+    if( fChargedIso > 1.5 )                    { //cout << "eb, fail ch ..." << endl; 
       pass=false;}
-    if( fNeutralIso > (1.0 + 0.04*ph->Pt())  ) {// cout << "eb, fail nh ..." << (3.5 + 0.04*ph->Pt())<< endl; 
+    if( fNeutralIso > (1.0 + 0.04*ph->Pt())  ) { //cout << "eb, fail nh ..." << (3.5 + 0.04*ph->Pt())<< endl; 
       pass=false;}
-    if( fGammaIso > (0.7 + 0.005*ph->Pt())  )  {// cout << "eb, fail ga ..." << (1.3 + 0.005*ph->Pt()) << endl; 
+    if( fGammaIso > (0.7 + 0.005*ph->Pt())  )  { //cout << "eb, fail ga ..." << (1.3 + 0.005*ph->Pt()) << endl; 
       pass=false;}
   } else {
-    if( fChargedIso > 1.2 )                    {// cout << "ee, fail ch ..." << endl; 
+    if( fChargedIso > 1.2 )                    { //cout << "ee, fail ch ..." << endl; 
       pass=false;}
-    if( fNeutralIso > (1.5 + 0.04*ph->Pt())  ) {// cout << "ee, fail nh ..." << (1.5 + 0.04*ph->Pt()) << endl; 
+    if( fNeutralIso > (1.5 + 0.04*ph->Pt())  ) { //cout << "ee, fail nh ..." << (1.5 + 0.04*ph->Pt()) << endl; 
       pass=false;}
-    if( fGammaIso > (1.0 + 0.005*ph->Pt())  )  {// cout << "ee, fail ga ..." << (1.0 + 0.005*ph->Pt()) << endl; 
+    if( fGammaIso > (1.0 + 0.005*ph->Pt())  )  { //cout << "ee, fail ga ..." << (1.0 + 0.005*ph->Pt()) << endl; 
       pass=false;}
   }
 
@@ -953,6 +967,7 @@ vector<double> ZGTools::photonPFIso03(const mithep::Photon * ph,
           fabs(pf->TrackerTrk()->DzCorrected(*vtx))>0.2   ) continue;
       if( dr < 0.02 ) continue; // from the PF iso page???
       fChargedIso += pf->Pt();
+      //cout << "debug: charged " << pf->Pt() << "\n";
     }
 
     //
@@ -964,7 +979,7 @@ vector<double> ZGTools::photonPFIso03(const mithep::Photon * ph,
       //if( !isEB &&  dr<0.07 ) continue;
       if( !isEB &&  dr<0.00864*fabs(sinh(ph->SCluster()->Eta()))*4 ) continue;
 
-
+      //cout << "debug: gamma iso: " << dr << " " << pf->Pt() << " : " << deta << " " << dphi << " " << 0.00864*fabs(sinh(ph->SCluster()->Eta()))*4 << " " << isEB << "\n";
       fGammaIso += pf->Pt();
     }
 
@@ -974,7 +989,9 @@ vector<double> ZGTools::photonPFIso03(const mithep::Photon * ph,
     else {
       // not used for Zg ...
       //if( pf->Pt() > 0.5 ) {
-        fNeutralHadronIso += pf->Pt();
+        fNeutralHadronIso += pf->Pt();   
+	//cout << "debug: neutral hadron " << pf->Pt() << "\n";
+
         //}
     }
   }
@@ -990,6 +1007,8 @@ vector<double> iso;
 iso.push_back(fChargedIso);
 iso.push_back(fGammaIso);
 iso.push_back(fNeutralHadronIso);
+
+//cout << "iso: " << iso[0] << " " << iso[1] << " " << iso[2] << " \n";
 
 return iso;
 }
