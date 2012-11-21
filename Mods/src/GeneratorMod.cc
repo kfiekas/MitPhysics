@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.68 2011/10/29 14:11:52 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.69 2012/06/28 22:44:37 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -625,6 +625,86 @@ void GeneratorMod::Process()
         } // loop j
       } // loop i
       if(theLowMass > 12) {delete GenTempLeptons; SkipEvent(); return;}
+
+      GenTempLeptons->Sort();
+      GenLeptons->Sort();
+      if(GenTempLeptons->GetEntries() == 3 &&
+         GenLeptons->GetEntries() == 3){
+        CompositeParticle dilepton01;
+        dilepton01.AddDaughter(GenLeptons->At(0));
+        dilepton01.AddDaughter(GenLeptons->At(1));
+        CompositeParticle dilepton02;
+        dilepton02.AddDaughter(GenLeptons->At(0));
+        dilepton02.AddDaughter(GenLeptons->At(2));
+        CompositeParticle dilepton12;
+        dilepton12.AddDaughter(GenLeptons->At(1));
+        dilepton12.AddDaughter(GenLeptons->At(2));
+        CompositeParticle trilepton;
+        trilepton.AddDaughter(GenLeptons->At(0));
+        trilepton.AddDaughter(GenLeptons->At(1));
+        trilepton.AddDaughter(GenLeptons->At(2));
+        CompositeParticle trileptonGen;
+        trileptonGen.AddDaughter(GenTempLeptons->At(0));
+        trileptonGen.AddDaughter(GenTempLeptons->At(1));
+        trileptonGen.AddDaughter(GenTempLeptons->At(2));
+	Double_t mass_4l = -1.0;
+	Double_t massW[3] = {-1.0, -1.0, -1.0};
+	if(GenNeutrinos->GetEntries() >= 1) {
+	  Int_t theNeu = -1;
+          for(unsigned int neu=0; neu<GenNeutrinos->GetEntries(); neu++){
+            if(GenNeutrinos->At(neu)->DistinctMother()->AbsPdgId() == MCParticle::kW) {theNeu = neu; break;}
+	  }
+	  if(theNeu != -1){
+            CompositeParticle fourlepton;
+            fourlepton.AddDaughter(GenLeptons->At(0));
+            fourlepton.AddDaughter(GenLeptons->At(1));
+            fourlepton.AddDaughter(GenLeptons->At(2));
+            fourlepton.AddDaughter(GenNeutrinos->At(theNeu));
+	    mass_4l = fourlepton.Mass();
+            CompositeParticle lepton0N;
+            lepton0N.AddDaughter(GenLeptons->At(0));
+            lepton0N.AddDaughter(GenNeutrinos->At(theNeu));
+	    massW[0] = lepton0N.Mass();
+            CompositeParticle lepton1N;
+            lepton1N.AddDaughter(GenLeptons->At(1));
+            lepton1N.AddDaughter(GenNeutrinos->At(theNeu));
+	    massW[1] = lepton1N.Mass();
+            CompositeParticle lepton2N;
+            lepton2N.AddDaughter(GenLeptons->At(2));
+            lepton2N.AddDaughter(GenNeutrinos->At(theNeu));
+	    massW[2] = lepton2N.Mass();
+	  }
+	}
+        /*cout << "AAAAAAAAA "
+	     << GenLeptons->At(0)->PdgId() << " "
+	     << GenLeptons->At(1)->PdgId() << " "
+	     << GenLeptons->At(2)->PdgId() << " "
+	     << GenLeptons->At(0)->Pt() << " "
+	     << GenLeptons->At(1)->Pt() << " "
+	     << GenLeptons->At(2)->Pt() << " "
+	     << GenLeptons->At(0)->Eta() << " "
+	     << GenLeptons->At(1)->Eta() << " "
+	     << GenLeptons->At(2)->Eta() << " "
+	     << GenLeptons->At(0)->Phi() << " "
+	     << GenLeptons->At(1)->Phi() << " "
+	     << GenLeptons->At(2)->Phi() << " "
+	     << dilepton01.Mass() << " "
+	     << dilepton02.Mass() << " "
+	     << dilepton12.Mass() << " "
+	     << trilepton.Mass() << " "
+	     << mass_4l << " "
+	     << massW[0] << " "
+	     << massW[1] << " "
+	     << massW[2] << " "
+	     << trileptonGen.Mass() << " "
+	     << endl;*/
+        if(dilepton01.Mass() >  62 && dilepton01.Mass() <  72 &&
+	   dilepton02.Mass() >  52 && dilepton02.Mass() <  55 &&
+	   dilepton12.Mass() > 7.2 && dilepton12.Mass() < 8.2 &&
+	   GenLeptons->At(0)->AbsPdgId() == MCParticle::kEl &&
+	   GenLeptons->At(1)->AbsPdgId() == MCParticle::kEl &&
+	   GenLeptons->At(2)->AbsPdgId() == MCParticle::kEl) {delete GenTempLeptons; SkipEvent(); return;}
+      }
     }
     delete GenTempLeptons;
 
