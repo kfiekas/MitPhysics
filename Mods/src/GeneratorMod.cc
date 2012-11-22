@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.69 2012/06/28 22:44:37 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.70 2012/11/21 19:32:42 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -697,13 +697,13 @@ void GeneratorMod::Process()
 	     << massW[1] << " "
 	     << massW[2] << " "
 	     << trileptonGen.Mass() << " "
-	     << endl;*/
+	     << endl;
         if(dilepton01.Mass() >  62 && dilepton01.Mass() <  72 &&
 	   dilepton02.Mass() >  52 && dilepton02.Mass() <  55 &&
 	   dilepton12.Mass() > 7.2 && dilepton12.Mass() < 8.2 &&
 	   GenLeptons->At(0)->AbsPdgId() == MCParticle::kEl &&
 	   GenLeptons->At(1)->AbsPdgId() == MCParticle::kEl &&
-	   GenLeptons->At(2)->AbsPdgId() == MCParticle::kEl) {delete GenTempLeptons; SkipEvent(); return;}
+	   GenLeptons->At(2)->AbsPdgId() == MCParticle::kEl) {delete GenTempLeptons; SkipEvent(); return;}*/
       }
     }
     delete GenTempLeptons;
