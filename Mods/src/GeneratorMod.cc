@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.70 2012/11/21 19:32:42 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.71 2012/11/22 06:23:36 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -626,7 +626,7 @@ void GeneratorMod::Process()
       } // loop i
       if(theLowMass > 12) {delete GenTempLeptons; SkipEvent(); return;}
 
-      GenTempLeptons->Sort();
+      /*GenTempLeptons->Sort();
       GenLeptons->Sort();
       if(GenTempLeptons->GetEntries() == 3 &&
          GenLeptons->GetEntries() == 3){
@@ -675,7 +675,7 @@ void GeneratorMod::Process()
 	    massW[2] = lepton2N.Mass();
 	  }
 	}
-        /*cout << "AAAAAAAAA "
+        cout << "AAAAAAAAA "
 	     << GenLeptons->At(0)->PdgId() << " "
 	     << GenLeptons->At(1)->PdgId() << " "
 	     << GenLeptons->At(2)->PdgId() << " "
