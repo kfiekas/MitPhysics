@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.41 2011/07/04 20:36:21 sixie Exp $
+// $Id: GeneratorMod.h,v 1.42 2011/10/29 14:12:03 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -15,6 +15,7 @@
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/MCParticleFwd.h"
 #include "MitAna/DataTree/interface/MetFwd.h"
+#include "MitAna/DataTree/interface/PFMetCol.h"
 
 class TH1D;
 class TH2D;
@@ -134,6 +135,7 @@ namespace mithep
       MCParticleArr       *fGenPhotons;         //!copied owning array for skimming
       MCParticleArr       *fGenRadPhotons;      //!copied owning array for skimming
       MCParticleArr       *fGenISRPhotons;      //!copied owning array for skimming
+      const PFMetCol      *fPFMetStd;
 
     ClassDef(GeneratorMod, 1) // Module to gather generator information
   };

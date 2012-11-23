@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.72 2012/11/22 06:26:41 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.73 2012/11/22 06:27:40 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -626,7 +626,8 @@ void GeneratorMod::Process()
       } // loop i
       if(theLowMass > 12) {delete GenTempLeptons; SkipEvent(); return;}
 
-      /*GenTempLeptons->Sort();
+      /*
+      GenTempLeptons->Sort();
       GenLeptons->Sort();
       if(GenTempLeptons->GetEntries() == 3 &&
          GenLeptons->GetEntries() == 3){
@@ -675,6 +676,8 @@ void GeneratorMod::Process()
 	    massW[2] = lepton2N.Mass();
 	  }
 	}
+        LoadBranch("PFMet");
+        const PFMet *PFMetStd = fPFMetStd->At(0);
         cout << "AAAAAAAAA "
 	     << GenLeptons->At(0)->PdgId() << " "
 	     << GenLeptons->At(1)->PdgId() << " "
@@ -697,6 +700,7 @@ void GeneratorMod::Process()
 	     << massW[1] << " "
 	     << massW[2] << " "
 	     << trileptonGen.Mass() << " "
+	     << PFMetStd->Pt() << " "
 	     << endl;
         if(dilepton01.Mass() >  62 && dilepton01.Mass() <  72 &&
 	   dilepton02.Mass() >  52 && dilepton02.Mass() <  55 &&
@@ -704,7 +708,8 @@ void GeneratorMod::Process()
 	   GenLeptons->At(0)->AbsPdgId() == MCParticle::kEl &&
 	   GenLeptons->At(1)->AbsPdgId() == MCParticle::kEl &&
 	   GenLeptons->At(2)->AbsPdgId() == MCParticle::kEl) {delete GenTempLeptons; SkipEvent(); return;}
-      }*/
+      }
+      */
     }
     delete GenTempLeptons;
 
@@ -1609,6 +1614,7 @@ void GeneratorMod::SlaveBegin()
   if(fIsData == kFALSE){
     ReqEventObject(fMCPartName, fParticles, kTRUE);
   }
+  ReqBranch("PFMet",   fPFMetStd);
   
   // Publish Arrays For the Output Module
   PublishObj(fGenLeptons);  
