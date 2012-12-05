@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.84 2012/06/15 11:58:54 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.85 2012/07/12 17:04:56 fabstoec Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -388,7 +388,7 @@ void MuonIDMod::Process()
 	    }
 	  }
 	}
-	Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 1.0, 0.1, 0.3, 0.0, fIntRadius);
+	Double_t totalIso =  IsolationTools::PFMuonIsolation(mu, fPFCandidates, fVertices->At(0), 0.1, 1.0, 0.3, 0.0, fIntRadius);
 	if (totalIso < (mu->Pt()*pfIsoCutValue) )
 	  isocut = kTRUE;
       }
