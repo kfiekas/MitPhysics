@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.26 2012/10/09 13:57:28 sixie Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.27 2012/11/14 20:06:32 sixie Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -29,7 +29,7 @@
 #include "MitPhysics/Utils/interface/PFMetCorrectionTools.h"
 #include "MitPhysics/Utils/interface/MVAVBF.h"
 #include "MitPhysics/Utils/interface/ElectronEnergyRegression.h"
-
+#include "MitPhysics/Utils/interface/AntiElectronIDMVA3.h"
 #endif
 
 #ifdef __CINT__
@@ -74,4 +74,5 @@
 #pragma link C++ class mithep::PFMetCorrectionTools;
 #pragma link C++ class mithep::MVAVBF;
 #pragma link C++ class mithep::ElectronEnergyRegression;
+#pragma link C++ class mithep::AntiElectronIDMVA3;
 #endif
