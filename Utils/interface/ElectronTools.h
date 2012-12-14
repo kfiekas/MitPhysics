@@ -18,6 +18,7 @@
 #include "MitAna/DataTree/interface/TriggerObjectCol.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/ElectronLikelihood/interface/ElectronLikelihood.h"
+#include <utility>
 
 namespace mithep {
   class ElectronTools {
@@ -131,6 +132,8 @@ namespace mithep {
       static Double_t     Likelihood(ElectronLikelihood *LH, const Electron *ele);
       static Double_t     ElectronEffectiveArea(EElectronEffectiveAreaType type, Double_t Eta, 
                                                 EElectronEffectiveAreaTarget EffectiveAreaTarget = kEleEAData2011);
+      static std::pair<Double_t,Double_t> ComputeEPCombination( const Electron * ele, const float regression_energy, 
+						  const float regression_energy_error);
 
       static Bool_t       PassHggLeptonTagID(const Electron *el);
       static Bool_t       PassHggLeptonTagID2012(const Electron *el);

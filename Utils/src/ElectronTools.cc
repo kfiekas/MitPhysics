@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.48 2012/07/12 17:05:49 fabstoec Exp $
+// $Id: ElectronTools.cc,v 1.49 2012/10/08 17:22:59 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -1650,3 +1650,110 @@ Bool_t ElectronTools::PassHggLeptonTagID2012(const Electron* ele) {
   return true;
 }
 
+std::pair<Double_t,Double_t> ElectronTools::ComputeEPCombination( const Electron * ele, const float regression_energy, 
+						  const float regression_energy_error) {
+
+  enum Classification { GSF_ELECTRON_UNKNOWN=-1, 
+			GSF_ELECTRON_GOLDEN=0, 
+			GSF_ELECTRON_BIGBREM=1, 
+			GSF_ELECTRON_BADTRACK=2, 
+			GSF_ELECTRON_SHOWERING=3, 
+			GSF_ELECTRON_GAP=4 } ;
+
+  float newEnergyError_ = regression_energy_error;
+  float scEnergy = regression_energy;
+
+  int elClass = ele->Classification();
+
+  float trackMomentum  = ele->PIn() ;
+  float errorTrackMomentum_ = 999. ;
+  
+  // the electron's track momentum error was not available in bambu versions less than 029
+  if(ele->TrackMomentumError() > 0)
+    errorTrackMomentum_ = ele->TrackMomentumError();
+  else if ( ele->GsfTrk()->PtErr() > 0)
+    errorTrackMomentum_ = ele->GsfTrk()->PtErr()*cosh(ele->GsfTrk()->Eta());
+  else
+    assert(0);
+
+  float finalMomentum = ele->E(); // initial
+  float finalMomentumError = 999.;
+  
+  // first check for large errors
+
+  if (errorTrackMomentum_/trackMomentum > 0.5 && regression_energy_error/regression_energy <= 0.5) {
+    finalMomentum = regression_energy;    finalMomentumError = regression_energy_error;
+  }
+  else if (errorTrackMomentum_/trackMomentum <= 0.5 && regression_energy_error/regression_energy > 0.5){  
+    finalMomentum = trackMomentum;  finalMomentumError = errorTrackMomentum_;
+  }
+  else if (errorTrackMomentum_/trackMomentum > 0.5 && regression_energy_error/regression_energy > 0.5){
+    if (errorTrackMomentum_/trackMomentum < regression_energy_error/regression_energy) {
+      finalMomentum = trackMomentum; finalMomentumError = errorTrackMomentum_;
+    }
+    else{
+      finalMomentum = regression_energy; finalMomentumError = regression_energy_error;
+    }
+  }
+  // then apply the combination algorithm
+  else {
+     // calculate E/p and corresponding error
+    float eOverP = regression_energy / trackMomentum;
+    float errorEOverP = sqrt(
+			     (regression_energy_error/trackMomentum)*(regression_energy_error/trackMomentum) +
+			     (regression_energy*errorTrackMomentum_/trackMomentum/trackMomentum)*
+			     (regression_energy*errorTrackMomentum_/trackMomentum/trackMomentum));
+
+
+    bool eleIsNotInCombination = false ;
+    if ( (eOverP  > 1 + 2.5*errorEOverP) || (eOverP  < 1 - 2.5*errorEOverP) || (eOverP < 0.8) || (eOverP > 1.3) )
+      { eleIsNotInCombination = true ; }
+     if (eleIsNotInCombination)
+       {
+	 if (eOverP > 1)
+	   { finalMomentum = regression_energy ; finalMomentumError = regression_energy_error ; }
+	 else
+	   {
+	     if (elClass == GSF_ELECTRON_GOLDEN)
+	       { finalMomentum = regression_energy; finalMomentumError = regression_energy_error; }
+	     if (elClass == GSF_ELECTRON_BIGBREM)
+	       {
+		 if (regression_energy<36)
+		   { finalMomentum = trackMomentum ; finalMomentumError = errorTrackMomentum_ ; }
+		 else
+		   { finalMomentum = regression_energy ; finalMomentumError = regression_energy_error ; }
+	       }
+	     if (elClass == GSF_ELECTRON_BADTRACK)
+	       { finalMomentum = regression_energy; finalMomentumError = regression_energy_error ; }
+	     if (elClass == GSF_ELECTRON_SHOWERING)
+	       {
+		 if (regression_energy<30)
+		   { finalMomentum = trackMomentum ; finalMomentumError = errorTrackMomentum_; }
+		 else
+		   { finalMomentum = regression_energy; finalMomentumError = regression_energy_error;}
+	       }
+	     if (elClass == GSF_ELECTRON_GAP)
+	       {
+		 if (regression_energy<60)
+		   { finalMomentum = trackMomentum ; finalMomentumError = errorTrackMomentum_ ; }
+		 else
+		   { finalMomentum = regression_energy; finalMomentumError = regression_energy_error ; }
+	       }
+	   }
+       }     
+     else 
+       {
+	 // combination
+	 finalMomentum = (regression_energy/regression_energy_error/regression_energy_error + trackMomentum/errorTrackMomentum_/errorTrackMomentum_) /
+	   (1/regression_energy_error/regression_energy_error + 1/errorTrackMomentum_/errorTrackMomentum_);
+	 float finalMomentumVariance = 1 / (1/regression_energy_error/regression_energy_error + 1/errorTrackMomentum_/errorTrackMomentum_);
+	 finalMomentumError = sqrt(finalMomentumVariance);
+       }
+  }  
+
+  std::pair<Double_t,Double_t> value;
+  value.first = finalMomentum;
+  value.second = finalMomentumError;
+  return value;
+
+}
