@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.133 2012/10/27 13:41:33 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.134 2012/10/27 19:36:15 mingyang Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -85,7 +85,8 @@ ElectronIDMod::ElectronIDMod(const char *name, const char *title) :
   fElectronMVAWeights_Subdet0Pt20ToInf(""),
   fElectronMVAWeights_Subdet1Pt20ToInf(""),
   fElectronMVAWeights_Subdet2Pt20ToInf(""),
-  fTheRhoType(RhoUtilities::DEFAULT)
+  fTheRhoType(RhoUtilities::DEFAULT),
+  fPVName(Names::gkPVBeamSpotBrn)
 {
   // Constructor.
 }
@@ -582,6 +583,11 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
 void ElectronIDMod::Process()
 {
   // Process entries of the tree. 
+  if(fElIdType == ElectronTools::kHggLeptonTagId2012HCP){
+    LoadEventObject(fPVName,fVertices);
+  }else{
+    fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
+  }
 
   if(fElIsoType != ElectronTools::kPFIsoNoL) {
     LoadEventObject(fElectronBranchName, fElectrons);
@@ -608,8 +614,6 @@ void ElectronIDMod::Process()
     assert(fPileupEnergyDensity);
   }
 
-  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
-
   if(fElIsoType == ElectronTools::kPFIso_HWW2012TrigV0 || fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012 || fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012HCP) {
     // Name is hardcoded, can be changed if someone feels to do it
     fPFNoPileUpCands = GetObjThisEvt<PFCandidateCol>(fPFNoPileUpName);
@@ -630,6 +634,7 @@ void ElectronIDMod::Process()
   int NPass = 0;
 
   for (UInt_t i=0; i<fElectrons->GetEntries() && fVertices->GetEntries() > 0 ; ++i) {
+  
     const Electron *e = fElectrons->At(i);        
 
     if (e->SCluster() == 0) 
@@ -648,6 +653,7 @@ void ElectronIDMod::Process()
       continue;
     }
     
+
     if (fApplyEcalSeeded && !e->IsEcalDriven()) {
       continue;
     }    
@@ -656,7 +662,7 @@ void ElectronIDMod::Process()
     Bool_t matchTrigger = fApplyTriggerMatching && ElectronTools::PassTriggerMatching(e,trigObjs);
     if (fApplyTriggerMatching && !matchTrigger)
       continue;
-
+    
     //apply ECAL spike removal    
     Bool_t spikecut = ElectronTools::PassSpikeRemovalFilter(e);
     if (fApplySpikeRemoval && !spikecut)
@@ -690,11 +696,11 @@ void ElectronIDMod::Process()
 	break;
       }
     }
-
+    
     Bool_t isocut = kFALSE;
+    Double_t distVtx = 999.0;
+    Int_t closestVtx = 0;
     if(fElIsoType == ElectronTools::kPFIso_HggLeptonTag2012HCP){
-      Double_t distVtx = 999.0;
-      Int_t closestVtx = 0;
       for(UInt_t nv=0; nv<fVertices->GetEntries(); nv++){
 	double dz = TMath::Abs(e->GsfTrk()->DzCorrected(*fVertices->At(nv)));
 	if(dz < distVtx) {
@@ -706,6 +712,7 @@ void ElectronIDMod::Process()
     }else{
       isocut = PassIsolationCut(e, fElIsoType, fTracks, fVertices->At(0), Rho, fElIdType);
     }
+
     if (!isocut)
       continue;
 
@@ -732,7 +739,7 @@ void ElectronIDMod::Process()
     }
     
     if (passConvVetoType2 == kFALSE) continue;
-
+    
     // apply NExpectedHitsInner Cut
     if(fInvertNExpectedHitsInnerCut == kFALSE && fNExpectedHitsInnerCut < 999 && 
        e->CorrectedNExpectedHitsInner() > fNExpectedHitsInnerCut) continue;
@@ -740,7 +747,7 @@ void ElectronIDMod::Process()
     // apply NExpectedHitsInner inverted Cut
     if(fInvertNExpectedHitsInnerCut == kTRUE && fNExpectedHitsInnerCut < 999 && 
        e->CorrectedNExpectedHitsInner() <= fNExpectedHitsInnerCut) continue;
-
+    
     // apply d0 cut
     if (fApplyD0Cut) {
       Bool_t passD0cut = kTRUE;
@@ -749,31 +756,19 @@ void ElectronIDMod::Process()
       if (!passD0cut)
         continue;
     }
-
+  
     // apply dz cut
     if (fApplyDZCut) {
       Bool_t passDZcut = ElectronTools::PassDZCut(e, fVertices, fDZCut, fWhichVertex);
       if (!passDZcut)
         continue;
     }
-
+ 
     //apply id cut
     Bool_t idcut = kFALSE;
     if(fElIdType == ElectronTools::kHggLeptonTagId2012HCP){
-      Double_t distVtx = 999.0;
-      Int_t closestVtx = 0;
-      for(UInt_t nv=0; nv<fVertices->GetEntries(); nv++){
-	double dz = TMath::Abs(e->GsfTrk()->DzCorrected(*fVertices->At(nv)));
-	if(dz < distVtx) {
-	  distVtx    = dz;
-	  closestVtx = nv;
-	}
-      }
-
       MVAValue = EvaluateMVAID(e, ElectronTools::kHggLeptonTagId2012HCP, fVertices->At(closestVtx), fPFCandidates, fPileupEnergyDensity);
-
       idcut = PassIDCut(e, fElIdType, fVertices->At(closestVtx));
-
       if(MVAValue>MVAValueMax){
 	MVAValueMax = MVAValue;
 	NElectronMVAValueMax = i;
@@ -781,9 +776,9 @@ void ElectronIDMod::Process()
     } else {
       idcut = PassIDCut(e, fElIdType, fVertices->At(0));
     }
+
     if (!idcut) 
       continue;
-
 
     // apply charge filter
     if(fChargeFilter == kTRUE) {
@@ -793,7 +788,6 @@ void ElectronIDMod::Process()
 
     // apply full combined id, using Tight cuts
     if(fCombinedIdCut == kTRUE) {
-      fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
       LoadEventObject(fConversionBranchName, fConversions);
       Int_t result = ElectronTools::PassTightId(e, *&fVertices, fConversions, 2);
       if(result != 15) continue;
@@ -807,7 +801,7 @@ void ElectronIDMod::Process()
     NPass = NPass+1;
   }
 
-  if((fElIdType==ElectronTools::kHggLeptonTagId2012HCP) && (NPass>0)){
+   if((fElIdType==ElectronTools::kHggLeptonTagId2012HCP) && (NPass>0)){
     GoodElectrons->Add(fElectrons->At(NElectronMVAValueMax));
   }
   
@@ -824,6 +818,10 @@ void ElectronIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the electron collection branch.
 
+  if(fElectronIDType.CompareTo("Hgg_LeptonTag_2012IdHCP") == 0){
+    ReqEventObject(fPVName,fVertices,true);
+  }
+ 
    // In this case we cannot have a branch
   if (fElectronIsoType.CompareTo("PFIsoNoL") != 0 ) {
     ReqEventObject(fElectronBranchName, fElectrons,fElectronsFromBranch);

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.52 2012/06/15 11:59:00 ceballos Exp $
+// $Id: MuonIDMod.h,v 1.53 2012/07/12 17:04:56 fabstoec Exp $
 //
 // MuonIDMod
 //
@@ -81,6 +81,7 @@ namespace mithep
 	{ fTheRhoType = type; };
 
       void               SetVertexName(const char* name) { fVertexName = name; }
+      void               SetPVName(const char *n)             { fPVName = n;                }
 
       enum EMuIdType {
         kIdUndef = 0,       //not defined
@@ -175,6 +176,7 @@ namespace mithep
       const PileupEnergyDensityCol *fPileupEnergyDensity;
       MuonTools          *fMuonTools;           // interface to tools for muon ID
       MuonIDMVA          *fMuonIDMVA;           // helper class for MuonMVA
+      TString             fPVName;
 
       RhoUtilities::RhoType fTheRhoType;
       

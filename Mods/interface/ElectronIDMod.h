@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: ElectronIDMod.h,v 1.60 2012/07/12 17:04:56 fabstoec Exp $
+// $Id: ElectronIDMod.h,v 1.61 2012/10/08 17:18:09 mingyang Exp $
 //
 // ElectronIDMod
 //
@@ -126,6 +126,7 @@ namespace mithep
       void                SetVertexName(TString name)            { fVertexName = name;         }
       void                SetIntRadius(Double_t dr)              { fIntRadius = dr;            }
       void                SetPFNoPileUpName(const char *n)       { fPFNoPileUpName  = n; }  
+      void                SetPVName(const char *n)               { fPVName = n;                }
       void                Setup();
  
       void                SetElectronMVAWeightsSubdet0Pt10To20(TString s)  
@@ -216,6 +217,7 @@ namespace mithep
       TString                   fElectronMVAWeights_Subdet0Pt20ToInf;
       TString                   fElectronMVAWeights_Subdet1Pt20ToInf;
       TString                   fElectronMVAWeights_Subdet2Pt20ToInf;
+      TString                   fPVName;
 
       RhoUtilities::RhoType    fTheRhoType;
 

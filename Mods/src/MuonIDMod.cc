@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.85 2012/07/12 17:04:56 fabstoec Exp $
+// $Id: MuonIDMod.cc,v 1.86 2012/12/05 19:06:07 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -57,7 +57,8 @@ ClassImp(mithep::MuonIDMod)
   fPileupEnergyDensity(0),
   fMuonTools(0),
   fMuonIDMVA(0),
-  fTheRhoType(RhoUtilities::DEFAULT)
+  fTheRhoType(RhoUtilities::DEFAULT),
+  fPVName(Names::gkPVBeamSpotBrn)
 {
   // Constructor.
 }
@@ -66,6 +67,13 @@ ClassImp(mithep::MuonIDMod)
 void MuonIDMod::Process()
 {
   // Process entries of the tree. 
+
+  if(fCleanMuonsName.CompareTo("HggLeptonTagMuons") == 0 ){
+    LoadEventObject(fPVName,fVertices);
+  }
+  else{
+    fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
+  }
 
   if(fMuIsoType != kPFIsoNoL) {
     LoadEventObject(fMuonBranchName, fMuons);
@@ -93,8 +101,6 @@ void MuonIDMod::Process()
 
   MuonOArr *CleanMuons = new MuonOArr;
   CleanMuons->SetName(fCleanMuonsName);
-
-  fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
   for (UInt_t i=0; i<fMuons->GetEntries() && fVertices->GetEntries() > 0 ; ++i) {
     const Muon *mu = fMuons->At(i);
@@ -541,6 +547,10 @@ void MuonIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the muon collection branch.
 
+  if(fCleanMuonsName.CompareTo("HggLeptonTagMuons") == 0 ){
+    ReqEventObject(fPVName,fVertices,true);
+  }
+
    // In this case we cannot have a branch
   if (fMuonIsoType.CompareTo("PFIsoNoL") != 0) {
     ReqEventObject(fMuonBranchName, fMuons, kTRUE);
@@ -555,7 +565,7 @@ void MuonIDMod::SlaveBegin()
       || fMuonIsoType.CompareTo("MVA_BDTG_IDIso") == 0
       || fMuonIsoType.CompareTo("IsoRingsV0_BDTG_Iso") == 0
       || fMuonIsoType.CompareTo("IsoDeltaR") == 0
-    ) {
+      ) {
     ReqEventObject(fPileupEnergyDensityName, fPileupEnergyDensity, kTRUE);
   }
 
