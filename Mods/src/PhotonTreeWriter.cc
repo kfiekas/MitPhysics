@@ -856,8 +856,7 @@ void PhotonTreeWriter::Process()
     Float_t ph1ecoreleerr = fDiphotonEvent->photons[0].Ecoreleerr();
     Float_t ph2ecorele    = fDiphotonEvent->photons[1].Ecorele();
     Float_t ph2ecoreleerr = fDiphotonEvent->photons[1].Ecoreleerr();
-    
-    
+      
     fDiphotonEvent->masscor    = TMath::Sqrt(2.0*ph1ecor*ph2ecor*(1.0-fDiphotonEvent->costheta));
     fDiphotonEvent->masscorerr = 0.5*fDiphotonEvent->masscor*
       TMath::Sqrt(ph1ecorerr*ph1ecorerr/ph1ecor/ph1ecor + ph2ecorerr*ph2ecorerr/ph2ecor/ph2ecor);
@@ -917,7 +916,7 @@ void PhotonTreeWriter::Process()
       //           = +1   -> event tagged as muon-event
       //           = +2   -> event tagged as electron-event
       fDiphotonEvent->leptonTag = 0;
-      
+      Int_t closestVtx = 0;
       if ( fLeptonTagMuons->GetEntries() > 0 ) {
 	// need to have dR > 1 for with respect to both photons ***changed to 0.7 for 2012
 	if( (MathUtils::DeltaR(fLeptonTagMuons->At(0),phHard) >= 1.0) && 
@@ -967,7 +966,6 @@ void PhotonTreeWriter::Process()
 
 	  if ( fDoSynching ) {
 	    Double_t distVtx = 999.0;
-	    Int_t closestVtx = 0;
 	    for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
 	      double dz = TMath::Abs(fLeptonTagElectrons->At(0)->GsfTrk()->DzCorrected(*fPV->At(nv)));
 	      if(dz < distVtx) {
@@ -992,6 +990,12 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> eleMass1 = (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
 	  fDiphotonEvent-> eleMass2 = (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
 	  fDiphotonEvent-> eleNinnerHits =      fLeptonTagElectrons->At(0)->Trk()->NExpectedHitsInner();
+	}
+      }
+      
+      if(false){
+	if(fDiphotonEvent->evt==197022547 || fDiphotonEvent->evt==172664113 || fDiphotonEvent->evt==332789938 || fDiphotonEvent->evt==465586356){
+	  printf("ming sync check 0:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numelectrons:%d  idmva:%f  mass:%f\n  elePt:%f  eleEta:%f  eleSCEta:%f  vtx:%d\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagElectrons->GetEntries(),fDiphotonEvent->eleIdMva,_mass,fDiphotonEvent->elePt,fDiphotonEvent->eleEta,fDiphotonEvent->eleSCEta,closestVtx);
 	}
       }
     }

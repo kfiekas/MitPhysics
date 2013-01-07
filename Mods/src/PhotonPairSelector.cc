@@ -406,6 +406,7 @@ void PhotonPairSelector::Process()
 
   // ------------------------------------------------------------
   // Loop over all Pairs and do the 'incredible machine' running....
+  int leptag[20];
   for (unsigned int iPair = 0; iPair < numPairs; ++iPair) {
     // first we need a hard copy of the incoming photons
     fixPh1st.push_back(new Photon(*preselPh->At(idx1st[iPair])));
@@ -488,15 +489,15 @@ void PhotonPairSelector::Process()
     }
 
     // lepton tag for this pair -- ming
-    int leptag = -1;
+    leptag[iPair] = -1;
     if(fApplyLeptonTag){
-      int leptag = 0;
+      leptag[iPair] = 0;
       if ( fLeptonTagMuons->GetEntries() > 0 ) {
 	if( (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh1st[iPair]) >= 1.0) && 
 	    (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh2nd[iPair]) >= 1.0) && 
 	    ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
 	    ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120)) ){
-	  leptag = 1;
+	  leptag[iPair] = 1;
 	}
       } else if( fLeptonTagElectrons->GetEntries() > 0 ){
 	if( (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh1st[iPair]) >= 1) &&
@@ -507,7 +508,7 @@ void PhotonPairSelector::Process()
 	    (TMath::Abs( (fixPh2nd[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
 	    ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
 	    ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120)) ){
-	  leptag = 2;
+	  leptag[iPair] = 2;
 	}
       }
     }
@@ -884,11 +885,13 @@ void PhotonPairSelector::Process()
   //PhotonTools::CiCBaseLineCats catPh2 = PhotonTools::kCiCNoCat;
 
   double maxSumEt = 0.;
+  int maxleptag = 0;
   for (unsigned int iPair=0; iPair<passPairs.size(); ++iPair) {
     double sumEt  = fixPh1st[passPairs[iPair]]->Et()
       +             fixPh2nd[passPairs[iPair]]->Et();
-    if (sumEt > maxSumEt) {
+    if (((sumEt > maxSumEt) && leptag[iPair] == maxleptag) || (leptag[iPair] > maxleptag)) {
       maxSumEt = sumEt;
+      maxleptag = leptag[iPair];
       phHard   = fixPh1st[passPairs[iPair]];
       phSoft   = fixPh2nd[passPairs[iPair]];
       //catPh1   = cat1st  [passPairs[iPair]];
