@@ -1,4 +1,4 @@
-// $Id: runHgg2012HCP.C,v 1.1 2012/10/08 17:41:20 mingyang Exp $
+// $Id: runHgg2012HCP.C,v 1.2 2012/10/24 14:47:27 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -12,6 +12,7 @@
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitAna/DataTree/interface/Names.h"
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
@@ -42,10 +43,11 @@ void runHgg2012HCP(const char *fileset    = "0000",
 		   //const char *dataset = "r12a-pho-pr-v1",
 		   //const char *dataset = "s12-pj40-2em-v9",
 		   //const char *dataset = "s12-h125gg-vbf-v7a", 
-		   //const char *dataset = "s12-h125gg-vh-v7a", 
-		   const char *dataset = "s12-h125gg-gf-v7a", 
+		   const char *dataset = "s12-h125gg-vh-v7a", 
+		   //const char *dataset = "s12-h125gg-gf-v7a", 
 		   //const char *dataset = "r12a-pho-j13-v1", 
 		   //const char *dataset = "r12b-dph-j13-v1", 
+		   //const char *dataset = "s12-zllm50-v7a", 
 		   const char *book       = "t2mit/filefi/029",
 		   const char *catalogDir = "/home/cmsprod/catalog",
 		   const char *outputName = "hgg",
@@ -267,7 +269,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   eleIdMod -> SetInvertNExpectedHitsInnerCut(kFALSE);
   eleIdMod -> SetNExpectedHitsInnerCut(1);   
   eleIdMod -> SetApplyConversionFilterType1(kTRUE);
-  
+  eleIdMod -> SetPVName(Names::gkPVBeamSpotBrn);   
+
   MuonIDMod* muonIdMod = new MuonIDMod;
   // base kinematics
   muonIdMod -> SetPtMin(20.);
@@ -282,6 +285,7 @@ void runHgg2012HCP(const char *fileset    = "0000",
   muonIdMod -> SetOutputName("HggLeptonTagMuons");
   muonIdMod -> SetPFNoPileUpName("pfnopileupcands");
   muonIdMod -> SetPFPileUpName("pfpileupcands");
+  muonIdMod -> SetPVName(Names::gkPVBeamSpotBrn); 
   
   PublisherMod<PFJet,Jet> *pubJet = new PublisherMod<PFJet,Jet>("JetPub");
   pubJet->SetInputName("AKt5PFJets");
@@ -328,20 +332,21 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photreg->SetApplyShowerRescaling(kTRUE);
   photreg->SetIsData(isData);
 
-    
+  
   PhotonPairSelector         *photcic = new PhotonPairSelector("PhotonPairSelectorCiC");
   photcic->SetOutputName("GoodPhotonsCIC");
   photcic->SetOutputVtxName("OutVtxCiC");        
   photcic->SetPhotonSelType("CiCPFSelection");
   photcic->SetVertexSelType("CiCMVA2012Selection");
-  //photcic->SetUseSingleLegConversions(kTRUE);
+  photcic->SetUseSingleLegConversions(kFALSE);
   photcic->DoMCSmear(kTRUE);
   photcic->DoDataEneCorr(kTRUE);
   photcic->SetPhotonsFromBranch(kFALSE);
   photcic->SetInputPhotonsName(photreg->GetOutputName());
   
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photcic->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  //photcic->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  photcic->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
   photcic->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photcic->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photcic->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -381,14 +386,15 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photcicnoeleveto->SetOutputVtxName("OutVtxCiCInvertEleVeto");      
   photcicnoeleveto->SetPhotonSelType("CiCPFSelection");
   photcicnoeleveto->SetVertexSelType("CiCMVA2012Selection");
-  //photcicnoeleveto->SetUseSingleLegConversions(kTRUE);
+  photcicnoeleveto->SetUseSingleLegConversions(kFALSE);
   photcicnoeleveto->DoMCSmear(kTRUE);
   photcicnoeleveto->DoDataEneCorr(kTRUE);
   photcicnoeleveto->SetPhotonsFromBranch(kFALSE);
   photcicnoeleveto->SetInputPhotonsName(photreg->GetOutputName());
   
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photcicnoeleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  //photcicnoeleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  photcicnoeleveto->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -416,7 +422,7 @@ void runHgg2012HCP(const char *fileset    = "0000",
   //photcicnoeleveto->SetMCErrScale(1.07, 1.045);    
   //photcicnoeleveto->SetMCErrScale(1, 1);    
   photcicnoeleveto->SetApplyEleVeto(kFALSE);
-  photcicnoeleveto->SetInvertElectronVeto(kFALSE);
+  photcicnoeleveto->SetInvertElectronVeto(kTRUE);
   photcicnoeleveto->SetJetsName(jetCorr->GetOutputName());  
   //photcicnoeleveto->SetRescaledBeamspotWidth(5.0);
   photcicnoeleveto->SetIsData(isData);
@@ -429,14 +435,15 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photpresel->SetOutputName("GoodPhotonsPresel");
   photpresel->SetPhotonSelType("MITPFSelection");
   photpresel->SetVertexSelType("CiCMVA2012Selection");
-  photpresel->SetUseSingleLegConversions(kTRUE);
+  photpresel->SetUseSingleLegConversions(kFALSE);
   photpresel->SetIdMVAType("2012IdMVA_globe");
   photpresel->DoMCSmear(kTRUE);
   photpresel->DoDataEneCorr(kTRUE);
   photpresel->SetPhotonsFromBranch(kFALSE);
   photpresel->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photpresel->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  //photpresel->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  photpresel->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
   photpresel->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photpresel->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photpresel->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -467,21 +474,21 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photpresel->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photpresel->SetLeptonTagMuonsName("HggLeptonTagMuons");  
   photpresel->Set2012HCP(kTRUE); 
-
+ 
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputName("GoodPhotonsPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputVtxName("OutVtxPreselInvertEleVeto");    
   photpreselinverteleveto->SetPhotonSelType("MITPFSelection");
   photpreselinverteleveto->SetIdMVAType("2012IdMVA_globe");
-  photpreselinverteleveto->SetVertexSelType("CiCMVA2012Selection");
-  //photpreselinverteleveto->SetUseSingleLegConversions(kTRUE);
+  //photpreselinverteleveto->SetVertexSelType("CiCMVA2012Selection");//ming change
+  photpreselinverteleveto->SetUseSingleLegConversions(kFALSE);
   photpreselinverteleveto->DoMCSmear(kTRUE);
   photpreselinverteleveto->DoDataEneCorr(kTRUE);
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
-  
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photpreselinverteleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  //photpreselinverteleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
+  photpreselinverteleveto->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -498,29 +505,29 @@ void runHgg2012HCP(const char *fileset    = "0000",
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(200532,201656,0.9961,0.9961,1.0017,1.0017,0.9860,0.9996,0.9904,0.9970,0.9945,1.0063);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(201657,202305,0.9969,0.9969,1.0025,1.0025,0.9866,1.0002,0.9914,0.9980,0.9999,1.0116);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(202305,203002,0.9982,0.9982,1.0038,1.0038,0.9872,1.0008,0.9934,1.0000,1.0018,1.0135);
-
   //-----------------------------------------------------------------------------------------------------------------
-   photpreselinverteleveto->SetShowerShapeType("2012ShowerShape");
-   photpreselinverteleveto->SetDoShowerShapeScaling(kTRUE);  
-   //photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
-   //photpreselinverteleveto->SetMCErrScale(1.07, 1.045);  
-   //photpreselinverteleveto->SetMCErrScale(1, 1);  
-   photpreselinverteleveto->SetApplyEleVeto(kFALSE);
-   photpreselinverteleveto->SetInvertElectronVeto(kFALSE);
-   photpreselinverteleveto->SetJetsName(jetCorr->GetOutputName());  
-   //photpreselinverteleveto->SetRescaledBeamspotWidth(5.0);   
-   photpreselinverteleveto->SetIsData(isData);
-   photpreselinverteleveto->SetApplyLeptonTag(kTRUE);
-   photpreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   photpreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");    
-   photpreselinverteleveto->Set2012HCP(kTRUE);  
-  
+  photpreselinverteleveto->SetShowerShapeType("2012ShowerShape");
+  photpreselinverteleveto->SetDoShowerShapeScaling(kTRUE);  
+  //photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
+  //photpreselinverteleveto->SetMCErrScale(1.07, 1.045);  
+  //photpreselinverteleveto->SetMCErrScale(1, 1);  
+  photpreselinverteleveto->SetApplyEleVeto(kFALSE);
+  photpreselinverteleveto->SetInvertElectronVeto(kTRUE);
+  photpreselinverteleveto->SetJetsName(jetCorr->GetOutputName());  
+  //photpreselinverteleveto->SetRescaledBeamspotWidth(5.0);   
+  photpreselinverteleveto->SetIsData(isData);
+  photpreselinverteleveto->SetApplyLeptonTag(kTRUE);
+  photpreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
+  photpreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");    
+  photpreselinverteleveto->Set2012HCP(kTRUE);  
+  photpreselinverteleveto->SetLeadingPtMin(20.);
+  photpreselinverteleveto->SetTrailingPtMin(20.);
 
    PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
    photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
    photpreselnosmear->SetPhotonSelType("MITPFSelection");
    photpreselnosmear->SetVertexSelType("CiCMVA2012Selection");
-   photpreselnosmear->SetUseSingleLegConversions(kTRUE);  
+   photpreselnosmear->SetUseSingleLegConversions(kFALSE);  
    photpreselnosmear->SetIdMVAType("2012IdMVA_globe");
    photpreselnosmear->SetShowerShapeType("2012ShowerShape");
    photpreselnosmear->SetDoShowerShapeScaling(kTRUE);  
@@ -538,6 +545,33 @@ void runHgg2012HCP(const char *fileset    = "0000",
    photpreselnosmear->Set2012HCP(kTRUE); 
    photpreselnosmear->DoMCSmear(kFALSE);
    photpreselnosmear->DoDataEneCorr(kFALSE);
+
+   PhotonPairSelector         *photpreselinvertelevetonosmear = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVetoNoSmear");
+   photpreselinvertelevetonosmear->SetOutputName("GoodPhotonsPreselInvertEleVetoNoSmear");
+   photpreselinvertelevetonosmear->SetPhotonSelType("MITPFSelection");
+   //photpreselinvertelevetonosmear->SetVertexSelType("CiCMVA2012Selection");//ming change
+   photpreselinvertelevetonosmear->SetUseSingleLegConversions(kFALSE);  
+   photpreselinvertelevetonosmear->SetIdMVAType("2012IdMVA_globe");
+   photpreselinvertelevetonosmear->SetShowerShapeType("2012ShowerShape");
+   photpreselinvertelevetonosmear->SetDoShowerShapeScaling(kTRUE);  
+   photpreselinvertelevetonosmear->SetPhotonsFromBranch(kFALSE);
+   photpreselinvertelevetonosmear->SetInputPhotonsName(photreg->GetOutputName());
+   photpreselinvertelevetonosmear->SetJetsName(jetCorr->GetOutputName());  
+   photpreselinvertelevetonosmear->SetOutputVtxName("OutVtxPreselInvertEleVetoNoSmear");  
+   //photpreselinvertelevetonosmear->SetLeadingPtMin(30.);
+   photpreselinvertelevetonosmear->SetLeadingPtMin(20.);//ming
+   //photpreselinvertelevetonosmear->SetTrailingPtMin(22.);
+   photpreselinvertelevetonosmear->SetTrailingPtMin(20.);//ming
+   //photpreselinvertelevetonosmear->SetRescaledBeamspotWidth(5.0);      
+   photpreselinvertelevetonosmear->SetIsData(isData);  
+   photpreselinvertelevetonosmear->SetApplyLeptonTag(kTRUE);
+   photpreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
+   photpreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   photpreselinvertelevetonosmear->Set2012HCP(kTRUE); 
+   photpreselinvertelevetonosmear->DoMCSmear(kFALSE);
+   photpreselinvertelevetonosmear->DoDataEneCorr(kFALSE);
+   photpreselinvertelevetonosmear->SetApplyEleVeto(kFALSE);
+   photpreselinvertelevetonosmear->SetInvertElectronVeto(kTRUE);
    
    PhotonTreeWriter *phottreecic = new PhotonTreeWriter("PhotonTreeWriterCiC");
    phottreecic->SetPhotonsFromBranch(kFALSE);
@@ -554,6 +588,7 @@ void runHgg2012HCP(const char *fileset    = "0000",
    phottreecic->SetLeptonTagMuonsName("HggLeptonTagMuons");
    phottreecic->SetApplyVBFTag(kTRUE);
    phottreecic->SetApplyPFMetCorr(kTRUE);
+   phottreecic->SetBeamspotWidth(5.0);
    
    PhotonTreeWriter *phottreecicnoeleveto = new PhotonTreeWriter("PhotonTreeWriterCiCInvertEleVeto");
    phottreecicnoeleveto->SetPhotonsFromBranch(kFALSE);
@@ -571,6 +606,7 @@ void runHgg2012HCP(const char *fileset    = "0000",
    phottreecicnoeleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");
    phottreecicnoeleveto->SetApplyVBFTag(kTRUE);
    phottreecicnoeleveto->SetApplyPFMetCorr(kTRUE);
+   phottreecicnoeleveto->SetBeamspotWidth(5.0);
    
    PhotonTreeWriter *phottreepresel = new PhotonTreeWriter("PhotonTreeWriterPresel");
    phottreepresel->SetPhotonsFromBranch(kFALSE);
@@ -588,7 +624,14 @@ void runHgg2012HCP(const char *fileset    = "0000",
    phottreepresel->SetApplyVBFTag(kTRUE);
    phottreepresel->SetApplyPFMetCorr(kTRUE);
    phottreepresel->SetBeamspotWidth(5.0);
-   
+   phottreepresel->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
+   phottreepresel->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
+   phottreepresel->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
+   phottreepresel->SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
+   phottreepresel->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
+   phottreepresel->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
+   phottreepresel->SetDoSynching(kTRUE);
+    
    PhotonTreeWriter *phottreepreselinverteleveto = new PhotonTreeWriter("PhotonTreeWriterPreselInvertEleVeto");
    phottreepreselinverteleveto->SetPhotonsFromBranch(kFALSE);
    phottreepreselinverteleveto->SetInputPhotonsName(photpreselinverteleveto->GetOutputName());
@@ -605,6 +648,7 @@ void runHgg2012HCP(const char *fileset    = "0000",
    phottreepreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");
    phottreepreselinverteleveto->SetApplyVBFTag(kTRUE);
    phottreepreselinverteleveto->SetApplyPFMetCorr(kTRUE);
+   phottreepreselinverteleveto->SetBeamspotWidth(5.0);
   
    PhotonTreeWriter *phottreepreselnosmear = new PhotonTreeWriter("PhotonTreeWriterPreselNoSmear");
    phottreepreselnosmear->SetPhotonsFromBranch(kFALSE);
@@ -622,6 +666,24 @@ void runHgg2012HCP(const char *fileset    = "0000",
    phottreepreselnosmear->SetApplyVBFTag(kTRUE);
    phottreepreselnosmear->SetApplyPFMetCorr(kTRUE);
    phottreepreselnosmear->SetBeamspotWidth(5.0); 
+
+   PhotonTreeWriter *phottreepreselinvertelevetonosmear = new PhotonTreeWriter("PhotonTreeWriterPreselInvertEleVetoNoSmear");
+   phottreepreselinvertelevetonosmear->SetPhotonsFromBranch(kFALSE);
+   phottreepreselinvertelevetonosmear->SetInputPhotonsName(photpreselinvertelevetonosmear->GetOutputName());
+   phottreepreselinvertelevetonosmear->SetEnableJets(kTRUE);
+   phottreepreselinvertelevetonosmear->SetApplyJetId(kTRUE);  
+   phottreepreselinvertelevetonosmear->SetPFJetsFromBranch(kFALSE);
+   phottreepreselinvertelevetonosmear->SetPFJetName(jetCorr->GetOutputName());  
+   phottreepreselinvertelevetonosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
+   phottreepreselinvertelevetonosmear->SetIsData(isData);    
+   if (is25) phottreepreselinvertelevetonosmear->SetEnablePFPhotons(kFALSE); 
+   phottreepreselinvertelevetonosmear->SetApplyLeptonTag(kTRUE);
+   phottreepreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
+   phottreepreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   phottreepreselinvertelevetonosmear->SetApplyVBFTag(kTRUE);
+   phottreepreselinvertelevetonosmear->SetApplyPFMetCorr(kTRUE);
+   phottreepreselinvertelevetonosmear->SetBeamspotWidth(5.0); 
+   phottreepreselinvertelevetonosmear->SetApplyElectronVeto(kFALSE); 
    
    PhotonIDMod         *photidpresel = new PhotonIDMod("PhotonIDModPresel");
    photidpresel->SetPtMin(25.0);
@@ -699,17 +761,19 @@ void runHgg2012HCP(const char *fileset    = "0000",
   SepPUMod         ->Add(eleIdMod);
   eleIdMod         ->Add(muonIdMod);
    
-  //muonIdMod          ->Add(photcic);
-  //muonIdMod          ->Add(photcicnoeleveto);  
+  muonIdMod          ->Add(photcic);
+  muonIdMod          ->Add(photcicnoeleveto);  
   muonIdMod          ->Add(photpresel);  
-  //muonIdMod          ->Add(photpreselinverteleveto);  
+  muonIdMod          ->Add(photpreselinverteleveto);  
   muonIdMod          ->Add(photpreselnosmear);  
+  muonIdMod          ->Add(photpreselinvertelevetonosmear);  
 
-  //photcic         ->Add(phottreecic);
-  //photcicnoeleveto         ->Add(phottreecicnoeleveto);
+  photcic         ->Add(phottreecic);
+  photcicnoeleveto       ->Add(phottreecicnoeleveto);
   photpresel    ->Add(phottreepresel);
-  //photpreselinverteleveto    ->Add(phottreepreselinverteleveto);
+  photpreselinverteleveto    ->Add(phottreepreselinverteleveto);
   photpreselnosmear    ->Add(phottreepreselnosmear);
+  photpreselinvertelevetonosmear    ->Add(phottreepreselinvertelevetonosmear);
 
 
   //jetCorr          ->Add(photidpresel);
