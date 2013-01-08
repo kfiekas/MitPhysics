@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.38 2012/10/10 23:17:05 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.39 2012/10/26 19:23:04 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -89,9 +89,16 @@ void PhotonTools::SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t i
   FourVectorM mom = p->Mom();
   Double_t scale = rng->Gaus(1.,width);
 
-  if( scale > 0)
+  if( scale > 0) {
     p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
-  
+
+    // moved here from SmearPhotonError, in order to being able to
+    // use different smearing for Error and actual Momentum (any reason not to? Josh?)
+    Double_t smear = p->EnergySmearing();
+    p->SetEnergySmearing(TMath::Sqrt(smear*smear+width*width*p->E()*p->E()));
+    
+  }
+
   return;
 }
 
@@ -100,9 +107,10 @@ void PhotonTools::SmearPhotonError(Photon* p, Double_t width) {
   if( !p  )       return;
   if( width < 0.) return;  
   
-  
-  Double_t smear = p->EnergySmearing();
-  p->SetEnergySmearing(TMath::Sqrt(smear*smear+width*width*p->E()*p->E()));
+  // WARNING: This is not set correctly if different smearing is used for error and actual momentum...
+  // therefore move this into 'SmearPhoton'.... any reason not to ? Josh ?
+  //Double_t smear = p->EnergySmearing();
+  //p->SetEnergySmearing(TMath::Sqrt(smear*smear+width*width*p->E()*p->E()));
   
   Double_t err = p->EnergyErrSmeared();
   if (err>=0.0) {

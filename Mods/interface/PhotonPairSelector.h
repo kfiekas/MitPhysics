@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.30 2012/08/02 12:59:31 fabstoec Exp $
+// $Id: PhotonPairSelector.h,v 1.31 2012/10/08 16:32:40 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -164,6 +164,28 @@ namespace mithep
       fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
     };
 
+    // special routine in ordetr to use different smearing to compute mass-error for di-photon MVA input
+    void                SetMCSmearFactorsMVA(Double_t _EBlowEta_hR9central,
+					     Double_t _EBlowEta_hR9gap, 
+					     Double_t _EBlowEta_lR9,
+					     Double_t _EBhighEta_hR9, 
+					     Double_t _EBhighEta_lR9,
+					     Double_t _EElowEta_hR9, 
+					     Double_t _EElowEta_lR9,
+					     Double_t _EEhighEta_hR9,
+					     Double_t _EEhighEta_lR9) {
+
+      fMCSmearMVA_EBlowEta_hR9central = _EBlowEta_hR9central;
+      fMCSmearMVA_EBlowEta_hR9gap = _EBlowEta_hR9gap;
+      fMCSmearMVA_EBlowEta_lR9 = _EBlowEta_lR9;
+      fMCSmearMVA_EBhighEta_hR9 = _EBhighEta_hR9;
+      fMCSmearMVA_EBhighEta_lR9 = _EBhighEta_lR9;      
+      fMCSmearMVA_EElowEta_hR9 = _EElowEta_hR9;
+      fMCSmearMVA_EElowEta_lR9 = _EElowEta_lR9;
+      fMCSmearMVA_EEhighEta_hR9 = _EEhighEta_hR9;
+      fMCSmearMVA_EEhighEta_lR9 = _EEhighEta_lR9;      
+    };
+
 
     void                AddEnCorrPerRun2012HCP( UInt_t sRun, UInt_t eRun,
 						Double_t corr_EBlowEta_hR9central,
@@ -211,11 +233,36 @@ namespace mithep
       fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
       fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
     };
-        
+
+    // special routine in ordetr to use different smearing to compute mass-error for di-photon MVA input
+    void SetMCSmearFactors2012HCPMVA(Double_t _EBlowEta_hR9central,
+				     Double_t _EBlowEta_hR9gap, 
+				     Double_t _EBlowEta_lR9central,
+				     Double_t _EBlowEta_lR9gap,
+				     Double_t _EBhighEta_hR9, 
+				     Double_t _EBhighEta_lR9,
+				     Double_t _EElowEta_hR9, 
+				     Double_t _EElowEta_lR9,
+				     Double_t _EEhighEta_hR9,
+				     Double_t _EEhighEta_lR9) {
+      fMCSmearMVA_EBlowEta_hR9central = _EBlowEta_hR9central;
+      fMCSmearMVA_EBlowEta_hR9gap = _EBlowEta_hR9gap;
+      fMCSmearMVA_EBlowEta_lR9central = _EBlowEta_lR9central;
+      fMCSmearMVA_EBlowEta_lR9gap = _EBlowEta_lR9gap;
+      fMCSmearMVA_EBhighEta_hR9 = _EBhighEta_hR9;
+      fMCSmearMVA_EBhighEta_lR9 = _EBhighEta_lR9;      
+      fMCSmearMVA_EElowEta_hR9 = _EElowEta_hR9;
+      fMCSmearMVA_EElowEta_lR9 = _EElowEta_lR9;
+      fMCSmearMVA_EEhighEta_hR9 = _EEhighEta_hR9;
+      fMCSmearMVA_EEhighEta_lR9 = _EEhighEta_lR9;      
+    };
+
+
     void                SetApplyEleVeto(bool a)            { fApplyEleVeto  = a; }
     void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b;     }          
     void                DoDataEneCorr(bool a)           { fDoDataEneCorr = a; }
     void                DoMCSmear(bool a)               { fDoMCSmear     = a; }
+    void                UseSpecialSmearForDPMVA(bool a) { fUseSpecialSmearForDPMVA     = a; }
 
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
     void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
@@ -244,9 +291,9 @@ namespace mithep
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);
     Int_t               FindRunRangeIdx(UInt_t run);
     Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat);
-    Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat);
+    Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat,                    bool useSpecialSmear = false);   // last flag in case of special smearing for error computation
     Double_t            GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat);
-    Double_t            GetMCSmearFacHCP(PhotonTools::eScaleCats cat);
+    Double_t            GetMCSmearFacHCP(PhotonTools::eScaleCats cat,                 bool useSpecialSmear = false);   // last flag in case of special smearing for error computation
     Float_t             GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonTools::CiCBaseLineCats cat2);
 
     // Names for the input Collections
@@ -349,6 +396,20 @@ namespace mithep
     Double_t              fMCSmear_EEhighEta_hR9;
     Double_t              fMCSmear_EEhighEta_lR9;    
 
+    //  special Smear factors for usage for diphoton MVA input, incase differrent from std smearing
+    Double_t              fMCSmearMVA_EBlowEta_hR9central;
+    Double_t              fMCSmearMVA_EBlowEta_hR9gap;
+    Double_t              fMCSmearMVA_EBlowEta_lR9;
+    Double_t              fMCSmearMVA_EBlowEta_lR9central;
+    Double_t              fMCSmearMVA_EBlowEta_lR9gap;
+    Double_t              fMCSmearMVA_EBhighEta_hR9;
+    Double_t              fMCSmearMVA_EBhighEta_lR9;    
+    Double_t              fMCSmearMVA_EElowEta_hR9;
+    Double_t              fMCSmearMVA_EElowEta_lR9;
+    Double_t              fMCSmearMVA_EEhighEta_hR9;
+    Double_t              fMCSmearMVA_EEhighEta_lR9;    
+
+
     // pointer to RNG ionstance for smearing
     TRandom3*             fRng;
     EGEnergyCorrector     fEgCor;
@@ -363,6 +424,7 @@ namespace mithep
     // some streagin flags, not adjustable yet (FIX-ME)
     bool                  fDoDataEneCorr;
     bool                  fDoMCSmear;
+    bool                  fUseSpecialSmearForDPMVA;   // if set to true, the special smearing numbers set in fMCSmearMVA_* are used to compute the mass-errors (input to diphoton MVA)
     bool                  fDoVtxSelection;
     bool                  fApplyEleVeto;
     Bool_t                fInvertElectronVeto; //=true (invert ele veto, for cic sel only atm)

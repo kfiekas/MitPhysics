@@ -98,6 +98,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fDataEnCorr_EEhighEta_lR9      (0.),
   fRunStart                      (0),
   fRunEnd                        (0),
+
   fMCSmear_EBlowEta_hR9central   (0.),
   fMCSmear_EBlowEta_hR9gap       (0.),
   fMCSmear_EBlowEta_lR9          (0.),
@@ -109,6 +110,20 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCSmear_EElowEta_lR9          (0.),
   fMCSmear_EEhighEta_hR9         (0.),
   fMCSmear_EEhighEta_lR9         (0.),
+
+  fMCSmearMVA_EBlowEta_hR9central   (0.),
+  fMCSmearMVA_EBlowEta_hR9gap       (0.),
+  fMCSmearMVA_EBlowEta_lR9          (0.),
+  fMCSmearMVA_EBlowEta_lR9central   (0.),
+  fMCSmearMVA_EBlowEta_lR9gap       (0.),
+  fMCSmearMVA_EBhighEta_hR9         (0.),
+  fMCSmearMVA_EBhighEta_lR9         (0.),
+  fMCSmearMVA_EElowEta_hR9          (0.),
+  fMCSmearMVA_EElowEta_lR9          (0.),
+  fMCSmearMVA_EEhighEta_hR9         (0.),
+  fMCSmearMVA_EEhighEta_lR9         (0.),
+
+
   // ---------------------------------------
   fRng                           (new TRandom3()),
   fPhFixString                   ("4_2"),
@@ -116,6 +131,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // ---------------------------------------
   fDoDataEneCorr                 (true),
   fDoMCSmear                     (true),
+  fUseSpecialSmearForDPMVA       (false),
   fDoVtxSelection                (true),
   fApplyEleVeto                  (true),
   fInvertElectronVeto            (kFALSE),
@@ -462,10 +478,11 @@ void PhotonPairSelector::Process()
       }
     }
     
-    double width1;
-    double width2;
-
     if (fDoMCSmear) {
+
+      double width1 = 0.;
+      double width2 = 0.;
+      
       if(f2012HCP){
 	width1 = GetMCSmearFacHCP(escalecat1);
 	width2 = GetMCSmearFacHCP(escalecat2);
@@ -473,6 +490,7 @@ void PhotonPairSelector::Process()
 	width1 = GetMCSmearFac(escalecat1);
 	width2 = GetMCSmearFac(escalecat2);
       }
+      
       if (!fIsData) {
         // get the seed to do deterministic smearing...
         UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
@@ -484,6 +502,20 @@ void PhotonPairSelector::Process()
         PhotonTools::SmearPhoton(fixPh1st[iPair], fRng, width1, seed1);
         PhotonTools::SmearPhoton(fixPh2nd[iPair], fRng, width2, seed2);
       }
+
+      // in case we want to use specail smearing factors for Error computation, recompute widths
+      if( fUseSpecialSmearForDPMVA ) {
+	
+	if(f2012HCP){
+	  width1 = GetMCSmearFacHCP(escalecat1, true);
+	  width2 = GetMCSmearFacHCP(escalecat2, true);
+	}else {
+	  width1 = GetMCSmearFac(escalecat1, true);
+	  width2 = GetMCSmearFac(escalecat2, true);
+	}
+	
+      }
+      
       PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
       PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
     }
@@ -750,7 +782,7 @@ void PhotonPairSelector::Process()
     // ---------------------------------------------------------------------------------------------------------------    
 
     //printf("applying id\n");
-
+    
     // check if both photons pass the CiC selection
     // FIX-ME: Add other possibilities....
     bool pass1 = false;
@@ -1139,30 +1171,57 @@ Double_t PhotonPairSelector::GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCa
 }
 
 //---------------------------------------------------------------------------------------------------
-Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat)
+Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat, bool useSpecialSmear)
 {
-  switch (cat) {
-  case PhotonTools::kEBhighEtaGold:
-    return fMCSmear_EBhighEta_hR9;
-  case PhotonTools::kEBhighEtaBad:
-    return fMCSmear_EBhighEta_lR9;
-  case PhotonTools::kEBlowEtaGoldCenter:
-    return fMCSmear_EBlowEta_hR9central;
-  case PhotonTools::kEBlowEtaGoldGap:
-    return fMCSmear_EBlowEta_hR9gap;
-  case PhotonTools::kEBlowEtaBad:
-    return fMCSmear_EBlowEta_lR9;
-  case PhotonTools::kEEhighEtaGold:
-    return fMCSmear_EEhighEta_hR9;
-  case PhotonTools::kEEhighEtaBad:
-    return fMCSmear_EEhighEta_lR9;
-  case PhotonTools::kEElowEtaGold:
-    return fMCSmear_EElowEta_hR9;
-  case PhotonTools::kEElowEtaBad:
-    return fMCSmear_EElowEta_lR9;
-  default:
-    return 1.;
+
+  if(!useSpecialSmear) {
+    switch (cat) {
+    case PhotonTools::kEBhighEtaGold:
+      return fMCSmear_EBhighEta_hR9;
+    case PhotonTools::kEBhighEtaBad:
+      return fMCSmear_EBhighEta_lR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmear_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmear_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaBad:
+      return fMCSmear_EBlowEta_lR9;
+    case PhotonTools::kEEhighEtaGold:
+      return fMCSmear_EEhighEta_hR9;
+    case PhotonTools::kEEhighEtaBad:
+      return fMCSmear_EEhighEta_lR9;
+    case PhotonTools::kEElowEtaGold:
+      return fMCSmear_EElowEta_hR9;
+    case PhotonTools::kEElowEtaBad:
+      return fMCSmear_EElowEta_lR9;
+    default:
+      return 1.;
+    }
+  } else {
+    switch (cat) {
+    case PhotonTools::kEBhighEtaGold:
+      return fMCSmearMVA_EBhighEta_hR9;
+    case PhotonTools::kEBhighEtaBad:
+      return fMCSmearMVA_EBhighEta_lR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmearMVA_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmearMVA_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaBad:
+      return fMCSmearMVA_EBlowEta_lR9;
+    case PhotonTools::kEEhighEtaGold:
+      return fMCSmearMVA_EEhighEta_hR9;
+    case PhotonTools::kEEhighEtaBad:
+      return fMCSmearMVA_EEhighEta_lR9;
+    case PhotonTools::kEElowEtaGold:
+      return fMCSmearMVA_EElowEta_hR9;
+    case PhotonTools::kEElowEtaBad:
+      return fMCSmearMVA_EElowEta_lR9;
+    default:
+      return 1.;
+    }
   }
+  
 }
 
 Double_t PhotonPairSelector::GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat)
@@ -1194,31 +1253,63 @@ Double_t PhotonPairSelector::GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScal
 }
 
 //---------------------------------------------------------------------------------------------------
-Double_t PhotonPairSelector::GetMCSmearFacHCP(PhotonTools::eScaleCats cat)
+Double_t PhotonPairSelector::GetMCSmearFacHCP(PhotonTools::eScaleCats cat, bool useSpecialSmear)
 {
-  switch (cat) {
-  case PhotonTools::kEBhighEtaGold:
-    return fMCSmear_EBhighEta_hR9;
-  case PhotonTools::kEBhighEtaBad:
-    return fMCSmear_EBhighEta_lR9;
-  case PhotonTools::kEBlowEtaGoldCenter:
-    return fMCSmear_EBlowEta_hR9central;
-  case PhotonTools::kEBlowEtaGoldGap:
-    return fMCSmear_EBlowEta_hR9gap;
-  case PhotonTools::kEBlowEtaBadCenter:
-    return fMCSmear_EBlowEta_lR9central;
-  case PhotonTools::kEBlowEtaBadGap:
-    return fMCSmear_EBlowEta_lR9gap;
-  case PhotonTools::kEEhighEtaGold:
-    return fMCSmear_EEhighEta_hR9;
-  case PhotonTools::kEEhighEtaBad:
-    return fMCSmear_EEhighEta_lR9;
-  case PhotonTools::kEElowEtaGold:
-    return fMCSmear_EElowEta_hR9;
-  case PhotonTools::kEElowEtaBad:
-    return fMCSmear_EElowEta_lR9;
-  default:
-    return 1.;
+
+  if(!useSpecialSmear) {
+
+    switch (cat) {
+    case PhotonTools::kEBhighEtaGold:
+      return fMCSmear_EBhighEta_hR9;
+    case PhotonTools::kEBhighEtaBad:
+      return fMCSmear_EBhighEta_lR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmear_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmear_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaBadCenter:
+      return fMCSmear_EBlowEta_lR9central;
+    case PhotonTools::kEBlowEtaBadGap:
+      return fMCSmear_EBlowEta_lR9gap;
+    case PhotonTools::kEEhighEtaGold:
+      return fMCSmear_EEhighEta_hR9;
+    case PhotonTools::kEEhighEtaBad:
+      return fMCSmear_EEhighEta_lR9;
+    case PhotonTools::kEElowEtaGold:
+      return fMCSmear_EElowEta_hR9;
+    case PhotonTools::kEElowEtaBad:
+      return fMCSmear_EElowEta_lR9;
+    default:
+      return 1.;
+    }
+
+  } else {
+
+    switch (cat) {
+    case PhotonTools::kEBhighEtaGold:
+      return fMCSmearMVA_EBhighEta_hR9;
+    case PhotonTools::kEBhighEtaBad:
+      return fMCSmearMVA_EBhighEta_lR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmearMVA_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmearMVA_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaBadCenter:
+      return fMCSmearMVA_EBlowEta_lR9central;
+    case PhotonTools::kEBlowEtaBadGap:
+      return fMCSmearMVA_EBlowEta_lR9gap;
+    case PhotonTools::kEEhighEtaGold:
+      return fMCSmearMVA_EEhighEta_hR9;
+    case PhotonTools::kEEhighEtaBad:
+      return fMCSmearMVA_EEhighEta_lR9;
+    case PhotonTools::kEElowEtaGold:
+      return fMCSmearMVA_EElowEta_hR9;
+    case PhotonTools::kEElowEtaBad:
+      return fMCSmearMVA_EElowEta_lR9;
+    default:
+      return 1.;
+    }
+
   }
 }
 
