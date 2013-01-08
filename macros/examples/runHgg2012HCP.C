@@ -43,9 +43,9 @@ void runHgg2012HCP(const char *fileset    = "0000",
 		   //const char *dataset = "r12a-pho-pr-v1",
 		   //const char *dataset = "s12-pj40-2em-v9",
 		   //const char *dataset = "s12-h125gg-vbf-v7a", 
-		   const char *dataset = "s12-h125gg-vh-v7a", 
+		   //const char *dataset = "s12-h125gg-vh-v7a", 
 		   //const char *dataset = "s12-h125gg-gf-v7a", 
-		   //const char *dataset = "r12a-pho-j13-v1", 
+		   const char *dataset = "r12a-pho-j13-v1", 
 		   //const char *dataset = "r12b-dph-j13-v1", 
 		   //const char *dataset = "s12-zllm50-v7a", 
 		   const char *book       = "t2mit/filefi/029",
@@ -347,6 +347,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   //------------------------------------------2012 HCP--------------------------------------------------------------
   //photcic->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
   photcic->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photcic->SetMCSmearFactors2012HCPMVA(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photcic->UseSpecialSmearForDPMVA(true);
   photcic->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photcic->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photcic->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -395,6 +397,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   //------------------------------------------2012 HCP--------------------------------------------------------------
   //photcicnoeleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
   photcicnoeleveto->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photcicnoeleveto->SetMCSmearFactors2012HCPMVA(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photcicnoeleveto->UseSpecialSmearForDPMVA(true);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -444,6 +448,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   //------------------------------------------2012 HCP--------------------------------------------------------------
   //photpresel->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
   photpresel->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photpresel->SetMCSmearFactors2012HCPMVA(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photpresel->UseSpecialSmearForDPMVA(true);
   photpresel->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photpresel->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photpresel->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
@@ -489,6 +495,8 @@ void runHgg2012HCP(const char *fileset    = "0000",
   //------------------------------------------2012 HCP--------------------------------------------------------------
   //photpreselinverteleveto->SetMCSmearFactors2012HCP(0.0099,0.0098,0.0113,0.0094,0.0195,0.0198,0.0291,0.0275,0.0325,0.0356);
   photpreselinverteleveto->SetMCSmearFactors2012HCP(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photpreselinverteleveto->SetMCSmearFactors2012HCPMVA(0.01,0.011,0.0106,0.0106,0.0186,0.0196,0.0283,0.0267,0.0343,0.0345);
+  photpreselinverteleveto->UseSpecialSmearForDPMVA(true);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9964,0.9964,1.0020,1.0020,0.9893,1.0028,0.9871,0.9937,0.9839,0.9958);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(190782,191042,1.0024,1.0024,1.0079,1.0079,0.9923,1.0058,0.9911,0.9977,0.9886,1.0005);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(191043,193555,0.9935,0.9935,0.9991,0.9991,0.9861,0.9997,0.9894,0.9960,0.9864,0.9982);
