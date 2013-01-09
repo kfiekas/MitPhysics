@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.49 2012/10/08 17:22:59 mingyang Exp $
+// $Id: ElectronTools.cc,v 1.50 2012/12/14 14:12:17 sixie Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -351,6 +351,39 @@ Bool_t ElectronTools::PassConversionFilter(const Electron *ele,
     
   } // loop over all conversions 
 
+  return !isGoodConversion;
+}
+
+//--------------------------------------------------------------------------------------------------
+Bool_t ElectronTools::PassConversionFilterPFAOD(const Electron *ele, 
+                                           const DecayParticleCol *conversions,
+                                           const BaseVertex *vtx,
+                                           UInt_t nWrongHitsMax,
+                                           Double_t probMin,
+                                           Double_t lxyMin,
+                                           Bool_t matchCkf,
+                                           Bool_t requireArbitratedMerged,
+                                           Double_t trkptMin) 
+{
+
+  Bool_t isGoodConversion              = false;
+  for(unsigned int ifc=0; ifc<conversions->GetEntries(); ++ifc){
+    if(!(conversions->At(ifc)->Prob() > probMin) && (!requireArbitratedMerged || conversions->At(ifc)->Quality().Quality(ConversionQuality::arbitratedMerged)) && (conversions->At(ifc)->LxyCorrected((BaseVertex*)vtx) > lxyMin)) continue;
+    bool conversionMatchFound = false;
+    for(unsigned int d=0; d<conversions->At(ifc)->NDaughters(); ++d){
+      const ChargedParticle *pParticle = 0;
+      pParticle = dynamic_cast<const ChargedParticle*>(conversions->At(ifc)->Daughter(d));
+      if(pParticle == 0) continue;
+      const Track* trk = 0;
+      trk = pParticle->Trk();
+      if(trk == 0) continue;
+      if( ele->GsfTrk() == trk || (matchCkf && ele->TrackerTrk()==trk) ){ conversionMatchFound = true; break; }
+      const StableData* sd = dynamic_cast<const StableData*> (conversions->At(ifc)->DaughterDat(d));
+      isGoodConversion = true;
+      if( sd->NWrongHits() > nWrongHitsMax ){ isGoodConversion = false; }
+    }
+    if(isGoodConversion) break; 
+  }
   return !isGoodConversion;
 }
 
