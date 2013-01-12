@@ -6,9 +6,9 @@ ClassImp(mithep::RecoilTools)
 
 using namespace mithep;
 
-RecoilTools::RecoilTools(TString iJetLowPtMVAFile,TString iJetHighPtMVAFile,TString iCutFile,bool i42) { 
+RecoilTools::RecoilTools(TString iJetLowPtMVAFile,TString iJetHighPtMVAFile,TString iCutFile,bool i42,JetIDMVA::MVAType iType) { 
   fJetIDMVA = new JetIDMVA();
-  fJetIDMVA->Initialize( JetIDMVA::kMET,iJetLowPtMVAFile,iJetHighPtMVAFile,JetIDMVA::kBaseline,iCutFile);
+  fJetIDMVA->Initialize( JetIDMVA::kMET,iJetLowPtMVAFile,iJetHighPtMVAFile,iType,iCutFile);
   f42       = i42;
 }
 //--------------------------------------------------------------------------------------------------
@@ -108,12 +108,18 @@ Met RecoilTools::pfRecoilType1(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSum
 }
 //--------------------------------------------------------------------------------------------------
 Met RecoilTools::pfCone(double iPhi1,double iEta1,
-			  const PFCandidateCol *iCands) { 
+			const PFCandidateCol *iCands,const Vertex *iVertex,bool iCharge,Double_t iDZCut) { 
   double lSumEt = 0;
   FourVectorM lVec(0,0,0,0);
   for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) { 
     const PFCandidate *pfcand = iCands->At(i0);
     if(filter(pfcand,iPhi1,iEta1,100,100)) continue;
+    if(iCharge) { 
+      double lDZ = -999;
+      if(pfcand->HasTrackerTrk())  lDZ =  fabs(pfcand->TrackerTrk()->DzCorrected(*iVertex));//
+      else if(pfcand->HasGsfTrk()) lDZ =  fabs(pfcand->GsfTrk()    ->DzCorrected(*iVertex));
+      if( fabs(lDZ) > iDZCut) continue;
+    }
     lVec   += pfcand->Mom(); 
     lSumEt += pfcand->Pt();
   }

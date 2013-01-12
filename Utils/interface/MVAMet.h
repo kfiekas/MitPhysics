@@ -1,3 +1,4 @@
+
 //--------------------------------------------------------------------------------------------------
 // $Id $
 //
@@ -15,6 +16,7 @@
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/PFTauCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/Met.h"
 #include "MitAna/DataTree/interface/PFMet.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"
@@ -55,7 +57,7 @@ namespace mithep {
 		       TString iPhiWeights   ="$CMSSW_BASE/src/MitPhysics/data/gbrmetphi.root",
 		       TString iCovU1Weights   ="$CMSSW_BASE/src/MitPhysics/data/gbrcovu1_52.root",
 		       TString iCovU2Weights   ="$CMSSW_BASE/src/MitPhysics/data/gbrcovu2_52.root",
-		       MVAMet::MVAType  iType=kBaseline);
+		       JetIDMVA::MVAType  iType=JetIDMVA::kBaseline);
         
     Bool_t   IsInitialized() const { return fIsInitialized; }
     Float_t* getVals();
@@ -137,10 +139,16 @@ namespace mithep {
 		       const PFCandidateCol *iCands,const PFJetCol  *iJets,const Vertex *iPV,const VertexCol *iVertices,const PFMetCol *iPFMet,
 		       FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol* iPUEnergyDensity);
 
+    Met GetMet(const PhotonCol        *iPhotons,
+	       const PFCandidateCol *iCands,const PFJetCol  *iJets,const Vertex *iPV,const VertexCol *iVertices,const PFMetCol *iPFMet,
+	       FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol* iPUEnergyDensity);
+
     TMatrixD*   GetMetCovariance() { return fCov;         }
     Float_t     GetSignificance () { return fSignificance;}
     Float_t     GetUncertainty  () { return fUncertainty;}
     RecoilTools *fRecoilTools;
+
+    Int_t     fNPhotons;
     
   protected:
     TString      fPhiMethodName;
@@ -148,7 +156,7 @@ namespace mithep {
     TString      fCovU1MethodName;
     TString      fCovU2MethodName;
     Bool_t       fIsInitialized;
-    MVAType      fType;
+    JetIDMVA::MVAType      fType;
     Bool_t       f42;
     
     Float_t fSumEt  ;

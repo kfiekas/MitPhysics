@@ -31,7 +31,8 @@ namespace mithep {
     public:
     RecoilTools(TString iJetLowPtMVAFile ="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
 		TString iJetHighPtMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
-		TString iCutFile         ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py",bool i42=false);
+		TString iCutFile         ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py",
+		bool i42=false,JetIDMVA::MVAType iType=JetIDMVA::kBaseline);
     ~RecoilTools();
     JetIDMVA *fJetIDMVA;
 
@@ -47,7 +48,7 @@ namespace mithep {
 
     //Candidate filtered
     Met pfRecoil(double iPhi1,double iEta1,double iPhi2,double iEta2,const PFCandidateCol *iCands);
-    Met pfCone  (double iPhi1,double iEta1,const PFCandidateCol *iCands);
+    Met pfCone  (double iPhi1,double iEta1,const PFCandidateCol *iCands,const Vertex *iVertex,bool iCharge=false,Double_t iDZCut=0.3);
 
     Met trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Double_t iDZCut=0.1);
 

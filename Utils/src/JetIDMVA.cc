@@ -31,6 +31,7 @@ JetIDMVA::JetIDMVA() :
   fNCharged (0),
   fNNeutrals(0),
   fDRMean   (0),
+  fPtD      (0),
   fFrac01   (0),
   fFrac02   (0),
   fFrac03   (0),
@@ -60,10 +61,13 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   fCutType       = iCutType;
   
   std::string lCutId = "JetIdParams";
-  if(fType == k42)  lCutId = "PuJetIdOptMVA_wp";
-  if(fType == k52)  lCutId = "full_5x_wp";
-  if(fType == kCut) lCutId = "PuJetIdCutBased_wp";
-  //Load Cut Matrix
+  if(fType == k42)     lCutId = "PuJetIdOptMVA_wp";
+  if(fType == k52)     lCutId = "full_5x_wp";
+  if(fType == kCut)    lCutId = "PuJetIdCutBased_wp";
+  if(fType == k53)     lCutId = "full_53x_wp";
+  if(fType == k53MET)  lCutId = "met_53x_wp";
+
+ //Load Cut Matrix
   edm::ParameterSet lDefConfig = edm::readPSetsFrom(iCutFileName.Data())->getParameter<edm::ParameterSet>("JetIdParams");
   edm::ParameterSet lConfig    = edm::readPSetsFrom(iCutFileName.Data())->getParameter<edm::ParameterSet>(lCutId);
   std::string lCutType = "Tight";
@@ -110,16 +114,18 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   fLowPtReader   = 0;
   fLowPtReader   = new TMVA::Reader( "!Color:!Silent:Error" );  
   fLowPtReader->AddVariable( "nvtx"     , &fNVtx      ); 
-  fLowPtReader->AddVariable( "jetPt"    , &fJPt1      );  
-  fLowPtReader->AddVariable( "jetEta"   , &fJEta1     );
-  fLowPtReader->AddVariable( "jetPhi"   , &fJPhi1     );             
+  if(fType != k53) fLowPtReader->AddVariable( "jetPt"    , &fJPt1      );  
+  if(fType != k53) fLowPtReader->AddVariable( "jetEta"   , &fJEta1     );
+  if(fType != k53) fLowPtReader->AddVariable( "jetPhi"   , &fJPhi1     );             
   fLowPtReader->AddVariable( "dZ"       , &fJDZ1      );
   fLowPtReader->AddVariable( "d0"       , &fJD01      );
   fLowPtReader->AddVariable( "beta"     , &fBeta      );
   fLowPtReader->AddVariable( "betaStar" , &fBetaStar  );
   fLowPtReader->AddVariable( "nCharged" , &fNCharged  );
   fLowPtReader->AddVariable( "nNeutrals", &fNNeutrals );
-  fLowPtReader->AddVariable( "dRMean"   , &fDRMean    );
+  if(fType != k53 && fType != k53MET) fLowPtReader->AddVariable( "dRMean"   , &fDRMean    );
+  if(fType == k53 || fType == k53MET) fLowPtReader->AddVariable( "dR2Mean"  , &fDR2Mean   );
+  if(fType == k53 || fType == k53MET) fLowPtReader->AddVariable( "ptD"      , &fPtD       );
   fLowPtReader->AddVariable( "frac01"   , &fFrac01    );
   fLowPtReader->AddVariable( "frac02"   , &fFrac02    );
   fLowPtReader->AddVariable( "frac03"   , &fFrac03    );
@@ -177,6 +183,44 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
     fReader->AddSpectator( "jetPt"    , &fJPt1      );  
     fReader->AddSpectator( "jetEta"   , &fJEta1     );
   }
+  if (fType == k53) {
+    fReader->AddVariable( "nvtx"     , &fNVtx      ); 
+    fReader->AddVariable( "dZ"       , &fJDZ1      );
+    fReader->AddVariable( "d0"       , &fJD01      );
+    fReader->AddVariable( "beta"     , &fBeta      );
+    fReader->AddVariable( "betaStar" , &fBetaStar  );
+    fReader->AddVariable( "nCharged" , &fNCharged  );
+    fReader->AddVariable( "nNeutrals", &fNNeutrals );
+    fReader->AddVariable( "dR2Mean"  , &fDRMean    );
+    fReader->AddVariable( "ptD"      , &fPtD       );
+    fReader->AddVariable( "frac01"   , &fFrac01    );
+    fReader->AddVariable( "frac02"   , &fFrac02    );
+    fReader->AddVariable( "frac03"   , &fFrac03    );
+    fReader->AddVariable( "frac04"   , &fFrac04    );
+    fReader->AddVariable( "frac05"   , &fFrac05    );
+    fReader->AddSpectator( "jetPt"   , &fJPt1      );  
+    fReader->AddSpectator( "jetEta"  , &fJEta1     );
+    fReader->AddSpectator( "jetPhi"  , &fJPhi1     );  
+  } 
+  if (fType == k53MET) {
+    fReader->AddVariable( "nvtx"     , &fNVtx      ); 
+    fReader->AddVariable( "jetPt"    , &fJPt1      );  
+    fReader->AddVariable( "jetEta"   , &fJEta1     );
+    fReader->AddVariable( "jetPhi"   , &fJPhi1     );  
+    fReader->AddVariable( "dZ"       , &fJDZ1      );
+    fReader->AddVariable( "d0"       , &fJD01      );
+    fReader->AddVariable( "beta"     , &fBeta      );
+    fReader->AddVariable( "betaStar" , &fBetaStar  );
+    fReader->AddVariable( "nCharged" , &fNCharged  );
+    fReader->AddVariable( "nNeutrals", &fNNeutrals );
+    fReader->AddVariable( "dR2Mean"  , &fDRMean    );
+    fReader->AddVariable( "ptD"      , &fPtD       );
+    fReader->AddVariable( "frac01"   , &fFrac01    );
+    fReader->AddVariable( "frac02"   , &fFrac02    );
+    fReader->AddVariable( "frac03"   , &fFrac03    );
+    fReader->AddVariable( "frac04"   , &fFrac04    );
+    fReader->AddVariable( "frac05"   , &fFrac05    );
+  } 
   if (fType == kQGP) {
     fReader->AddVariable( "nvtx"      , &fNVtx       ); 
     fReader->AddVariable( "jetPt"     , &fJPt1       );  
@@ -220,7 +264,8 @@ Double_t JetIDMVA::MVAValue(
 			    Float_t iFrac03  ,
 			    Float_t iFrac04  ,
 			    Float_t iFrac05  ,
-			    Float_t iDR2Mean  
+			    Float_t iDR2Mean ,
+			    Float_t iPtD
 			    ){
   
   if(!fIsInitialized) { 
@@ -239,6 +284,7 @@ Double_t JetIDMVA::MVAValue(
   fNCharged  = iNCharged;
   fNNeutrals = iNNeutrals;
   fDRMean    = iDRMean;
+  fPtD       = iPtD;
   fFrac01    = iFrac01;
   fFrac02    = iFrac02;
   fFrac03    = iFrac03;
@@ -366,6 +412,7 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex,const Vertex
 
   fDRMean    = JetTools::dRMean(iJet,-1);
   fDR2Mean   = JetTools::dR2Mean(iJet,-1);
+  fPtD       = JetTools::W(iJet,-1,0);  
   fFrac01    = JetTools::frac  (iJet,0.1,0. ,-1);
   fFrac02    = JetTools::frac  (iJet,0.2,0.1,-1);
   fFrac03    = JetTools::frac  (iJet,0.3,0.2,-1);
@@ -388,12 +435,13 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex,const Vertex
 	      << fNCharged  << " "
 	      << fNNeutrals << " "
 	      << fDRMean    << " "
+	      << fPtD       << " "
 	      << fFrac01    << " "
 	      << fFrac02    << " "
 	      << fFrac03    << " "
 	      << fFrac04    << " "
 	      << fFrac05    << " "
-	      << fDRMean    
+	      << fDR2Mean    
               << " === : === "
               << lMVA << " "    
               << std::endl;
@@ -421,7 +469,7 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, const Verte
   fBetaStar  = JetTools::betaStar(iJet,iVertex,iVertices,fDZCut);
   fNCharged  = iJet->ChargedMultiplicity();
   fNNeutrals = iJet->NeutralMultiplicity();
-
+  fPtD       = JetTools::W(iJet,-1,0);  
   fDRMean    = JetTools::dRMean (iJet,-1);
   fDR2Mean   = JetTools::dR2Mean(iJet,-1);
   fFrac01    = JetTools::frac   (iJet,0.1,0. ,-1);
@@ -447,12 +495,13 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, const Verte
 	      << fNCharged  << " "
 	      << fNNeutrals << " "
 	      << fDRMean    << " "
+	      << fPtD       << " "
 	      << fFrac01    << " "
 	      << fFrac02    << " "
 	      << fFrac03    << " "
 	      << fFrac04    << " "
 	      << fFrac05    << " "
-	      << fDRMean    
+	      << fDR2Mean    
               << " === : === "
               << lMVA << " "    
               << std::endl;

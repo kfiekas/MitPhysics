@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.50 2012/12/14 14:12:17 sixie Exp $
+// $Id: ElectronTools.cc,v 1.51 2013/01/09 18:22:07 pharris Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -366,27 +366,56 @@ Bool_t ElectronTools::PassConversionFilterPFAOD(const Electron *ele,
                                            Double_t trkptMin) 
 {
 
-  Bool_t isGoodConversion              = false;
-  for(unsigned int ifc=0; ifc<conversions->GetEntries(); ++ifc){
-    if(!(conversions->At(ifc)->Prob() > probMin) && (!requireArbitratedMerged || conversions->At(ifc)->Quality().Quality(ConversionQuality::arbitratedMerged)) && (conversions->At(ifc)->LxyCorrected((BaseVertex*)vtx) > lxyMin)) continue;
-    bool conversionMatchFound = false;
-    for(unsigned int d=0; d<conversions->At(ifc)->NDaughters(); ++d){
+  Bool_t isGoodConversion = kFALSE;
+
+  for (UInt_t ifc=0; ifc<conversions->GetEntries(); ifc++) {
+    Bool_t ConversionMatchFound = kFALSE;
+    for (UInt_t d=0; d<conversions->At(ifc)->NDaughters(); d++) {
       const ChargedParticle *pParticle = 0;
       pParticle = dynamic_cast<const ChargedParticle*>(conversions->At(ifc)->Daughter(d));
       if(pParticle == 0) continue;
       const Track* trk = 0;
       trk = pParticle->Trk();
       if(trk == 0) continue;
-      if( ele->GsfTrk() == trk || (matchCkf && ele->TrackerTrk()==trk) ){ conversionMatchFound = true; break; }
-      const StableData* sd = dynamic_cast<const StableData*> (conversions->At(ifc)->DaughterDat(d));
-      isGoodConversion = true;
-      if( sd->NWrongHits() > nWrongHitsMax ){ isGoodConversion = false; }
+      if (ele->GsfTrk() == trk || (matchCkf && ele->TrackerTrk()==trk) ) {
+        ConversionMatchFound = kTRUE;
+        break;
+      }
     }
-    if(isGoodConversion) break; 
-  }
+
+    // if match between the e-track and one of the conversion legs
+    if (ConversionMatchFound == kTRUE){
+      isGoodConversion =  (conversions->At(ifc)->Prob() > probMin) &&
+        (!requireArbitratedMerged || conversions->At(ifc)->Quality().Quality(ConversionQuality::arbitratedMerged)) &&
+        (conversions->At(ifc)->LxyCorrected(vtx) > lxyMin);
+
+      if (isGoodConversion == kTRUE) {
+        for (UInt_t d=0; d<conversions->At(ifc)->NDaughters(); d++) {
+	  const ChargedParticle *pParticle = 0;
+	  pParticle = dynamic_cast<const ChargedParticle*>(conversions->At(ifc)->Daughter(d));
+	  if(pParticle == 0) continue;
+	  const Track* trk = 0;
+	  trk = pParticle->Trk();
+	  if(trk == 0) continue;
+          if (trk) {
+            if (trk->Pt()<trkptMin) isGoodConversion = kFALSE;
+            const StableData *sd = dynamic_cast<const StableData*>
+              (conversions->At(ifc)->DaughterDat(d));
+            if (sd->NWrongHits() > nWrongHitsMax)
+              isGoodConversion = kFALSE;
+          } else {
+            isGoodConversion = kFALSE;
+          }
+        }
+      }
+    }
+    
+    if (isGoodConversion == kTRUE) break;
+    
+  } // loop over all conversions 
+  
   return !isGoodConversion;
 }
-
 //--------------------------------------------------------------------------------------------------
 Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, Double_t fD0Cut, Int_t nVertex) 
 {

@@ -8,6 +8,7 @@
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/PFTauCol.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/Met.h"
 #include "MitAna/DataTree/interface/PFMet.h"
 #include "MitAna/DataTree/interface/PFMetCol.h"
@@ -31,6 +32,7 @@ namespace mithep {
     static bool    looseEleId(const Electron *iElectron,const PileupEnergyDensityCol* iPUEnergyDensity,
 			      const PFCandidateCol *iCands,const Vertex *iPV,const VertexCol *iVertices);
     static bool    looseMuId(const Muon *iMu,const PFCandidateCol *iCands,const Vertex *iPV,const VertexCol *iVertices);
+    static bool    loosePhotonId(const Photon *iPhoton);
     static double  vis(const PFTau *iTau);
     static Float_t PFIsolation(const ChargedParticle *iLep,const PFCandidateCol *iCands);  
     static Float_t isoPV(const ChargedParticle *iLep,const PFCandidateCol *iCands,

@@ -80,6 +80,14 @@ bool MetLeptonTools::looseMuId(const Muon *iMu,const PFCandidateCol *iCands,cons
   if(iMu->IsoR03SumPt()/iMu->Pt()                > 0.2)         return false;
   return true;
 }
+bool MetLeptonTools::loosePhotonId(const Photon *iPhoton) { 
+  if(iPhoton->Pt()        <   20)                                   return false;
+  if(fabs(iPhoton->Eta()) > 1.45)                                   return false; 
+  if(iPhoton->HadOverEm() > 0.05)                                   return false;
+  if(iPhoton->CoviEtaiEta() > 0.01)                                 return false;
+  if(iPhoton->HollowConeTrkIsoDr04()    > (2.+0.002*iPhoton->Pt())) return false;
+  return true;
+}
 double MetLeptonTools::vis(const PFTau *iTau) {
   double lPtTot        = 0.;
   double lChargedPtTot = 0.;
