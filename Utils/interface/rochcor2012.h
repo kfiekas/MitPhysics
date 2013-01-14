@@ -1,4 +1,11 @@
+#ifndef WWAnalysis_AnalysisStep_RochCor2012_h
+#define WWAnalysis_AnalysisStep_RochCor2012_h
+
+////  VERSION for 2012 received from Jiyeon on 30 september 2012
+////  moved static const float from .h to .cc to make the gcc happy
+
 #include <iostream>
+
 #include <TChain.h>
 #include <TClonesArray.h>
 #include <TString.h>
@@ -11,20 +18,17 @@
 #include <TRandom3.h>
 
 
-#ifndef ROCHCOR2012
-#define ROCHCOR2012
-
 class rochcor2012 {
  public:
   rochcor2012();
   rochcor2012(int seed);
   ~rochcor2012();
   
-  void momcor_mc(TLorentzVector&, float, float, int, float&);
-  void momcor_data(TLorentzVector&, float, float, int, float&);
+  void momcor_mc(TLorentzVector&, float, float, int);
+  void momcor_data(TLorentzVector&, float, float, int);
   
   void musclefit_data(TLorentzVector& , TLorentzVector&);
-
+  
   float zptcor(float);
   int etabin(float);
   int phibin(float);
@@ -34,8 +38,41 @@ class rochcor2012 {
   TRandom3 eran;
   TRandom3 sran;
   
-  static const float netabin[9];  
-
+  //  static float netabin[9] = {-2.4,-2.1,-1.4,-0.7,0.0,0.7,1.4,2.1,2.4};
+  static const float netabin[9];
+////^^^^^------------ GP BEGIN 
+  static const double pi;
+  
+  static const float genm_smr;
+  static const float genm;
+  
+  static const float mrecm;
+  static const float drecm;
+  static const float mgscl_stat;
+  static const float mgscl_syst;
+  static const float dgscl_stat;
+  static const float dgscl_syst;
+  
+  //iteration2 after FSR : after Z Pt correction
+  static const float delta;
+  static const float delta_stat;
+  static const float delta_syst;
+  
+  static const float sf;
+  static const float sf_stat;
+  static const float sf_syst;
+  
+  static const float apar;
+  static const float bpar;
+  static const float cpar;
+  static const float d0par;
+  static const float e0par;
+  static const float d1par;
+  static const float e1par;
+  static const float d2par;
+  static const float e2par;
+////^^^^^------------ GP END 
+ 
   //---------------------------------------------------------------------------------------------
   
   static const float dcor_bf[8][8];  
@@ -70,5 +107,5 @@ class rochcor2012 {
   float gscler_mc_dev;
   float gscler_da_dev;
 };
-
+  
 #endif
