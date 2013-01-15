@@ -205,17 +205,17 @@ PhotonPairSelector::~PhotonPairSelector()
 
 //--------------------------------------------------------------------------------------------------
 void PhotonPairSelector::Process()
-{
+{  
   // ------------------------------------------------------------
   // Process entries of the tree.
   LoadEventObject(fPhotonBranchName,   fPhotons);
-
+  assert(fPhotons);
   // lepton tag collections
   if( fApplyLeptonTag ) {
     LoadEventObject(fLeptonTagElectronsName, fLeptonTagElectrons);
     LoadEventObject(fLeptonTagMuonsName,     fLeptonTagMuons);
   }
-
+  //printf("check 0\n");
   // -----------------------------------------------------------
   // Output Photon Collection. It will ALWAYS contain either 0 or 2 photons
   PhotonOArr  *GoodPhotons = new PhotonOArr;
@@ -251,8 +251,7 @@ void PhotonPairSelector::Process()
   if (!fIsData) {
     LoadBranch(fMCParticleName);
   }
-  
-  
+ 
   // ------------------------------------------------------------
   // load event based information
   Float_t rho = -99.;
@@ -283,8 +282,6 @@ void PhotonPairSelector::Process()
   default:
     theRho = rho;
   }
-    
-
   // ------------------------------------------------------------
   // Get Event header for Run info etc.
   const EventHeader* evtHead   = this->GetEventHeader();
@@ -292,8 +289,11 @@ void PhotonPairSelector::Process()
   UInt_t             runNumber = evtHead->RunNum();
   Float_t            _runNum   = (Float_t) runNumber;
   Float_t            _lumiSec  = (Float_t) evtHead->LumiSec();
-
+ 
   // ------------------------------------------------------------
+  //if(evtNum==9009 || evtNum==9010){
+  //  printf("evtNum:%d\n",evtNum);
+  // }
   // here we'll store the preselected Photons (and which CiCCategory they are...)
   PhotonOArr* preselPh  = new PhotonOArr;
   std::vector<PhotonTools::CiCBaseLineCats> preselCat;
@@ -419,7 +419,9 @@ void PhotonPairSelector::Process()
   // store pair-indices for pairs passing the selection
   std::vector<unsigned int> passPairs;
   passPairs.resize(0);
-
+  //if(evtNum==9009 || evtNum==9010){
+  //  printf("check 1\n");
+  //}
   // ------------------------------------------------------------
   // Loop over all Pairs and do the 'incredible machine' running....
   int leptag[20];
@@ -477,7 +479,7 @@ void PhotonPairSelector::Process()
         PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
       }
     }
-    
+ 
     if (fDoMCSmear) {
 
       double width1 = 0.;
@@ -544,7 +546,7 @@ void PhotonPairSelector::Process()
 	}
       }
     }
-    
+   
     //probability that selected vertex is the correct one
     Double_t vtxProb = 1.0;
     
@@ -686,7 +688,7 @@ void PhotonPairSelector::Process()
     default:
       theVtx[iPair] = fPV->At(0);
     }
-    
+   
     /*
     if(leptag == 1){
       Double_t distVtx = 999.0;
@@ -903,8 +905,9 @@ void PhotonPairSelector::Process()
     if (pass1 && pass2)
       passPairs.push_back(iPair);
   }
-  
-
+  //if(evtNum==9009 || evtNum==9010){
+  //  printf("check 2\n");
+  // }
   // ---------------------------------------------------------------
   // ... we're almost done, stay focused...
   // loop over all passing pairs and find the one with the highest sum Et
@@ -931,7 +934,9 @@ void PhotonPairSelector::Process()
       vtx      = theVtx[iPair];
     }
   }
-
+  //if(evtNum==9009 || evtNum==9010){
+  //  printf("check 3\n");
+  // }
   for(unsigned int iPair = 0; iPair < numPairs; ++iPair) {
     if (fixPh1st[iPair]!=phHard) delete fixPh1st[iPair];
     if (fixPh2nd[iPair]!=phSoft) delete fixPh2nd[iPair];
@@ -946,20 +951,29 @@ void PhotonPairSelector::Process()
   }
 
   // we also store the chosen Vtx, so later modules can use it
-
+  //if(evtNum==9009 || evtNum==9010){
+  //  printf("check 4\n");
+  //}
   Vertex* chosenVtx = NULL;
   if ( vtx ) {
     chosenVtx = new Vertex( *vtx );
     ChosenVtx->AddOwned( chosenVtx );
   }
-  
+  //printf("ChosenVtx->GetEntries():%d\n",ChosenVtx->GetEntries()ChosenVtx->GetEntries());
+  //if(evtNum==9009 || evtNum==9010){
+  //  printf("check 5\n");
+  //}
   // sort according to pt
   GoodPhotons->Sort();
-  
+
   // delete auxiliary photon collection...
   delete preselPh;
+ 
   //delete[] theVtx;
-
+  //if(evtNum==9009 || evtNum==9010){
+  //  printf(" GoodPhotons->GetEntries():%d\n",GoodPhotons->GetEntries());
+  //  printf("check 6\n");
+  //}
   return;
 }
 
