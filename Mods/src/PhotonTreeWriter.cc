@@ -913,6 +913,7 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent-> eleIdMva = -99.;
 
     if( fApplyLeptonTag ) {
+         
       // perform lepton tagging
       // the diphoton event record will have one more entry; i.e. leptonTag
       // leptonTag = -1   -> lepton-taggng was swicthed off
@@ -949,7 +950,7 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> muNMatch = fLeptonTagMuons->At(0)->NMatches();
 	}
       }
-      if ( fDiphotonEvent->leptonTag < 2 && fLeptonTagElectrons->GetEntries() > 0 ) {
+      if ( fDiphotonEvent->leptonTag < 1 && fLeptonTagElectrons->GetEntries() > 0 ) {
 	if( (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard) >= 1) &&
 	    (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft) >= 1) &&
 	    (PhotonTools::ElectronVetoCiC(phHard,fLeptonTagElectrons) >= 1) &&
@@ -957,48 +958,64 @@ void PhotonTreeWriter::Process()
 	    (TMath::Abs( (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
 	    (TMath::Abs( (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
 	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
-	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.)) ){
+	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.))){
 	  
-	  fDiphotonEvent->leptonTag = 1;
-
-	  fDiphotonEvent-> elePt = fLeptonTagElectrons->At(0)->Pt();
-	  fDiphotonEvent-> eleEta = fLeptonTagElectrons->At(0)->Eta();
-	  fDiphotonEvent-> eleSCEta = fLeptonTagElectrons->At(0)->SCluster()->Eta();
-	  fDiphotonEvent-> eleIso1 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-
-	  fDiphotonEvent-> eleIso2 = -99.;
-
-	  if ( fDoSynching ) {
-	    Double_t distVtx = 999.0;
-	    for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
-	      double dz = TMath::Abs(fLeptonTagElectrons->At(0)->GsfTrk()->DzCorrected(*fPV->At(nv)));
-	      if(dz < distVtx) {
-		distVtx    = dz;
-		closestVtx = nv;
+	  int ph1passeveto=1;
+	  int ph2passeveto=1;
+	  
+	  for(UInt_t k=0;k<fElectrons->GetEntries();k++){
+	    if(fElectrons->At(k)->BestTrk()->NMissingHits()==0){
+	      if((fElectrons->At(k)->SCluster()==phHard->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phHard) < 1)){
+		ph1passeveto=0;
+	      }
+	      if((fElectrons->At(k)->SCluster()==phSoft->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phSoft) < 1)){
+		ph2passeveto=0;
 	      }
 	    }
-	    fDiphotonEvent-> eleIdMva = fElectronIDMVA->MVAValue(fLeptonTagElectrons->At(0), fPV->At(closestVtx));
 	  }
-
-	  //	  fDiphotonEvent-> eleIso2 = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso03,fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) + ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso03, fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) ;
-
-	  fDiphotonEvent-> eleIso3 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-	  fDiphotonEvent-> eleIso4 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-	  fDiphotonEvent-> eleDist = fLeptonTagElectrons->At(0)->ConvPartnerDist();
-	  fDiphotonEvent-> eleDcot = fLeptonTagElectrons->At(0)->ConvPartnerDCotTheta();
-	  fDiphotonEvent-> eleCoviee = fLeptonTagElectrons->At(0)->CoviEtaiEta();
-	  fDiphotonEvent-> eleDphiin = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaPhiSuperClusterTrackAtVtx());
-	  fDiphotonEvent-> eleDetain = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaEtaSuperClusterTrackAtVtx());
-	  fDiphotonEvent-> eleDR1 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard);
-	  fDiphotonEvent-> eleDR2 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft);
-	  fDiphotonEvent-> eleMass1 = (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
-	  fDiphotonEvent-> eleMass2 = (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
+	  
+	  if(ph1passeveto==1 && ph2passeveto==1){
+	    fDiphotonEvent->leptonTag = 1;
+	    
+	    fDiphotonEvent-> elePt = fLeptonTagElectrons->At(0)->Pt();
+	    fDiphotonEvent-> eleEta = fLeptonTagElectrons->At(0)->Eta();
+	    fDiphotonEvent-> eleSCEta = fLeptonTagElectrons->At(0)->SCluster()->Eta();
+	    fDiphotonEvent-> eleIso1 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+	    
+	    fDiphotonEvent-> eleIso2 = -99.;
+	    
+	    if ( fDoSynching ) {
+	      Double_t distVtx = 999.0;
+	      for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
+		double dz = TMath::Abs(fLeptonTagElectrons->At(0)->GsfTrk()->DzCorrected(*fPV->At(nv)));
+		if(dz < distVtx) {
+		  distVtx    = dz;
+		  closestVtx = nv;
+		}
+	      }
+	      fDiphotonEvent-> eleIdMva = fElectronIDMVA->MVAValue(fLeptonTagElectrons->At(0), fPV->At(closestVtx));
+	    }
+	    
+	    //	  fDiphotonEvent-> eleIso2 = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso03,fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) + ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso03, fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) ;
+	    
+	    fDiphotonEvent-> eleIso3 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+	    fDiphotonEvent-> eleIso4 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+	    fDiphotonEvent-> eleDist = fLeptonTagElectrons->At(0)->ConvPartnerDist();
+	    fDiphotonEvent-> eleDcot = fLeptonTagElectrons->At(0)->ConvPartnerDCotTheta();
+	    fDiphotonEvent-> eleCoviee = fLeptonTagElectrons->At(0)->CoviEtaiEta();
+	    fDiphotonEvent-> eleDphiin = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaPhiSuperClusterTrackAtVtx());
+	    fDiphotonEvent-> eleDetain = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaEtaSuperClusterTrackAtVtx());
+	    fDiphotonEvent-> eleDR1 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard);
+	    fDiphotonEvent-> eleDR2 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft);
+	    fDiphotonEvent-> eleMass1 = (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
+	    fDiphotonEvent-> eleMass2 = (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
 	  fDiphotonEvent-> eleNinnerHits =      fLeptonTagElectrons->At(0)->Trk()->NExpectedHitsInner();
+	  }
 	}
       }
       
       if(false){
-	if(fDiphotonEvent->evt==197022547 || fDiphotonEvent->evt==172664113 || fDiphotonEvent->evt==332789938 || fDiphotonEvent->evt==465586356){
+	if(fDiphotonEvent->evt==79737729 || fDiphotonEvent->evt==197022547 || fDiphotonEvent->evt==172664113 || fDiphotonEvent->evt==332789938 || fDiphotonEvent->evt==465586356){
 	  printf("ming sync check 0:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numelectrons:%d  idmva:%f  mass:%f\n  elePt:%f  eleEta:%f  eleSCEta:%f  vtx:%d\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagElectrons->GetEntries(),fDiphotonEvent->eleIdMva,_mass,fDiphotonEvent->elePt,fDiphotonEvent->eleEta,fDiphotonEvent->eleSCEta,closestVtx);
 	}
       }

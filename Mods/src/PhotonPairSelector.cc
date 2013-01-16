@@ -536,7 +536,7 @@ void PhotonPairSelector::Process()
 	  leptag[iPair] = 2;
 	}
       }
-      if(leptag[iPair] <2){
+      if(leptag[iPair] <1){
 	if( fLeptonTagElectrons->GetEntries() > 0 ){
 	  if( (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh1st[iPair]) >= 1) &&
 	      (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh2nd[iPair]) >= 1) &&
@@ -545,8 +545,24 @@ void PhotonPairSelector::Process()
 	      (TMath::Abs( (fixPh1st[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
 	      (TMath::Abs( (fixPh2nd[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
 	      ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
-	      ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120)) ){
-	    leptag[iPair] = 1;
+	      ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120))){
+	    int ph1passeveto=1;
+	    int ph2passeveto=1;
+	    
+	    for(UInt_t k=0;k<fElectrons->GetEntries();k++){
+	      if(fElectrons->At(k)->BestTrk()->NMissingHits()==0){
+		if((fElectrons->At(k)->SCluster()==fixPh1st[iPair]->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*fixPh1st[iPair]) < 1)){
+		  ph1passeveto=0;
+		}
+		if((fElectrons->At(k)->SCluster()==fixPh2nd[iPair]->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*fixPh2nd[iPair]) < 1)){
+		  ph2passeveto=0;
+		}
+	      }
+	    }
+	    
+	    if(ph1passeveto==1 && ph2passeveto==1){
+	      leptag[iPair] = 1;
+	    }
 	  }
 	}
       }
