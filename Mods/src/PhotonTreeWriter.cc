@@ -129,6 +129,10 @@ PhotonTreeWriter::~PhotonTreeWriter()
 //--------------------------------------------------------------------------------------------------
 void PhotonTreeWriter::Process()
 {
+
+  //if(GetEventHeader()->EvtNum()==9008 || GetEventHeader()->EvtNum()==9008 || GetEventHeader()->EvtNum()==9010){
+  //  printf("check photontreewriter 0\n");
+  // }
   // ------------------------------------------------------------  
   // Process entries of the tree. 
   LoadEventObject(fPhotonBranchName,   fPhotons);
@@ -924,7 +928,7 @@ void PhotonTreeWriter::Process()
 	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
 	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.)) ){
 	  
-	  fDiphotonEvent->leptonTag = 1;
+	  fDiphotonEvent->leptonTag = 2;
 
 	  fDiphotonEvent-> muonPt  = fLeptonTagMuons->At(0)->Pt();
 	  fDiphotonEvent-> muonEta = fLeptonTagMuons->At(0)->Eta();
@@ -945,7 +949,7 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> muNMatch = fLeptonTagMuons->At(0)->NMatches();
 	}
       }
-      if ( fDiphotonEvent->leptonTag < 1 && fLeptonTagElectrons->GetEntries() > 0 ) {
+      if ( fDiphotonEvent->leptonTag < 2 && fLeptonTagElectrons->GetEntries() > 0 ) {
 	if( (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard) >= 1) &&
 	    (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft) >= 1) &&
 	    (PhotonTools::ElectronVetoCiC(phHard,fLeptonTagElectrons) >= 1) &&
@@ -955,7 +959,7 @@ void PhotonTreeWriter::Process()
 	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
 	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.)) ){
 	  
-	  fDiphotonEvent->leptonTag = 2;
+	  fDiphotonEvent->leptonTag = 1;
 
 	  fDiphotonEvent-> elePt = fLeptonTagElectrons->At(0)->Pt();
 	  fDiphotonEvent-> eleEta = fLeptonTagElectrons->At(0)->Eta();

@@ -424,7 +424,9 @@ void PhotonPairSelector::Process()
   //}
   // ------------------------------------------------------------
   // Loop over all Pairs and do the 'incredible machine' running....
-  int leptag[20];
+  std::vector<int> leptag;
+  leptag.resize(numPairs);
+
   for (unsigned int iPair = 0; iPair < numPairs; ++iPair) {
     // first we need a hard copy of the incoming photons
     fixPh1st.push_back(new Photon(*preselPh->At(idx1st[iPair])));
@@ -531,22 +533,25 @@ void PhotonPairSelector::Process()
 	    (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh2nd[iPair]) >= 1.0) && 
 	    ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
 	    ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120)) ){
-	  leptag[iPair] = 1;
-	}
-      } else if( fLeptonTagElectrons->GetEntries() > 0 ){
-	if( (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh1st[iPair]) >= 1) &&
-	    (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh2nd[iPair]) >= 1) &&
-	    (PhotonTools::ElectronVetoCiC(fixPh1st[iPair],fLeptonTagElectrons) >= 1) &&
-	    (PhotonTools::ElectronVetoCiC(fixPh2nd[iPair],fLeptonTagElectrons) >= 1) &&
-	    (TMath::Abs( (fixPh1st[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
-	    (TMath::Abs( (fixPh2nd[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
-	    ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
-	    ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120)) ){
 	  leptag[iPair] = 2;
 	}
       }
+      if(leptag[iPair] <2){
+	if( fLeptonTagElectrons->GetEntries() > 0 ){
+	  if( (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh1st[iPair]) >= 1) &&
+	      (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh2nd[iPair]) >= 1) &&
+	      (PhotonTools::ElectronVetoCiC(fixPh1st[iPair],fLeptonTagElectrons) >= 1) &&
+	      (PhotonTools::ElectronVetoCiC(fixPh2nd[iPair],fLeptonTagElectrons) >= 1) &&
+	      (TMath::Abs( (fixPh1st[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
+	      (TMath::Abs( (fixPh2nd[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
+	      ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
+	      ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120)) ){
+	    leptag[iPair] = 1;
+	  }
+	}
+      }
     }
-   
+    
     //probability that selected vertex is the correct one
     Double_t vtxProb = 1.0;
     
@@ -922,8 +927,7 @@ void PhotonPairSelector::Process()
   double maxSumEt = 0.;
   int maxleptag = 0;
   for (unsigned int iPair=0; iPair<passPairs.size(); ++iPair) {
-    double sumEt  = fixPh1st[passPairs[iPair]]->Et()
-      +             fixPh2nd[passPairs[iPair]]->Et();
+    double sumEt  = fixPh1st[passPairs[iPair]]->Et()+fixPh2nd[passPairs[iPair]]->Et();
     if (((sumEt > maxSumEt) && leptag[iPair] == maxleptag) || (leptag[iPair] > maxleptag)) {
       maxSumEt = sumEt;
       maxleptag = leptag[iPair];
