@@ -64,13 +64,21 @@ void TauIsoMVA::Initialize( TString iWeightFile) {
   fReader->AddSpectator("jet_pt",  (Float_t *)0);
   fReader->AddSpectator("pv",      (Float_t *)0);
   fReader->BookMVA     ("BDTG", iWeightFile);
+  fGBR = false;
+}
+void TauIsoMVA::InitializeGBR( TString iWeightFile) { 
+  TFile *lForest = new TFile(iWeightFile,"READ");
+  fGBRReader = (GBRForest*)lForest->Get("gbrfTauIso");
+  lForest->Close();
+  fGBR = true;
 }
 double   TauIsoMVA::MVAValue(const PFTau *iTau,double iRho) {
   IsoRings lRings        = computeIsoRings(iTau);
   std::vector<float> mvainput = lRings.getVector();
   mvainput.push_back( iRho);
-  mvainput.insert(mvainput.end(), 6, 0); 
-  return fReader->EvaluateMVA(mvainput, "BDTG");
+  if(!fGBR) mvainput.insert(mvainput.end(), 6, 0); 
+  if(!fGBR) return fReader->EvaluateMVA(mvainput, "BDTG");
+  return fGBRReader->GetClassifier(&mvainput[0]);
 }
 TauIsoMVA::IsoRings TauIsoMVA::computeIsoRings(const PFTau *iTau) {
   std::vector<int>                 niso    (3);

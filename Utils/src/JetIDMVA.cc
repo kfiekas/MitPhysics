@@ -118,7 +118,7 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   if(fType != k53) fLowPtReader->AddVariable( "jetEta"   , &fJEta1     );
   if(fType != k53) fLowPtReader->AddVariable( "jetPhi"   , &fJPhi1     );             
   fLowPtReader->AddVariable( "dZ"       , &fJDZ1      );
-  fLowPtReader->AddVariable( "d0"       , &fJD01      );
+  if(fType != k53 && fType != k53MET) fLowPtReader->AddVariable( "d0"       , &fJD01      );
   fLowPtReader->AddVariable( "beta"     , &fBeta      );
   fLowPtReader->AddVariable( "betaStar" , &fBetaStar  );
   fLowPtReader->AddVariable( "nCharged" , &fNCharged  );
@@ -131,6 +131,9 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   fLowPtReader->AddVariable( "frac03"   , &fFrac03    );
   fLowPtReader->AddVariable( "frac04"   , &fFrac04    );
   fLowPtReader->AddVariable( "frac05"   , &fFrac05    );
+  if(fType == k53) fLowPtReader->AddSpectator( "jetPt"   , &fJPt1      );  
+  if(fType == k53) fLowPtReader->AddSpectator( "jetEta"  , &fJEta1     );
+  if(fType == k53) fLowPtReader->AddSpectator( "jetPhi"  , &fJPhi1     );  
   
   fReader        = 0;
   fReader        = new TMVA::Reader( "!Color:!Silent:Error" );  
@@ -186,7 +189,6 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
   if (fType == k53) {
     fReader->AddVariable( "nvtx"     , &fNVtx      ); 
     fReader->AddVariable( "dZ"       , &fJDZ1      );
-    fReader->AddVariable( "d0"       , &fJD01      );
     fReader->AddVariable( "beta"     , &fBeta      );
     fReader->AddVariable( "betaStar" , &fBetaStar  );
     fReader->AddVariable( "nCharged" , &fNCharged  );
@@ -208,7 +210,6 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
     fReader->AddVariable( "jetEta"   , &fJEta1     );
     fReader->AddVariable( "jetPhi"   , &fJPhi1     );  
     fReader->AddVariable( "dZ"       , &fJDZ1      );
-    fReader->AddVariable( "d0"       , &fJD01      );
     fReader->AddVariable( "beta"     , &fBeta      );
     fReader->AddVariable( "betaStar" , &fBetaStar  );
     fReader->AddVariable( "nCharged" , &fNCharged  );

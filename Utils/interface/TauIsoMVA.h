@@ -12,6 +12,7 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include <vector>
 #include "MitAna/DataTree/interface/PFTau.h"
+#include "CondFormats/EgammaObjects/interface/GBRForest.h"
 
 class TRandom3;
 namespace TMVA {
@@ -47,12 +48,15 @@ namespace mithep {
     TauIsoMVA();
     ~TauIsoMVA(); 
     void     Initialize     (TString iWeightFile);
+    void     InitializeGBR  (TString iWeightFile);
     double   MVAValue       (const PFTau *iTau,double iRho);
     IsoRings computeIsoRings(const PFTau *iTau);
     
   protected:      
+    bool                     fGBR;
+    GBRForest               *fGBRReader;
     TMVA::Reader            *fReader;
-    ClassDef(TauIsoMVA,0)
+    ClassDef(TauIsoMVA,1)
       };
 }
 #endif
