@@ -24,7 +24,7 @@ class rochcor2012 {
   rochcor2012(int seed);
   ~rochcor2012();
   
-  void momcor_mc(TLorentzVector&, float, float, int);
+  void momcor_mc(TLorentzVector&, float, float, int, bool);
   void momcor_data(TLorentzVector&, float, float, int);
   
   void musclefit_data(TLorentzVector& , TLorentzVector&);

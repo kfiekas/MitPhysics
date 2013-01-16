@@ -218,7 +218,7 @@ rochcor2012::rochcor2012(int seed){
   }
 }
 
-void rochcor2012::momcor_mc( TLorentzVector& mu, float charge, float sysdev, int runopt){
+void rochcor2012::momcor_mc( TLorentzVector& mu, float charge, float sysdev, int runopt, bool turnOffRandomization){
   
   //sysdev == num : deviation = num
 
@@ -254,8 +254,14 @@ void rochcor2012::momcor_mc( TLorentzVector& mu, float charge, float sysdev, int
   gscler = TMath::Sqrt( TMath::Power(mgscl_stat,2) + TMath::Power(mgscl_syst,2) );
   deltaer = TMath::Sqrt( TMath::Power(delta_stat,2) + TMath::Power(delta_syst,2) );
   sfer = TMath::Sqrt( TMath::Power(sf_stat,2) + TMath::Power(sf_syst,2) );
-  
-  float tune = 1.0/(1.0 + (delta + sysdev*deltaer)*sqrt(px*px + py*py)*eran.Gaus(1.0,(sf + sysdev*sfer)));
+
+  float random_number;
+  if(turnOffRandomization)
+    random_number = 1.0+(sf + sysdev*sfer);
+  else
+    random_number = eran.Gaus(1.0,(sf + sysdev*sfer));
+
+  float tune = 1.0/(1.0 + (delta + sysdev*deltaer)*sqrt(px*px + py*py)*random_number);
   
   px *= (tune); 
   py *= (tune);  
