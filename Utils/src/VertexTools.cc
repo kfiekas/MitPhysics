@@ -1,4 +1,4 @@
-// $Id: VertexTools.cc,v 1.13 2012/10/10 23:17:05 bendavid Exp $
+// $Id: VertexTools.cc,v 1.14 2012/10/26 19:23:04 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -680,13 +680,22 @@ Double_t VertexTools::DeltaMassVtx(Double_t xp1, Double_t yp1, Double_t zp1,
 
 std::pair<double,double> VertexTools::VtxZFromConversion(const Photon *p, const DecayParticle *c, const BaseVertex *bsp) {
   
+  //2012 ABC
+  //const double dzpxb = 0.011;
+  //const double dztib = 0.301;
+  //const double dztob = 1.603;
+  //const double dzpxf = 0.057;
+  //const double dztid = 0.316;
+  //const double dztec = 1.026;
+
+  //2012 ABCD
   const double dzpxb = 0.011;
-  const double dztib = 0.301;
-  const double dztob = 1.603;
-  const double dzpxf = 0.057;
-  const double dztid = 0.316;
-  const double dztec = 1.026;
-  
+  const double dztib = 0.297;
+  const double dztob = 1.530;
+  const double dzpxf = 0.059;
+  const double dztid = 0.315;
+  const double dztec = 1.021;
+ 
   const double dzpxbsingle = 0.007;
   const double dztibsingle = 0.472;
   const double dztobsingle = 0.540;
