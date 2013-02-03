@@ -23,7 +23,7 @@ class rochcor {
   rochcor(int seed);
   ~rochcor();
   
-  void momcor_mc(TLorentzVector&, float, float, int);
+  void momcor_mc(TLorentzVector&, float, float, int, bool);
   void momcor_data(TLorentzVector&, float, float, int);
   
   void musclefit_data(TLorentzVector& , TLorentzVector&);
