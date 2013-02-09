@@ -546,7 +546,7 @@ void PhotonPairSelector::Process()
 	      (TMath::Abs( (fixPh2nd[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
 	      ((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
 	      ((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120))){
-	    int ph1passeveto=1;
+	    /*int ph1passeveto=1;
 	    int ph2passeveto=1;
 	    
 	    for(UInt_t k=0;k<fElectrons->GetEntries();k++){
@@ -562,7 +562,20 @@ void PhotonPairSelector::Process()
 	    
 	    if(ph1passeveto==1 && ph2passeveto==1){
 	      leptag[iPair] = 1;
+	      }*/
+
+	    /*if(PhotonTools::PassElectronVeto(fixPh1st[iPair], fElectrons) && PhotonTools::PassElectronVeto(fixPh2nd[iPair], fElectrons)){
+	      leptag[iPair] = 1;
+	      }*/
+
+	    /*if(PhotonTools::PassElectronVeto(fixPh1st[iPair], fElectrons) && PhotonTools::PassElectronVeto(fixPh2nd[iPair], fElectrons)){
+	      leptag[iPair] = 1;
+	      }*/
+	    
+	    if(PhotonTools::ElectronVetoCiC(fixPh1st[iPair], fElectrons)>=1 && PhotonTools::ElectronVetoCiC(fixPh2nd[iPair], fElectrons)>=1){
+	      leptag[iPair] = 1;
 	    }
+	    
 	  }
 	}
       }
@@ -836,12 +849,12 @@ void PhotonPairSelector::Process()
       
       // loose preselection for mva
       pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
-	PhotonTools::PassSinglePhotonPreselPFISO(fixPh1st[iPair],fElectrons,fConversions,bsp,
+	PhotonTools::PassSinglePhotonPreselPFISONoEcal(fixPh1st[iPair],fElectrons,fConversions,bsp,
 					    fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
 					    fInvertElectronVeto);
       if (pass1)
 	pass2 = fixPh2nd[iPair]->Pt() > trailptcut &&
-	  PhotonTools::PassSinglePhotonPreselPFISO(fixPh2nd[iPair],fElectrons,fConversions,bsp,
+	  PhotonTools::PassSinglePhotonPreselPFISONoEcal(fixPh2nd[iPair],fElectrons,fConversions,bsp,
 					      fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
 					      fInvertElectronVeto);      
       
@@ -910,8 +923,25 @@ void PhotonPairSelector::Process()
 						   fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
 						   fInvertElectronVeto);           
       
-      break;      
+      break;    
 
+      // --------------------------------------------------------------------
+      // updated (PF absed) pre-selection as used in the 2012 8TeV MVA/Baseline analyses
+    case kMITPFPhSelectionNoEcal:
+      // loose preselection for mva
+      pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
+	PhotonTools::PassSinglePhotonPreselPFISONoEcal(fixPh1st[iPair],fElectrons,fConversions,bsp,
+						       fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+						       fInvertElectronVeto);      
+      
+      if (pass1)
+	pass2 = fixPh2nd[iPair]->Pt() > trailptcut &&
+	  PhotonTools::PassSinglePhotonPreselPFISONoEcal(fixPh2nd[iPair],fElectrons,fConversions,bsp,
+							 fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+							 fInvertElectronVeto);           
+      
+      break;      
+      
     default:
       pass1 = true;
       pass2 = true;
@@ -1037,6 +1067,8 @@ void PhotonPairSelector::SlaveBegin()
     fPhSelType =       kMITPhSelection;
   else if (fPhotonSelType.CompareTo("MITPFSelection") == 0)
     fPhSelType =       kMITPFPhSelection;  
+  else if (fPhotonSelType.CompareTo("MITPFSelectionNoEcal") == 0)
+    fPhSelType =       kMITPFPhSelectionNoEcal;  
   else if (fPhotonSelType.CompareTo("NoSelection") == 0)
     fPhSelType =       kNoPhSelection;
   else {

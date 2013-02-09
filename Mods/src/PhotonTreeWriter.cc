@@ -688,9 +688,9 @@ void PhotonTreeWriter::Process()
       
       // end of Vtx synching stuff ...
       // =================================================================================
-
-
-
+      
+      
+      
       if (jet1 && jet2) {
         fDiphotonEvent->zeppenfeld = TMath::Abs(_etagg - 0.5*(jet1->Eta()+jet2->Eta()));
         fDiphotonEvent->dphidijetgg = MathUtils::DeltaPhi( (jet1->Mom()+jet2->Mom()).Phi(), _phigg );
@@ -725,7 +725,7 @@ void PhotonTreeWriter::Process()
 				      &pfjets,
 				      int(fPV->GetEntries()),
 				      kFALSE);      
-                                  
+	  
 	  TMatrixD *metcov = fMVAMet.GetMetCovariance();
 	  
 	  ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
@@ -742,7 +742,7 @@ void PhotonTreeWriter::Process()
 	  vmet(1) = fullmet.Y();
 	  mcov.Invert();
 	  Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
-                                  
+          
 	  fDiphotonEvent->mvametsel = fullmet.Rho();
 	  fDiphotonEvent->mvametselphi = fullmet.Phi();
 	  fDiphotonEvent->mvametselx = fullmet.X();
@@ -787,35 +787,35 @@ void PhotonTreeWriter::Process()
       
     }
     
-
+    
     fDiphotonEvent->corrpfmet = -99.;
     fDiphotonEvent->corrpfmetphi = -99.;
     fDiphotonEvent->corrpfmetx = -99.;
     fDiphotonEvent->corrpfmety = -99.;
-
+    
     Met *corrMet =NULL;
     
     if (fApplyPFMetCorrections){
-    corrMet = new Met(fPFMet->At(0)->Px(),fPFMet->At(0)->Py());
+      corrMet = new Met(fPFMet->At(0)->Px(),fPFMet->At(0)->Py());
+      
+      if (!fIsData){
+	PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,1,0,funcorrPFJets,fGenJets,fPFJets,_evt);
+	PFMetCorrectionTools::shiftMet(corrMet,fIsData,_spfMet);
+      }
+      else {
+	PFMetCorrectionTools::shiftMet(corrMet,fIsData,_spfMet);
+	PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,0,1,funcorrPFJets,fGenJets,fPFJets,_evt);
+      }    
+      
+      fDiphotonEvent->corrpfmet = corrMet->Pt();
+      fDiphotonEvent->corrpfmetphi = corrMet->Phi();
+      fDiphotonEvent->corrpfmetx = corrMet->Px();
+      fDiphotonEvent->corrpfmety = corrMet->Py();
+      
+      delete corrMet;
+    }
     
-    if (!fIsData){
-      PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,1,0,funcorrPFJets,fGenJets,fPFJets,_evt);
-      PFMetCorrectionTools::shiftMet(corrMet,fIsData,_spfMet);
-    }
-    else {
-      PFMetCorrectionTools::shiftMet(corrMet,fIsData,_spfMet);
-      PFMetCorrectionTools::correctMet(corrMet,phHard,phSoft,0,1,funcorrPFJets,fGenJets,fPFJets,_evt);
-     }    
- 
-    fDiphotonEvent->corrpfmet = corrMet->Pt();
-    fDiphotonEvent->corrpfmetphi = corrMet->Phi();
-    fDiphotonEvent->corrpfmetx = corrMet->Px();
-    fDiphotonEvent->corrpfmety = corrMet->Py();
-
-    delete corrMet;
-    }
-
-
+    
     Float_t _massele = -99.;
     Float_t _ptee = -99.;
     Float_t _costhetaele = -99.;
@@ -829,7 +829,7 @@ void PhotonTreeWriter::Process()
     if (phgen1 && phgen2) {
       _gencostheta = ThreeVector(phgen1->Mom()).Unit().Dot(ThreeVector(phgen2->Mom()).Unit());
     }
-  
+    
     fDiphotonEvent->gencostheta = _gencostheta;
     fDiphotonEvent->dphiMetgg = _dphiMetgg;
     fDiphotonEvent->cosdphiMetgg = _cosdphiMetgg;
@@ -847,7 +847,7 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->ptee = _ptee;
     fDiphotonEvent->costhetaele =  _costhetaele;    
     fDiphotonEvent->evtcat = _evtcat;
-
+    
     fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto,realVtx);
     fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto,realVtx);
     
@@ -855,12 +855,12 @@ void PhotonTreeWriter::Process()
     Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
     Float_t ph2ecor    = fDiphotonEvent->photons[1].Ecor();
     Float_t ph2ecorerr = fDiphotonEvent->photons[1].Ecorerr();
-
+    
     Float_t ph1ecorele    = fDiphotonEvent->photons[0].Ecorele();
     Float_t ph1ecoreleerr = fDiphotonEvent->photons[0].Ecoreleerr();
     Float_t ph2ecorele    = fDiphotonEvent->photons[1].Ecorele();
     Float_t ph2ecoreleerr = fDiphotonEvent->photons[1].Ecoreleerr();
-      
+    
     fDiphotonEvent->masscor    = TMath::Sqrt(2.0*ph1ecor*ph2ecor*(1.0-fDiphotonEvent->costheta));
     fDiphotonEvent->masscorerr = 0.5*fDiphotonEvent->masscor*
       TMath::Sqrt(ph1ecorerr*ph1ecorerr/ph1ecor/ph1ecor + ph2ecorerr*ph2ecorerr/ph2ecor/ph2ecor);
@@ -890,7 +890,7 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent-> muNpixhits = -99;
     fDiphotonEvent-> muNegs = -99;
     fDiphotonEvent-> muNMatch = -99;
-
+    
     // Electron Stuff
     fDiphotonEvent-> elePt = -99.;
     fDiphotonEvent-> eleEta = -99.;
@@ -911,9 +911,9 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent-> eleNinnerHits = -99;     
     
     fDiphotonEvent-> eleIdMva = -99.;
-
+    
     if( fApplyLeptonTag ) {
-         
+      
       // perform lepton tagging
       // the diphoton event record will have one more entry; i.e. leptonTag
       // leptonTag = -1   -> lepton-taggng was swicthed off
@@ -930,12 +930,12 @@ void PhotonTreeWriter::Process()
 	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.)) ){
 	  
 	  fDiphotonEvent->leptonTag = 2;
-
+	  
 	  fDiphotonEvent-> muonPt  = fLeptonTagMuons->At(0)->Pt();
 	  fDiphotonEvent-> muonEta = fLeptonTagMuons->At(0)->Eta();
 	  fDiphotonEvent-> muDR1   = MathUtils::DeltaR(fLeptonTagMuons->At(0),phHard);
 	  fDiphotonEvent-> muDR2   = MathUtils::DeltaR(fLeptonTagMuons->At(0),phSoft);
-
+	  
 	  fDiphotonEvent-> muIso1   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
 	  fDiphotonEvent-> muIso2   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoRandom() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
 	  fDiphotonEvent-> muIso3   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
@@ -943,7 +943,7 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> muD0  = TMath::Abs(fLeptonTagMuons->At(0)->BestTrk()->D0Corrected(*fPV->At(0)));
 	  fDiphotonEvent-> muDZ  = TMath::Abs(fLeptonTagMuons->At(0)->BestTrk()->DzCorrected(*fPV->At(0)));
 	  fDiphotonEvent-> muChi2  = fLeptonTagMuons->At(0)->GlobalTrk()->Chi2()/fLeptonTagMuons->At(0)->GlobalTrk()->Ndof();
-	  	  
+	  
 	  fDiphotonEvent-> muNhits = fLeptonTagMuons->At(0)->BestTrk()->NHits();
  	  fDiphotonEvent-> muNpixhits = fLeptonTagMuons->At(0)->BestTrk()->NPixelHits();
 	  fDiphotonEvent-> muNegs = fLeptonTagMuons->At(0)->NSegments();
@@ -960,21 +960,24 @@ void PhotonTreeWriter::Process()
 	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
 	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.))){
 	  
-	  int ph1passeveto=1;
-	  int ph2passeveto=1;
-	  
-	  for(UInt_t k=0;k<fElectrons->GetEntries();k++){
+	  /*int ph1passeveto=1;
+	    int ph2passeveto=1;
+	    
+	    for(UInt_t k=0;k<fElectrons->GetEntries();k++){
 	    if(fElectrons->At(k)->BestTrk()->NMissingHits()==0){
-	      if((fElectrons->At(k)->SCluster()==phHard->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phHard) < 1)){
-		ph1passeveto=0;
-	      }
-	      if((fElectrons->At(k)->SCluster()==phSoft->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phSoft) < 1)){
-		ph2passeveto=0;
-	      }
+	    if((fElectrons->At(k)->SCluster()==phHard->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phHard) < 1)){
+	    ph1passeveto=0;
 	    }
-	  }
+	    if((fElectrons->At(k)->SCluster()==phSoft->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phSoft) < 1)){
+	    ph2passeveto=0;
+	    }
+	    }
+	    }
+	    
+	    if(ph1passeveto==1 && ph2passeveto==1){*/
 	  
-	  if(ph1passeveto==1 && ph2passeveto==1){
+	  if(PhotonTools::ElectronVetoCiC(phHard, fElectrons)>=1 && PhotonTools::ElectronVetoCiC(phSoft, fElectrons)>=1){
+	    
 	    fDiphotonEvent->leptonTag = 1;
 	    
 	    fDiphotonEvent-> elePt = fLeptonTagElectrons->At(0)->Pt();
@@ -1009,14 +1012,16 @@ void PhotonTreeWriter::Process()
 	    fDiphotonEvent-> eleDR2 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft);
 	    fDiphotonEvent-> eleMass1 = (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
 	    fDiphotonEvent-> eleMass2 = (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
-	  fDiphotonEvent-> eleNinnerHits =      fLeptonTagElectrons->At(0)->Trk()->NExpectedHitsInner();
+	    fDiphotonEvent-> eleNinnerHits =      fLeptonTagElectrons->At(0)->Trk()->NExpectedHitsInner();
 	  }
 	}
       }
       
       if(false){
-	if(fDiphotonEvent->evt==79737729 || fDiphotonEvent->evt==197022547 || fDiphotonEvent->evt==172664113 || fDiphotonEvent->evt==332789938 || fDiphotonEvent->evt==465586356){
+	if(fDiphotonEvent->evt==101794856 || fDiphotonEvent->evt==528937923 || fDiphotonEvent->evt==483561562 || fDiphotonEvent->evt==1374972270 || fDiphotonEvent->evt==835731908){
+	//if(fDiphotonEvent->evt==369441614 || fDiphotonEvent->evt==79737729){
 	  printf("ming sync check 0:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numelectrons:%d  idmva:%f  mass:%f\n  elePt:%f  eleEta:%f  eleSCEta:%f  vtx:%d\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagElectrons->GetEntries(),fDiphotonEvent->eleIdMva,_mass,fDiphotonEvent->elePt,fDiphotonEvent->eleEta,fDiphotonEvent->eleSCEta,closestVtx);
+	  //return;
 	}
       }
     }
@@ -1047,6 +1052,7 @@ void PhotonTreeWriter::Process()
 	}
       }
     }
+    
     //printf("vbfbdt:%f\n",fDiphotonEvent->vbfbdt);
     if (fWriteDiphotonTree)
       hCiCTuple->Fill();  
@@ -1058,12 +1064,11 @@ void PhotonTreeWriter::Process()
 	hVtxTree->Fill();
       }
     }
-    
   }
-
+  
   if (!fWriteSingleTree)
     return;
-
+  
   for (UInt_t iph = 0; iph<egcol->GetEntries(); ++iph) {
     const Particle *p = 0;
     const Photon *ph = 0;
