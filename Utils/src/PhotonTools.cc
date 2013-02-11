@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.39 2012/10/26 19:23:04 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.40 2013/01/08 13:24:01 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -243,6 +243,7 @@ Double_t PhotonTools::ElectronVetoCiC(const Photon *p, const ElectronCol *els) {
   
   for (UInt_t i=0; i<els->GetEntries(); ++i) {
     const Electron *e = els->At(i);
+    //if (MathUtils::DeltaR(*e->SCluster(),*p->SCluster())<1) {
     if (e->SCluster()==p->SCluster() ) {
       //if( e->GsfTrk()->NExpectedHitsInner()==0 && e->GsfTrk()->Pt() > 2.5 ) {
       if( e->GsfTrk()->NExpectedHitsInner()==0 ) {
@@ -873,6 +874,48 @@ bool PhotonTools::PassVgamma2011Selection(const Photon* ph, double rho) {
     return false;
 
   return true;
+}
+
+
+Bool_t  PhotonTools::PassSinglePhotonPreselPFISONoEcal(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto, Bool_t invertElectronVeto) {
+
+
+  float ScEta=p->SCluster()->Eta();
+  float Et=p->Et();
+  float R9=p->R9();
+  float HoE=p->HadOverEm();
+  float CovIEtaIEta=p->CoviEtaiEta();
+  float HcalIsoDr03=p->HcalTowerSumEtDr03();
+  float TrkIsoHollowDr03=p->HollowConeTrkIsoDr03();
+
+  float NewHcalIso=HcalIsoDr03-0.005*Et;
+  float NewTrkIsoHollowDr03=TrkIsoHollowDr03-0.002*Et;
+
+
+  Bool_t IsBarrel=kFALSE;
+  Bool_t IsEndcap=kFALSE;
+  Bool_t PassEleVetoRaw = PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, bs);  
+  Bool_t PassEleVeto = (!applyElectronVeto && !invertElectronVeto) || (applyElectronVeto && !invertElectronVeto && PassEleVetoRaw) || (!applyElectronVeto && invertElectronVeto && !PassEleVetoRaw);
+  float ChargedIso_selvtx_DR002To0p02=IsolationTools::PFChargedIsolation(p,vtx, 0.2, 0.,fPFCands);
+  if(fabs(ScEta)<1.4442){IsBarrel=kTRUE;}
+  if(fabs(ScEta)>1.566 && fabs(ScEta)<2.5){IsEndcap=kTRUE;}
+  if((!IsBarrel) && (!IsEndcap)){
+    return kFALSE;
+  }
+  if(!PassEleVeto){
+    return kFALSE;
+  }
+  if(R9<=0.9){
+    if(HoE<0.075 && ((IsBarrel && CovIEtaIEta<0.014) || (IsEndcap && CovIEtaIEta<0.034)) && NewHcalIso<4 && NewTrkIsoHollowDr03<4 && ChargedIso_selvtx_DR002To0p02<4) {
+      return kTRUE;
+    }
+  }
+  if(R9>0.9){
+    if(((IsBarrel && HoE<0.082 && CovIEtaIEta<0.014) || (IsEndcap && HoE <0.075 && CovIEtaIEta<0.034)) && NewHcalIso<50 && NewTrkIsoHollowDr03<50 && ChargedIso_selvtx_DR002To0p02<4) {
+      return kTRUE;  
+    }
+  }
+  return kFALSE;
 }
 
 void PhotonTools::ScalePhotonShowerShapes(Photon* p, PhotonTools::ShowerShapeScales scale) {
