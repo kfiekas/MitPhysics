@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.52 2013/01/12 11:49:50 pharris Exp $
+// $Id: ElectronTools.cc,v 1.53 2013/01/23 15:13:50 sixie Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -420,8 +420,10 @@ Bool_t ElectronTools::PassConversionFilterPFAOD(const Electron *ele,
 Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, Double_t fD0Cut, Int_t nVertex) 
 {
   Bool_t d0cut = kFALSE;
-
+  
   Double_t d0_real = 1e30;
+  Double_t dz_real = 1e30;
+  Int_t closestVtx = 0;
 
   if( nVertex >= (int) vertices->GetEntries() )
     nVertex = vertices->GetEntries() - 1;
@@ -429,16 +431,21 @@ Bool_t ElectronTools::PassD0Cut(const Electron *ele, const VertexCol *vertices, 
   if(nVertex >= 0) d0_real = TMath::Abs(ele->GsfTrk()->D0Corrected(*vertices->At(nVertex)));
   else            {
     Double_t distVtx = 999.0;
-    Int_t closestVtx = 0;
     for(UInt_t nv=0; nv<vertices->GetEntries(); nv++){
       double dz = TMath::Abs(ele->GsfTrk()->DzCorrected(*vertices->At(nv)));
       if(dz < distVtx) {
 	distVtx    = dz;
         closestVtx = nv;
       }
+      d0_real = TMath::Abs(ele->GsfTrk()->D0Corrected(*vertices->At(nv)));
+      //printf("ming sync check nv:%d dz:%f d0:%f\n",nv,dz,d0_real);
     }
     d0_real = TMath::Abs(ele->GsfTrk()->D0Corrected(*vertices->At(closestVtx)));
+    dz_real = TMath::Abs(ele->GsfTrk()->DzCorrected(*vertices->At(closestVtx)));
   }
+  
+  //printf("ming sync check electonidmod vtxind:%d vtx_x:%f vtx_y:%f vtx_z:%f dz:%f d0:%f\n",closestVtx,vertices->At(closestVtx)->X(),vertices->At(closestVtx)->Y(),vertices->At(closestVtx)->Z(),dz_real,d0_real);
+  
   if(d0_real < fD0Cut) d0cut = kTRUE;
   
   return d0cut;

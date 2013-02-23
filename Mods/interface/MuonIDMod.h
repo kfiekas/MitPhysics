@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod.h,v 1.53 2012/07/12 17:04:56 fabstoec Exp $
+// $Id: MuonIDMod_debug.h,v 1.54 2013/01/07 22:15:38 mingyang Exp $
 //
 // MuonIDMod
 //
@@ -88,6 +88,7 @@ namespace mithep
         kWMuId,             //"WMuId"
         kZMuId,             //"ZMuId"
         kTight,             //"Tight"
+	kmuonPOG2012CutBasedIDTight,             //"muonPOG2012CutBasedIDTight"
         kLoose,             //"Loose"
         kWWMuIdV1,          //"WWMuIdV1"
         kWWMuIdV2,          //"WWMuIdV2"

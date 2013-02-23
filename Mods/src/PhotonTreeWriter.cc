@@ -925,9 +925,8 @@ void PhotonTreeWriter::Process()
       if ( fLeptonTagMuons->GetEntries() > 0 ) {
 	// need to have dR > 1 for with respect to both photons ***changed to 0.7 for 2012
 	if( (MathUtils::DeltaR(fLeptonTagMuons->At(0),phHard) >= 1.0) && 
-	    (MathUtils::DeltaR(fLeptonTagMuons->At(0),phSoft) >= 1.0) && 
-	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
-	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.)) ){
+	    (MathUtils::DeltaR(fLeptonTagMuons->At(0),phSoft) >= 1.0)  
+	    ){
 	  
 	  fDiphotonEvent->leptonTag = 2;
 	  
@@ -950,15 +949,17 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent-> muNMatch = fLeptonTagMuons->At(0)->NMatches();
 	}
       }
+      
       if ( fDiphotonEvent->leptonTag < 1 && fLeptonTagElectrons->GetEntries() > 0 ) {
 	if( (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard) >= 1) &&
 	    (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft) >= 1) &&
 	    (PhotonTools::ElectronVetoCiC(phHard,fLeptonTagElectrons) >= 1) &&
 	    (PhotonTools::ElectronVetoCiC(phSoft,fLeptonTagElectrons) >= 1) &&
 	    (TMath::Abs( (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
-	    (TMath::Abs( (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
-	    ((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
-	    ((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.))){
+	    (TMath::Abs( (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10)  
+	    //((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
+	    //((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.))){
+	    ){
 	  
 	  /*int ph1passeveto=1;
 	    int ph2passeveto=1;
@@ -1018,14 +1019,16 @@ void PhotonTreeWriter::Process()
       }
       
       if(false){
-	if(fDiphotonEvent->evt==101794856 || fDiphotonEvent->evt==528937923 || fDiphotonEvent->evt==483561562 || fDiphotonEvent->evt==1374972270 || fDiphotonEvent->evt==835731908){
-	//if(fDiphotonEvent->evt==369441614 || fDiphotonEvent->evt==79737729){
-	  printf("ming sync check 0:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numelectrons:%d  idmva:%f  mass:%f\n  elePt:%f  eleEta:%f  eleSCEta:%f  vtx:%d\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagElectrons->GetEntries(),fDiphotonEvent->eleIdMva,_mass,fDiphotonEvent->elePt,fDiphotonEvent->eleEta,fDiphotonEvent->eleSCEta,closestVtx);
+	if(fDiphotonEvent->evt==79737729 || fDiphotonEvent->evt== 871378986  || fDiphotonEvent->evt==528937923 || fDiphotonEvent->evt== 261543921){
+	  printf("ming sync check ele:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numelectrons:%d  idmva:%f  mass:%f\n  elePt:%f  eleEta:%f  eleSCEta:%f  vtx:%d\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagElectrons->GetEntries(),fDiphotonEvent->eleIdMva,_mass,fDiphotonEvent->elePt,fDiphotonEvent->eleEta,fDiphotonEvent->eleSCEta,closestVtx);
+	  //return;
+	}
+	if(fDiphotonEvent->evt==333643114 || fDiphotonEvent->evt==89022540 || fDiphotonEvent->evt==8983064 || fDiphotonEvent->evt==876316897 || fDiphotonEvent->evt==541603559  || fDiphotonEvent->evt==223740859) {
+	  printf("ming sync check muon:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numMuons:%d  mass:%f\n  muonPt:%f  muonEta:%f\n\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagMuons->GetEntries(),_mass,fDiphotonEvent->muonPt,fDiphotonEvent->muonEta);
 	  //return;
 	}
       }
     }
-    
     //vbf tag
     fDiphotonEvent->vbfTag = -1;
     fDiphotonEvent->vbfbdt = -99;
@@ -1127,7 +1130,7 @@ void PhotonTreeWriter::Process()
 
 
   return;
-}
+  }
 
 //--------------------------------------------------------------------------------------------------
 void PhotonTreeWriter::SlaveBegin()

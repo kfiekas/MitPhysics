@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.35 2012/10/23 23:32:59 bendavid Exp $
+// $Id: IsolationTools.cc,v 1.36 2012/10/26 19:23:04 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -539,12 +539,18 @@ Double_t IsolationTools::PFElectronIsolation2012LepTag(const Electron *ele, cons
     // New Isolation Calculations
     //************************************************************
     Double_t dr = MathUtils::DeltaR(ele->Mom(), pf->Mom());
-
     if (dr < 1.0) {
       Bool_t IsLeptonFootprint = kFALSE;
       //************************************************************
       // Lepton Footprint Removal
-      //************************************************************            
+      //************************************************************   
+      if(pf->PFType() == PFCandidate::eGamma){
+	for (UInt_t i=0; i<PFCands->GetEntries();i++) { 
+	  const PFCandidate *pf2 = PFCands->At(i);
+	  if(pf2->PFType()==PFCandidate::eElectron && pf->SCluster() == pf2->SCluster())IsLeptonFootprint = kTRUE;
+	}
+      }
+         
       for (UInt_t q=0; q < goodElectrons->GetEntries() ; ++q) {
 	//if pf candidate matches an electron passing ID cuts, then veto it
 	if(pf->GsfTrk() && goodElectrons->At(q)->GsfTrk() &&
@@ -581,7 +587,7 @@ Double_t IsolationTools::PFElectronIsolation2012LepTag(const Electron *ele, cons
 	   //************************************************************
 	   if (passVeto) {
 	     if (dr < dRMax) {
-	       if ( false ) printf("PFCand Pt = %f    eta= %f       phi= %f     , dr= %f    charge=%f   \n",pf->Pt(),pf->Eta(),pf->Phi(),dr, pf->Charge());
+	       if ( false ) printf("Charged PFCand Pt = %f    eta= %f       phi= %f     , dr= %f    charge=%f   \n",pf->Pt(),pf->Eta(),pf->Phi(),dr, pf->Charge());
 	       tmpChargedIso_DR += pf->Pt();
 	     } //pass dr
 	   } //pass veto	  
@@ -596,11 +602,17 @@ Double_t IsolationTools::PFElectronIsolation2012LepTag(const Electron *ele, cons
 	   //************************************************************
 	   
 	   if (passVeto) {
-	     if (dr < dRMax) tmpGammaIso_DR += pf->Pt();
+	     if(pf->HasSCluster()){
+	       if ( false ) printf("Gamma PFCand Pt = %f    eta= %f       phi= %f     , dr= %f   \n",pf->Pt(),pf->SCluster()->Eta(),pf->Phi(),dr);//ming
+	     }
+	     //if (dr < dRMax ) tmpGammaIso_DR += pf->Pt();
+	     //if (dr < dRMax && ((pf->HasSCluster() && pf->SCluster()!=ele->SCluster()) || !pf->HasSCluster())) tmpGammaIso_DR += pf->Pt();//ming
+	     if(dr < dRMax && !(ele->GsfTrk()->NExpectedHitsInner()>0 && pf->MvaGamma() > 0.99 && pf->HasSCluster() && ele->SCluster() == pf->SCluster())) tmpGammaIso_DR += pf->Pt();//ming:HZZ
 	   }
 	 }
 	 //NeutralHadron
 	 else {
+	   if ( false ) printf("NeutralHadron PFCand Pt = %f    eta= %f       phi= %f     , dr= %f   \n",pf->Pt(),pf->Eta(),pf->Phi(),dr);
            if (dr < dRMax) tmpNeutralHadronIso_DR += pf->Pt();
 	 }
       } //not lepton footprint
@@ -608,8 +620,10 @@ Double_t IsolationTools::PFElectronIsolation2012LepTag(const Electron *ele, cons
   } //loop over PF candidates
 
   Double_t Rho = 0;
-  if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();
-  
+  assert(PileupEnergyDensity);
+  //if (!(TMath::IsNaN(PileupEnergyDensity->At(0)->Rho()) || isinf(PileupEnergyDensity->At(0)->Rho()))) Rho = PileupEnergyDensity->At(0)->Rho();//ming
+  Rho = PileupEnergyDensity->At(0)->RhoKt6PFJets();//ming
+
   Double_t IsoVar_ChargedIso_DR = tmpChargedIso_DR/ele->Pt();
   Double_t IsoVar_NeutralIso_DR = tmpGammaIso_DR + tmpNeutralHadronIso_DR;
   // Careful here, we have kEleNeutralIso04 only for now            ****added kEleGammaIso03 and kEleNeutralHadronIso03 --heng june 16th 2012
@@ -623,8 +637,6 @@ Double_t IsolationTools::PFElectronIsolation2012LepTag(const Electron *ele, cons
 
   return (IsoVar_ChargedIso_DR + IsoVar_NeutralIso_DR);
 }
-
-
 
 //--------------------------------------------------------------------------------------------------
 Double_t IsolationTools::BetaM(const TrackCol *tracks, const Muon *p, const Vertex *vertex, 
@@ -711,10 +723,10 @@ Double_t IsolationTools::BetaMwithPUCorrection(const PFCandidateCol *PFNoPileUp,
   //     const PFCandidate *pfpu = PFPUCand->At(i);
   //     ptsumPU += pfpu->Pt();
   //   }
-  //  printf("ChHad    Gamma     Neu      PU    \n");
-  //  printf("%f       %f       %f        %f     \n",ptSumChHadnoPU,ptsumGamma,etsumNeuHad,ptsumPU);
+  //printf("ChHad    Gamma     Neu      PU    \n");
+  // printf("%f       %f       %f        %f     \n",ptSumChHadnoPU,ptsumGamma,etsumNeuHad,ptsumPU);
   ptSum=ptSumChHadnoPU+ TMath::Max(0.,ptsumGamma+etsumNeuHad - 0.5*ptsumPU);
-  //  printf("isolation is %f \n",ptSum);
+  //printf("ming muon check isolation is %f \n",ptSum);
   
   return ptSum;
 }

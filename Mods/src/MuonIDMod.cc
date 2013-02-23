@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.86 2012/12/05 19:06:07 ceballos Exp $
+// $Id: MuonIDMod.cc,v 1.87 2013/01/07 22:14:56 mingyang Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -233,6 +233,15 @@ void MuonIDMod::Process()
 		 mu->BestTrk()->NPixelHits() > 0 &&
 		 RChi2 < 10.0;
         break;
+      case kmuonPOG2012CutBasedIDTight:
+        idpass = mu->IsGlobalMuon() &&
+                 mu->IsPFMuon() &&
+                 mu->GlobalTrk()->RChi2() < 10 &&
+                 mu->NValidHits() != 0 && 
+                 mu->NMatches() > 1    &&
+	         mu->BestTrk()->NPixelHits() != 0 &&
+	         mu->NTrkLayersHit() > 5;
+       break;
       // 2012 WW analysis for 42x (there is no PFMuon link)
       case kWWMuIdV1:
         idpass = mu->BestTrk() != 0 &&
@@ -429,6 +438,7 @@ void MuonIDMod::Process()
 	  }
 	}
 	Double_t totalIso =  IsolationTools::BetaMwithPUCorrection(fPFNoPileUpCands, fPFPileUpCands, mu, 0.4);
+	
 	if (totalIso < (mu->Pt()*pfIsoCutValue) )
 	  isocut = kTRUE;
       }
@@ -576,6 +586,8 @@ void MuonIDMod::SlaveBegin()
     fMuIDType = kZMuId;
   else if (fMuonIDType.CompareTo("Tight") == 0) 
     fMuIDType = kTight;
+  else if (fMuonIDType.CompareTo("muonPOG2012CutBasedIDTight") == 0) 
+    fMuIDType = kmuonPOG2012CutBasedIDTight;
   else if (fMuonIDType.CompareTo("Loose") == 0) 
     fMuIDType = kLoose;
   else if (fMuonIDType.CompareTo("WWMuIdV1") == 0) 
