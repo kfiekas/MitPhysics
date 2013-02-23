@@ -52,7 +52,7 @@ void runHgg2013Moriond(const char *fileset    = "0000",
 		       const char *book       = "local/filefi/029",
 		       const char *catalogDir = "/home/cmsprod/catalog",
 		       const char *outputName = "hgg",
-		       int         nEvents    = 1000)
+		       int         nEvents    = -1)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -217,8 +217,8 @@ void runHgg2013Moriond(const char *fileset    = "0000",
   // SepPUMod->SetVertexName("OutVtxCiC");
   SepPUMod->SetPFNoPileUpName("pfnopileupcands");
   SepPUMod->SetPFPileUpName("pfpileupcands");
-  SepPUMod->SetCheckClosestZVertex(kFALSE);
-  
+  SepPUMod->SetCheckClosestZVertex(kTRUE);
+   
   //------------------------------------------------------------------------------------------------
   // select events with a good primary vertex
   //------------------------------------------------------------------------------------------------
@@ -274,13 +274,14 @@ void runHgg2013Moriond(const char *fileset    = "0000",
   eleIdMod -> SetNExpectedHitsInnerCut(1);   
   eleIdMod -> SetApplyConversionFilterType1(kTRUE);
   eleIdMod -> SetPVName(Names::gkPVBeamSpotBrn);   
-
+   
   MuonIDMod* muonIdMod = new MuonIDMod;
   // base kinematics
   muonIdMod -> SetPtMin(20.);
   muonIdMod -> SetEtaCut(2.4);
   // base ID
-  muonIdMod -> SetIDType("Tight");
+  //muonIdMod -> SetIDType("Tight");
+  muonIdMod -> SetIDType("muonPOG2012CutBasedIDTight");
   muonIdMod -> SetWhichVertex(-1); // this is a 'hack'.. but hopefully good enough...
   muonIdMod -> SetD0Cut(0.2);
   muonIdMod -> SetDZCut(0.5);
@@ -916,9 +917,27 @@ void runHgg2013Moriond(const char *fileset    = "0000",
     d = c->FindDataset(bookstr,dataset,fileset);
   else 
     d = c->FindDataset(bookstr,skimdataset.Data(),fileset);
+ 
   ana->AddDataset(d);
-  //ana->AddFile("/scratch/mingyang/root/DA2D6D6F-BB95-E111-9564-001A92971B7E.root");
-
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12a-pho-j13-v1/385B77DE-58D0-E111-B925-001E67396928.root");//79737729
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12b-dph-j13-v1/FE308E0A-23D2-E111-8B2D-00266CFAE7D0.root");//871378986
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/54E239DC-2725-E211-A52C-003048D373F6.root");//528937923
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/EC80B121-7E30-E211-BFFF-5404A640A63D.root");//261543921
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/66CE9443-472C-E211-B08F-001D09F2437B.root");//483561562
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/F03B81B2-0B29-E211-B28F-BCAEC518FF67.root");
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/A6EC91DD-CB39-E211-8897-BCAEC53296F8.root");
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12c-dph-pr-v2/64F7EAB0-CBEA-E111-B8AD-003048F117B6.root");
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12c-dph-pr-v2/0615B16F-ECDA-E111-A266-003048F117B6.root"); 
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12a-pho-j13-v1/385B77DE-58D0-E111-B925-001E67396928.root"); 
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12c-dph-pr-v2/068B257D-81D0-E111-A835-5404A63886B4.root");//369441614 
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/5443DBCB-562C-E211-8042-00237DDBE0E2.root");//333643114
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/B2698ACF-843A-E211-8D9E-001D09F244DE.root");//89022540
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12b-dph-j13-v1/1E050D78-6DD4-E111-81D2-00266CFAE8D0.root");//223740859
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12b-dph-j13-v1/2CD64E47-79D3-E111-90C5-00A0D1EE8E60.root");//541603559
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12b-dph-j13-v1/147EF338-B2D3-E111-B1A6-00266CF256CC.root");//8983064 
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/8843BD9F-DC3E-E211-9E2F-003048678110.root");//876316897 
+  //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12c-dph-pr-v2/CAA12077-F9F6-E111-8DF2-001D09F28D54.root");
+ 
   //------------------------------------------------------------------------------------------------
   // organize output
   //------------------------------------------------------------------------------------------------
