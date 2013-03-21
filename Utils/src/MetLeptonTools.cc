@@ -8,8 +8,10 @@ using namespace mithep;
 ClassImp(mithep::MetLeptonTools)
 
 MetLeptonTools::MetLeptonTools() { 
+  //fTauIsoMVA = new TauIsoMVA();
+  //fTauIsoMVA->Initialize(TString(getenv("CMSSW_BASE")+std::string("/src/MitPhysics/data/SXIsoMVA_BDTG.weights.xml")));
   fTauIsoMVA = new TauIsoMVA();
-  fTauIsoMVA->Initialize(TString(getenv("CMSSW_BASE")+std::string("/src/MitPhysics/data/SXIsoMVA_BDTG.weights.xml")));
+  fTauIsoMVA->InitializeGBR(TString(getenv("CMSSW_BASE")+std::string("/src/MitPhysics/data/gbrfTauIso_v2.root")));
 }
 
 bool MetLeptonTools::looseTauId(const PFTau *iTau,const PileupEnergyDensityCol* iPUEnergyDensity) {
@@ -17,9 +19,9 @@ bool MetLeptonTools::looseTauId(const PFTau *iTau,const PileupEnergyDensityCol* 
   if(fabs(iTau->Eta()) > fabs(2.3) )                                  return false;
   if(!iTau->DiscriminationByDecayModeFinding())                       return false;
   if(!iTau->DiscriminationByLooseElectronRejection())                 return false;
-  if(!iTau->DiscriminationByLooseMuonRejection())                     return false;
+  if(!iTau->LooseMuonRejection2())                                    return false;
   //if(!iTau->DiscriminationByVLooseIsolation()   )                   return false;
-  if(fTauIsoMVA->MVAValue(iTau,iPUEnergyDensity->At(0)->Rho()) < 0.7) return false;
+  if(fTauIsoMVA->MVAValue(iTau,iPUEnergyDensity->At(0)->Rho()) < 0.8) return false;
   return true;
 }
 bool MetLeptonTools::looseEleId(const Electron *iElectron,const PileupEnergyDensityCol* iPUEnergyDensity,
@@ -53,8 +55,8 @@ bool MetLeptonTools::looseEleId(const Electron *iElectron,const PileupEnergyDens
     double lP = iElectron->P();
     if(fabs(1./lE-1./lP)                                 > 0.05 )    return false;
   } else { 
-    if(fabs(iElectron->DeltaEtaSuperClusterTrackAtVtx()) > 0.007)   return false;
-    if(fabs(iElectron->DeltaPhiSuperClusterTrackAtVtx()) > 0.03)    return false;
+    if(fabs(iElectron->DeltaEtaSuperClusterTrackAtVtx()) > 0.009)   return false;
+    if(fabs(iElectron->DeltaPhiSuperClusterTrackAtVtx()) > 0.10)    return false;
     if(iElectron->CoviEtaiEta()                          > 0.03)    return false;
     if(iElectron->HadronicOverEm()                       > 0.10)    return false;
     double lE = iElectron->SCluster()->Energy();
@@ -75,9 +77,9 @@ bool MetLeptonTools::looseMuId(const Muon *iMu,const PFCandidateCol *iCands,cons
   if(iMu->TrackerTrk()->NHits()                 < 6  )          return false;
   if(iMu->NValidHits()                          < 1  )          return false;
   if(iMu->NMatches()                            < 1  )          return false;
-  //if(PFIsolation(iMu,iCands)                    > 0.2)          return false;
+  if(PFIsolation(iMu,iCands)                    > 0.3)          return false;
   //if(isoPV(iMu,iCands,iPV,iVertices)/iMu->Pt()   > 0.2)          return false;
-  if(iMu->IsoR03SumPt()/iMu->Pt()                > 0.2)         return false;
+  //if(iMu->IsoR03SumPt()/iMu->Pt()                > 0.2)         return false;
   return true;
 }
 bool MetLeptonTools::loosePhotonId(const Photon *iPhoton) { 
@@ -102,14 +104,18 @@ Float_t MetLeptonTools::PFIsolation(const ChargedParticle *iLep,const PFCandidat
   Double_t lPtSum = 0.;
   for(UInt_t i0 = 0; i0 < iCands->GetEntries(); i0++) {
     const PFCandidate *pCand = iCands->At(i0);
-    if(pCand->PFType() != PFCandidate::eHadron) continue;
-    Double_t pDR = MathUtils::DeltaR(iLep->Mom(), pCand->Mom());
-    if(pCand->Pt() < 0.5) continue;
-    if(pDR         < 0.015 && fabs(iLep->Eta()) > 1.56)   continue;
-    if(pDR         > 0.3)                                 continue;
+     Double_t pDR = MathUtils::DeltaR(iLep->Mom(), pCand->Mom());
+     if(pDR < 0.0001) continue;
+     if(pDR < 0.01 && (pCand->PFType() != PFCandidate::eNeutralHadron || pCand->PFType() != PFCandidate::eGamma)) continue;
+     if(pCand->Pt() < 0.5 && (pCand->PFType() != PFCandidate::eNeutralHadron || pCand->PFType() != PFCandidate::eGamma)) continue;
+     if(pCand->PFType() != PFCandidate::eNeutralHadron && pCand->PFType() != PFCandidate::eGamma && pCand->PFType() != PFCandidate::eHadron ) continue;
+     //if(pCand->PFType() != PFCandidate::eHadron) continue;
+     //if(pCand->Pt() < 0.5) continue;
+     //if(pDR         < 0.0001 && fabs(iLep->Eta()) > 1.56)   continue;
+     if(pDR         > 0.3)                                 continue;
     lPtSum += pCand->Pt();
   }
-  return lPtSum;
+  return lPtSum/iLep->Pt();
 }
 Float_t MetLeptonTools::isoPV(const ChargedParticle *iLep,const PFCandidateCol *iCands,
 			      const Vertex *iPV,const VertexCol *iVertices,bool iEle) {

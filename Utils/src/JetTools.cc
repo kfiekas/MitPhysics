@@ -646,3 +646,67 @@ double JetTools::genFrac(const PFJet *iJet) {
   return lTrueFrac;
 }
 */
+/*
+double* JetTools::subStructure(const PFJet *iJet) { 
+  for(UInt_t i0 = 0; i0 < iJet->NPFCands(); i0++) { 
+    const PFCandidate *pCand = iJet->PFCand(i0);
+    //Fast Jet
+    FJparticles.push_back( fastjet::PseudoJet( pCand->Px(),pCand->Py(),pCand->Pz(),pCand->Energy() ) );
+  }
+  //ReCluster
+  fastjet::JetDefinition jetDef(fastjet::antikt_algorithm, 0.5);
+  int activeAreaRepeats = 1;
+  double ghostArea = 0.01;
+  double ghostEtaMax = 5.0;
+  fastjet::ActiveAreaSpec fjActiveArea(ghostEtaMax,activeAreaRepeats,ghostArea);
+  fjActiveArea.set_fj2_placement(true);
+
+  fastjet::AreaDefinition fjAreaDefinition(fastjet::active_area_explicit_ghosts, fjActiveArea );
+  fastjet::ClusterSequenceArea thisClustering(FJparticles, jetDef, fjAreaDefinition);
+  std::vector<fastjet::PseudoJet> out_jets = sorted_by_pt(thisClustering.inclusive_jets(0.0));
+  //std::cout << "===>  Size " << FJparticles.size() << " -- " << out_jets.size() << std::endl;
+  // Adding substructure
+  // define groomers                                                                                                                                                           
+  fastjet::Filter trimmer( fastjet::Filter(fastjet::JetDefinition(fastjet::kt_algorithm, 0.2), fastjet::SelectorPtFractionMin(0.03)));
+  fastjet::Filter filter( fastjet::Filter(fastjet::JetDefinition(fastjet::cambridge_algorithm, 0.3), fastjet::SelectorNHardest(3)));
+  fastjet::Pruner pruner(fastjet::cambridge_algorithm, 0.1, 0.5);
+
+  std::vector<fastjet::Transformer const *> transformers;
+  transformers.push_back(&trimmer);
+  transformers.push_back(&filter);
+  transformers.push_back(&pruner);
+
+  // define n-subjettiness                                                                                                                                                   
+  NsubParameters paraNsub = NsubParameters(1.0, 0.8);
+  Nsubjettiness routine(nsub_kt_axes, paraNsub);
+  for (unsigned i0 = 0; i0 < out_jets.size(); i0++) {
+    int i1 = -1;
+    if(out_jets.at(i0).pt()  < 1.) continue; 
+    //std::cout << " ---> " << out_jets.at(i0).pt() << std::endl;
+    for ( std::vector<fastjet::Transformer const *>::const_iterator itransf = transformers.begin(), itransfEnd = transformers.end(); itransf != itransfEnd; ++itransf ) {
+      i1++;
+      fastjet::PseudoJet transformedJet = out_jets.at(i0);
+      transformedJet = (**itransf)(transformedJet);
+      TLorentzVector jetcorr(transformedJet.px() * jec,transformedJet.py() * jec,transformedJet.pz() * jec,transformedJet.e() * jec);
+      if(i1 == 0) internalId_.trimmass_   = jetcorr.M();
+      if(i1 == 0) internalId_.trimarea_   = transformedJet.area();
+      if(i1 == 1) internalId_.filtermass_ = jetcorr.M();
+      if(i1 == 1) internalId_.filterarea_ = transformedJet.area();
+      if(i1 == 2) internalId_.prunedmass_ = jetcorr.M();
+      if(i1 == 2) internalId_.prunedarea_ = transformedJet.area();
+      if (transformedJet.constituents().size() > 1 && i1 == 2 ) {
+	std::vector<fastjet::PseudoJet> subjets = transformedJet.associated_cluster_sequence()->exclusive_subjets(transformedJet,2);
+	internalId_.nsubjets_     = subjets.size();
+	internalId_.massdrop_     = subjets.at(0).m()/transformedJet.m();
+	internalId_.massdropcorr_ = subjets.at(0).m()/internalId_.prunedmass_;
+      }
+    }
+    internalId_.tau1_ = routine.getTau(1, out_jets.at(i0).constituents());
+    internalId_.tau2_ = routine.getTau(2, out_jets.at(i0).constituents());
+    internalId_.tau3_ = routine.getTau(3, out_jets.at(i0).constituents());
+    internalId_.tau4_ = routine.getTau(4, out_jets.at(i0).constituents());
+    internalId_.tau2tau1_ = internalId_.tau2_/internalId_.tau1_;
+  }
+ }
+}
+*/
