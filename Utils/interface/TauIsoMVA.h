@@ -15,6 +15,8 @@
 #include "CondFormats/EgammaObjects/interface/GBRForest.h"
 
 class TRandom3;
+class GBRForest;
+
 namespace TMVA {
   class Reader;
 }
