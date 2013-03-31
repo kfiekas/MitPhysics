@@ -193,7 +193,7 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
     fReader->AddVariable( "betaStar" , &fBetaStar  );
     fReader->AddVariable( "nCharged" , &fNCharged  );
     fReader->AddVariable( "nNeutrals", &fNNeutrals );
-    fReader->AddVariable( "dR2Mean"  , &fDRMean    );
+    fReader->AddVariable( "dR2Mean"  , &fDR2Mean   );
     fReader->AddVariable( "ptD"      , &fPtD       );
     fReader->AddVariable( "frac01"   , &fFrac01    );
     fReader->AddVariable( "frac02"   , &fFrac02    );
@@ -214,7 +214,7 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
     fReader->AddVariable( "betaStar" , &fBetaStar  );
     fReader->AddVariable( "nCharged" , &fNCharged  );
     fReader->AddVariable( "nNeutrals", &fNNeutrals );
-    fReader->AddVariable( "dR2Mean"  , &fDRMean    );
+    fReader->AddVariable( "dR2Mean"  , &fDR2Mean   );
     fReader->AddVariable( "ptD"      , &fPtD       );
     fReader->AddVariable( "frac01"   , &fFrac01    );
     fReader->AddVariable( "frac02"   , &fFrac02    );
@@ -296,7 +296,6 @@ Double_t JetIDMVA::MVAValue(
   Double_t lMVA = -9999;  
   if(iJPt1 < 10) lMVA = fLowPtReader->EvaluateMVA( fLowPtMethodName  );
   if(iJPt1 > 10) lMVA = fReader->EvaluateMVA( fHighPtMethodName );
-
   return lMVA;
 }
 //--------------------------------------------------------------------------------------------------
@@ -423,6 +422,7 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex,const Vertex
   double lMVA = 0;
   if(fJPt1 < 10) lMVA = fLowPtReader->EvaluateMVA( fLowPtMethodName  );
   if(fJPt1 > 10) lMVA = fReader->EvaluateMVA( fHighPtMethodName );
+  printDebug = kTRUE;
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
 	      << fNVtx      << " "
@@ -445,9 +445,9 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex,const Vertex
 	      << fDR2Mean    
               << " === : === "
               << lMVA << " "    
-              << std::endl;
+              << " -----> raw pt " << iJet->Pt() << std::endl;
   }
-
+  //std::cout << " === " << iJet->Pt() << " -- " << iJet->Eta() << " -- "  << fPtD << " -- " << lMVA << std::endl;
   return lMVA;
 }
 Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex, const VertexCol *iVertices,//Vertex here is the PV
