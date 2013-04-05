@@ -422,7 +422,6 @@ Double_t JetIDMVA::MVAValue(const PFJet *iJet,const Vertex *iVertex,const Vertex
   double lMVA = 0;
   if(fJPt1 < 10) lMVA = fLowPtReader->EvaluateMVA( fLowPtMethodName  );
   if(fJPt1 > 10) lMVA = fReader->EvaluateMVA( fHighPtMethodName );
-  printDebug = kTRUE;
   if (printDebug == kTRUE) {
     std::cout << "Debug Jet MVA: "
 	      << fNVtx      << " "
