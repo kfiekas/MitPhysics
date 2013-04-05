@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.53 2013/01/23 15:13:50 sixie Exp $
+// $Id: ElectronTools.cc,v 1.54 2013/02/23 14:52:59 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -369,6 +369,7 @@ Bool_t ElectronTools::PassConversionFilterPFAOD(const Electron *ele,
   Bool_t isGoodConversion = kFALSE;
 
   for (UInt_t ifc=0; ifc<conversions->GetEntries(); ifc++) {
+    if(!(conversions->At(ifc)->Prob() > probMin) && (!requireArbitratedMerged || conversions->At(ifc)->Quality().Quality(ConversionQuality::arbitratedMerged)) && (conversions->At(ifc)->LxyCorrected((BaseVertex*)vtx) > lxyMin)) continue;
     Bool_t ConversionMatchFound = kFALSE;
     for (UInt_t d=0; d<conversions->At(ifc)->NDaughters(); d++) {
       const ChargedParticle *pParticle = 0;
