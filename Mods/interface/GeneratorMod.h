@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.42 2011/10/29 14:12:03 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.43 2012/11/23 12:29:24 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -52,6 +52,7 @@ namespace mithep
       void                 SetAllowWWEvents(Bool_t b)	       { fAllowWWEvents    = b; }	 
       void                 SetAllowWZEvents(Bool_t b)	       { fAllowWZEvents    = b; }	 
       void                 SetAllowZZEvents(Bool_t b)	       { fAllowZZEvents    = b; }	       
+      void                 SetFilterBTEvents(Bool_t b)	       { fFilterBTEvents   = b; }	       
       void                 SetCopyArrays(Bool_t b)	       { fCopyArrays       = b; }	 
       void                 SetEtaLeptonMax(Double_t x)         { fEtaLeptonMax     = x; }     
       void                 SetEtaPhotonMax(Double_t x)         { fEtaPhotonMax     = x; }	  
@@ -110,6 +111,7 @@ namespace mithep
       Bool_t               fAllowWWEvents;            //=true then allow WW events  (def=0)
       Bool_t               fAllowWZEvents;            //=true then allow WZ events  (def=0)
       Bool_t               fAllowZZEvents;            //=true then allow ZZ events  (def=0)
+      Bool_t               fFilterBTEvents;           //=true then filter B and T events  (def=0)
       const MCParticleCol *fParticles;	        //!MCParticle branch
       TH1D                *hDGenPtMin;          //!histo for Pt min for leptons from W/Z
       TH1D                *hDGenMet[10];        //!histos for gen MET

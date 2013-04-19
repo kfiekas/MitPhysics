@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.73 2012/11/22 06:27:40 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.74 2012/11/23 12:29:25 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -46,6 +46,7 @@ GeneratorMod::GeneratorMod(const char *name, const char *title) :
   fAllowWWEvents(kTRUE),
   fAllowWZEvents(kFALSE),
   fAllowZZEvents(kFALSE),
+  fFilterBTEvents(kFALSE),
   fParticles(0)
 {
   // Constructor
@@ -234,10 +235,7 @@ void GeneratorMod::Process()
 
       // quarks from W/Z decays or top particles
       else if (p->IsQuark() && p->HasMother()) {
-	if (p->Mother()->Is(MCParticle::kZ) || p->Mother()->Is(MCParticle::kW) ||
-            p->Is(MCParticle::kTop)         || p->Mother()->Is(MCParticle::kTop)) {
-          GenQuarks->Add(p);
-	}
+        GenQuarks->Add(p);
       }
 
       // qqH, information about the forward jets
@@ -1464,6 +1462,7 @@ void GeneratorMod::Process()
     delete neutrinoTotal;
     
     // quarks
+    int nBQuarks=0; int nTQuarks=0;
     hDGenQuarks[0]->Fill(GenQuarks->GetEntries());
     for(UInt_t i=0; i<GenQuarks->GetEntries(); i++) {
       for(UInt_t j=i+1; j<GenQuarks->GetEntries(); j++) {
@@ -1480,8 +1479,10 @@ void GeneratorMod::Process()
 	delete dijet;
       }
       // b quark info
-      if    (GenQuarks->At(i)->AbsPdgId() == 5) {
-        hDGenQuarks[5]->Fill(GenQuarks->At(i)->Pt());
+      if    (GenQuarks->At(i)->AbsPdgId() == MCParticle::kBottom && !GenQuarks->At(i)->FindMother(MCParticle::kTop) && 
+                                                                    !GenQuarks->At(i)->FindMother(MCParticle::kBottom)) {
+        nBQuarks++;
+	hDGenQuarks[5]->Fill(GenQuarks->At(i)->Pt());
         hDGenQuarks[6]->Fill(GenQuarks->At(i)->Eta());      
         hDGenQuarks[7]->Fill(GenQuarks->At(i)->Phi());      
         if (GenLeptons->GetEntries() >= 2 && 
@@ -1496,7 +1497,8 @@ void GeneratorMod::Process()
 	}
       }
       // t quark info
-      else if (GenQuarks->At(i)->AbsPdgId() == 6) {
+      else if (GenQuarks->At(i)->AbsPdgId() == MCParticle::kTop && !GenQuarks->At(i)->FindMother(MCParticle::kTop)) {
+        nTQuarks++;
         hDGenQuarks[11]->Fill(GenQuarks->At(i)->Pt());
         hDGenQuarks[12]->Fill(GenQuarks->At(i)->Eta());      
         hDGenQuarks[13]->Fill(GenQuarks->At(i)->Phi());      
@@ -1508,6 +1510,9 @@ void GeneratorMod::Process()
         hDGenQuarks[16]->Fill(GenQuarks->At(i)->Phi());      
       }
     }
+
+    // filter events with either b or top quarks
+    if(fFilterBTEvents == kTRUE && (nBQuarks > 0 || nTQuarks > 0)) SkipEvent();
 
     // wbf
     if (GenqqHs->GetEntries() == 2) {
