@@ -31,7 +31,7 @@ full_53x_wp  = cms.PSet(
                 )
 
 full_53x_chs_wp  = cms.PSet(
-                #4 Eta Categories  0-2.5 2.5-2.75 2.75-3.0 3.0-5.0
+    #4 Eta Categories  0-2.5 2.5-2.75 2.75-3.0 3.0-5.0
 
                 #Tight Id
                 Pt010_Tight    = cms.vdouble(-0.83,-0.81,-0.74,-0.81),
@@ -49,12 +49,11 @@ full_53x_chs_wp  = cms.PSet(
                 Pt010_Loose    = cms.vdouble(-0.95,-0.96,-0.94,-0.95),
                 Pt1020_Loose   = cms.vdouble(-0.95,-0.96,-0.94,-0.95),
                 Pt2030_Loose   = cms.vdouble(-0.15,-0.26,-0.16,-0.16),
-                Pt3050_Loose   = cms.vdouble(-0.15,-0.26,-0.16,-0.16),
+                Pt3050_Loose   = cms.vdouble(-0.15,-0.26,-0.16,-0.16)
                 )
 
 met_53x_wp  = cms.PSet(
-    
-                                    #Tight Id
+                                        #Tight Id
                                     Pt010_Tight    = cms.vdouble(-2, -2, -2, -2, -2),
                                     Pt1020_Tight   = cms.vdouble(-2, -2, -2, -2, -2),
                                     Pt2030_Tight   = cms.vdouble(-2, -2, -2, -2, -2),
