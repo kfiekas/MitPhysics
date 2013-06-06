@@ -111,17 +111,17 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCSmear_EEhighEta_hR9         (0.),
   fMCSmear_EEhighEta_lR9         (0.),
 
-  fMCSmearMVA_EBlowEta_hR9central   (0.),
-  fMCSmearMVA_EBlowEta_hR9gap       (0.),
-  fMCSmearMVA_EBlowEta_lR9          (0.),
-  fMCSmearMVA_EBlowEta_lR9central   (0.),
-  fMCSmearMVA_EBlowEta_lR9gap       (0.),
-  fMCSmearMVA_EBhighEta_hR9         (0.),
-  fMCSmearMVA_EBhighEta_lR9         (0.),
-  fMCSmearMVA_EElowEta_hR9          (0.),
-  fMCSmearMVA_EElowEta_lR9          (0.),
-  fMCSmearMVA_EEhighEta_hR9         (0.),
-  fMCSmearMVA_EEhighEta_lR9         (0.),
+  fMCSmearMVA_EBlowEta_hR9central(0.),
+  fMCSmearMVA_EBlowEta_hR9gap    (0.),
+  fMCSmearMVA_EBlowEta_lR9       (0.),
+  fMCSmearMVA_EBlowEta_lR9central(0.),
+  fMCSmearMVA_EBlowEta_lR9gap    (0.),
+  fMCSmearMVA_EBhighEta_hR9      (0.),
+  fMCSmearMVA_EBhighEta_lR9      (0.),
+  fMCSmearMVA_EElowEta_hR9       (0.),
+  fMCSmearMVA_EElowEta_lR9       (0.),
+  fMCSmearMVA_EEhighEta_hR9      (0.),
+  fMCSmearMVA_EEhighEta_lR9      (0.),
 
 
   // ---------------------------------------
@@ -185,13 +185,13 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   
   // ---------------------------------------------------------------------------
   fApplyLeptonTag                (kFALSE),
-  fLeptonTagElectronsName ("HggLeptonTagElectrons"),
-  fLeptonTagMuonsName     ("HggLeptonTagMuons"),
-  fLeptonTagElectrons     (0),
-  fLeptonTagMuons         (0),
+  fLeptonTagElectronsName        ("HggLeptonTagElectrons"),
+  fLeptonTagMuonsName            ("HggLeptonTagMuons"),
+  fLeptonTagElectrons            (0),
+  fLeptonTagMuons                (0),
   
   // ------------------------------------------------------
-  f2012HCP                (kFALSE)
+  f2012HCP                       (kFALSE)
   
 {
   // Constructor.
@@ -1054,11 +1054,12 @@ void PhotonPairSelector::SlaveBegin()
   ReqEventObject(fPileUpDenName,      fPileUpDen,    true);
   ReqEventObject(fPVName,             fPV,           fPVFromBranch);
   ReqEventObject(fConversionName,     fConversions,  true);
-  if (fUseSingleLegConversions) ReqEventObject(fPFConversionName,     fPFConversions,  true);
+  if (fUseSingleLegConversions)
+    ReqEventObject(fPFConversionName, fPFConversions,true);
   ReqEventObject(fBeamspotName,       fBeamspot,     true);
   ReqEventObject(fPFCandName,         fPFCands,      true);
-  ReqEventObject(fJetsName,         fJets,      false);  
-  ReqEventObject(fPFMetName,         fPFMet,      true);    
+  ReqEventObject(fJetsName,           fJets,         false);  
+  ReqEventObject(fPFMetName,          fPFMet,        true);    
   if (!fIsData) {
     //ReqBranch(fPileUpName,            fPileUp);
     ReqBranch(fMCParticleName,        fMCParticles);
