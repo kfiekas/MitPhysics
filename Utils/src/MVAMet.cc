@@ -124,13 +124,13 @@ void MVAMet::Initialize(TString iJetLowPtFile,
 			TString iPhiWeights, 
 			TString iCovU1Weights,
                         TString iCovU2Weights,
-			JetIDMVA::MVAType     iType) { 
+			JetIDMVA::MVAType     iType,bool iOld42) { 
   
   fIsInitialized = kTRUE;
   fType          = iType;
   f42            = iU1Weights.Contains("42");
-
-  fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile,f42,fType);
+  fOld42         = iOld42;
+  fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile,fOld42,fType);
   if(f42) fRecoilTools->fJetIDMVA->fJetPtMin = 1.;
 
   ROOT::Cintex::Cintex::Enable();   
@@ -273,7 +273,7 @@ Double_t MVAMet::evaluateCovU1() {
   fCovVals[24] =  fUPhiMVA ;
   fCovVals[25] =  fUMVA    ;
   double lCovU1 = fCovU1Reader->GetResponse(fCovVals);
-  if(!f42) lCovU1 = lCovU1*lCovU1*fUMVA*fUMVA; 
+  if(!fOld42) lCovU1 = lCovU1*lCovU1*fUMVA*fUMVA; 
   return lCovU1;
 }
 //--------------------------------------------------------------------------------------------------
@@ -305,7 +305,7 @@ Double_t MVAMet::evaluateCovU2() {
   fCovVals[24] =  fUPhiMVA ;
   fCovVals[25] =  fUMVA    ;
   double lCovU2 = fCovU2Reader->GetResponse(fCovVals);
-  if(!f42) lCovU2 = lCovU2*lCovU2*fUMVA*fUMVA; 
+  if(!fOld42) lCovU2 = lCovU2*lCovU2*fUMVA*fUMVA; 
   return lCovU2;
 }
 //-------------------------------------------------------------------------------------------------- 
