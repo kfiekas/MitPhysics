@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.40 2013/01/08 13:24:01 fabstoec Exp $
+// $Id: PhotonTools.cc,v 1.41 2013/02/11 13:26:28 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -686,6 +686,106 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
   return false;
 }
 
+//for mono photon: cic photon id with conversion safe eleveto
+bool PhotonTools::PassCiCPFIsoSelectionWithEleVeto(const Photon* ph, 
+						   const ElectronCol *els,
+						   const DecayParticleCol *conversions, const BaseVertex *bs,
+						   const Vertex* vtx, 
+						   const PFCandidateCol*    pfCol,
+						   const VertexCol*   vtxCol,
+						   double rho, double ptmin,
+						   Bool_t applyElectronVeto, Bool_t invertElectronVeto,
+						   std::vector<double>* kin  // store variables for debugging...
+						   ) {
+
+  Bool_t PassEleVetoRaw = PhotonTools::PassElectronVetoConvRecovery(ph, els, conversions, bs);  
+  Bool_t PassEleVeto = (!applyElectronVeto && !invertElectronVeto) || (applyElectronVeto && !invertElectronVeto && PassEleVetoRaw) || (!applyElectronVeto && invertElectronVeto && !PassEleVetoRaw);
+  if(!PassEleVeto){
+    return false;
+  }
+ 
+  // these values are taken from the H2GGlobe code... (actually from Marco/s mail)
+  float cic4_allcuts_temp_sublead[] = { 
+    6.0,         4.7,         5.6,         3.6,
+    10.0,        6.5,         5.6,         4.4,
+    3.8,         2.5,         3.1,         2.2,
+    0.0108,      0.0102,      0.028,       0.028,
+    0.124,       0.092,       0.142,       0.063,
+    0.94,        0.28,        0.94,        0.24 };  
+  
+  // cut on Et instead of Pt???    
+  Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
+      
+  
+  // compute all relevant observables first
+  double ecalIso3 = IsolationTools::PFGammaIsolation(ph, 0.3, 0.0, pfCol);
+  double ecalIso4 = IsolationTools::PFGammaIsolation(ph, 0.4, 0.0, pfCol);
+
+  unsigned int wVtxInd = 0;
+
+  double trackIsoSel03 = IsolationTools::PFChargedIsolation(ph, vtx, 0.3, 0.0, pfCol);
+
+  // track iso worst vtx
+  double trackIsoWorst04 = IsolationTools::PFChargedIsolation(ph, vtx, 0.4, 0.00, pfCol, &wVtxInd, vtxCol);
+  
+  double combIso1 = ecalIso3+trackIsoSel03   + 2.5 - 0.09*rho;
+  double combIso2 = ecalIso4+trackIsoWorst04 + 2.5 - 0.23*rho;
+  
+  double tIso1 = (combIso1) *50./ph->Et();
+  double tIso2 = (combIso2) *50./(ph->MomVtx(vtxCol->At(wVtxInd)->Position()).Pt());
+  //double tIso2 = (combIso2) *50./ph->Et();
+  double tIso3 = (trackIsoSel03)*50./ph->Et();
+  
+  double covIEtaIEta  =ph->CoviEtaiEta();
+  double HoE = ph->HadOverEm();
+  
+  double R9 = ph->R9();
+  
+  // check which category it is ...
+  int _tCat = 1;
+  if ( !isbarrel ) _tCat = 3;
+  if ( R9 < 0.94 ) _tCat++;
+  
+  float passCuts = 1.;
+
+  if( kin ) {
+    kin->resize(0);
+
+    kin->push_back(tIso1);
+    kin->push_back(tIso2);
+    kin->push_back(tIso3);
+    kin->push_back(covIEtaIEta);
+    kin->push_back(HoE);
+    kin->push_back(R9);
+
+    kin->push_back( (double) wVtxInd );
+    kin->push_back( ecalIso3 );
+    kin->push_back( ecalIso4 );
+
+    kin->push_back( trackIsoSel03 );
+    kin->push_back( trackIsoWorst04 );
+
+    kin->push_back( combIso1 );
+    kin->push_back( combIso2 );
+  }
+
+
+  if ( ph->Pt()     <= ptmin      ) passCuts = -1.;
+
+  // not needed anymore, do in pre-selection...
+  //if (  ph->SCluster()->AbsEta()>=2.5 || (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566)) passCuts = -1.;
+  
+  if(   ! (    tIso1                          < cic4_allcuts_temp_sublead[_tCat-1+0*4]
+               && tIso2                       < cic4_allcuts_temp_sublead[_tCat-1+1*4]
+               && tIso3                       < cic4_allcuts_temp_sublead[_tCat-1+2*4]
+               && covIEtaIEta                 < cic4_allcuts_temp_sublead[_tCat-1+3*4]
+               && HoE                         < cic4_allcuts_temp_sublead[_tCat-1+4*4]
+               && R9                          > cic4_allcuts_temp_sublead[_tCat-1+5*4] ) )   passCuts = -1.;
+  
+
+  if(passCuts > 0.) return true;
+  return false;
+}
 
 
 
@@ -912,6 +1012,47 @@ Bool_t  PhotonTools::PassSinglePhotonPreselPFISONoEcal(const Photon *p,const Ele
   }
   if(R9>0.9){
     if(((IsBarrel && HoE<0.082 && CovIEtaIEta<0.014) || (IsEndcap && HoE <0.075 && CovIEtaIEta<0.034)) && NewHcalIso<50 && NewTrkIsoHollowDr03<50 && ChargedIso_selvtx_DR002To0p02<4) {
+      return kTRUE;  
+    }
+  }
+  return kFALSE;
+}
+
+Bool_t  PhotonTools::PassSinglePhotonPreselPFISONoEcalNoPFChargedIso(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto, Bool_t invertElectronVeto) {
+
+
+  float ScEta=p->SCluster()->Eta();
+  float Et=p->Et();
+  float R9=p->R9();
+  float HoE=p->HadOverEm();
+  float CovIEtaIEta=p->CoviEtaiEta();
+  float HcalIsoDr03=p->HcalTowerSumEtDr03();
+  float TrkIsoHollowDr03=p->HollowConeTrkIsoDr03();
+
+  float NewHcalIso=HcalIsoDr03-0.005*Et;
+  float NewTrkIsoHollowDr03=TrkIsoHollowDr03-0.002*Et;
+
+
+  Bool_t IsBarrel=kFALSE;
+  Bool_t IsEndcap=kFALSE;
+  Bool_t PassEleVetoRaw = PhotonTools::PassElectronVetoConvRecovery(p, els, conversions, bs);  
+  Bool_t PassEleVeto = (!applyElectronVeto && !invertElectronVeto) || (applyElectronVeto && !invertElectronVeto && PassEleVetoRaw) || (!applyElectronVeto && invertElectronVeto && !PassEleVetoRaw);
+ 
+  if(fabs(ScEta)<1.4442){IsBarrel=kTRUE;}
+  if(fabs(ScEta)>1.566 && fabs(ScEta)<2.5){IsEndcap=kTRUE;}
+  if((!IsBarrel) && (!IsEndcap)){
+    return kFALSE;
+  }
+  if(!PassEleVeto){
+    return kFALSE;
+  }
+  if(R9<=0.9){
+    if(HoE<0.075 && ((IsBarrel && CovIEtaIEta<0.014) || (IsEndcap && CovIEtaIEta<0.034)) && NewHcalIso<4 && NewTrkIsoHollowDr03<4) {
+      return kTRUE;
+    }
+  }
+  if(R9>0.9){
+    if(((IsBarrel && HoE<0.082 && CovIEtaIEta<0.014) || (IsEndcap && HoE <0.075 && CovIEtaIEta<0.034)) && NewHcalIso<50 && NewTrkIsoHollowDr03<50) {
       return kTRUE;  
     }
   }

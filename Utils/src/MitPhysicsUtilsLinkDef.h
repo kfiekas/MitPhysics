@@ -1,4 +1,4 @@
-// $Id: MitPhysicsUtilsLinkDef.h,v 1.27 2012/11/14 20:06:32 sixie Exp $
+// $Id: MitPhysicsUtilsLinkDef.h,v 1.28 2012/12/07 14:12:47 mhchan Exp $
 
 #ifndef MITPHYSICS_UTILS_LINKDEF_H
 #define MITPHYSICS_UTILS_LINKDEF_H
@@ -6,10 +6,14 @@
 #include "MitPhysics/Utils/interface/DiTauSystem.h"
 #include "MitPhysics/Utils/interface/GeneratorTools.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
+#include "MitPhysics/Utils/interface/IsolationTools_debug.h"
 #include "MitPhysics/Utils/interface/MatchingTools.h"
 #include "MitPhysics/Utils/interface/MuonTools.h"
 #include "MitPhysics/Utils/interface/MetTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
+#include "MitPhysics/Utils/interface/MuonTools_debug.h"
+#include "MitPhysics/Utils/interface/MetTools_debug.h"
+#include "MitPhysics/Utils/interface/ElectronTools_debug.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/RecoilTools.h"
 #include "MitPhysics/Utils/interface/JetTools.h"
@@ -44,21 +48,32 @@
 #pragma link C++ class mithep::DiTauSystem;
 #pragma link C++ class mithep::GeneratorTools;
 #pragma link C++ class mithep::IsolationTools;
+#pragma link C++ class mithep::IsolationTools_debug;
 #pragma link C++ class mithep::MatchingTools;
 #pragma link C++ class mithep::MuonTools;
 #pragma link C++ enum mithep::MuonTools::EMuonEffectiveAreaType;
 #pragma link C++ enum mithep::MuonTools::EMuonEffectiveAreaTarget; 
 #pragma link C++ class mithep::MetTools;
 #pragma link C++ class mithep::ElectronTools;
+#pragma link C++ class mithep::MuonTools_debug;
+#pragma link C++ enum mithep::MuonTools_debug::EMuonEffectiveAreaType;
+#pragma link C++ enum mithep::MuonTools_debug::EMuonEffectiveAreaTarget; 
+#pragma link C++ class mithep::MetTools_debug;
+#pragma link C++ class mithep::ElectronTools_debug;
 #pragma link C++ class mithep::PhotonTools;
 #pragma link C++ class mithep::JetTools;
 #pragma link C++ class mithep::MetLeptonTools;
 #pragma link C++ class mithep::MetTools;
+#pragma link C++ class mithep::MetTools_debug;
 #pragma link C++ class mithep::RecoilTools;
 #pragma link C++ enum mithep::ElectronTools::EElIdType;
 #pragma link C++ enum mithep::ElectronTools::EElIsoType;
 #pragma link C++ enum mithep::ElectronTools::EElectronEffectiveAreaType;
 #pragma link C++ enum mithep::ElectronTools::EElectronEffectiveAreaTarget;
+#pragma link C++ enum mithep::ElectronTools_debug::EElIdType;
+#pragma link C++ enum mithep::ElectronTools_debug::EElIsoType;
+#pragma link C++ enum mithep::ElectronTools_debug::EElectronEffectiveAreaType;
+#pragma link C++ enum mithep::ElectronTools_debug::EElectronEffectiveAreaTarget;
 #pragma link C++ class mithep::VertexTools;
 #pragma link C++ class mithep::VertexMVA;
 #pragma link C++ class mithep::PUReweighting;
