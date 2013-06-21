@@ -106,6 +106,7 @@ namespace mithep {
     static Bool_t       PassSinglePhotonPresel(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol, const Vertex *vtx, double rho, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);
     static Bool_t       PassSinglePhotonPreselPFISO(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);
     static Bool_t       PassSinglePhotonPreselPFISONoEcal(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);
+    static Bool_t       PassSinglePhotonPreselPFISONoEcalNoPFChargedIso(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);
     static Bool_t       PassSinglePhotonPreselPFISO_NoTrigger(const Photon *p,const ElectronCol *els, const DecayParticleCol *conversions, const BaseVertex *bs, const TrackCol* trackCol,const Vertex *vtx, double rho, const PFCandidateCol *fPFCands, Bool_t applyElectronVeto = kTRUE, Bool_t invertElectronVeto = kFALSE);
     static Bool_t       PassConversionId(const Photon *p, const DecayParticle *c);
     static Bool_t       PassElectronVeto(const Photon *p, const ElectronCol *els);
@@ -152,7 +153,18 @@ namespace mithep {
 				      const PFCandidateCol*    pfCol,
 				      const VertexCol*   vtxCol,
 				      double rho, double ptmin,
-				      std::vector<double>* kin = NULL);                                 
+				      std::vector<double>* kin = NULL); 
+
+    static bool PassCiCPFIsoSelectionWithEleVeto(const Photon* ph, 
+						 const ElectronCol *els,
+						 const DecayParticleCol *conversions, const BaseVertex *bs,
+						 const Vertex* vtx, 
+						 const PFCandidateCol*    pfCol,
+						 const VertexCol*   vtxCol,
+						 double rho, double ptmin,
+						 Bool_t applyElectronVeto, Bool_t invertElectronVeto,
+						 std::vector<double>* kin= NULL  // store variables for debugging...
+						 );// add for mono photon                                
     
     static bool PassVgamma2011Selection(const Photon* ph, double rho);
 
