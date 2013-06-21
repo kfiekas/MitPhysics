@@ -519,7 +519,7 @@ void PhotonPairSelector::Process()
 	  width2 = GetMCSmearFac(escalecat2, true);
 	}
 	 
-     }
+      }
       
       PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
       PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
@@ -871,6 +871,30 @@ void PhotonPairSelector::Process()
         pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
                                                fPV, rho2012, trailptcut);
       break;      
+
+      // --------------------------------------------------------------------
+      // PF-CiC4 Selection, as used in the 2012 8TeV Baseline analysis but with charged iso removed
+    case kCiCPFPhSelectionNoPFChargedIso:
+      
+      // loose preselection for mva
+      pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
+	PhotonTools::PassSinglePhotonPreselPFISONoEcalNoPFChargedIso(fixPh1st[iPair],fElectrons,fConversions,bsp,
+	  //PhotonTools::PassSinglePhotonPreselPFISO(fixPh1st[iPair],fElectrons,fConversions,bsp,
+					    fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+					    fInvertElectronVeto);
+      if (pass1)
+	pass2 = fixPh2nd[iPair]->Pt() > trailptcut &&
+	  PhotonTools::PassSinglePhotonPreselPFISONoEcalNoPFChargedIso(fixPh2nd[iPair],fElectrons,fConversions,bsp,
+	  //PhotonTools::PassSinglePhotonPreselPFISO(fixPh2nd[iPair],fElectrons,fConversions,bsp,
+					      fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+					      fInvertElectronVeto);      
+      
+      pass1 = pass1 && PhotonTools::PassCiCPFIsoSelection(fixPh1st[iPair], theVtx[iPair], fPFCands,
+                                             fPV, rho2012, leadptcut);
+      if (pass1)
+        pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
+                                               fPV, rho2012, trailptcut);
+      break;      
       
       // --------------------------------------------------------------------
       // MVA selection
@@ -946,6 +970,23 @@ void PhotonPairSelector::Process()
 	  PhotonTools::PassSinglePhotonPreselPFISONoEcal(fixPh2nd[iPair],fElectrons,fConversions,bsp,
 							 fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
 							 fInvertElectronVeto);           
+      
+      break;      
+      
+      // --------------------------------------------------------------------
+      // updated (PF absed) pre-selection as used in the 2012 8TeV MVA/Baseline analyses but with pf chared iso removed
+    case kMITPFPhSelectionNoEcalNoPFChargedIso:
+      // loose preselection for mva
+      pass1 = fixPh1st[iPair]->Pt() > leadptcut &&
+	PhotonTools::PassSinglePhotonPreselPFISONoEcalNoPFChargedIso(fixPh1st[iPair],fElectrons,fConversions,bsp,
+								     fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+								     fInvertElectronVeto);      
+      
+      if (pass1)
+	pass2 = fixPh2nd[iPair]->Pt() > trailptcut &&
+	  PhotonTools::PassSinglePhotonPreselPFISONoEcalNoPFChargedIso(fixPh2nd[iPair],fElectrons,fConversions,bsp,
+								       fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
+								       fInvertElectronVeto);           
       
       break;      
       
@@ -1070,6 +1111,8 @@ void PhotonPairSelector::SlaveBegin()
     fPhSelType =       kCiCPhSelection;
   else if      (fPhotonSelType.CompareTo("CiCPFSelection") == 0)
     fPhSelType =       kCiCPFPhSelection;  
+  else if      (fPhotonSelType.CompareTo("CiCPFSelectionNoPFChargedIso") == 0)
+    fPhSelType =       kCiCPFPhSelectionNoPFChargedIso;  
   else if (fPhotonSelType.CompareTo("MVASelection") == 0) //MVA
     fPhSelType =       kMVAPhSelection;
   else if (fPhotonSelType.CompareTo("MITSelection") == 0)
@@ -1078,6 +1121,8 @@ void PhotonPairSelector::SlaveBegin()
     fPhSelType =       kMITPFPhSelection;  
   else if (fPhotonSelType.CompareTo("MITPFSelectionNoEcal") == 0)
     fPhSelType =       kMITPFPhSelectionNoEcal;  
+  else if (fPhotonSelType.CompareTo("MITPFSelectionNoEcalNoPFChargedIso") == 0)
+    fPhSelType =       kMITPFPhSelectionNoEcalNoPFChargedIso;  
   else if (fPhotonSelType.CompareTo("NoSelection") == 0)
     fPhSelType =       kNoPhSelection;
   else {

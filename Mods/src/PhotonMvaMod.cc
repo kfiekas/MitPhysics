@@ -96,7 +96,7 @@ void PhotonMvaMod::Process()
   PhotonOArr *GoodPhotons = new PhotonOArr;
   GoodPhotons->SetName(fGoodPhotonsName);
   GoodPhotons->SetOwner(kTRUE);
-  // add to event for other modules to use
+  // add to event for other modules to us
   AddObjThisEvt(GoodPhotons);  
   
   if ( fPhotons->GetEntries() < fMinNumPhotons ) return;
@@ -107,7 +107,7 @@ void PhotonMvaMod::Process()
   // ------------------------------------------------------------
   // here we'll store the preselected Photons (and which CiCCategory they are...)
   PhotonOArr* preselPh  = new PhotonOArr;
-  
+  //printf("photonmvamod check 0\n"); 
   // 1. we do the pre-selection; but keep the non-passing photons in a secont container...
   for (UInt_t i=0; i<fPhotons->GetEntries(); ++i) {    
     const Photon *ph = fPhotons->At(i);
@@ -125,9 +125,11 @@ void PhotonMvaMod::Process()
     
     preselPh->Add(ph);
   }
-  
+  //printf("photonmvamod check 1\n"); 
+  assert(preselPh);  
+  //printf("preselPh->GetEntries():%d\n",preselPh->GetEntries()); 
   if ( preselPh->GetEntries() < fMinNumPhotons ) return;
-
+  
   // Sorry... need the second loop here in order to sort & assign the right Categories..
   //preselPh->Sort();
   for(unsigned int iPh = 0; iPh <preselPh->GetEntries(); ++iPh) {
@@ -146,7 +148,7 @@ void PhotonMvaMod::Process()
       outph->SetCaloPosXYZ(scpos.X(),scpos.Y(),scpos.Z());
       
     }
-    
+    //printf("photonmvamod check 2\n"); 
     GoodPhotons->AddOwned(outph);
     
   }
@@ -159,7 +161,7 @@ void PhotonMvaMod::Process()
   // delete auxiliary photon collection...
   delete preselPh;
   //delete[] theVtx;
-    
+     
   return;
 
 }

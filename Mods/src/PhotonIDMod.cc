@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.34 2012/08/02 12:30:55 fabstoec Exp $
+// $Id: PhotonIDMod.cc,v 1.35 2012/08/02 12:59:10 fabstoec Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -312,6 +312,13 @@ void PhotonIDMod::Process()
 	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }    
+
+    //add for mono photon: cic id without presel
+    if(fPhIdType == kBaseLineCiCPFNoPresel) {
+      if(PhotonTools::PassCiCPFIsoSelectionWithEleVeto(ph, fElectrons,fConversions,bsp,fPV->At(0), fPFCands, fPV, rho2012, fPhotonPtMin,fApplyElectronVeto,fInvertElectronVeto) )
+	GoodPhotons->AddOwned(ph);
+      continue; // go to next Photons
+    }    
     // ---------------------------------------------------------------------
 
     //loose photon preselection for subsequent mva
@@ -527,6 +534,10 @@ void PhotonIDMod::SlaveBegin()
   }
   else if (fPhotonIDType.CompareTo("BaseLineCiCPF") == 0) {
     fPhIdType = kBaseLineCiCPF;
+    fPhotonIsoType = "NoIso";
+  } 
+  else if (fPhotonIDType.CompareTo("BaseLineCiCPFNoPresel") == 0) {
+    fPhIdType = kBaseLineCiCPFNoPresel;
     fPhotonIsoType = "NoIso";
   }  
   else if (fPhotonIDType.CompareTo("MITMVAId") == 0) {

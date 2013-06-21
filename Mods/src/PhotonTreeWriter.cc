@@ -68,7 +68,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fPFPhotons              (0),
   fElectrons              (0),
   fConversions            (0),
-  fPFConversions                 (0),
+  fPFConversions          (0),
   fTracks                 (0),
   fPileUpDen              (0),
   fPV                     (0),
@@ -95,6 +95,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fExcludeSinglePrompt    (kFALSE),
   fExcludeDoublePrompt    (kFALSE),
   fEnableJets             (kFALSE),
+  fEnableGenJets          (kFALSE),
   fApplyJetId             (kFALSE),
   fApplyLeptonTag         (kFALSE),
   fApplyVBFTag            (kFALSE),
@@ -189,7 +190,7 @@ void PhotonTreeWriter::Process()
     LoadBranch(fMCParticleName);
     LoadBranch(fMCEventInfoName);
     LoadBranch(fPileUpName);
-    if (fEnableJets) LoadEventObject(fGenJetName,        fGenJets);
+    if (fEnableGenJets) LoadEventObject(fGenJetName,        fGenJets);
   }  else fGenJets = NULL;
   
   if( !fIsData ) {
@@ -1168,7 +1169,7 @@ void PhotonTreeWriter::SlaveBegin()
     ReqBranch(fPileUpName,         fPileUp);
     ReqBranch(fMCParticleName,     fMCParticles);
     ReqBranch(fMCEventInfoName,    fMCEventInfo);
-    if (fEnableJets) ReqEventObject(fGenJetName, fGenJets, true);
+    if (fEnableGenJets) ReqEventObject(fGenJetName, fGenJets, true);
   }
   if (fIsData) {
     fPhFixDataFile = gSystem->Getenv("CMSSW_BASE") +

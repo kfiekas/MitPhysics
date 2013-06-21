@@ -1,4 +1,4 @@
-// $Id: GoodPVFilterMod.cc,v 1.8 2011/06/13 20:15:19 sixie Exp $
+// $Id: GoodPVFilterMod.cc,v 1.9 2011/06/29 17:05:27 bendavid Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
@@ -92,7 +92,7 @@ void GoodPVFilterMod::Process()
     
     if (failed.NBitsSet() > 1)
       continue;
-    
+       
     BitMask8 failedNTracks = failed;
     failedNTracks.ClearBit(eNTracks);
     if (!failedNTracks.NBitsSet())
@@ -118,7 +118,7 @@ void GoodPVFilterMod::Process()
       GoodVertexes->Add(v);
     }
   }
-
+ 
   //fill histograms
   hNVtx->Fill(fVertexes->GetEntries());
   hNGoodVtx->Fill(GoodVertexes->GetEntries());
@@ -148,7 +148,7 @@ void GoodPVFilterMod::Process()
     }
     return;
   } 
-
+  //printf("goodvertex check 0\n");
   // take action if accepted
   ++fNAcceped;
   IncNEventsProcessed();
