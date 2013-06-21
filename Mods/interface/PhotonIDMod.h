@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.30 2012/08/02 12:59:31 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.31 2013/06/21 13:11:09 mingyang Exp $
 //
 // PhotonIDMod
 //
@@ -92,8 +92,8 @@ namespace mithep
 
     void                SetPVName(const char *n)          { fPVName = n;                 }
     void                SetPVFromBranch(bool b)           { fPVFromBranch = b;           }
-    void                SetIsData (Bool_t b) { fIsData = b;};
-
+    void                SetIsData (Bool_t b) { fIsData = b;}
+    void                Set2012HCP (Bool_t b) { f2012HCP = b;}
 
     void                SetShowerShapeType(const char *type) { fShowerShapeType        = type;    } 
 
@@ -141,6 +141,55 @@ namespace mithep
       fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
       fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
     };
+
+
+    void                AddEnCorrPerRun2012HCP( UInt_t sRun, UInt_t eRun,
+						Double_t corr_EBlowEta_hR9central,
+						Double_t corr_EBlowEta_hR9gap,
+						Double_t corr_EBlowEta_lR9central,
+						Double_t corr_EBlowEta_lR9gap,
+						Double_t corr_EBhighEta_hR9,
+						Double_t corr_EBhighEta_lR9,                                         
+						Double_t corr_EElowEta_hR9,
+						Double_t corr_EElowEta_lR9,
+						Double_t corr_EEhighEta_hR9,
+						Double_t corr_EEhighEta_lR9) {
+      fDataEnCorr_EBlowEta_hR9central.push_back(corr_EBlowEta_hR9central);
+      fDataEnCorr_EBlowEta_hR9gap.push_back(corr_EBlowEta_hR9gap);
+      fDataEnCorr_EBlowEta_lR9central.push_back(corr_EBlowEta_lR9central);
+      fDataEnCorr_EBlowEta_lR9gap.push_back(corr_EBlowEta_lR9gap);
+      fDataEnCorr_EBhighEta_hR9.push_back(corr_EBhighEta_hR9);
+      fDataEnCorr_EBhighEta_lR9.push_back(corr_EBhighEta_lR9);      
+      fDataEnCorr_EElowEta_hR9.push_back(corr_EElowEta_hR9);
+      fDataEnCorr_EElowEta_lR9.push_back(corr_EElowEta_lR9);      
+      fDataEnCorr_EEhighEta_hR9.push_back(corr_EEhighEta_hR9);
+      fDataEnCorr_EEhighEta_lR9.push_back(corr_EEhighEta_lR9);       
+      fRunStart.push_back         (sRun);
+      fRunEnd.push_back           (eRun);
+    };
+
+    void SetMCSmearFactors2012HCP(Double_t _EBlowEta_hR9central,
+				  Double_t _EBlowEta_hR9gap, 
+				  Double_t _EBlowEta_lR9central,
+				  Double_t _EBlowEta_lR9gap,
+				  Double_t _EBhighEta_hR9, 
+				  Double_t _EBhighEta_lR9,
+				  Double_t _EElowEta_hR9, 
+				  Double_t _EElowEta_lR9,
+				  Double_t _EEhighEta_hR9,
+				  Double_t _EEhighEta_lR9) {
+      fMCSmear_EBlowEta_hR9central = _EBlowEta_hR9central;
+      fMCSmear_EBlowEta_hR9gap = _EBlowEta_hR9gap;
+      fMCSmear_EBlowEta_lR9central = _EBlowEta_lR9central;
+      fMCSmear_EBlowEta_lR9gap = _EBlowEta_lR9gap;
+      fMCSmear_EBhighEta_hR9 = _EBhighEta_hR9;
+      fMCSmear_EBhighEta_lR9 = _EBhighEta_lR9;      
+      fMCSmear_EElowEta_hR9 = _EElowEta_hR9;
+      fMCSmear_EElowEta_lR9 = _EElowEta_lR9;
+      fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
+      fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
+    };
+
 
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
     void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
@@ -197,8 +246,10 @@ namespace mithep
 
       Int_t               FindRunRangeIdx(UInt_t run);
       Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat);
-      Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat);
-
+      Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat);   // last flag in case of special smearing for error computation
+      Double_t            GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat);
+      Double_t            GetMCSmearFacHCP(PhotonTools::eScaleCats cat);   // last flag in case of special smearing for error computation
+      
       TString             fPhotonBranchName;     //name of photon collection (input)
       TString             fGoodPhotonsName;      //name of exported "good photon" collection
       TString             fTrackBranchName;      // name of the track collection (only needed for PU corrected isolation)
@@ -280,6 +331,8 @@ namespace mithep
       Bool_t              fGoodElectronsFromBranch;
       Bool_t              fIsData;
 
+      Bool_t              f2012HCP;
+
 
       // showershape
       TString                                fShowerShapeType;
@@ -294,26 +347,30 @@ namespace mithep
       std::vector<Double_t> fDataEnCorr_EBlowEta_hR9central;
       std::vector<Double_t> fDataEnCorr_EBlowEta_hR9gap;
       std::vector<Double_t> fDataEnCorr_EBlowEta_lR9;
+      std::vector<Double_t> fDataEnCorr_EBlowEta_lR9central;
+      std::vector<Double_t> fDataEnCorr_EBlowEta_lR9gap;
       std::vector<Double_t> fDataEnCorr_EBhighEta_hR9;
       std::vector<Double_t> fDataEnCorr_EBhighEta_lR9;    
       std::vector<Double_t> fDataEnCorr_EElowEta_hR9;
       std::vector<Double_t> fDataEnCorr_EElowEta_lR9;
       std::vector<Double_t> fDataEnCorr_EEhighEta_hR9;
       std::vector<Double_t> fDataEnCorr_EEhighEta_lR9;
-      
+    
       std::vector<UInt_t>   fRunStart;
       std::vector<UInt_t>   fRunEnd;
       
       Double_t              fMCSmear_EBlowEta_hR9central;
       Double_t              fMCSmear_EBlowEta_hR9gap;
       Double_t              fMCSmear_EBlowEta_lR9;
+      Double_t              fMCSmear_EBlowEta_lR9central;
+      Double_t              fMCSmear_EBlowEta_lR9gap;
       Double_t              fMCSmear_EBhighEta_hR9;
       Double_t              fMCSmear_EBhighEta_lR9;    
       Double_t              fMCSmear_EElowEta_hR9;
       Double_t              fMCSmear_EElowEta_lR9;
       Double_t              fMCSmear_EEhighEta_hR9;
       Double_t              fMCSmear_EEhighEta_lR9;    
-
+      
       TRandom3* fRng;
 
       RhoUtilities::RhoType fRhoType;
