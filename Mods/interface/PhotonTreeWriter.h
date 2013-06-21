@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.27 2012/10/26 19:42:48 fabstoec Exp $
+// $Id: PhotonTreeWriter.h,v 1.28 2012/11/09 21:38:04 mingyang Exp $
 //
 // PhotonTreeWriter
 //
@@ -705,6 +705,7 @@ namespace mithep
 
     void                SetPFJetsFromBranch(Bool_t b)     { fPFJetsFromBranch = b;       }
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
+    void                SetEnableGenJets(Bool_t b)           { fEnableGenJets = b;             }
     void                SetApplyJetId(Bool_t b)           { fApplyJetId = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
     void                SetApplyVBFTag(Bool_t b)          { fApplyVBFTag = b;            }
@@ -846,6 +847,7 @@ namespace mithep
     Bool_t                         fExcludeDoublePrompt;
     
     Bool_t                         fEnableJets;
+    Bool_t                         fEnableGenJets;
     Bool_t                         fApplyJetId;
 
     Bool_t                         fApplyLeptonTag;

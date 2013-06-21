@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.29 2012/08/02 12:30:55 fabstoec Exp $
+// $Id: PhotonIDMod.h,v 1.30 2012/08/02 12:59:31 fabstoec Exp $
 //
 // PhotonIDMod
 //
@@ -173,6 +173,7 @@ namespace mithep
         kLooseEM,           //"LooseEM"
 	kBaseLineCiC,         //"2011" Hgg BaseLine CiC
 	kBaseLineCiCPF,       //"2012" Hgg BaseLine CiC
+	kBaseLineCiCPFNoPresel,       //"2012" Hgg BaseLine CiC plus eleveto -- for mono photon
 	kMITMVAId,            // MingMing MVA ID
 	kMITPhSelection,      //MIT loose preselection (for mva)
 	kMITPFPhSelection,    //MIT loose preselection (for mva)

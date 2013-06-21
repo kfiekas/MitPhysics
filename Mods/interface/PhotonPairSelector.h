@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.32 2013/01/08 13:24:01 fabstoec Exp $
+// $Id: PhotonPairSelector.h,v 1.33 2013/02/09 15:17:23 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -52,11 +52,13 @@ namespace mithep
     enum PhotonSelection {
       kNoPhSelection = 0,
       kCiCPhSelection,
-      kCiCPFPhSelection,      
+      kCiCPFPhSelection,   
+      kCiCPFPhSelectionNoPFChargedIso,   
       kMVAPhSelection, //MVA
       kMITPhSelection,
       kMITPFPhSelection,
-      kMITPFPhSelectionNoEcal
+      kMITPFPhSelectionNoEcal,
+      kMITPFPhSelectionNoEcalNoPFChargedIso
     };
     enum VertexSelection {
       kStdVtxSelection = 0,
