@@ -174,6 +174,7 @@ void PhotonTreeWriter::Process()
     //   if(!fIsData) LoadEventObject(fGenJetName,        fGenJets);
   }
 
+  
   // ------------------------------------------------------------  
   // load event based information
   Int_t _numPU      = -1.;        // some sensible default values....
@@ -182,7 +183,7 @@ void PhotonTreeWriter::Process()
 
   Float_t rho  = -99.;
   if( fPileUpDen->GetEntries() > 0 )
-    rho  = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();
+    rho  = (Double_t) fPileUpDen->At(0)->RhoRandomLowEta();//m
   
   const BaseVertex *bsp = dynamic_cast<const BaseVertex*>(fBeamspot->At(0));//ming:what's this?
     
@@ -341,7 +342,7 @@ void PhotonTreeWriter::Process()
 //   fDiphotonEvent->diuncorrjetmass = -99.; 
 
 
-
+ 
   Int_t nhitsbeforevtxmax = 1;
   if (!fApplyElectronVeto)
     nhitsbeforevtxmax = 999;  
@@ -355,7 +356,7 @@ void PhotonTreeWriter::Process()
     const Electron *ele2 = 0;
     const SuperCluster *sc1 = 0;
     const SuperCluster *sc2 = 0;
-    
+   
     if (fLoopOnGoodElectrons) {
       ele1 = fGoodElectrons->At(0);
       ele2 = fGoodElectrons->At(1);
@@ -391,7 +392,7 @@ void PhotonTreeWriter::Process()
       phgen1 = PhotonTools::MatchMC(p1,fMCParticles,!fApplyElectronVeto);
       phgen2 = PhotonTools::MatchMC(p2,fMCParticles,!fApplyElectronVeto);
     }
-    
+  
     if (fExcludeSinglePrompt && (phgen1 || phgen2))
       return;
     if (fExcludeDoublePrompt && (phgen1 && phgen2))
@@ -412,7 +413,7 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent -> btagJet2       = -1.;
     fDiphotonEvent -> btagJet2Pt     = -99.;
     fDiphotonEvent -> btagJet2Eta    = -99.;
-
+   
     if( fApplyBTag && fEnableJets ) {
       float highTag     = 0.;
       float highJetPt   = 0.;
@@ -451,7 +452,8 @@ void PhotonTreeWriter::Process()
       fDiphotonEvent -> btagJet2Eta = trailJetEta;      
 
     }
-    
+
+       
     //fill jet variables
     const Vertex *selvtx = fPV->At(0);
     if (!fLoopOnGoodElectrons && phHard->HasPV()) selvtx = phHard->PV();
@@ -468,58 +470,59 @@ void PhotonTreeWriter::Process()
         }
         if (jet1&&jet2&&jetcentral) break;
       }
-    }
-    
-    for(UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet){
-      const Jet *jet = fPFJets->At(ijet);
-      if (MathUtils::DeltaR(jet,p1)>0.5 && MathUtils::DeltaR(jet,p2)>0.5) {
-	fDiphotonEvent->jetleadNoIDpt   = jet->Pt();
-	fDiphotonEvent->jetleadNoIDeta  = jet->Eta();
-	fDiphotonEvent->jetleadNoIDphi  = jet->Phi();
-	fDiphotonEvent->jetleadNoIDmass = jet->Mass();
-	break;
-      }
-    }
+      
+      for(UInt_t ijet=0; ijet<fPFJets->GetEntries();++ijet){
 
-    if (jet1) {
-      fDiphotonEvent->jet1pt   = jet1->Pt();
-      fDiphotonEvent->jet1eta  = jet1->Eta();
-      fDiphotonEvent->jet1phi  = jet1->Phi();
-      fDiphotonEvent->jet1mass = jet1->Mass();
-    }
-    
-    if (jet2) {
-      fDiphotonEvent->jet2pt   = jet2->Pt();
-      fDiphotonEvent->jet2eta  = jet2->Eta();
-      fDiphotonEvent->jet2phi  = jet2->Phi();
-      fDiphotonEvent->jet2mass = jet2->Mass();
-    }
-  
-    if (jetcentral) {
-      fDiphotonEvent->jetcentralpt   = jetcentral->Pt();
-      fDiphotonEvent->jetcentraleta  = jetcentral->Eta();
-      fDiphotonEvent->jetcentralphi  = jetcentral->Phi();
-      fDiphotonEvent->jetcentralmass = jetcentral->Mass();
-    }
-    
-    if (jet1&&jet2){
-      FourVectorM momjj = (jet1->Mom() + jet2->Mom());
-      
-      fDiphotonEvent->dijetpt =  momjj.Pt();
-      fDiphotonEvent->dijeteta = momjj.Eta();
-      fDiphotonEvent->dijetphi = momjj.Phi();
-      fDiphotonEvent->dijetmass = momjj.M();    
-      
-      if (jet1->Eta()>jet2->Eta()) {
-        fDiphotonEvent->jetetaplus = jet1->Eta();
-        fDiphotonEvent->jetetaminus = jet2->Eta();
+	const Jet *jet = fPFJets->At(ijet);
+	if (MathUtils::DeltaR(jet,p1)>0.5 && MathUtils::DeltaR(jet,p2)>0.5) {
+	  fDiphotonEvent->jetleadNoIDpt   = jet->Pt();
+	  fDiphotonEvent->jetleadNoIDeta  = jet->Eta();
+	  fDiphotonEvent->jetleadNoIDphi  = jet->Phi();
+	  fDiphotonEvent->jetleadNoIDmass = jet->Mass();
+	  break;
+	}
       }
-      else {
-        fDiphotonEvent->jetetaplus = jet2->Eta();
-        fDiphotonEvent->jetetaminus = jet1->Eta();      
+      
+      if (jet1) {
+	fDiphotonEvent->jet1pt   = jet1->Pt();
+	fDiphotonEvent->jet1eta  = jet1->Eta();
+	fDiphotonEvent->jet1phi  = jet1->Phi();
+	fDiphotonEvent->jet1mass = jet1->Mass();
+      }
+      
+      if (jet2) {
+	fDiphotonEvent->jet2pt   = jet2->Pt();
+	fDiphotonEvent->jet2eta  = jet2->Eta();
+	fDiphotonEvent->jet2phi  = jet2->Phi();
+	fDiphotonEvent->jet2mass = jet2->Mass();
+      }
+      
+      if (jetcentral) {
+	fDiphotonEvent->jetcentralpt   = jetcentral->Pt();
+	fDiphotonEvent->jetcentraleta  = jetcentral->Eta();
+	fDiphotonEvent->jetcentralphi  = jetcentral->Phi();
+	fDiphotonEvent->jetcentralmass = jetcentral->Mass();
+      }
+      
+      if (jet1&&jet2){
+	FourVectorM momjj = (jet1->Mom() + jet2->Mom());
+	
+	fDiphotonEvent->dijetpt =  momjj.Pt();
+	fDiphotonEvent->dijeteta = momjj.Eta();
+	fDiphotonEvent->dijetphi = momjj.Phi();
+	fDiphotonEvent->dijetmass = momjj.M();    
+	
+	if (jet1->Eta()>jet2->Eta()) {
+	  fDiphotonEvent->jetetaplus = jet1->Eta();
+	  fDiphotonEvent->jetetaminus = jet2->Eta();
+	}
+	else {
+	  fDiphotonEvent->jetetaplus = jet2->Eta();
+	  fDiphotonEvent->jetetaminus = jet1->Eta();      
+	}
       }
     }
-    
+   
     //added gen. info of whether a lep. or nutrino is from W or Z --Heng 02/14/2012 12:30 EST
     Double_t _fromZ = -99;
     Double_t _fromW = -99;
@@ -527,7 +530,7 @@ void PhotonTreeWriter::Process()
     Float_t _zEta = -99;
     Float_t _allZpt = -99;
     Float_t _allZEta = -99;
-
+    
     if( !fIsData ){
       
       // loop over all GEN particles and look for nutrinos whoes mother is Z
@@ -545,7 +548,7 @@ void PhotonTreeWriter::Process()
 	else _fromW=1;
       }
     }
- 
+   
     fDiphotonEvent->fromZ = _fromZ;
     fDiphotonEvent->fromW = _fromW;
     fDiphotonEvent->zpt = _zpt;
@@ -686,108 +689,107 @@ void PhotonTreeWriter::Process()
 	}
       }
       
-      
       // end of Vtx synching stuff ...
       // =================================================================================
-      
-      
-      
-      if (jet1 && jet2) {
-        fDiphotonEvent->zeppenfeld = TMath::Abs(_etagg - 0.5*(jet1->Eta()+jet2->Eta()));
-        fDiphotonEvent->dphidijetgg = MathUtils::DeltaPhi( (jet1->Mom()+jet2->Mom()).Phi(), _phigg );
-      }
-      
-      PFJetOArr pfjets;
-      for (UInt_t ijet=0; ijet<fPFJets->GetEntries(); ++ijet) {
-        const PFJet *pfjet = dynamic_cast<const PFJet*>(fPFJets->At(ijet));
-        if (pfjet && MathUtils::DeltaR(*pfjet,*phHard)>0.3 && MathUtils::DeltaR(*pfjet,*phSoft)>0.3) pfjets.Add(pfjet);
-      }
-      
-      PFCandidateOArr pfcands;
-      for (UInt_t icand=0; icand<fPFCands->GetEntries(); ++icand) {
-        const PFCandidate *pfcand = fPFCands->At(icand);
-        if (MathUtils::DeltaR(*pfcand,*phHard)>0.1 && MathUtils::DeltaR(*pfcand,*phSoft)>0.1) pfcands.Add(pfcand);
-      }      
-      
-      const Vertex *firstvtx = fPV->At(0);
-      const Vertex *selvtx = fPV->At(0);
-      
-      if (!fLoopOnGoodElectrons && phHard->HasPV()) {
-        selvtx = phHard->PV();
-      }
-      
-      if (0) //disable for now for performance reasons
-	{
-	  Met mmet = fMVAMet.GetMet(  false,
-				      0.,0.,0.,
-				      0.,0.,0.,
-				      fPFMet->At(0),
-				      &pfcands,selvtx,fPV, fPileUpDen->At(0)->Rho(),
-				      &pfjets,
-				      int(fPV->GetEntries()),
-				      kFALSE);      
+      	
+	PFJetOArr pfjets;
+	if (fEnableJets){
+	  if (jet1 && jet2) {
+	    fDiphotonEvent->zeppenfeld = TMath::Abs(_etagg - 0.5*(jet1->Eta()+jet2->Eta()));
+	    fDiphotonEvent->dphidijetgg = MathUtils::DeltaPhi( (jet1->Mom()+jet2->Mom()).Phi(), _phigg );
+	  }
 	  
-	  TMatrixD *metcov = fMVAMet.GetMetCovariance();
-	  
-	  ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
-			      mmet.Py() - phHard->Py() - phSoft->Py(),
-			      0.);
-	  
-	  ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
-	  mcov(0,0) = (*metcov)(0,0);
-	  mcov(0,1) = (*metcov)(0,1);
-	  mcov(1,0) = (*metcov)(1,0);
-	  mcov(1,1) = (*metcov)(1,1);
-	  ROOT::Math::SVector<double,2> vmet;
-	  vmet(0) = fullmet.X();
-	  vmet(1) = fullmet.Y();
-	  mcov.Invert();
-	  Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
-          
-	  fDiphotonEvent->mvametsel = fullmet.Rho();
-	  fDiphotonEvent->mvametselphi = fullmet.Phi();
-	  fDiphotonEvent->mvametselx = fullmet.X();
-	  fDiphotonEvent->mvametsely = fullmet.Y();
-	  fDiphotonEvent->mvametselsig = metsig;
+	  //PFJetOArr pfjets;
+	  for (UInt_t ijet=0; ijet<fPFJets->GetEntries(); ++ijet) {
+	    const PFJet *pfjet = dynamic_cast<const PFJet*>(fPFJets->At(ijet));
+	    if (pfjet && MathUtils::DeltaR(*pfjet,*phHard)>0.3 && MathUtils::DeltaR(*pfjet,*phSoft)>0.3) pfjets.Add(pfjet);
+	  }
 	}
-      
-      if (0) //disable for now for performance reasons
-	{
-	  Met mmet = fMVAMet.GetMet(  false,
-				      0.,0.,0.,
-				      0.,0.,0.,
-				      fPFMet->At(0),
-				      &pfcands,firstvtx,fPV, fPileUpDen->At(0)->Rho(),
-				      &pfjets,
-				      int(fPV->GetEntries()),
-				      kFALSE);      
-	  
-	  TMatrixD *metcov = fMVAMet.GetMetCovariance();
-	  
-	  ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
-			      mmet.Py() - phHard->Py() - phSoft->Py(),
-			      0.);
-	  
-	  ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
-	  mcov(0,0) = (*metcov)(0,0);
-	  mcov(0,1) = (*metcov)(0,1);
-	  mcov(1,0) = (*metcov)(1,0);
-	  mcov(1,1) = (*metcov)(1,1);
-	  ROOT::Math::SVector<double,2> vmet;
-	  vmet(0) = fullmet.X();
-	  vmet(1) = fullmet.Y();
-	  mcov.Invert();
-	  Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
-	  
-	  fDiphotonEvent->mvametfirst = fullmet.Rho();
-	  fDiphotonEvent->mvametfirstphi = fullmet.Phi();
-	  fDiphotonEvent->mvametfirstx = fullmet.X();
-	  fDiphotonEvent->mvametfirsty = fullmet.Y();
-	  fDiphotonEvent->mvametfirstsig = metsig;
+	
+	PFCandidateOArr pfcands;
+	for (UInt_t icand=0; icand<fPFCands->GetEntries(); ++icand) {
+	  const PFCandidate *pfcand = fPFCands->At(icand);
+	  if (MathUtils::DeltaR(*pfcand,*phHard)>0.1 && MathUtils::DeltaR(*pfcand,*phSoft)>0.1) pfcands.Add(pfcand);
 	}      
       
+	const Vertex *firstvtx = fPV->At(0);
+	const Vertex *selvtx = fPV->At(0);
+	
+	if (!fLoopOnGoodElectrons && phHard->HasPV()) {
+	  selvtx = phHard->PV();
+	}
+	
+	if (0) //disable for now for performance reasons
+	  {
+	    Met mmet = fMVAMet.GetMet(  false,
+					0.,0.,0.,
+					0.,0.,0.,
+					fPFMet->At(0),
+					&pfcands,selvtx,fPV, fPileUpDen->At(0)->Rho(),
+					&pfjets,
+					int(fPV->GetEntries()),
+					kFALSE);      
+	    
+	    TMatrixD *metcov = fMVAMet.GetMetCovariance();
+	    
+	    ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
+				mmet.Py() - phHard->Py() - phSoft->Py(),
+				0.);
+	    
+	    ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
+	    mcov(0,0) = (*metcov)(0,0);
+	    mcov(0,1) = (*metcov)(0,1);
+	    mcov(1,0) = (*metcov)(1,0);
+	    mcov(1,1) = (*metcov)(1,1);
+	    ROOT::Math::SVector<double,2> vmet;
+	    vmet(0) = fullmet.X();
+	    vmet(1) = fullmet.Y();
+	    mcov.Invert();
+	    Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
+	    
+	    fDiphotonEvent->mvametsel = fullmet.Rho();
+	    fDiphotonEvent->mvametselphi = fullmet.Phi();
+	    fDiphotonEvent->mvametselx = fullmet.X();
+	    fDiphotonEvent->mvametsely = fullmet.Y();
+	    fDiphotonEvent->mvametselsig = metsig;
+	  }
+	
+	if (0) //disable for now for performance reasons
+	  {
+	    Met mmet = fMVAMet.GetMet(  false,
+					0.,0.,0.,
+					0.,0.,0.,
+					fPFMet->At(0),
+					&pfcands,firstvtx,fPV, fPileUpDen->At(0)->Rho(),
+					&pfjets,
+					int(fPV->GetEntries()),
+					kFALSE);      
+	    
+	    TMatrixD *metcov = fMVAMet.GetMetCovariance();
+	    
+	    ThreeVector fullmet(mmet.Px() - phHard->Px() - phSoft->Px(),
+				mmet.Py() - phHard->Py() - phSoft->Py(),
+				0.);
+	    
+	    ROOT::Math::SMatrix<double,2,2,ROOT::Math::MatRepSym<double,2> > mcov;
+	    mcov(0,0) = (*metcov)(0,0);
+	    mcov(0,1) = (*metcov)(0,1);
+	    mcov(1,0) = (*metcov)(1,0);
+	    mcov(1,1) = (*metcov)(1,1);
+	    ROOT::Math::SVector<double,2> vmet;
+	    vmet(0) = fullmet.X();
+	    vmet(1) = fullmet.Y();
+	    mcov.Invert();
+	    Double_t metsig = sqrt(ROOT::Math::Similarity(mcov,vmet));
+	    
+	    fDiphotonEvent->mvametfirst = fullmet.Rho();
+	    fDiphotonEvent->mvametfirstphi = fullmet.Phi();
+	    fDiphotonEvent->mvametfirstx = fullmet.X();
+	    fDiphotonEvent->mvametfirsty = fullmet.Y();
+	    fDiphotonEvent->mvametfirstsig = metsig;
+	  }      
+	
     }
-    
     
     fDiphotonEvent->corrpfmet = -99.;
     fDiphotonEvent->corrpfmetphi = -99.;
@@ -913,6 +915,7 @@ void PhotonTreeWriter::Process()
     
     fDiphotonEvent-> eleIdMva = -99.;
     
+     
     if( fApplyLeptonTag ) {
       
       // perform lepton tagging
@@ -1018,7 +1021,7 @@ void PhotonTreeWriter::Process()
 	  }
 	}
       }
-      
+     
       if(false){
 	if(fDiphotonEvent->evt==79737729 || fDiphotonEvent->evt== 871378986  || fDiphotonEvent->evt==528937923 || fDiphotonEvent->evt== 261543921){
 	  printf("ming sync check ele:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numelectrons:%d  idmva:%f  mass:%f\n  elePt:%f  eleEta:%f  eleSCEta:%f  vtx:%d\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagElectrons->GetEntries(),fDiphotonEvent->eleIdMva,_mass,fDiphotonEvent->elePt,fDiphotonEvent->eleEta,fDiphotonEvent->eleSCEta,closestVtx);
@@ -1069,7 +1072,7 @@ void PhotonTreeWriter::Process()
       }
     }
   }
-  
+ 
   if (!fWriteSingleTree)
     return;
   
@@ -1131,7 +1134,7 @@ void PhotonTreeWriter::Process()
 
 
   return;
-  }
+}
 
 //--------------------------------------------------------------------------------------------------
 void PhotonTreeWriter::SlaveBegin()

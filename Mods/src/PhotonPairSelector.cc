@@ -306,13 +306,13 @@ void PhotonPairSelector::Process()
     if (ph->SCluster()->AbsEta()>= fPhotonEtaMax ||
         (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566))
       continue;
-
+    
     if (ph->Et()                <  fPhotonPtMin)
       continue;
-
+    
     if (ph->HadOverEm()         >  0.15)
       continue;
-
+    
     if (ph->IsEB()) {
       if (ph->CoviEtaiEta()     >  0.015)
         continue;
@@ -321,7 +321,7 @@ void PhotonPairSelector::Process()
       if (ph->CoviEtaiEta()     >  0.035)
         continue;
     }
-
+    
     // photon passes the preselection
     ph->Mark();        // mark for later skimming
     preselPh->Add(ph);

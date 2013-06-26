@@ -1,4 +1,4 @@
-// $Id: GoodPVFilterMod.cc,v 1.9 2011/06/29 17:05:27 bendavid Exp $
+// $Id: GoodPVFilterMod.cc,v 1.10 2013/06/21 13:07:34 mingyang Exp $
 
 #include "MitPhysics/Mods/interface/GoodPVFilterMod.h"
 #include <TFile.h>
@@ -118,7 +118,7 @@ void GoodPVFilterMod::Process()
       GoodVertexes->Add(v);
     }
   }
- 
+  
   //fill histograms
   hNVtx->Fill(fVertexes->GetEntries());
   hNGoodVtx->Fill(GoodVertexes->GetEntries());

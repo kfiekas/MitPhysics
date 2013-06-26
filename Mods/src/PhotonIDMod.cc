@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.36 2013/06/21 13:07:34 mingyang Exp $
+// $Id: PhotonIDMod.cc,v 1.37 2013/06/21 19:04:16 mingyang Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -101,7 +101,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fPVFromBranch      (true),
   fGoodElectronsFromBranch (kTRUE),
   fIsData(false),
-  
+
   // ------------------------------------------------
   // added by fab: smearing/scaling options...
   fDoDataEneCorr                 (false),
@@ -109,7 +109,7 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   
   fDoShowerShapeScaling          (false),
 
-// ---------------------------------------
+  // ---------------------------------------
   fDataEnCorr_EBlowEta_hR9central(0.),
   fDataEnCorr_EBlowEta_hR9gap    (0.),
   fDataEnCorr_EBlowEta_lR9       (0.),
@@ -357,7 +357,15 @@ void PhotonIDMod::Process()
       }
       continue;
     }    
-
+    
+    //loose photon preselection for subsequent mva
+    if(fPhIdType == kMITPFPhSelectionNoEcal) {
+      if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPreselPFISONoEcal(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) ) {
+        GoodPhotons->AddOwned(ph);
+      }
+      continue;
+    }   
+    
     //loose photon preselection for subsequent mva
     if(fPhIdType == kMITPFPhSelection_NoTrigger ) {
       if( ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPreselPFISO_NoTrigger(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) ) {
@@ -529,7 +537,7 @@ void PhotonIDMod::SlaveBegin()
   ReqEventObject(fPhotonBranchName,   fPhotons,     fPhotonsFromBranch);
   ReqEventObject(fTrackBranchName,    fTracks,      kTRUE);
   ReqEventObject(fBeamspotBranchName, fBeamspots,   kTRUE);
-  ReqEventObject(fConversionName,     fConversions, kTRUE);
+  ReqEventObject(fConversionName,     fConversions,  true);
   ReqEventObject(fElectronName,       fElectrons,   kTRUE);
   ReqEventObject(fGoodElectronName,       fGoodElectrons,   fGoodElectronsFromBranch);  
   ReqEventObject(fPVName, fPV, fPVFromBranch);
@@ -574,6 +582,10 @@ void PhotonIDMod::SlaveBegin()
   else if (fPhotonIDType.CompareTo("MITPFSelection") == 0)  {
     fPhIdType = kMITPFPhSelection;
     fPhotonIsoType = "NoIso";    
+  }
+  else if (fPhotonIDType.CompareTo("MITPFSelectionNoEcal") == 0){
+    fPhIdType =       kMITPFPhSelectionNoEcal; 
+    fPhotonIsoType = "NoIso";
   }
   else if (fPhotonIDType.CompareTo("MITPFSelection_NoTrigger") == 0)  {
     fPhIdType = kMITPFPhSelection_NoTrigger;
