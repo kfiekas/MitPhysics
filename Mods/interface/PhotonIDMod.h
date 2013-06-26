@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonIDMod.h,v 1.31 2013/06/21 13:11:09 mingyang Exp $
+// $Id: PhotonIDMod.h,v 1.32 2013/06/21 19:04:27 mingyang Exp $
 //
 // PhotonIDMod
 //
@@ -214,8 +214,8 @@ namespace mithep
     void                SetIdMVAType(const char *type)    { fIdMVATypeName        = type;    } 
 
     void                SetRhoType(RhoUtilities::RhoType type) { fRhoType = type ; }
-
-      enum EPhIdType {
+    
+    enum EPhIdType {
         kIdUndef = 0,       //not defined
         kTight,             //"Tight"
         kLoose,             //"Loose"
@@ -226,6 +226,7 @@ namespace mithep
 	kMITMVAId,            // MingMing MVA ID
 	kMITPhSelection,      //MIT loose preselection (for mva)
 	kMITPFPhSelection,    //MIT loose preselection (for mva)
+        kMITPFPhSelectionNoEcal,
 	kMITPFPhSelection_NoTrigger,    //MIT loose preselection (for mva, no Trigger)
 	kVgamma2011Selection, // Vgamma 2011 Photon ID
 	kTrivialSelection,    // only pt & eta cuts
