@@ -302,9 +302,9 @@ void PhotonPairSelector::Process()
   // 1. we do the pre-selection; but keep the non-passing photons in a second container...
   for (UInt_t i=0; i<fPhotons->GetEntries(); ++i) {
     const Photon *ph = fPhotons->At(i);
-
+    /*
     if (ph->SCluster()->AbsEta()>= fPhotonEtaMax ||
-        (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566))
+       (ph->SCluster()->AbsEta()>=1.4442 && ph->SCluster()->AbsEta()<=1.566))
       continue;
     
     if (ph->Et()                <  fPhotonPtMin)
@@ -320,18 +320,18 @@ void PhotonPairSelector::Process()
     else {
       if (ph->CoviEtaiEta()     >  0.035)
         continue;
-    }
+	}*/
     
     // photon passes the preselection
     ph->Mark();        // mark for later skimming
     preselPh->Add(ph);
   }
   
-  if (preselPh->GetEntries()<2) {
+  /*if (preselPh->GetEntries()<2) {
     this->SkipEvent();
     delete preselPh;
     return;
-  }
+    }*/
   
   //fill conversion collection for vertex selection, adding single leg conversions if needed
   //note that momentum of single leg conversions needs to be recomputed from the track
