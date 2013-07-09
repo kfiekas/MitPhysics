@@ -1,9 +1,9 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.28 2012/11/09 21:38:04 mingyang Exp $
+// $Id: PhotonTreeWriter.h,v 1.29 2013/06/21 13:11:09 mingyang Exp $
 //
 // PhotonTreeWriter
 //
-// Authors: J. Bendavid
+// Authors: J. Bendavid, J. Veverka
 //--------------------------------------------------------------------------------------------------
 
 #ifndef MITPHYSICS_MODS_PHOTONTREEWRITER_H
@@ -35,7 +35,6 @@
 
 #include "MitPhysics/Utils/interface/VertexTools.h"
 #include "MitPhysics/Utils/interface/ElectronIDMVA.h"
-
 
 class TNtuple;
 class TRandom3;
@@ -87,7 +86,8 @@ namespace mithep
       Float_t Ecor()    const { return ecor;    };
       Float_t Ecorerr() const { return ecorerr; };
       Float_t Ecorele()    const { return ecorele;    };
-      Float_t Ecoreleerr() const { return ecoreleerr; };      
+      Float_t Ecoreleerr() const { return ecoreleerr; };
+      Float_t Pt() const {return pt;};
       
     private:  
       UChar_t hasphoton;
@@ -613,6 +613,9 @@ namespace mithep
       Int_t vbfTag;
       Float_t vbfbdt;
 
+      // ----------- TTH TAG STUFF -------------
+      Int_t tthTag;
+      
       // ----------------------------------------
       UChar_t  ismc;
       Int_t mcprocid;
@@ -709,9 +712,11 @@ namespace mithep
     void                SetApplyJetId(Bool_t b)           { fApplyJetId = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
     void                SetApplyVBFTag(Bool_t b)          { fApplyVBFTag = b;            }
+    void                SetApplyTTHTag(Bool_t b)          { fApplyTTHTag = b;            }
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
     void                SetApplyPFMetCorr(Bool_t b)       { fApplyPFMetCorrections = b;  }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
+    void                SetVerbosityLevel(Bool_t b)       { fVerbosityLevel = b;         }
 
 
 
@@ -762,10 +767,16 @@ namespace mithep
   protected:
     void                Process();
     void                SlaveBegin();
+    void                Terminate();
     // Private auxiliary methods...
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);
     Float_t             GetEventCat    (PhotonTools::CiCBaseLineCats cat1,
 					PhotonTools::CiCBaseLineCats cat2);
+    void                ApplyTTHTag(const Photon*, const Photon*, const Vertex*);
+    void                PrintTTHDebugInfo();
+    void                PrintTTHDecay();
+    void                PrintGenElectrons();
+    void                PrintElectrons(const char *, const ElectronCol*);
 
     // Names for the input Collections
     TString             fPhotonBranchName;
@@ -852,6 +863,7 @@ namespace mithep
 
     Bool_t                         fApplyLeptonTag;
     Bool_t                         fApplyVBFTag;
+    Bool_t                         fApplyTTHTag;
     Bool_t                         fApplyBTag;
     Bool_t                         fApplyPFMetCorrections;
 
@@ -859,12 +871,16 @@ namespace mithep
     Bool_t                         fFillVertexTree;
     
     Bool_t                         fDo2012LepTag;
+    
+    Int_t                          fVerbosityLevel;
 
     TString                        fPhFixDataFile;
     PhotonFix                      fPhfixph;
     PhotonFix                      fPhfixele;
     
     Double_t                       fBeamspotWidth;
+    
+    TFile                          *fTmpFile;
 
     // --------------------------------
     // variables for vbf
