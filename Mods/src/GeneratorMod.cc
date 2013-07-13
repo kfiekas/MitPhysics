@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.74 2012/11/23 12:29:25 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.75 2013/04/19 15:03:39 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -887,6 +887,16 @@ void GeneratorMod::Process()
 	  }
 	  if     (diBoson && diBosonMass[0] <= 0) diBosonMass[0] = diBoson->Mass();
 	  else if(diBoson && diBosonMass[1] <= 0) diBosonMass[1] = diBoson->Mass();
+	  if(diBoson) {
+            for(UInt_t i=0; i<GenQuarks->GetEntries(); i++) {
+	      if(GenQuarks->At(i)->AbsPdgId() != MCParticle::kBottom) continue;
+	      CompositeParticle topCand;
+	      topCand.AddDaughter(diBoson);
+	      topCand.AddDaughter(GenQuarks->At(i));
+	      hDTopMass[0]->Fill(TMath::Min(topCand.Mass(),299.999));
+	      if(fFilterBTEvents == kTRUE && topCand.Mass() > 170.0 && topCand.Mass() < 180.0) SkipEvent();
+	    }
+	  }
 	  delete diBoson;
 	}
 	else if (p->Status() == 3 && (p->Is(MCParticle::kZ)  || p->Is(MCParticle::kW))) {
@@ -908,7 +918,7 @@ void GeneratorMod::Process()
 	    else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kW) && 
                     p->HasDaughter(MCParticle::kMu)  && 
                     p->HasDaughter(MCParticle::kMuNu))
-	      hDVVMass[1]->Fill(TMath::Min(p->Mass(),199.999));
+	      hDVVMass[1]->Fill(p->Mass());
 	    else if(sumV[0] + 4*sumV[1] == 5 && p->Is(MCParticle::kW) && 
                     p->HasDaughter(MCParticle::kEl)  && 
                     p->HasDaughter(MCParticle::kElNu))
@@ -965,6 +975,16 @@ void GeneratorMod::Process()
                     p->HasDaughter(MCParticle::kTauNu,kTRUE) && 
                     p->HasDaughter(-1*MCParticle::kTauNu,kTRUE))
 	      hDVVMass[17]->Fill(TMath::Min(p->Mass(),199.999));
+	  }
+	  if(p->Is(MCParticle::kW)) {
+            for(UInt_t i=0; i<GenQuarks->GetEntries(); i++) {
+	      if(GenQuarks->At(i)->AbsPdgId() != MCParticle::kBottom) continue;
+	      CompositeParticle topCand;
+	      topCand.AddDaughter(p);
+	      topCand.AddDaughter(GenQuarks->At(i));
+	      hDTopMass[1]->Fill(topCand.Mass());
+	      if(fFilterBTEvents == kTRUE && topCand.Mass() > 170.0 && topCand.Mass() < 180.0) SkipEvent();
+	    }
 	  }
 	}
       } // end loop of particles
@@ -1512,7 +1532,8 @@ void GeneratorMod::Process()
     }
 
     // filter events with either b or top quarks
-    if(fFilterBTEvents == kTRUE && (nBQuarks > 0 || nTQuarks > 0)) SkipEvent();
+    //if(fFilterBTEvents == kTRUE && (nBQuarks > 0 || nTQuarks > 0)) SkipEvent();
+    if(fFilterBTEvents == kTRUE && nTQuarks > 0) SkipEvent();
 
     // wbf
     if (GenqqHs->GetEntries() == 2) {
@@ -1858,5 +1879,9 @@ void GeneratorMod::SlaveBegin()
     AddTH1(hDVVMass[25],"hDVVMass_25","Minimum mass for WZ events;Mass [GeV];#",200,0.,200.);
     AddTH1(hDVVMass[26],"hDVVMass_26","Maximum mass for ZZ events;Mass [GeV];#",200,0.,200.);
     AddTH1(hDVVMass[27],"hDVVMass_27","Minimum mass for ZZ events;Mass [GeV];#",200,0.,200.);
+
+    // Special study about top search
+    AddTH1(hDTopMass[0],"hDTopMass_0","Top mass [GeV];#",150,100.,250.);
+    AddTH1(hDTopMass[1],"hDTopMass_1","Top mass [GeV];#",150,100.,250.);
   }
 }
