@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.43 2012/11/23 12:29:24 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.44 2013/04/19 15:03:39 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -127,6 +127,7 @@ namespace mithep
       TH1D                *hDGenISRPhotons[20]; //!histos for ISR photons
       TH1D                *hDVMass[20];         //!histos for auxiliar MG work
       TH1D                *hDVVMass[50];        //!histos for auxiliar VV work
+      TH1D                *hDTopMass[2];        //!histos for auxiliar Top work
       MCParticleArr       *fGenLeptons;         //!copied owning array for skimming
       MCParticleArr       *fGenAllLeptons;      //!copied owning array for skimming
       MCParticleArr       *fGenTaus;            //!copied owning array for skimming
