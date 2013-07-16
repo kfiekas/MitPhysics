@@ -131,7 +131,9 @@ void MVAMet::Initialize(TString iJetLowPtFile,
   f42            = iU1Weights.Contains("42");
   fOld42         = iOld42;
   fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile,fOld42,fType);
+  if(f42) fRecoilTools->fJetIDMVA->f42       = true;
   if(f42) fRecoilTools->fJetIDMVA->fJetPtMin = 1.;
+  if(f42) std::cout << "====> Using 42 Config : " << std::endl;
 
   ROOT::Cintex::Cintex::Enable();   
   

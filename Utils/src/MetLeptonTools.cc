@@ -19,7 +19,7 @@ bool MetLeptonTools::looseTauId(const PFTau *iTau,const PileupEnergyDensityCol* 
   if(fabs(iTau->Eta()) > fabs(2.3) )                                  return false;
   if(!iTau->DiscriminationByDecayModeFinding())                       return false;
   if(!iTau->DiscriminationByLooseElectronRejection())                 return false;
-  if(!iTau->LooseMuonRejection2())                                    return false;
+  //if(!iTau->LooseMuonRejection2())                                    return false;
   //if(!iTau->DiscriminationByVLooseIsolation()   )                   return false;
   if(fTauIsoMVA->MVAValue(iTau,iPUEnergyDensity->At(0)->Rho()) < 0.8) return false;
   return true;

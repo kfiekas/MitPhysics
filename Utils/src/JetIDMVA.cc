@@ -53,13 +53,14 @@ void JetIDMVA::Initialize( JetIDMVA::CutType iCutType,
 			   TString iLowPtWeights,
 			   TString iHighPtWeights, 
 			   JetIDMVA::MVAType iType,
-			   TString iCutFileName) 
+			   TString iCutFileName,bool i42) 
 { 
   
   fIsInitialized = kTRUE;
   fType          = iType;
   fCutType       = iCutType;
-  
+  f42            = i42;
+
   std::string lCutId = "JetIdParams";
   if(fType == k42)     lCutId = "PuJetIdOptMVA_wp";
   if(fType == k52)     lCutId = "full_5x_wp";
@@ -600,7 +601,7 @@ Double_t JetIDMVA::correctedPt(const PFJet *iJet, FactorizedJetCorrector *iJetCo
     break;
   default:
     // use the old default
-    Rho = iPUEnergyDensity->At(0)->Rho();
+    f42 ? Rho = iPUEnergyDensity->At(0)->RhoRandom() : Rho = iPUEnergyDensity->At(0)->Rho();
     break;
   }
     

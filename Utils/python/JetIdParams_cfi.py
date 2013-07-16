@@ -22,15 +22,15 @@ JetIdParams = cms.PSet(
     Pt3050_Loose   = cms.vdouble( 0. , 0. , 0.6,0.2),
 
     #MET
-    #Pt010_MET      = cms.vdouble(-0.2, 0. , 0.2, 0.5),
-    #Pt1020_MET     = cms.vdouble( 0.2,-0.6,-0.6,-0.4),
-    #Pt2030_MET     = cms.vdouble( 0.2,-0.6,-0.6,-0.4),
-    #Pt3050_MET     = cms.vdouble( 0.2,-0.8,-0.8,-0.4)
+    Pt010_MET      = cms.vdouble(-0.2, 0. , 0.2, 0.5),
+    Pt1020_MET     = cms.vdouble( 0.2,-0.6,-0.6,-0.4),
+    Pt2030_MET     = cms.vdouble( 0.2,-0.6,-0.6,-0.4),
+    Pt3050_MET     = cms.vdouble( 0.2,-0.8,-0.8,-0.4)
 
-    Pt010_MET      = cms.vdouble(-0.2,-0.3,-0.5,-0.5),
-    Pt1020_MET     = cms.vdouble(-0.2,-0.2,-0.5,-0.3),
-    Pt2030_MET     = cms.vdouble(-0.2,-0.2,-0.2, 0.1),
-    Pt3050_MET     = cms.vdouble(-0.2,-0.2, 0. , 0.2)
+    #Pt010_MET      = cms.vdouble(-0.2,-0.3,-0.5,-0.5),
+    #Pt1020_MET     = cms.vdouble(-0.2,-0.2,-0.5,-0.3),
+    #Pt2030_MET     = cms.vdouble(-0.2,-0.2,-0.2, 0.1),
+    #Pt3050_MET     = cms.vdouble(-0.2,-0.2, 0. , 0.2)
 )
 full_5x_wp = cms.PSet(
         #4 Eta Categories  0-2.5 2.5-2.75 2.75-3.0 3.0-5.0

@@ -57,7 +57,7 @@ namespace mithep {
 			  TString           iLowPtWeights ="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
 			  TString           iHighPtWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
 			  JetIDMVA::MVAType iType=kBaseline,
-			  TString           iCutFileName  ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py");
+			  TString           iCutFileName  ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py",bool i42=false);
     
       Bool_t   IsInitialized() const { return fIsInitialized; }
       Double_t MVAValue(    
@@ -117,6 +117,7 @@ namespace mithep {
 
       Float_t                  fJetPtMin;
       Float_t                  fDZCut;
+      Bool_t                   f42;
 
     protected:      
       TMVA::Reader            *fReader;
@@ -129,7 +130,7 @@ namespace mithep {
       Float_t                  fMVACut[4][4]; //Fix the cut array
       Float_t                  fRMSCut[4][4];
       Float_t                  fBetaStarCut[4][4];
-      
+
       Float_t fNVtx     ;
       Float_t fJPt1     ;
       Float_t fJEta1    ;
