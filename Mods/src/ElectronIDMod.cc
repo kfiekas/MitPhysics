@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.135 2013/01/07 22:14:10 mingyang Exp $
+// $Id: ElectronIDMod.cc,v 1.136 2013/02/23 14:51:25 mingyang Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -533,13 +533,14 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
       
       Bool_t isDebug = kFALSE;
       if(isDebug == kTRUE){
-        printf("PFIso_HggLeptonTag2012HCP: %d, pt, eta = %f, %f, rho = %f(%f) : ",
-           GetEventHeader()->EvtNum(),ele->Pt(), ele->Eta(),
+        printf("PFIso_HggLeptonTag2012HCP: %d, pt, eta, sceta = %f, %f, %f,rho = %f(%f) : ",
+	       GetEventHeader()->EvtNum(),ele->Pt(), ele->Eta(),ele->SCluster()->AbsEta(),
 	   fPileupEnergyDensity->At(0)->Rho(),fPileupEnergyDensity->At(0)->RhoKt6PFJets());
       }
       ElectronOArr *tempIsoElectrons = new  ElectronOArr;
       MuonOArr     *tempIsoMuons     = new  MuonOArr;
       Double_t IsoOverPt = IsolationTools::PFElectronIsolation2012LepTag(ele, vertex, fPFNoPileUpCands,fPileupEnergyDensity, ElectronTools::kEleEAData2012, tempIsoElectrons, tempIsoMuons, 0.3, isDebug);
+      //printf("ming sync check IsoOverPt:%f\n\n",IsoOverPt);
       delete tempIsoElectrons;
       delete tempIsoMuons;
       Double_t eta = ele->SCluster()->AbsEta();
@@ -633,19 +634,28 @@ void ElectronIDMod::Process()
   int NElectronMVAValueMax = 0;
   int NPass = 0;
 
+
+  //printf("\n");
+  //printf("ming sync check number of electrons:%d\n",fElectrons->GetEntries());
+
   for (UInt_t i=0; i<fElectrons->GetEntries() && fVertices->GetEntries() > 0 ; ++i) {
-  
+
+    //printf("ming sync check electron i:%d\n",i);
+   
     const Electron *e = fElectrons->At(i);        
 
     if (e->SCluster() == 0) 
       continue;
     
+    //printf("ming sync check elept:%f  sceta:%f \n",e->Pt(),e->SCluster()->Eta());
+
     if (e->Pt() < fElectronPtMin) 
       continue;
     
     if (e->SCluster()->Et() < fElectronEtMin)
       continue;    
-    
+
+       
     if (e->AbsEta() > fElectronEtaMax) 
       continue;
 
@@ -716,6 +726,8 @@ void ElectronIDMod::Process()
     if (!isocut)
       continue;
 
+    //printf("ming sync check pass isocut\n");
+
     // apply conversion filters
     Bool_t passConvVetoType1 = kFALSE;
     if (fApplyConvFilterType1) {
@@ -747,6 +759,9 @@ void ElectronIDMod::Process()
     // apply NExpectedHitsInner inverted Cut
     if(fInvertNExpectedHitsInnerCut == kTRUE && fNExpectedHitsInnerCut < 999 && 
        e->CorrectedNExpectedHitsInner() <= fNExpectedHitsInnerCut) continue;
+
+    //printf("ming sync check pass Nexpectedinner cut \n");
+
     
     // apply d0 cut
     if (fApplyD0Cut) {
@@ -756,7 +771,10 @@ void ElectronIDMod::Process()
       if (!passD0cut)
         continue;
     }
-  
+ 
+    //printf("ming sync check pass d0 cut \n");
+
+ 
     // apply dz cut
     if (fApplyDZCut) {
       Bool_t passDZcut = ElectronTools::PassDZCut(e, fVertices, fDZCut, fWhichVertex);
