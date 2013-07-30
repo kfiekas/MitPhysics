@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.37 2013/06/21 19:04:16 mingyang Exp $
+// $Id: PhotonIDMod.cc,v 1.38 2013/06/26 21:43:01 mingyang Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -638,6 +638,8 @@ void PhotonIDMod::SlaveBegin()
     fIdMVAType =       MVATools::k2012IdMVA_globe;
   else if (fIdMVATypeName.CompareTo("2012IdMVA") == 0)
     fIdMVAType =       MVATools::k2012IdMVA;
+  else if (fIdMVATypeName.CompareTo("2013FinalIdMVA") == 0)
+    fIdMVAType =       MVATools::k2013FinalIdMVA;
   else if (fIdMVATypeName.CompareTo("2011IdMVA_HZg") == 0)
     fIdMVAType =       MVATools::k2011IdMVA_HZg;
   else if (fIdMVATypeName.CompareTo("None") == 0)

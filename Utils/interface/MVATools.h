@@ -43,6 +43,7 @@ namespace mithep {
       k2011IdMVA,
       k2012IdMVA_globe,
       k2012IdMVA,        // same as above, but more logical name...
+      k2013FinalIdMVA, 
       k2011IdMVA_HZg
     };
     

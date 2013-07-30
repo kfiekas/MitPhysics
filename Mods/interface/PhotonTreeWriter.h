@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.29 2013/06/21 13:11:09 mingyang Exp $
+// $Id: PhotonTreeWriter.h,v 1.30 2013/07/09 15:41:16 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -87,8 +87,7 @@ namespace mithep
       Float_t Ecorerr() const { return ecorerr; };
       Float_t Ecorele()    const { return ecorele;    };
       Float_t Ecoreleerr() const { return ecoreleerr; };
-      Float_t Pt() const {return pt;};
-      
+           
     private:  
       UChar_t hasphoton;
       Float_t e;
@@ -368,7 +367,7 @@ namespace mithep
     Float_t idmva_ChargedIso_worstvtx;
     Float_t idmva_PsEffWidthSigmaRR;
     
-        Float_t ebcs[NClus];
+    Float_t ebcs[NClus];
       Float_t etabcs[NClus];
       Float_t phibcs[NClus];
       Int_t ietabcs[NClus];
@@ -613,6 +612,7 @@ namespace mithep
       Int_t vbfTag;
       Float_t vbfbdt;
 
+
       // ----------- TTH TAG STUFF -------------
       Int_t tthTag;
       
@@ -767,16 +767,18 @@ namespace mithep
   protected:
     void                Process();
     void                SlaveBegin();
-    void                Terminate();
+  
     // Private auxiliary methods...
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);
     Float_t             GetEventCat    (PhotonTools::CiCBaseLineCats cat1,
 					PhotonTools::CiCBaseLineCats cat2);
-    void                ApplyTTHTag(const Photon*, const Photon*, const Vertex*);
-    void                PrintTTHDebugInfo();
-    void                PrintTTHDecay();
+    //void                ApplyTTHTag(const Photon*, const Photon*, const Vertex*);
+    //void                PrintTTHDebugInfo();
+    //void                PrintTTHDecay();
     void                PrintGenElectrons();
     void                PrintElectrons(const char *, const ElectronCol*);
+
+    void                ApplyTTHTag(const Photon *phHard, const Photon *phSoft,const Vertex *selvtx);
 
     // Names for the input Collections
     TString             fPhotonBranchName;
@@ -880,7 +882,6 @@ namespace mithep
     
     Double_t                       fBeamspotWidth;
     
-    TFile                          *fTmpFile;
 
     // --------------------------------
     // variables for vbf

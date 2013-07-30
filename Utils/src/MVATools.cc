@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.19 2012/10/13 20:42:20 mingyang Exp $
+// $Id: MVATools.cc,v 1.20 2012/10/26 19:23:04 fabstoec Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -176,6 +176,42 @@ void MVATools::InitializeMVA(MVATools::IdMVAType type) {
 			  TString("weights.xml"));
 
     mvaVars.resize(12);
+    varNames.push_back("ph.r9"			      );
+    varNames.push_back("ph.sigietaieta"		      );
+    varNames.push_back("ph.scetawidth"		      );
+    varNames.push_back("ph.scphiwidth"		      );
+    varNames.push_back("ph.idmva_CoviEtaiPhi"	      );
+    varNames.push_back("ph.idmva_s4ratio"	      );
+    varNames.push_back("ph.idmva_GammaIso"	      );
+    varNames.push_back("ph.idmva_ChargedIso_selvtx"   );
+    varNames.push_back("ph.idmva_ChargedIso_worstvtx" );
+    varNames.push_back("ph.sceta"		      );
+    varNames.push_back("rho"			      );
+    varNames.push_back("ph.idmva_PsEffWidthSigmaRR"   );
+
+    for( unsigned int iV = 0; iV < mvaVars.size() - 1; ++iV) {
+      mvaVarMapEB.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
+      mvaVarMapEE.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
+    }
+    
+    // pre-shower only used for Endcaps
+    mvaVarMapEE.insert( std::pair<std::string,unsigned int> ( varNames[mvaVars.size() - 1], mvaVars.size() - 1) );
+
+    break;
+
+  case k2013FinalIdMVA:
+    
+    EndcapWeights =      (gSystem->Getenv("CMSSW_BASE")+
+			  TString("/src/MitPhysics/data/")+
+			  TString("2013FinalPaper_PhotonID_Endcap_BDT_TrainRangePT15.")+
+			  TString("weights.xml"));
+    BarrelWeights =      (gSystem->Getenv("CMSSW_BASE")+
+			  TString("/src/MitPhysics/data/")+
+			  TString("2013FinalPaper_PhotonID_Barrel_BDT_TrainRangePT15.")+
+			  TString("weights.xml"));
+
+    mvaVars.resize(13);
+    varNames.push_back("ph.scrawe"		      );
     varNames.push_back("ph.r9"			      );
     varNames.push_back("ph.sigietaieta"		      );
     varNames.push_back("ph.scetawidth"		      );
@@ -585,7 +621,7 @@ Double_t MVATools::GetMVAbdtValue(const Photon* p, const Vertex* vtx, const Trac
       (*theVarValue) = p->EffSigmaRR();
       varCounter++;
     } else if (
-	       !theVarName.CompareTo("rawe")
+	       !theVarName.CompareTo("rawe")|| !theVarName.CompareTo("ph.scrawe") 
 	       ) {
       (*theVarValue) = p->SCluster()->RawEnergy();
       varCounter++;
