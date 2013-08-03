@@ -1,4 +1,4 @@
-// $Id: ModNames.cc,v 1.16 2010/10/20 02:44:47 ceballos Exp $
+// $Id: ModNames.cc,v 1.17 2011/01/21 09:23:26 dkralph Exp $
 
 #include "MitPhysics/Init/interface/ModNames.h"
 
@@ -8,6 +8,7 @@ using namespace mithep;
 
 const char *ModNames::gkCleanCaloMetName       = "CleanCaloMet";
 const char *ModNames::gkCleanElectronsName     = "CleanElectrons";
+const char *ModNames::gkCleanCosmicsName       = "CleanCosmics";
 const char *ModNames::gkCleanFwdJetsName       = "CleanFwdJets";
 const char *ModNames::gkCleanJetsName          = "CleanRandomJets";
 const char *ModNames::gkCleanMuonsName         = "CleanMuons";

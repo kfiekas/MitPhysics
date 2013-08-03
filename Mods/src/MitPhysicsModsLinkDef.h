@@ -1,10 +1,11 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.39 2013/06/21 13:07:34 mingyang Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.40 2013/06/23 17:00:04 mingyang Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
 #include "MitPhysics/Mods/interface/CaloMetCorrectionMod.h"
 #include "MitPhysics/Mods/interface/EffMod.h"
 #include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
+#include "MitPhysics/Mods/interface/CosmicCleaningMod.h"
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitPhysics/Mods/interface/ElectronCorrectionMod.h"
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
@@ -45,6 +46,7 @@
 #pragma link C++ class mithep::CaloMetCorrectionMod+;
 #pragma link C++ class mithep::EffMod+;
 #pragma link C++ class mithep::ElectronCleaningMod+;
+#pragma link C++ class mithep::CosmicCleaningMod+;
 #pragma link C++ class mithep::ElectronIDMod+;
 #pragma link C++ class mithep::ElectronCorrectionMod+;
 #pragma link C++ class mithep::GeneratorMod+;
