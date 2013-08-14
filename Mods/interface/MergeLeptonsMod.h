@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MergeLeptonsMod.h,v 1.3 2009/03/23 14:23:06 loizides Exp $
+// $Id: MergeLeptonsMod.h,v 1.4 2009/06/15 15:00:21 loizides Exp $
 //
 // MergeLeptonsMod
 //
@@ -16,6 +16,7 @@
 #include "MitAna/DataTree/interface/ElectronFwd.h"
 #include "MitAna/DataTree/interface/MuonFwd.h"
 #include "MitAna/DataTree/interface/ParticleFwd.h"
+#include "TH1D.h"
 
 namespace mithep 
 {
@@ -35,7 +36,10 @@ namespace mithep
       void                     SetOutputName(const char *n)       { SetMergedName(n);       }
 
     protected:
+      void                     BeginRun();
       void                     Process();
+      void                     SlaveBegin();
+      void                     SlaveTerminate();
 
       TString                  fElName;        //name of electrons collection (input)
       TString                  fMuName;        //name of muons collection (input)
@@ -43,6 +47,8 @@ namespace mithep
       const ElectronCol       *fElIn;          //!pointer to electron collection
       const MuonCol           *fMuIn;          //!pointer to muon collection 
       ParticleOArr            *fColOut;        //!pointer to merged collection
+      TH1D*		       fRecoWMuons;
+      TH1D*		       fRecoWElectrons;
 
     ClassDef(MergeLeptonsMod, 1) // Merging leptons module
   };

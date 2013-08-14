@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: GeneratorMod.h,v 1.44 2013/04/19 15:03:39 ceballos Exp $
+// $Id: GeneratorMod.h,v 1.45 2013/07/15 18:47:15 ceballos Exp $
 //
 // GeneratorMod
 //
@@ -116,6 +116,8 @@ namespace mithep
       TH1D                *hDGenPtMin;          //!histo for Pt min for leptons from W/Z
       TH1D                *hDGenMet[10];        //!histos for gen MET
       TH1D                *hDGenLeptons[40];    //!histos for W/Z/H leptons
+      TH1D		  *hDGenWMuons ;        //!histo for # of W muons only
+      TH1D		  *hDGenWElectrons;     //!histo for # of W electrons only
       TH1D                *hDGenAllLeptons[20]; //!histos for all leptons
       TH1D                *hDGenTaus[20];       //!histos for taus
       TH1D                *hDGenNeutrinos[20];  //!histos for neutrinos

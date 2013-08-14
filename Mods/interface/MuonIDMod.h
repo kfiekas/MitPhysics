@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MuonIDMod_debug.h,v 1.54 2013/01/07 22:15:38 mingyang Exp $
+// $Id: MuonIDMod.h,v 1.55 2013/02/23 14:52:11 mingyang Exp $
 //
 // MuonIDMod
 //
@@ -121,6 +121,7 @@ namespace mithep
         kClassUndef = 0,    //not defined
         kAll,               //"All"
         kGlobal,            //"Global"
+        kGlobalorTracker,   //"Global or Tracker Muon"
         kGlobalTracker,     //"GlobalTracker"
         kSta,               //"Standalone"
         kTrackerMuon,       //"TrackerMuon"
@@ -163,7 +164,7 @@ namespace mithep
       EMuIdType          fMuIDType;            //!muon id type (imposed)
       EMuIsoType         fMuIsoType;           //!muon iso type (imposed)
       EMuClassType       fMuClassType;         //!muon class type (imposed)
-      const MuonCol     *fMuons;               //!muon collection
+      const MuonCol    	 *fMuons;               //!muon collection
       const VertexCol   *fVertices;            //!vertices branch
       const BeamSpotCol *fBeamSpot;            //!beamspot branch
       const TrackCol    *fTracks;              //!track branch     

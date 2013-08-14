@@ -1,10 +1,11 @@
-// $Id: GeneratorMod.cc,v 1.75 2013/04/19 15:03:39 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.76 2013/07/13 08:08:21 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/MetCol.h" 	 
 #include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitAna/DataTree/interface/MCParticleFwd.h"
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TParameter.h>
@@ -136,7 +137,10 @@ void GeneratorMod::Process()
 
     // load MCParticle branch
     LoadEventObject(fMCPartName, fParticles);
-
+    
+    unsigned int nGenWMuons = 0;
+    unsigned int nGenWElectrons = 0; //for MonoJet generator-level information
+    
     for (UInt_t i=0; i<fParticles->GetEntries(); ++i) {
       const MCParticle *p = fParticles->At(i);
 
@@ -180,7 +184,16 @@ void GeneratorMod::Process()
         GenTempLeptons->Add(p);
       }
 
-
+	//For Monojet generator-level information:
+	if(p->Is(MCParticle::kMu)  && p->Status() == 3 && !p->HasMother(MCParticle::kTau, kFALSE) && p->HasMother(MCParticle::kW, kFALSE)){
+		nGenWMuons++;		
+	}
+	if(p->Is(MCParticle::kEl)  && p->Status() == 3 && !p->HasMother(MCParticle::kTau, kFALSE) && p->HasMother(MCParticle::kW, kFALSE)){
+		nGenWElectrons++;	
+	}
+	
+	
+	
       if ((((p->Is(MCParticle::kEl) || p->Is(MCParticle::kMu)) && 
             !p->HasMother(MCParticle::kTau, kFALSE)) || p->Is(MCParticle::kTau)) && 
            p->Status() == 3 &&
@@ -584,6 +597,22 @@ void GeneratorMod::Process()
 	return;
       }   
     } // end loop of particles
+    
+    //Filling generated muon/electron histograms for MonoJet selection
+    if(GetFillHist()){
+    	if(nGenWMuons > 0 && nGenWElectrons == 0){
+    	hDGenWMuons->Fill(nGenWMuons);
+    	hDGenWElectrons->Fill(0);
+    	}
+    	else if(nGenWElectrons > 0 && nGenWMuons == 0){
+    	hDGenWElectrons->Fill(nGenWElectrons);
+    	hDGenWMuons->Fill(nGenWMuons);
+    	}
+    	else{
+    	hDGenWElectrons->Fill(0);
+    	hDGenWMuons->Fill(0);
+    	}
+    }
 
     delete GenTempMG0;
     if (GetFillHist()) {
@@ -1665,7 +1694,7 @@ void GeneratorMod::SlaveBegin()
     // pt min for leptons from W/Z
     AddTH1(hDGenPtMin, "hDGenPtMin","Pt min leptons from W/Z;p_{t} [GeV];#",200,0.0,200.0); 
 
-    // leptons from W
+    // leptons from W/Z
     AddTH1(hDGenLeptons[0], "hDGenLeptons_0",
            "Number of leptons from W/Z;N_{leptons};#",10,-0.5,9.5); 
     AddTH1(hDGenLeptons[1], "hDGenLeptons_1","Pt leptons from W/Z;p_{t} [GeV];#",100,0.0,200.0); 
@@ -1712,7 +1741,11 @@ void GeneratorMod::SlaveBegin()
            "Fourlepton mass for 3 lepton case;m_{llll};#",1000,0.0,1000.0); 
     AddTH1(hDGenLeptons[26],"hDGenLeptons_26",
            "Delta R Minimum between leptons for 4 lepton case;#Delta R_{ll};#",100,0.0,5.0); 
-
+           
+           //leptons for monojet generator-level info
+    AddTH1(hDGenWMuons,"hDGenWMuons","Number of Muons in Generated W Events;N_{muons};#",10,-0.5,9.5);
+    AddTH1(hDGenWElectrons,"hDGenWElectrons","Number of Electrons in Generated W Events;N_{electrons};#",10,-0.5,9.5);
+    
     // all leptons
     AddTH1(hDGenAllLeptons[0], "hDGenAllLeptons_0",
            "Number of all leptons;N_{leptons};#",10,-0.5,9.5); 

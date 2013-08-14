@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.88 2013/02/23 14:51:45 mingyang Exp $
+// $Id: MuonIDMod.cc,v 1.90 2013/07/16 09:40:45 veverka Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -25,15 +25,15 @@ ClassImp(mithep::MuonIDMod)
   fPFCandidatesName(Names::gkPFCandidatesBrn),
   fPFNoPileUpName("PFNoPileUp"),
   fPFPileUpName("PFPileUp"),
-  fMuonIDType("WWMuIdV3"),
+  fMuonIDType("NoId"),
   fMuonIsoType("PFIso"),
-  fMuonClassType("Global"),  
+  fMuonClassType("GlobalorTracker"),  
   fTrackIsolationCut(3.0),
   fCaloIsolationCut(3.0),
   fCombIsolationCut(0.15),
   fCombRelativeIsolationCut(0.15),
   fPFIsolationCut(-999.0),
-  fMuonPtMin(10),
+  fMuonPtMin(10.),
   fApplyD0Cut(kTRUE),
   fApplyDZCut(kTRUE),
   fD0Cut(0.020),
@@ -57,8 +57,8 @@ ClassImp(mithep::MuonIDMod)
   fPileupEnergyDensity(0),
   fMuonTools(0),
   fMuonIDMVA(0),
-  fTheRhoType(RhoUtilities::DEFAULT),
-  fPVName(Names::gkPVBeamSpotBrn)
+  fPVName(Names::gkPVBeamSpotBrn),
+  fTheRhoType(RhoUtilities::DEFAULT)
 {
   // Constructor.
 }
@@ -127,6 +127,16 @@ void MuonIDMod::Process()
 	  eta = TMath::Abs(mu->Eta());
 	}
 	break;
+      case kGlobalorTracker:
+      	pass = mu->HasGlobalTrk() || mu->IsTrackerMuon();
+      	if (pass && mu->TrackerTrk()) {
+      	  pt = mu->TrackerTrk()->Pt();
+      	  eta = TMath::Abs(mu->TrackerTrk()->Eta());
+        }
+        else{
+          pt = mu->Pt();
+          eta = TMath::Abs(mu->Eta());
+          }
       case kGlobalTracker:
         pass = (mu->HasGlobalTrk() && mu->GlobalTrk()->Chi2()/mu->GlobalTrk()->Ndof() < 10 &&
 	       (mu->NSegments() > 1 || mu->NMatches() > 1) && mu->NValidHits() > 0) ||
@@ -188,11 +198,9 @@ void MuonIDMod::Process()
     if (!pass)
       continue;
 
-    if (pt <= fMuonPtMin) 
-      continue;
+    if (pt <= fMuonPtMin) continue;
 
-    if (eta >= fEtaCut) 
-      continue;
+    if (eta >= fEtaCut) continue;
 
     Double_t RChi2 = 0.0;
     if     (mu->HasGlobalTrk()) {
@@ -202,7 +210,11 @@ void MuonIDMod::Process()
       RChi2 = mu->BestTrk()->Chi2()/mu->BestTrk()->Ndof();
     }
     Bool_t idpass = kFALSE;
+    
+    
+    
     switch (fMuIDType) {
+    
       case kWMuId:
         idpass = mu->BestTrk() != 0 &&
 	         mu->BestTrk()->NHits() > 10 &&
@@ -290,7 +302,9 @@ void MuonIDMod::Process()
         }
         break;
       case kNoId:
+       {
         idpass = kTRUE;
+	}
         break;
       default:
         break;
@@ -653,7 +667,7 @@ void MuonIDMod::SlaveBegin()
               fMuonIsoType.Data());
     return;
   }
-
+	
   if (fMuonClassType.CompareTo("All") == 0) 
     fMuClassType = kAll;
   else if (fMuonClassType.CompareTo("Global") == 0) 
@@ -670,6 +684,8 @@ void MuonIDMod::SlaveBegin()
     fMuClassType = kTrackerBased;
   else if (fMuonClassType.CompareTo("GlobalOnly") == 0) 
     fMuClassType = kGlobalOnly;
+  else if (fMuonClassType.CompareTo("GlobalorTracker") == 0)
+    fMuClassType = kGlobalorTracker;
   else {
     SendError(kAbortAnalysis, "SlaveBegin",
               "The specified muon class %s is not defined.",
