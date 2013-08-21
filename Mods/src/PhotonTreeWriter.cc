@@ -221,6 +221,7 @@ void PhotonTreeWriter::Process()
   fDiphotonEvent->mcprocid = -999;
   if (!fIsData) {
     fDiphotonEvent->mcprocid = fMCEventInfo->ProcessId();
+    fDiphotonEvent->mcweight = fMCEventInfo->Weight();
   }
 
   Double_t _evt = GetEventHeader()->EvtNum();

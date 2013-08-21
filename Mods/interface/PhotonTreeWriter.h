@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.30 2013/07/09 15:41:16 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.31 2013/07/30 21:08:04 mingyang Exp $
 //
 // PhotonTreeWriter
 //
@@ -619,6 +619,7 @@ namespace mithep
       // ----------------------------------------
       UChar_t  ismc;
       Int_t mcprocid;
+      Double_t mcweight;
       
       //corrected quantities from PhotonFix corrections
       Float_t masscor;
