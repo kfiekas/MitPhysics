@@ -27,10 +27,14 @@
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
-
+#include "RooArgList.h"
 
 class TRandom3;
 class GBRForest;
+class HybridGBRForest;
+class RooRealVar;
+class RooAbsPdf;
+class RooAbsReal;
 // namespace TMVA {
 //   class Reader;
 // }
@@ -42,13 +46,15 @@ namespace mithep {
       EGEnergyCorrector();
       ~EGEnergyCorrector(); 
 
-      void Initialize(TString phfixstring, TString phfixfile, TString regweights);
+      void Initialize(TString phfixstring, TString phfixfile, TString regweights, Int_t version);
       Bool_t IsInitialized() const { return fIsInitialized; }
       
       void CorrectEnergyWithError(Photon *p, const VertexCol *vtxs = 0, Double_t rho = 0., UInt_t version=1, Bool_t applyRescale = kFALSE);
       std::pair<double,double> CorrectedEnergyWithError(const Photon *p);
       std::pair<double,double> CorrectedEnergyWithErrorV2(const Photon *p, const VertexCol *vtxs);
       std::pair<double,double> CorrectedEnergyWithErrorV3(const Photon *p, const VertexCol *vtxs, Double_t rho, Bool_t applyRescale = kFALSE);
+
+      void CorrectedEnergyWithErrorV5(const Photon *p, const VertexCol *vtxs, Double_t rho, Double_t &ecor, Double_t &mean, Double_t &sigma, Double_t &alpha1, Double_t &n1, Double_t &alpha2, Double_t &n2, Double_t &pdfpeakval);
 
       
     protected:
@@ -57,7 +63,25 @@ namespace mithep {
       GBRForest *fReaderebvariance;
       GBRForest *fReaderee;
       GBRForest *fReadereevariance;      
+      
+      HybridGBRForest *fReaderebsemi;
+      HybridGBRForest *fReadereesemi;
 
+      RooRealVar *_mean;
+      RooRealVar *_tgt;
+      RooRealVar *_sigma;
+      RooRealVar *_n1;
+      RooRealVar *_n2;
+      
+      RooAbsReal *_meanlim;
+      RooAbsReal *_sigmalim;
+      RooAbsReal *_n1lim;
+      RooAbsReal *_n2lim;
+      
+      RooAbsPdf *_pdf;
+      
+      RooArgList _args;      
+      
       TString fMethodname;
       
       Bool_t fIsInitialized;

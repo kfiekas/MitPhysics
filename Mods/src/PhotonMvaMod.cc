@@ -138,7 +138,7 @@ void PhotonMvaMod::Process()
 
     if (fDoRegression) {
       if (!egcor.IsInitialized()) {
-        egcor.Initialize(fPhFixString,fPhFixFile,fRegWeights);
+        egcor.Initialize(fPhFixString,fPhFixFile,fRegWeights,fRegressionVersion);
       }
     
       if (fRegressionVersion>0)

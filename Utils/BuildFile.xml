@@ -3,7 +3,9 @@
 <use   name="CondFormats/EgammaObjects"/>
 <use   name="MitCommon/MathTools"/>
 <use   name="MitPhysics/ElectronLikelihood"/>
+<use   name="HiggsAnalysis/GBRLikelihood"/>
 <use   name="root"/>
+<use   name="roofit"/>
 <use   name="roottmva"/>
 <use   name="rootcintex"/>
 <lib   name="EG"/>

@@ -1,10 +1,17 @@
-// $Id: EGEnergyCorrector.cc,v 1.8 2012/05/25 19:41:11 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.9 2012/06/17 23:11:58 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
 #include "CondFormats/EgammaObjects/interface/GBRForest.h"
+#include "RooRealVar.h"
+#include "RooAbsReal.h"
+#include "RooAbsPdf.h"
+#include "RooConstVar.h"
+#include "HiggsAnalysis/GBRLikelihood/interface/RooHybridBDTAutoPdf.h"
+#include "HiggsAnalysis/GBRLikelihood/interface/RooDoubleCBFast.h"
+#include "HiggsAnalysis/GBRLikelihood/interface/HybridGBRForest.h"
 #include "Cintex/Cintex.h"
 #include <TFile.h>
 #include <TRandom3.h>
@@ -19,6 +26,18 @@ fReadereb(0),
 fReaderebvariance(0),
 fReaderee(0),
 fReadereevariance(0),
+fReaderebsemi(0),
+fReadereesemi(0),
+_mean(0),
+_tgt(0),
+_sigma(0),
+_n1(0),
+_n2(0),
+_meanlim(0),
+_sigmalim(0),
+_n1lim(0),
+_n2lim(0),
+_pdf(0),
 fMethodname("BDTG method"),
 fIsInitialized(kFALSE),
 fVals(0)
@@ -39,50 +58,119 @@ EGEnergyCorrector::~EGEnergyCorrector()
 }
 
 //--------------------------------------------------------------------------------------------------
-void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TString regweights) {
+void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TString regweights, Int_t version=0) {
     fIsInitialized = kTRUE;
-    fPhFix.initialise(std::string(phfixstring),std::string(phfixfile));
-
     if (fVals) delete [] fVals;
     if (fReadereb) delete fReadereb;
     if (fReaderebvariance) delete fReaderebvariance;  
     if (fReaderee) delete fReaderee;
-    if (fReadereevariance) delete fReadereevariance;    
+    if (fReadereevariance) delete fReadereevariance;        
+    if (fReaderebsemi) delete fReaderebsemi;
+    if (fReadereesemi) delete fReadereesemi;
     
-    fVals = new Float_t[73];
+    if (version<=3) {
     
-    ROOT::Cintex::Cintex::Enable();   
+      fPhFix.initialise(std::string(phfixstring),std::string(phfixfile));
+
+
+      
+      fVals = new Float_t[73];
+      
+      ROOT::Cintex::Cintex::Enable();   
+      
+      TFile *fgbr = new TFile(regweights,"READ");
+      fReadereb = (GBRForest*)fgbr->Get("EBCorrection");
+      fReaderebvariance = (GBRForest*)fgbr->Get("EBUncertainty");  
+      fReaderee = (GBRForest*)fgbr->Get("EECorrection");
+      fReadereevariance = (GBRForest*)fgbr->Get("EEUncertainty");      
+      fgbr->Close();
     
-    TFile *fgbr = new TFile(regweights,"READ");
-    fReadereb = (GBRForest*)fgbr->Get("EBCorrection");
-    fReaderebvariance = (GBRForest*)fgbr->Get("EBUncertainty");  
-    fReaderee = (GBRForest*)fgbr->Get("EECorrection");
-    fReadereevariance = (GBRForest*)fgbr->Get("EEUncertainty");      
-    fgbr->Close();
+    }
+    else {
+      fVals = new Float_t[37];
+      
+      TFile *fgbr = TFile::Open(regweights,"READ");
+      fgbr->GetObject("EGRegressionForest_EB", fReaderebsemi);
+      fgbr->GetObject("EGRegressionForest_EE", fReadereesemi);
+      fgbr->Close();
+
+      //recreate pdf with constraint transformations (can't load directly from file due to weird RooWorkspace IO features)
+      
+      _tgt = new RooRealVar("tgt","",1.);
+      _mean = new RooRealVar("mean","",1.);
+      _sigma = new RooRealVar("sigma","",1.);
+      _n1 = new RooRealVar("n1","",2.);
+      _n2 = new RooRealVar("n2","",2.);
+      
+      _sigmalim = new RooRealConstraint("sigmalim","",*_sigma,0.0002,0.5);
+      _meanlim = new RooRealConstraint("meanlim","",*_mean,0.2,2.0);
+      _n1lim = new RooRealConstraint("n1lim","",*_n1,1.01,110.);
+      _n2lim = new RooRealConstraint("n2lim","",*_n2,1.01,110.);
+      
+      RooConstVar *cbmean = new RooConstVar("cbmean","",1.0);
+      RooConstVar *alpha1 = new RooConstVar("alpha1","",2.0);
+      RooConstVar *alpha2 = new RooConstVar("alpha2","",1.0);
+      
+      _pdf = new RooDoubleCBFast("sigpdf","",*_tgt,*cbmean,*_sigmalim,*alpha1,*_n1lim,*alpha2,*_n2lim);
+      
+      //add to RooArgList for proper garbage collection
+      _args.addOwned(*_tgt);
+      _args.addOwned(*_mean);
+      _args.addOwned(*_sigma);
+      _args.addOwned(*_n1);
+      _args.addOwned(*_n2);
+      _args.addOwned(*cbmean);
+      _args.addOwned(*alpha1);
+      _args.addOwned(*alpha2);
+      _args.addOwned(*_sigmalim);
+      _args.addOwned(*_meanlim);
+      _args.addOwned(*_n1lim);
+      _args.addOwned(*_n2lim);
+      _args.addOwned(*_pdf);       
+      
+    }
 
 }
 
 //--------------------------------------------------------------------------------------------------
 void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs, Double_t rho, UInt_t version, Bool_t applyRescale) {
   
-  std::pair<double,double> correction;
-  if (version == 1) {
-    correction = CorrectedEnergyWithError(p);
-  }
-  else if (version == 2) {
-    correction = CorrectedEnergyWithErrorV2(p,vtxs);
-  }
-  else if (version == 3) {
-    correction = CorrectedEnergyWithErrorV3(p,vtxs,rho,applyRescale);
-  }
+  
+  if (version<=3) {
+    std::pair<double,double> correction;
+    if (version == 1) {
+      correction = CorrectedEnergyWithError(p);
+    }
+    else if (version == 2) {
+      correction = CorrectedEnergyWithErrorV2(p,vtxs);
+    }
+    else if (version == 3) {
+      correction = CorrectedEnergyWithErrorV3(p,vtxs,rho,applyRescale);
+    }
 
-  //printf("photon: e = %5f, eerr = %5f, sceta = %5f\n",p->E(),p->EnergyErr(),p->SCluster()->Eta());
-  //printf("gbr   : e = %5f, eerr = %5f\n",correction.first,correction.second);
-  FourVectorM mom = p->Mom();
-  double scale = correction.first/mom.E();
-  p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
-  p->SetEnergyErr(correction.second);
-  p->SetEnergyErrSmeared(correction.second);
+    //printf("photon: e = %5f, eerr = %5f, sceta = %5f\n",p->E(),p->EnergyErr(),p->SCluster()->Eta());
+    //printf("gbr   : e = %5f, eerr = %5f\n",correction.first,correction.second);
+    FourVectorM mom = p->Mom();
+    double scale = correction.first/mom.E();
+    p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
+    p->SetEnergyErr(correction.second);
+    p->SetEnergyErrSmeared(correction.second);
+  }
+  else {
+    
+    if (version == 5) {
+      double ecor,mean,sigma,alpha1,n1,alpha2,n2,peakpdfval;
+      CorrectedEnergyWithErrorV5(p,vtxs,rho,ecor,mean,sigma,alpha1,n1,alpha2,n2,peakpdfval);
+      
+      FourVectorM mom = p->Mom();
+      double scale = ecor/mom.E();
+      p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
+      p->SetEnergyErr(sigma*ecor);
+      p->SetEnergyErrSmeared(sigma*ecor);    
+    }
+    
+  }
+  
   
   //printf("initial pt = %5f, regression pt = %5f\n",mom.Pt(),p->Pt());
   
@@ -451,4 +539,98 @@ std::pair<double,double> EGEnergyCorrector::CorrectedEnergyWithErrorV3(const Pho
   Double_t ecorerr = readervar->GetResponse(fVals)*den;
   
   return std::pair<double,double>(ecor,ecorerr);
+}
+
+//--------------------------------------------------------------------------------------------------
+void EGEnergyCorrector::CorrectedEnergyWithErrorV5(const Photon *p, const VertexCol *vtxs, Double_t rho, Double_t &ecor, Double_t &mean, Double_t &sigma, Double_t &alpha1, Double_t &n1, Double_t &alpha2, Double_t &n2, Double_t &pdfpeakval) {
+ 
+  const SuperCluster *s = p->SCluster();
+  const BasicCluster *b = s->Seed();
+  
+  
+  Bool_t isbarrel = (s->AbsEta()<1.5);
+  
+// //basic supercluster variables
+  fVals[0] = s->RawEnergy();
+  fVals[1] = s->Eta();
+  fVals[2] = p->R9();
+  fVals[3] = s->EtaWidth();
+  fVals[4] = s->PhiWidth();
+  fVals[5] = double(s->NClusters());
+  fVals[6] = p->HadOverEmTow();
+  fVals[7] = rho;
+  fVals[8] = double(vtxs->GetEntries());
+
+  //seed basic cluster variables
+  fVals[9] = b->Eta()-s->Eta();
+  fVals[10] = atan2(sin(b->Phi()-s->Phi()), cos(b->Phi()-s->Phi()));
+  fVals[11] = b->Energy()/s->RawEnergy();
+  fVals[12] = b->E3x3()/b->E5x5();
+  fVals[13] = sqrt(b->CoviEtaiEta()); //sigietaieta
+  fVals[14] = sqrt(b->CoviPhiiPhi()); //sigiphiiphi
+  fVals[15] = b->CoviEtaiPhi();   //sigietaiphi
+  fVals[16] = b->EMax()/b->E5x5(); //crystal energy ratio gap variables
+  fVals[17] = b->E2nd()/b->E5x5();
+  fVals[18] = b->ETop()/b->E5x5();
+  fVals[19] = b->EBottom()/b->E5x5();
+  fVals[20] = b->ELeft()/b->E5x5();
+  fVals[21] = b->ERight()/b->E5x5();
+  fVals[22] = b->E2x5Max()/b->E5x5(); //crystal energy ratio gap variables
+  fVals[23] = b->E2x5Top()/b->E5x5();
+  fVals[24] = b->E2x5Bottom()/b->E5x5();
+  fVals[25] = b->E2x5Left()/b->E5x5();
+  fVals[26] = b->E2x5Right()/b->E5x5();
+
+  if (isbarrel) {
+    //additional energy ratio (always ~1 for endcap, therefore only included for barrel)
+    fVals[27] = b->E5x5()/b->Energy();
+    
+    fVals[28] = b->IEta();
+    fVals[29] = b->IPhi()%18;  //should really be (iphi-1)%20 ie duplicate with the later variable
+    fVals[30] = b->IEta()%5;
+    fVals[31] = b->IPhi()%2;
+    fVals[32] = (TMath::Abs(b->IEta())<=25)*(b->IEta()%25) + (TMath::Abs(b->IEta())>25)*((b->IEta()-25*TMath::Abs(b->IEta())/b->IEta())%20); //should be ieta->ieta-1 for %
+    fVals[33] = b->IPhi()%20; //should really be (iphi-1)%20
+    fVals[34] = b->EtaCry();
+    fVals[35] = b->PhiCry();        
+    
+
+  }
+  else {
+    //preshower energy ratio (endcap only)
+    fVals[27] = s->PreshowerEnergy()/s->RawEnergy();
+  }
+  
+  double den;
+  HybridGBRForest *forest;
+  if (isbarrel) {
+    den = s->RawEnergy();
+    forest = fReaderebsemi;
+  }
+  else {
+    den = s->RawEnergy() + s->PreshowerEnergy();
+    forest = fReadereesemi;
+  }
+  
+  _tgt->setVal(1.0); //evaluate pdf at peak position
+  
+  //set raw response variables from GBRForest
+  _sigma->setVal(forest->GetResponse(&fVals[0],0));
+  _mean->setVal(forest->GetResponse(&fVals[0],1));
+  _n1->setVal(forest->GetResponse(&fVals[0],2));
+  _n2->setVal(forest->GetResponse(&fVals[0],3));
+  
+  //retrieve final pdf parameter values from transformed forest outputs
+  ecor = den/_meanlim->getVal();
+  mean = _meanlim->getVal();
+  sigma = _sigmalim->getVal();
+  alpha1 = 2.0; //alpha hardcoded in this version of the regression
+  n1 = _n1lim->getVal();
+  alpha2 = 1.0; //alpha hardcoded in this version of the regression
+  n2 = _n2lim->getVal();
+  
+  pdfpeakval = _pdf->getVal(*_tgt);  
+  
+  return;
+  
 }
