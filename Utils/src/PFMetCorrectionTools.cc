@@ -1,4 +1,4 @@
-// $Id: PFMetCorrectionTools.cc,v 1.5 2012/06/21 16:06:08 mtouch Exp $
+// $Id: PFMetCorrectionTools.cc,v 1.6 2012/07/05 11:17:36 mtouch Exp $
 
 #include "MitPhysics/Utils/interface/PFMetCorrectionTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -87,7 +87,7 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
   
   TLorentzVector jetSumUnsmeared;
   jetSumUnsmeared.SetXYZT(0.,0.,0.,0);
-  TRandom3 *jSmearRan= new TRandom3(evt);
+  TRandom3 jSmearRan(evt);
 
   
   if( !fPFJet || !fcorrJet) {
@@ -162,8 +162,8 @@ void PFMetCorrectionTools::correctMet(Met *met, const Photon *phHard, const Phot
       else {
 	Double_t expres = ErrEt(recojet->Mom().Pt(),recojet->Mom().Eta());
 	Double_t relsmear = expres * sqrt(smear*smear-1);
-	jSmearRan->SetSeed(evt+(Int_t)(recojet->Mom().Eta()*1000));
-	shift = jSmearRan->Gaus(0.,relsmear);
+	jSmearRan.SetSeed(evt+(Int_t)(recojet->Mom().Eta()*1000));
+	shift = jSmearRan.Gaus(0.,relsmear);
       }
       
            
