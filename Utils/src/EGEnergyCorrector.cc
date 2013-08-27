@@ -1,4 +1,4 @@
-// $Id: EGEnergyCorrector.cc,v 1.9 2012/06/17 23:11:58 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.10 2013/08/21 13:16:30 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -127,6 +127,9 @@ void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TStri
       _args.addOwned(*_n1lim);
       _args.addOwned(*_n2lim);
       _args.addOwned(*_pdf);       
+      
+      //add target var to static normalization set to avoid memory churn/leak
+      _normset.add(*_tgt);
       
     }
 
@@ -629,7 +632,7 @@ void EGEnergyCorrector::CorrectedEnergyWithErrorV5(const Photon *p, const Vertex
   alpha2 = 1.0; //alpha hardcoded in this version of the regression
   n2 = _n2lim->getVal();
   
-  pdfpeakval = _pdf->getVal(*_tgt);  
+  pdfpeakval = _pdf->getVal(&_normset);  
   
   return;
   

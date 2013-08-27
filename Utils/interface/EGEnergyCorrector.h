@@ -28,6 +28,7 @@
 #include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "RooArgList.h"
+#include "RooArgSet.h"
 
 class TRandom3;
 class GBRForest;
@@ -81,6 +82,7 @@ namespace mithep {
       RooAbsPdf *_pdf;
       
       RooArgList _args;      
+      RooArgSet _normset;
       
       TString fMethodname;
       
