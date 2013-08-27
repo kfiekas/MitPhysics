@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PFTauIDMod.h,v 1.2 2011/02/17 14:08:49 ceballos Exp $
+// $Id: PFTauIDMod.h,v 1.4 2011/03/09 14:56:26 dkralph Exp $
 //
 // PFTauIDMod
 //
@@ -35,11 +35,13 @@ namespace mithep
       // note: for safety, tau name is determined by fIsHPSSel in SlaveBegin()
       void                SetPFTausName(const char *n)               { fPFTausName	    	     = n; }
       void                SetPtMin(Double_t x)                       { fPtMin 	           	     = x; }
+      void                SetEtaMax(Double_t x)                      { fEtaMax 	           	     = x; }
       void                SetPtLeadChargedHadronPFCandMin(Double_t x){ fPtLeadChargedHadronPFCandMin = x; }
       void                SetIsoChargedHadronPtSumMax(Double_t x)    { fIsoChargedHadronPtSumMax     = x; }
       void                SetIsoGammaEtSumMax(Double_t x)   	     { fIsoGammaEtSumMax    	     = x; }
       void                SetSignalMassMin(Double_t x)	    	     { fSignalMassMin	    	     = x; }
       void                SetSignalMassMax(Double_t x)	    	     { fSignalMassMax	    	     = x; }
+      void                SetIsLooseId(Bool_t b)	             { fIsLooseId                    = b; }
       void                SetIsHPSSel(Bool_t b)	    	             { fIsHPSSel                     = b; }
       void                SetHPSIso(const char *i)                   { fHPSIso                       = i; }
 
@@ -50,11 +52,13 @@ namespace mithep
       TString             fPFTausName;               	 //name of tau collection (input)
       TString             fGoodPFTausName;           	 //name of exported good PFTau collection (output)
       Double_t            fPtMin;                    	 //min tau pt cut
+      Double_t            fEtaMax;                    	 //max tau eta cut
       Double_t            fPtLeadChargedHadronPFCandMin; //min LeadChargedHadronPFCand pt cut
       Double_t            fIsoChargedHadronPtSumMax; 	 //maximum of Pt iso tracks
       Double_t            fIsoGammaEtSumMax;         	 //maximum of Pt iso neutrals
       Double_t            fSignalMassMin;            	 //minimum of tau mass
       Double_t            fSignalMassMax;            	 //maximum of tau mass
+      Bool_t              fIsLooseId;            	 //apply Loose Tau selection
       Bool_t              fIsHPSSel;            	 //apply HPS Tau selection
       TString             fHPSIso;                       //isolation tightness: "tight", "medium", "loose"
       const PFTauCol     *fPFTaus;                       //!tau branch

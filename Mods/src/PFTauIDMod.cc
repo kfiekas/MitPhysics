@@ -1,4 +1,4 @@
-// $Id: PFTauIDMod.cc,v 1.3 2011/02/17 14:08:49 ceballos Exp $
+// $Id: PFTauIDMod.cc,v 1.5 2011/03/09 14:56:46 dkralph Exp $
 
 #include "MitPhysics/Mods/interface/PFTauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
@@ -14,11 +14,13 @@ PFTauIDMod::PFTauIDMod(const char *name, const char *title) :
   fPFTausName(Names::gkPFTauBrn),
   fGoodPFTausName(ModNames::gkGoodPFTausName),
   fPtMin(15.0),
+  fEtaMax(2.4),
   fPtLeadChargedHadronPFCandMin(5.0),
   fIsoChargedHadronPtSumMax(2.0),
   fIsoGammaEtSumMax(3.0),
   fSignalMassMin(0.13),
   fSignalMassMax(2.00),
+  fIsLooseId(kTRUE),
   fIsHPSSel(kFALSE),
   fHPSIso("loose"),
   fPFTaus(0)
@@ -39,7 +41,15 @@ void PFTauIDMod::Process()
   for (UInt_t i=0; i<fPFTaus->GetEntries(); ++i) {
     const PFTau *tau = fPFTaus->At(i);
 
-    if(fIsHPSSel == kFALSE) {
+    // loose Id
+    if (fIsLooseId) {
+      if (tau->Pt() < fPtMin) continue;
+      if (fabs(tau->Eta()) > fEtaMax) continue;
+      if (!tau->DiscriminationByDecayModeFinding()) continue;
+    }
+
+    // non-HPS
+    else if(fIsHPSSel == kFALSE) {
       if (tau->NSignalPFCands() == 0)
 	continue;
 
@@ -79,6 +89,7 @@ void PFTauIDMod::Process()
       if (tauChargedSystem.Mass() <= fSignalMassMin || tauChargedSystem.Mass() >= fSignalMassMax)
 	continue;
     }
+    // HPS
     else { // if we're doing hps selection:
       if(tau->Pt() <= fPtMin)
 	continue;
