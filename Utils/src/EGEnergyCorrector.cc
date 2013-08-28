@@ -1,4 +1,4 @@
-// $Id: EGEnergyCorrector.cc,v 1.10 2013/08/21 13:16:30 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.11 2013/08/27 15:27:50 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -632,7 +632,9 @@ void EGEnergyCorrector::CorrectedEnergyWithErrorV5(const Photon *p, const Vertex
   alpha2 = 1.0; //alpha hardcoded in this version of the regression
   n2 = _n2lim->getVal();
   
-  pdfpeakval = _pdf->getVal(&_normset);  
+  //possible memory leak
+  //pdfpeakval = _pdf->getVal(&_normset);
+  pdfpeakval = 0.;
   
   return;
   
