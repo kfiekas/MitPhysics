@@ -128,7 +128,10 @@ void PhotonMvaMod::Process()
   //printf("photonmvamod check 1\n"); 
   assert(preselPh);  
   //printf("preselPh->GetEntries():%d\n",preselPh->GetEntries()); 
-  if ( preselPh->GetEntries() < fMinNumPhotons ) return;
+  if ( preselPh->GetEntries() < fMinNumPhotons ) {
+    delete preselPh;
+    return;
+  }
   
   // Sorry... need the second loop here in order to sort & assign the right Categories..
   //preselPh->Sort();
