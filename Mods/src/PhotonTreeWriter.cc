@@ -1,3 +1,4 @@
+#include <sstream>
 #include "MitPhysics/Mods/interface/PhotonTreeWriter.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
@@ -106,9 +107,14 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fFillClusterArrays      (kFALSE),
   fFillVertexTree         (kFALSE),
   fDo2012LepTag           (kFALSE),
+  fVerbosityLevel         (0),
   fPhFixDataFile          (gSystem->Getenv("CMSSW_BASE") +
 		           TString("/src/MitPhysics/data/PhotonFixSTART42V13.dat")),
   fBeamspotWidth          (5.8),
+  fTmpFile                (0),
+
+  // JV: moved up the initializtion of fTupleName to avoid compilation warning
+  fTupleName              ("hPhotonTree"),
 
   fElectronIDMVA(0),
   fElectronMVAWeights_Subdet0Pt10To20(""),
@@ -117,9 +123,9 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fElectronMVAWeights_Subdet0Pt20ToInf(""),
   fElectronMVAWeights_Subdet1Pt20ToInf(""),
   fElectronMVAWeights_Subdet2Pt20ToInf(""),
-  fTheRhoType(RhoUtilities::DEFAULT),
 
-  fTupleName              ("hPhotonTree")
+  fTheRhoType(RhoUtilities::DEFAULT)
+
 {
   // Constructor
 }
@@ -127,6 +133,14 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
 PhotonTreeWriter::~PhotonTreeWriter()
 {
   // Destructor
+  // Deal with the temporary file here?
+  // fTmpFile->Write();
+  fTmpFile->Close();
+  TString shellcmd = TString("rm ") + TString(fTmpFile->GetName());
+  delete fTmpFile;
+  cout << shellcmd.Data() << endl;
+  gSystem->Exec(shellcmd.Data());
+  
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1061,12 +1075,13 @@ void PhotonTreeWriter::Process()
 	  fDiphotonEvent->vbfTag = 1;
 	}
       }
-    }
-
+    } // End of VBF tag stuff
+    
     // ttH tag stuff
     fDiphotonEvent->tthTag = -1;
-    if (fApplyTTHTag) {
-      ApplyTTHTag(phHard,phSoft,selvtx);
+    if (fApplyTTHTag && phHard && phSoft && selvtx) {
+      ApplyTTHTag(phHard, phSoft, selvtx);
+      PrintTTHDebugInfo();
     }
     
     //printf("vbfbdt:%f\n",fDiphotonEvent->vbfbdt);
@@ -1242,7 +1257,7 @@ void PhotonTreeWriter::SlaveBegin()
   fDiphotonEvent = new PhotonTreeWriterDiphotonEvent;
   fSinglePhoton  = new PhotonTreeWriterPhoton<16>;
   
-  TFile *ftmp = TFile::Open(TString::Format("%s_tmp.root",GetName()),"RECREATE");
+  fTmpFile = TFile::Open(TString::Format("%s_tmp.root",GetName()),"RECREATE");
   
   if (fWriteDiphotonTree) {
     hCiCTuple = new TTree(fTupleName.Data(),fTupleName.Data());
@@ -1495,7 +1510,8 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
     // -----------------------------------------------------
     // PF-CiC4 Debug Stuff
     std::vector<double> debugVals;
-    bool tmpPass = PhotonTools::PassCiCPFIsoSelection(p, vtx, fPFCands, vtxCol, rho, 20., &debugVals);
+    // bool tmpPass = PhotonTools::PassCiCPFIsoSelection(p, vtx, fPFCands, vtxCol, rho, 20., &debugVals);
+    PhotonTools::PassCiCPFIsoSelection(p, vtx, fPFCands, vtxCol, rho, 20., &debugVals);
     if( debugVals.size() == 13 ) {
       pfcic4_tIso1   = debugVals[0];
       pfcic4_tIso2   = debugVals[1];
@@ -2244,8 +2260,15 @@ void PhotonTreeWriterVtx::SetVars(const Vertex *v, const Photon *p1, const Photo
   
 }
 
+
 //_____________________________________________________________________________
-void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard, const Photon *phSoft,const Vertex *selvtx)
+// Applies the ttH tag given precelected leading and trailing photons
+// phHard and phSoft and the corresponding (pre?) selected vertex selvtx. 
+// The result is stored as an integer value of the tthTag variable
+// entering the diphoton event record.
+void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
+                                   const Photon *phSoft,
+                                   const Vertex *selvtx)
 {
   // ttH tag = -1 .. not applied
   //            0 .. not tagged
@@ -2253,12 +2276,14 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard, const Photon *phSoft,co
   //            2 .. tagged as a hadronic ttH event
   fDiphotonEvent->tthTag = 0;
   
-  // Selection taken from the AN2012_480_V6 of 24 April 2013, further 
-  // refferred to as "the AN"
+  // The selection taken from the AN2012_480_V6 of 24 April 2013, further 
+  // referred to as "the AN", and the approval slides at
+  // https://twiki.cern.ch/twiki/pub/CMS/JanVeverkaHgg/micheli_ttH_approval_20130508_2_reduced.pdf,
+  // further referred to as "the slides" or "the slide n" (n = 1, 2, ..)
 
   // Check the pt of the photons, see L141 and L142 of the AN
-  if (phHard->Pt() < 33.) return;
-  if (phSoft->Pt() < 25.) return;
+  if (fDiphotonEvent->photons[0].Pt() < 33.) return;
+  if (fDiphotonEvent->photons[1].Pt() < 25.) return;
 
   // Init final-state object counters
   UInt_t nJets = 0;
@@ -2266,6 +2291,8 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard, const Photon *phSoft,co
   UInt_t nElectrons = 0;
   UInt_t nMuons = 0;
     
+  // Get the selected vertex
+  
   // Loop over jets, count those passing selection.
   // No Delta R(gamma, j) requirement!?  
   for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
@@ -2280,13 +2307,13 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard, const Photon *phSoft,co
     // (Aram & Valentina say so)
     if (!JetTools::passPFLooseId(pfjet)) continue;
     // Apply the jet ID as given in Table 4
-    // TODO: JetTools::betaStar or JetTools::betaStarClassic?
+    // TODO: JetTools::betaStar or JetTools::betaStarClassic? (yes, classic)
     // Go for the latter now as it is used in the JetIDMVA::passCut(..) which in turn
     // is used for the VBF tag.
     Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
     // TODO: Really 0.67? JetIDMVA::passCut(..) and AN-13-008 use 0.64 insted.
     if (betaStar > 0.2 * log(fPV->GetEntries() - 0.67)) continue;
-    // TODO: is the second argument iPFType = -1 correct?
+    // TODO: is the second argument iPFType = -1 correct? yes
     if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
     // this jet passes, count it in
     ++nJets;
@@ -2324,7 +2351,11 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard, const Photon *phSoft,co
   for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {
     const Electron *ele = fLeptonTagElectrons->At(iele);
     // Apply kinematic cuts, see L133 and L134 of the AN
-    if (ele->Pt() < 20. || ele->AbsEta() < 2.5) continue;
+    if (ele->Pt() < 20. || ele->AbsEta() > 2.5) continue;
+    // Require separation between this electron and both photons,
+    // see the slide 7, bullet 5
+    if (MathUtils::DeltaR(ele, phHard) < 1.0) continue;
+    if (MathUtils::DeltaR(ele, phSoft) < 1.0) continue;
     ++nElectrons;
   }
   
@@ -2332,7 +2363,12 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard, const Photon *phSoft,co
   for (UInt_t imu=0; imu < fLeptonTagMuons->GetEntries(); ++imu) {
     const Muon *mu = fLeptonTagMuons->At(imu);
     // Apply kinematic cuts, see L132 and L134 of the AN
-    if (mu->Pt() < 20. || mu->AbsEta() < 2.4) continue;
+    if (mu->Pt() < 20. || mu->AbsEta() > 2.4) continue;
+    // Require separation between this electron and both photons,
+    // see the slide 7, bullet 2
+    // TODO: Check with authors that this is indeed applied.
+    if (MathUtils::DeltaR(mu, phHard) < 1.0) continue;
+    if (MathUtils::DeltaR(mu, phSoft) < 1.0) continue;
     ++nMuons;
   }
 
@@ -2353,4 +2389,128 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard, const Photon *phSoft,co
   }  
   
 } // void PhotonTreeWriter::ApplyTTHTag()
+
+
+//_____________________________________________________________________________
+void PhotonTreeWriter::Terminate()
+{
+  // Run finishing code on the computer (slave) that did the analysis
+}
+
+
+//_____________________________________________________________________________
+void PhotonTreeWriter::PrintTTHDebugInfo()
+{
+  if (fVerbosityLevel > 0) {
+    cout << "JV: Processing run " << fDiphotonEvent->run
+          << " event " << fDiphotonEvent->evt << " .. " << endl;
+    PrintTTHDecay();
+  }
+
+  if (fVerbosityLevel > 1) {
+    PrintGenElectrons();
+    PrintElectrons("reco electrons", fElectrons);
+    PrintElectrons("lepton-tag electrons", fLeptonTagElectrons);
+  }
+} // void PhotonTreeWriter::PrintTTHDebugInfo()
+
+
+//_____________________________________________________________________________
+void PhotonTreeWriter::PrintTTHDecay()
+{
+  // Initialize W decay type counters
+  UInt_t nLeptonic = 0;
+  UInt_t nHadronic = 0;
+  Int_t WplusDau1PID = 0;
+  Int_t WminusDau1PID = 0;
+  // loop over all GEN particles and look for W bosons
+  for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
+    const MCParticle* p = fMCParticles->At(i);
+    if (p->Is(MCParticle::kW) && p->Status() == 3 && p->NDaughters() > 0) {
+      // found a W in the ME
+      cout << "JV: " << p->PdgEntry()->GetName() 
+           << "[" << i << "] -> ";
+
+      // Set the PID of the first daughter
+      if (p->PdgId() > 0) {
+        WplusDau1PID = p->Daughter(0)->PdgId();
+      } else {
+        WminusDau1PID = p->Daughter(0)->PdgId();
+      }
+
+      // loop over W daughters
+      for (UInt_t j=0; j < p->NDaughters(); ++j) {
+        const MCParticle *d = p->Daughter(j);
+        if (d->Status() == 2) continue;
+        cout << d->PdgEntry()->GetName() << " ";
+      } // loop over W daughters
+      cout << endl;
+
+      // Check the decay type     
+      if (p->NDaughters() > 0 && p->Daughter(0)->IsQuark()) {
+        ++nHadronic;
+      } else {
+        ++nLeptonic;
+      }
+    } // found the W
+  } // loop over all GEN particles
+  
+  cout << "JV: ttbar decay is ";
+  switch (nHadronic) {
+    case 0: cout << "leptonic"; break;
+    case 1: cout << "semi-leptonic"; break;
+    case 2: cout << "hadronic"; break;
+    default: cout << "ERROR";
+  }
+  cout << endl;
+  
+  cout << "JV: tthTag WplusDau1PID WminusDau1PID:\t"
+       << fDiphotonEvent->tthTag << "\t"
+       << WplusDau1PID << "\t"
+       << WminusDau1PID << endl;
+  return;
+} // void PrintTTHDecay()
+
+
+//_____________________________________________________________________________
+void PhotonTreeWriter::PrintGenElectrons()
+{
+  ostringstream report;
+  report << "JV: gen electrons" << endl;
+  UInt_t nEl = 0;
+  for (UInt_t i=0; i < fMCParticles->GetEntries(); ++i){
+    const MCParticle *p = fMCParticles->At(i);
+    if (p->Is(MCParticle::kEl) && 
+        p->Status() == 1 && 
+        p->Pt() > 15 && 
+        p->AbsEta() < 2.6) {
+      ++nEl;
+      report << "  " << p->PdgEntry()->GetName() << ": "
+             << "pt=" << p->Pt() << ", "
+             << "eta=" << p->AbsEta() << endl;
+    } // Electron preselection
+  } // End of loop over MC particles
+  if (nEl > 0) cout << report.str();
+} // void PhotonTreeWriter::PrintGenElectrons()
+
+
+//_____________________________________________________________________________
+void PhotonTreeWriter::PrintElectrons(const char *tag,
+                                      const ElectronCol *electrons)
+{
+  ostringstream report;
+  report << "JV: " << tag << endl;
+  UInt_t nEl = 0;
+  for (UInt_t i=0; i < electrons->GetEntries(); ++i){
+    const Electron *e = electrons->At(i);
+    if (e->Pt() > 20 && e->AbsEta() < 2.5) {
+      ++nEl;
+      report << "  q=" << e->Charge() << ", "
+             << "pt=" << e->Pt() << ", "
+             << "eta=" << e->AbsEta() << endl;
+    } // Electron preselection
+  } // End of loop over reco electrons
+  if (nEl > 0) cout << report.str();
+} // void PhotonTreeWriter::PrintRecoElectrons()
+
 
