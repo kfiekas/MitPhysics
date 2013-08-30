@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.32 2013/08/21 13:29:50 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.33 2013/08/30 12:02:37 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -461,7 +461,8 @@ namespace mithep
       Float_t btagJet2Pt;
       Float_t btagJet2Eta;
       // ----------- LEPTON TAG STUFF -------------
-      Int_t leptonTag;
+      Int_t leptonTag; // flavor-based, Moriond 2013
+      Int_t leptonTag2; // MET-based, since legacy paper 2013
       // ----------- VEERTEX SYNCHING STUFF -------
 
       Int_t vtxInd1;
@@ -676,7 +677,7 @@ namespace mithep
       Float_t dphidijetgg;
       
       PhotonTreeWriterPhoton<16> photons[2];
-  };
+  }; // PhotonTreeWriterDiphotonEvent
   
   class PhotonTreeWriter : public BaseMod
   {
@@ -712,6 +713,7 @@ namespace mithep
     void                SetEnableGenJets(Bool_t b)           { fEnableGenJets = b;             }
     void                SetApplyJetId(Bool_t b)           { fApplyJetId = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
+    void                SetApplyLeptonTag2(Bool_t b)      { fApplyLeptonTag2 = b;        }
     void                SetApplyVBFTag(Bool_t b)          { fApplyVBFTag = b;            }
     void                SetApplyTTHTag(Bool_t b)          { fApplyTTHTag = b;            }
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
@@ -773,11 +775,17 @@ namespace mithep
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);
     Float_t             GetEventCat    (PhotonTools::CiCBaseLineCats cat1,
 					PhotonTools::CiCBaseLineCats cat2);
-    void                ApplyTTHTag(const Photon*, const Photon*, const Vertex*);
-    void                PrintTTHDebugInfo();
-    void                PrintTTHDecay();
-    void                PrintGenElectrons();
-    void                PrintElectrons(const char *, const ElectronCol*);
+    void                ApplyLeptonTag(const Photon *phHard,
+                                       const Photon *phSoft,
+                                       const Vertex *selvtx);
+    void                ApplyLeptonTag2(const Photon *phHard,
+                                        const Photon *phSoft,
+                                        const Vertex *selvtx);
+    void                ApplyTTHTag(const Photon *phHard, const Photon *phSoft,const Vertex *selvtx);
+//     void                PrintTTHDebugInfo();
+//     void                PrintTTHDecay();
+//     void                PrintGenElectrons();
+//     void                PrintElectrons(const char *, const ElectronCol*);
 
     // Names for the input Collections
     TString             fPhotonBranchName;
@@ -863,6 +871,7 @@ namespace mithep
     Bool_t                         fApplyJetId;
 
     Bool_t                         fApplyLeptonTag;
+    Bool_t                         fApplyLeptonTag2;
     Bool_t                         fApplyVBFTag;
     Bool_t                         fApplyTTHTag;
     Bool_t                         fApplyBTag;

@@ -1,4 +1,3 @@
-#include <sstream>
 #include "MitPhysics/Mods/interface/PhotonTreeWriter.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
@@ -100,6 +99,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fEnableGenJets          (kFALSE),
   fApplyJetId             (kFALSE),
   fApplyLeptonTag         (kFALSE),
+  fApplyLeptonTag2        (kFALSE),
   fApplyVBFTag            (kFALSE),
   fApplyTTHTag            (kFALSE),
   fApplyBTag              (kFALSE),
@@ -156,7 +156,7 @@ void PhotonTreeWriter::Process()
   LoadEventObject(fGoodElectronName,   fGoodElectrons);
 
   // lepton tag collections
-  if( fApplyLeptonTag ) {
+  if( fApplyLeptonTag || fApplyLeptonTag2 ) {
     LoadEventObject(fLeptonTagElectronsName, fLeptonTagElectrons);
     LoadEventObject(fLeptonTagMuonsName,     fLeptonTagMuons);
   }
@@ -243,6 +243,7 @@ void PhotonTreeWriter::Process()
   Double_t _spfMet = fPFMet->At(0)->SumEt();
 
   fDiphotonEvent->leptonTag = -1; // disabled
+  fDiphotonEvent->leptonTag2 = -1; // disabled
 
   // ====================================================
   // Vtx synching stuff...
@@ -934,122 +935,13 @@ void PhotonTreeWriter::Process()
     
      
     if( fApplyLeptonTag ) {
-      
-      // perform lepton tagging
-      // the diphoton event record will have one more entry; i.e. leptonTag
-      // leptonTag = -1   -> lepton-taggng was swicthed off
-      //           =  0   -> event tagged as 'non-lepton-event'
-      //           = +1   -> event tagged as muon-event
-      //           = +2   -> event tagged as electron-event
-      fDiphotonEvent->leptonTag = 0;
-      Int_t closestVtx = 0;
-      if ( fLeptonTagMuons->GetEntries() > 0 ) {
-	// need to have dR > 1 for with respect to both photons ***changed to 0.7 for 2012
-	if( (MathUtils::DeltaR(fLeptonTagMuons->At(0),phHard) >= 1.0) && 
-	    (MathUtils::DeltaR(fLeptonTagMuons->At(0),phSoft) >= 1.0)  
-	    ){
-	  
-	  fDiphotonEvent->leptonTag = 2;
-	  
-	  fDiphotonEvent-> muonPt  = fLeptonTagMuons->At(0)->Pt();
-	  fDiphotonEvent-> muonEta = fLeptonTagMuons->At(0)->Eta();
-	  fDiphotonEvent-> muDR1   = MathUtils::DeltaR(fLeptonTagMuons->At(0),phHard);
-	  fDiphotonEvent-> muDR2   = MathUtils::DeltaR(fLeptonTagMuons->At(0),phSoft);
-	  
-	  fDiphotonEvent-> muIso1   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
-	  fDiphotonEvent-> muIso2   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoRandom() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
-	  fDiphotonEvent-> muIso3   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
-	  fDiphotonEvent-> muIso4   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
-	  fDiphotonEvent-> muD0  = TMath::Abs(fLeptonTagMuons->At(0)->BestTrk()->D0Corrected(*fPV->At(0)));
-	  fDiphotonEvent-> muDZ  = TMath::Abs(fLeptonTagMuons->At(0)->BestTrk()->DzCorrected(*fPV->At(0)));
-	  fDiphotonEvent-> muChi2  = fLeptonTagMuons->At(0)->GlobalTrk()->Chi2()/fLeptonTagMuons->At(0)->GlobalTrk()->Ndof();
-	  
-	  fDiphotonEvent-> muNhits = fLeptonTagMuons->At(0)->BestTrk()->NHits();
- 	  fDiphotonEvent-> muNpixhits = fLeptonTagMuons->At(0)->BestTrk()->NPixelHits();
-	  fDiphotonEvent-> muNegs = fLeptonTagMuons->At(0)->NSegments();
-	  fDiphotonEvent-> muNMatch = fLeptonTagMuons->At(0)->NMatches();
-	}
-      }
-      
-      if ( fDiphotonEvent->leptonTag < 1 && fLeptonTagElectrons->GetEntries() > 0 ) {
-	if( (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard) >= 1) &&
-	    (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft) >= 1) &&
-	    (PhotonTools::ElectronVetoCiC(phHard,fLeptonTagElectrons) >= 1) &&
-	    (PhotonTools::ElectronVetoCiC(phSoft,fLeptonTagElectrons) >= 1) &&
-	    (TMath::Abs( (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
-	    (TMath::Abs( (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10)  
-	    //((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
-	    //((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.))){
-	    ){
-	  
-	  /*int ph1passeveto=1;
-	    int ph2passeveto=1;
-	    
-	    for(UInt_t k=0;k<fElectrons->GetEntries();k++){
-	    if(fElectrons->At(k)->BestTrk()->NMissingHits()==0){
-	    if((fElectrons->At(k)->SCluster()==phHard->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phHard) < 1)){
-	    ph1passeveto=0;
-	    }
-	    if((fElectrons->At(k)->SCluster()==phSoft->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phSoft) < 1)){
-	    ph2passeveto=0;
-	    }
-	    }
-	    }
-	    
-	    if(ph1passeveto==1 && ph2passeveto==1){*/
-	  
-	  if(PhotonTools::ElectronVetoCiC(phHard, fElectrons)>=1 && PhotonTools::ElectronVetoCiC(phSoft, fElectrons)>=1){
-	    
-	    fDiphotonEvent->leptonTag = 1;
-	    
-	    fDiphotonEvent-> elePt = fLeptonTagElectrons->At(0)->Pt();
-	    fDiphotonEvent-> eleEta = fLeptonTagElectrons->At(0)->Eta();
-	    fDiphotonEvent-> eleSCEta = fLeptonTagElectrons->At(0)->SCluster()->Eta();
-	    fDiphotonEvent-> eleIso1 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-	    
-	    fDiphotonEvent-> eleIso2 = -99.;
-	    
-	    if ( fDoSynching ) {
-	      Double_t distVtx = 999.0;
-	      for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
-		double dz = TMath::Abs(fLeptonTagElectrons->At(0)->GsfTrk()->DzCorrected(*fPV->At(nv)));
-		if(dz < distVtx) {
-		  distVtx    = dz;
-		  closestVtx = nv;
-		}
-	      }
-	      fDiphotonEvent-> eleIdMva = fElectronIDMVA->MVAValue(fLeptonTagElectrons->At(0), fPV->At(closestVtx));
-	    }
-	    
-	    //	  fDiphotonEvent-> eleIso2 = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso03,fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) + ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso03, fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) ;
-	    
-	    fDiphotonEvent-> eleIso3 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-	    fDiphotonEvent-> eleIso4 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-	    fDiphotonEvent-> eleDist = fLeptonTagElectrons->At(0)->ConvPartnerDist();
-	    fDiphotonEvent-> eleDcot = fLeptonTagElectrons->At(0)->ConvPartnerDCotTheta();
-	    fDiphotonEvent-> eleCoviee = fLeptonTagElectrons->At(0)->CoviEtaiEta();
-	    fDiphotonEvent-> eleDphiin = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaPhiSuperClusterTrackAtVtx());
-	    fDiphotonEvent-> eleDetain = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaEtaSuperClusterTrackAtVtx());
-	    fDiphotonEvent-> eleDR1 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard);
-	    fDiphotonEvent-> eleDR2 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft);
-	    fDiphotonEvent-> eleMass1 = (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
-	    fDiphotonEvent-> eleMass2 = (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
-	    fDiphotonEvent-> eleNinnerHits =      fLeptonTagElectrons->At(0)->Trk()->NExpectedHitsInner();
-	  }
-	}
-      }
-     
-      if(false){
-	if(fDiphotonEvent->evt==79737729 || fDiphotonEvent->evt== 871378986  || fDiphotonEvent->evt==528937923 || fDiphotonEvent->evt== 261543921){
-	  printf("ming sync check ele:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numelectrons:%d  idmva:%f  mass:%f\n  elePt:%f  eleEta:%f  eleSCEta:%f  vtx:%d\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagElectrons->GetEntries(),fDiphotonEvent->eleIdMva,_mass,fDiphotonEvent->elePt,fDiphotonEvent->eleEta,fDiphotonEvent->eleSCEta,closestVtx);
-	  //return;
-	}
-	if(fDiphotonEvent->evt==333643114 || fDiphotonEvent->evt==89022540 || fDiphotonEvent->evt==8983064 || fDiphotonEvent->evt==876316897 || fDiphotonEvent->evt==541603559  || fDiphotonEvent->evt==223740859) {
-	  printf("ming sync check muon:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numMuons:%d  mass:%f\n  muonPt:%f  muonEta:%f\n\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagMuons->GetEntries(),_mass,fDiphotonEvent->muonPt,fDiphotonEvent->muonEta);
-	  //return;
-	}
-      }
+      ApplyLeptonTag(phHard, phSoft, selvtx);
     }
+
+    if( fApplyLeptonTag2 ) {
+      ApplyLeptonTag2(phHard, phSoft, selvtx);
+    }
+      
     //vbf tag
     fDiphotonEvent->vbfTag = -1;
     fDiphotonEvent->vbfbdt = -99;
@@ -1081,7 +973,6 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->tthTag = -1;
     if (fApplyTTHTag && phHard && phSoft && selvtx) {
       ApplyTTHTag(phHard, phSoft, selvtx);
-      PrintTTHDebugInfo();
     }
     
     //printf("vbfbdt:%f\n",fDiphotonEvent->vbfbdt);
@@ -1510,7 +1401,6 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
     // -----------------------------------------------------
     // PF-CiC4 Debug Stuff
     std::vector<double> debugVals;
-    // bool tmpPass = PhotonTools::PassCiCPFIsoSelection(p, vtx, fPFCands, vtxCol, rho, 20., &debugVals);
     PhotonTools::PassCiCPFIsoSelection(p, vtx, fPFCands, vtxCol, rho, 20., &debugVals);
     if( debugVals.size() == 13 ) {
       pfcic4_tIso1   = debugVals[0];
@@ -2262,6 +2152,168 @@ void PhotonTreeWriterVtx::SetVars(const Vertex *v, const Photon *p1, const Photo
 
 
 //_____________________________________________________________________________
+void PhotonTreeWriter::ApplyLeptonTag(const Photon *phHard,
+                                      const Photon *phSoft,
+                                      const Vertex *selvtx)
+{
+  // perform flavor-based lepton tagging (used before the legacy paper of 2013)
+  // the diphoton event record will have one more entry; i.e. leptonTag
+  // leptonTag = -1   -> lepton-taggng was swicthed off
+  //           =  0   -> event tagged as 'non-lepton-event'
+  //           = +1   -> event tagged as muon-event
+  //           = +2   -> event tagged as electron-event
+  fDiphotonEvent->leptonTag = 0;
+  Int_t closestVtx = 0;
+  if ( fLeptonTagMuons->GetEntries() > 0 ) {
+    // need to have dR > 1 for with respect to both photons ***changed to 0.7 for 2012
+    if( (MathUtils::DeltaR(fLeptonTagMuons->At(0),phHard) >= 1.0) && 
+        (MathUtils::DeltaR(fLeptonTagMuons->At(0),phSoft) >= 1.0)  
+        ){
+      
+      fDiphotonEvent->leptonTag = 2;
+      
+      fDiphotonEvent-> muonPt  = fLeptonTagMuons->At(0)->Pt();
+      fDiphotonEvent-> muonEta = fLeptonTagMuons->At(0)->Eta();
+      fDiphotonEvent-> muDR1   = MathUtils::DeltaR(fLeptonTagMuons->At(0),phHard);
+      fDiphotonEvent-> muDR2   = MathUtils::DeltaR(fLeptonTagMuons->At(0),phSoft);
+      
+      fDiphotonEvent-> muIso1   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
+      fDiphotonEvent-> muIso2   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoRandom() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
+      fDiphotonEvent-> muIso3   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
+      fDiphotonEvent-> muIso4   = (fLeptonTagMuons->At(0)->IsoR03SumPt() + fLeptonTagMuons->At(0)->IsoR03EmEt() + fLeptonTagMuons->At(0)->IsoR03HadEt() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/ fLeptonTagMuons->At(0)->Pt();
+      fDiphotonEvent-> muD0  = TMath::Abs(fLeptonTagMuons->At(0)->BestTrk()->D0Corrected(*fPV->At(0)));
+      fDiphotonEvent-> muDZ  = TMath::Abs(fLeptonTagMuons->At(0)->BestTrk()->DzCorrected(*fPV->At(0)));
+      fDiphotonEvent-> muChi2  = fLeptonTagMuons->At(0)->GlobalTrk()->Chi2()/fLeptonTagMuons->At(0)->GlobalTrk()->Ndof();
+      
+      fDiphotonEvent-> muNhits = fLeptonTagMuons->At(0)->BestTrk()->NHits();
+      fDiphotonEvent-> muNpixhits = fLeptonTagMuons->At(0)->BestTrk()->NPixelHits();
+      fDiphotonEvent-> muNegs = fLeptonTagMuons->At(0)->NSegments();
+      fDiphotonEvent-> muNMatch = fLeptonTagMuons->At(0)->NMatches();
+    }
+  }
+  
+  if ( fDiphotonEvent->leptonTag < 1 && fLeptonTagElectrons->GetEntries() > 0 ) {
+    if( (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard) >= 1) &&
+        (MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft) >= 1) &&
+        (PhotonTools::ElectronVetoCiC(phHard,fLeptonTagElectrons) >= 1) &&
+        (PhotonTools::ElectronVetoCiC(phSoft,fLeptonTagElectrons) >= 1) &&
+        (TMath::Abs( (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
+        (TMath::Abs( (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10)  
+        //((phHard->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(45./120.)) && 
+        //((phSoft->Pt()/(phHard->Mom() + phSoft->Mom()).M())>(30./120.))){
+        ){
+      
+      /*int ph1passeveto=1;
+        int ph2passeveto=1;
+        
+        for(UInt_t k=0;k<fElectrons->GetEntries();k++){
+        if(fElectrons->At(k)->BestTrk()->NMissingHits()==0){
+        if((fElectrons->At(k)->SCluster()==phHard->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phHard) < 1)){
+        ph1passeveto=0;
+        }
+        if((fElectrons->At(k)->SCluster()==phSoft->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*phSoft) < 1)){
+        ph2passeveto=0;
+        }
+        }
+        }
+        
+        if(ph1passeveto==1 && ph2passeveto==1){*/
+      
+      if(PhotonTools::ElectronVetoCiC(phHard, fElectrons)>=1 && PhotonTools::ElectronVetoCiC(phSoft, fElectrons)>=1){
+        
+        fDiphotonEvent->leptonTag = 1;
+        
+        fDiphotonEvent-> elePt = fLeptonTagElectrons->At(0)->Pt();
+        fDiphotonEvent-> eleEta = fLeptonTagElectrons->At(0)->Eta();
+        fDiphotonEvent-> eleSCEta = fLeptonTagElectrons->At(0)->SCluster()->Eta();
+        fDiphotonEvent-> eleIso1 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+        
+        fDiphotonEvent-> eleIso2 = -99.;
+        
+        if ( fDoSynching ) {
+          Double_t distVtx = 999.0;
+          for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
+            double dz = TMath::Abs(fLeptonTagElectrons->At(0)->GsfTrk()->DzCorrected(*fPV->At(nv)));
+            if(dz < distVtx) {
+              distVtx    = dz;
+              closestVtx = nv;
+            }
+          }
+          fDiphotonEvent-> eleIdMva = fElectronIDMVA->MVAValue(fLeptonTagElectrons->At(0), fPV->At(closestVtx));
+        }
+        
+        //        fDiphotonEvent-> eleIso2 = ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIso03,fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) + ElectronTools::ElectronEffectiveArea(ElectronTools::kEleNeutralHadronIso03, fLeptonTagElectrons->At(0)->SCluster()->Eta(), ElectronTools::kEleEAData2012) ;
+        
+        fDiphotonEvent-> eleIso3 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+        fDiphotonEvent-> eleIso4 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+        fDiphotonEvent-> eleDist = fLeptonTagElectrons->At(0)->ConvPartnerDist();
+        fDiphotonEvent-> eleDcot = fLeptonTagElectrons->At(0)->ConvPartnerDCotTheta();
+        fDiphotonEvent-> eleCoviee = fLeptonTagElectrons->At(0)->CoviEtaiEta();
+        fDiphotonEvent-> eleDphiin = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaPhiSuperClusterTrackAtVtx());
+        fDiphotonEvent-> eleDetain = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaEtaSuperClusterTrackAtVtx());
+        fDiphotonEvent-> eleDR1 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard);
+        fDiphotonEvent-> eleDR2 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft);
+        fDiphotonEvent-> eleMass1 = (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
+        fDiphotonEvent-> eleMass2 = (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
+        fDiphotonEvent-> eleNinnerHits =      fLeptonTagElectrons->At(0)->Trk()->NExpectedHitsInner();
+      }
+    }
+  }
+  
+  if(false){
+    if(fDiphotonEvent->evt==79737729 || fDiphotonEvent->evt== 871378986  || fDiphotonEvent->evt==528937923 || fDiphotonEvent->evt== 261543921){
+      printf("ming sync check ele:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numelectrons:%d  idmva:%f  mass:%f\n  elePt:%f  eleEta:%f  eleSCEta:%f  vtx:%d\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagElectrons->GetEntries(),fDiphotonEvent->eleIdMva,fDiphotonEvent->mass,fDiphotonEvent->elePt,fDiphotonEvent->eleEta,fDiphotonEvent->eleSCEta,closestVtx);
+      //return;
+    }
+    if(fDiphotonEvent->evt==333643114 || fDiphotonEvent->evt==89022540 || fDiphotonEvent->evt==8983064 || fDiphotonEvent->evt==876316897 || fDiphotonEvent->evt==541603559  || fDiphotonEvent->evt==223740859) {
+      printf("ming sync check muon:  run:%d  evt:%d  lumi:%d  leptonTag:%d  numMuons:%d  mass:%f\n  muonPt:%f  muonEta:%f\n\n",fDiphotonEvent->run,fDiphotonEvent->evt,fDiphotonEvent->lumi,fDiphotonEvent->leptonTag,fLeptonTagMuons->GetEntries(),fDiphotonEvent->mass,fDiphotonEvent->muonPt,fDiphotonEvent->muonEta);
+      //return;
+    }
+  }
+} // void PhotonTreeWriter::ApplyLeptonTag(..)
+
+
+//_____________________________________________________________________________
+void PhotonTreeWriter::ApplyLeptonTag2(const Photon *phHard,
+                                       const Photon *phSoft,
+                                       const Vertex *selvtx)
+{
+  
+  // perform flavor-based lepton tagging (used since the legacy paper of 2013)
+  // the diphoton event record will have one more entry; i.e. leptonTag
+  // leptonTag2 = -1   -> lepton-taggng was swicthed off
+  //            =  0   -> event tagged as 'non-lepton-event'
+  //            = +1   -> event tagged as a high-MET high-S/sqrt(B) event
+  //            = +2   -> event tagged as a low-MET low-S/sqrt(B) event
+
+  if (fDiphotonEvent->leptonTag < 0) {
+    ApplyLeptonTag(phHard, phSoft, selvtx);
+  }
+
+  switch (fDiphotonEvent->leptonTag) {
+    case 0:
+      fDiphotonEvent->leptonTag2 = 0;
+      break;
+    case 1:
+    case 2:
+      // TODO: find reference for the MET cut value
+      if (fDiphotonEvent->corrpfmet > 45.) {
+        fDiphotonEvent->leptonTag2 = 1;
+      } else {
+        fDiphotonEvent->leptonTag2 = 2;
+      } // if (MET < 45.)
+      break;
+    default:
+      // this should never happen!
+      cout << "Illegal value of leptonTag=" << fDiphotonEvent->leptonTag 
+           << endl << flush;
+      assert(false);
+  }  // switch(leptonTag)
+
+} // void PhotonTreeWriter::ApplyLeptonTag2(..)
+
+
+//_____________________________________________________________________________
 // Applies the ttH tag given precelected leading and trailing photons
 // phHard and phSoft and the corresponding (pre?) selected vertex selvtx. 
 // The result is stored as an integer value of the tthTag variable
@@ -2276,14 +2328,12 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   //            2 .. tagged as a hadronic ttH event
   fDiphotonEvent->tthTag = 0;
   
-  // The selection taken from the AN2012_480_V6 of 24 April 2013, further 
-  // referred to as "the AN", and the approval slides at
-  // https://twiki.cern.ch/twiki/pub/CMS/JanVeverkaHgg/micheli_ttH_approval_20130508_2_reduced.pdf,
-  // further referred to as "the slides" or "the slide n" (n = 1, 2, ..)
+  // Selection taken from the AN2012_480_V6 of 24 April 2013, further 
+  // refferred to as "the AN"
 
   // Check the pt of the photons, see L141 and L142 of the AN
-  if (fDiphotonEvent->photons[0].Pt() < 33.) return;
-  if (fDiphotonEvent->photons[1].Pt() < 25.) return;
+  if (phHard->Pt() < 33.) return;
+  if (phSoft->Pt() < 25.) return;
 
   // Init final-state object counters
   UInt_t nJets = 0;
@@ -2291,8 +2341,6 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   UInt_t nElectrons = 0;
   UInt_t nMuons = 0;
     
-  // Get the selected vertex
-  
   // Loop over jets, count those passing selection.
   // No Delta R(gamma, j) requirement!?  
   for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
@@ -2302,47 +2350,21 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
     // Make sure we have a PF jet
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
-    // TODO: Assume that this is implicitly implied in the AN, 
-    // copied from JetIDMVA::passCut(...). Is this correct?
-    // (Aram & Valentina say so)
     if (!JetTools::passPFLooseId(pfjet)) continue;
     // Apply the jet ID as given in Table 4
-    // TODO: JetTools::betaStar or JetTools::betaStarClassic? (yes, classic)
-    // Go for the latter now as it is used in the JetIDMVA::passCut(..) which in turn
-    // is used for the VBF tag.
     Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
-    // TODO: Really 0.67? JetIDMVA::passCut(..) and AN-13-008 use 0.64 insted.
-    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.67)) continue;
-    // TODO: is the second argument iPFType = -1 correct? yes
+    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
     if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
     // this jet passes, count it in
     ++nJets;
+    // Select b-jets that pass the CSV medium working point, see L128 of the AN
+    // and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
+    if (jet->CombinedSecondaryVertexBJetTagsDisc() < 0.679) continue;
+    ++nBJets;
   } // End of loop over jets
   
   // Check the number of selected jets, see Table 7 near L196 of the AN
   if (nJets < 2) return;
-  
-  // Loop over jets again and count those that pass the b-tag defined as the 
-  // CSV medium working point, see L128 of the AN
-  // and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
-  // TODO: Are there any other cuts applied to the b-jet candidates beyond the
-  for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
-    // Assume that this is implicitly used in the AN.     
-    // (Aram & Valentina say so)
-
-    // Make sure we have a PF jet
-    const Jet *jet = fPFJets->At(ijet);
-    if (jet->Pt() < 20. || jet->AbsEta() > 2.4) continue; 
-    const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
-    if (!pfjet) continue;
-    if (!JetTools::passPFLooseId(pfjet)) continue;
-    // This is explicit in the AN.
-    if (jet->CombinedSecondaryVertexBJetTagsDisc() < 0.679) continue;
-    // TODO: It could be also the MVA flavor of the CSV:
-    // if (jet->CombinedSecondaryVertexMVABJetTagsDisc() < 0.679) continue;
-    // Which one is the correct one?
-    ++nBJets;
-  } // End of the loop over jets
   
   // Check the number of b-tagged jets, see Table 7 near L196 of the AN
   if (nBJets < 1) return;
@@ -2351,11 +2373,7 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {
     const Electron *ele = fLeptonTagElectrons->At(iele);
     // Apply kinematic cuts, see L133 and L134 of the AN
-    if (ele->Pt() < 20. || ele->AbsEta() > 2.5) continue;
-    // Require separation between this electron and both photons,
-    // see the slide 7, bullet 5
-    if (MathUtils::DeltaR(ele, phHard) < 1.0) continue;
-    if (MathUtils::DeltaR(ele, phSoft) < 1.0) continue;
+    if (ele->Pt() < 20. || ele->AbsEta() < 2.5) continue;
     ++nElectrons;
   }
   
@@ -2364,17 +2382,17 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
     const Muon *mu = fLeptonTagMuons->At(imu);
     // Apply kinematic cuts, see L132 and L134 of the AN
     if (mu->Pt() < 20. || mu->AbsEta() > 2.4) continue;
-    // Require separation between this electron and both photons,
+    // Require separation between this muon and both photons,
     // see the slide 7, bullet 2
-    // TODO: Check with authors that this is indeed applied.
+    // Also confirmed by Francesco Micheli in an e-mail from 15 July 2013
     if (MathUtils::DeltaR(mu, phHard) < 1.0) continue;
     if (MathUtils::DeltaR(mu, phSoft) < 1.0) continue;
     ++nMuons;
   }
 
   // Check the lepton tag, see Table 7 near L196 of the AN
-  // TODO: Does the leptonic tag have a precedence if both the leptonic and
-  // hadronic tags pass?
+  // It has a precedence if both the leptonic and hadronic tags pass.
+  // (private e-mail from Francesco Micheli on 15 July 2013).
   if (nElectrons + nMuons >= 1) {
     // apply the leptonic tth tag
     fDiphotonEvent->tthTag = 1;
@@ -2397,120 +2415,5 @@ void PhotonTreeWriter::Terminate()
   // Run finishing code on the computer (slave) that did the analysis
 }
 
-
-//_____________________________________________________________________________
-void PhotonTreeWriter::PrintTTHDebugInfo()
-{
-  if (fVerbosityLevel > 0) {
-    cout << "JV: Processing run " << fDiphotonEvent->run
-          << " event " << fDiphotonEvent->evt << " .. " << endl;
-    PrintTTHDecay();
-  }
-
-  if (fVerbosityLevel > 1) {
-    PrintGenElectrons();
-    PrintElectrons("reco electrons", fElectrons);
-    PrintElectrons("lepton-tag electrons", fLeptonTagElectrons);
-  }
-} // void PhotonTreeWriter::PrintTTHDebugInfo()
-
-
-//_____________________________________________________________________________
-void PhotonTreeWriter::PrintTTHDecay()
-{
-  // Initialize W decay type counters
-  UInt_t nLeptonic = 0;
-  UInt_t nHadronic = 0;
-  Int_t WplusDau1PID = 0;
-  Int_t WminusDau1PID = 0;
-  // loop over all GEN particles and look for W bosons
-  for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
-    const MCParticle* p = fMCParticles->At(i);
-    if (p->Is(MCParticle::kW) && p->Status() == 3 && p->NDaughters() > 0) {
-      // found a W in the ME
-      cout << "JV: " << p->PdgEntry()->GetName() 
-           << "[" << i << "] -> ";
-
-      // Set the PID of the first daughter
-      if (p->PdgId() > 0) {
-        WplusDau1PID = p->Daughter(0)->PdgId();
-      } else {
-        WminusDau1PID = p->Daughter(0)->PdgId();
-      }
-
-      // loop over W daughters
-      for (UInt_t j=0; j < p->NDaughters(); ++j) {
-        const MCParticle *d = p->Daughter(j);
-        if (d->Status() == 2) continue;
-        cout << d->PdgEntry()->GetName() << " ";
-      } // loop over W daughters
-      cout << endl;
-
-      // Check the decay type     
-      if (p->NDaughters() > 0 && p->Daughter(0)->IsQuark()) {
-        ++nHadronic;
-      } else {
-        ++nLeptonic;
-      }
-    } // found the W
-  } // loop over all GEN particles
-  
-  cout << "JV: ttbar decay is ";
-  switch (nHadronic) {
-    case 0: cout << "leptonic"; break;
-    case 1: cout << "semi-leptonic"; break;
-    case 2: cout << "hadronic"; break;
-    default: cout << "ERROR";
-  }
-  cout << endl;
-  
-  cout << "JV: tthTag WplusDau1PID WminusDau1PID:\t"
-       << fDiphotonEvent->tthTag << "\t"
-       << WplusDau1PID << "\t"
-       << WminusDau1PID << endl;
-  return;
-} // void PrintTTHDecay()
-
-
-//_____________________________________________________________________________
-void PhotonTreeWriter::PrintGenElectrons()
-{
-  ostringstream report;
-  report << "JV: gen electrons" << endl;
-  UInt_t nEl = 0;
-  for (UInt_t i=0; i < fMCParticles->GetEntries(); ++i){
-    const MCParticle *p = fMCParticles->At(i);
-    if (p->Is(MCParticle::kEl) && 
-        p->Status() == 1 && 
-        p->Pt() > 15 && 
-        p->AbsEta() < 2.6) {
-      ++nEl;
-      report << "  " << p->PdgEntry()->GetName() << ": "
-             << "pt=" << p->Pt() << ", "
-             << "eta=" << p->AbsEta() << endl;
-    } // Electron preselection
-  } // End of loop over MC particles
-  if (nEl > 0) cout << report.str();
-} // void PhotonTreeWriter::PrintGenElectrons()
-
-
-//_____________________________________________________________________________
-void PhotonTreeWriter::PrintElectrons(const char *tag,
-                                      const ElectronCol *electrons)
-{
-  ostringstream report;
-  report << "JV: " << tag << endl;
-  UInt_t nEl = 0;
-  for (UInt_t i=0; i < electrons->GetEntries(); ++i){
-    const Electron *e = electrons->At(i);
-    if (e->Pt() > 20 && e->AbsEta() < 2.5) {
-      ++nEl;
-      report << "  q=" << e->Charge() << ", "
-             << "pt=" << e->Pt() << ", "
-             << "eta=" << e->AbsEta() << endl;
-    } // Electron preselection
-  } // End of loop over reco electrons
-  if (nEl > 0) cout << report.str();
-} // void PhotonTreeWriter::PrintRecoElectrons()
 
 
