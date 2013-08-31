@@ -680,6 +680,7 @@ namespace mithep
       PhotonTreeWriterPhoton<16> photons[2];
   }; // PhotonTreeWriterDiphotonEvent
   
+  
   class PhotonTreeWriter : public BaseMod
   {
   public:
@@ -916,7 +917,7 @@ namespace mithep
     Double_t                       fBeamspotWidth;
     
     TFile                          *fTmpFile;
-
+    
     // --------------------------------
     // variables for vbf
     float jet1pt_vbf;

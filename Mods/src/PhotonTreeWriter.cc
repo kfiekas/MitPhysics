@@ -940,7 +940,6 @@ void PhotonTreeWriter::Process()
     
     fDiphotonEvent-> eleIdMva = -99.;
     
-     
     if( fApplyLeptonTag ) {
       ApplyLeptonTag(phHard, phSoft, selvtx);
     }
@@ -2527,11 +2526,14 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   UInt_t nMuons = 0;
     
   // Loop over jets, count those passing selection.
-  // No Delta R(gamma, j) requirement!?  
   for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
     const Jet *jet = fPFJets->At(ijet);
     // Apply jet selection, see L116 and L125 of the AN
-    if (jet->Pt() < 25. || jet->AbsEta() > 2.4) continue; 
+    if (jet->Pt() < 25. || jet->AbsEta() > 2.4) continue;
+    // Apply Delta R(photon, jet), see email from Francesco Micheli 
+    // sent 31 Aug 2013
+    if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
+    if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
     // Make sure we have a PF jet
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
@@ -2553,22 +2555,34 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   
   // Check the number of b-tagged jets, see Table 7 near L196 of the AN
   if (nBJets < 1) return;
-
-  // Loop over electrons
-  for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {
-    const Electron *ele = fLeptonTagElectrons->At(iele);
-    // Apply kinematic cuts, see L133 and L134 of the AN
-    if (ele->Pt() < 20. || ele->AbsEta() < 2.5) continue;
-    ++nElectrons;
-  }
+  
+  if (PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
+      PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
+      PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          && 
+      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1){
+    // Loop over electrons
+    for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {
+      const Electron *ele = fLeptonTagElectrons->At(iele);
+      // Apply kinematic cuts, see L133 and L134 of the AN
+      if (ele->Pt() < 20. || ele->AbsEta() < 2.5) continue;
+      // Require separation between this electron and both photons,
+      // see the slide 7, bullet 2
+      if (MathUtils::DeltaR(ele, phHard) < 1.0) continue;
+      if (MathUtils::DeltaR(ele, phSoft) < 1.0) continue;
+      // Require electron-photon mass outside of a 20 GeV window around MZ
+      if (MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10)) continue;
+      if (MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10)) continue;
+      ++nElectrons;
+    }
+  }  
   
   // Loop over muons
   for (UInt_t imu=0; imu < fLeptonTagMuons->GetEntries(); ++imu) {
     const Muon *mu = fLeptonTagMuons->At(imu);
     // Apply kinematic cuts, see L132 and L134 of the AN
     if (mu->Pt() < 20. || mu->AbsEta() > 2.4) continue;
-    // Require separation between this muon and both photons,
-    // see the slide 7, bullet 2
+    // Same as for electrons, require separation between this muon and both 
+    // photons.
     // Also confirmed by Francesco Micheli in an e-mail from 15 July 2013
     if (MathUtils::DeltaR(mu, phHard) < 1.0) continue;
     if (MathUtils::DeltaR(mu, phSoft) < 1.0) continue;
