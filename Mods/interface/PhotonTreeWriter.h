@@ -28,6 +28,7 @@
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/GenJetCol.h"
+#include "MitAna/DataTree/interface/Particle.h"
 #include "MitPhysics/Utils/interface/PhotonFix.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVAMet.h"
@@ -462,7 +463,7 @@ namespace mithep
       Float_t btagJet2Eta;
       // ----------- LEPTON TAG STUFF -------------
       Int_t leptonTag; // flavor-based, Moriond 2013
-      Int_t leptonTag2; // MET-based, since legacy paper 2013
+      Int_t VHLepTag; // MET-based, since legacy paper 2013
       // ----------- VEERTEX SYNCHING STUFF -------
 
       Int_t vtxInd1;
@@ -682,6 +683,7 @@ namespace mithep
   class PhotonTreeWriter : public BaseMod
   {
   public:
+    enum CounterFlag {kCountNotDefined = -1};
     PhotonTreeWriter(const char *name ="PhotonTreeWriter", 
 		       const char *title="Selecting PhotonPairs");
     
@@ -713,7 +715,7 @@ namespace mithep
     void                SetEnableGenJets(Bool_t b)           { fEnableGenJets = b;             }
     void                SetApplyJetId(Bool_t b)           { fApplyJetId = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
-    void                SetApplyLeptonTag2(Bool_t b)      { fApplyLeptonTag2 = b;        }
+    void                SetApplyVHLepTag(Bool_t b)        { fApplyVHLepTag = b;        }
     void                SetApplyVBFTag(Bool_t b)          { fApplyVBFTag = b;            }
     void                SetApplyTTHTag(Bool_t b)          { fApplyTTHTag = b;            }
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
@@ -744,6 +746,8 @@ namespace mithep
 
     void                SetLeptonTagElectronsName(TString name) { fLeptonTagElectronsName = name; }
     void                SetLeptonTagMuonsName    (TString name) { fLeptonTagMuonsName     = name; }
+    void                SetLeptonTagSoftElectronsName(TString name) { fLeptonTagSoftElectronsName = name; }
+    void                SetLeptonTagSoftMuonsName    (TString name) { fLeptonTagSoftMuonsName     = name; }
     void                SetFillClusterArrays(Bool_t b)          { fFillClusterArrays = b; }
 
     void                SetDo2012LepTag(Bool_t b) {                         fDo2012LepTag = b; }
@@ -778,14 +782,31 @@ namespace mithep
     void                ApplyLeptonTag(const Photon *phHard,
                                        const Photon *phSoft,
                                        const Vertex *selvtx);
-    void                ApplyLeptonTag2(const Photon *phHard,
-                                        const Photon *phSoft,
-                                        const Vertex *selvtx);
+    const Muon *        GetLeptonTagMuon(const Photon *phHard,
+                                         const Photon *phSoft);
+    void                SetLeptonTagMuonVars(const Photon *phHard,
+                                             const Photon *phSoft,
+                                             const Muon *muon);
+    const Electron *    GetLeptonTagElectron(const Photon *phHard,
+                                             const Photon *phSoft);
+    bool                MassOfPairIsWithinWindowAroundMZ(
+                          const Particle * particle1,
+                          const Particle * particle2,
+                          Float_t halfWindowSize,
+                          Float_t MZ = 91.19
+                        );
+    void                ApplyVHLepTag(const Photon *phHard,
+                                      const Photon *phSoft,
+                                      const Vertex *selvtx);
+    bool                VHHasDielectron(const Photon *phHard, 
+                                        const Photon *phSoft);
+    bool                VHHasDimuon(const Photon *phHard, 
+                                    const Photon *phSoft);
+    UInt_t              VHNumberOfJets(const Photon *phHard,
+                                       const Photon *phSoft,
+                                       const Vertex *selvtx,
+                                       const Particle *lepton);
     void                ApplyTTHTag(const Photon *phHard, const Photon *phSoft,const Vertex *selvtx);
-//     void                PrintTTHDebugInfo();
-//     void                PrintTTHDecay();
-//     void                PrintGenElectrons();
-//     void                PrintElectrons(const char *, const ElectronCol*);
 
     // Names for the input Collections
     TString             fPhotonBranchName;
@@ -817,6 +838,8 @@ namespace mithep
 
     TString             fLeptonTagElectronsName;
     TString             fLeptonTagMuonsName;
+    TString             fLeptonTagSoftElectronsName;
+    TString             fLeptonTagSoftMuonsName;
 
     
     // is it Data or MC?
@@ -852,6 +875,8 @@ namespace mithep
     
     const ElectronCol             *fLeptonTagElectrons;
     const MuonCol                 *fLeptonTagMuons;
+    const ElectronCol             *fLeptonTagSoftElectrons;
+    const MuonCol                 *fLeptonTagSoftMuons;
     const PFCandidateCol          *fPFNoPileUpCands;  //!pfnpu collection
     const PFCandidateCol          *fPFPileUpCands;    //!pfpu collection
 
@@ -871,7 +896,7 @@ namespace mithep
     Bool_t                         fApplyJetId;
 
     Bool_t                         fApplyLeptonTag;
-    Bool_t                         fApplyLeptonTag2;
+    Bool_t                         fApplyVHLepTag;
     Bool_t                         fApplyVBFTag;
     Bool_t                         fApplyTTHTag;
     Bool_t                         fApplyBTag;
