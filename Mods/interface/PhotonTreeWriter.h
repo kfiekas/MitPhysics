@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.33 2013/08/30 12:02:37 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.36 2013/08/31 07:36:37 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -775,6 +775,7 @@ namespace mithep
   protected:
     void                Process();
     void                SlaveBegin();
+    void                SlaveTerminate(); 
     void                Terminate();
     // Private auxiliary methods...
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);

@@ -137,13 +137,23 @@ PhotonTreeWriter::~PhotonTreeWriter()
   // Destructor
   // Deal with the temporary file here?
   // fTmpFile->Write();
-  fTmpFile->Close();
-  TString shellcmd = TString("rm ") + TString(fTmpFile->GetName());
-  delete fTmpFile;
-  cout << shellcmd.Data() << endl;
-  gSystem->Exec(shellcmd.Data());
+   fTmpFile->Close();
+//   TString shellcmd = TString("rm ") + TString(fTmpFile->GetName());
+//   delete fTmpFile;
+//   cout << shellcmd.Data() << endl;
+//   gSystem->Exec(shellcmd.Data());
   
 }
+
+//--------------------------------------------------------------------------------------------------
+void PhotonTreeWriter::SlaveTerminate()
+{
+ 
+  if (hCiCTuple) fTmpFile->WriteTObject(hCiCTuple,hCiCTuple->GetName());
+  if (hCiCTupleSingle) fTmpFile->WriteTObject(hCiCTuple,hCiCTupleSingle->GetName());
+  
+}
+
 
 //--------------------------------------------------------------------------------------------------
 void PhotonTreeWriter::Process()
@@ -1164,11 +1174,13 @@ void PhotonTreeWriter::SlaveBegin()
   if (fWriteDiphotonTree) {
     hCiCTuple = new TTree(fTupleName.Data(),fTupleName.Data());
     hCiCTuple->SetAutoSave(300e9);
+    hCiCTuple->SetDirectory(fTmpFile);
   }
   TString singlename = fTupleName + TString("Single");
   if (fWriteSingleTree) {
     hCiCTupleSingle = new TTree(singlename,singlename);
     hCiCTupleSingle->SetAutoSave(300e9);
+    hCiCTupleSingle->SetDirectory(fTmpFile);
   }
     
   //make flattish tree from classes so we don't have to rely on dictionaries for reading later
