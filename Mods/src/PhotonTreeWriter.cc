@@ -34,7 +34,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fElectronName           (Names::gkElectronBrn),
   fGoodElectronName       (Names::gkElectronBrn),  
   fConversionName         (Names::gkMvfConversionBrn),  
-  fPFConversionName              ("PFPhotonConversions"),  
+  fPFConversionName       ("PFPhotonConversions"),  
   fTrackBranchName        (Names::gkTrackBrn),
   fPileUpDenName          (Names::gkPileupEnergyDensityBrn),
   fPVName                 (Names::gkPVBeamSpotBrn),
@@ -101,7 +101,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fEnableGenJets          (kFALSE),
   fApplyJetId             (kFALSE),
   fApplyLeptonTag         (kFALSE),
-  fApplyVHLepTag        (kFALSE),
+  fApplyVHLepTag          (kFALSE),
+  fApplyVHHadTag          (kFALSE),
   fApplyVBFTag            (kFALSE),
   fApplyTTHTag            (kFALSE),
   fApplyBTag              (kFALSE),
@@ -261,6 +262,7 @@ void PhotonTreeWriter::Process()
 
   fDiphotonEvent->leptonTag = -1; // disabled
   fDiphotonEvent->VHLepTag = -1; // disabled
+  fDiphotonEvent->VHHadTag = -1; // disabled
 
   // ====================================================
   // Vtx synching stuff...
@@ -956,6 +958,10 @@ void PhotonTreeWriter::Process()
 
     if( fApplyVHLepTag ) {
       ApplyVHLepTag(phHard, phSoft, selvtx);
+    }
+      
+    if( fApplyVHHadTag ) {
+      ApplyVHHadTag(phHard, phSoft, selvtx);
     }
       
     //vbf tag
@@ -2343,9 +2349,9 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
                                      const Vertex *selvtx)
 {
   
-  // perform flavor-based lepton tagging (used since the legacy paper of 2013)
+  // Perform flavor-based lepton tagging (used since the legacy paper of 2013)
   // the diphoton event record will have one more entry; i.e. leptonTag
-  // VHLepTag = -1   -> lepton-taggng was swicthed off
+  // VHLepTag = -1   -> lepton-tagging was swicthed off
   //            =  0   -> event tagged as 'non-lepton event'
   //            = +1   -> event tagged as a low-MET high-S/sqrt(B) event
   //            = +2   -> event tagged as a high-MET low-S/sqrt(B) event
@@ -2354,12 +2360,12 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
   
   fDiphotonEvent->VHLepTag = 0; // non-lepton event
   
-  if (VHHasDielectron(phHard, phSoft)) {
+  if (VHLepHasDielectron(phHard, phSoft)) {
     fDiphotonEvent->VHLepTag = 2; // high MET
     return;
   }
   
-  if (VHHasDimuon(phHard, phSoft)) {
+  if (VHLepHasDimuon(phHard, phSoft)) {
     fDiphotonEvent->VHLepTag = 2; // high MET
     return;
   }
@@ -2370,7 +2376,7 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
 
   const Muon *muon = GetLeptonTagMuon(phHard, phSoft);
   if (muon &&
-      VHNumberOfJets(phHard, phSoft, selvtx, muon) <= 2) {
+      VHLepNumberOfJets(phHard, phSoft, selvtx, muon) <= 2) {
     // Found a good VH(lep) tag muon.
     if (fDiphotonEvent->corrpfmet > 45.) {
       fDiphotonEvent->VHLepTag = 2; // high MET event
@@ -2382,7 +2388,7 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
   
   const Electron *electron = GetLeptonTagElectron(phHard, phSoft);
   if (electron &&
-      VHNumberOfJets(phHard, phSoft, selvtx, electron) <= 2) {
+      VHLepNumberOfJets(phHard, phSoft, selvtx, electron) <= 2) {
     // Found a good VH(lep) tag electron.
     if (fDiphotonEvent->corrpfmet > 45.) {
       // High MET event.
@@ -2403,12 +2409,60 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
 
 
 //_____________________________________________________________________________
-bool PhotonTreeWriter::VHHasDielectron(const Photon *phHard, 
-                                       const Photon *phSoft) {
+void PhotonTreeWriter::ApplyVHHadTag(const Photon *phHard,
+                                     const Photon *phSoft,
+                                     const Vertex *selvtx)
+{
+  
+  // Perform VH hadronic tagging (used since the legacy paper of 2013)
+  // the diphoton event record will have one more entry; i.e. leptonTag
+  // VHHadTag = -1   -> VH(had)-tagging was swicthed off
+  //          =  0   -> event tagged as 'non-VH(had) event'
+  //          = +1   -> event tagged as a VH(had)-no-b-tag event
+  //          = +2   -> event tagged as a VH(had)-b-tag event
+  // TODO: Should the selected vertex be updated using the vertex of the jets?
+
+  fDiphotonEvent->VHHadTag = 0; // non-VH(had) event
+  
+  if (!VHHadPassesCommonCuts(phHard, phSoft, selvtx)) return;
+  
+  UInt_t nBJets = VHHadNumberOfBJets(phHard, phSoft, selvtx);
+  Float_t scaleFactor = fDiphotonEvent->mass / 120.;
+  
+  // Calculate |cos(theta*)|.
+  FourVectorM pgg = phHard->Mom() + phSoft->Mom(); // diphoton 4-vector
+  FourVectorM pg1 = phHard->Mom(); // leading photon 4-vector
+  FourVectorM::BetaVector boostVector = pgg.BoostToCM();
+  ThreeVector::Scalar cosThetaStar = ThreeVector(pg1).Unit().Dot(boostVector);
+  ThreeVector::Scalar absCosThetaStar = TMath::Abs(cosThetaStar);
+  
+  if (nBJets == 0 &&
+      fDiphotonEvent->ptgg > 96. * scaleFactor &&
+      fDiphotonEvent->dijetpt > 57. &&
+      absCosThetaStar < 0.48) {
+    // VH(had) tag, no b-tag.
+    fDiphotonEvent->VHHadTag = 1;
+  }
+  
+  if (nBJets >= 1 &&
+      fDiphotonEvent->ptgg > 87. * scaleFactor &&
+      fDiphotonEvent->dijetpt > 37. &&
+      absCosThetaStar < 0.65) {
+    // VH(had) tag, b-tag.
+    fDiphotonEvent->VHHadTag = 2;
+  }
+  
+} // void PhotonTreeWriter::ApplyVHHadTag(..)  
+  
+  
+
+//_____________________________________________________________________________
+bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
+                                          const Photon *phSoft) {
   if (fLeptonTagSoftElectrons->GetEntries() < 2) return false;
   
   if (fVerbosityLevel > 0) {
-    cout << "JV PhotonTreeWriter::VHHasDielectron: Found >= 2 electrons!" 
+    cout << "JV PhotonTreeWriter::VHLepHasDielectron: Found >= 2 electrons!"
          << endl;
   }
   
@@ -2435,16 +2489,16 @@ bool PhotonTreeWriter::VHHasDielectron(const Photon *phHard,
   
   return false;
   
-} // bool PhotonTreeWriter::VHHasDielectron(..)
+} // bool PhotonTreeWriter::VHLepHasDielectron(..)
 
 
 //_____________________________________________________________________________
-bool PhotonTreeWriter::VHHasDimuon(const Photon *phHard, 
-                                   const Photon *phSoft) {
+bool PhotonTreeWriter::VHLepHasDimuon(const Photon *phHard,
+                                      const Photon *phSoft) {
   if (fLeptonTagSoftMuons->GetEntries() < 2) return false;
   
   if (fVerbosityLevel > 0) {
-    cout << "JV PhotonTreeWriter::VHHasDimuon: Found >= 2 muons!" << endl;
+    cout << "JV PhotonTreeWriter::VHLepHasDimuon: Found >= 2 muons!" << endl;
   }
   
   vector<UInt_t> goodMuons;
@@ -2470,14 +2524,14 @@ bool PhotonTreeWriter::VHHasDimuon(const Photon *phHard,
   
   return false;
   
-} // PhotonTreeWriter::VHHasDimuon(..)
+} // PhotonTreeWriter::VHLepHasDimuon(..)
 
 
 //_____________________________________________________________________________
-UInt_t PhotonTreeWriter::VHNumberOfJets(const Photon *phHard,
-                                        const Photon *phSoft,
-                                        const Vertex *selvtx,
-                                        const Particle *lepton) {
+UInt_t PhotonTreeWriter::VHLepNumberOfJets(const Photon *phHard,
+                                           const Photon *phSoft,
+                                           const Vertex *selvtx,
+                                           const Particle *lepton) {
 
   UInt_t nJets = 0;
   
@@ -2506,7 +2560,7 @@ UInt_t PhotonTreeWriter::VHNumberOfJets(const Photon *phHard,
                                                    
   return nJets;
   
-} // PhotonTreeWriter::VHNumberOfJets(..)
+} // PhotonTreeWriter::VHLepNumberOfJets(..)
 
 
 //_____________________________________________________________________________
@@ -2618,6 +2672,100 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   }  
   
 } // void PhotonTreeWriter::ApplyTTHTag()
+
+
+//_____________________________________________________________________________
+bool PhotonTreeWriter::VHHadPassesCommonCuts(const Photon *phHard,
+                                             const Photon *phSoft,
+                                             const Vertex *selvtx)
+{
+  // Tests cuts common for VH(had) no tag and VH(had) b-tag categories.
+  
+  Float_t scaleFactor = fDiphotonEvent->mass / 120.;
+  UInt_t  nJets = VHHadNumberOfJets(phHard, phSoft, selvtx);
+  Float_t mjj = fDiphotonEvent->dijetmass;
+  bool passes = false;
+  
+  if ( phHard->Pt() > 60. * scaleFactor &&
+       phSoft->Pt() > 25. * scaleFactor &&
+       2 <= nJets && nJets < 4 &&
+       60. < mjj && mjj < 120. ) {
+    passes = true;
+  }
+  
+  return passes;
+} // bool PhotonTreeWriter::VHHadPassesCommonCuts()
+
+
+//_____________________________________________________________________________
+UInt_t PhotonTreeWriter::VHHadNumberOfJets(const Photon *phHard,
+                                           const Photon *phSoft,
+                                           const Vertex *selvtx) {
+
+  UInt_t nJets = 0;
+  
+  // Loop over jets, count those passing selection
+  // Use same ID as for the tth tag
+  for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
+    const Jet *jet = fPFJets->At(ijet);
+    // Apply jet selection, see L116 and L125 of the AN
+    if (jet->Pt() < 20. || jet->AbsEta() > 2.4) continue; 
+    // Apply the cut Delta R(photon, jet) < 0.5.
+    if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
+    if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
+    // Make sure we have a PF jet
+    const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
+    if (!pfjet) continue;
+    if (!JetTools::passPFLooseId(pfjet)) continue;
+    // Apply the jet ID / pileup removal as given in Table 4
+    Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
+    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
+    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+    // this jet passes, count it in
+    ++nJets;
+  } // End of loop over jets  
+                                                   
+  return nJets;
+  
+} // PhotonTreeWriter::VHHadNumberOfJets(..)
+
+
+
+//_____________________________________________________________________________
+UInt_t PhotonTreeWriter::VHHadNumberOfBJets(const Photon *phHard,
+                                            const Photon *phSoft,
+                                            const Vertex *selvtx) {
+
+  UInt_t nBJets = 0;
+  
+  // Loop over jets, count those passing selection
+  // Use same ID as for the tth tag
+  for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
+    const Jet *jet = fPFJets->At(ijet);
+    // Apply jet selection, see L116 and L125 of the AN
+    if (jet->Pt() < 20. || jet->AbsEta() > 2.4) continue; 
+    // Apply the cut Delta R(photon, jet) < 0.5.
+    if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
+    if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
+    // Make sure we have a PF jet
+    const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
+    if (!pfjet) continue;
+    if (!JetTools::passPFLooseId(pfjet)) continue;
+    // Apply the jet ID / pileup removal.
+    Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
+    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
+    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+    // Select b-jets that pass the CSV medium working point.  See
+    // the ttH tag for details.
+    if (jet->CombinedSecondaryVertexBJetTagsDisc() < 0.679) continue;
+    // This b-jet passes, count it in!
+    ++nBJets;
+  } // End of loop over jets  
+                                                   
+  return nBJets;
+  
+} // PhotonTreeWriter::VHHadNumberOfBJets(..)
+
 
 
 //_____________________________________________________________________________

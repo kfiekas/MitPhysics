@@ -6,6 +6,14 @@
 // Authors: J. Bendavid, J. Veverka
 //--------------------------------------------------------------------------------------------------
 
+/**
+ * TODO
+ * - Factor out taggers (VHLep, VHHad, ttH) into separate classes
+ * - Factor out transient diphoton-final-state data (phHard, phSoft, selvtx, ..)
+ *   into a separate class.
+ */
+
+
 #ifndef MITPHYSICS_MODS_PHOTONTREEWRITER_H
 #define MITPHYSICS_MODS_PHOTONTREEWRITER_H
 
@@ -461,10 +469,11 @@ namespace mithep
       Float_t btagJet2;
       Float_t btagJet2Pt;
       Float_t btagJet2Eta;
-      // ----------- LEPTON TAG STUFF -------------
+      // ----------- VH/LEPTON TAG STUFF -------------
       Int_t leptonTag; // flavor-based, Moriond 2013
       Int_t VHLepTag; // MET-based, since legacy paper 2013
-      // ----------- VEERTEX SYNCHING STUFF -------
+      Int_t VHHadTag; // VH hadronic tag
+      // ----------- VERTEX SYNCHING STUFF -------
 
       Int_t vtxInd1;
       Int_t vtxInd2;
@@ -707,16 +716,17 @@ namespace mithep
     void                SetPFJetName(const char *n)       { fPFJetName = n;              }
     void                SetGenJetName(const char *n)      { fGenJetName = n;             }
     void                SetuncorrPFJetName(const char *n) { funcorrPFJetName = n;        }
-    void                SetPFNoPileUpName(const char *n)  { fPFNoPileUpName  = n;       } 
-    void                SetPFPileUpName(const char *n)    { fPFPileUpName  = n;         }
+    void                SetPFNoPileUpName(const char *n)  { fPFNoPileUpName  = n;        }
+    void                SetPFPileUpName(const char *n)    { fPFPileUpName  = n;          }
 
 
     void                SetPFJetsFromBranch(Bool_t b)     { fPFJetsFromBranch = b;       }
     void                SetEnableJets(Bool_t b)           { fEnableJets = b;             }
-    void                SetEnableGenJets(Bool_t b)           { fEnableGenJets = b;             }
+    void                SetEnableGenJets(Bool_t b)        { fEnableGenJets = b;          }
     void                SetApplyJetId(Bool_t b)           { fApplyJetId = b;             }
     void                SetApplyLeptonTag(Bool_t b)       { fApplyLeptonTag = b;         }
-    void                SetApplyVHLepTag(Bool_t b)        { fApplyVHLepTag = b;        }
+    void                SetApplyVHLepTag(Bool_t b)        { fApplyVHLepTag = b;          }
+    void                SetApplyVHHadTag(Bool_t b)        { fApplyVHHadTag = b;          }
     void                SetApplyVBFTag(Bool_t b)          { fApplyVBFTag = b;            }
     void                SetApplyTTHTag(Bool_t b)          { fApplyTTHTag = b;            }
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
@@ -775,7 +785,7 @@ namespace mithep
   protected:
     void                Process();
     void                SlaveBegin();
-    void                SlaveTerminate(); 
+    void                SlaveTerminate();
     void                Terminate();
     // Private auxiliary methods...
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);
@@ -800,15 +810,29 @@ namespace mithep
     void                ApplyVHLepTag(const Photon *phHard,
                                       const Photon *phSoft,
                                       const Vertex *selvtx);
-    bool                VHHasDielectron(const Photon *phHard, 
-                                        const Photon *phSoft);
-    bool                VHHasDimuon(const Photon *phHard, 
-                                    const Photon *phSoft);
-    UInt_t              VHNumberOfJets(const Photon *phHard,
-                                       const Photon *phSoft,
-                                       const Vertex *selvtx,
-                                       const Particle *lepton);
-    void                ApplyTTHTag(const Photon *phHard, const Photon *phSoft,const Vertex *selvtx);
+    void                ApplyVHHadTag(const Photon *phHard,
+                                      const Photon *phSoft,
+                                      const Vertex *selvtx);
+    void                ApplyTTHTag(const Photon *phHard, 
+                                    const Photon *phSoft,
+                                    const Vertex *selvtx);
+    bool                VHLepHasDielectron(const Photon *phHard,
+                                           const Photon *phSoft);
+    bool                VHLepHasDimuon(const Photon *phHard,
+                                       const Photon *phSoft);
+    UInt_t              VHLepNumberOfJets(const Photon *phHard,
+                                          const Photon *phSoft,
+                                          const Vertex *selvtx,
+                                          const Particle *lepton);
+    bool                VHHadPassesCommonCuts(const Photon *phHard,
+                                              const Photon *phSoft,
+                                              const Vertex *selvtx);
+    UInt_t              VHHadNumberOfJets(const Photon *phHard,
+                                          const Photon *phSoft,
+                                          const Vertex *selvtx);
+    UInt_t              VHHadNumberOfBJets(const Photon *phHard,
+                                           const Photon *phSoft,
+                                           const Vertex *selvtx);
 
     // Names for the input Collections
     TString             fPhotonBranchName;
@@ -899,6 +923,7 @@ namespace mithep
 
     Bool_t                         fApplyLeptonTag;
     Bool_t                         fApplyVHLepTag;
+    Bool_t                         fApplyVHHadTag;
     Bool_t                         fApplyVBFTag;
     Bool_t                         fApplyTTHTag;
     Bool_t                         fApplyBTag;
