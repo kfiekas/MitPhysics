@@ -1,4 +1,4 @@
-// $Id: HKFactorProducer.cc,v 1.17 2012/09/24 09:22:03 ceballos Exp $
+// $Id: HKFactorProducer.cc,v 1.18 2012/09/24 12:23:15 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/HKFactorProducer.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -113,7 +113,7 @@ void HKFactorProducer::Process()
   }
   else if (fProcessID == 997){ // for tau embedding samples
     LoadBranch(fEmbedWeightName);
-    theWeight = fEmbedWeight->At(fEmbedWeight->GetEntries()-1)->Weight();
+    theWeight = fEmbedWeight->At(fEmbedWeight->GetEntries()-1)->GenWeight();
     if (GetFillHist()) hDHKFactor[3]->Fill(TMath::Max(TMath::Min(theWeight,5.999),-3.999));
     if (GetFillHist()) hDHKFactor[0]->Fill(0.5,theWeight);
   }
