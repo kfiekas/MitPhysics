@@ -15,6 +15,7 @@ CosmicCleaningMod::CosmicCleaningMod(const char *name, const char *title) :
   fCosmicsName("random"),        
   fCleanMuonsName(ModNames::gkCleanMuonsName),        
   fCleanCosmicsName(ModNames::gkCleanCosmicsName),
+  fDeltaR(0.1),
   fCosmics(0)
 {
   // Constructor.
@@ -45,7 +46,7 @@ void CosmicCleaningMod::Process()
         UInt_t n = CleanMuons->GetEntries();
         for (UInt_t j=0; j<n; ++j) {
           Double_t deltaR = MathUtils::DeltaR(CleanMuons->At(j)->Mom(), mom);     
-          if (deltaR < 0.1) {
+          if (deltaR < fDeltaR) {
             isMuonOverlap = kTRUE;
             break;         
           }
@@ -55,17 +56,6 @@ void CosmicCleaningMod::Process()
       }
         
       if (isMuonOverlap)
-        continue;
-
-      // Check whether it overlaps with another cosmic candidate:
-      bool isCosmicOverlap = kFALSE;
-      for (UInt_t j=0; j<CleanCosTemp.size(); ++j) {
-          Double_t deltaR = MathUtils::DeltaR(CleanCosTemp[j]->Mom(), mom);
-          if (deltaR < 0.1)
-            isCosmicOverlap = kTRUE;
-      }
-
-      if (isCosmicOverlap)
         continue;
 
       // if no overlaps then add to clean cosmics
