@@ -1,4 +1,4 @@
-// $Id: MetCorrectionMod.cc,v 1.1 2013/09/26 23:08:08 dimatteo Exp $
+// $Id: MetCorrectionMod.cc,v 1.2 2013/09/26 23:12:53 dimatteo Exp $
 
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitPhysics/Mods/interface/MetCorrectionMod.h"
@@ -58,6 +58,18 @@ void MetCorrectionMod::SlaveBegin()
   // ===== load PFMET and PFCandidates braches ====
   ReqBranch(fMetName, fPFMet);
   ReqBranch(fPFCandidatesName, fPFCandidates);
+
+}
+
+//--------------------------------------------------------------------------------------------------
+void MetCorrectionMod::SlaveTerminate()
+{
+  // ===== deallocate memory ====
+  delete   fFormulaType0;
+  delete   fFormulaShiftDataPx;
+  delete   fFormulaShiftDataPy;
+  delete   fFormulaShiftMCPx;
+  delete   fFormulaShiftMCPy;
 
 }
 

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MetCorrectionMod.h,v 1.1 2013/09/26 23:08:09 dimatteo Exp $
+// $Id: MetCorrectionMod.h,v 1.2 2013/09/26 23:12:54 dimatteo Exp $
 //
 // MetCorrectionMod
 //
@@ -34,7 +34,7 @@ namespace mithep
       const char   *GetJetsName()                  const     { return fJetsName;         }   
       const char   *GetCorrectedJetsName()         const     { return fCorrectedJetsName;}     
       const char   *GetOutputName()                const     { return GetCorrectedName();}
-      Double_t     GetMinDz()                     const      { return fMinDz;            }
+      Double_t     GetMinDz()                      const     { return fMinDz;            }
       const char   *GetExprType0()                 const     { return fExprType0;        }
       const char   *GetExprShiftDataPx()           const     { return fExprShiftDataPx;  }
       const char   *GetExprShiftDataPy()           const     { return fExprShiftDataPy;  }
@@ -59,6 +59,7 @@ namespace mithep
 
     protected:
       void                  SlaveBegin();
+      void                  SlaveTerminate();
       void                  Process();
       
       TString               fMetName;            //name of met collection (input)
