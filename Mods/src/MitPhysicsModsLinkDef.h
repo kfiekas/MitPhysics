@@ -1,4 +1,4 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.40 2013/06/23 17:00:04 mingyang Exp $
+// $Id: MitPhysicsModsLinkDef.h,v 1.41 2013/08/03 11:52:45 ceballos Exp $
 
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
@@ -17,6 +17,7 @@
 #include "MitPhysics/Mods/interface/MVAMetMod.h"
 #include "MitPhysics/Mods/interface/JetCorrectionMod.h"
 #include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
+#include "MitPhysics/Mods/interface/MetCorrectionMod.h"
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitPhysics/Mods/interface/PDFProducerMod.h"
 #include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
@@ -58,6 +59,7 @@
 #pragma link C++ class mithep::MVAMetMod+;
 #pragma link C++ class mithep::JetCorrectionMod+;
 #pragma link C++ class mithep::MergeLeptonsMod+;
+#pragma link C++ class mithep::MetCorrectionMod+;
 #pragma link C++ class mithep::MuonIDMod+;
 #pragma link C++ enum mithep::MuonIDMod::EMuClassType;
 #pragma link C++ enum mithep::MuonIDMod::EMuIdType;
