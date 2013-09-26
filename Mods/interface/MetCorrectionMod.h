@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MetCorrectionMod.h,v 1.10 2012/05/07 19:30:13 ceballos Exp $
+// $Id: MetCorrectionMod.h,v 1.1 2013/09/26 23:08:09 dimatteo Exp $
 //
 // MetCorrectionMod
 //
@@ -58,16 +58,16 @@ namespace mithep
       void         SetPrint(bool b)                          { fPrint = b;               }
 
     protected:
-      void              SlaveBegin();
-      void              Process();
+      void                  SlaveBegin();
+      void                  Process();
       
       TString               fMetName;            //name of met collection (input)
       TString               fCorrectedMetName;   //name of corrected met collection (output)
       TString               fJetsName;           //name of uncorrected jet collection (input)
       TString               fCorrectedJetsName;  //name of corrected jet collection (input)
       TString               fPFCandidatesName;   //name of PF candidates collection (input)
-      TString               fVertexName;	       //name of vertex collection (input)
-      Double_t              fMinDz;	             //delta Z for separating PU verteces from PV
+      TString               fVertexName;         //name of vertex collection (input)
+      Double_t              fMinDz;              //delta Z for separating PU verteces from PV
                            
       bool                  fApplyType0;         //switch on type 0 correction
       bool                  fApplyType1;         //switch on type 1 correction
@@ -88,7 +88,7 @@ namespace mithep
       bool                  fPrint;              //flag for debug print out
                            
       const PFMetCol       *fPFMet;              //met branch
-      const PFCandidateCol *fPFCandidates;       // particle flow branch
+      const PFCandidateCol *fPFCandidates;       //particle flow branch
 
       ClassDef(MetCorrectionMod, 1) // Jet identification module
   };

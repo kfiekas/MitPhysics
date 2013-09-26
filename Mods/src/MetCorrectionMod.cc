@@ -1,4 +1,4 @@
-// $Id: MetCorrectionMod.cc,v 1.16 2012/05/07 19:30:10 ceballos Exp $
+// $Id: MetCorrectionMod.cc,v 1.1 2013/09/26 23:08:08 dimatteo Exp $
 
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitPhysics/Mods/interface/MetCorrectionMod.h"
@@ -46,8 +46,7 @@ MetCorrectionMod::~MetCorrectionMod() {}
 //--------------------------------------------------------------------------------------------------
 void MetCorrectionMod::SlaveBegin()
 {
-  // ===== initialize the formulae ====
-  
+  // ===== initialize the formulae ====  
   //type0 formula: function of Pt of vectorial sum of PU particles
   fFormulaType0       = new TFormula("formulaType0",       fExprType0);
   //XY shift formula: function of nVtx
@@ -57,7 +56,6 @@ void MetCorrectionMod::SlaveBegin()
   fFormulaShiftMCPy   = new TFormula("formulaShiftMCPy",   fExprShiftMCPy);
 
   // ===== load PFMET and PFCandidates braches ====
-
   ReqBranch(fMetName, fPFMet);
   ReqBranch(fPFCandidatesName, fPFCandidates);
 
@@ -90,7 +88,7 @@ void MetCorrectionMod::Process()
   Met *CorrectedMet = fPFMet->At(0)->MakeCopy();
   
   // ===== Type 0 corrections, to mitigate pileup ====
-  // https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1473/1.html
+  // https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1473/1.html  
   if (fApplyType0) {
     
     LoadBranch(fPFCandidatesName);
@@ -153,7 +151,6 @@ void MetCorrectionMod::Process()
 
   // ===== Type 1 corrections, to propagate JEC to MET ====
   // https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#Type_I_Correction
-
   if (fApplyType1) {
     
     const JetCol   *inJets     = GetObjThisEvt<JetCol>(fJetsName);
@@ -220,7 +217,6 @@ void MetCorrectionMod::Process()
   // ===== XY Shift correction, to reduce the MET azimuthal modulation ====
   // https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#xy_Shift_Correction
   // NB: the correction in CMSSW is applied with a minus sign, not as noted on the twiki
-
   if (fApplyShift) {
     
     // prepare the correction containers
