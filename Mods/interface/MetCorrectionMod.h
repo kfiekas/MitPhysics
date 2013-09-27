@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: MetCorrectionMod.h,v 1.2 2013/09/26 23:12:54 dimatteo Exp $
+// $Id: MetCorrectionMod.h,v 1.3 2013/09/26 23:38:59 dimatteo Exp $
 //
 // MetCorrectionMod
 //
@@ -91,7 +91,7 @@ namespace mithep
       const PFMetCol       *fPFMet;              //met branch
       const PFCandidateCol *fPFCandidates;       //particle flow branch
 
-      ClassDef(MetCorrectionMod, 1) // Jet identification module
+      ClassDef(MetCorrectionMod, 1)              // met correction module
   };
 }
 #endif

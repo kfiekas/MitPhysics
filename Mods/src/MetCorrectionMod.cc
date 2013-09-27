@@ -1,4 +1,4 @@
-// $Id: MetCorrectionMod.cc,v 1.2 2013/09/26 23:12:53 dimatteo Exp $
+// $Id: MetCorrectionMod.cc,v 1.3 2013/09/26 23:38:59 dimatteo Exp $
 
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitPhysics/Mods/interface/MetCorrectionMod.h"
@@ -55,7 +55,7 @@ void MetCorrectionMod::SlaveBegin()
   fFormulaShiftMCPx   = new TFormula("formulaShiftMCPx",   fExprShiftMCPx);
   fFormulaShiftMCPy   = new TFormula("formulaShiftMCPy",   fExprShiftMCPy);
 
-  // ===== load PFMET and PFCandidates braches ====
+  // ===== load PFMET and PFCandidates branches ====
   ReqBranch(fMetName, fPFMet);
   ReqBranch(fPFCandidatesName, fPFCandidates);
 
