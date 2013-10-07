@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.36 2013/08/31 07:36:37 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.38 2013/09/14 00:19:00 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -91,7 +91,25 @@ namespace mithep
   class PhotonTreeWriterPhoton
   {
     public:  
-    void SetVars(const Photon *p, const DecayParticle *c, const Electron *ele, const SuperCluster *pfsc, const MCParticle *m, PhotonFix &phfixph, PhotonFix &phfixele, const TrackCol* trackCol,const VertexCol* vtxCol, const PFCandidateCol* candCol, Double_t _tRho, Bool_t fillclusterarrays, const ElectronCol* els, const DecayParticleCol *convs, const BaseVertex *bs, Bool_t applyElectronVeto=kTRUE, const Vertex* realVtx = NULL);
+    void SetVars(const Photon *p,
+                 const DecayParticle *c,
+                 const Electron *ele,
+                 const SuperCluster *pfsc,
+                 const MCParticle *m,
+                 PhotonFix &phfixph,
+                 PhotonFix &phfixele,
+                 const TrackCol* trackCol,
+                 const VertexCol* vtxCol,
+                 const PFCandidateCol* candCol,
+                 Double_t _tRho,
+                 Bool_t fillclusterarrays,
+                 const PhotonCol* ps,
+                 const SuperClusterCol* scs,
+                 const ElectronCol* els,
+                 const DecayParticleCol *convs,
+                 const BaseVertex *bs,
+                 Bool_t applyElectronVeto=kTRUE,
+                 const Vertex* realVtx = NULL);
       Float_t Ecor()    const { return ecor;    };
       Float_t Ecorerr() const { return ecorerr; };
       Float_t Ecorele()    const { return ecorele;    };
@@ -100,6 +118,7 @@ namespace mithep
       
     private:  
       UChar_t hasphoton;
+      UInt_t  index;
       Float_t e;
       Float_t pt;
       Float_t eta;
@@ -107,6 +126,7 @@ namespace mithep
       Float_t r9;
       Float_t e3x3;
       Float_t e5x5;
+      UInt_t  scindex;
       Float_t sce;
       Float_t scrawe;
       Float_t scpse;
@@ -712,7 +732,7 @@ namespace mithep
     void                SetPUInfoName(const char *n)      { fPileUpName = n;             }
     void                SetBeamspotName(const char *n)    { fBeamspotName = n;           }
     void                SetPFCandName(const char *n)      { fPFCandName = n;             }
-    void                SetSuperClusterName(const char *n) { fSuperClusterName = n;      }
+    void                SetPFSuperClusterName(const char *n) { fPFSuperClusterName = n;      }
     void                SetPFJetName(const char *n)       { fPFJetName = n;              }
     void                SetGenJetName(const char *n)      { fGenJetName = n;             }
     void                SetuncorrPFJetName(const char *n) { funcorrPFJetName = n;        }
@@ -765,23 +785,27 @@ namespace mithep
     
     void                SetBeamspotWidth(Double_t x)            { fBeamspotWidth = x; }
 
-      void                SetElectronMVAWeightsSubdet0Pt10To20(TString s)  
-                          { fElectronMVAWeights_Subdet0Pt10To20  = s; }
-      void                SetElectronMVAWeightsSubdet1Pt10To20(TString s)  
-                          { fElectronMVAWeights_Subdet1Pt10To20  = s; }
-      void                SetElectronMVAWeightsSubdet2Pt10To20(TString s)  
-                          { fElectronMVAWeights_Subdet2Pt10To20  = s; }
-      void                SetElectronMVAWeightsSubdet0Pt20ToInf(TString s) 
-                          { fElectronMVAWeights_Subdet0Pt20ToInf = s; }
-      void                SetElectronMVAWeightsSubdet1Pt20ToInf(TString s) 
-                          { fElectronMVAWeights_Subdet1Pt20ToInf = s; }
-      void                SetElectronMVAWeightsSubdet2Pt20ToInf(TString s) 
-                          { fElectronMVAWeights_Subdet2Pt20ToInf = s; }
+    void                SetElectronMVAWeightsSubdet0Pt10To20(TString s)
+                        { fElectronMVAWeights_Subdet0Pt10To20  = s; }
+    void                SetElectronMVAWeightsSubdet1Pt10To20(TString s)
+                        { fElectronMVAWeights_Subdet1Pt10To20  = s; }
+    void                SetElectronMVAWeightsSubdet2Pt10To20(TString s)
+                        { fElectronMVAWeights_Subdet2Pt10To20  = s; }
+    void                SetElectronMVAWeightsSubdet0Pt20ToInf(TString s)
+                        { fElectronMVAWeights_Subdet0Pt20ToInf = s; }
+    void                SetElectronMVAWeightsSubdet1Pt20ToInf(TString s)
+                        { fElectronMVAWeights_Subdet1Pt20ToInf = s; }
+    void                SetElectronMVAWeightsSubdet2Pt20ToInf(TString s)
+                        { fElectronMVAWeights_Subdet2Pt20ToInf = s; }
 
-      void                SetDoSynching(bool b) {fDoSynching = b;}
+    void                SetDoSynching(bool b) {fDoSynching = b;}
 
+    template<typename Element, typename Collection>
+    static UInt_t       IndexOfElementInCollection(
+                          const Element *element,
+                          const Collection *collection
+                          );
 
-    
   protected:
     void                Process();
     void                SlaveBegin();
@@ -842,7 +866,7 @@ namespace mithep
     TString             fConversionName;
     TString             fPFConversionName;
     TString             fTrackBranchName;
-    TString             fPileUpDenName;    
+    TString             fPileUpDenName;
     TString             fPVName;
     TString             fBeamspotName;
     TString             fPFCandName;
@@ -851,16 +875,14 @@ namespace mithep
 
     TString             fMCParticleName;
     TString             fMCEventInfoName;
-    
+
     TString             fPileUpName;
-    TString             fSuperClusterName;
+    TString             fPFSuperClusterName;
     TString             fPFMetName;
     TString             fPFJetName;
 
-
     TString             funcorrPFJetName;
     TString             fGenJetName;   //added to do pfmet correction 05/01/2012
-
 
     TString             fLeptonTagElectronsName;
     TString             fLeptonTagMuonsName;
@@ -893,7 +915,7 @@ namespace mithep
     const MCParticleCol           *fMCParticles;
     const MCEventInfo             *fMCEventInfo;
     const PileupInfoCol           *fPileUp;    
-    const SuperClusterCol         *fSuperClusters;   
+    const SuperClusterCol         *fPFSuperClusters;   
     const PFMetCol                *fPFMet;
     const JetCol                  *fPFJets;
     const GenJetCol               *fGenJets;

@@ -45,7 +45,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fMCParticleName         (Names::gkMCPartBrn),
   fMCEventInfoName        (Names::gkMCEvtInfoBrn),
   fPileUpName             (Names::gkPileupInfoBrn),  
-  fSuperClusterName       ("PFSuperClusters"),
+  fPFSuperClusterName     ("PFSuperClusters"),
   fPFMetName              ("PFMet"),
   fPFJetName              (Names::gkPFJetBrn),
   funcorrPFJetName        ("AKt5PFJets"),
@@ -80,7 +80,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fMCParticles            (0),
   fMCEventInfo            (0),
   fPileUp                 (0),
-  fSuperClusters          (0),
+  fPFSuperClusters        (0),
   fPFJets                 (0),
   fGenJets                (0),
   funcorrPFJets           (0),
@@ -196,7 +196,7 @@ void PhotonTreeWriter::Process()
   LoadEventObject(fPVName,             fPV);    
   LoadEventObject(fBeamspotName,       fBeamspot);
   LoadEventObject(fPFCandName,         fPFCands);
-  LoadEventObject(fSuperClusterName,   fSuperClusters);
+  LoadEventObject(fPFSuperClusterName, fPFSuperClusters);
   LoadEventObject(fPFMetName,          fPFMet);  
 //   LoadEventObject(fPFNoPileUpName,     fPFNoPileUpCands);
 //   LoadEventObject(fPFPileUpName,     fPFPileUpCands);
@@ -888,8 +888,18 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->costhetaele =  _costhetaele;    
     fDiphotonEvent->evtcat = _evtcat;
     
-    fDiphotonEvent->photons[0].SetVars(phHard,conv1,ele1,pfsc1,phgen1,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto,realVtx);
-    fDiphotonEvent->photons[1].SetVars(phSoft,conv2,ele2,pfsc2,phgen2,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,fElectrons,fConversions,bsp,fApplyElectronVeto,realVtx);
+    fDiphotonEvent->photons[0].SetVars(phHard, conv1, ele1, pfsc1, phgen1,
+                                       fPhfixph, fPhfixele, fTracks, fPV,
+                                       fPFCands, rho, fFillClusterArrays,
+                                       fPhotons, fPFSuperClusters,
+                                       fElectrons, fConversions, bsp,
+                                       fApplyElectronVeto, realVtx);
+    fDiphotonEvent->photons[1].SetVars(phSoft, conv2, ele2, pfsc2, phgen2,
+                                       fPhfixph, fPhfixele, fTracks, fPV,
+                                       fPFCands, rho, fFillClusterArrays,
+                                       fPhotons, fPFSuperClusters,
+                                       fElectrons, fConversions,
+                                       bsp, fApplyElectronVeto, realVtx);
     
     Float_t ph1ecor    = fDiphotonEvent->photons[0].Ecor();
     Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
@@ -1063,8 +1073,10 @@ void PhotonTreeWriter::Process()
 						 (1.0-fDiphotonEvent->cosphimetele));      
     }
     
-    fSinglePhoton->SetVars(ph,conv,ele,pfsc,phgen,fPhfixph,fPhfixele,fTracks,fPV,fPFCands,rho,fFillClusterArrays,
-			   fElectrons,fConversions,bsp,fApplyElectronVeto);
+    fSinglePhoton->SetVars(ph, conv, ele, pfsc, phgen, fPhfixph, fPhfixele,
+                           fTracks, fPV, fPFCands, rho, fFillClusterArrays,
+                           fPhotons, fPFSuperClusters, fElectrons, fConversions,
+                           bsp, fApplyElectronVeto);
     hCiCTupleSingle->Fill();
   }
 
@@ -1103,7 +1115,7 @@ void PhotonTreeWriter::SlaveBegin()
   if ( fDoSynching ) ReqEventObject(fPFConversionName,     fPFConversions,  true);
   ReqEventObject(fBeamspotName,    fBeamspot,     true);
   ReqEventObject(fPFCandName,      fPFCands,      true);
-  ReqEventObject(fSuperClusterName,fSuperClusters,true);
+  ReqEventObject(fPFSuperClusterName,fPFSuperClusters,true);
   ReqEventObject(fPFMetName,       fPFMet,        true);
   if (fEnableJets){
     ReqEventObject(fPFJetName,       fPFJets,       fPFJetsFromBranch);
@@ -1337,15 +1349,28 @@ Float_t PhotonTreeWriter::GetEventCat(PhotonTools::CiCBaseLineCats cat1,
 }
 
 template <int NClus>
-void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle *c, const Electron *ele,
-					    const SuperCluster *pfsc, const MCParticle *m,
-					    PhotonFix &phfixph, PhotonFix &phfixele,
-					    const TrackCol* trackCol,const VertexCol* vtxCol,
-					    const PFCandidateCol* fPFCands,
-					    Double_t rho,
-					    Bool_t fillclusterarrays, 
-					    const ElectronCol* els, const DecayParticleCol *convs, const BaseVertex *bs, Bool_t applyElectronVeto, const Vertex* realVtx) {
-  
+void
+PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p,
+                                       const DecayParticle *c,
+                                       const Electron *ele,
+                                       const SuperCluster *pfsc,
+                                       const MCParticle *m,
+                                       PhotonFix &phfixph,
+                                       PhotonFix &phfixele,
+                                       const TrackCol* trackCol,
+                                       const VertexCol* vtxCol,
+                                       const PFCandidateCol* fPFCands,
+                                       Double_t rho,
+                                       Bool_t fillclusterarrays,
+                                       const PhotonCol* ps,
+                                       const SuperClusterCol* scs,
+                                       const ElectronCol* els,
+                                       const DecayParticleCol *convs,
+                                       const BaseVertex *bs,
+                                       Bool_t applyElectronVeto,
+                                       const Vertex* realVtx)
+{
+
   const SuperCluster *s = 0;
   if (p)
     s = p->SCluster();
@@ -1384,6 +1409,8 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
   
   if (p) {
     hasphoton = kTRUE;
+    index = PhotonTreeWriter::IndexOfElementInCollection(p, ps);
+    
     e = p->E();
     pt = p->Pt();
     eta = p->Eta();
@@ -1465,6 +1492,7 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
   }
   else {
     hasphoton = kFALSE;
+    index = (UInt_t) -1;
     e = -99.;
     pt = -99.;
     eta = -99.;
@@ -1490,7 +1518,10 @@ void PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p, const DecayParticle
     combiso1 = -99.;
     combiso2 = -99.;
   }
-  
+
+  scindex = PhotonTreeWriter::IndexOfElementInCollection(s, scs);
+  /// DEBUG
+  cout << "JV: s, scs, index: " << s << ", " << scs << ", " << scindex << endl;
   sce = s->Energy();
   scrawe = s->RawEnergy();
   scpse = s->PreshowerEnergy();
@@ -2766,6 +2797,22 @@ UInt_t PhotonTreeWriter::VHHadNumberOfBJets(const Photon *phHard,
   
 } // PhotonTreeWriter::VHHadNumberOfBJets(..)
 
+
+//_____________________________________________________________________________
+template<typename Element, typename Collection>
+UInt_t PhotonTreeWriter::IndexOfElementInCollection(
+          const Element * element,
+          const Collection * collection
+          )
+{
+  UInt_t index = 0;
+  for (; index < collection->GetEntries() && index < (UInt_t) -1; ++index) {
+    if (element == collection->At(index)) {
+      break;
+    }
+  }
+  return index;
+}
 
 
 //_____________________________________________________________________________
