@@ -1,4 +1,4 @@
-// $Id: GeneratorMod.cc,v 1.76 2013/07/13 08:08:21 ceballos Exp $
+// $Id: GeneratorMod.cc,v 1.77 2013/08/14 20:22:23 mdecross Exp $
 
 #include "MitPhysics/Mods/interface/GeneratorMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -1305,10 +1305,10 @@ void GeneratorMod::Process()
 
     // pt min for leptons from W/Z
     hDGenPtMin->Fill(TMath::Min(ptMin, 199.999));
-    //if(ptMin < 10){
-    //  SkipEvent();
-    //  return;
-    //}
+
+    //if(GenLeptons->GetEntries() != 3) {SkipEvent(); return;}
+    //if(GenLeptons->At(0)->Pt()     <= 20.0 || GenLeptons->At(1)->Pt()     <= 10.0 || GenLeptons->At(2)->Pt()     <= 10.0 ||
+    //   GenLeptons->At(0)->AbsEta() >=  2.5 || GenLeptons->At(1)->AbsEta() >=  2.5 || GenLeptons->At(2)->AbsEta() >=  2.5) {SkipEvent(); return;}
   
     // leptons
     hDGenLeptons[0]->Fill(GenLeptons->GetEntries());
