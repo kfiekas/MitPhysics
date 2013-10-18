@@ -1,4 +1,4 @@
-// $Id: ElectronTools.cc,v 1.54 2013/02/23 14:52:59 mingyang Exp $
+// $Id: ElectronTools.cc,v 1.55 2013/04/05 13:13:31 arapyan Exp $
 
 #include "MitPhysics/Utils/interface/ElectronTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -31,12 +31,13 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
     {0.8,0.2,0.9,0,0,0,0,0}};                              //extra cuts fbrem and E_Over_P 
 
   Double_t loosecuts[6][8]={
-    {0.076, 0.033, 0.07, 0.0, 0.083,0.148, 0.033, 0.0},         //hovere
-    {0.0101, 0.0095, 0.0097, 0.0, 0.03, 0.03, 0.03, 0.0},       //sigmaetaeta
-    {0.053, 0.0189, 0.059, 0.099, 0.0278,0.0157, 0.042, 0.080}, //deltaphiin
-    {0.0078, 0.00259, 0.0062, 0.0, 0.0078,0.0061, 0.0061, 0.0}, //deltaetain
-    {0.3, 0.92, 0.211, 0.0, 0.42, 0.88, 0.68, 0.0},             //eoverp
-    {0.8,0.2,0,0,0,0,0,0}};                                     //extra cuts fbrem and E_Over_P 
+    {0.12,  0.12,  0.12,  0.12,  0.10,   0.10,   0.10,   0.10 }, //hovere
+    {0.01,  0.01,  0.01,  0.01,  0.03,   0.03,   0.03,   0.03 }, //sigmaetaeta
+    {0.06,  0.06,  0.06,  0.06,  0.03,   0.03,   0.03,   0.03 }, //deltaphiin
+    {0.004, 0.004, 0.004, 0.004, 0.007,  0.007,  0.007,  0.007}, //deltaetain
+    {0.0,   0.0,   0.0,   0.0,   0.0,	 0.0,	 0.0,	 0.0  }, //eoverp
+    {0.0,   0.0,   0,	  0,	 0,	 0,	 0,	 0    }  //extra cuts fbrem and E_Over_P 
+  };            
 
   Double_t VBTFWorkingPointFakeable[6][8] = {
     {0.12,  0.12,  0.12,  0.12,  0.10,   0.10,   0.10,   0.10  }, //hovere
@@ -162,6 +163,11 @@ Bool_t ElectronTools::PassCustomID(const Electron *ele, EElIdType idType) {
   else if (eOverP < 1.2 && eOverP > 0.8) 
     cat=0;
   
+  if(idType == kCustomIdLoose){
+    double eleOneOverEMinusOneOverP = TMath::Abs((1.0/(ele->EcalEnergy())) - (1.0 / ele->P()));
+    if(eleOneOverEMinusOneOverP >= 0.05) return kFALSE;
+  }
+
   if(ele->SCluster() == 0)
     return kFALSE;
   Double_t eSeedOverPin = ele->ESeedClusterOverPIn();

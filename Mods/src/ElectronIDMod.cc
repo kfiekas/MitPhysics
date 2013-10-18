@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.136 2013/02/23 14:51:25 mingyang Exp $
+// $Id: ElectronIDMod.cc,v 1.138 2013/07/16 09:45:03 veverka Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -398,7 +398,7 @@ Bool_t ElectronIDMod::PassIsolationCut(const Electron *ele, ElectronTools::EElIs
     break;
     case ElectronTools::kCombinedRelativeConeAreaCorrected:
     {
-      Double_t totalIso = ele->TrackIsolationDr03() + ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03() - rho * TMath::Pi() * 0.3 * 0.3;
+      Double_t totalIso = ele->TrackIsolationDr03() + TMath::Max(ele->EcalRecHitIsoDr03() + ele->HcalTowerSumEtDr03() - rho * TMath::Pi() * 0.3 * 0.3, 0.0);
       if (ele->SCluster()->AbsEta() < 1.5)  { // Barrel
 	if (totalIso < (ele->Pt()*fCombRelativeIsolationCut) )
 	  isocut = kTRUE;
