@@ -1,4 +1,4 @@
-// $Id: MuonIDMod.cc,v 1.90 2013/07/16 09:40:45 veverka Exp $
+// $Id: MuonIDMod.cc,v 1.91 2013/08/14 20:22:23 mdecross Exp $
 
 #include "MitPhysics/Mods/interface/MuonIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
@@ -380,7 +380,7 @@ void MuonIDMod::Process()
     case kCombinedRelativeConeAreaCorrected: 	 
       { 	 
 	//const PileupEnergyDensity *rho =  fPileupEnergyDensity->At(0); // Fabian: made Rho customable 	 
-	Double_t totalIso =  mu->IsoR03SumPt() + mu->IsoR03EmEt() + mu->IsoR03HadEt() - Rho * TMath::Pi() * 0.3 * 0.3 ; 	 
+	Double_t totalIso =  mu->IsoR03SumPt() + TMath::Max(mu->IsoR03EmEt() + mu->IsoR03HadEt() - Rho * TMath::Pi() * 0.3 * 0.3, 0.0); 	 
 	double theIsoCut = fCombRelativeIsolationCut; 	 
 	if (totalIso < (mu->Pt()*theIsoCut)) isocut = kTRUE; 	 
       } 	 
