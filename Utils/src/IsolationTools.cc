@@ -1,4 +1,4 @@
-// $Id: IsolationTools.cc,v 1.36 2012/10/26 19:23:04 fabstoec Exp $
+// $Id: IsolationTools.cc,v 1.37 2013/02/23 14:53:07 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
@@ -1306,7 +1306,7 @@ Double_t IsolationTools::PFNeutralHadronIsolation(const mithep::Photon *p,
   
   for (UInt_t ipfc = 0; ipfc<PFCands->GetEntries(); ++ipfc) {
     const PFCandidate *pfc = PFCands->At(ipfc);
-    if (pfc->PFType()!=PFCandidate::eGamma) continue;
+    if (pfc->PFType()!=PFCandidate::eNeutralHadron) continue;
     if (!setdir) {
       photondir = ThreeVector(p->SCluster()->Point() - pfc->SourceVertex());
       setdir = kTRUE;
