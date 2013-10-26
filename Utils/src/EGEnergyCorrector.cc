@@ -1,4 +1,4 @@
-// $Id: EGEnergyCorrector.cc,v 1.11 2013/08/27 15:27:50 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.12 2013/08/28 13:51:46 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -12,6 +12,7 @@
 #include "HiggsAnalysis/GBRLikelihood/interface/RooHybridBDTAutoPdf.h"
 #include "HiggsAnalysis/GBRLikelihood/interface/RooDoubleCBFast.h"
 #include "HiggsAnalysis/GBRLikelihood/interface/HybridGBRForest.h"
+#include "HiggsAnalysis/GBRLikelihood/interface/HybridGBRForestD.h"
 #include "Cintex/Cintex.h"
 #include <TFile.h>
 #include <TRandom3.h>
@@ -28,6 +29,8 @@ fReaderee(0),
 fReadereevariance(0),
 fReaderebsemi(0),
 fReadereesemi(0),
+fReaderDebsemi(0),
+fReaderDeesemi(0),
 _mean(0),
 _tgt(0),
 _sigma(0),
@@ -55,11 +58,14 @@ EGEnergyCorrector::~EGEnergyCorrector()
   if (fReaderebvariance) delete fReaderebvariance;  
   if (fReaderee) delete fReaderee;
   if (fReadereevariance) delete fReadereevariance;
+  if (fReaderebsemi) delete fReaderebsemi;
+  if (fReadereesemi) delete fReadereesemi;
+  if (fReaderDebsemi) delete fReaderDebsemi;
+  if (fReaderDeesemi) delete fReaderDeesemi;  
 }
 
 //--------------------------------------------------------------------------------------------------
 void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TString regweights, Int_t version=0) {
-    fIsInitialized = kTRUE;
     if (fVals) delete [] fVals;
     if (fReadereb) delete fReadereb;
     if (fReaderebvariance) delete fReaderebvariance;  
@@ -67,6 +73,8 @@ void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TStri
     if (fReadereevariance) delete fReadereevariance;        
     if (fReaderebsemi) delete fReaderebsemi;
     if (fReadereesemi) delete fReadereesemi;
+    if (fReaderDebsemi) delete fReaderDebsemi;
+    if (fReaderDeesemi) delete fReaderDeesemi;
     
     if (version<=3) {
     
@@ -84,9 +92,12 @@ void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TStri
       fReaderee = (GBRForest*)fgbr->Get("EECorrection");
       fReadereevariance = (GBRForest*)fgbr->Get("EEUncertainty");      
       fgbr->Close();
+      
+      fIsInitialized = kTRUE;
+
     
     }
-    else {
+    else if (version==5) {
       fVals = new Float_t[37];
       
       TFile *fgbr = TFile::Open(regweights,"READ");
@@ -131,6 +142,55 @@ void EGEnergyCorrector::Initialize(TString phfixstring, TString phfixfile, TStri
       //add target var to static normalization set to avoid memory churn/leak
       _normset.add(*_tgt);
       
+      fIsInitialized = kTRUE;     
+      
+    }
+    else if (version>=6 && version<=8) {
+      fVals = new Float_t[37];
+      
+      TFile *fgbr = TFile::Open(regweights,"READ");
+      fgbr->GetObject("EGRegressionForest_EB", fReaderDebsemi);
+      fgbr->GetObject("EGRegressionForest_EE", fReaderDeesemi);
+      fgbr->Close();      
+      
+      assert(fReaderDebsemi!=0);
+      assert(fReaderDeesemi!=0);
+      
+      _tgt = new RooRealVar("tgt","",1.);
+      _mean = new RooRealVar("mean","",1.);
+      _sigma = new RooRealVar("sigma","",0.01);
+      _n1 = new RooRealVar("n1","",2.);
+      _n2 = new RooRealVar("n2","",2.);
+      
+      _sigmalim = new RooRealConstraint("sigmalim","",*_sigma,0.0002,0.5);
+      _meanlim = new RooRealConstraint("meanlim","",*_mean,0.2,2.0);
+      _n1lim = new RooRealConstraint("n1lim","",*_n1,1.01,5000.);
+      _n2lim = new RooRealConstraint("n2lim","",*_n2,1.01,5000.);
+      
+      RooConstVar *alpha1 = new RooConstVar("alpha1","",2.0);
+      RooConstVar *alpha2 = new RooConstVar("alpha2","",1.0);
+      
+      _pdf = new RooDoubleCBFast("sigpdf","",*_tgt,*_meanlim,*_sigmalim,*alpha1,*_n1lim,*alpha2,*_n2lim);
+      
+      //add to RooArgList for proper garbage collection
+      _args.addOwned(*_tgt);
+      _args.addOwned(*_mean);
+      _args.addOwned(*_sigma);
+      _args.addOwned(*_n1);
+      _args.addOwned(*_n2);
+      _args.addOwned(*alpha1);
+      _args.addOwned(*alpha2);
+      _args.addOwned(*_sigmalim);
+      _args.addOwned(*_meanlim);
+      _args.addOwned(*_n1lim);
+      _args.addOwned(*_n2lim);
+      _args.addOwned(*_pdf);      
+      
+      //add target var to static normalization set to avoid memory churn/leak
+      _normset.add(*_tgt);      
+      
+      fIsInitialized = kTRUE;
+      
     }
 
 }
@@ -171,6 +231,25 @@ void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs,
       p->SetEnergyErr(sigma*ecor);
       p->SetEnergyErrSmeared(sigma*ecor);    
     }
+    if (version>=6 && version<=8) {
+      double ecor,sigEoverE,mean,sigma,alpha1,n1,alpha2,n2,peakpdfval;
+      
+      if (version==6) {
+        CorrectedEnergyWithErrorV6(p,vtxs,rho,ecor,sigEoverE, mean,sigma,alpha1,n1,alpha2,n2,peakpdfval);
+      }
+      else if (version==7) {
+        CorrectedEnergyWithErrorV7(p,vtxs,rho,ecor,sigEoverE, mean,sigma,alpha1,n1,alpha2,n2,peakpdfval);  
+      }
+      else if (version==8) {
+        CorrectedEnergyWithErrorV8(p,vtxs,rho,ecor,sigEoverE, mean,sigma,alpha1,n1,alpha2,n2,peakpdfval);        
+      }
+      
+      FourVectorM mom = p->Mom();
+      double scale = ecor/mom.E();
+      p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
+      p->SetEnergyErr(sigEoverE*ecor);
+      p->SetEnergyErrSmeared(sigEoverE*ecor);    
+    }    
     
   }
   
@@ -570,7 +649,7 @@ void EGEnergyCorrector::CorrectedEnergyWithErrorV5(const Photon *p, const Vertex
   fVals[11] = b->Energy()/s->RawEnergy();
   fVals[12] = b->E3x3()/b->E5x5();
   fVals[13] = sqrt(b->CoviEtaiEta()); //sigietaieta
-  fVals[14] = sqrt(b->CoviPhiiPhi()); //sigiphiiphi
+  fVals[14] = sqrt(b->CoviEtaiEta()); //sigietaieta
   fVals[15] = b->CoviEtaiPhi();   //sigietaiphi
   fVals[16] = b->EMax()/b->E5x5(); //crystal energy ratio gap variables
   fVals[17] = b->E2nd()/b->E5x5();
@@ -635,6 +714,218 @@ void EGEnergyCorrector::CorrectedEnergyWithErrorV5(const Photon *p, const Vertex
   //possible memory leak
   //pdfpeakval = _pdf->getVal(&_normset);
   pdfpeakval = 0.;
+  
+  return;
+  
+}
+
+//--------------------------------------------------------------------------------------------------
+void EGEnergyCorrector::CorrectedEnergyWithErrorV6(const Photon *p, const VertexCol *vtxs, Double_t rho, double &ecor, double &sigEoverE, double &cbmean, double &cbsigma, double &cbalpha1, double &cbn1, double &cbalpha2, double &cbn2, double &pdfpeakval) {
+ 
+  const SuperCluster *s = p->SCluster();
+  const BasicCluster *b = s->Seed();
+  
+  
+  Bool_t isbarrel = (s->AbsEta()<1.5);
+  
+// //basic supercluster variables
+  fVals[0] = s->RawEnergy();
+  fVals[1] = s->Eta();
+  fVals[2] = s->Phi();
+  fVals[3] = p->R9();
+  fVals[4] = s->EtaWidth();
+  fVals[5] = s->PhiWidth();
+  fVals[6] = double(s->NClusters());
+  fVals[7] = p->HadOverEmTow();
+  fVals[8] = rho;
+  fVals[9] = double(vtxs->GetEntries());
+
+  fVals[10] = b->Eta()-s->Eta();
+  fVals[11] = atan2(sin(b->Phi()-s->Phi()), cos(b->Phi()-s->Phi()));
+  fVals[12] = b->Energy()/s->RawEnergy();
+  fVals[13] = b->E3x3()/b->E5x5();
+  fVals[14] = sqrt(b->CoviEtaiEta()); //sigietaieta
+  fVals[15] = sqrt(b->CoviPhiiPhi()); //sigiphiiphi
+  fVals[16] = b->CoviEtaiPhi();   //sigietaiphi
+  fVals[17] = b->EMax()/b->E5x5(); //crystal energy ratio gap variables
+  fVals[18] = b->E2nd()/b->E5x5();
+  fVals[19] = b->ETop()/b->E5x5();
+  fVals[20] = b->EBottom()/b->E5x5();
+  fVals[21] = b->ELeft()/b->E5x5();
+  fVals[22] = b->ERight()/b->E5x5();
+  fVals[23] = b->E2x5Max()/b->E5x5(); //crystal energy ratio gap variables
+  fVals[24] = b->E2x5Top()/b->E5x5();
+  fVals[25] = b->E2x5Bottom()/b->E5x5();
+  fVals[26] = b->E2x5Left()/b->E5x5();
+  fVals[27] = b->E2x5Right()/b->E5x5();
+
+  if (isbarrel) {
+    //additional energy ratio (always ~1 for endcap, therefore only included for barrel)
+    fVals[28] = b->E5x5()/b->Energy();
+    
+    //local coordinates and crystal indices (barrel only)
+    
+    //seed cluster    
+    fVals[29] = b->IEta(); //crystal ieta
+    fVals[30] = b->IPhi(); //crystal iphi
+    fVals[31] = (b->IEta()-1*TMath::Abs(b->IEta())/b->IEta())%5; //submodule boundary eta symmetry
+    fVals[32] = (b->IPhi()-1)%2; //submodule boundary phi symmetry
+    fVals[33] = (TMath::Abs(b->IEta())<=25)*((b->IEta()-1*TMath::Abs(b->IEta())/b->IEta())%25) + (TMath::Abs(b->IEta())>25)*((b->IEta()-26*TMath::Abs(b->IEta())/b->IEta())%20); //module boundary eta approximate symmetry
+    fVals[34] = (b->IPhi()-1)%20; //module boundary phi symmetry
+    fVals[35] = b->EtaCry(); //local coordinates with respect to closest crystal center at nominal shower depth
+    fVals[36] = b->PhiCry();
+    
+  }
+  else {
+    //preshower energy ratio (endcap only)
+    fVals[28] = s->PreshowerEnergy()/s->RawEnergy();
+  }
+  
+  double den;
+  HybridGBRForestD *forest;
+  if (isbarrel) {
+    den = s->RawEnergy();
+    forest = fReaderDebsemi;
+  }
+  else {
+    den = s->RawEnergy() + s->PreshowerEnergy();
+    forest = fReaderDeesemi;
+  }
+    
+  //set raw response variables from GBRForest
+  _sigma->setVal(forest->GetResponse(&fVals[0],0));
+  _mean->setVal(forest->GetResponse(&fVals[0],1));
+  _n1->setVal(forest->GetResponse(&fVals[0],2));
+  _n2->setVal(forest->GetResponse(&fVals[0],3));
+  
+  //retrieve final pdf parameter values from transformed forest outputs
+  cbmean = _meanlim->getVal();
+  cbsigma = _sigmalim->getVal();
+  cbalpha1 = 2.0; //alpha hardcoded in this version of the regression
+  cbn1 = _n1lim->getVal();
+  cbalpha2 = 1.0; //alpha hardcoded in this version of the regression
+  cbn2 = _n2lim->getVal();
+  
+  _tgt->setVal(cbmean); //evaluate pdf at peak position
+  pdfpeakval = _pdf->getVal(*_tgt);
+    
+  //set final energy and relative energy resolution
+  ecor = den*cbmean;
+  sigEoverE = cbsigma/cbmean;
+    
+  return;
+  
+}
+
+//--------------------------------------------------------------------------------------------------
+void EGEnergyCorrector::CorrectedEnergyWithErrorV7(const Photon *p, const VertexCol *vtxs, Double_t rho, double &ecor, double &sigEoverE, double &cbmean, double &cbsigma, double &cbalpha1, double &cbn1, double &cbalpha2, double &cbn2, double &pdfpeakval) {
+ 
+  const SuperCluster *s = p->SCluster();
+  const BasicCluster *b = s->Seed();
+  
+  
+  Bool_t isbarrel = (s->AbsEta()<1.5);
+  
+// //basic supercluster variables
+  fVals[0] = s->RawEnergy();
+  fVals[1] = s->Eta();
+  fVals[2] = p->R9();
+  fVals[3] = s->EtaWidth();
+  fVals[4] = s->PhiWidth();
+  fVals[5] = double(s->NClusters());
+  fVals[6] = p->HadOverEmTow();
+  fVals[7] = rho;
+  fVals[8] = double(vtxs->GetEntries());
+
+  fVals[9]  = b->Eta()-s->Eta();
+  fVals[10] = atan2(sin(b->Phi()-s->Phi()), cos(b->Phi()-s->Phi()));
+  fVals[11] = b->Energy()/s->RawEnergy();
+  fVals[12] = b->E3x3()/b->E5x5();
+  fVals[13] = sqrt(b->CoviEtaiEta()); //sigietaieta
+  fVals[14] = sqrt(b->CoviPhiiPhi()); //sigiphiiphi
+  fVals[15] = b->CoviEtaiPhi();   //sigietaiphi
+  fVals[16] = b->EMax()/b->E5x5(); //crystal energy ratio gap variables
+  fVals[17] = b->E2nd()/b->E5x5();
+  fVals[18] = b->ETop()/b->E5x5();
+  fVals[19] = b->EBottom()/b->E5x5();
+  fVals[20] = b->ELeft()/b->E5x5();
+  fVals[21] = b->ERight()/b->E5x5();
+  fVals[22] = b->E2x5Max()/b->E5x5(); //crystal energy ratio gap variables
+  fVals[23] = b->E2x5Top()/b->E5x5();
+  fVals[24] = b->E2x5Bottom()/b->E5x5();
+  fVals[25] = b->E2x5Left()/b->E5x5();
+  fVals[26] = b->E2x5Right()/b->E5x5();
+
+  if (isbarrel) {
+    //additional energy ratio (always ~1 for endcap, therefore only included for barrel)
+    fVals[27] = b->E5x5()/b->Energy();
+    
+    //local coordinates and crystal indices (barrel only)
+    
+    //seed cluster    
+    fVals[28] = b->IEta(); //crystal ieta
+    fVals[29] = (b->IEta()-1*TMath::Abs(b->IEta())/b->IEta())%5; //submodule boundary eta symmetry
+    fVals[30] = (b->IPhi()-1)%2; //submodule boundary phi symmetry
+    fVals[31] = (TMath::Abs(b->IEta())<=25)*((b->IEta()-1*TMath::Abs(b->IEta())/b->IEta())%25) + (TMath::Abs(b->IEta())>25)*((b->IEta()-26*TMath::Abs(b->IEta())/b->IEta())%20); //module boundary eta approximate symmetry
+    fVals[32] = (b->IPhi()-1)%20; //module boundary phi symmetry
+    fVals[33] = b->EtaCry(); //local coordinates with respect to closest crystal center at nominal shower depth
+    fVals[34] = b->PhiCry();
+    
+  }
+  else {
+    //preshower energy ratio (endcap only)
+    fVals[27] = s->PreshowerEnergy()/s->RawEnergy();
+  }
+  
+  double den;
+  HybridGBRForestD *forest;
+  if (isbarrel) {
+    den = s->RawEnergy();
+    forest = fReaderDebsemi;
+  }
+  else {
+    den = s->RawEnergy() + s->PreshowerEnergy();
+    forest = fReaderDeesemi;
+  }
+    
+  //set raw response variables from GBRForest
+  _sigma->setVal(forest->GetResponse(&fVals[0],0));
+  _mean->setVal(forest->GetResponse(&fVals[0],1));
+  _n1->setVal(forest->GetResponse(&fVals[0],2));
+  _n2->setVal(forest->GetResponse(&fVals[0],3));
+  
+  //retrieve final pdf parameter values from transformed forest outputs
+  cbmean = _meanlim->getVal();
+  cbsigma = _sigmalim->getVal();
+  cbalpha1 = 2.0; //alpha hardcoded in this version of the regression
+  cbn1 = _n1lim->getVal();
+  cbalpha2 = 1.0; //alpha hardcoded in this version of the regression
+  cbn2 = _n2lim->getVal();
+  
+  _tgt->setVal(cbmean); //evaluate pdf at peak position
+  pdfpeakval = _pdf->getVal(*_tgt);
+    
+  //set final energy and relative energy resolution
+  ecor = den*cbmean;
+  sigEoverE = cbsigma/cbmean;
+    
+  return;
+  
+}
+
+//--------------------------------------------------------------------------------------------------
+void EGEnergyCorrector::CorrectedEnergyWithErrorV8(const Photon *p, const VertexCol *vtxs, Double_t rho, double &ecor, double &sigEoverE, double &cbmean, double &cbsigma, double &cbalpha1, double &cbn1, double &cbalpha2, double &cbn2, double &pdfpeakval) {
+ 
+  const SuperCluster *s = p->SCluster();
+  
+  Bool_t isbarrel = (s->AbsEta()<1.5);
+  
+  if (isbarrel) {
+    CorrectedEnergyWithErrorV6(p,vtxs,rho,ecor,sigEoverE,cbmean,cbsigma,cbalpha1,cbn1,cbalpha2,cbn2,pdfpeakval);
+  }
+  else {
+    CorrectedEnergyWithErrorV7(p,vtxs,rho,ecor,sigEoverE,cbmean,cbsigma,cbalpha1,cbn1,cbalpha2,cbn2,pdfpeakval);
+  }
   
   return;
   

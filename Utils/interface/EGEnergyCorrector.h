@@ -33,6 +33,7 @@
 class TRandom3;
 class GBRForest;
 class HybridGBRForest;
+class HybridGBRForestD;
 class RooRealVar;
 class RooAbsPdf;
 class RooAbsReal;
@@ -57,6 +58,11 @@ namespace mithep {
 
       void CorrectedEnergyWithErrorV5(const Photon *p, const VertexCol *vtxs, Double_t rho, Double_t &ecor, Double_t &mean, Double_t &sigma, Double_t &alpha1, Double_t &n1, Double_t &alpha2, Double_t &n2, Double_t &pdfpeakval);
 
+      void CorrectedEnergyWithErrorV6(const Photon *p, const VertexCol *vtxs, Double_t rho, double &ecor, double &sigEoverE, double &cbmean, double &cbsigma, double &cbalpha1, double &cbn1, double &cbalpha2, double &cbn2, double &pdfpeakval);       
+      
+      void CorrectedEnergyWithErrorV7(const Photon *p, const VertexCol *vtxs, Double_t rho, double &ecor, double &sigEoverE, double &cbmean, double &cbsigma, double &cbalpha1, double &cbn1, double &cbalpha2, double &cbn2, double &pdfpeakval);      
+      
+      void CorrectedEnergyWithErrorV8(const Photon *p, const VertexCol *vtxs, Double_t rho, double &ecor, double &sigEoverE, double &cbmean, double &cbsigma, double &cbalpha1, double &cbn1, double &cbalpha2, double &cbn2, double &pdfpeakval);      
       
     protected:
       PhotonFix fPhFix;
@@ -67,6 +73,9 @@ namespace mithep {
       
       HybridGBRForest *fReaderebsemi;
       HybridGBRForest *fReadereesemi;
+      
+      HybridGBRForestD *fReaderDebsemi;
+      HybridGBRForestD *fReaderDeesemi;       
 
       RooRealVar *_mean;
       RooRealVar *_tgt;
