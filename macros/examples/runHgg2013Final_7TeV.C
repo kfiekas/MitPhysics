@@ -30,37 +30,12 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-void runHgg2013Final_8TeV(const char *fileset    = "0000",
+void runHgg2013Final_7TeV(const char *fileset    = "0000",
 			  const char *skim       = "noskim",
-			  //const char *dataset = "f11--h120gg-gf-v14b-pu",
-			  //const char *dataset = "r11a-pho-j16-v1",   
-			  //const char *dataset = "meridiani2012-diphoj-v9",
-			  //const char *dataset = "s12-h125gg-gf-v9",
-			  //const char *dataset = "s12-pj40-2em-v9",
-			  //const char *dataset = "s12-diphoj-3-v9",
-			  //const char *dataset = "s12-zllm50-v9",
-			  //const char *dataset = "f11--h121gg-gf-v14b-pu",
-			  //const char *dataset = "r12a-pho-pr-v1",
-			  //const char *dataset = "s12-pj40-2em-v9",
-			  //const char *dataset = "s12-h125gg-vbf-v7a", 
-			  //const char *dataset = "s12-h125gg-vh-v7a",   
-			  //const char *dataset = "s12-h125gg-gf-v7a", 
-			  //const char *dataset = "r12a-pho-j13-v1", 
-			  //const char *dataset = "r12b-dph-j13-v1", 
-			  //const char *dataset = "s12-zllm50-v7a", 
-			  //const char *dataset = "r12a-pho-j22-v1", 
-			  //const char *dataset = "r12b-dph-j22-v1", 
-			  //const char *dataset = "r12c-dph-j22-v1", 
-			  //const char *dataset = "r12d-dph-j22-v1", 
-			  //const char *dataset = "s12-h124gg-gf-v7n",
-			  //const char *dataset = "s12-diphoj-m60-v7n",
-			  //const char *dataset = "s12-pjm80-2em-v7n",
-			  //const char *dataset = "s12-h120gg-vh-v7n",
-			  //const char *dataset = "r12a-pho-j22-v1",
-			  const char *dataset = "s12-h120gg-vh-v7n",
-			  const char *book       = "t2mit/filefi/030",
-			  //const char *book       = "local/filefi/029",
-			  //const char *book       = "t2mit/filefi/031",
+			  //const char *dataset = "s11-h120gg-gf-lv3",
+			  //const char *dataset = "r11a-pho-j21-v1",
+			  const char *dataset = "s11-h120gg-vh-lv3",
+			  const char *book       = "t2mit/filefi/031",
 			  const char *catalogDir = "/home/cmsprod/catalog",
 			  const char *outputName = "hgg",
 			  int         nEvents    = 1000)
@@ -165,7 +140,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   hltModES->SetTrigObjsName("MyHltElecSObjs");
   hltModES->SetAbortIfNotAccepted(isData);
 
-  HLTMod *hltModP = new HLTMod("HLTModP");
+   HLTMod *hltModP = new HLTMod("HLTModP");
   
   hltModP->AddTrigger("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v*",160000,161176);
   
@@ -202,24 +177,10 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   hltModP->AddTrigger("HLT_Photon36_CaloIdL_IsoVL_Photon22_R9Id_v*",178420,189999);
   hltModP->AddTrigger("HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL_v*",178420,189999);
   hltModP->AddTrigger("HLT_Photon36_R9Id_Photon22_R9Id_v*",178420,189999);
-
-  //hltModP->AddTrigger("HLT_Photon26_CaloId10_Iso50_Photon18_CaloId10_Iso50_Mass60_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon26_CaloId10_Iso50_Photon18_R9Id85_Mass60_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass60_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass70_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon26_R9Id85_Photon18_CaloId10_Iso50_Mass60_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon26_R9Id85_Photon18_R9Id85_Mass60_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v*",190000,999999); 
-  //hltModP->AddTrigger("HLT_Photon36_R9Id85_Photon22_R9Id85_v*",190000,999999); 
-
-  hltModP->AddTrigger("HLT_Photon26_R9Id85_OR_CaloId10_Iso50_Photon18_R9Id85_OR_CaloId10_Iso50_Mass*",190000,999999); 
-  hltModP->AddTrigger("HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v*",190000,999999); 
     
   hltModP->SetTrigObjsName("MyHltPhotObjs");
   hltModP->SetAbortIfNotAccepted(isData);
+
   //------------------------------------------------------------------------------------------------
   // split pfcandidates to PFPU and PFnoPU
   //------------------------------------------------------------------------------------------------
@@ -285,7 +246,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   eleIdMod -> SetNExpectedHitsInnerCut(1);   
   eleIdMod -> SetApplyConversionFilterType1(kTRUE);
   eleIdMod -> SetPVName(Names::gkPVBeamSpotBrn);   
-  
+
   ElectronIDMod* softEleIdMod = new ElectronIDMod;
   softEleIdMod -> SetPtMin(10);  
   softEleIdMod -> SetEtaMax(2.5);
@@ -308,8 +269,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   softEleIdMod -> SetNExpectedHitsInnerCut(1);   
   softEleIdMod -> SetApplyConversionFilterType1(kTRUE);
   softEleIdMod -> SetPVName(Names::gkPVBeamSpotBrn);
-
- 
+   
   MuonIDMod* muonIdMod = new MuonIDMod;
   // base kinematics
   muonIdMod -> SetPtMin(20.);
@@ -327,7 +287,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   muonIdMod -> SetPFPileUpName("pfpileupcands");
   muonIdMod -> SetPVName(Names::gkPVBeamSpotBrn); 
 
-  MuonIDMod* softMuonIdMod = new MuonIDMod;
+ MuonIDMod* softMuonIdMod = new MuonIDMod;
   // base kinematics
   softMuonIdMod -> SetPtMin(10.);
   softMuonIdMod -> SetEtaCut(2.4);
@@ -344,6 +304,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   softMuonIdMod -> SetPFPileUpName("pfpileupcands");
   softMuonIdMod -> SetPVName(Names::gkPVBeamSpotBrn); 
   
+  
   PublisherMod<PFJet,Jet> *pubJet = new PublisherMod<PFJet,Jet>("JetPub");
   pubJet->SetInputName("AKt5PFJets");
   pubJet->SetOutputName("PubAKt5PFJets");
@@ -353,29 +314,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   pubJetOpen->SetOutputName("PubAKt5PFJetsOpen");  
   
   JetCorrectionMod *jetCorr = new JetCorrectionMod;
-  /*if(isData){ 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/GR_P_V42_AN3_L1FastJet_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/GR_P_V42_AN3_L2Relative_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/GR_P_V42_AN3_L3Absolute_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/GR_P_V42_AN3_L2L3Residual_AK5PF.txt")).Data())); 
-  }
-  else {
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/START53_V15_L1FastJet_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/START53_V15_L2Relative_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/START53_V15_L3Absolute_AK5PF.txt")).Data())); 
-    }*/
-  /*if(isData){ 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer12_V7_DATA_L1FastJet_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer12_V7_DATA_L2Relative_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer12_V7_DATA_L3Absolute_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer12_V7_DATA_L2L3Residual_AK5PF.txt")).Data())); 
-  }
-  else {
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer12_V7_MC_L1FastJet_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer12_V7_MC_L2Relative_AK5PF.txt")).Data())); 
-    jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer12_V7_MC_L3Absolute_AK5PF.txt")).Data())); 
-    }*/
-  if(isData){ 
+   if(isData){ 
     jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer13_V1_DATA_L1FastJet_AK5PF.txt")).Data())); 
     jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer13_V1_DATA_L2Relative_AK5PF.txt")).Data())); 
     jetCorr->AddCorrectionFromFile(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/Summer13_V1_DATA_L3Absolute_AK5PF.txt")).Data())); 
@@ -388,7 +327,6 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   }
   jetCorr->SetInputName(pubJet->GetOutputName());
   jetCorr->SetCorrectedName("CorrectedJets");    
-  
   
   Bool_t excludedoubleprompt = kFALSE;
   if (TString(dataset).Contains("-pj")) {
@@ -405,13 +343,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   if (TString(book).Contains("025")) is25 = kTRUE;
   
   PhotonMvaMod *photreg = new PhotonMvaMod;
-  //photreg->SetRegressionVersion(3);
-  //photreg->SetRegressionWeights(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/gbrv3ph_52x.root")).Data()));
-  //photreg->SetOutputName("GoodPhotonsRegr");
-  //photreg->SetApplyShowerRescaling(kTRUE);
-  //photreg->SetIsData(isData);
-  photreg->SetRegressionVersion(5);
-  photreg->SetRegressionWeights(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/regweights_v5_forest_ph.root")).Data()));
+  photreg->SetRegressionVersion(8);
+  photreg->SetRegressionWeights(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/regweights_v8_7TeV_forest_ph.root")).Data()));
   photreg->SetOutputName("GoodPhotonsRegr");
   //photreg->SetApplyShowerRescaling(kTRUE);
   photreg->SetIsData(isData);
@@ -421,7 +354,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photcic->SetOutputName("GoodPhotonsCIC");
   photcic->SetOutputVtxName("OutVtxCiC");        
   photcic->SetPhotonSelType("CiCPFSelection");
-  photcic->SetVertexSelType("CiCMVA2012Selection");
+  photcic->SetVertexSelType("CiCMVASelection");
   photcic->SetUseSingleLegConversions(kFALSE);
   photcic->DoMCSmear(kTRUE);
   photcic->DoDataEneCorr(kFALSE);
@@ -429,61 +362,18 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photcic->SetInputPhotonsName(photreg->GetOutputName());
   
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photcic->SetMCSmearFactors2012HCP(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
-  photcic->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
+  photcic->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
+  photcic->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
   photcic->UseSpecialSmearForDPMVA(true);
 
-  photcic->AddEnCorrPerRun2012HCP(190645,190781,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9856,0.9919,0.9812,0.9862);
-  photcic->AddEnCorrPerRun2012HCP(190782,191042,0.9961,0.9961,0.9989,0.9989,0.9909,1.0014,0.9854,0.9917,0.976,0.981);
-  photcic->AddEnCorrPerRun2012HCP(191043,191720,0.9902,0.9902,0.9931,0.9931,0.9858,0.9963,0.988,0.9944,0.9795,0.9845);
-  photcic->AddEnCorrPerRun2012HCP(191721,193833,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9853,0.9917,0.9791,0.9841);
-  photcic->AddEnCorrPerRun2012HCP(193834,194116,0.99,0.99,0.9929,0.9929,0.9865,0.997,0.9842,0.9906,0.9793,0.9843);
-  photcic->AddEnCorrPerRun2012HCP(194117,194427,0.9907,0.9907,0.9935,0.9935,0.987,0.9975,0.9855,0.9918,0.9805,0.9855);
-  photcic->AddEnCorrPerRun2012HCP(194428,194618,0.9901,0.9901,0.9929,0.9929,0.9867,0.9973,0.9841,0.9905,0.9786,0.9836);
-  photcic->AddEnCorrPerRun2012HCP(194619,194789,0.9904,0.9904,0.9932,0.9932,0.9874,0.9979,0.9876,0.994,0.9788,0.9838);
-  photcic->AddEnCorrPerRun2012HCP(194790,195111,0.991,0.991,0.9938,0.9938,0.9887,0.9992,0.99,0.9963,0.9803,0.9853);
-  photcic->AddEnCorrPerRun2012HCP(195112,195377,0.9912,0.9912,0.994,0.994,0.9871,0.9976,0.9885,0.9948,0.9817,0.9866);
-  photcic->AddEnCorrPerRun2012HCP(195378,195398,0.9903,0.9903,0.9931,0.9931,0.9863,0.9968,0.9867,0.993,0.9801,0.9851);
-  photcic->AddEnCorrPerRun2012HCP(195399,195657,0.9908,0.9908,0.9936,0.9936,0.9888,0.9993,0.9866,0.9929,0.9806,0.9856);
-  photcic->AddEnCorrPerRun2012HCP(195658,195918,0.9914,0.9914,0.9942,0.9942,0.9878,0.9983,0.9898,0.9962,0.9797,0.9846);
-  photcic->AddEnCorrPerRun2012HCP(195919,196198,0.9908,0.9908,0.9936,0.9936,0.9874,0.998,0.9878,0.9942,0.9796,0.9846);
-  photcic->AddEnCorrPerRun2012HCP(196199,196356,0.9915,0.9915,0.9943,0.9943,0.9877,0.9983,0.988,0.9944,0.9781,0.9831);
-  photcic->AddEnCorrPerRun2012HCP(196357,198115,0.991,0.991,0.9938,0.9938,0.9871,0.9977,0.9859,0.9923,0.9791,0.9841);
-  photcic->AddEnCorrPerRun2012HCP(198116,198940,0.9906,0.9906,0.9934,0.9934,0.9864,0.997,0.9877,0.994,0.9818,0.9868);
-  photcic->AddEnCorrPerRun2012HCP(198941,199317,0.9907,0.9907,0.9936,0.9936,0.9865,0.997,0.9856,0.992,0.9805,0.9855);
-  photcic->AddEnCorrPerRun2012HCP(199318,199428,0.9904,0.9904,0.9933,0.9933,0.9868,0.9973,0.9857,0.9921,0.9808,0.9858);
-  photcic->AddEnCorrPerRun2012HCP(199429,199697,0.9907,0.9907,0.9935,0.9935,0.987,0.9976,0.9853,0.9916,0.9803,0.9853);
-  photcic->AddEnCorrPerRun2012HCP(199698,199832,0.991,0.991,0.9938,0.9938,0.9879,0.9985,0.9845,0.9909,0.9803,0.9853);
-  photcic->AddEnCorrPerRun2012HCP(199833,199960,0.9912,0.9912,0.994,0.994,0.9877,0.9983,0.9875,0.9938,0.9823,0.9873);
-  photcic->AddEnCorrPerRun2012HCP(199961,200151,0.9913,0.9913,0.9942,0.9942,0.9865,0.997,0.986,0.9924,0.9817,0.9867);
-  photcic->AddEnCorrPerRun2012HCP(200152,200490,0.9912,0.9912,0.994,0.994,0.9879,0.9984,0.9878,0.9942,0.9809,0.9858);
-  photcic->AddEnCorrPerRun2012HCP(200491,200991,0.9919,0.9919,0.9947,0.9947,0.9866,0.9971,0.9861,0.9924,0.9814,0.9864);
-  photcic->AddEnCorrPerRun2012HCP(200992,201201,0.9909,0.9909,0.9937,0.9937,0.9864,0.9969,0.985,0.9914,0.9833,0.9883);
-  photcic->AddEnCorrPerRun2012HCP(201202,201624,0.9915,0.9915,0.9943,0.9943,0.9886,0.9992,0.9857,0.992,0.9827,0.9876);
-  photcic->AddEnCorrPerRun2012HCP(201625,201707,0.9917,0.9917,0.9945,0.9945,0.9878,0.9983,0.9856,0.9919,0.982,0.987);
-  photcic->AddEnCorrPerRun2012HCP(201708,202059,0.9916,0.9916,0.9944,0.9944,0.9869,0.9974,0.9866,0.9929,0.9833,0.9883);
-  photcic->AddEnCorrPerRun2012HCP(202060,202204,0.9919,0.9919,0.9947,0.9947,0.9871,0.9977,0.985,0.9914,0.9827,0.9877);
-  photcic->AddEnCorrPerRun2012HCP(202205,202332,0.9923,0.9923,0.9951,0.9951,0.9883,0.9989,0.9887,0.995,0.9825,0.9874);
-  photcic->AddEnCorrPerRun2012HCP(202333,202972,0.9921,0.9921,0.9949,0.9949,0.9888,0.9994,0.9857,0.992,0.9812,0.9861);
-  photcic->AddEnCorrPerRun2012HCP(202973,203002,0.9916,0.9916,0.9944,0.9944,0.9857,0.9962,0.986,0.9924,0.9816,0.9865);
-  photcic->AddEnCorrPerRun2012HCP(203003,203852,0.993,0.993,0.9958,0.9958,0.9831,0.9936,0.9705,0.9769,0.9728,0.9778);
-  photcic->AddEnCorrPerRun2012HCP(203853,204099,0.9906,0.9906,0.9935,0.9935,0.9886,0.9991,0.9851,0.9914,0.9777,0.9827);
-  photcic->AddEnCorrPerRun2012HCP(204100,204562,0.991,0.991,0.9939,0.9939,0.9894,0.9999,0.9868,0.9931,0.9814,0.9864);
-  photcic->AddEnCorrPerRun2012HCP(204563,205085,0.991,0.991,0.9938,0.9938,0.9901,1.0006,0.9871,0.9934,0.9789,0.9839);
-  photcic->AddEnCorrPerRun2012HCP(205086,205310,0.9911,0.9911,0.9939,0.9939,0.9886,0.9991,0.9868,0.9932,0.9782,0.9832);
-  photcic->AddEnCorrPerRun2012HCP(205311,205617,0.9909,0.9909,0.9938,0.9938,0.989,0.9995,0.9852,0.9916,0.9766,0.9816);
-  photcic->AddEnCorrPerRun2012HCP(205618,205825,0.9914,0.9914,0.9942,0.9942,0.9877,0.9982,0.9866,0.993,0.9792,0.9842);
-  photcic->AddEnCorrPerRun2012HCP(205826,206207,0.9921,0.9921,0.9949,0.9949,0.9908,1.0012,0.9882,0.9945,0.9816,0.9866);
-  photcic->AddEnCorrPerRun2012HCP(206208,206389,0.9918,0.9918,0.9946,0.9946,0.989,0.9995,0.9842,0.9906,0.9794,0.9844);
-  photcic->AddEnCorrPerRun2012HCP(206390,206483,0.9917,0.9917,0.9945,0.9945,0.989,0.9995,0.9894,0.9957,0.9824,0.9873);
-  photcic->AddEnCorrPerRun2012HCP(206484,206597,0.9917,0.9917,0.9945,0.9945,0.9892,0.9997,0.9886,0.9949,0.9791,0.9841);
-  photcic->AddEnCorrPerRun2012HCP(206598,206896,0.9913,0.9913,0.9941,0.9941,0.9893,0.9998,0.9846,0.991,0.9789,0.9839);
-  photcic->AddEnCorrPerRun2012HCP(206897,207220,0.9923,0.9923,0.9952,0.9952,0.9892,0.9997,0.9872,0.9935,0.9813,0.9863);
-  photcic->AddEnCorrPerRun2012HCP(207221,207315,0.9921,0.9921,0.9949,0.9949,0.9901,1.0006,0.987,0.9934,0.9798,0.9848);
-  photcic->AddEnCorrPerRun2012HCP(207316,207489,0.9922,0.9922,0.995,0.995,0.9896,1.0001,0.9881,0.9944,0.9791,0.9841);
-  photcic->AddEnCorrPerRun2012HCP(207490,207919,0.9922,0.9922,0.9951,0.9951,0.9901,1.0006,0.9866,0.993,0.9769,0.9819);
-  photcic->AddEnCorrPerRun2012HCP(207920,208351,0.9919,0.9919,0.9947,0.9947,0.9895,1,0.9867,0.993,0.9813,0.9863);
-  photcic->AddEnCorrPerRun2012HCP(208352,208686,0.9924,0.9924,0.9952,0.9952,0.9906,1.0011,0.9871,0.9934,0.9809,0.9859);
+  photcic->AddEnCorrPerRun2012HCP(160431, 165547, 0.9929, 0.9929, 0.9961, 0.9961, 0.9883, 0.9981, 0.9944, 0.9883, 0.9941, 0.9987);
+  photcic->AddEnCorrPerRun2012HCP(165548, 167042, 0.9939, 0.9939, 0.9971, 0.9971, 0.9876, 0.9973, 0.9956, 0.9876, 0.9937, 0.9982);
+  photcic->AddEnCorrPerRun2012HCP(167043, 172400, 0.9942, 0.9942, 0.9974, 0.9974, 0.9883, 0.9981, 0.9956, 0.9883, 0.9948, 0.9993);
+  photcic->AddEnCorrPerRun2012HCP(172401, 173663, 0.9944, 0.9944, 0.9976, 0.9976, 0.9883, 0.9980, 0.9956, 0.9883, 0.9948, 0.9993);
+  photcic->AddEnCorrPerRun2012HCP(173664, 176840, 0.9932, 0.9932, 0.9964, 0.9964, 0.9854, 0.9952, 0.9968, 0.9854, 0.9938, 0.9983);
+  photcic->AddEnCorrPerRun2012HCP(176841, 177775, 0.9939, 0.9939, 0.9971, 0.9971, 0.9868, 0.9965, 0.9958, 0.9868, 0.9949, 0.9994);
+  photcic->AddEnCorrPerRun2012HCP(177776, 178723, 0.9929, 0.9929, 0.9962, 0.9962, 0.9867, 0.9964, 0.9952, 0.9867, 0.9961, 1.0006);
+  photcic->AddEnCorrPerRun2012HCP(178724, 180252, 0.9929, 0.9929, 0.9961, 0.9961, 0.9868, 0.9965, 0.9945, 0.9868, 0.9950, 0.9995);
   
   
 
@@ -492,7 +382,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   //  photcic->SetDoMCR9Scaling(kTRUE);
   //  photcic->SetMCR9Scale(1.0035, 1.0035);
   photcic->SetDoShowerShapeScaling(kFALSE); 
-  photcic->SetShowerShapeType("2012ShowerShape");
+  photcic->SetShowerShapeType("2011ShowerShape");
   //photcic->SetDoMCErrScaling(kTRUE);
   //photcic->SetMCErrScale(1.07, 1.045); 
   //photcic->SetMCErrScale(1, 1); //ming:scale(sigE/E)
@@ -502,14 +392,14 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photcic->SetApplyLeptonTag(kTRUE);
   photcic->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photcic->SetLeptonTagMuonsName("HggLeptonTagMuons");  
-  photcic->Set2012HCP(kTRUE);
-  photcic->SetIdMVAType("2013FinalIdMVA_8TeV");
+  photcic->Set2012HCP(kFALSE);
+  photcic->SetIdMVAType("2013FinalIdMVA_7TeV");
   
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
   photcicnoeleveto->SetOutputName("GoodPhotonsCICNoEleVeto");
   photcicnoeleveto->SetOutputVtxName("OutVtxCiCInvertEleVeto");      
   photcicnoeleveto->SetPhotonSelType("CiCPFSelection");
-  photcicnoeleveto->SetVertexSelType("CiCMVA2012Selection");
+  photcicnoeleveto->SetVertexSelType("CiCMVASelection");
   photcicnoeleveto->SetUseSingleLegConversions(kFALSE);
   photcicnoeleveto->DoMCSmear(kTRUE);
   photcicnoeleveto->DoDataEneCorr(kFALSE);
@@ -517,68 +407,25 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photcicnoeleveto->SetInputPhotonsName(photreg->GetOutputName());
   
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photcicnoeleveto->SetMCSmearFactors2012HCP(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
-  photcicnoeleveto->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
+  photcicnoeleveto->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
+  photcicnoeleveto->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
   photcicnoeleveto->UseSpecialSmearForDPMVA(true);
 
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9856,0.9919,0.9812,0.9862);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(190782,191042,0.9961,0.9961,0.9989,0.9989,0.9909,1.0014,0.9854,0.9917,0.976,0.981);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(191043,191720,0.9902,0.9902,0.9931,0.9931,0.9858,0.9963,0.988,0.9944,0.9795,0.9845);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(191721,193833,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9853,0.9917,0.9791,0.9841);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(193834,194116,0.99,0.99,0.9929,0.9929,0.9865,0.997,0.9842,0.9906,0.9793,0.9843);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(194117,194427,0.9907,0.9907,0.9935,0.9935,0.987,0.9975,0.9855,0.9918,0.9805,0.9855);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(194428,194618,0.9901,0.9901,0.9929,0.9929,0.9867,0.9973,0.9841,0.9905,0.9786,0.9836);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(194619,194789,0.9904,0.9904,0.9932,0.9932,0.9874,0.9979,0.9876,0.994,0.9788,0.9838);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(194790,195111,0.991,0.991,0.9938,0.9938,0.9887,0.9992,0.99,0.9963,0.9803,0.9853);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(195112,195377,0.9912,0.9912,0.994,0.994,0.9871,0.9976,0.9885,0.9948,0.9817,0.9866);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(195378,195398,0.9903,0.9903,0.9931,0.9931,0.9863,0.9968,0.9867,0.993,0.9801,0.9851);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(195399,195657,0.9908,0.9908,0.9936,0.9936,0.9888,0.9993,0.9866,0.9929,0.9806,0.9856);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(195658,195918,0.9914,0.9914,0.9942,0.9942,0.9878,0.9983,0.9898,0.9962,0.9797,0.9846);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(195919,196198,0.9908,0.9908,0.9936,0.9936,0.9874,0.998,0.9878,0.9942,0.9796,0.9846);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(196199,196356,0.9915,0.9915,0.9943,0.9943,0.9877,0.9983,0.988,0.9944,0.9781,0.9831);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(196357,198115,0.991,0.991,0.9938,0.9938,0.9871,0.9977,0.9859,0.9923,0.9791,0.9841);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(198116,198940,0.9906,0.9906,0.9934,0.9934,0.9864,0.997,0.9877,0.994,0.9818,0.9868);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(198941,199317,0.9907,0.9907,0.9936,0.9936,0.9865,0.997,0.9856,0.992,0.9805,0.9855);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(199318,199428,0.9904,0.9904,0.9933,0.9933,0.9868,0.9973,0.9857,0.9921,0.9808,0.9858);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(199429,199697,0.9907,0.9907,0.9935,0.9935,0.987,0.9976,0.9853,0.9916,0.9803,0.9853);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(199698,199832,0.991,0.991,0.9938,0.9938,0.9879,0.9985,0.9845,0.9909,0.9803,0.9853);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(199833,199960,0.9912,0.9912,0.994,0.994,0.9877,0.9983,0.9875,0.9938,0.9823,0.9873);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(199961,200151,0.9913,0.9913,0.9942,0.9942,0.9865,0.997,0.986,0.9924,0.9817,0.9867);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(200152,200490,0.9912,0.9912,0.994,0.994,0.9879,0.9984,0.9878,0.9942,0.9809,0.9858);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(200491,200991,0.9919,0.9919,0.9947,0.9947,0.9866,0.9971,0.9861,0.9924,0.9814,0.9864);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(200992,201201,0.9909,0.9909,0.9937,0.9937,0.9864,0.9969,0.985,0.9914,0.9833,0.9883);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(201202,201624,0.9915,0.9915,0.9943,0.9943,0.9886,0.9992,0.9857,0.992,0.9827,0.9876);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(201625,201707,0.9917,0.9917,0.9945,0.9945,0.9878,0.9983,0.9856,0.9919,0.982,0.987);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(201708,202059,0.9916,0.9916,0.9944,0.9944,0.9869,0.9974,0.9866,0.9929,0.9833,0.9883);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(202060,202204,0.9919,0.9919,0.9947,0.9947,0.9871,0.9977,0.985,0.9914,0.9827,0.9877);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(202205,202332,0.9923,0.9923,0.9951,0.9951,0.9883,0.9989,0.9887,0.995,0.9825,0.9874);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(202333,202972,0.9921,0.9921,0.9949,0.9949,0.9888,0.9994,0.9857,0.992,0.9812,0.9861);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(202973,203002,0.9916,0.9916,0.9944,0.9944,0.9857,0.9962,0.986,0.9924,0.9816,0.9865);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(203003,203852,0.993,0.993,0.9958,0.9958,0.9831,0.9936,0.9705,0.9769,0.9728,0.9778);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(203853,204099,0.9906,0.9906,0.9935,0.9935,0.9886,0.9991,0.9851,0.9914,0.9777,0.9827);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(204100,204562,0.991,0.991,0.9939,0.9939,0.9894,0.9999,0.9868,0.9931,0.9814,0.9864);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(204563,205085,0.991,0.991,0.9938,0.9938,0.9901,1.0006,0.9871,0.9934,0.9789,0.9839);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(205086,205310,0.9911,0.9911,0.9939,0.9939,0.9886,0.9991,0.9868,0.9932,0.9782,0.9832);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(205311,205617,0.9909,0.9909,0.9938,0.9938,0.989,0.9995,0.9852,0.9916,0.9766,0.9816);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(205618,205825,0.9914,0.9914,0.9942,0.9942,0.9877,0.9982,0.9866,0.993,0.9792,0.9842);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(205826,206207,0.9921,0.9921,0.9949,0.9949,0.9908,1.0012,0.9882,0.9945,0.9816,0.9866);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(206208,206389,0.9918,0.9918,0.9946,0.9946,0.989,0.9995,0.9842,0.9906,0.9794,0.9844);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(206390,206483,0.9917,0.9917,0.9945,0.9945,0.989,0.9995,0.9894,0.9957,0.9824,0.9873);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(206484,206597,0.9917,0.9917,0.9945,0.9945,0.9892,0.9997,0.9886,0.9949,0.9791,0.9841);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(206598,206896,0.9913,0.9913,0.9941,0.9941,0.9893,0.9998,0.9846,0.991,0.9789,0.9839);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(206897,207220,0.9923,0.9923,0.9952,0.9952,0.9892,0.9997,0.9872,0.9935,0.9813,0.9863);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(207221,207315,0.9921,0.9921,0.9949,0.9949,0.9901,1.0006,0.987,0.9934,0.9798,0.9848);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(207316,207489,0.9922,0.9922,0.995,0.995,0.9896,1.0001,0.9881,0.9944,0.9791,0.9841);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(207490,207919,0.9922,0.9922,0.9951,0.9951,0.9901,1.0006,0.9866,0.993,0.9769,0.9819);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(207920,208351,0.9919,0.9919,0.9947,0.9947,0.9895,1,0.9867,0.993,0.9813,0.9863);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(208352,208686,0.9924,0.9924,0.9952,0.9952,0.9906,1.0011,0.9871,0.9934,0.9809,0.9859);
+  photcicnoeleveto->AddEnCorrPerRun2012HCP(160431, 165547, 0.9929, 0.9929, 0.9961, 0.9961, 0.9883, 0.9981, 0.9944, 0.9883, 0.9941, 0.9987);
+  photcicnoeleveto->AddEnCorrPerRun2012HCP(165548, 167042, 0.9939, 0.9939, 0.9971, 0.9971, 0.9876, 0.9973, 0.9956, 0.9876, 0.9937, 0.9982);
+  photcicnoeleveto->AddEnCorrPerRun2012HCP(167043, 172400, 0.9942, 0.9942, 0.9974, 0.9974, 0.9883, 0.9981, 0.9956, 0.9883, 0.9948, 0.9993);
+  photcicnoeleveto->AddEnCorrPerRun2012HCP(172401, 173663, 0.9944, 0.9944, 0.9976, 0.9976, 0.9883, 0.9980, 0.9956, 0.9883, 0.9948, 0.9993);
+  photcicnoeleveto->AddEnCorrPerRun2012HCP(173664, 176840, 0.9932, 0.9932, 0.9964, 0.9964, 0.9854, 0.9952, 0.9968, 0.9854, 0.9938, 0.9983);
+  photcicnoeleveto->AddEnCorrPerRun2012HCP(176841, 177775, 0.9939, 0.9939, 0.9971, 0.9971, 0.9868, 0.9965, 0.9958, 0.9868, 0.9949, 0.9994);
+  photcicnoeleveto->AddEnCorrPerRun2012HCP(177776, 178723, 0.9929, 0.9929, 0.9962, 0.9962, 0.9867, 0.9964, 0.9952, 0.9867, 0.9961, 1.0006);
+  photcicnoeleveto->AddEnCorrPerRun2012HCP(178724, 180252, 0.9929, 0.9929, 0.9961, 0.9961, 0.9868, 0.9965, 0.9945, 0.9868, 0.9950, 0.9995);
 
   //-----------------------------------------------------------------------------------------------------------------
   
   //photcicnoeleveto->SetDoMCR9Scaling(kTRUE);
   //photcicnoeleveto->SetMCR9Scale(1.0035, 1.0035);
   photcicnoeleveto->SetDoShowerShapeScaling(kFALSE);
-  photcicnoeleveto->SetShowerShapeType("2012ShowerShape");
+  photcicnoeleveto->SetShowerShapeType("2011ShowerShape");
   //photcicnoeleveto->SetDoMCErrScaling(kTRUE);
   //photcicnoeleveto->SetMCErrScale(1.07, 1.045);    
   //photcicnoeleveto->SetMCErrScale(1, 1);    
@@ -590,82 +437,39 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photcicnoeleveto->SetApplyLeptonTag(kTRUE);
   photcicnoeleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photcicnoeleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");  
-  photcicnoeleveto->Set2012HCP(kTRUE);  
-  photcicnoeleveto->SetIdMVAType("2013FinalIdMVA_8TeV");
+  photcicnoeleveto->Set2012HCP(kFALSE);  
+  photcicnoeleveto->SetIdMVAType("2013FinalIdMVA_7TeV");
  
   PhotonPairSelector         *photpresel = new PhotonPairSelector("PhotonPairSelectorPresel");
   photpresel->SetOutputName("GoodPhotonsPresel");
-  photpresel->SetPhotonSelType("MITPFSelectionNoEcal");
-  photpresel->SetVertexSelType("CiCMVA2012Selection");
+  photpresel->SetPhotonSelType("MITPFSelection");//diff 2012
+  //photpresel->SetPhotonSelType("MITSelection");
+  photpresel->SetVertexSelType("CiCMVASelection");//diff 2012
   photpresel->SetUseSingleLegConversions(kFALSE);
-  photpresel->SetIdMVAType("2013FinalIdMVA_8TeV");
+  photpresel->SetIdMVAType("2013FinalIdMVA_7TeV");//diff 2012
   photpresel->DoMCSmear(kTRUE);
-  //photpresel->DoDataEneCorr(kFALSE);
   photpresel->DoDataEneCorr(kTRUE);
   photpresel->SetPhotonsFromBranch(kFALSE);
   photpresel->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photpresel->SetMCSmearFactors2012HCP(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
-  photpresel->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
+  photpresel->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
+  photpresel->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
   photpresel->UseSpecialSmearForDPMVA(true);
 
-  photpresel->AddEnCorrPerRun2012HCP(190645,190781,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9856,0.9919,0.9812,0.9862);
-  photpresel->AddEnCorrPerRun2012HCP(190782,191042,0.9961,0.9961,0.9989,0.9989,0.9909,1.0014,0.9854,0.9917,0.976,0.981);
-  photpresel->AddEnCorrPerRun2012HCP(191043,191720,0.9902,0.9902,0.9931,0.9931,0.9858,0.9963,0.988,0.9944,0.9795,0.9845);
-  photpresel->AddEnCorrPerRun2012HCP(191721,193833,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9853,0.9917,0.9791,0.9841);
-  photpresel->AddEnCorrPerRun2012HCP(193834,194116,0.99,0.99,0.9929,0.9929,0.9865,0.997,0.9842,0.9906,0.9793,0.9843);
-  photpresel->AddEnCorrPerRun2012HCP(194117,194427,0.9907,0.9907,0.9935,0.9935,0.987,0.9975,0.9855,0.9918,0.9805,0.9855);
-  photpresel->AddEnCorrPerRun2012HCP(194428,194618,0.9901,0.9901,0.9929,0.9929,0.9867,0.9973,0.9841,0.9905,0.9786,0.9836);
-  photpresel->AddEnCorrPerRun2012HCP(194619,194789,0.9904,0.9904,0.9932,0.9932,0.9874,0.9979,0.9876,0.994,0.9788,0.9838);
-  photpresel->AddEnCorrPerRun2012HCP(194790,195111,0.991,0.991,0.9938,0.9938,0.9887,0.9992,0.99,0.9963,0.9803,0.9853);
-  photpresel->AddEnCorrPerRun2012HCP(195112,195377,0.9912,0.9912,0.994,0.994,0.9871,0.9976,0.9885,0.9948,0.9817,0.9866);
-  photpresel->AddEnCorrPerRun2012HCP(195378,195398,0.9903,0.9903,0.9931,0.9931,0.9863,0.9968,0.9867,0.993,0.9801,0.9851);
-  photpresel->AddEnCorrPerRun2012HCP(195399,195657,0.9908,0.9908,0.9936,0.9936,0.9888,0.9993,0.9866,0.9929,0.9806,0.9856);
-  photpresel->AddEnCorrPerRun2012HCP(195658,195918,0.9914,0.9914,0.9942,0.9942,0.9878,0.9983,0.9898,0.9962,0.9797,0.9846);
-  photpresel->AddEnCorrPerRun2012HCP(195919,196198,0.9908,0.9908,0.9936,0.9936,0.9874,0.998,0.9878,0.9942,0.9796,0.9846);
-  photpresel->AddEnCorrPerRun2012HCP(196199,196356,0.9915,0.9915,0.9943,0.9943,0.9877,0.9983,0.988,0.9944,0.9781,0.9831);
-  photpresel->AddEnCorrPerRun2012HCP(196357,198115,0.991,0.991,0.9938,0.9938,0.9871,0.9977,0.9859,0.9923,0.9791,0.9841);
-  photpresel->AddEnCorrPerRun2012HCP(198116,198940,0.9906,0.9906,0.9934,0.9934,0.9864,0.997,0.9877,0.994,0.9818,0.9868);
-  photpresel->AddEnCorrPerRun2012HCP(198941,199317,0.9907,0.9907,0.9936,0.9936,0.9865,0.997,0.9856,0.992,0.9805,0.9855);
-  photpresel->AddEnCorrPerRun2012HCP(199318,199428,0.9904,0.9904,0.9933,0.9933,0.9868,0.9973,0.9857,0.9921,0.9808,0.9858);
-  photpresel->AddEnCorrPerRun2012HCP(199429,199697,0.9907,0.9907,0.9935,0.9935,0.987,0.9976,0.9853,0.9916,0.9803,0.9853);
-  photpresel->AddEnCorrPerRun2012HCP(199698,199832,0.991,0.991,0.9938,0.9938,0.9879,0.9985,0.9845,0.9909,0.9803,0.9853);
-  photpresel->AddEnCorrPerRun2012HCP(199833,199960,0.9912,0.9912,0.994,0.994,0.9877,0.9983,0.9875,0.9938,0.9823,0.9873);
-  photpresel->AddEnCorrPerRun2012HCP(199961,200151,0.9913,0.9913,0.9942,0.9942,0.9865,0.997,0.986,0.9924,0.9817,0.9867);
-  photpresel->AddEnCorrPerRun2012HCP(200152,200490,0.9912,0.9912,0.994,0.994,0.9879,0.9984,0.9878,0.9942,0.9809,0.9858);
-  photpresel->AddEnCorrPerRun2012HCP(200491,200991,0.9919,0.9919,0.9947,0.9947,0.9866,0.9971,0.9861,0.9924,0.9814,0.9864);
-  photpresel->AddEnCorrPerRun2012HCP(200992,201201,0.9909,0.9909,0.9937,0.9937,0.9864,0.9969,0.985,0.9914,0.9833,0.9883);
-  photpresel->AddEnCorrPerRun2012HCP(201202,201624,0.9915,0.9915,0.9943,0.9943,0.9886,0.9992,0.9857,0.992,0.9827,0.9876);
-  photpresel->AddEnCorrPerRun2012HCP(201625,201707,0.9917,0.9917,0.9945,0.9945,0.9878,0.9983,0.9856,0.9919,0.982,0.987);
-  photpresel->AddEnCorrPerRun2012HCP(201708,202059,0.9916,0.9916,0.9944,0.9944,0.9869,0.9974,0.9866,0.9929,0.9833,0.9883);
-  photpresel->AddEnCorrPerRun2012HCP(202060,202204,0.9919,0.9919,0.9947,0.9947,0.9871,0.9977,0.985,0.9914,0.9827,0.9877);
-  photpresel->AddEnCorrPerRun2012HCP(202205,202332,0.9923,0.9923,0.9951,0.9951,0.9883,0.9989,0.9887,0.995,0.9825,0.9874);
-  photpresel->AddEnCorrPerRun2012HCP(202333,202972,0.9921,0.9921,0.9949,0.9949,0.9888,0.9994,0.9857,0.992,0.9812,0.9861);
-  photpresel->AddEnCorrPerRun2012HCP(202973,203002,0.9916,0.9916,0.9944,0.9944,0.9857,0.9962,0.986,0.9924,0.9816,0.9865);
-  photpresel->AddEnCorrPerRun2012HCP(203003,203852,0.993,0.993,0.9958,0.9958,0.9831,0.9936,0.9705,0.9769,0.9728,0.9778);
-  photpresel->AddEnCorrPerRun2012HCP(203853,204099,0.9906,0.9906,0.9935,0.9935,0.9886,0.9991,0.9851,0.9914,0.9777,0.9827);
-  photpresel->AddEnCorrPerRun2012HCP(204100,204562,0.991,0.991,0.9939,0.9939,0.9894,0.9999,0.9868,0.9931,0.9814,0.9864);
-  photpresel->AddEnCorrPerRun2012HCP(204563,205085,0.991,0.991,0.9938,0.9938,0.9901,1.0006,0.9871,0.9934,0.9789,0.9839);
-  photpresel->AddEnCorrPerRun2012HCP(205086,205310,0.9911,0.9911,0.9939,0.9939,0.9886,0.9991,0.9868,0.9932,0.9782,0.9832);
-  photpresel->AddEnCorrPerRun2012HCP(205311,205617,0.9909,0.9909,0.9938,0.9938,0.989,0.9995,0.9852,0.9916,0.9766,0.9816);
-  photpresel->AddEnCorrPerRun2012HCP(205618,205825,0.9914,0.9914,0.9942,0.9942,0.9877,0.9982,0.9866,0.993,0.9792,0.9842);
-  photpresel->AddEnCorrPerRun2012HCP(205826,206207,0.9921,0.9921,0.9949,0.9949,0.9908,1.0012,0.9882,0.9945,0.9816,0.9866);
-  photpresel->AddEnCorrPerRun2012HCP(206208,206389,0.9918,0.9918,0.9946,0.9946,0.989,0.9995,0.9842,0.9906,0.9794,0.9844);
-  photpresel->AddEnCorrPerRun2012HCP(206390,206483,0.9917,0.9917,0.9945,0.9945,0.989,0.9995,0.9894,0.9957,0.9824,0.9873);
-  photpresel->AddEnCorrPerRun2012HCP(206484,206597,0.9917,0.9917,0.9945,0.9945,0.9892,0.9997,0.9886,0.9949,0.9791,0.9841);
-  photpresel->AddEnCorrPerRun2012HCP(206598,206896,0.9913,0.9913,0.9941,0.9941,0.9893,0.9998,0.9846,0.991,0.9789,0.9839);
-  photpresel->AddEnCorrPerRun2012HCP(206897,207220,0.9923,0.9923,0.9952,0.9952,0.9892,0.9997,0.9872,0.9935,0.9813,0.9863);
-  photpresel->AddEnCorrPerRun2012HCP(207221,207315,0.9921,0.9921,0.9949,0.9949,0.9901,1.0006,0.987,0.9934,0.9798,0.9848);
-  photpresel->AddEnCorrPerRun2012HCP(207316,207489,0.9922,0.9922,0.995,0.995,0.9896,1.0001,0.9881,0.9944,0.9791,0.9841);
-  photpresel->AddEnCorrPerRun2012HCP(207490,207919,0.9922,0.9922,0.9951,0.9951,0.9901,1.0006,0.9866,0.993,0.9769,0.9819);
-  photpresel->AddEnCorrPerRun2012HCP(207920,208351,0.9919,0.9919,0.9947,0.9947,0.9895,1,0.9867,0.993,0.9813,0.9863);
-  photpresel->AddEnCorrPerRun2012HCP(208352,208686,0.9924,0.9924,0.9952,0.9952,0.9906,1.0011,0.9871,0.9934,0.9809,0.9859);
+  photpresel->AddEnCorrPerRun2012HCP(160431, 165547, 0.9929, 0.9929, 0.9961, 0.9961, 0.9883, 0.9981, 0.9944, 0.9883, 0.9941, 0.9987);
+  photpresel->AddEnCorrPerRun2012HCP(165548, 167042, 0.9939, 0.9939, 0.9971, 0.9971, 0.9876, 0.9973, 0.9956, 0.9876, 0.9937, 0.9982);
+  photpresel->AddEnCorrPerRun2012HCP(167043, 172400, 0.9942, 0.9942, 0.9974, 0.9974, 0.9883, 0.9981, 0.9956, 0.9883, 0.9948, 0.9993);
+  photpresel->AddEnCorrPerRun2012HCP(172401, 173663, 0.9944, 0.9944, 0.9976, 0.9976, 0.9883, 0.9980, 0.9956, 0.9883, 0.9948, 0.9993);
+  photpresel->AddEnCorrPerRun2012HCP(173664, 176840, 0.9932, 0.9932, 0.9964, 0.9964, 0.9854, 0.9952, 0.9968, 0.9854, 0.9938, 0.9983);
+  photpresel->AddEnCorrPerRun2012HCP(176841, 177775, 0.9939, 0.9939, 0.9971, 0.9971, 0.9868, 0.9965, 0.9958, 0.9868, 0.9949, 0.9994);
+  photpresel->AddEnCorrPerRun2012HCP(177776, 178723, 0.9929, 0.9929, 0.9962, 0.9962, 0.9867, 0.9964, 0.9952, 0.9867, 0.9961, 1.0006);
+  photpresel->AddEnCorrPerRun2012HCP(178724, 180252, 0.9929, 0.9929, 0.9961, 0.9961, 0.9868, 0.9965, 0.9945, 0.9868, 0.9950, 0.9995);
 
   
   //-----------------------------------------------------------------------------------------------------------------
   //photpresel->SetDoMCR9Scaling(kTRUE);
   photpresel->SetDoShowerShapeScaling(kFALSE);
-  photpresel->SetShowerShapeType("2012ShowerShape");
+  photpresel->SetShowerShapeType("2011ShowerShape");
   //photpresel->SetDoMCErrScaling(kTRUE);
   //photpresel->SetMCErrScale(1.07, 1.045); 
   //photpresel->SetMCErrScale(1, 1); 
@@ -676,14 +480,12 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photpresel->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photpresel->SetLeptonTagMuonsName("HggLeptonTagMuons");  
   photpresel->Set2012HCP(kTRUE); 
-  //
-
  
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputName("GoodPhotonsPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputVtxName("OutVtxPreselInvertEleVeto");    
-  photpreselinverteleveto->SetPhotonSelType("MITPFSelectionNoEcal");
-  photpreselinverteleveto->SetIdMVAType("2013FinalIdMVA_8TeV");
+  photpreselinverteleveto->SetPhotonSelType("MITPFSelection");
+  photpreselinverteleveto->SetIdMVAType("2013FinalIdMVA_7TeV");
   //photpreselinverteleveto->SetVertexSelType("CiCMVA2012Selection");//ming change
   photpreselinverteleveto->SetUseSingleLegConversions(kFALSE);
   photpreselinverteleveto->DoMCSmear(kTRUE);
@@ -691,64 +493,21 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photpreselinverteleveto->SetMCSmearFactors2012HCP(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
-  photpreselinverteleveto->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
+  photpreselinverteleveto->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
+  photpreselinverteleveto->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
   photpreselinverteleveto->UseSpecialSmearForDPMVA(true);
 
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9856,0.9919,0.9812,0.9862);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(190782,191042,0.9961,0.9961,0.9989,0.9989,0.9909,1.0014,0.9854,0.9917,0.976,0.981);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(191043,191720,0.9902,0.9902,0.9931,0.9931,0.9858,0.9963,0.988,0.9944,0.9795,0.9845);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(191721,193833,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9853,0.9917,0.9791,0.9841);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(193834,194116,0.99,0.99,0.9929,0.9929,0.9865,0.997,0.9842,0.9906,0.9793,0.9843);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(194117,194427,0.9907,0.9907,0.9935,0.9935,0.987,0.9975,0.9855,0.9918,0.9805,0.9855);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(194428,194618,0.9901,0.9901,0.9929,0.9929,0.9867,0.9973,0.9841,0.9905,0.9786,0.9836);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(194619,194789,0.9904,0.9904,0.9932,0.9932,0.9874,0.9979,0.9876,0.994,0.9788,0.9838);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(194790,195111,0.991,0.991,0.9938,0.9938,0.9887,0.9992,0.99,0.9963,0.9803,0.9853);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(195112,195377,0.9912,0.9912,0.994,0.994,0.9871,0.9976,0.9885,0.9948,0.9817,0.9866);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(195378,195398,0.9903,0.9903,0.9931,0.9931,0.9863,0.9968,0.9867,0.993,0.9801,0.9851);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(195399,195657,0.9908,0.9908,0.9936,0.9936,0.9888,0.9993,0.9866,0.9929,0.9806,0.9856);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(195658,195918,0.9914,0.9914,0.9942,0.9942,0.9878,0.9983,0.9898,0.9962,0.9797,0.9846);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(195919,196198,0.9908,0.9908,0.9936,0.9936,0.9874,0.998,0.9878,0.9942,0.9796,0.9846);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(196199,196356,0.9915,0.9915,0.9943,0.9943,0.9877,0.9983,0.988,0.9944,0.9781,0.9831);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(196357,198115,0.991,0.991,0.9938,0.9938,0.9871,0.9977,0.9859,0.9923,0.9791,0.9841);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(198116,198940,0.9906,0.9906,0.9934,0.9934,0.9864,0.997,0.9877,0.994,0.9818,0.9868);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(198941,199317,0.9907,0.9907,0.9936,0.9936,0.9865,0.997,0.9856,0.992,0.9805,0.9855);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(199318,199428,0.9904,0.9904,0.9933,0.9933,0.9868,0.9973,0.9857,0.9921,0.9808,0.9858);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(199429,199697,0.9907,0.9907,0.9935,0.9935,0.987,0.9976,0.9853,0.9916,0.9803,0.9853);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(199698,199832,0.991,0.991,0.9938,0.9938,0.9879,0.9985,0.9845,0.9909,0.9803,0.9853);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(199833,199960,0.9912,0.9912,0.994,0.994,0.9877,0.9983,0.9875,0.9938,0.9823,0.9873);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(199961,200151,0.9913,0.9913,0.9942,0.9942,0.9865,0.997,0.986,0.9924,0.9817,0.9867);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(200152,200490,0.9912,0.9912,0.994,0.994,0.9879,0.9984,0.9878,0.9942,0.9809,0.9858);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(200491,200991,0.9919,0.9919,0.9947,0.9947,0.9866,0.9971,0.9861,0.9924,0.9814,0.9864);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(200992,201201,0.9909,0.9909,0.9937,0.9937,0.9864,0.9969,0.985,0.9914,0.9833,0.9883);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(201202,201624,0.9915,0.9915,0.9943,0.9943,0.9886,0.9992,0.9857,0.992,0.9827,0.9876);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(201625,201707,0.9917,0.9917,0.9945,0.9945,0.9878,0.9983,0.9856,0.9919,0.982,0.987);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(201708,202059,0.9916,0.9916,0.9944,0.9944,0.9869,0.9974,0.9866,0.9929,0.9833,0.9883);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(202060,202204,0.9919,0.9919,0.9947,0.9947,0.9871,0.9977,0.985,0.9914,0.9827,0.9877);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(202205,202332,0.9923,0.9923,0.9951,0.9951,0.9883,0.9989,0.9887,0.995,0.9825,0.9874);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(202333,202972,0.9921,0.9921,0.9949,0.9949,0.9888,0.9994,0.9857,0.992,0.9812,0.9861);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(202973,203002,0.9916,0.9916,0.9944,0.9944,0.9857,0.9962,0.986,0.9924,0.9816,0.9865);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(203003,203852,0.993,0.993,0.9958,0.9958,0.9831,0.9936,0.9705,0.9769,0.9728,0.9778);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(203853,204099,0.9906,0.9906,0.9935,0.9935,0.9886,0.9991,0.9851,0.9914,0.9777,0.9827);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(204100,204562,0.991,0.991,0.9939,0.9939,0.9894,0.9999,0.9868,0.9931,0.9814,0.9864);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(204563,205085,0.991,0.991,0.9938,0.9938,0.9901,1.0006,0.9871,0.9934,0.9789,0.9839);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(205086,205310,0.9911,0.9911,0.9939,0.9939,0.9886,0.9991,0.9868,0.9932,0.9782,0.9832);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(205311,205617,0.9909,0.9909,0.9938,0.9938,0.989,0.9995,0.9852,0.9916,0.9766,0.9816);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(205618,205825,0.9914,0.9914,0.9942,0.9942,0.9877,0.9982,0.9866,0.993,0.9792,0.9842);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(205826,206207,0.9921,0.9921,0.9949,0.9949,0.9908,1.0012,0.9882,0.9945,0.9816,0.9866);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(206208,206389,0.9918,0.9918,0.9946,0.9946,0.989,0.9995,0.9842,0.9906,0.9794,0.9844);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(206390,206483,0.9917,0.9917,0.9945,0.9945,0.989,0.9995,0.9894,0.9957,0.9824,0.9873);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(206484,206597,0.9917,0.9917,0.9945,0.9945,0.9892,0.9997,0.9886,0.9949,0.9791,0.9841);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(206598,206896,0.9913,0.9913,0.9941,0.9941,0.9893,0.9998,0.9846,0.991,0.9789,0.9839);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(206897,207220,0.9923,0.9923,0.9952,0.9952,0.9892,0.9997,0.9872,0.9935,0.9813,0.9863);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(207221,207315,0.9921,0.9921,0.9949,0.9949,0.9901,1.0006,0.987,0.9934,0.9798,0.9848);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(207316,207489,0.9922,0.9922,0.995,0.995,0.9896,1.0001,0.9881,0.9944,0.9791,0.9841);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(207490,207919,0.9922,0.9922,0.9951,0.9951,0.9901,1.0006,0.9866,0.993,0.9769,0.9819);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(207920,208351,0.9919,0.9919,0.9947,0.9947,0.9895,1,0.9867,0.993,0.9813,0.9863);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(208352,208686,0.9924,0.9924,0.9952,0.9952,0.9906,1.0011,0.9871,0.9934,0.9809,0.9859);
+  photpreselinverteleveto->AddEnCorrPerRun2012HCP(160431, 165547, 0.9929, 0.9929, 0.9961, 0.9961, 0.9883, 0.9981, 0.9944, 0.9883, 0.9941, 0.9987);
+  photpreselinverteleveto->AddEnCorrPerRun2012HCP(165548, 167042, 0.9939, 0.9939, 0.9971, 0.9971, 0.9876, 0.9973, 0.9956, 0.9876, 0.9937, 0.9982);
+  photpreselinverteleveto->AddEnCorrPerRun2012HCP(167043, 172400, 0.9942, 0.9942, 0.9974, 0.9974, 0.9883, 0.9981, 0.9956, 0.9883, 0.9948, 0.9993);
+  photpreselinverteleveto->AddEnCorrPerRun2012HCP(172401, 173663, 0.9944, 0.9944, 0.9976, 0.9976, 0.9883, 0.9980, 0.9956, 0.9883, 0.9948, 0.9993);
+  photpreselinverteleveto->AddEnCorrPerRun2012HCP(173664, 176840, 0.9932, 0.9932, 0.9964, 0.9964, 0.9854, 0.9952, 0.9968, 0.9854, 0.9938, 0.9983);
+  photpreselinverteleveto->AddEnCorrPerRun2012HCP(176841, 177775, 0.9939, 0.9939, 0.9971, 0.9971, 0.9868, 0.9965, 0.9958, 0.9868, 0.9949, 0.9994);
+  photpreselinverteleveto->AddEnCorrPerRun2012HCP(177776, 178723, 0.9929, 0.9929, 0.9962, 0.9962, 0.9867, 0.9964, 0.9952, 0.9867, 0.9961, 1.0006);
+  photpreselinverteleveto->AddEnCorrPerRun2012HCP(178724, 180252, 0.9929, 0.9929, 0.9961, 0.9961, 0.9868, 0.9965, 0.9945, 0.9868, 0.9950, 0.9995);
   
   //-----------------------------------------------------------------------------------------------------------------
-  photpreselinverteleveto->SetShowerShapeType("2012ShowerShape");
+  photpreselinverteleveto->SetShowerShapeType("2011ShowerShape");
   photpreselinverteleveto->SetDoShowerShapeScaling(kFALSE);  
   //photpreselinverteleveto->SetDoMCErrScaling(kTRUE);
   //photpreselinverteleveto->SetMCErrScale(1.07, 1.045);  
@@ -761,17 +520,17 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photpreselinverteleveto->SetApplyLeptonTag(kTRUE);
   photpreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photpreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");    
-  photpreselinverteleveto->Set2012HCP(kTRUE);  
+  photpreselinverteleveto->Set2012HCP(kFALSE);  
   photpreselinverteleveto->SetLeadingPtMin(20.);
   photpreselinverteleveto->SetTrailingPtMin(20.);
 
    PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
    photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
-   photpreselnosmear->SetPhotonSelType("MITPFSelectionNoEcal");
-   photpreselnosmear->SetVertexSelType("CiCMVA2012Selection");
+   photpreselnosmear->SetPhotonSelType("MITPFSelection");
+   photpreselnosmear->SetVertexSelType("CiCMVASelection");
    photpreselnosmear->SetUseSingleLegConversions(kFALSE);  
-   photpreselnosmear->SetIdMVAType("2013FinalIdMVA_8TeV");
-   photpreselnosmear->SetShowerShapeType("2012ShowerShape");
+   photpreselnosmear->SetIdMVAType("2013FinalIdMVA_7TeV");
+   photpreselnosmear->SetShowerShapeType("2011ShowerShape");
    photpreselnosmear->SetDoShowerShapeScaling(kFALSE);  
    photpreselnosmear->SetPhotonsFromBranch(kFALSE);
    photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
@@ -784,7 +543,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    photpreselnosmear->SetApplyLeptonTag(kTRUE);
    photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   photpreselnosmear->Set2012HCP(kTRUE); 
+   photpreselnosmear->Set2012HCP(kFALSE); 
    photpreselnosmear->DoMCSmear(kFALSE);
    photpreselnosmear->DoDataEneCorr(kFALSE);
 
@@ -792,7 +551,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    photcicnosmear->SetOutputName("GoodPhotonsCICNoSmear");
    photcicnosmear->SetOutputVtxName("OutVtxCiCNoSmear");        
    photcicnosmear->SetPhotonSelType("CiCPFSelection");
-   photcicnosmear->SetVertexSelType("CiCMVA2012Selection");
+   photcicnosmear->SetVertexSelType("CiCMVASelection");
    photcicnosmear->SetUseSingleLegConversions(kFALSE);
    photcicnosmear->DoMCSmear(kFALSE);
    photcicnosmear->DoDataEneCorr(kFALSE);
@@ -801,7 +560,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    //  photcicnosmear->SetDoMCR9Scaling(kTRUE);
    //  photcicnosmear->SetMCR9Scale(1.0035, 1.0035);
    photcicnosmear->SetDoShowerShapeScaling(kFALSE); 
-   photcicnosmear->SetShowerShapeType("2012ShowerShape");
+   photcicnosmear->SetShowerShapeType("2011ShowerShape");
    //photcicnosmear->SetDoMCErrScaling(kTRUE);
    //photcicnosmear->SetMCErrScale(1.07, 1.045); 
    //photcicnosmear->SetMCErrScale(1, 1); //ming:scale(sigE/E)
@@ -811,15 +570,15 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    photcicnosmear->SetApplyLeptonTag(kTRUE);
    photcicnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    photcicnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");  
-   photcicnosmear->Set2012HCP(kTRUE);
+   photcicnosmear->Set2012HCP(kFALSE);
    
    PhotonPairSelector         *photpreselinvertelevetonosmear = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVetoNoSmear");
    photpreselinvertelevetonosmear->SetOutputName("GoodPhotonsPreselInvertEleVetoNoSmear");
    photpreselinvertelevetonosmear->SetPhotonSelType("MITPFSelectionNoEcal");
    //photpreselinvertelevetonosmear->SetVertexSelType("CiCMVA2012Selection");//ming change
    photpreselinvertelevetonosmear->SetUseSingleLegConversions(kFALSE);  
-   photpreselinvertelevetonosmear->SetIdMVAType("2013FinalIdMVA_8TeV");
-   photpreselinvertelevetonosmear->SetShowerShapeType("2012ShowerShape");
+   photpreselinvertelevetonosmear->SetIdMVAType("2013FinalIdMVA_7TeV");
+   photpreselinvertelevetonosmear->SetShowerShapeType("2011ShowerShape");
    photpreselinvertelevetonosmear->SetDoShowerShapeScaling(kFALSE);  
    photpreselinvertelevetonosmear->SetPhotonsFromBranch(kFALSE);
    photpreselinvertelevetonosmear->SetInputPhotonsName(photreg->GetOutputName());
@@ -834,7 +593,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    photpreselinvertelevetonosmear->SetApplyLeptonTag(kTRUE);
    photpreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    photpreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   photpreselinvertelevetonosmear->Set2012HCP(kTRUE); 
+   photpreselinvertelevetonosmear->Set2012HCP(kFALSE); 
    photpreselinvertelevetonosmear->DoMCSmear(kFALSE);
    photpreselinvertelevetonosmear->DoDataEneCorr(kFALSE);
    photpreselinvertelevetonosmear->SetApplyEleVeto(kFALSE);
@@ -850,7 +609,6 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreecic->SetExcludeDoublePrompt(excludedoubleprompt);
    phottreecic->SetIsData(isData);
    if (is25) phottreecic->SetEnablePFPhotons(kFALSE);
-   phottreecic->SetBeamspotWidth(5.0);
    phottreecic->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreecic->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
    phottreecic->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
@@ -880,7 +638,6 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreecicnoeleveto->SetExcludeDoublePrompt(excludedoubleprompt);
    phottreecicnoeleveto->SetIsData(isData);  
    if (is25) phottreecicnoeleveto->SetEnablePFPhotons(kFALSE);
-   phottreecicnoeleveto->SetBeamspotWidth(5.0);
    phottreecicnoeleveto->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreecicnoeleveto->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
    phottreecicnoeleveto->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
@@ -898,7 +655,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreecicnoeleveto->SetApplyVHHadTag(kTRUE);
    phottreecicnoeleveto->SetApplyVBFTag(kTRUE);
    phottreecicnoeleveto->SetApplyTTHTag(kTRUE);
-
+   
    PhotonTreeWriter *phottreepresel = new PhotonTreeWriter("PhotonTreeWriterPresel");
    phottreepresel->SetPhotonsFromBranch(kFALSE);
    phottreepresel->SetInputPhotonsName(photpresel->GetOutputName());
@@ -909,7 +666,6 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepresel->SetExcludeDoublePrompt(excludedoubleprompt);  
    phottreepresel->SetIsData(isData);  
    if (is25) phottreepresel->SetEnablePFPhotons(kFALSE);
-   phottreepresel->SetBeamspotWidth(5.0);
    phottreepresel->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreepresel->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
    phottreepresel->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
@@ -917,19 +673,18 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepresel->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
    phottreepresel->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    phottreepresel->SetDoSynching(kTRUE);
-   //
-   //phottreepresel->SetApplyLeptonTag(kTRUE);
-   //phottreepresel->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   //phottreepresel->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   //phottreepresel->SetApplyVBFTag(kTRUE);
-   phottreepresel->SetApplyPFMetCorr(kTRUE);
-   phottreepresel->SetApplyVHLepTag(kTRUE);
-   phottreepresel->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
-   phottreepresel->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
-   phottreepresel->SetApplyVHHadTag(kTRUE);
-   phottreepresel->SetApplyVBFTag(kTRUE);
-   phottreepresel->SetApplyTTHTag(kTRUE);
- 
+   // phottreepresel->SetApplyLeptonTag(kTRUE);
+   // phottreepresel->SetLeptonTagElectronsName("HggLeptonTagElectrons");
+   // phottreepresel->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   // phottreepresel->SetApplyVBFTag(kTRUE);
+    phottreepresel->SetApplyPFMetCorr(kTRUE);
+    phottreepresel->SetApplyVHLepTag(kTRUE);
+    phottreepresel->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
+    phottreepresel->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
+    phottreepresel->SetApplyVHHadTag(kTRUE);
+    phottreepresel->SetApplyVBFTag(kTRUE);
+    phottreepresel->SetApplyTTHTag(kTRUE);
+    
    PhotonTreeWriter *phottreepreselinverteleveto = new PhotonTreeWriter("PhotonTreeWriterPreselInvertEleVeto");
    phottreepreselinverteleveto->SetPhotonsFromBranch(kFALSE);
    phottreepreselinverteleveto->SetInputPhotonsName(photpreselinverteleveto->GetOutputName());
@@ -941,25 +696,24 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepreselinverteleveto->SetExcludeDoublePrompt(excludedoubleprompt);    
    phottreepreselinverteleveto->SetIsData(isData); 
    if (is25) phottreepreselinverteleveto->SetEnablePFPhotons(kFALSE);  
-   phottreepreselinverteleveto->SetBeamspotWidth(5.0);
-  phottreepreselinverteleveto->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
-  phottreepreselinverteleveto->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
-  phottreepreselinverteleveto->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
-  phottreepreselinverteleveto->SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
-  phottreepreselinverteleveto->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
-  phottreepreselinverteleveto->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
-   // phottreepreselinverteleveto->SetApplyLeptonTag(kTRUE);
-   // phottreepreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   // phottreepreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   // phottreepreselinverteleveto->SetApplyVBFTag(kTRUE);
-    phottreepreselinverteleveto->SetApplyPFMetCorr(kTRUE);
-    phottreepreselinverteleveto->SetApplyVHLepTag(kTRUE);
-    phottreepreselinverteleveto->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
-    phottreepreselinverteleveto->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
-    phottreepreselinverteleveto->SetApplyVHHadTag(kTRUE);
-    phottreepreselinverteleveto->SetApplyVBFTag(kTRUE);
-    phottreepreselinverteleveto->SetApplyTTHTag(kTRUE);
-
+   phottreepreselinverteleveto->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
+   phottreepreselinverteleveto->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
+   phottreepreselinverteleveto->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
+   phottreepreselinverteleveto->SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
+   phottreepreselinverteleveto->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
+   phottreepreselinverteleveto->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
+   //  phottreepreselinverteleveto->SetApplyLeptonTag(kTRUE);
+   //  phottreepreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
+   //  phottreepreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   //  phottreepreselinverteleveto->SetApplyVBFTag(kTRUE);
+   phottreepreselinverteleveto->SetApplyPFMetCorr(kTRUE);
+   phottreepreselinverteleveto->SetApplyVHLepTag(kTRUE);
+   phottreepreselinverteleveto->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
+   phottreepreselinverteleveto->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
+   phottreepreselinverteleveto->SetApplyVHHadTag(kTRUE);
+   phottreepreselinverteleveto->SetApplyVBFTag(kTRUE);
+   phottreepreselinverteleveto->SetApplyTTHTag(kTRUE);
+  
    PhotonTreeWriter *phottreepreselnosmear = new PhotonTreeWriter("PhotonTreeWriterPreselNoSmear");
    phottreepreselnosmear->SetPhotonsFromBranch(kFALSE);
    phottreepreselnosmear->SetInputPhotonsName(photpreselnosmear->GetOutputName());
@@ -970,24 +724,23 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepreselnosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
    phottreepreselnosmear->SetIsData(isData);    
    if (is25) phottreepreselnosmear->SetEnablePFPhotons(kFALSE); 
-   phottreepreselnosmear->SetBeamspotWidth(5.0); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreepreselnosmear->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
    phottreepreselnosmear->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
    phottreepreselnosmear->SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
-   // phottreepreselnosmear->SetApplyLeptonTag(kTRUE);
-   // phottreepreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   // phottreepreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   // phottreepreselnosmear->SetApplyVBFTag(kTRUE);
-    phottreepreselnosmear->SetApplyPFMetCorr(kTRUE);
-    phottreepreselnosmear->SetApplyVHLepTag(kTRUE);
-    phottreepreselnosmear->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
-    phottreepreselnosmear->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
-    phottreepreselnosmear->SetApplyVHHadTag(kTRUE);
-    phottreepreselnosmear->SetApplyVBFTag(kTRUE);
-    phottreepreselnosmear->SetApplyTTHTag(kTRUE);
+   //  phottreepreselnosmear->SetApplyLeptonTag(kTRUE);
+   //  phottreepreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
+   //  phottreepreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   //  phottreepreselnosmear->SetApplyVBFTag(kTRUE);
+   phottreepreselnosmear->SetApplyPFMetCorr(kTRUE);
+   phottreepreselnosmear->SetApplyVHLepTag(kTRUE);
+   phottreepreselnosmear->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
+   phottreepreselnosmear->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
+   phottreepreselnosmear->SetApplyVHHadTag(kTRUE);
+   phottreepreselnosmear->SetApplyVBFTag(kTRUE);
+   phottreepreselnosmear->SetApplyTTHTag(kTRUE);
 
    PhotonTreeWriter *phottreecicnosmear = new PhotonTreeWriter("PhotonTreeWriterCiCNoSmear");
    phottreecicnosmear->SetPhotonsFromBranch(kFALSE);
@@ -999,7 +752,6 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreecicnosmear->SetExcludeDoublePrompt(excludedoubleprompt);
    phottreecicnosmear->SetIsData(isData);
    if (is25) phottreecicnosmear->SetEnablePFPhotons(kFALSE);
-   phottreecicnosmear->SetBeamspotWidth(5.0);
    phottreecicnosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreecicnosmear->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
    phottreecicnosmear->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
@@ -1010,14 +762,14 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    //  phottreecicnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    //  phottreecicnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
    //  phottreecicnosmear->SetApplyVBFTag(kTRUE);
-    phottreecicnosmear->SetApplyPFMetCorr(kTRUE);
-    phottreecicnosmear->SetApplyVHLepTag(kTRUE);
-    phottreecicnosmear->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
-    phottreecicnosmear->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
-    phottreecicnosmear->SetApplyVHHadTag(kTRUE);
-    phottreecicnosmear->SetApplyVBFTag(kTRUE);
-    phottreecicnosmear->SetApplyTTHTag(kTRUE);
-   
+   phottreecicnosmear->SetApplyPFMetCorr(kTRUE);
+   phottreecicnosmear->SetApplyVHLepTag(kTRUE);
+   phottreecicnosmear->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
+   phottreecicnosmear->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
+   phottreecicnosmear->SetApplyVHHadTag(kTRUE);
+   phottreecicnosmear->SetApplyVBFTag(kTRUE);
+   phottreecicnosmear->SetApplyTTHTag(kTRUE);
+
    PhotonTreeWriter *phottreepreselinvertelevetonosmear = new PhotonTreeWriter("PhotonTreeWriterPreselInvertEleVetoNoSmear");
    phottreepreselinvertelevetonosmear->SetPhotonsFromBranch(kFALSE);
    phottreepreselinvertelevetonosmear->SetInputPhotonsName(photpreselinvertelevetonosmear->GetOutputName());
@@ -1028,25 +780,24 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepreselinvertelevetonosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
    phottreepreselinvertelevetonosmear->SetIsData(isData);    
    if (is25) phottreepreselinvertelevetonosmear->SetEnablePFPhotons(kFALSE); 
-   phottreepreselinvertelevetonosmear->SetBeamspotWidth(5.0); 
-   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
-   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
-   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
-   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
-   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
-   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    phottreepreselinvertelevetonosmear->SetApplyElectronVeto(kFALSE); 
-   //   phottreepreselinvertelevetonosmear->SetApplyLeptonTag(kTRUE);
-   //   phottreepreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   //   phottreepreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   //   phottreepreselinvertelevetonosmear->SetApplyVBFTag(kTRUE);
-    phottreepreselinvertelevetonosmear->SetApplyPFMetCorr(kTRUE);
-    phottreepreselinvertelevetonosmear->SetApplyVHLepTag(kTRUE);
-    phottreepreselinvertelevetonosmear->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
-    phottreepreselinvertelevetonosmear->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
-    phottreepreselinvertelevetonosmear->SetApplyVHHadTag(kTRUE);
-    phottreepreselinvertelevetonosmear->SetApplyVBFTag(kTRUE);
-    phottreepreselinvertelevetonosmear->SetApplyTTHTag(kTRUE);
+  phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
+  phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
+  phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet2Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat3.weights.xml"))));  
+  phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
+  phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
+  phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
+   // phottreepreselinvertelevetonosmear->SetApplyLeptonTag(kTRUE);
+   // phottreepreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
+   // phottreepreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   // phottreepreselinvertelevetonosmear->SetApplyVBFTag(kTRUE);
+  phottreepreselinvertelevetonosmear->SetApplyPFMetCorr(kTRUE);
+  phottreepreselinvertelevetonosmear->SetApplyVHLepTag(kTRUE);
+  phottreepreselinvertelevetonosmear->SetLeptonTagSoftElectronsName("HggLeptonTagSoftElectrons");
+  phottreepreselinvertelevetonosmear->SetLeptonTagSoftMuonsName("HggLeptonTagSoftMuons");
+  phottreepreselinvertelevetonosmear->SetApplyVHHadTag(kTRUE);
+  phottreepreselinvertelevetonosmear->SetApplyVBFTag(kTRUE);
+  phottreepreselinvertelevetonosmear->SetApplyTTHTag(kTRUE);
    
    PhotonIDMod         *photidpresel = new PhotonIDMod("PhotonIDModPresel");
    photidpresel->SetPtMin(25.0);
@@ -1070,7 +821,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   phottreesingle->SetEnableJets(kTRUE);
   phottreesingle->SetPFJetsFromBranch(kFALSE);
   phottreesingle->SetPFJetName(jetCorr->GetOutputName());      
-  phottreesingle->SetBeamspotWidth(5.0);
+  //phottreesingle->SetBeamspotWidth(5.0);
   phottreesingle->SetIsData(isData);
   if (is25) phottreesingle->SetEnablePFPhotons(kFALSE);  
   
@@ -1082,7 +833,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   phottreesingleinvert->SetPFJetsFromBranch(kFALSE);
   phottreesingleinvert->SetPFJetName(pubJetOpen->GetOutputName());
   phottreesingleinvert->SetApplyElectronVeto(kFALSE);
-  phottreesingleinvert->SetBeamspotWidth(5.0);
+  //phottreesingleinvert->SetBeamspotWidth(5.0);
   phottreesingleinvert->SetIsData(isData);  
   if (is25) phottreesingleinvert->SetEnablePFPhotons(kFALSE);    
   
@@ -1120,16 +871,13 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   //goodPVFilterModE -> Add(pubJetOpen);
   //pubJetOpen       -> Add(photidpreselinvert);
   //goodPVFilterModES ->Add(elecIdS);
-  //jetCorr          ->Add(SepPUMod); 
-  //SepPUMod         ->Add(eleIdMod);
-  //eleIdMod         ->Add(muonIdMod);
-
+ 
   jetCorr          ->Add(SepPUMod); 
   SepPUMod         ->Add(eleIdMod);
   eleIdMod         ->Add(softEleIdMod);
   softEleIdMod     ->Add(softMuonIdMod);
   softMuonIdMod    ->Add(muonIdMod);
-   
+     
   muonIdMod          ->Add(photcic);
   muonIdMod          ->Add(photcicnoeleveto);  
   muonIdMod          ->Add(photpresel);  
