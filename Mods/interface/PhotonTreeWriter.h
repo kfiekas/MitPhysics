@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.39 2013/10/07 12:47:49 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.40 2013/11/07 17:15:45 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -869,7 +869,7 @@ namespace mithep
     UInt_t              VHHadNumberOfBJets(const Photon *phHard,
                                            const Photon *phSoft,
                                            const Vertex *selvtx);
-
+    void                LogEventInfo();
     // Names for the input Collections
     TString             fPhotonBranchName;
     TString             fPFPhotonName;
@@ -977,7 +977,7 @@ namespace mithep
     Double_t                       fBeamspotWidth;
     
     TFile                          *fTmpFile;
-    
+
     // --------------------------------
     // variables for vbf
     float jet1pt_vbf;
@@ -1016,6 +1016,7 @@ namespace mithep
     TString                   fElectronMVAWeights_Subdet2Pt20ToInf;
 
     RhoUtilities::RhoType    fTheRhoType;
+    UInt_t                         fProcessedEvents;
 
     ClassDef(PhotonTreeWriter, 1) // Photon identification module
       };

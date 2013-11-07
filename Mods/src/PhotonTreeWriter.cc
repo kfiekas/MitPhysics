@@ -1,3 +1,4 @@
+#include <time.h>
 #include "MitPhysics/Mods/interface/PhotonTreeWriter.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
@@ -127,7 +128,8 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fElectronMVAWeights_Subdet1Pt20ToInf(""),
   fElectronMVAWeights_Subdet2Pt20ToInf(""),
 
-  fTheRhoType(RhoUtilities::DEFAULT)
+  fTheRhoType(RhoUtilities::DEFAULT),
+  fProcessedEvents(0)
 
 {
   // Constructor
@@ -159,6 +161,12 @@ void PhotonTreeWriter::SlaveTerminate()
 //--------------------------------------------------------------------------------------------------
 void PhotonTreeWriter::Process()
 {
+
+  fProcessedEvents++;
+
+  if (fVerbosityLevel > 0) {
+    PhotonTreeWriter::LogEventInfo();
+  }
 
   //if(GetEventHeader()->EvtNum()==9008 || GetEventHeader()->EvtNum()==9008 || GetEventHeader()->EvtNum()==9010){
   //  printf("check photontreewriter 0\n");
@@ -2494,8 +2502,8 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
   if (fLeptonTagSoftElectrons->GetEntries() < 2) return false;
   
   if (fVerbosityLevel > 0) {
-    cout << "JV PhotonTreeWriter::VHLepHasDielectron: Found >= 2 electrons!"
-         << endl;
+    cout << "PhotonTreeWriter::VHLepHasDielectron: Found "
+         << fLeptonTagSoftElectrons->GetEntries() << endl;
   }
   
   vector<UInt_t> goodElectrons;
@@ -2508,6 +2516,8 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
     goodElectrons.push_back(iele);
   }
   
+  if (goodElectrons.size() < 2) return false;
+
   // Loop over pairs of selected electrons.
   for (UInt_t iiele1 = 0; iiele1 < goodElectrons.size() - 1; ++iiele1) {
     UInt_t iele1 = goodElectrons[iiele1];
@@ -2517,6 +2527,9 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
       const Electron *ele2 = fLeptonTagSoftElectrons->At(iele2);
       Double_t mass12 = (ele1->Mom() + ele2->Mom()).M();
       if (mass12 < 70. || 110. < mass12) continue;
+      if (fVerbosityLevel > 0) {
+        cout << "    Found a tagging dielectron!" << endl << flush;
+      }      
       return true;
     }
   }
@@ -2532,7 +2545,8 @@ bool PhotonTreeWriter::VHLepHasDimuon(const Photon *phHard,
   if (fLeptonTagSoftMuons->GetEntries() < 2) return false;
   
   if (fVerbosityLevel > 0) {
-    cout << "JV PhotonTreeWriter::VHLepHasDimuon: Found >= 2 muons!" << endl;
+    cout << "PhotonTreeWriter::VHLepHasDimuon: Found " 
+         << fLeptonTagSoftMuons->GetEntries() << " muons!" << endl;
   }
   
   vector<UInt_t> goodMuons;
@@ -2545,6 +2559,8 @@ bool PhotonTreeWriter::VHLepHasDimuon(const Photon *phHard,
     goodMuons.push_back(imu);
   }
   
+  if (goodMuons.size() < 2) return false;
+
   // Loop over muon pairs of selected muons and apply the cut 70 < mass(mu1, mu2) < 110.
   for (UInt_t iimu1 = 0; iimu1 < goodMuons.size() - 1; ++iimu1) {
     UInt_t imu1 = goodMuons[iimu1];
@@ -2554,6 +2570,9 @@ bool PhotonTreeWriter::VHLepHasDimuon(const Photon *phHard,
       const Muon *mu2 = fLeptonTagSoftMuons->At(imu2);
       Double_t mass12 = (mu1->Mom() + mu2->Mom()).M();
       if (mass12 < 70. || 110. < mass12) continue;
+      if (fVerbosityLevel > 0) {
+        cout << "    Found a tagging dimoun!" << endl << flush;
+      }      
       return true;
     }
   }
@@ -2870,3 +2889,20 @@ void PhotonTreeWriter::Terminate()
 }
 
 
+//_____________________________________________________________________________
+void PhotonTreeWriter::LogEventInfo()
+{
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer[80];
+
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(buffer, 80, "%c", timeinfo);
+
+  const EventHeader *event = GetEventHeader();
+  cout << buffer << ": Processing " << fProcessedEvents << ". record"
+       << ", run " <<  event->RunNum()
+       << ", lumi " << event->LumiSec()
+       << ", event " << event->EvtNum() << endl;  
+}
