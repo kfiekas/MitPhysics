@@ -1519,9 +1519,10 @@ PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p,
     combiso2 = -99.;
   }
 
-  scindex = PhotonTreeWriter::IndexOfElementInCollection(s, scs);
+  // TODO: fix the bug with supercluster index
+  scindex = PhotonTreeWriter::IndexOfNearestSuperClusterInCollection(s, scs);
   /// DEBUG
-  cout << "JV: s, scs, index: " << s << ", " << scs << ", " << scindex << endl;
+  // cout << "JV: s, scs, index: " << s << ", " << scs << ", " << scindex << endl;
   sce = s->Energy();
   scrawe = s->RawEnergy();
   scpse = s->PreshowerEnergy();
@@ -2507,10 +2508,12 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
     goodElectrons.push_back(iele);
   }
   
-  // Loop over electron pairs.
-  for (UInt_t iele1 = 0; iele1 < goodElectrons.size() - 1; ++iele1) {
+  // Loop over pairs of selected electrons.
+  for (UInt_t iiele1 = 0; iiele1 < goodElectrons.size() - 1; ++iiele1) {
+    UInt_t iele1 = goodElectrons[iiele1];
     const Electron *ele1 = fLeptonTagSoftElectrons->At(iele1);
-    for (UInt_t iele2 = iele1; iele2 < goodElectrons.size(); ++iele2) {
+    for (UInt_t iiele2 = iiele1 + 1; iiele2 < goodElectrons.size(); ++iiele2) {
+      UInt_t iele2 = goodElectrons[iiele2];
       const Electron *ele2 = fLeptonTagSoftElectrons->At(iele2);
       Double_t mass12 = (ele1->Mom() + ele2->Mom()).M();
       if (mass12 < 70. || 110. < mass12) continue;
@@ -2542,10 +2545,12 @@ bool PhotonTreeWriter::VHLepHasDimuon(const Photon *phHard,
     goodMuons.push_back(imu);
   }
   
-  // Loop over muon pairs and apply the cut 70 < mass(mu1, mu2) < 110.
-  for (UInt_t imu1 = 0; imu1 < goodMuons.size() - 1; ++imu1) {
+  // Loop over muon pairs of selected muons and apply the cut 70 < mass(mu1, mu2) < 110.
+  for (UInt_t iimu1 = 0; iimu1 < goodMuons.size() - 1; ++iimu1) {
+    UInt_t imu1 = goodMuons[iimu1];
     const Muon *mu1 = fLeptonTagSoftMuons->At(imu1);
-    for (UInt_t imu2 = imu1; imu2 < goodMuons.size(); ++imu2) {
+    for (UInt_t iimu2 = iimu1 + 1; iimu2 < goodMuons.size(); ++iimu2) {
+      UInt_t imu2 = goodMuons[iimu2];
       const Muon *mu2 = fLeptonTagSoftMuons->At(imu2);
       Double_t mass12 = (mu1->Mom() + mu2->Mom()).M();
       if (mass12 < 70. || 110. < mass12) continue;
@@ -2812,6 +2817,49 @@ UInt_t PhotonTreeWriter::IndexOfElementInCollection(
     }
   }
   return index;
+}
+
+//_____________________________________________________________________________
+UInt_t PhotonTreeWriter::IndexOfNearestSuperClusterInCollection(
+          const SuperCluster    *element,
+          const SuperClusterCol *collection
+          )
+{
+  double minMass = 999.;
+  UInt_t minIndex = 0;
+  if (collection->GetEntries() > 0) {
+    minMass = SuperClusterPairMass(element, collection->At(0));
+  }
+  for (UInt_t index = 1;
+       index < collection->GetEntries() && index < (UInt_t) -1; ++index) {
+    double mass = SuperClusterPairMass(element, collection->At(index));
+    if (mass < minMass) {
+      minMass = mass;
+      minIndex = index;
+    }
+  }
+  return minIndex;
+}
+
+
+//_____________________________________________________________________________
+double PhotonTreeWriter::SuperClusterPairMass(const SuperCluster *sc1,
+                                              const SuperCluster *sc2)
+{
+  FourVectorM p1 = SuperClusterFourVectorM(sc1);
+  FourVectorM p2 = SuperClusterFourVectorM(sc2);
+  return (p1 + p2).M();
+}
+
+
+//_____________________________________________________________________________
+FourVectorM PhotonTreeWriter::SuperClusterFourVectorM(const SuperCluster *sc)
+{
+  double e   = sc->Energy();
+  double eta = sc->Eta();
+  double phi = sc->Phi();
+  double pt  = e / TMath::CosH(eta);
+  return FourVectorM(pt, eta, phi, 0.);
 }
 
 

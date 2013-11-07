@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.38 2013/09/14 00:19:00 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.39 2013/10/07 12:47:49 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -805,6 +805,18 @@ namespace mithep
                           const Element *element,
                           const Collection *collection
                           );
+
+    static UInt_t       IndexOfNearestSuperClusterInCollection(
+                          const SuperCluster    *element,
+                          const SuperClusterCol *collection
+                          );
+
+    static double       SuperClusterPairMass(
+                          const SuperCluster *sc1,
+                          const SuperCluster *sc2
+                          );
+
+    static FourVectorM  SuperClusterFourVectorM(const SuperCluster *sc1);
 
   protected:
     void                Process();
