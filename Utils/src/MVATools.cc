@@ -1,4 +1,4 @@
-// $Id: MVATools.cc,v 1.20 2012/10/26 19:23:04 fabstoec Exp $
+// $Id: MVATools.cc,v 1.21 2013/07/30 21:08:50 mingyang Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/MVATools.h"
@@ -199,15 +199,51 @@ void MVATools::InitializeMVA(MVATools::IdMVAType type) {
 
     break;
 
-  case k2013FinalIdMVA:
+  case k2013FinalIdMVA_8TeV:
     
     EndcapWeights =      (gSystem->Getenv("CMSSW_BASE")+
-			  TString("/src/MitPhysics/data/")+
-			  TString("2013FinalPaper_PhotonID_Endcap_BDT_TrainRangePT15.")+
+			  TString("/src/MitPhysics/data/2013FinalPaper_PhotonID_Weight/8TeV/")+
+			  TString("2013FinalPaper_PhotonID_Endcap_BDT_TrainRangePT15_8TeV.")+
 			  TString("weights.xml"));
     BarrelWeights =      (gSystem->Getenv("CMSSW_BASE")+
-			  TString("/src/MitPhysics/data/")+
-			  TString("2013FinalPaper_PhotonID_Barrel_BDT_TrainRangePT15.")+
+			  TString("/src/MitPhysics/data/2013FinalPaper_PhotonID_Weight/8TeV/")+
+			  TString("2013FinalPaper_PhotonID_Barrel_BDT_TrainRangePT15_8TeV.")+
+			  TString("weights.xml"));
+
+    mvaVars.resize(13);
+    varNames.push_back("ph.scrawe"		      );
+    varNames.push_back("ph.r9"			      );
+    varNames.push_back("ph.sigietaieta"		      );
+    varNames.push_back("ph.scetawidth"		      );
+    varNames.push_back("ph.scphiwidth"		      );
+    varNames.push_back("ph.idmva_CoviEtaiPhi"	      );
+    varNames.push_back("ph.idmva_s4ratio"	      );
+    varNames.push_back("ph.idmva_GammaIso"	      );
+    varNames.push_back("ph.idmva_ChargedIso_selvtx"   );
+    varNames.push_back("ph.idmva_ChargedIso_worstvtx" );
+    varNames.push_back("ph.sceta"		      );
+    varNames.push_back("rho"			      );
+    varNames.push_back("ph.idmva_PsEffWidthSigmaRR"   );
+
+    for( unsigned int iV = 0; iV < mvaVars.size() - 1; ++iV) {
+      mvaVarMapEB.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
+      mvaVarMapEE.insert(  std::pair<std::string,unsigned int>(varNames[iV], iV) );
+    }
+    
+    // pre-shower only used for Endcaps
+    mvaVarMapEE.insert( std::pair<std::string,unsigned int> ( varNames[mvaVars.size() - 1], mvaVars.size() - 1) );
+
+    break;
+
+  case k2013FinalIdMVA_7TeV:
+    
+    EndcapWeights =      (gSystem->Getenv("CMSSW_BASE")+
+			  TString("/src/MitPhysics/data/2013FinalPaper_PhotonID_Weight/7TeV/")+
+			  TString("2013FinalPaper_PhotonID_Endcap_BDT_TrainRangePT15_7TeV.")+
+			  TString("weights.xml"));
+    BarrelWeights =      (gSystem->Getenv("CMSSW_BASE")+
+			  TString("/src/MitPhysics/data/2013FinalPaper_PhotonID_Weight/7TeV/")+
+			  TString("2013FinalPaper_PhotonID_Barrel_BDT_TrainRangePT15_7TeV.")+
 			  TString("weights.xml"));
 
     mvaVars.resize(13);
@@ -496,6 +532,7 @@ void MVATools::InitializeMVA(MVATools::IdMVAType type) {
 Double_t MVATools::GetMVAbdtValue(const Photon* p, const Vertex* vtx, const TrackCol* trackCol, const VertexCol* vtxCol, Double_t _tRho, const PFCandidateCol *fPFCands, const ElectronCol* els, Bool_t applyElectronVeto) {
 
   // if there's no reader, or the type is kNone, return the default values of -99.
+  //if( ( !fReaderBarrel || !fReaderEndcap ) ) return -199.;
   if( ( !fReaderBarrel || !fReaderEndcap ) || fMVAType == kNone ) return -99.;
 
   // we compute the variable names... make sure no confilcts when adding new variables...
