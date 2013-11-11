@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.38 2013/06/26 21:43:01 mingyang Exp $
+// $Id: PhotonIDMod.cc,v 1.39 2013/07/30 21:07:36 mingyang Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -302,6 +302,7 @@ void PhotonIDMod::Process()
     // ---------------------------------------------------------------------
     // set the photonIdMVA value of requested...
     double idMvaVal = fTool.GetMVAbdtValue(ph,fPV->At(0),fTracks, fPV, theRho, fPFCands, fElectrons, fApplyElectronVeto);
+
     ph->SetIdMva(idMvaVal);
 
     // ---------------------------------------------------------------------
@@ -548,6 +549,27 @@ void PhotonIDMod::SlaveBegin()
     ReqBranch(fPileUpName,            fPileUp);
     ReqBranch(fMCParticleName,        fMCParticles);
   }   
+
+  if(fIdMVATypeName.CompareTo("2011IdMVA") == 0)
+    fIdMVAType =       MVATools::k2011IdMVA;
+  else if (fIdMVATypeName.CompareTo("2012IdMVA_globe") == 0)
+    fIdMVAType =       MVATools::k2012IdMVA_globe;
+  else if (fIdMVATypeName.CompareTo("2012IdMVA") == 0)
+    fIdMVAType =       MVATools::k2012IdMVA;
+  else if (fIdMVATypeName.CompareTo("2013FinalIdMVA_8TeV") == 0)
+    fIdMVAType =       MVATools::k2013FinalIdMVA_8TeV;
+  else if (fIdMVATypeName.CompareTo("2013FinalIdMVA_7TeV") == 0)
+    fIdMVAType =       MVATools::k2013FinalIdMVA_7TeV;
+  else if (fIdMVATypeName.CompareTo("2011IdMVA_HZg") == 0)
+    fIdMVAType =       MVATools::k2011IdMVA_HZg;
+  else if (fIdMVATypeName.CompareTo("None") == 0)
+    fIdMVAType =       MVATools::kNone;
+  else {
+    std::cerr<<" Id MVA "<<fIdMVATypeName<<" not implemented."<<std::endl;
+    return;
+  }
+
+  fTool.InitializeMVA(fIdMVAType);
   
   if (fPhotonIDType.CompareTo("Tight") == 0) 
     fPhIdType = kTight;
@@ -632,28 +654,6 @@ void PhotonIDMod::SlaveBegin()
     return;
   }
   
-  if      (fIdMVATypeName.CompareTo("2011IdMVA") == 0)
-    fIdMVAType =       MVATools::k2011IdMVA;
-  else if (fIdMVATypeName.CompareTo("2012IdMVA_globe") == 0)
-    fIdMVAType =       MVATools::k2012IdMVA_globe;
-  else if (fIdMVATypeName.CompareTo("2012IdMVA") == 0)
-    fIdMVAType =       MVATools::k2012IdMVA;
-  else if (fIdMVATypeName.CompareTo("2013FinalIdMVA") == 0)
-    fIdMVAType =       MVATools::k2013FinalIdMVA;
-  else if (fIdMVATypeName.CompareTo("2011IdMVA_HZg") == 0)
-    fIdMVAType =       MVATools::k2011IdMVA_HZg;
-  else if (fIdMVATypeName.CompareTo("None") == 0)
-    fIdMVAType =       MVATools::kNone;
-  else {
-    std::cerr<<" Id MVA "<<fIdMVATypeName<<" not implemented."<<std::endl;
-    return;
-  }
-
-  // ------------------------------------------------------------------------------------
-  // we fill ALWAYS the bdt varible with some value... so initialize the BDT if not set to 'None' (will be handeled by MVATools)   (fab)
-  fTool.InitializeMVA(fIdMVAType);
-  // ------------------------------------------------------------------------------------
-
 }
 
 
