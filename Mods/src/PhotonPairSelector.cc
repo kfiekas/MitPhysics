@@ -1159,8 +1159,10 @@ void PhotonPairSelector::SlaveBegin()
     fIdType =       MVATools::k2012IdMVA_globe;
   else if (fIdMVAType.CompareTo("2012IdMVA") == 0)
     fIdType =       MVATools::k2012IdMVA;
-  else if (fIdMVAType.CompareTo("2013FinalIdMVA") == 0)
-    fIdType =       MVATools::k2013FinalIdMVA;
+  else if (fIdMVAType.CompareTo("2013FinalIdMVA_8TeV") == 0)
+    fIdType =       MVATools::k2013FinalIdMVA_8TeV;
+  else if (fIdMVAType.CompareTo("2013FinalIdMVA_7TeV") == 0)
+    fIdType =       MVATools::k2013FinalIdMVA_7TeV;
   else if (fIdMVAType.CompareTo("2011IdMVA_HZg") == 0)
     fIdType =       MVATools::k2011IdMVA_HZg;
   else if (fIdMVAType.CompareTo("None") == 0)
