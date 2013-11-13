@@ -1,4 +1,4 @@
-// $Id: EGEnergyCorrector.cc,v 1.12 2013/08/28 13:51:46 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.13 2013/10/26 17:40:48 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -649,7 +649,7 @@ void EGEnergyCorrector::CorrectedEnergyWithErrorV5(const Photon *p, const Vertex
   fVals[11] = b->Energy()/s->RawEnergy();
   fVals[12] = b->E3x3()/b->E5x5();
   fVals[13] = sqrt(b->CoviEtaiEta()); //sigietaieta
-  fVals[14] = sqrt(b->CoviEtaiEta()); //sigietaieta
+  fVals[14] = sqrt(b->CoviPhiiPhi()); //sigiphiiphi
   fVals[15] = b->CoviEtaiPhi();   //sigietaiphi
   fVals[16] = b->EMax()/b->E5x5(); //crystal energy ratio gap variables
   fVals[17] = b->E2nd()/b->E5x5();
