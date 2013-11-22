@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.40 2013/11/07 17:15:45 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.41 2013/11/07 22:38:16 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -50,6 +50,8 @@ class TRandom3;
 
 namespace mithep 
 {
+
+  class PhotonTreeWriterDiphotonEvent;
   
   class PhotonTreeWriterVtx
   {
@@ -154,7 +156,7 @@ namespace mithep
       Float_t trkisohollowdr03;
       Float_t ecalisodr04;
       Float_t hcalisodr04;
-      Float_t trkisohollowdr04;      
+      Float_t trkisohollowdr04;
       Float_t trackiso1;
       Float_t trackiso2;
       Float_t combiso1;
@@ -530,6 +532,7 @@ namespace mithep
       // ---------- MUON STUFF --------------------
       Float_t muonPt;
       Float_t muonEta;
+      Float_t muonPhi;
       Float_t muDR1;
       Float_t muDR2;
       Float_t muIso1;
@@ -542,10 +545,19 @@ namespace mithep
       Float_t muChi2;
       Int_t muNpixhits;
       Int_t muNegs;
-      Int_t muNMatch;      
+      Int_t muNMatch;
+      // ------------ DIMUON STUFF ---------------
+      Float_t mu1Pt;
+      Float_t mu1Eta;
+      Float_t mu1Phi;
+      Float_t mu2Pt;
+      Float_t mu2Eta;
+      Float_t mu2Phi;
+
       // ----------- ELECTRON STUFF --------------
       Float_t elePt;
       Float_t eleEta;
+      Float_t elePhi;
       Float_t eleSCEta;     
       Float_t eleIso1;
       Float_t eleIso2;
@@ -562,6 +574,13 @@ namespace mithep
       Float_t eleMass2;
       Int_t eleNinnerHits;     
       Float_t eleIdMva;
+      // ------------ DIELECTRON STUFF -------------
+      Float_t ele1Pt;
+      Float_t ele1Eta;
+      Float_t ele1Phi;
+      Float_t ele2Pt;
+      Float_t ele2Eta;
+      Float_t ele2Phi;
       // -----------------------------------------
       Float_t rho;
       Float_t rho25;
@@ -640,12 +659,17 @@ namespace mithep
       
       Double_t spfMet;
 
+      // ----------- VH HAD TAG STUFF -----------
+      Float_t costhetastar;
+
       // ----------- VBF TAG STUFF -------------
       Int_t vbfTag;
       Float_t vbfbdt;
 
       // ----------- TTH TAG STUFF -------------
       Int_t tthTag;
+      Int_t numJets;
+      Int_t numBJets;
       
       // ----------------------------------------
       UChar_t  ismc;
@@ -848,7 +872,9 @@ namespace mithep
                                       const Vertex *selvtx);
     void                ApplyVHHadTag(const Photon *phHard,
                                       const Photon *phSoft,
-                                      const Vertex *selvtx);
+                                      const Vertex *selvtx,
+                                      const Jet    *jet1,
+                                      const Jet    *jet2);
     void                ApplyTTHTag(const Photon *phHard, 
                                     const Photon *phSoft,
                                     const Vertex *selvtx);

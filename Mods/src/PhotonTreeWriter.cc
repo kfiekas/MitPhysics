@@ -14,6 +14,7 @@
 #include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/GenJetCol.h"
 #include "TDataMember.h"
+#include "TLorentzVector.h"
 #include "TFile.h"
 #include <TNtuple.h>
 #include <TRandom3.h>
@@ -935,6 +936,7 @@ void PhotonTreeWriter::Process()
     // MuonStuff
     fDiphotonEvent-> muonPt  = -99.;
     fDiphotonEvent-> muonEta  = -99.;
+    fDiphotonEvent-> muonPhi  = -99.;
     fDiphotonEvent-> muDR1  = -99.;
     fDiphotonEvent-> muDR2  = -99.;
     fDiphotonEvent-> muIso1  = -99.;
@@ -948,10 +950,19 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent-> muNpixhits = -99;
     fDiphotonEvent-> muNegs = -99;
     fDiphotonEvent-> muNMatch = -99;
+
+    // Dimuon Stuff
+    fDiphotonEvent-> mu1Pt   = -99.;
+    fDiphotonEvent-> mu1Eta  = -99.;
+    fDiphotonEvent-> mu1Phi  = -99.;
+    fDiphotonEvent-> mu2Pt   = -99.;
+    fDiphotonEvent-> mu2Eta  = -99.;
+    fDiphotonEvent-> mu2Phi  = -99.;
     
     // Electron Stuff
     fDiphotonEvent-> elePt = -99.;
     fDiphotonEvent-> eleEta = -99.;
+    fDiphotonEvent-> elePhi = -99.;
     fDiphotonEvent-> eleSCEta = -99.;     
     fDiphotonEvent-> eleIso1 = -99.;
     fDiphotonEvent-> eleIso2 = -99.;
@@ -966,9 +977,17 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent-> eleDR2 = -99.;
     fDiphotonEvent-> eleMass1 = -99.;
     fDiphotonEvent-> eleMass2 = -99.;
-    fDiphotonEvent-> eleNinnerHits = -99;     
-    
+    fDiphotonEvent-> eleNinnerHits = -99;
     fDiphotonEvent-> eleIdMva = -99.;
+    
+    // Dielectron Stuff
+    fDiphotonEvent-> ele1Pt   = -99.;
+    fDiphotonEvent-> ele1Eta  = -99.;
+    fDiphotonEvent-> ele1Phi  = -99.;
+    fDiphotonEvent-> ele2Pt   = -99.;
+    fDiphotonEvent-> ele2Eta  = -99.;
+    fDiphotonEvent-> ele2Phi  = -99.;
+
     
     if( fApplyLeptonTag ) {
       ApplyLeptonTag(phHard, phSoft, selvtx);
@@ -977,11 +996,13 @@ void PhotonTreeWriter::Process()
     if( fApplyVHLepTag ) {
       ApplyVHLepTag(phHard, phSoft, selvtx);
     }
-      
-    if( fApplyVHHadTag ) {
-      ApplyVHHadTag(phHard, phSoft, selvtx);
+
+    fDiphotonEvent->costhetastar = -99.;
+
+    if( fApplyVHHadTag && jet1 && jet2) {
+      ApplyVHHadTag(phHard, phSoft, selvtx, jet1, jet2);
     }
-      
+
     //vbf tag
     fDiphotonEvent->vbfTag = -1;
     fDiphotonEvent->vbfbdt = -99;
@@ -1014,6 +1035,15 @@ void PhotonTreeWriter::Process()
     if (fApplyTTHTag && phHard && phSoft && selvtx) {
       ApplyTTHTag(phHard, phSoft, selvtx);
     }
+
+    fDiphotonEvent->numJets  = -99;
+    fDiphotonEvent->numBJets = -99;
+
+    if (fDoSynching) {
+      fDiphotonEvent->numJets  = VHHadNumberOfJets (phHard, phSoft, selvtx);
+      fDiphotonEvent->numBJets = VHHadNumberOfBJets(phHard, phSoft, selvtx);
+    }
+
     
     //printf("vbfbdt:%f\n",fDiphotonEvent->vbfbdt);
     if (fWriteDiphotonTree)
@@ -2253,6 +2283,7 @@ void PhotonTreeWriter::ApplyLeptonTag(const Photon *phHard,
     
     fDiphotonEvent-> elePt = fLeptonTagElectrons->At(0)->Pt();
     fDiphotonEvent-> eleEta = fLeptonTagElectrons->At(0)->Eta();
+    fDiphotonEvent-> elePhi = fLeptonTagElectrons->At(0)->Phi();
     fDiphotonEvent-> eleSCEta = fLeptonTagElectrons->At(0)->SCluster()->Eta();
     fDiphotonEvent-> eleIso1 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
     
@@ -2321,6 +2352,7 @@ void PhotonTreeWriter::SetLeptonTagMuonVars(const Photon *phHard,
 {
   fDiphotonEvent-> muonPt  = muon->Pt();
   fDiphotonEvent-> muonEta = muon->Eta();
+  fDiphotonEvent-> muonPhi = muon->Phi();
   fDiphotonEvent-> muDR1   = MathUtils::DeltaR(muon, phHard);
   fDiphotonEvent-> muDR2   = MathUtils::DeltaR(muon, phSoft);
   
@@ -2399,13 +2431,10 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
   //       VH(lep) event.
   
   fDiphotonEvent->VHLepTag = 0; // non-lepton event
-  
-  if (VHLepHasDielectron(phHard, phSoft)) {
-    fDiphotonEvent->VHLepTag = 2; // high MET
-    return;
-  }
-  
-  if (VHLepHasDimuon(phHard, phSoft)) {
+
+  bool hasDielectron = VHLepHasDielectron(phHard, phSoft);
+  bool hasDimuon     = VHLepHasDimuon    (phHard, phSoft);
+  if (hasDielectron || hasDimuon) {
     fDiphotonEvent->VHLepTag = 2; // high MET
     return;
   }
@@ -2451,11 +2480,13 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
 //_____________________________________________________________________________
 void PhotonTreeWriter::ApplyVHHadTag(const Photon *phHard,
                                      const Photon *phSoft,
-                                     const Vertex *selvtx)
+                                     const Vertex *selvtx,
+                                     const Jet    *jet1,
+                                     const Jet    *jet2)
 {
   
   // Perform VH hadronic tagging (used since the legacy paper of 2013)
-  // the diphoton event record will have one more entry; i.e. leptonTag
+  // the diphoton event record will have one more entry; i.e. VHHadTag
   // VHHadTag = -1   -> VH(had)-tagging was swicthed off
   //          =  0   -> event tagged as 'non-VH(had) event'
   //          = +1   -> event tagged as a VH(had)-no-b-tag event
@@ -2464,18 +2495,27 @@ void PhotonTreeWriter::ApplyVHHadTag(const Photon *phHard,
 
   fDiphotonEvent->VHHadTag = 0; // non-VH(had) event
   
-  if (!VHHadPassesCommonCuts(phHard, phSoft, selvtx)) return;
-  
   UInt_t nBJets = VHHadNumberOfBJets(phHard, phSoft, selvtx);
   Float_t scaleFactor = fDiphotonEvent->mass / 120.;
   
-  // Calculate |cos(theta*)|.
+  // Calculate |cos(theta*)|
+  // Inspired by Globe:
+  // https://github.com/h2gglobe/h2gglobe/blob/ae4356ac0d18e6f77da6e0420ab6f5168e353315/PhotonAnalysis/src/PhotonAnalysis.cc#L4369-L4377
   FourVectorM pgg = phHard->Mom() + phSoft->Mom(); // diphoton 4-vector
-  FourVectorM pg1 = phHard->Mom(); // leading photon 4-vector
-  FourVectorM::BetaVector boostVector = pgg.BoostToCM();
-  ThreeVector::Scalar cosThetaStar = ThreeVector(pg1).Unit().Dot(boostVector);
-  ThreeVector::Scalar absCosThetaStar = TMath::Abs(cosThetaStar);
-  
+  FourVectorM pjj = jet1  ->Mom() + jet2  ->Mom(); // dijet 4-vector
+  FourVectorM p4   = pjj + pgg;                   // 4-body 4-vector
+  TLorentzVector Vstar(p4.X(), p4.Y(), p4.Z(), p4.T());
+  TLorentzVector H_Vstar(pgg.X(), pgg.Y(), pgg.Z(), pgg.T());
+  H_Vstar.Boost(-Vstar.BoostVector());
+  double cosThetaStar = -H_Vstar.CosTheta();
+  double absCosThetaStar = TMath::Abs(cosThetaStar);
+
+  if (fDoSynching) {
+    fDiphotonEvent->costhetastar = cosThetaStar;
+  }
+
+  if (!VHHadPassesCommonCuts(phHard, phSoft, selvtx)) return;
+
   if (nBJets == 0 &&
       fDiphotonEvent->ptgg > 96. * scaleFactor &&
       fDiphotonEvent->dijetpt > 57. &&
@@ -2529,7 +2569,13 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
       if (mass12 < 70. || 110. < mass12) continue;
       if (fVerbosityLevel > 0) {
         cout << "    Found a tagging dielectron!" << endl << flush;
-      }      
+      }
+      fDiphotonEvent->ele1Pt  = ele1->Pt ();
+      fDiphotonEvent->ele1Eta = ele1->Eta();
+      fDiphotonEvent->ele1Phi = ele1->Phi();
+      fDiphotonEvent->ele2Pt  = ele2->Pt ();
+      fDiphotonEvent->ele2Eta = ele2->Eta();
+      fDiphotonEvent->ele2Phi = ele2->Phi();
       return true;
     }
   }
@@ -2573,6 +2619,12 @@ bool PhotonTreeWriter::VHLepHasDimuon(const Photon *phHard,
       if (fVerbosityLevel > 0) {
         cout << "    Found a tagging dimoun!" << endl << flush;
       }      
+      fDiphotonEvent->mu1Pt  = mu1->Pt ();
+      fDiphotonEvent->mu1Eta = mu1->Eta();
+      fDiphotonEvent->mu1Phi = mu1->Phi();
+      fDiphotonEvent->mu2Pt  = mu2->Pt ();
+      fDiphotonEvent->mu2Eta = mu2->Eta();
+      fDiphotonEvent->mu2Phi = mu2->Phi();
       return true;
     }
   }

@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.33 2013/02/09 15:17:23 mingyang Exp $
+// $Id: PhotonPairSelector.h,v 1.34 2013/06/21 13:11:09 mingyang Exp $
 //
 // PhotonPairSelector
 //
@@ -265,6 +265,8 @@ namespace mithep
     void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b;     }          
     void                DoDataEneCorr(bool a)           { fDoDataEneCorr = a; }
     void                DoMCSmear(bool a)               { fDoMCSmear     = a; }
+    void                DoMCEneSmear(bool a)            { fDoMCEneSmear = a; }
+    void                DoEneErrSmear(bool a)           { fDoEneErrSmear = a; }
     void                UseSpecialSmearForDPMVA(bool a) { fUseSpecialSmearForDPMVA     = a; }
 
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
@@ -427,6 +429,8 @@ namespace mithep
     // some streagin flags, not adjustable yet (FIX-ME)
     bool                  fDoDataEneCorr;
     bool                  fDoMCSmear;
+    bool                  fDoMCEneSmear;
+    bool                  fDoEneErrSmear;
     bool                  fUseSpecialSmearForDPMVA;   // if set to true, the special smearing numbers set in fMCSmearMVA_* are used to compute the mass-errors (input to diphoton MVA)
     bool                  fDoVtxSelection;
     bool                  fApplyEleVeto;

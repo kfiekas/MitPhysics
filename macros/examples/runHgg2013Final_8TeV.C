@@ -1,4 +1,4 @@
-// $Id: runHgg2012HCP.C,v 1.2 2012/10/24 14:47:27 mingyang Exp $
+// $Id: runHgg2013Final_8TeV.C,v 1.3 2013/11/20 18:33:07 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -65,7 +65,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
 			  //const char *book       = "t2mit/filefi/031",
 			  const char *catalogDir = "/home/cmsprod/catalog",
 			  const char *outputName = "hgg",
-			  int         nEvents    = 1000)
+			  int         nEvents    = 100)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -771,23 +771,28 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
    photpreselnosmear->SetPhotonSelType("MITPFSelectionNoEcal");
    photpreselnosmear->SetVertexSelType("CiCMVA2012Selection");
-   photpreselnosmear->SetUseSingleLegConversions(kFALSE);  
+   photpreselnosmear->SetUseSingleLegConversions(kFALSE);
    photpreselnosmear->SetIdMVAType("2013FinalIdMVA_8TeV");
    photpreselnosmear->SetShowerShapeType("2012ShowerShape");
-   photpreselnosmear->SetDoShowerShapeScaling(kFALSE);  
+   photpreselnosmear->SetDoShowerShapeScaling(kFALSE);
    photpreselnosmear->SetPhotonsFromBranch(kFALSE);
    photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
-   photpreselnosmear->SetJetsName(jetCorr->GetOutputName());  
-   photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");  
+   photpreselnosmear->SetMCSmearFactors2012HCP(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
+   photpreselnosmear->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
+   photpresel->UseSpecialSmearForDPMVA(true);
+   photpreselnosmear->SetJetsName(jetCorr->GetOutputName());
+   photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");
    photpreselnosmear->SetLeadingPtMin(30.);
    photpreselnosmear->SetTrailingPtMin(22.);
-   //photpreselnosmear->SetRescaledBeamspotWidth(5.0);      
-   photpreselnosmear->SetIsData(isData);  
+   //photpreselnosmear->SetRescaledBeamspotWidth(5.0);
+   photpreselnosmear->SetIsData(isData);
    photpreselnosmear->SetApplyLeptonTag(kTRUE);
    photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   photpreselnosmear->Set2012HCP(kTRUE); 
+   photpreselnosmear->Set2012HCP(kTRUE);
    photpreselnosmear->DoMCSmear(kFALSE);
+   photpreselnosmear->DoMCEneSmear(kFALSE);
+   photpreselnosmear->DoEneErrSmear(kTRUE);
    photpreselnosmear->DoDataEneCorr(kFALSE);
 
    PhotonPairSelector         *photcicnosmear = new PhotonPairSelector("PhotonPairSelectorCiCNoSmear");
@@ -979,6 +984,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepreselnosmear->SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
+   phottreepreselnosmear->SetDoSynching(kTRUE);
    // phottreepreselnosmear->SetApplyLeptonTag(kTRUE);
    // phottreepreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    // phottreepreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");

@@ -131,6 +131,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // ---------------------------------------
   fDoDataEneCorr                 (true),
   fDoMCSmear                     (true),
+  fDoMCEneSmear                  (true),
+  fDoEneErrSmear                 (true),
   fUseSpecialSmearForDPMVA       (false),
   fDoVtxSelection                (true),
   fApplyEleVeto                  (true),
@@ -181,8 +183,6 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCErrScaleEE                  (1.0),
   fRelativePtCuts                (kFALSE),
   
-  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS),
-  
   // ---------------------------------------------------------------------------
   fApplyLeptonTag                (kFALSE),
   fLeptonTagElectronsName        ("HggLeptonTagElectrons"),
@@ -191,8 +191,10 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fLeptonTagMuons                (0),
   
   // ------------------------------------------------------
-  f2012HCP                       (kFALSE)
+  f2012HCP                       (kFALSE),
   
+  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS)
+
 {
   // Constructor.
 }
@@ -482,8 +484,13 @@ void PhotonPairSelector::Process()
         PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
       }
     }
- 
+
     if (fDoMCSmear) {
+      fDoMCEneSmear = true;
+      fDoEneErrSmear = true;
+    }
+
+    if (fDoMCEneSmear || fDoEneErrSmear) {
 
       double width1 = 0.;
       double width2 = 0.;
@@ -496,7 +503,7 @@ void PhotonPairSelector::Process()
 	width2 = GetMCSmearFac(escalecat2);
       }
       
-      if (!fIsData) {
+      if (!fIsData && fDoMCEneSmear) {
         // get the seed to do deterministic smearing...
         UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
         UInt_t seed1    = seedBase + (UInt_t) fixPh1st[iPair]->E() +
@@ -520,9 +527,10 @@ void PhotonPairSelector::Process()
 	}
 	 
       }
-      
-      PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
-      PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
+      if (fDoEneErrSmear) {
+        PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
+        PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
+      }
     }
 
     // lepton tag for this pair -- ming
