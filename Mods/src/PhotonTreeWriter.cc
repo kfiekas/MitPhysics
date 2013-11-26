@@ -2771,17 +2771,37 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   // It has a precedence if both the leptonic and hadronic tags pass.
   // (private e-mail from Francesco Micheli on 15 July 2013).
   if (nElectrons + nMuons >= 1) {
-    // apply the leptonic tth tag
-    fDiphotonEvent->tthTag = 2;
-    return;
+    // Check the Photon ID, see L2071-2072 of the Hgg AN
+    bool passPhotonID = false;
+    if (fIsCutBased) {
+      passPhotonID = true;
+    } else {
+      passPhotonID = (phHard->IdMva() > -0.6 &&
+                      phSoft->IdMva() > -0.6);
+    }
+    if (passPhotonID) {
+      // apply the leptonic tth tag
+      fDiphotonEvent->tthTag = 2;
+      return;
+    }
   }
   
   // Check the hadron tag, see Table 7 near L196 of the AN
   if (nJets >= 5) {
-    // apply the hadronic tth tag
-    fDiphotonEvent->tthTag = 1;
-    return;
-  }  
+    // Check the Photon ID, see L2092-2093 of the Hgg AN
+    bool passPhotonID = false;
+    if (fIsCutBased) {
+      passPhotonID = true;
+    } else {
+      passPhotonID = (phHard->IdMva() > -0.2 &&
+                      phSoft->IdMva() > -0.2);
+    }
+    if (passPhotonID) {
+      // apply the hadronic tth tag
+      fDiphotonEvent->tthTag = 1;
+      return;
+    }
+  }
   
 } // void PhotonTreeWriter::ApplyTTHTag()
 
