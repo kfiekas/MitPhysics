@@ -2702,38 +2702,8 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   UInt_t nBJets = 0;
   UInt_t nElectrons = 0;
   UInt_t nMuons = 0;
-    
-  // Loop over jets, count those passing selection.
-  for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
-    const Jet *jet = fPFJets->At(ijet);
-    // Apply jet selection, see L116 and L125 of the AN
-    if (jet->Pt() < 25. || jet->AbsEta() > 2.4) continue;
-    // Apply Delta R(photon, jet), see email from Francesco Micheli 
-    // sent 31 Aug 2013
-    if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
-    if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
-    // Make sure we have a PF jet
-    const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
-    if (!pfjet) continue;
-    if (!JetTools::passPFLooseId(pfjet)) continue;
-    // Apply the jet ID as given in Table 4
-    Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
-    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
-    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
-    // this jet passes, count it in
-    ++nJets;
-    // Select b-jets that pass the CSV medium working point, see L128 of the AN
-    // and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
-    if (jet->CombinedSecondaryVertexBJetTagsDisc() < 0.679) continue;
-    ++nBJets;
-  } // End of loop over jets
-  
-  // Check the number of selected jets, see Table 7 near L196 of the AN
-  if (nJets < 2) return;
-  
-  // Check the number of b-tagged jets, see Table 7 near L196 of the AN
-  if (nBJets < 1) return;
-  
+
+  std::vector<UInt_t> selectedElectronIndexes;
   if (PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
       PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
       PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          && 
@@ -2750,11 +2720,13 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
       // Require electron-photon mass outside of a 20 GeV window around MZ
       if (MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10)) continue;
       if (MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10)) continue;
+      selectedElectronIndexes.push_back(iele);
       ++nElectrons;
     }
   }  
   
   // Loop over muons
+  std::vector<UInt_t> selectedMuonIndexes;
   for (UInt_t imu=0; imu < fLeptonTagMuons->GetEntries(); ++imu) {
     const Muon *mu = fLeptonTagMuons->At(imu);
     // Apply kinematic cuts, see L132 and L134 of the AN
@@ -2764,8 +2736,61 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
     // Also confirmed by Francesco Micheli in an e-mail from 15 July 2013
     if (MathUtils::DeltaR(mu, phHard) < 1.0) continue;
     if (MathUtils::DeltaR(mu, phSoft) < 1.0) continue;
+    selectedMuonIndexes.push_back(imu);
     ++nMuons;
   }
+
+  // Loop over jets, count those passing selection.
+  for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
+    const Jet *jet = fPFJets->At(ijet);
+    // Apply jet selection, see L116 and L125 of the AN
+    if (jet->Pt() < 25. || jet->AbsEta() > 2.4) continue;
+    // Apply Delta R(photon, jet), see email from Francesco Micheli
+    // sent 31 Aug 2013
+    if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
+    if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
+    
+    // Apply Delta R(lepton, jet), see emails from Franceso Micheli
+    // from 24 and 26 Nov 2013
+    std::vector<UInt_t>::const_iterator imu = selectedMuonIndexes.begin();
+    for (; imu < selectedMuonIndexes.end(); ++imu) {
+      const Muon *mu = fLeptonTagMuons->At(*imu);
+      if (MathUtils::DeltaR(jet, mu) < 0.5) break;
+    } // loop over selected muon indexes
+    if (imu < selectedMuonIndexes.end()) {
+      continue;
+    } // failed DR(mu, jet) < 0.5
+
+    std::vector<UInt_t>::const_iterator iele = selectedElectronIndexes.begin();
+    for (; iele < selectedElectronIndexes.end(); ++iele) {
+      const Electron *ele = fLeptonTagElectrons->At(*iele);
+      if (MathUtils::DeltaR(jet, ele) < 0.5) break;
+    } // loop over selected electron indexes
+    if (iele < selectedElectronIndexes.end()) {
+      continue;
+    } // failed DR(ele, jet) < 0.5
+    
+    // Make sure we have a PF jet
+    const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
+    if (!pfjet) continue;
+    if (!JetTools::passPFLooseId(pfjet)) continue;
+    // Apply the jet ID as given in Table 4
+    Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
+    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
+    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+    // this jet passes, count it in
+    ++nJets;
+    // Select b-jets that pass the CSV medium working point, see L128 of the AN
+    // and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
+    if (jet->CombinedSecondaryVertexBJetTagsDisc() < 0.679) continue;
+    ++nBJets;
+  } // End of loop over jets
+
+  // Check the number of selected jets, see Table 7 near L196 of the AN
+  if (nJets < 2) return;
+
+  // Check the number of b-tagged jets, see Table 7 near L196 of the AN
+  if (nBJets < 1) return;
 
   // Check the lepton tag, see Table 7 near L196 of the AN
   // It has a precedence if both the leptonic and hadronic tags pass.
