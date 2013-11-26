@@ -887,15 +887,16 @@ namespace mithep
                                           const Photon *phSoft,
                                           const Vertex *selvtx,
                                           const Particle *lepton);
-    bool                VHHadPassesCommonCuts(const Photon *phHard,
-                                              const Photon *phSoft,
-                                              const Vertex *selvtx);
-    UInt_t              VHHadNumberOfJets(const Photon *phHard,
-                                          const Photon *phSoft,
-                                          const Vertex *selvtx);
-    UInt_t              VHHadNumberOfBJets(const Photon *phHard,
-                                           const Photon *phSoft,
-                                           const Vertex *selvtx);
+    UInt_t              NumberOfJets(const Photon *phHard,
+                                     const Photon *phSoft,
+                                     const Vertex *selvtx,
+                                     const double minJetPt,
+                                     const double maxAbsEta);
+    UInt_t              NumberOfBJets(const Photon *phHard,
+                                      const Photon *phSoft,
+                                      const Vertex *selvtx,
+                                      const double minJetPt,
+                                      const double maxAbsEta);
     const Particle *    TTHSelectLepton(const Photon *phHard,
                                         const Photon *phSoft,
                                         const Vertex *selvtx);

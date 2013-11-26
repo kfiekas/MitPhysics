@@ -1041,8 +1041,12 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->numBJets = -99;
 
     if (fDoSynching) {
-      fDiphotonEvent->numJets  = VHHadNumberOfJets (phHard, phSoft, selvtx);
-      fDiphotonEvent->numBJets = VHHadNumberOfBJets(phHard, phSoft, selvtx);
+      double minJetPt = 40.;
+      double maxJetAbsEta = 4.7;
+      fDiphotonEvent->numJets  = NumberOfJets (phHard, phSoft, selvtx, minJetPt,
+                                               maxJetAbsEta);
+      fDiphotonEvent->numBJets = NumberOfBJets(phHard, phSoft, selvtx, minJetPt,
+                                               maxJetAbsEta);
     }
 
     
@@ -2490,14 +2494,10 @@ void PhotonTreeWriter::ApplyVHHadTag(const Photon *phHard,
   // the diphoton event record will have one more entry; i.e. VHHadTag
   // VHHadTag = -1   -> VH(had)-tagging was swicthed off
   //          =  0   -> event tagged as 'non-VH(had) event'
-  //          = +1   -> event tagged as a VH(had)-no-b-tag event
-  //          = +2   -> event tagged as a VH(had)-b-tag event
+  //          = +1   -> event tagged as a VH(had) event
   // TODO: Should the selected vertex be updated using the vertex of the jets?
 
   fDiphotonEvent->VHHadTag = 0; // non-VH(had) event
-  
-  UInt_t nBJets = VHHadNumberOfBJets(phHard, phSoft, selvtx);
-  Float_t scaleFactor = fDiphotonEvent->mass / 120.;
   
   // Calculate |cos(theta*)|
   // Inspired by Globe:
@@ -2515,27 +2515,24 @@ void PhotonTreeWriter::ApplyVHHadTag(const Photon *phHard,
     fDiphotonEvent->costhetastar = cosThetaStar;
   }
 
-  if (!VHHadPassesCommonCuts(phHard, phSoft, selvtx)) return;
+  Float_t &mass       = fDiphotonEvent->mass;
+  Float_t reducedMass = mass / 120.;
+  UInt_t  nJets       = NumberOfJets(phHard, phSoft, selvtx, 40., 2.4);
+  Float_t mjj         = fDiphotonEvent->dijetmass;
 
-  if (nBJets == 0 &&
-      fDiphotonEvent->ptgg > 96. * scaleFactor &&
-      fDiphotonEvent->dijetpt > 57. &&
-      absCosThetaStar < 0.48) {
-    // VH(had) tag, no b-tag.
+  /// See L2007-2013 of the Hgg AN 2013/253 v3
+  if (phHard->Pt() > 60. * reducedMass &&
+      (fIsCutBased ? phSoft->Pt() > 25. : phSoft->Pt() > 30. * reducedMass) &&
+      100. < mass && mass < 180. &&
+      fDiphotonEvent->ptgg > 130. * reducedMass &&
+      nJets >= 2 &&
+      60. < mjj && mjj < 120. &&
+      absCosThetaStar < 0.5) {
+    // Tag this event as a VH-hadronic one!
     fDiphotonEvent->VHHadTag = 1;
   }
-  
-  if (nBJets >= 1 &&
-      fDiphotonEvent->ptgg > 87. * scaleFactor &&
-      fDiphotonEvent->dijetpt > 37. &&
-      absCosThetaStar < 0.65) {
-    // VH(had) tag, b-tag.
-    fDiphotonEvent->VHHadTag = 2;
-  }
-  
 } // void PhotonTreeWriter::ApplyVHHadTag(..)  
-  
-  
+
 
 //_____________________________________________________________________________
 bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
@@ -2777,41 +2774,20 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
 
 
 //_____________________________________________________________________________
-bool PhotonTreeWriter::VHHadPassesCommonCuts(const Photon *phHard,
-                                             const Photon *phSoft,
-                                             const Vertex *selvtx)
-{
-  // Tests cuts common for VH(had) no tag and VH(had) b-tag categories.
-  
-  Float_t scaleFactor = fDiphotonEvent->mass / 120.;
-  UInt_t  nJets = VHHadNumberOfJets(phHard, phSoft, selvtx);
-  Float_t mjj = fDiphotonEvent->dijetmass;
-  bool passes = false;
-  
-  if ( phHard->Pt() > 60. * scaleFactor &&
-       phSoft->Pt() > 25. * scaleFactor &&
-       2 <= nJets && nJets < 4 &&
-       60. < mjj && mjj < 120. ) {
-    passes = true;
-  }
-  
-  return passes;
-} // bool PhotonTreeWriter::VHHadPassesCommonCuts()
-
-
-//_____________________________________________________________________________
-UInt_t PhotonTreeWriter::VHHadNumberOfJets(const Photon *phHard,
-                                           const Photon *phSoft,
-                                           const Vertex *selvtx) {
+UInt_t PhotonTreeWriter::NumberOfJets(const Photon *phHard,
+                                      const Photon *phSoft,
+                                      const Vertex *selvtx,
+                                      const double minJetPt,
+                                      const double maxAbsEta) {
 
   UInt_t nJets = 0;
-  
+
   // Loop over jets, count those passing selection
   // Use same ID as for the tth tag
   for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
     const Jet *jet = fPFJets->At(ijet);
     // Apply jet selection, see L116 and L125 of the AN
-    if (jet->Pt() < 20. || jet->AbsEta() > 2.4) continue; 
+    if (jet->Pt() < minJetPt || jet->AbsEta() > maxAbsEta) continue;
     // Apply the cut Delta R(photon, jet) < 0.5.
     if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
     if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
@@ -2825,27 +2801,28 @@ UInt_t PhotonTreeWriter::VHHadNumberOfJets(const Photon *phHard,
     if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
     // this jet passes, count it in
     ++nJets;
-  } // End of loop over jets  
-                                                   
-  return nJets;
-  
-} // PhotonTreeWriter::VHHadNumberOfJets(..)
+  } // End of loop over jets
 
+  return nJets;
+
+} // NumberOfJets
 
 
 //_____________________________________________________________________________
-UInt_t PhotonTreeWriter::VHHadNumberOfBJets(const Photon *phHard,
-                                            const Photon *phSoft,
-                                            const Vertex *selvtx) {
+UInt_t PhotonTreeWriter::NumberOfBJets(const Photon *phHard,
+                                       const Photon *phSoft,
+                                       const Vertex *selvtx,
+                                       const double minJetPt,
+                                       const double maxAbsEta) {
 
   UInt_t nBJets = 0;
-  
+
   // Loop over jets, count those passing selection
   // Use same ID as for the tth tag
   for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
     const Jet *jet = fPFJets->At(ijet);
     // Apply jet selection, see L116 and L125 of the AN
-    if (jet->Pt() < 20. || jet->AbsEta() > 2.4) continue; 
+    if (jet->Pt() < minJetPt || jet->AbsEta() > maxAbsEta) continue;
     // Apply the cut Delta R(photon, jet) < 0.5.
     if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
     if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
@@ -2853,20 +2830,19 @@ UInt_t PhotonTreeWriter::VHHadNumberOfBJets(const Photon *phHard,
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
     if (!JetTools::passPFLooseId(pfjet)) continue;
-    // Apply the jet ID / pileup removal.
+    // Apply the jet ID / pileup removal as given in Table 4
     Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
     if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
     if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
-    // Select b-jets that pass the CSV medium working point.  See
-    // the ttH tag for details.
+    // Select b-jets that pass the CSV medium working point, see L128 of the AN
+    // and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
     if (jet->CombinedSecondaryVertexBJetTagsDisc() < 0.679) continue;
-    // This b-jet passes, count it in!
+    // this jet passes, count it in
     ++nBJets;
-  } // End of loop over jets  
-                                                   
+  } // End of loop over jets
+
   return nBJets;
-  
-} // PhotonTreeWriter::VHHadNumberOfBJets(..)
+} // NumberOfBJets
 
 
 //_____________________________________________________________________________
