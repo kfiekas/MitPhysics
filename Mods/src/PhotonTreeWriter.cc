@@ -2681,8 +2681,8 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
 {
   // ttH tag = -1 .. not applied
   //            0 .. not tagged
-  //            1 .. tagged as a leptonic ttH event
-  //            2 .. tagged as a hadronic ttH event
+  //            1 .. tagged as a hadronic ttH event
+  //            2 .. tagged as a leptonic ttH event
   fDiphotonEvent->tthTag = 0;
   
   // Selection taken from the AN2012_480_V6 of 24 April 2013, further 
@@ -2767,14 +2767,14 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   // (private e-mail from Francesco Micheli on 15 July 2013).
   if (nElectrons + nMuons >= 1) {
     // apply the leptonic tth tag
-    fDiphotonEvent->tthTag = 1;
+    fDiphotonEvent->tthTag = 2;
     return;
   }
   
   // Check the hadron tag, see Table 7 near L196 of the AN
   if (nJets >= 5) {
     // apply the hadronic tth tag
-    fDiphotonEvent->tthTag = 2;
+    fDiphotonEvent->tthTag = 1;
     return;
   }  
   
