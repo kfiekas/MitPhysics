@@ -58,6 +58,7 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fLeptonTagSoftMuonsName     ("HggLeptonTagSoftMuons"),
 
   fIsData                 (false),
+  fIsCutBased             (false),
   fPhotonsFromBranch      (kTRUE),  
   fPVFromBranch           (kTRUE),
   fGoodElectronsFromBranch(kTRUE),
@@ -2685,12 +2686,16 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   //            2 .. tagged as a leptonic ttH event
   fDiphotonEvent->tthTag = 0;
   
-  // Selection taken from the AN2012_480_V6 of 24 April 2013, further 
+  // Selection taken from the AN2012_480_V6 of 24 April 2013 further
   // refferred to as "the AN"
+  // And from "the Hgg AN"
+  // http://cms.cern.ch/iCMS/jsp/openfile.jsp?tp=draft&files=AN2013_253_v3.pdf
 
-  // Check the pt of the photons, see L141 and L142 of the AN
-  if (phHard->Pt() < 33.) return;
-  if (phSoft->Pt() < 25.) return;
+  // Check the pt of the photons, see L2064 and L2065 of the Hgg AN
+  double reducedMass = fDiphotonEvent->mass / 120.;
+  if (phHard->Pt() < 60. * reducedMass) return;
+  if (phSoft->Pt() < 30. * reducedMass && !fIsCutBased) return;
+  if (phSoft->Pt() < 25.               &&  fIsCutBased) return;
 
   // Init final-state object counters
   UInt_t nJets = 0;

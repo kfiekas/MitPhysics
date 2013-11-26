@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_8TeV.C,v 1.3 2013/11/20 18:33:07 mingyang Exp $
+// $Id: runHgg2013Final_8TeV.C,v 1.4 2013/11/22 14:28:24 veverka Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -856,6 +856,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreecic->SetPFJetName(jetCorr->GetOutputName());
    phottreecic->SetExcludeDoublePrompt(excludedoubleprompt);
    phottreecic->SetIsData(isData);
+   phottreecic->SetIsCutBased(kTRUE);
    if (is25) phottreecic->SetEnablePFPhotons(kFALSE);
    phottreecic->SetBeamspotWidth(5.0);
    phottreecic->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
@@ -885,7 +886,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreecicnoeleveto->SetPFJetName(jetCorr->GetOutputName());
    phottreecicnoeleveto->SetApplyElectronVeto(kFALSE);
    phottreecicnoeleveto->SetExcludeDoublePrompt(excludedoubleprompt);
-   phottreecicnoeleveto->SetIsData(isData);  
+   phottreecicnoeleveto->SetIsData(isData);
+   phottreecicnoeleveto->SetIsCutBased(kTRUE);
    if (is25) phottreecicnoeleveto->SetEnablePFPhotons(kFALSE);
    phottreecicnoeleveto->SetBeamspotWidth(5.0);
    phottreecicnoeleveto->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
@@ -914,7 +916,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepresel->SetPFJetsFromBranch(kFALSE);
    phottreepresel->SetPFJetName(jetCorr->GetOutputName());  
    phottreepresel->SetExcludeDoublePrompt(excludedoubleprompt);  
-   phottreepresel->SetIsData(isData);  
+   phottreepresel->SetIsData(isData);
+   phottreepresel->SetIsCutBased(kFALSE);
    if (is25) phottreepresel->SetEnablePFPhotons(kFALSE);
    phottreepresel->SetBeamspotWidth(5.0);
    phottreepresel->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
@@ -946,7 +949,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepreselinverteleveto->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselinverteleveto->SetApplyElectronVeto(kFALSE);  
    phottreepreselinverteleveto->SetExcludeDoublePrompt(excludedoubleprompt);    
-   phottreepreselinverteleveto->SetIsData(isData); 
+   phottreepreselinverteleveto->SetIsData(isData);
+   phottreepreselinverteleveto->SetIsCutBased(kFALSE);
    if (is25) phottreepreselinverteleveto->SetEnablePFPhotons(kFALSE);  
    phottreepreselinverteleveto->SetBeamspotWidth(5.0);
   phottreepreselinverteleveto->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
@@ -975,7 +979,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepreselnosmear->SetPFJetsFromBranch(kFALSE);
    phottreepreselnosmear->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselnosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
-   phottreepreselnosmear->SetIsData(isData);    
+   phottreepreselnosmear->SetIsData(isData);
+   phottreepreselnosmear->SetIsCutBased(kFALSE);
    if (is25) phottreepreselnosmear->SetEnablePFPhotons(kFALSE); 
    phottreepreselnosmear->SetBeamspotWidth(5.0); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
@@ -1006,6 +1011,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreecicnosmear->SetPFJetName(jetCorr->GetOutputName());
    phottreecicnosmear->SetExcludeDoublePrompt(excludedoubleprompt);
    phottreecicnosmear->SetIsData(isData);
+   phottreecicnosmear->SetIsCutBased(kTRUE);
    if (is25) phottreecicnosmear->SetEnablePFPhotons(kFALSE);
    phottreecicnosmear->SetBeamspotWidth(5.0);
    phottreecicnosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
@@ -1034,7 +1040,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreepreselinvertelevetonosmear->SetPFJetsFromBranch(kFALSE);
    phottreepreselinvertelevetonosmear->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselinvertelevetonosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
-   phottreepreselinvertelevetonosmear->SetIsData(isData);    
+   phottreepreselinvertelevetonosmear->SetIsData(isData);
+   phottreepreselinvertelevetonosmear->SetIsCutBased(kFALSE);
    if (is25) phottreepreselinvertelevetonosmear->SetEnablePFPhotons(kFALSE); 
    phottreepreselinvertelevetonosmear->SetBeamspotWidth(5.0); 
    phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
@@ -1069,7 +1076,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photidpreselinvert->SetIDType("MITPFSelection");
   photidpreselinvert->SetApplyElectronVeto(kFALSE);
   photidpreselinvert->SetInvertElectronVeto(kTRUE);
-  photidpreselinvert->SetIsData(isData);  
+  photidpreselinvert->SetIsData(isData);
   
   PhotonTreeWriter *phottreesingle = new PhotonTreeWriter("PhotonTreeWriterSingle");
   phottreesingle->SetWriteDiphotonTree(kFALSE);

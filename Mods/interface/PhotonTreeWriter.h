@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.41 2013/11/07 22:38:16 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.42 2013/11/22 14:28:23 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -784,7 +784,8 @@ namespace mithep
     // set basic Cut variables (FOR PRE-SELECTION)
 
     // is Data Or Not?
-    void                SetIsData (Bool_t b)                 { fIsData = b; };
+    void                SetIsData     (Bool_t b)             { fIsData = b; };
+    void                SetIsCutBased (Bool_t b)             { fIsCutBased = b; };
     
 
     void                SetApplyElectronVeto(Bool_t b)   { fApplyElectronVeto = b;     }          
@@ -930,6 +931,8 @@ namespace mithep
     
     // is it Data or MC?
     Bool_t              fIsData;
+    // Is it cut-based? "false" means mass-factorized.
+    Bool_t              fIsCutBased;
     
     // in case there's some PV pre-selection
     Bool_t              fPhotonsFromBranch;
