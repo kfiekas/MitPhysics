@@ -896,7 +896,17 @@ namespace mithep
     UInt_t              VHHadNumberOfBJets(const Photon *phHard,
                                            const Photon *phSoft,
                                            const Vertex *selvtx);
+    const Particle *    TTHSelectLepton(const Photon *phHard,
+                                        const Photon *phSoft,
+                                        const Vertex *selvtx);
+    const Electron *    TTHSelectElectron(const Photon *phHard,
+                                          const Photon *phSoft,
+                                          const Vertex *selvtx);
+    const Muon *        TTHSelectMuon(const Photon *phHard,
+                                      const Photon *phSoft,
+                                      const Vertex *selvtx);
     void                LogEventInfo();
+    double              GetElectronIdMva(const Electron *electron);
     // Names for the input Collections
     TString             fPhotonBranchName;
     TString             fPFPhotonName;

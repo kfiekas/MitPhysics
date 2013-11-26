@@ -2653,7 +2653,7 @@ UInt_t PhotonTreeWriter::VHLepNumberOfJets(const Photon *phHard,
     if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
     if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
     // Apply the cut Delta R(photon, lepton) < 0.5.
-    if (MathUtils::DeltaR(jet, lepton) < 0.5) continue;    
+    if (MathUtils::DeltaR(jet, lepton) < 0.5) continue;
     // Make sure we have a PF jet
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
@@ -2697,48 +2697,11 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   if (phSoft->Pt() < 30. * reducedMass && !fIsCutBased) return;
   if (phSoft->Pt() < 25.               &&  fIsCutBased) return;
 
-  // Init final-state object counters
+  const Particle *lepton = TTHSelectLepton(phHard, phSoft, selvtx);
+
+  // Init jet object counters
   UInt_t nJets = 0;
   UInt_t nBJets = 0;
-  UInt_t nElectrons = 0;
-  UInt_t nMuons = 0;
-
-  std::vector<UInt_t> selectedElectronIndexes;
-  if (PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
-      PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
-      PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          && 
-      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1){
-    // Loop over electrons
-    for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {
-      const Electron *ele = fLeptonTagElectrons->At(iele);
-      // Apply kinematic cuts, see L133 and L134 of the AN
-      if (ele->Pt() < 20. || ele->AbsEta() < 2.5) continue;
-      // Require separation between this electron and both photons,
-      // see the slide 7, bullet 2
-      if (MathUtils::DeltaR(ele, phHard) < 1.0) continue;
-      if (MathUtils::DeltaR(ele, phSoft) < 1.0) continue;
-      // Require electron-photon mass outside of a 20 GeV window around MZ
-      if (MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10)) continue;
-      if (MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10)) continue;
-      selectedElectronIndexes.push_back(iele);
-      ++nElectrons;
-    }
-  }  
-  
-  // Loop over muons
-  std::vector<UInt_t> selectedMuonIndexes;
-  for (UInt_t imu=0; imu < fLeptonTagMuons->GetEntries(); ++imu) {
-    const Muon *mu = fLeptonTagMuons->At(imu);
-    // Apply kinematic cuts, see L132 and L134 of the AN
-    if (mu->Pt() < 20. || mu->AbsEta() > 2.4) continue;
-    // Same as for electrons, require separation between this muon and both 
-    // photons.
-    // Also confirmed by Francesco Micheli in an e-mail from 15 July 2013
-    if (MathUtils::DeltaR(mu, phHard) < 1.0) continue;
-    if (MathUtils::DeltaR(mu, phSoft) < 1.0) continue;
-    selectedMuonIndexes.push_back(imu);
-    ++nMuons;
-  }
 
   // Loop over jets, count those passing selection.
   for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
@@ -2749,27 +2712,9 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
     // sent 31 Aug 2013
     if (MathUtils::DeltaR(jet, phHard) < 0.5) continue;
     if (MathUtils::DeltaR(jet, phSoft) < 0.5) continue;
-    
     // Apply Delta R(lepton, jet), see emails from Franceso Micheli
     // from 24 and 26 Nov 2013
-    std::vector<UInt_t>::const_iterator imu = selectedMuonIndexes.begin();
-    for (; imu < selectedMuonIndexes.end(); ++imu) {
-      const Muon *mu = fLeptonTagMuons->At(*imu);
-      if (MathUtils::DeltaR(jet, mu) < 0.5) break;
-    } // loop over selected muon indexes
-    if (imu < selectedMuonIndexes.end()) {
-      continue;
-    } // failed DR(mu, jet) < 0.5
-
-    std::vector<UInt_t>::const_iterator iele = selectedElectronIndexes.begin();
-    for (; iele < selectedElectronIndexes.end(); ++iele) {
-      const Electron *ele = fLeptonTagElectrons->At(*iele);
-      if (MathUtils::DeltaR(jet, ele) < 0.5) break;
-    } // loop over selected electron indexes
-    if (iele < selectedElectronIndexes.end()) {
-      continue;
-    } // failed DR(ele, jet) < 0.5
-    
+    if (lepton && MathUtils::DeltaR(jet, lepton) < 0.5) continue;
     // Make sure we have a PF jet
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
@@ -2795,7 +2740,7 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   // Check the lepton tag, see Table 7 near L196 of the AN
   // It has a precedence if both the leptonic and hadronic tags pass.
   // (private e-mail from Francesco Micheli on 15 July 2013).
-  if (nElectrons + nMuons >= 1) {
+  if (lepton) {
     // Check the Photon ID, see L2071-2072 of the Hgg AN
     bool passPhotonID = false;
     if (fIsCutBased) {
@@ -2925,6 +2870,93 @@ UInt_t PhotonTreeWriter::VHHadNumberOfBJets(const Photon *phHard,
 
 
 //_____________________________________________________________________________
+const Particle *
+PhotonTreeWriter::TTHSelectLepton(const Photon *phHard,
+                                  const Photon *phSoft,
+                                  const Vertex *selvtx)
+{
+  const Electron * electron = TTHSelectElectron(phHard, phSoft, selvtx);
+  const Muon *     muon     = TTHSelectMuon    (phHard, phSoft, selvtx);
+  const Particle * lepton = 0;
+  /// Select the lepton with the higher Pt (private discussion
+  /// with Francesco Micheli on 26 Nov 2013)
+  if (electron && muon) {
+    if (electron->Pt() > muon->Pt()) {lepton = electron;}
+    else                             {lepton = muon    ;}
+  } else if (electron && !muon) {
+    lepton = electron;
+  } else if (!electron && muon) {
+    lepton = muon    ;
+  }
+  return lepton;
+} // TTHSelectLepton
+
+
+//_____________________________________________________________________________
+// Returns the highest-MVA-ID electron passing all cuts, 0 if none found.
+const Electron *
+PhotonTreeWriter::TTHSelectElectron(const Photon *phHard,
+                                    const Photon *phSoft,
+                                    const Vertex *selvtx)
+{
+  const Electron *selectedElectron = 0;
+  if (PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
+      PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
+      PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          &&
+      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1){
+    double maxIdMva = -999.;
+    // Loop over electrons, apply all cuts, find the one wiht hightes ID MVA
+    for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {
+      const Electron *ele = fLeptonTagElectrons->At(iele);
+      // Apply kinematic cuts, see L133 and L134 of the AN
+      if (ele->Pt() < 20. || ele->AbsEta() < 2.5) continue;
+      // Require separation between this electron and both photons,
+      // see the slide 7, bullet 2
+      if (MathUtils::DeltaR(ele, phHard) < 1.0) continue;
+      if (MathUtils::DeltaR(ele, phSoft) < 1.0) continue;
+      // Require electron-photon mass outside of a 20 GeV window around MZ
+      if (MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10)) continue;
+      if (MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10)) continue;
+      // Electron ID MVA arbitration (private discussion with
+      // Francesco Micheli on 26 Nov 2013)
+      double idMva = GetElectronIdMva(ele);
+      if (idMva > maxIdMva) {
+        maxIdMva = idMva;
+        selectedElectron = ele;
+      }
+    } // Loop over electrons
+  }
+  return selectedElectron;
+} // TTHSelectElectron
+
+
+//_____________________________________________________________________________
+// Returns the highest-pt muon passing all the cuts, 0 if none found.
+const Muon *
+PhotonTreeWriter::TTHSelectMuon(const Photon *phHard,
+                                const Photon *phSoft,
+                                const Vertex *selvtx)
+{
+  const Muon *selectedMuon = 0;
+  // Loop over muons
+  for (UInt_t imu=0; imu < fLeptonTagMuons->GetEntries(); ++imu) {
+    const Muon *mu = fLeptonTagMuons->At(imu);
+    // Apply kinematic cuts, see L132 and L134 of the AN
+    if (mu->Pt() < 20. || mu->AbsEta() > 2.4) continue;
+    // Same as for electrons, require separation between this muon and both
+    // photons.
+    // Also confirmed by Francesco Micheli in an e-mail from 15 July 2013
+    if (MathUtils::DeltaR(mu, phHard) < 1.0) continue;
+    if (MathUtils::DeltaR(mu, phSoft) < 1.0) continue;
+    // The first muon found is the highest-pt one because muons are pt-ordered.
+    selectedMuon = mu;
+    break;
+  }
+  return selectedMuon;
+} // TTHSelectMuon
+
+
+//_____________________________________________________________________________
 template<typename Element, typename Collection>
 UInt_t PhotonTreeWriter::IndexOfElementInCollection(
           const Element * element,
@@ -3008,3 +3040,21 @@ void PhotonTreeWriter::LogEventInfo()
        << ", lumi " << event->LumiSec()
        << ", event " << event->EvtNum() << endl;  
 }
+
+
+//______________________________________________________________________________
+double
+PhotonTreeWriter::GetElectronIdMva(const Electron *electron)
+{
+  Int_t closestVtx = 0;
+  Double_t distVtx = 999.0;
+  /// Find the closest vertex in dz.
+  for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
+    double dz = TMath::Abs(electron->GsfTrk()->DzCorrected(*fPV->At(nv)));
+    if(dz < distVtx) {
+      distVtx    = dz;
+      closestVtx = nv;
+    }
+  }
+  return fElectronIDMVA->MVAValue(electron, fPV->At(closestVtx));
+} // GetElectronIdMva
