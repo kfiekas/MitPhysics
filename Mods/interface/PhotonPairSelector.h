@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.34 2013/06/21 13:11:09 mingyang Exp $
+// $Id: PhotonPairSelector.h,v 1.35 2013/11/22 14:28:23 veverka Exp $
 //
 // PhotonPairSelector
 //
@@ -259,7 +259,43 @@ namespace mithep
       fMCSmearMVA_EEhighEta_hR9 = _EEhighEta_hR9;
       fMCSmearMVA_EEhighEta_lR9 = _EEhighEta_lR9;      
     };
+    
+    void SetMCStochasticPivot(Double_t pivot_lowEta_hR9,
+                              Double_t pivot_lowEta_lR9,
+                              Double_t pivot_highEta_hR9,
+                              Double_t pivot_highEta_lR9) {
+     
+      fMCStochasticPivot_EBlowEta_hR9 = pivot_lowEta_hR9;
+      fMCStochasticPivot_EBlowEta_lR9 = pivot_lowEta_lR9;
+      fMCStochasticPivot_EBhighEta_hR9 = pivot_highEta_hR9;
+      fMCStochasticPivot_EBhighEta_lR9 = pivot_highEta_lR9;
+      
+    }
+    
+    void SetMCStochasticRho(Double_t rho_lowEta_hR9,
+                              Double_t rho_lowEta_lR9,
+                              Double_t rho_highEta_hR9,
+                              Double_t rho_highEta_lR9) {
+     
+      fMCStochasticRho_EBlowEta_hR9 = rho_lowEta_hR9;
+      fMCStochasticRho_EBlowEta_lR9 = rho_lowEta_lR9;
+      fMCStochasticRho_EBhighEta_hR9 = rho_highEta_hR9;
+      fMCStochasticRho_EBhighEta_lR9 = rho_highEta_lR9;
+      
+    }    
 
+    void SetMCStochasticPhi(Double_t phi_lowEta_hR9,
+                              Double_t phi_lowEta_lR9,
+                              Double_t phi_highEta_hR9,
+                              Double_t phi_highEta_lR9) {
+     
+      fMCStochasticPhi_EBlowEta_hR9 = phi_lowEta_hR9;
+      fMCStochasticPhi_EBlowEta_lR9 = phi_lowEta_lR9;
+      fMCStochasticPhi_EBhighEta_hR9 = phi_highEta_hR9;
+      fMCStochasticPhi_EBhighEta_lR9 = phi_highEta_lR9;
+      
+    }    
+    
 
     void                SetApplyEleVeto(bool a)            { fApplyEleVeto  = a; }
     void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b;     }          
@@ -268,7 +304,8 @@ namespace mithep
     void                DoMCEneSmear(bool a)            { fDoMCEneSmear = a; }
     void                DoEneErrSmear(bool a)           { fDoEneErrSmear = a; }
     void                UseSpecialSmearForDPMVA(bool a) { fUseSpecialSmearForDPMVA     = a; }
-
+    void                SetStochasticSmear(bool a)      { fStochasticSmear = a; }
+    
     void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
     void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
     void                SetUseSingleLegConversions(Bool_t b) { fUseSingleLegConversions = b; }
@@ -299,6 +336,9 @@ namespace mithep
     Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat,                    bool useSpecialSmear = false);   // last flag in case of special smearing for error computation
     Double_t            GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat);
     Double_t            GetMCSmearFacHCP(PhotonTools::eScaleCats cat,                 bool useSpecialSmear = false);   // last flag in case of special smearing for error computation
+    
+    Double_t            GetMCSmearFacStochastic(const Photon *p) const;
+    
     Float_t             GetEventCat(PhotonTools::CiCBaseLineCats cat1, PhotonTools::CiCBaseLineCats cat2);
 
     // Names for the input Collections
@@ -355,6 +395,7 @@ namespace mithep
     Bool_t              fUseSingleLegConversions;
 
     Bool_t              f2012HCP;
+    Bool_t              fStochasticSmear;
 
     const PhotonCol              *fPhotons;
     const ElectronCol            *fElectrons;
@@ -413,6 +454,21 @@ namespace mithep
     Double_t              fMCSmearMVA_EElowEta_lR9;
     Double_t              fMCSmearMVA_EEhighEta_hR9;
     Double_t              fMCSmearMVA_EEhighEta_lR9;    
+    
+    Double_t              fMCStochasticPivot_EBlowEta_hR9;
+    Double_t              fMCStochasticPivot_EBlowEta_lR9;
+    Double_t              fMCStochasticPivot_EBhighEta_hR9;
+    Double_t              fMCStochasticPivot_EBhighEta_lR9;     
+    
+    Double_t              fMCStochasticRho_EBlowEta_hR9;
+    Double_t              fMCStochasticRho_EBlowEta_lR9;
+    Double_t              fMCStochasticRho_EBhighEta_hR9;
+    Double_t              fMCStochasticRho_EBhighEta_lR9; 
+    
+    Double_t              fMCStochasticPhi_EBlowEta_hR9;
+    Double_t              fMCStochasticPhi_EBlowEta_lR9;
+    Double_t              fMCStochasticPhi_EBhighEta_hR9;
+    Double_t              fMCStochasticPhi_EBhighEta_lR9;     
 
 
     // pointer to RNG ionstance for smearing

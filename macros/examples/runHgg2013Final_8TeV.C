@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_8TeV.C,v 1.4 2013/11/22 14:28:24 veverka Exp $
+// $Id: runHgg2013Final_8TeV.C,v 1.5 2013/11/26 10:39:36 veverka Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -57,7 +57,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
 			  //const char *dataset = "s12-pjm80-2em-v7n",
 			  //const char *dataset = "s12-h120gg-vh-v7n",
 			  //const char *dataset = "r12a-pho-j22-v1",
-			  const char *dataset = "s12-h120gg-vh-v7n",
+			  const char *dataset = "s12-h125gg-gf-v7n",
 			  //const char *dataset = "s12-h145gg-vh-v7n",
 			  //const char *dataset = "s12-h120gg-gf-v7n",
 			  const char *book       = "t2mit/filefi/030",
@@ -65,7 +65,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
 			  //const char *book       = "t2mit/filefi/031",
 			  const char *catalogDir = "/home/cmsprod/catalog",
 			  const char *outputName = "hgg",
-			  int         nEvents    = 100)
+			  int         nEvents    = 1000)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -434,6 +434,11 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photcic->SetMCSmearFactors2012HCP(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
   photcic->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
   photcic->UseSpecialSmearForDPMVA(true);
+  
+  photcic->SetMCStochasticPivot(7.05,7.18,8.08,8.71);
+  photcic->SetMCStochasticRho(7.8e-3,7.9e-3,1.18e-2,1.31e-2);
+  photcic->SetMCStochasticPhi(0.16,0.,0.72,0.01);
+  photcic->SetStochasticSmear(true);  
 
   photcic->AddEnCorrPerRun2012HCP(190645,190781,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9856,0.9919,0.9812,0.9862);
   photcic->AddEnCorrPerRun2012HCP(190782,191042,0.9961,0.9961,0.9989,0.9989,0.9909,1.0014,0.9854,0.9917,0.976,0.981);
@@ -522,6 +527,11 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photcicnoeleveto->SetMCSmearFactors2012HCP(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
   photcicnoeleveto->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
   photcicnoeleveto->UseSpecialSmearForDPMVA(true);
+  
+  photcicnoeleveto->SetMCStochasticPivot(7.05,7.18,8.08,8.71);
+  photcicnoeleveto->SetMCStochasticRho(7.8e-3,7.9e-3,1.18e-2,1.31e-2);
+  photcicnoeleveto->SetMCStochasticPhi(0.16,0.,0.72,0.01);
+  photcicnoeleveto->SetStochasticSmear(true);    
 
   photcicnoeleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9856,0.9919,0.9812,0.9862);
   photcicnoeleveto->AddEnCorrPerRun2012HCP(190782,191042,0.9961,0.9961,0.9989,0.9989,0.9909,1.0014,0.9854,0.9917,0.976,0.981);
@@ -611,6 +621,12 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photpresel->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
   photpresel->UseSpecialSmearForDPMVA(true);
 
+  photpresel->SetMCStochasticPivot(7.05,7.18,8.08,8.71);
+  photpresel->SetMCStochasticRho(7.8e-3,7.9e-3,1.18e-2,1.31e-2);
+  photpresel->SetMCStochasticPhi(0.16,0.,0.72,0.01);
+  photpresel->SetStochasticSmear(true);
+  
+  
   photpresel->AddEnCorrPerRun2012HCP(190645,190781,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9856,0.9919,0.9812,0.9862);
   photpresel->AddEnCorrPerRun2012HCP(190782,191042,0.9961,0.9961,0.9989,0.9989,0.9909,1.0014,0.9854,0.9917,0.976,0.981);
   photpresel->AddEnCorrPerRun2012HCP(191043,191720,0.9902,0.9902,0.9931,0.9931,0.9858,0.9963,0.988,0.9944,0.9795,0.9845);
@@ -697,6 +713,11 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photpreselinverteleveto->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
   photpreselinverteleveto->UseSpecialSmearForDPMVA(true);
 
+  photpreselinverteleveto->SetMCStochasticPivot(7.05,7.18,8.08,8.71);
+  photpreselinverteleveto->SetMCStochasticRho(7.8e-3,7.9e-3,1.18e-2,1.31e-2);
+  photpreselinverteleveto->SetMCStochasticPhi(0.16,0.,0.72,0.01);
+  photpreselinverteleveto->SetStochasticSmear(true);  
+  
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(190645,190781,0.9894,0.9894,0.9922,0.9922,0.9876,0.9982,0.9856,0.9919,0.9812,0.9862);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(190782,191042,0.9961,0.9961,0.9989,0.9989,0.9909,1.0014,0.9854,0.9917,0.976,0.981);
   photpreselinverteleveto->AddEnCorrPerRun2012HCP(191043,191720,0.9902,0.9902,0.9931,0.9931,0.9858,0.9963,0.988,0.9944,0.9795,0.9845);

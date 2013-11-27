@@ -122,7 +122,21 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCSmearMVA_EElowEta_lR9       (0.),
   fMCSmearMVA_EEhighEta_hR9      (0.),
   fMCSmearMVA_EEhighEta_lR9      (0.),
-
+  
+  fMCStochasticPivot_EBlowEta_hR9(0.),
+  fMCStochasticPivot_EBlowEta_lR9(0.),
+  fMCStochasticPivot_EBhighEta_hR9(0.),
+  fMCStochasticPivot_EBhighEta_lR9(0.),    
+  
+  fMCStochasticRho_EBlowEta_hR9(0.),
+  fMCStochasticRho_EBlowEta_lR9(0.),
+  fMCStochasticRho_EBhighEta_hR9(0.),
+  fMCStochasticRho_EBhighEta_lR9(0.),    
+  
+  fMCStochasticPhi_EBlowEta_hR9(0.),
+  fMCStochasticPhi_EBlowEta_lR9(0.),
+  fMCStochasticPhi_EBhighEta_hR9(0.),
+  fMCStochasticPhi_EBhighEta_lR9(0.),      
 
   // ---------------------------------------
   fRng                           (new TRandom3()),
@@ -192,6 +206,7 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   
   // ------------------------------------------------------
   f2012HCP                       (kFALSE),
+  fStochasticSmear               (kFALSE),
   
   fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS)
 
@@ -503,6 +518,19 @@ void PhotonPairSelector::Process()
 	width2 = GetMCSmearFac(escalecat2);
       }
       
+      double ewidth1 = width1;
+      double ewidth2 = width2;
+      
+      //replace smearing (for photon energy only!) with stochastic smearing (only applies to EB for now)
+      if (fStochasticSmear) {
+        if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) {
+          ewidth1 = GetMCSmearFacStochastic(fixPh1st[iPair]);
+        }
+        if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) {
+          ewidth2 = GetMCSmearFacStochastic(fixPh2nd[iPair]);
+        }
+      }
+      
       if (!fIsData && fDoMCEneSmear) {
         // get the seed to do deterministic smearing...
         UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
@@ -511,8 +539,8 @@ void PhotonPairSelector::Process()
         UInt_t seed2    = seedBase + (UInt_t) fixPh2nd[iPair]->E() +
           (UInt_t) (TMath::Abs(10.*fixPh2nd[iPair]->SCluster()->Eta()));
         // get the smearing for MC photons..
-        PhotonTools::SmearPhoton(fixPh1st[iPair], fRng, width1, seed1);
-        PhotonTools::SmearPhoton(fixPh2nd[iPair], fRng, width2, seed2);
+        PhotonTools::SmearPhoton(fixPh1st[iPair], fRng, ewidth1, seed1);
+        PhotonTools::SmearPhoton(fixPh2nd[iPair], fRng, ewidth2, seed2);
       }
 
       // in case we want to use specail smearing factors for Error computation, recompute widths
@@ -1444,6 +1472,50 @@ Double_t PhotonPairSelector::GetMCSmearFacHCP(PhotonTools::eScaleCats cat, bool 
 
   }
 }
+
+//---------------------------------------------------------------------------------------------------
+Double_t PhotonPairSelector::GetMCSmearFacStochastic(const Photon *p) const {
+ 
+  PhotonTools::eScaleCats cat = PhotonTools::EScaleCat(p);
+  
+  double pivot = 0.;
+  double rho = 0.;
+  double phi = 0.;
+  
+  if (cat == PhotonTools::kEBlowEtaGoldCenter || cat == PhotonTools::kEBlowEtaGoldGap) {
+    pivot = fMCStochasticPivot_EBlowEta_hR9;
+    rho = fMCStochasticRho_EBlowEta_hR9;
+    phi = fMCStochasticPhi_EBlowEta_hR9;
+  }
+  else if (cat == PhotonTools::kEBlowEtaBad) {
+    pivot = fMCStochasticPivot_EBlowEta_lR9;
+    rho = fMCStochasticRho_EBlowEta_lR9;
+    phi = fMCStochasticPhi_EBlowEta_lR9;
+  }  
+  else if (cat == PhotonTools::kEBhighEtaGold) {
+    pivot = fMCStochasticPivot_EBhighEta_hR9;
+    rho = fMCStochasticRho_EBhighEta_hR9;
+    phi = fMCStochasticPhi_EBhighEta_hR9;
+  }  
+  else if (cat == PhotonTools::kEBhighEtaBad) {
+    pivot = fMCStochasticPivot_EBhighEta_lR9;
+    rho = fMCStochasticRho_EBhighEta_lR9;
+    phi = fMCStochasticPhi_EBhighEta_lR9;
+  }    
+  else {
+    return 0.;
+  }
+  
+  double etorigin = p->E()/cosh(p->SCluster()->Eta());
+  double smearconst = rho*sin(phi);
+  double smearstochastic = rho*cos(phi)*pivot/sqrt(etorigin);
+  
+  double smear = sqrt( smearconst*smearconst + smearstochastic*smearstochastic);
+  
+  return smear;
+  
+}
+
 
 //---------------------------------------------------------------------------------------------------
 Float_t PhotonPairSelector::GetEventCat(PhotonTools::CiCBaseLineCats cat1,
