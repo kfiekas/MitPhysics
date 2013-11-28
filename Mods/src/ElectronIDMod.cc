@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.138 2013/07/16 09:45:03 veverka Exp $
+// $Id: ElectronIDMod.cc,v 1.139 2013/10/18 15:17:34 ceballos Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -631,7 +631,9 @@ void ElectronIDMod::Process()
 
   Double_t MVAValue = -100;
   Double_t MVAValueMax = -99;
+  Double_t MVAValueSubMax = -99;
   int NElectronMVAValueMax = 0;
+  int NElectronMVAValueSubMax = 0;
   int NPass = 0;
 
 
@@ -788,8 +790,11 @@ void ElectronIDMod::Process()
       MVAValue = EvaluateMVAID(e, ElectronTools::kHggLeptonTagId2012HCP, fVertices->At(closestVtx), fPFCandidates, fPileupEnergyDensity);
       idcut = PassIDCut(e, fElIdType, fVertices->At(closestVtx));
       if(MVAValue>MVAValueMax){
-	MVAValueMax = MVAValue;
-	NElectronMVAValueMax = i;
+        MVAValueMax = MVAValue;
+        NElectronMVAValueMax = i;
+      } else if (MVAValue > MVAValueSubMax){
+        MVAValueSubMax = MVAValue;
+        NElectronMVAValueSubMax = i;
       }
     } else {
       idcut = PassIDCut(e, fElIdType, fVertices->At(0));
@@ -819,15 +824,20 @@ void ElectronIDMod::Process()
     NPass = NPass+1;
   }
 
-   if((fElIdType==ElectronTools::kHggLeptonTagId2012HCP) && (NPass>0)){
-    GoodElectrons->Add(fElectrons->At(NElectronMVAValueMax));
-  }
-  
   // sort according to pt
   GoodElectrons->Sort();
 
+  if(fElIdType == ElectronTools::kHggLeptonTagId2012HCP) {
+    if (NPass > 0) {
+      GoodElectrons->Add(fElectrons->At(NElectronMVAValueMax));
+    }
+    if (NPass > 1) {
+      GoodElectrons->Add(fElectrons->At(NElectronMVAValueSubMax));
+    }
+  }
+
   // add to event for other modules to use
-  AddObjThisEvt(GoodElectrons);  
+  AddObjThisEvt(GoodElectrons);
 }
 
 //--------------------------------------------------------------------------------------------------
