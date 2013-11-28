@@ -534,10 +534,10 @@ void PhotonPairSelector::Process()
       if (!fIsData && fDoMCEneSmear) {
         // get the seed to do deterministic smearing...
         UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
-        UInt_t seed1    = seedBase + (UInt_t) fixPh1st[iPair]->E() +
-          (UInt_t) (TMath::Abs(10.*fixPh1st[iPair]->SCluster()->Eta()));
-        UInt_t seed2    = seedBase + (UInt_t) fixPh2nd[iPair]->E() +
-          (UInt_t) (TMath::Abs(10.*fixPh2nd[iPair]->SCluster()->Eta()));
+        UInt_t seed1    = seedBase + 100000*(UInt_t) (TMath::Abs(100.*fixPh1st[iPair]->SCluster()->Phi())) +
+          1000*(UInt_t) (TMath::Abs(100.*fixPh1st[iPair]->SCluster()->Eta()));
+        UInt_t seed2    = seedBase + 100000*(UInt_t) (TMath::Abs(100.*fixPh2nd[iPair]->SCluster()->Phi())) +
+          1000*(UInt_t) (TMath::Abs(100.*fixPh2nd[iPair]->SCluster()->Eta()));
         // get the smearing for MC photons..
         PhotonTools::SmearPhoton(fixPh1st[iPair], fRng, ewidth1, seed1);
         PhotonTools::SmearPhoton(fixPh2nd[iPair], fRng, ewidth2, seed2);
