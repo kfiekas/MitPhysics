@@ -1,4 +1,4 @@
-// $Id: PFMetCorrectionTools.cc,v 1.6 2012/07/05 11:17:36 mtouch Exp $
+// $Id: PFMetCorrectionTools.cc,v 1.7 2013/08/27 15:32:20 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PFMetCorrectionTools.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -221,12 +221,24 @@ void PFMetCorrectionTools::shiftMet(Met *uncormet, Bool_t fIsData, Double_t spfM
   if(fIsData){
     //    px =uncormet->Px() -0.00563109*spfMet+0.959742;
     //    py =uncormet->Py() +0.00586162*spfMet-0.540137; 
-    px = uncormet->Px()-0.006239*spfMet+0.662; // change shift factor for 2012 correction
-    py = uncormet->Py()+0.004613*spfMet-0.673;
+    
+    //moriond 2013 corrections
+//     px = uncormet->Px()-0.006239*spfMet+0.662; // change shift factor for 2012 correction
+//     py = uncormet->Py()+0.004613*spfMet-0.673;
+    
+    //legacy corrections
+    px = uncormet->Px()-0.005117*spfMet+0.830150;
+    py = uncormet->Py()+0.002813*spfMet-0.384595;    
+    
     // MC
   }else{  
-    px =uncormet->Px() +0.00135*spfMet-0.021;
-    py =uncormet->Py() +0.00371*spfMet-0.826;
+    //moriond 2013 corrections
+//     px =uncormet->Px() +0.00135*spfMet-0.021;
+//     py =uncormet->Py() +0.00371*spfMet-0.826;
+    
+    //legacy corrections
+    px =uncormet->Px() -0.000685*spfMet+0.084403;
+    py =uncormet->Py() +0.003950*spfMet-0.415907;    
     
   }
   //  e = sqrt(px*px+py*py);
