@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.45 2013/11/26 17:52:41 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.46 2013/11/27 23:41:21 bendavid Exp $
 //
 // PhotonTreeWriter
 //
@@ -17,6 +17,9 @@
 #ifndef MITPHYSICS_MODS_PHOTONTREEWRITER_H
 #define MITPHYSICS_MODS_PHOTONTREEWRITER_H
 
+
+#include <utility>  // provides std::pair
+#include <vector>
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/PhotonFwd.h"
 #include "MitAna/DataTree/interface/TrackCol.h"
@@ -739,8 +742,11 @@ namespace mithep
   {
   public:
     enum CounterFlag {kCountNotDefined = -1};
-    PhotonTreeWriter(const char *name ="PhotonTreeWriter", 
-		       const char *title="Selecting PhotonPairs");
+    typedef std::pair<const Particle*, double>  DeltaRVeto;
+    typedef std::vector<DeltaRVeto>             DeltaRVetoVector;
+    typedef std::vector<const PFJet*>           PFJetVector;
+    PhotonTreeWriter(const char *name ="PhotonTreeWriter",
+		     const char *title="Selecting PhotonPairs");
     
     ~PhotonTreeWriter();
 
@@ -883,7 +889,7 @@ namespace mithep
     bool                VHLepHasDielectron(const Photon *phHard,
                                            const Photon *phSoft);
     bool                VHLepHasDimuon(const Photon *phHard,
-                                       const Photon *phSoft);
+                                      const Photon *phSoft);
     UInt_t              VHLepNumberOfJets(const Photon *phHard,
                                           const Photon *phSoft,
                                           const Vertex *selvtx,
@@ -893,6 +899,10 @@ namespace mithep
                                      const Vertex *selvtx,
                                      const double minJetPt,
                                      const double maxAbsEta);
+    PFJetVector *      GetSelectedPFJets(const DeltaRVetoVector &drVetos,
+                                          const Vertex &vertex,
+                                          const double minJetPt,
+                                          const double maxAbsEta);
     UInt_t              NumberOfBJets(const Photon *phHard,
                                       const Photon *phSoft,
                                       const Vertex *selvtx,
