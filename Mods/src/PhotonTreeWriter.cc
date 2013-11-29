@@ -2433,52 +2433,39 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
   //          =  0   -> event tagged as 'non-lepton event'
   //          = +1   -> event tagged as a low-MET low-S/sqrt(B) event
   //          = +2   -> event tagged as a high-MET/dilepton high-S/sqrt(B) event
+  //          = +3   -> event tagged as both a loose and a tight VH leptonic event
   // TODO: Set the selected vertex to the lepton vertex if tagged as a
   //       VH(lep) event.
   
   fDiphotonEvent->VHLepTag = 0; // non-lepton event
+  bool isVHLepLoose = false;
+  bool isVHLepTight = false;
 
-  bool hasDielectron = VHLepHasDielectron(phHard, phSoft);
-  bool hasDimuon     = VHLepHasDimuon    (phHard, phSoft);
-  if (hasDielectron || hasDimuon) {
-    fDiphotonEvent->VHLepTag = 2; // high MET
-    return;
-  }
+  if (VHLepHasDielectron(phHard, phSoft) || 
+      VHLepHasDimuon    (phHard, phSoft)) isVHLepTight = true;
   
   if (fDiphotonEvent->leptonTag < 0) {
     ApplyLeptonTag(phHard, phSoft, selvtx);
   }
 
   const Muon *muon = GetLeptonTagMuon(phHard, phSoft);
-  if (muon &&
-      VHLepNumberOfJets(phHard, phSoft, selvtx, muon) <= 2) {
-    // Found a good VH(lep) tag muon.
-    if (fDiphotonEvent->corrpfmet > 45.) {
-      fDiphotonEvent->VHLepTag = 2; // high MET event
-    } else {
-      fDiphotonEvent->VHLepTag = 1; // low MET event
-    }
-    return;
+  if (muon && VHLepNumberOfJets(phHard, phSoft, selvtx, muon) <= 2) {
+    if (fDiphotonEvent->corrpfmet > 45.) isVHLepTight = true; // high MET event
+    else                                 isVHLepLoose = true; // low MET event
   } // Found a good VH(lep) tag muon.
   
   const Electron *electron = GetLeptonTagElectron(phHard, phSoft);
-  if (electron &&
-      VHLepNumberOfJets(phHard, phSoft, selvtx, electron) <= 2) {
-    // Found a good VH(lep) tag electron.
+  if (electron && VHLepNumberOfJets(phHard, phSoft, selvtx, electron) <= 2) {
     if (fDiphotonEvent->corrpfmet > 45.) {
-      // High MET event.
-      fDiphotonEvent->VHLepTag = 2; 
-    } else {
-      // Low MET event. Exclude Z->ee(->gamma) candidates based on mass
-      if (MassOfPairIsWithinWindowAroundMZ(phHard, electron, 10) == false &&
-          MassOfPairIsWithinWindowAroundMZ(phSoft, electron, 10) == false) {
-        fDiphotonEvent->VHLepTag = 1; // low MET event
-      } else {
-        // Reject because m(e,g) is within 10 GeV of MZ
-        fDiphotonEvent->VHLepTag = 0; // non-lepton event
-      }
+      isVHLepTight = true;      // High MET event.
+    } else if (!MassOfPairIsWithinWindowAroundMZ(phHard, electron, 10) &&
+               !MassOfPairIsWithinWindowAroundMZ(phSoft, electron, 10)) {
+      isVHLepLoose = true;   // low MET event
     } // Low MET event.
   } // Found a good VH(lep) tag electron.
+  
+  if (isVHLepLoose) fDiphotonEvent->VHLepTag += 1;
+  if (isVHLepTight) fDiphotonEvent->VHLepTag += 2;
 
 } // void PhotonTreeWriter::ApplyVHLepTag(..)
 
@@ -2523,7 +2510,6 @@ void PhotonTreeWriter::ApplyVHHadTag(const Photon *phHard,
 
   /// See L2007-2013 of the Hgg AN 2013/253 v3
   if (fDiphotonEvent->ptgg > 130. * reducedMass &&
-      /// TODO: Should this be nJets >= 2 or nJets == 2?
       nJets >= 2 &&
       60. < mjj && mjj < 120. &&
       absCosThetaStar < 0.5) {
@@ -2680,6 +2666,7 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   //            0 .. not tagged
   //            1 .. tagged as a hadronic ttH event
   //            2 .. tagged as a leptonic ttH event
+  //            3 .. tagged as both a hadronic and a leptonic ttH event
   fDiphotonEvent->tthTag = 0;
   
   // Selection taken from the AN2012_480_V6 of 24 April 2013 further
@@ -2721,26 +2708,13 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
     ++nBJets;
   } // End of loop over jets
 
-  // Check the number of selected jets, see Table 7 near L196 of the AN
-  if (nJets < 2) return;
-
-  // Check the number of b-tagged jets, see Table 7 near L196 of the AN
-  if (nBJets < 1) return;
+  // Check the hadron tag, see Table 7 near L196 of the AN
+  if (nJets >= 5 && nBJets >= 1)           fDiphotonEvent->tthTag += 1;
 
   // Check the lepton tag, see Table 7 near L196 of the AN
   // It has a precedence if both the leptonic and hadronic tags pass.
   // (private e-mail from Francesco Micheli on 15 July 2013).
-  if (lepton) {
-    fDiphotonEvent->tthTag = 2;
-    return;
-  }
-  
-  // Check the hadron tag, see Table 7 near L196 of the AN
-  if (nJets >= 5) {
-    // apply the hadronic tth tag
-    fDiphotonEvent->tthTag = 1;
-    return;
-  }
+  if (nJets >= 2 && nBJets >= 1 && lepton) fDiphotonEvent->tthTag += 2;
   
 } // void PhotonTreeWriter::ApplyTTHTag()
 
