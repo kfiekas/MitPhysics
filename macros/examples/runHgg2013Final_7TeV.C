@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_7TeV.C,v 1.1 2013/10/29 15:53:55 mingyang Exp $
+// $Id: runHgg2013Final_7TeV.C,v 1.2 2013/12/01 22:47:49 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -534,6 +534,9 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    photpreselnosmear->SetDoShowerShapeScaling(kFALSE);  
    photpreselnosmear->SetPhotonsFromBranch(kFALSE);
    photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
+   photpreselnosmear->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
+   photpreselnosmear->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
+   photpreselnosmear->UseSpecialSmearForDPMVA(true);
    photpreselnosmear->SetJetsName(jetCorr->GetOutputName());  
    photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");  
    photpreselnosmear->SetLeadingPtMin(30.);
@@ -545,6 +548,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
    photpreselnosmear->Set2012HCP(kFALSE); 
    photpreselnosmear->DoMCSmear(kFALSE);
+   photpreselnosmear->DoMCEneSmear(kFALSE);
+   photpreselnosmear->DoEneErrSmear(kTRUE);
    photpreselnosmear->DoDataEneCorr(kFALSE);
 
    PhotonPairSelector         *photcicnosmear = new PhotonPairSelector("PhotonPairSelectorCiCNoSmear");
@@ -608,6 +613,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecic->SetPFJetName(jetCorr->GetOutputName());
    phottreecic->SetExcludeDoublePrompt(excludedoubleprompt);
    phottreecic->SetIsData(isData);
+   phottreecic->SetIsCutBased(kTRUE);
    if (is25) phottreecic->SetEnablePFPhotons(kFALSE);
    phottreecic->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreecic->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
@@ -637,6 +643,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecicnoeleveto->SetApplyElectronVeto(kFALSE);
    phottreecicnoeleveto->SetExcludeDoublePrompt(excludedoubleprompt);
    phottreecicnoeleveto->SetIsData(isData);  
+   phottreecicnoeleveto->SetIsCutBased(kTRUE);
    if (is25) phottreecicnoeleveto->SetEnablePFPhotons(kFALSE);
    phottreecicnoeleveto->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreecicnoeleveto->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
@@ -665,6 +672,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepresel->SetPFJetName(jetCorr->GetOutputName());  
    phottreepresel->SetExcludeDoublePrompt(excludedoubleprompt);  
    phottreepresel->SetIsData(isData);  
+   phottreepresel->SetIsCutBased(kFALSE);
    if (is25) phottreepresel->SetEnablePFPhotons(kFALSE);
    phottreepresel->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreepresel->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
@@ -694,7 +702,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselinverteleveto->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselinverteleveto->SetApplyElectronVeto(kFALSE);  
    phottreepreselinverteleveto->SetExcludeDoublePrompt(excludedoubleprompt);    
-   phottreepreselinverteleveto->SetIsData(isData); 
+   phottreepreselinverteleveto->SetIsData(isData);
+   phottreepreselinverteleveto->SetIsCutBased(kFALSE); 
    if (is25) phottreepreselinverteleveto->SetEnablePFPhotons(kFALSE);  
    phottreepreselinverteleveto->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreepreselinverteleveto->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
@@ -723,6 +732,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselnosmear->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselnosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
    phottreepreselnosmear->SetIsData(isData);    
+   phottreepreselnosmear->SetIsCutBased(kFALSE);
    if (is25) phottreepreselnosmear->SetEnablePFPhotons(kFALSE); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreepreselnosmear->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
@@ -730,6 +740,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselnosmear->SetElectronMVAWeightsSubdet0Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat4.weights.xml")))); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
    phottreepreselnosmear->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
+   phottreepreselnosmear->SetDoSynching(kTRUE);
    //  phottreepreselnosmear->SetApplyLeptonTag(kTRUE);
    //  phottreepreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    //  phottreepreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
@@ -751,6 +762,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecicnosmear->SetPFJetName(jetCorr->GetOutputName());
    phottreecicnosmear->SetExcludeDoublePrompt(excludedoubleprompt);
    phottreecicnosmear->SetIsData(isData);
+   phottreecicnosmear->SetIsCutBased(kTRUE);
    if (is25) phottreecicnosmear->SetEnablePFPhotons(kFALSE);
    phottreecicnosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
    phottreecicnosmear->SetElectronMVAWeightsSubdet1Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat2.weights.xml"))));  
@@ -778,7 +790,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselinvertelevetonosmear->SetPFJetsFromBranch(kFALSE);
    phottreepreselinvertelevetonosmear->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselinvertelevetonosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
-   phottreepreselinvertelevetonosmear->SetIsData(isData);    
+   phottreepreselinvertelevetonosmear->SetIsData(isData);  
+   phottreepreselinvertelevetonosmear->SetIsCutBased(kFALSE);  
    if (is25) phottreepreselinvertelevetonosmear->SetEnablePFPhotons(kFALSE); 
    phottreepreselinvertelevetonosmear->SetApplyElectronVeto(kFALSE); 
   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet0Pt10To20(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat1.weights.xml"))));
