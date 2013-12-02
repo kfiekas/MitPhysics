@@ -1041,7 +1041,7 @@ void PhotonTreeWriter::Process()
     fDiphotonEvent->numBJets = -99;
 
     if (fDoSynching) {
-      double minJetPt = 40.;
+      double minJetPt = 20.;
       double maxJetAbsEta = 4.7;
       fDiphotonEvent->numJets  = NumberOfJets (phHard, phSoft, selvtx, minJetPt,
                                                maxJetAbsEta);
@@ -2752,6 +2752,46 @@ UInt_t PhotonTreeWriter::NumberOfJets(const Photon *phHard,
   return nJets;
 
 } // NumberOfJets
+
+
+//_____________________________________________________________________________
+PhotonTreeWriter::PFJetVector *
+PhotonTreeWriter::GetSelectedPFJets(const DeltaRVetoVector &drVetos,
+                                    const Vertex &vertex,
+                                    const double minPt,
+                                    const double maxAbsEta) {
+
+  PFJetVector *pfjets = new PFJetVector();
+
+  // Loop over jets, count those passing selection
+  // Use same ID as for the tth tag
+  for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
+    const Jet *jet = fPFJets->At(ijet);
+    // Apply jet selection, see L116 and L125 of the AN
+    if (jet->Pt() < minPt || jet->AbsEta() > maxAbsEta) continue;
+    // Apply the vetos Delta R(jet, particle) > minDeltaR.
+    DeltaRVetoVector::const_iterator drVeto = drVetos.begin();
+    for (; drVeto < drVetos.end(); ++drVeto) {
+      const Particle *particle = drVeto->first;
+      double minDeltaR = drVeto->second;
+      if (MathUtils::DeltaR(particle, jet) < minDeltaR) break;
+    } /// Loop over Delta R vetos.
+    if (drVeto < drVetos.end()) continue; /// failed a Delta R veto
+    // Make sure we have a PF jet
+    const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
+    if (!pfjet) continue;
+    if (!JetTools::passPFLooseId(pfjet)) continue;
+    // Apply the jet ID / pileup removal as given in Table 4
+    Double_t betaStar = JetTools::betaStarClassic(pfjet, &vertex, fPV);
+    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
+    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+    // this jet passes, count it in
+    pfjets->push_back(pfjet);
+  } // End of loop over jets
+
+  return pfjets;
+
+} // GetSelectedPFJets
 
 
 //_____________________________________________________________________________

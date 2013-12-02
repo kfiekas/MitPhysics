@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.46 2013/11/27 23:41:21 bendavid Exp $
+// $Id: PhotonTreeWriter.h,v 1.47 2013/11/28 18:04:39 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -674,6 +674,7 @@ namespace mithep
       Int_t tthTag;
       Int_t numJets;
       Int_t numBJets;
+      Float_t bjetcsv;
       
       // ----------------------------------------
       UChar_t  ismc;
@@ -899,15 +900,16 @@ namespace mithep
                                      const Vertex *selvtx,
                                      const double minJetPt,
                                      const double maxAbsEta);
-    PFJetVector *      GetSelectedPFJets(const DeltaRVetoVector &drVetos,
-                                          const Vertex &vertex,
-                                          const double minJetPt,
-                                          const double maxAbsEta);
     UInt_t              NumberOfBJets(const Photon *phHard,
                                       const Photon *phSoft,
                                       const Vertex *selvtx,
                                       const double minJetPt,
                                       const double maxAbsEta);
+    PFJetVector *      GetSelectedPFJets(const DeltaRVetoVector &drVetos,
+                                         const Vertex &vertex,
+                                         const double minJetPt,
+                                         const double maxJetAbsEta);
+    PFJetVector *      GetSelectedPFBJets(const PFJetVector &pfjets);
     const Particle *    TTHSelectLepton(const Photon *phHard,
                                         const Photon *phSoft,
                                         const Vertex *selvtx);
