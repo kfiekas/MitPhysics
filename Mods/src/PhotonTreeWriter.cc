@@ -2524,13 +2524,15 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
                                           const Photon *phSoft) {
   if (fLeptonTagSoftElectrons->GetEntries() < 2) return false;
   
-  if (fVerbosityLevel > 0) {
-    cout << "PhotonTreeWriter::VHLepHasDielectron: Found "
-         << fLeptonTagSoftElectrons->GetEntries() << endl;
+  if (PhotonTools::ElectronVetoCiC(phHard, fLeptonTagSoftElectrons) < 1 ||
+      PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagSoftElectrons) < 1 ||
+      PhotonTools::ElectronVetoCiC(phHard, fElectrons)              < 1 || 
+      PhotonTools::ElectronVetoCiC(phSoft, fElectrons)              < 1) {
+    return false;
   }
-  
+
   vector<UInt_t> goodElectrons;
-  
+
   // Loop over electrons.
   for (UInt_t iele=0; iele < fLeptonTagSoftElectrons->GetEntries(); ++iele){
     const Electron *ele = fLeptonTagSoftElectrons->At(iele);
