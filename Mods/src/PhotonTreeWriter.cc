@@ -1039,6 +1039,7 @@ void PhotonTreeWriter::Process()
 
     fDiphotonEvent->numJets  = -99;
     fDiphotonEvent->numBJets = -99;
+    fDiphotonEvent->bjetcsv = -99;
 
     if (fDoSynching) {
       double minJetPt = 20.;
@@ -1047,6 +1048,17 @@ void PhotonTreeWriter::Process()
                                                maxJetAbsEta);
       fDiphotonEvent->numBJets = NumberOfBJets(phHard, phSoft, selvtx, minJetPt,
                                                maxJetAbsEta);
+      /// The lines below cause a segmentation violation in the call to 
+      /// GetSelectedPFJets
+//       DeltaRVetoVector vetos(2);
+//       vetos.push_back(DeltaRVeto(static_cast<const Particle*>(phHard), 0.5));
+//       vetos.push_back(DeltaRVeto(static_cast<const Particle*>(phSoft), 0.5));
+//       // for (unsigned
+//       PFJetVector *jets = GetSelectedPFJets(vetos, *selvtx, minJetPt, 
+//                                             maxJetAbsEta);
+//       fDiphotonEvent->numJets = jets->size();
+//       delete jets;
+      
     }
 
     
@@ -2757,43 +2769,51 @@ UInt_t PhotonTreeWriter::NumberOfJets(const Photon *phHard,
 
 
 //_____________________________________________________________________________
-PhotonTreeWriter::PFJetVector *
-PhotonTreeWriter::GetSelectedPFJets(const DeltaRVetoVector &drVetos,
-                                    const Vertex &vertex,
-                                    const double minPt,
-                                    const double maxAbsEta) {
-
-  PFJetVector *pfjets = new PFJetVector();
-
-  // Loop over jets, count those passing selection
-  // Use same ID as for the tth tag
-  for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
-    const Jet *jet = fPFJets->At(ijet);
-    // Apply jet selection, see L116 and L125 of the AN
-    if (jet->Pt() < minPt || jet->AbsEta() > maxAbsEta) continue;
-    // Apply the vetos Delta R(jet, particle) > minDeltaR.
-    DeltaRVetoVector::const_iterator drVeto = drVetos.begin();
-    for (; drVeto < drVetos.end(); ++drVeto) {
-      const Particle *particle = drVeto->first;
-      double minDeltaR = drVeto->second;
-      if (MathUtils::DeltaR(particle, jet) < minDeltaR) break;
-    } /// Loop over Delta R vetos.
-    if (drVeto < drVetos.end()) continue; /// failed a Delta R veto
-    // Make sure we have a PF jet
-    const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
-    if (!pfjet) continue;
-    if (!JetTools::passPFLooseId(pfjet)) continue;
-    // Apply the jet ID / pileup removal as given in Table 4
-    Double_t betaStar = JetTools::betaStarClassic(pfjet, &vertex, fPV);
-    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
-    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
-    // this jet passes, count it in
-    pfjets->push_back(pfjet);
-  } // End of loop over jets
-
-  return pfjets;
-
-} // GetSelectedPFJets
+// PhotonTreeWriter::PFJetVector *
+// PhotonTreeWriter::GetSelectedPFJets(const DeltaRVetoVector &drVetos,
+//                                     const Vertex &vertex,
+//                                     const double minPt,
+//                                     const double maxAbsEta) {
+// 
+//   PFJetVector *pfjets = new PFJetVector();
+// 
+//   // Loop over jets, count those passing selection
+//   // Use same ID as for the tth tag
+//   for(UInt_t ijet=0; ijet < fPFJets->GetEntries(); ++ijet){
+//     const Jet *jet = fPFJets->At(ijet);
+//     // Apply jet selection, see L116 and L125 of the AN
+//     if (jet->Pt() < minPt || jet->AbsEta() > maxAbsEta) continue;
+//     // Apply the vetos Delta R(jet, particle) > minDeltaR.
+//     DeltaRVetoVector::const_iterator drVeto = drVetos.begin();
+//     for (; drVeto < drVetos.end(); ++drVeto) {
+//       const Particle *particle = drVeto->first;
+//       std::cout << "run: " << fDiphotonEvent->run
+//                 << ", lumi: " << fDiphotonEvent->lumi
+//                 << ", events: " << fDiphotonEvent->evt
+//                 /// The line below causes a segmentation fault!
+//                 << ", veto particle pt: " << particle->Mom().Pt()
+//                 << ", eta: " << particle->Mom().Eta()
+//                 << ", phi: " << particle->Mom().Phi()
+//                 << "\n";
+//       double minDeltaR = drVeto->second;
+//       if (MathUtils::DeltaR(particle, jet) < minDeltaR) break;
+//     } /// Loop over Delta R vetos.
+//     if (drVeto < drVetos.end()) continue; /// failed a Delta R veto
+//     // Make sure we have a PF jet
+//     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
+//     if (!pfjet) continue;
+//     if (!JetTools::passPFLooseId(pfjet)) continue;
+//     // Apply the jet ID / pileup removal as given in Table 4
+//     Double_t betaStar = JetTools::betaStarClassic(pfjet, &vertex, fPV);
+//     if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
+//     if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+//     // this jet passes, count it in
+//     pfjets->push_back(pfjet);
+//   } // End of loop over jets
+// 
+//   return pfjets;
+// 
+// } // GetSelectedPFJets
 
 
 //_____________________________________________________________________________
@@ -2827,6 +2847,9 @@ UInt_t PhotonTreeWriter::NumberOfBJets(const Photon *phHard,
     if (jet->CombinedSecondaryVertexBJetTagsDisc() < 0.679) continue;
     // this jet passes, count it in
     ++nBJets;
+    if (fDoSynching && fDiphotonEvent->bjetcsv <= -99) {
+      fDiphotonEvent->bjetcsv = jet->CombinedSecondaryVertexBJetTagsDisc();
+    }
   } // End of loop over jets
 
   return nBJets;
