@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_8TeV.C,v 1.5 2013/11/26 10:39:36 veverka Exp $
+// $Id: runHgg2013Final_8TeV.C,v 1.6 2013/11/27 23:41:22 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -800,7 +800,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
    photpreselnosmear->SetMCSmearFactors2012HCP(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
    photpreselnosmear->SetMCSmearFactors2012HCPMVA(0.0075,0.0075,0.0086,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
-   photpresel->UseSpecialSmearForDPMVA(true);
+   photpreselnosmear->UseSpecialSmearForDPMVA(true);
    photpreselnosmear->SetJetsName(jetCorr->GetOutputName());
    photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");
    photpreselnosmear->SetLeadingPtMin(30.);
