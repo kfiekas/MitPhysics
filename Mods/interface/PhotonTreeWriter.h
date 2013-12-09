@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.47 2013/11/28 18:04:39 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.48 2013/12/02 21:08:18 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -154,6 +154,7 @@ namespace mithep
       Float_t eerrsmeared;
       Float_t esmearing;
       Float_t eerrsmearing;
+      Float_t escale;
       Float_t idmva;
       Float_t ecalisodr03;
       Float_t hcalisodr03;

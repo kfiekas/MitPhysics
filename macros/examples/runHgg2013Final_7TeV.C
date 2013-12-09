@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_7TeV.C,v 1.2 2013/12/01 22:47:49 bendavid Exp $
+// $Id: runHgg2013Final_7TeV.C,v 1.3 2013/12/02 11:50:07 mingyang Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -35,6 +35,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
 			  //const char *dataset = "s11-h120gg-gf-lv3",
 			  //const char *dataset = "r11a-pho-j21-v1",
 			  const char *dataset = "s11-h120gg-vh-lv3",
+                          //const char *dataset = "r11b-pho-j21-v1",
 			  const char *book       = "t2mit/filefi/031",
 			  const char *catalogDir = "/home/cmsprod/catalog",
 			  const char *outputName = "hgg",
@@ -342,6 +343,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   Bool_t is25 = kFALSE;
   if (TString(book).Contains("025")) is25 = kTRUE;
   
+  TString encorrfilename = std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/21Jun2012_7TeV-step2-invMass_SC_regrCorrSemiPar7TeVtrainV8_pho-loose-Et_25-noPF-HggRunEtaR9.dat")).Data());
+  
   PhotonMvaMod *photreg = new PhotonMvaMod;
   photreg->SetRegressionVersion(8);
   photreg->SetRegressionWeights(std::string((gSystem->Getenv("CMSSW_BASE") + TString("/src/MitPhysics/data/regweights_v8_7TeV_forest_ph.root")).Data()));
@@ -362,20 +365,9 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photcic->SetInputPhotonsName(photreg->GetOutputName());
   
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photcic->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-  photcic->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-  photcic->UseSpecialSmearForDPMVA(true);
+  photcic->SetMCSmearFactors(0.0068, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
 
-  photcic->AddEnCorrPerRun2012HCP(160431, 165547, 0.9929, 0.9929, 0.9961, 0.9961, 0.9883, 0.9981, 0.9944, 0.9883, 0.9941, 0.9987);
-  photcic->AddEnCorrPerRun2012HCP(165548, 167042, 0.9939, 0.9939, 0.9971, 0.9971, 0.9876, 0.9973, 0.9956, 0.9876, 0.9937, 0.9982);
-  photcic->AddEnCorrPerRun2012HCP(167043, 172400, 0.9942, 0.9942, 0.9974, 0.9974, 0.9883, 0.9981, 0.9956, 0.9883, 0.9948, 0.9993);
-  photcic->AddEnCorrPerRun2012HCP(172401, 173663, 0.9944, 0.9944, 0.9976, 0.9976, 0.9883, 0.9980, 0.9956, 0.9883, 0.9948, 0.9993);
-  photcic->AddEnCorrPerRun2012HCP(173664, 176840, 0.9932, 0.9932, 0.9964, 0.9964, 0.9854, 0.9952, 0.9968, 0.9854, 0.9938, 0.9983);
-  photcic->AddEnCorrPerRun2012HCP(176841, 177775, 0.9939, 0.9939, 0.9971, 0.9971, 0.9868, 0.9965, 0.9958, 0.9868, 0.9949, 0.9994);
-  photcic->AddEnCorrPerRun2012HCP(177776, 178723, 0.9929, 0.9929, 0.9962, 0.9962, 0.9867, 0.9964, 0.9952, 0.9867, 0.9961, 1.0006);
-  photcic->AddEnCorrPerRun2012HCP(178724, 180252, 0.9929, 0.9929, 0.9961, 0.9961, 0.9868, 0.9965, 0.9945, 0.9868, 0.9950, 0.9995);
-  
-  
+  photcic->AddEnCorrFromFile(encorrfilename);
 
   //-----------------------------------------------------------------------------------------------------------------
   
@@ -392,7 +384,6 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photcic->SetApplyLeptonTag(kTRUE);
   photcic->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photcic->SetLeptonTagMuonsName("HggLeptonTagMuons");  
-  photcic->Set2012HCP(kFALSE);
   photcic->SetIdMVAType("2013FinalIdMVA_7TeV");
   
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
@@ -407,18 +398,10 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photcicnoeleveto->SetInputPhotonsName(photreg->GetOutputName());
   
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photcicnoeleveto->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-  photcicnoeleveto->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-  photcicnoeleveto->UseSpecialSmearForDPMVA(true);
+  photcicnoeleveto->SetMCSmearFactors(0.0068, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
 
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(160431, 165547, 0.9929, 0.9929, 0.9961, 0.9961, 0.9883, 0.9981, 0.9944, 0.9883, 0.9941, 0.9987);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(165548, 167042, 0.9939, 0.9939, 0.9971, 0.9971, 0.9876, 0.9973, 0.9956, 0.9876, 0.9937, 0.9982);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(167043, 172400, 0.9942, 0.9942, 0.9974, 0.9974, 0.9883, 0.9981, 0.9956, 0.9883, 0.9948, 0.9993);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(172401, 173663, 0.9944, 0.9944, 0.9976, 0.9976, 0.9883, 0.9980, 0.9956, 0.9883, 0.9948, 0.9993);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(173664, 176840, 0.9932, 0.9932, 0.9964, 0.9964, 0.9854, 0.9952, 0.9968, 0.9854, 0.9938, 0.9983);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(176841, 177775, 0.9939, 0.9939, 0.9971, 0.9971, 0.9868, 0.9965, 0.9958, 0.9868, 0.9949, 0.9994);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(177776, 178723, 0.9929, 0.9929, 0.9962, 0.9962, 0.9867, 0.9964, 0.9952, 0.9867, 0.9961, 1.0006);
-  photcicnoeleveto->AddEnCorrPerRun2012HCP(178724, 180252, 0.9929, 0.9929, 0.9961, 0.9961, 0.9868, 0.9965, 0.9945, 0.9868, 0.9950, 0.9995);
+  photcicnoeleveto->AddEnCorrFromFile(encorrfilename);
+
 
   //-----------------------------------------------------------------------------------------------------------------
   
@@ -437,7 +420,6 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photcicnoeleveto->SetApplyLeptonTag(kTRUE);
   photcicnoeleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photcicnoeleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");  
-  photcicnoeleveto->Set2012HCP(kFALSE);  
   photcicnoeleveto->SetIdMVAType("2013FinalIdMVA_7TeV");
  
   PhotonPairSelector         *photpresel = new PhotonPairSelector("PhotonPairSelectorPresel");
@@ -452,18 +434,9 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photpresel->SetPhotonsFromBranch(kFALSE);
   photpresel->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photpresel->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-  photpresel->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-  photpresel->UseSpecialSmearForDPMVA(true);
+  photpresel->SetMCSmearFactors(0.0068, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
 
-  photpresel->AddEnCorrPerRun2012HCP(160431, 165547, 0.9929, 0.9929, 0.9961, 0.9961, 0.9883, 0.9981, 0.9944, 0.9883, 0.9941, 0.9987);
-  photpresel->AddEnCorrPerRun2012HCP(165548, 167042, 0.9939, 0.9939, 0.9971, 0.9971, 0.9876, 0.9973, 0.9956, 0.9876, 0.9937, 0.9982);
-  photpresel->AddEnCorrPerRun2012HCP(167043, 172400, 0.9942, 0.9942, 0.9974, 0.9974, 0.9883, 0.9981, 0.9956, 0.9883, 0.9948, 0.9993);
-  photpresel->AddEnCorrPerRun2012HCP(172401, 173663, 0.9944, 0.9944, 0.9976, 0.9976, 0.9883, 0.9980, 0.9956, 0.9883, 0.9948, 0.9993);
-  photpresel->AddEnCorrPerRun2012HCP(173664, 176840, 0.9932, 0.9932, 0.9964, 0.9964, 0.9854, 0.9952, 0.9968, 0.9854, 0.9938, 0.9983);
-  photpresel->AddEnCorrPerRun2012HCP(176841, 177775, 0.9939, 0.9939, 0.9971, 0.9971, 0.9868, 0.9965, 0.9958, 0.9868, 0.9949, 0.9994);
-  photpresel->AddEnCorrPerRun2012HCP(177776, 178723, 0.9929, 0.9929, 0.9962, 0.9962, 0.9867, 0.9964, 0.9952, 0.9867, 0.9961, 1.0006);
-  photpresel->AddEnCorrPerRun2012HCP(178724, 180252, 0.9929, 0.9929, 0.9961, 0.9961, 0.9868, 0.9965, 0.9945, 0.9868, 0.9950, 0.9995);
+  photpresel->AddEnCorrFromFile(encorrfilename);
 
   
   //-----------------------------------------------------------------------------------------------------------------
@@ -479,7 +452,6 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photpresel->SetApplyLeptonTag(kTRUE);
   photpresel->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photpresel->SetLeptonTagMuonsName("HggLeptonTagMuons");  
-  photpresel->Set2012HCP(kTRUE); 
  
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputName("GoodPhotonsPreselInvertEleVeto");
@@ -493,18 +465,10 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
-  photpreselinverteleveto->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-  photpreselinverteleveto->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-  photpreselinverteleveto->UseSpecialSmearForDPMVA(true);
+  photpreselinverteleveto->SetMCSmearFactors(0.0068, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
 
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(160431, 165547, 0.9929, 0.9929, 0.9961, 0.9961, 0.9883, 0.9981, 0.9944, 0.9883, 0.9941, 0.9987);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(165548, 167042, 0.9939, 0.9939, 0.9971, 0.9971, 0.9876, 0.9973, 0.9956, 0.9876, 0.9937, 0.9982);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(167043, 172400, 0.9942, 0.9942, 0.9974, 0.9974, 0.9883, 0.9981, 0.9956, 0.9883, 0.9948, 0.9993);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(172401, 173663, 0.9944, 0.9944, 0.9976, 0.9976, 0.9883, 0.9980, 0.9956, 0.9883, 0.9948, 0.9993);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(173664, 176840, 0.9932, 0.9932, 0.9964, 0.9964, 0.9854, 0.9952, 0.9968, 0.9854, 0.9938, 0.9983);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(176841, 177775, 0.9939, 0.9939, 0.9971, 0.9971, 0.9868, 0.9965, 0.9958, 0.9868, 0.9949, 0.9994);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(177776, 178723, 0.9929, 0.9929, 0.9962, 0.9962, 0.9867, 0.9964, 0.9952, 0.9867, 0.9961, 1.0006);
-  photpreselinverteleveto->AddEnCorrPerRun2012HCP(178724, 180252, 0.9929, 0.9929, 0.9961, 0.9961, 0.9868, 0.9965, 0.9945, 0.9868, 0.9950, 0.9995);
+  photpreselinverteleveto->AddEnCorrFromFile(encorrfilename);
+
   
   //-----------------------------------------------------------------------------------------------------------------
   photpreselinverteleveto->SetShowerShapeType("2011ShowerShape");
@@ -520,7 +484,6 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photpreselinverteleveto->SetApplyLeptonTag(kTRUE);
   photpreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
   photpreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");    
-  photpreselinverteleveto->Set2012HCP(kFALSE);  
   photpreselinverteleveto->SetLeadingPtMin(20.);
   photpreselinverteleveto->SetTrailingPtMin(20.);
 
@@ -534,9 +497,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    photpreselnosmear->SetDoShowerShapeScaling(kFALSE);  
    photpreselnosmear->SetPhotonsFromBranch(kFALSE);
    photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
-   photpreselnosmear->SetMCSmearFactors2012HCP(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-   photpreselnosmear->SetMCSmearFactors2012HCPMVA(0.0068, 0.0068, 0.0096, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-   photpreselnosmear->UseSpecialSmearForDPMVA(true);
+   photpreselnosmear->SetMCSmearFactors(0.0068, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
    photpreselnosmear->SetJetsName(jetCorr->GetOutputName());  
    photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");  
    photpreselnosmear->SetLeadingPtMin(30.);
@@ -546,7 +507,6 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    photpreselnosmear->SetApplyLeptonTag(kTRUE);
    photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   photpreselnosmear->Set2012HCP(kFALSE); 
    photpreselnosmear->DoMCSmear(kFALSE);
    photpreselnosmear->DoMCEneSmear(kFALSE);
    photpreselnosmear->DoEneErrSmear(kTRUE);
@@ -575,7 +535,6 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    photcicnosmear->SetApplyLeptonTag(kTRUE);
    photcicnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    photcicnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");  
-   photcicnosmear->Set2012HCP(kFALSE);
    
    PhotonPairSelector         *photpreselinvertelevetonosmear = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVetoNoSmear");
    photpreselinvertelevetonosmear->SetOutputName("GoodPhotonsPreselInvertEleVetoNoSmear");
@@ -598,7 +557,6 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    photpreselinvertelevetonosmear->SetApplyLeptonTag(kTRUE);
    photpreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
    photpreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
-   photpreselinvertelevetonosmear->Set2012HCP(kFALSE); 
    photpreselinvertelevetonosmear->DoMCSmear(kFALSE);
    photpreselinvertelevetonosmear->DoDataEneCorr(kFALSE);
    photpreselinvertelevetonosmear->SetApplyEleVeto(kFALSE);

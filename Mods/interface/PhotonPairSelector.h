@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.35 2013/11/22 14:28:23 veverka Exp $
+// $Id: PhotonPairSelector.h,v 1.36 2013/11/27 23:41:21 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -33,7 +33,6 @@
 
 #include "MitPhysics/Utils/interface/MVAMet.h"
 #include "MitPhysics/Utils/interface/RhoUtilities.h"
-
 
 class TNtuple;
 class TRandom3;
@@ -68,6 +67,24 @@ namespace mithep
       kMetSigVtxSelection
     };
 
+    class EnergyCorrection {
+      
+      public:
+        
+        EnergyCorrection() : fCat(PhotonTools::kEBlowEtaGold), fMinRun(0), fMaxRun(0), fMinEt(-99.), fMaxEt(-99.), fCorr(1.) {}
+        EnergyCorrection(PhotonTools::eScaleCats cat, UInt_t minrun, UInt_t maxrun, Double_t minet, Double_t maxet, Double_t corr) : 
+          fCat(cat), fMinRun(minrun), fMaxRun(maxrun), fMinEt(minet), fMaxEt(maxet), fCorr(corr) {}
+          
+        PhotonTools::eScaleCats fCat;
+        UInt_t fMinRun;
+        UInt_t fMaxRun;
+        Double_t fMinEt;
+        Double_t fMaxEt;
+        Double_t fCorr;
+      
+    };
+    
+    
     // outsourced to MVATools (IdMVAType)  (fab)
 /*     enum IdMVA { */
 /*       k2011IdMVA = 0, */
@@ -119,36 +136,21 @@ namespace mithep
     // is Data Or Not?
     void                SetIsData (Bool_t b) { fIsData = b;}
 
-    void                Set2012HCP (Bool_t b) { f2012HCP = b;};
-
+    
+    void AddEnCorrFromFile(TString filename);
     
     // methods to set the MC smearing/energy correction values
-    void                AddEnCorrPerRun( UInt_t sRun, UInt_t eRun,
-					 Double_t corr_EBlowEta_hR9central,
-                                         Double_t corr_EBlowEta_hR9gap,
-					 Double_t corr_EBlowEta_lR9,
-                                         Double_t corr_EBhighEta_hR9,
-                                         Double_t corr_EBhighEta_lR9,                                         
-					 Double_t corr_EElowEta_hR9,
-					 Double_t corr_EElowEta_lR9,
-                                         Double_t corr_EEhighEta_hR9,
-                                         Double_t corr_EEhighEta_lR9) {
+    void                AddEnCorrPerRun( PhotonTools::eScaleCats cat, UInt_t sRun, UInt_t eRun, Double_t corr) {
 
-      fDataEnCorr_EBlowEta_hR9central.push_back(corr_EBlowEta_hR9central);
-      fDataEnCorr_EBlowEta_hR9gap.push_back(corr_EBlowEta_hR9gap);
-      fDataEnCorr_EBlowEta_lR9.push_back(corr_EBlowEta_lR9);
-      fDataEnCorr_EBhighEta_hR9.push_back(corr_EBhighEta_hR9);
-      fDataEnCorr_EBhighEta_lR9.push_back(corr_EBhighEta_lR9);      
-      fDataEnCorr_EElowEta_hR9.push_back(corr_EElowEta_hR9);
-      fDataEnCorr_EElowEta_lR9.push_back(corr_EElowEta_lR9);      
-      fDataEnCorr_EEhighEta_hR9.push_back(corr_EEhighEta_hR9);
-      fDataEnCorr_EEhighEta_lR9.push_back(corr_EEhighEta_lR9);       
-      fRunStart.push_back         (sRun);
-      fRunEnd.push_back           (eRun);
+      fDataEnCorr.push_back(EnergyCorrection(cat,sRun,eRun,-99.,-99.,corr));
     };
 
-    void                SetMCSmearFactors(Double_t _EBlowEta_hR9central,
-                                          Double_t _EBlowEta_hR9gap, 
+    void                AddEnCorrPerRunEtDep( PhotonTools::eScaleCats cat, UInt_t sRun, UInt_t eRun, Double_t minet, Double_t maxet, Double_t corr) {
+
+      fDataEnCorr.push_back(EnergyCorrection(cat,sRun,eRun,minet,maxet,corr));
+    };    
+    
+    void                SetMCSmearFactors(Double_t _EBlowEta_hR9,
 					  Double_t _EBlowEta_lR9,
                                           Double_t _EBhighEta_hR9, 
                                           Double_t _EBhighEta_lR9,
@@ -156,8 +158,7 @@ namespace mithep
 					  Double_t _EElowEta_lR9,
                                           Double_t _EEhighEta_hR9,
                                           Double_t _EEhighEta_lR9) {
-      fMCSmear_EBlowEta_hR9central = _EBlowEta_hR9central;
-      fMCSmear_EBlowEta_hR9gap = _EBlowEta_hR9gap;
+      fMCSmear_EBlowEta_hR9 = _EBlowEta_hR9;
       fMCSmear_EBlowEta_lR9 = _EBlowEta_lR9;
       fMCSmear_EBhighEta_hR9 = _EBhighEta_hR9;
       fMCSmear_EBhighEta_lR9 = _EBhighEta_lR9;      
@@ -168,8 +169,7 @@ namespace mithep
     };
 
     // special routine in ordetr to use different smearing to compute mass-error for di-photon MVA input
-    void                SetMCSmearFactorsMVA(Double_t _EBlowEta_hR9central,
-					     Double_t _EBlowEta_hR9gap, 
+    void                SetMCSmearFactorsMVA(Double_t _EBlowEta_hR9,
 					     Double_t _EBlowEta_lR9,
 					     Double_t _EBhighEta_hR9, 
 					     Double_t _EBhighEta_lR9,
@@ -178,8 +178,7 @@ namespace mithep
 					     Double_t _EEhighEta_hR9,
 					     Double_t _EEhighEta_lR9) {
 
-      fMCSmearMVA_EBlowEta_hR9central = _EBlowEta_hR9central;
-      fMCSmearMVA_EBlowEta_hR9gap = _EBlowEta_hR9gap;
+      fMCSmearMVA_EBlowEta_hR9 = _EBlowEta_hR9;
       fMCSmearMVA_EBlowEta_lR9 = _EBlowEta_lR9;
       fMCSmearMVA_EBhighEta_hR9 = _EBhighEta_hR9;
       fMCSmearMVA_EBhighEta_lR9 = _EBhighEta_lR9;      
@@ -189,77 +188,6 @@ namespace mithep
       fMCSmearMVA_EEhighEta_lR9 = _EEhighEta_lR9;      
     };
 
-
-    void                AddEnCorrPerRun2012HCP( UInt_t sRun, UInt_t eRun,
-						Double_t corr_EBlowEta_hR9central,
-						Double_t corr_EBlowEta_hR9gap,
-						Double_t corr_EBlowEta_lR9central,
-						Double_t corr_EBlowEta_lR9gap,
-						Double_t corr_EBhighEta_hR9,
-						Double_t corr_EBhighEta_lR9,                                         
-						Double_t corr_EElowEta_hR9,
-						Double_t corr_EElowEta_lR9,
-						Double_t corr_EEhighEta_hR9,
-						Double_t corr_EEhighEta_lR9) {
-      fDataEnCorr_EBlowEta_hR9central.push_back(corr_EBlowEta_hR9central);
-      fDataEnCorr_EBlowEta_hR9gap.push_back(corr_EBlowEta_hR9gap);
-      fDataEnCorr_EBlowEta_lR9central.push_back(corr_EBlowEta_lR9central);
-      fDataEnCorr_EBlowEta_lR9gap.push_back(corr_EBlowEta_lR9gap);
-      fDataEnCorr_EBhighEta_hR9.push_back(corr_EBhighEta_hR9);
-      fDataEnCorr_EBhighEta_lR9.push_back(corr_EBhighEta_lR9);      
-      fDataEnCorr_EElowEta_hR9.push_back(corr_EElowEta_hR9);
-      fDataEnCorr_EElowEta_lR9.push_back(corr_EElowEta_lR9);      
-      fDataEnCorr_EEhighEta_hR9.push_back(corr_EEhighEta_hR9);
-      fDataEnCorr_EEhighEta_lR9.push_back(corr_EEhighEta_lR9);       
-      fRunStart.push_back         (sRun);
-      fRunEnd.push_back           (eRun);
-    };
-    
-    void SetMCSmearFactors2012HCP(Double_t _EBlowEta_hR9central,
-				  Double_t _EBlowEta_hR9gap, 
-				  Double_t _EBlowEta_lR9central,
-				  Double_t _EBlowEta_lR9gap,
-				  Double_t _EBhighEta_hR9, 
-				  Double_t _EBhighEta_lR9,
-				  Double_t _EElowEta_hR9, 
-				  Double_t _EElowEta_lR9,
-				  Double_t _EEhighEta_hR9,
-				  Double_t _EEhighEta_lR9) {
-      fMCSmear_EBlowEta_hR9central = _EBlowEta_hR9central;
-      fMCSmear_EBlowEta_hR9gap = _EBlowEta_hR9gap;
-      fMCSmear_EBlowEta_lR9central = _EBlowEta_lR9central;
-      fMCSmear_EBlowEta_lR9gap = _EBlowEta_lR9gap;
-      fMCSmear_EBhighEta_hR9 = _EBhighEta_hR9;
-      fMCSmear_EBhighEta_lR9 = _EBhighEta_lR9;      
-      fMCSmear_EElowEta_hR9 = _EElowEta_hR9;
-      fMCSmear_EElowEta_lR9 = _EElowEta_lR9;
-      fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
-      fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
-    };
-
-    // special routine in ordetr to use different smearing to compute mass-error for di-photon MVA input
-    void SetMCSmearFactors2012HCPMVA(Double_t _EBlowEta_hR9central,
-				     Double_t _EBlowEta_hR9gap, 
-				     Double_t _EBlowEta_lR9central,
-				     Double_t _EBlowEta_lR9gap,
-				     Double_t _EBhighEta_hR9, 
-				     Double_t _EBhighEta_lR9,
-				     Double_t _EElowEta_hR9, 
-				     Double_t _EElowEta_lR9,
-				     Double_t _EEhighEta_hR9,
-				     Double_t _EEhighEta_lR9) {
-      fMCSmearMVA_EBlowEta_hR9central = _EBlowEta_hR9central;
-      fMCSmearMVA_EBlowEta_hR9gap = _EBlowEta_hR9gap;
-      fMCSmearMVA_EBlowEta_lR9central = _EBlowEta_lR9central;
-      fMCSmearMVA_EBlowEta_lR9gap = _EBlowEta_lR9gap;
-      fMCSmearMVA_EBhighEta_hR9 = _EBhighEta_hR9;
-      fMCSmearMVA_EBhighEta_lR9 = _EBhighEta_lR9;      
-      fMCSmearMVA_EElowEta_hR9 = _EElowEta_hR9;
-      fMCSmearMVA_EElowEta_lR9 = _EElowEta_lR9;
-      fMCSmearMVA_EEhighEta_hR9 = _EEhighEta_hR9;
-      fMCSmearMVA_EEhighEta_lR9 = _EEhighEta_lR9;      
-    };
-    
     void SetMCStochasticPivot(Double_t pivot_lowEta_hR9,
                               Double_t pivot_lowEta_lR9,
                               Double_t pivot_highEta_hR9,
@@ -331,11 +259,8 @@ namespace mithep
 
     // private auxiliary methods...
     void                FindHiggsPtAndZ(Float_t& pt, Float_t& z, Float_t& mass);
-    Int_t               FindRunRangeIdx(UInt_t run);
-    Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat);
+    Double_t            GetDataEnCorr(UInt_t run, const Photon *p);
     Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat,                    bool useSpecialSmear = false);   // last flag in case of special smearing for error computation
-    Double_t            GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat);
-    Double_t            GetMCSmearFacHCP(PhotonTools::eScaleCats cat,                 bool useSpecialSmear = false);   // last flag in case of special smearing for error computation
     
     Double_t            GetMCSmearFacStochastic(const Photon *p) const;
     
@@ -394,7 +319,6 @@ namespace mithep
     Bool_t              fGoodElectronsFromBranch;
     Bool_t              fUseSingleLegConversions;
 
-    Bool_t              f2012HCP;
     Bool_t              fStochasticSmear;
 
     const PhotonCol              *fPhotons;
@@ -413,28 +337,14 @@ namespace mithep
     const PFMetCol               *fPFMet;
     const ElectronCol            *fLeptonTagElectrons;
     const MuonCol                *fLeptonTagMuons;
+       
+    //vector of energy scale corrections
+    //format of tuple is:
+    //category, minrun, maxrun, minet, maxet, correction
+    std::vector<EnergyCorrection> fDataEnCorr;
     
-    // Vectroes to hols smeraring/correction factors
-    std::vector<Double_t> fDataEnCorr_EBlowEta_hR9central;
-    std::vector<Double_t> fDataEnCorr_EBlowEta_hR9gap;
-    std::vector<Double_t> fDataEnCorr_EBlowEta_lR9;
-    std::vector<Double_t> fDataEnCorr_EBlowEta_lR9central;
-    std::vector<Double_t> fDataEnCorr_EBlowEta_lR9gap;
-    std::vector<Double_t> fDataEnCorr_EBhighEta_hR9;
-    std::vector<Double_t> fDataEnCorr_EBhighEta_lR9;    
-    std::vector<Double_t> fDataEnCorr_EElowEta_hR9;
-    std::vector<Double_t> fDataEnCorr_EElowEta_lR9;
-    std::vector<Double_t> fDataEnCorr_EEhighEta_hR9;
-    std::vector<Double_t> fDataEnCorr_EEhighEta_lR9;
-    
-    std::vector<UInt_t>   fRunStart;
-    std::vector<UInt_t>   fRunEnd;
-    
-    Double_t              fMCSmear_EBlowEta_hR9central;
-    Double_t              fMCSmear_EBlowEta_hR9gap;
+    Double_t              fMCSmear_EBlowEta_hR9;
     Double_t              fMCSmear_EBlowEta_lR9;
-    Double_t              fMCSmear_EBlowEta_lR9central;
-    Double_t              fMCSmear_EBlowEta_lR9gap;
     Double_t              fMCSmear_EBhighEta_hR9;
     Double_t              fMCSmear_EBhighEta_lR9;    
     Double_t              fMCSmear_EElowEta_hR9;
@@ -443,11 +353,8 @@ namespace mithep
     Double_t              fMCSmear_EEhighEta_lR9;    
 
     //  special Smear factors for usage for diphoton MVA input, incase differrent from std smearing
-    Double_t              fMCSmearMVA_EBlowEta_hR9central;
-    Double_t              fMCSmearMVA_EBlowEta_hR9gap;
+    Double_t              fMCSmearMVA_EBlowEta_hR9;
     Double_t              fMCSmearMVA_EBlowEta_lR9;
-    Double_t              fMCSmearMVA_EBlowEta_lR9central;
-    Double_t              fMCSmearMVA_EBlowEta_lR9gap;
     Double_t              fMCSmearMVA_EBhighEta_hR9;
     Double_t              fMCSmearMVA_EBhighEta_lR9;    
     Double_t              fMCSmearMVA_EElowEta_hR9;

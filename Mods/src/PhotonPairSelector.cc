@@ -85,25 +85,9 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fJets                          (0),
   fPFMet                         (0),
   // ---------------------------------------
-  fDataEnCorr_EBlowEta_hR9central(0.),
-  fDataEnCorr_EBlowEta_hR9gap    (0.),
-  fDataEnCorr_EBlowEta_lR9       (0.),
-  fDataEnCorr_EBlowEta_lR9central(0.),
-  fDataEnCorr_EBlowEta_lR9gap    (0.),
-  fDataEnCorr_EBhighEta_hR9      (0.),
-  fDataEnCorr_EBhighEta_lR9      (0.),
-  fDataEnCorr_EElowEta_hR9       (0.),
-  fDataEnCorr_EElowEta_lR9       (0.),
-  fDataEnCorr_EEhighEta_hR9      (0.),
-  fDataEnCorr_EEhighEta_lR9      (0.),
-  fRunStart                      (0),
-  fRunEnd                        (0),
 
-  fMCSmear_EBlowEta_hR9central   (0.),
-  fMCSmear_EBlowEta_hR9gap       (0.),
+  fMCSmear_EBlowEta_hR9          (0.),
   fMCSmear_EBlowEta_lR9          (0.),
-  fMCSmear_EBlowEta_lR9central   (0.),
-  fMCSmear_EBlowEta_lR9gap       (0.),
   fMCSmear_EBhighEta_hR9         (0.),
   fMCSmear_EBhighEta_lR9         (0.),
   fMCSmear_EElowEta_hR9          (0.),
@@ -111,11 +95,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCSmear_EEhighEta_hR9         (0.),
   fMCSmear_EEhighEta_lR9         (0.),
 
-  fMCSmearMVA_EBlowEta_hR9central(0.),
-  fMCSmearMVA_EBlowEta_hR9gap    (0.),
+  fMCSmearMVA_EBlowEta_hR9       (0.),
   fMCSmearMVA_EBlowEta_lR9       (0.),
-  fMCSmearMVA_EBlowEta_lR9central(0.),
-  fMCSmearMVA_EBlowEta_lR9gap    (0.),
   fMCSmearMVA_EBhighEta_hR9      (0.),
   fMCSmearMVA_EBhighEta_lR9      (0.),
   fMCSmearMVA_EElowEta_hR9       (0.),
@@ -205,7 +186,6 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fLeptonTagMuons                (0),
   
   // ------------------------------------------------------
-  f2012HCP                       (kFALSE),
   fStochasticSmear               (kFALSE),
   
   fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS)
@@ -462,13 +442,8 @@ void PhotonPairSelector::Process()
     PhotonTools::eScaleCats escalecat1;
     PhotonTools::eScaleCats escalecat2;
 
-    if(f2012HCP){
-      escalecat1 = PhotonTools::EScaleCatHCP(fixPh1st[iPair]);
-      escalecat2 = PhotonTools::EScaleCatHCP(fixPh2nd[iPair]);
-    }else{
-      escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
-      escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);
-    }
+    escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
+    escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);
     
     // now we dicide if we either scale (Data) or Smear (MC) the Photons
     if (fIsData) {
@@ -478,23 +453,10 @@ void PhotonPairSelector::Process()
         double scaleFac2 = 1.;
 	
         //eta-dependent corrections
-	
-        // checking the run Rangees ...
-        Int_t runRange = FindRunRangeIdx(runNumber);
 
-        if(runRange > -1) {
-	  if(f2012HCP){
-	    scaleFac1 *= GetDataEnCorrHCP(runRange, escalecat1);
-	    scaleFac2 *= GetDataEnCorrHCP(runRange, escalecat2);
-	  }else{
-	    scaleFac1 *= GetDataEnCorr(runRange, escalecat1);
-	    scaleFac2 *= GetDataEnCorr(runRange, escalecat2);
-	  }
-        }
-        else {
-	  printf("Error: Run Range not found for data energy scale correction\n");
-	  assert(0);
-	}
+	scaleFac1 *= GetDataEnCorr(runNumber, fixPh1st[iPair]);
+	scaleFac2 *= GetDataEnCorr(runNumber, fixPh2nd[iPair]);
+        
         PhotonTools::ScalePhoton(fixPh1st[iPair], scaleFac1);
         PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
       }
@@ -510,13 +472,8 @@ void PhotonPairSelector::Process()
       double width1 = 0.;
       double width2 = 0.;
       
-      if(f2012HCP){
-	width1 = GetMCSmearFacHCP(escalecat1);
-	width2 = GetMCSmearFacHCP(escalecat2);
-      }else {
-	width1 = GetMCSmearFac(escalecat1);
-	width2 = GetMCSmearFac(escalecat2);
-      }
+      width1 = GetMCSmearFac(escalecat1);
+      width2 = GetMCSmearFac(escalecat2);
       
       double ewidth1 = width1;
       double ewidth2 = width2;
@@ -545,15 +502,8 @@ void PhotonPairSelector::Process()
 
       // in case we want to use specail smearing factors for Error computation, recompute widths
       if( fUseSpecialSmearForDPMVA ) {
-	
-	if(f2012HCP){
-	  width1 = GetMCSmearFacHCP(escalecat1, true);
-	  width2 = GetMCSmearFacHCP(escalecat2, true);
-	}else {
-	  width1 = GetMCSmearFac(escalecat1, true);
-	  width2 = GetMCSmearFac(escalecat2, true);
-	}
-	 
+        width1 = GetMCSmearFac(escalecat1, true);
+        width2 = GetMCSmearFac(escalecat2, true); 
       }
       if (fDoEneErrSmear) {
         PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
@@ -1290,44 +1240,41 @@ void PhotonPairSelector::FindHiggsPtAndZ(Float_t& pt, Float_t& decayZ, Float_t& 
 }
 
 //---------------------------------------------------------------------------------------------------
-Int_t PhotonPairSelector::FindRunRangeIdx(UInt_t run)
+Double_t PhotonPairSelector::GetDataEnCorr(UInt_t run, const Photon *p)
 {
-  // this routine looks for the idx of the run-range
-  Int_t runRange=-1;
-  for (UInt_t iRun = 0; iRun<fRunStart.size(); ++iRun) {
-    if (run >= fRunStart[iRun] && run <= fRunEnd[iRun]) {
-      runRange = (Int_t) iRun;
-      return runRange;
+  
+  PhotonTools::eScaleCats cat = PhotonTools::EScaleCat(p);
+  
+  int nmatch = 0;  
+  double scale = 1.;
+  
+  for (std::vector<EnergyCorrection>::const_iterator it=fDataEnCorr.begin(); it!=fDataEnCorr.end(); ++it) {
+    if (cat==it->fCat && run>=it->fMinRun && run<=it->fMaxRun) {
+      if (it->fMinEt<0. && it->fMaxEt<0.) {
+        //non-et dependent scale
+        scale = it->fCorr;
+        ++nmatch;
+      }
+      else {
+        //et dependent scale
+        //use Et from supercluster position to avoid vertex selection dependence (consistent with stochastic smearing)
+        double etorigin = p->E()/cosh(p->SCluster()->Eta());
+        if (etorigin>=it->fMinEt && (etorigin<it->fMaxEt || it->fMaxEt<0.)) {
+          scale = it->fCorr;
+          ++nmatch;
+        }
+      }    
     }
   }
-  return runRange;
-}
-
-//---------------------------------------------------------------------------------------------------
-Double_t PhotonPairSelector::GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat)
-{
-  switch (cat) {
-  case PhotonTools::kEBhighEtaGold:
-    return fDataEnCorr_EBhighEta_hR9[runRange];
-  case PhotonTools::kEBhighEtaBad:
-    return fDataEnCorr_EBhighEta_lR9[runRange];
-  case PhotonTools::kEBlowEtaGoldCenter:
-    return fDataEnCorr_EBlowEta_hR9central[runRange];
-  case PhotonTools::kEBlowEtaGoldGap:
-    return fDataEnCorr_EBlowEta_hR9gap[runRange];
-  case PhotonTools::kEBlowEtaBad:
-    return fDataEnCorr_EBlowEta_lR9[runRange];
-  case PhotonTools::kEEhighEtaGold:
-    return fDataEnCorr_EEhighEta_hR9[runRange];
-  case PhotonTools::kEEhighEtaBad:
-    return fDataEnCorr_EEhighEta_lR9[runRange];
-  case PhotonTools::kEElowEtaGold:
-    return fDataEnCorr_EElowEta_hR9[runRange];
-  case PhotonTools::kEElowEtaBad:
-    return fDataEnCorr_EElowEta_lR9[runRange];
-  default:
-    return 1.;
+  
+  if (nmatch!=1) {
+    printf("ERROR: Number of matching energy scale corrections = %i (should be exactly 1)\n",nmatch);
+    printf("run = %i, cat = %i, ncortotal = %i\n",int(run),int(cat),int(fDataEnCorr.size()));
+    assert(0);
   }
+    
+  return scale;
+  
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -1340,10 +1287,8 @@ Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat, bool use
       return fMCSmear_EBhighEta_hR9;
     case PhotonTools::kEBhighEtaBad:
       return fMCSmear_EBhighEta_lR9;
-    case PhotonTools::kEBlowEtaGoldCenter:
-      return fMCSmear_EBlowEta_hR9central;
-    case PhotonTools::kEBlowEtaGoldGap:
-      return fMCSmear_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaGold:
+      return fMCSmear_EBlowEta_hR9;
     case PhotonTools::kEBlowEtaBad:
       return fMCSmear_EBlowEta_lR9;
     case PhotonTools::kEEhighEtaGold:
@@ -1363,10 +1308,8 @@ Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat, bool use
       return fMCSmearMVA_EBhighEta_hR9;
     case PhotonTools::kEBhighEtaBad:
       return fMCSmearMVA_EBhighEta_lR9;
-    case PhotonTools::kEBlowEtaGoldCenter:
-      return fMCSmearMVA_EBlowEta_hR9central;
-    case PhotonTools::kEBlowEtaGoldGap:
-      return fMCSmearMVA_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaGold:
+      return fMCSmearMVA_EBlowEta_hR9;
     case PhotonTools::kEBlowEtaBad:
       return fMCSmearMVA_EBlowEta_lR9;
     case PhotonTools::kEEhighEtaGold:
@@ -1384,95 +1327,6 @@ Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat, bool use
   
 }
 
-Double_t PhotonPairSelector::GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat)
-{
-  switch (cat) {
-  case PhotonTools::kEBhighEtaGold:
-    return fDataEnCorr_EBhighEta_hR9[runRange];
-  case PhotonTools::kEBhighEtaBad:
-    return fDataEnCorr_EBhighEta_lR9[runRange];
-  case PhotonTools::kEBlowEtaGoldCenter:
-    return fDataEnCorr_EBlowEta_hR9central[runRange];
-  case PhotonTools::kEBlowEtaGoldGap:
-    return fDataEnCorr_EBlowEta_hR9gap[runRange];
-  case PhotonTools::kEBlowEtaBadCenter:
-    return fDataEnCorr_EBlowEta_lR9central[runRange];
-  case PhotonTools::kEBlowEtaBadGap:
-    return fDataEnCorr_EBlowEta_lR9gap[runRange];
-  case PhotonTools::kEEhighEtaGold:
-    return fDataEnCorr_EEhighEta_hR9[runRange];
-  case PhotonTools::kEEhighEtaBad:
-    return fDataEnCorr_EEhighEta_lR9[runRange];
-  case PhotonTools::kEElowEtaGold:
-    return fDataEnCorr_EElowEta_hR9[runRange];
-  case PhotonTools::kEElowEtaBad:
-    return fDataEnCorr_EElowEta_lR9[runRange];
-  default:
-    return 1.;
-  }
-}
-
-//---------------------------------------------------------------------------------------------------
-Double_t PhotonPairSelector::GetMCSmearFacHCP(PhotonTools::eScaleCats cat, bool useSpecialSmear)
-{
-
-  if(!useSpecialSmear) {
-
-    switch (cat) {
-    case PhotonTools::kEBhighEtaGold:
-      return fMCSmear_EBhighEta_hR9;
-    case PhotonTools::kEBhighEtaBad:
-      return fMCSmear_EBhighEta_lR9;
-    case PhotonTools::kEBlowEtaGoldCenter:
-      return fMCSmear_EBlowEta_hR9central;
-    case PhotonTools::kEBlowEtaGoldGap:
-      return fMCSmear_EBlowEta_hR9gap;
-    case PhotonTools::kEBlowEtaBadCenter:
-      return fMCSmear_EBlowEta_lR9central;
-    case PhotonTools::kEBlowEtaBadGap:
-      return fMCSmear_EBlowEta_lR9gap;
-    case PhotonTools::kEEhighEtaGold:
-      return fMCSmear_EEhighEta_hR9;
-    case PhotonTools::kEEhighEtaBad:
-      return fMCSmear_EEhighEta_lR9;
-    case PhotonTools::kEElowEtaGold:
-      return fMCSmear_EElowEta_hR9;
-    case PhotonTools::kEElowEtaBad:
-      return fMCSmear_EElowEta_lR9;
-    default:
-      return 1.;
-    }
-
-  } else {
-
-    switch (cat) {
-    case PhotonTools::kEBhighEtaGold:
-      return fMCSmearMVA_EBhighEta_hR9;
-    case PhotonTools::kEBhighEtaBad:
-      return fMCSmearMVA_EBhighEta_lR9;
-    case PhotonTools::kEBlowEtaGoldCenter:
-      return fMCSmearMVA_EBlowEta_hR9central;
-    case PhotonTools::kEBlowEtaGoldGap:
-      return fMCSmearMVA_EBlowEta_hR9gap;
-    case PhotonTools::kEBlowEtaBadCenter:
-      return fMCSmearMVA_EBlowEta_lR9central;
-    case PhotonTools::kEBlowEtaBadGap:
-      return fMCSmearMVA_EBlowEta_lR9gap;
-    case PhotonTools::kEEhighEtaGold:
-      return fMCSmearMVA_EEhighEta_hR9;
-    case PhotonTools::kEEhighEtaBad:
-      return fMCSmearMVA_EEhighEta_lR9;
-    case PhotonTools::kEElowEtaGold:
-      return fMCSmearMVA_EElowEta_hR9;
-    case PhotonTools::kEElowEtaBad:
-      return fMCSmearMVA_EElowEta_lR9;
-    default:
-      return 1.;
-    }
-
-  }
-}
-
 //---------------------------------------------------------------------------------------------------
 Double_t PhotonPairSelector::GetMCSmearFacStochastic(const Photon *p) const {
  
@@ -1482,7 +1336,7 @@ Double_t PhotonPairSelector::GetMCSmearFacStochastic(const Photon *p) const {
   double rho = 0.;
   double phi = 0.;
   
-  if (cat == PhotonTools::kEBlowEtaGoldCenter || cat == PhotonTools::kEBlowEtaGoldGap) {
+  if (cat == PhotonTools::kEBlowEtaGold) {
     pivot = fMCStochasticPivot_EBlowEta_hR9;
     rho = fMCStochasticRho_EBlowEta_hR9;
     phi = fMCStochasticPhi_EBlowEta_hR9;
@@ -1531,5 +1385,91 @@ Float_t PhotonPairSelector::GetEventCat(PhotonTools::CiCBaseLineCats cat1,
     return (ph1IsHR9 && ph2IsHR9 ? 0. : 1.);
 
   return (ph1IsHR9 && ph2IsHR9 ? 2. : 3.);
+}
+
+//---------------------------------------------------------------------------------------------------
+void PhotonPairSelector::AddEnCorrFromFile(TString filename) {
+  
+  ifstream f_in(filename);
+  if(!f_in.good()){
+    std::cerr << "[ERROR] file " << filename << " not readable" << std::endl;
+    exit(1);
+    return;
+  }
+  
+  unsigned int runMin, runMax;
+  TString catstring, dummy;
+  double deltaP, err_deltaP;
+
+  PhotonTools::eScaleCats cat;
+  
+  while (1) {
+    f_in >> catstring >> dummy
+         >> runMin >> runMax
+         >> deltaP >> err_deltaP;
+
+    if (!f_in.good()) break;
+    
+    
+    //set eta-r9 category
+    if (catstring.Contains("absEta_0_1-gold")) {
+      cat = PhotonTools::kEBlowEtaGold;
+    }
+    else if (catstring.Contains("absEta_0_1-bad")) {
+      cat = PhotonTools::kEBlowEtaBad;
+    }
+    else if (catstring.Contains("absEta_1_1.4442-gold")) {
+      cat = PhotonTools::kEBhighEtaGold;
+    }
+    else if (catstring.Contains("absEta_1_1.4442-bad")) {
+      cat = PhotonTools::kEBhighEtaBad;
+    }
+    else if (catstring.Contains("absEta_1.566_2-gold")) {
+      cat = PhotonTools::kEElowEtaGold;
+    }
+    else if (catstring.Contains("absEta_1.566_2-bad")) {
+      cat = PhotonTools::kEElowEtaBad;
+    }
+    else if (catstring.Contains("absEta_2_2.5-gold")) {
+      cat = PhotonTools::kEEhighEtaGold;
+    }
+    else if (catstring.Contains("absEta_2_2.5-bad")) {
+      cat = PhotonTools::kEEhighEtaBad;
+    }    
+    else {
+      printf("ERROR: Category String not matched\n");
+      assert(0);
+    }
+    
+    double minet = -99.;
+    double maxet = -99.;
+    
+    //set Et boundaries if applicable
+    if (catstring.Contains("-Et_")) {
+      TObjArray *substrings = catstring.Tokenize("_");
+      int minetidx = 0;
+      int maxetidx = 0;
+      for (int istr=0; istr<substrings->GetSize(); ++istr) {
+        TString substr = static_cast<TObjString*>(substrings->At(istr))->GetString();
+        if (substr.Contains("-Et")) {
+          minet = static_cast<TObjString*>(substrings->At(istr+1))->GetString().Atof();
+          maxet = static_cast<TObjString*>(substrings->At(istr+2))->GetString().Atof();
+          break;
+        }
+      }
+      delete substrings;
+    }
+    
+    //printf("category = %s, dummy = %s, scalecat = %i, minrun = %i, maxrun = %i, minet = %5f, maxet = %5f, dp = %5f, dperr = %5f\n",catstring.Data(),dummy.Data(),int(cat),runMin,runMax,minet, maxet, deltaP,err_deltaP);
+    
+    if (minet==20.) minet = -99.;
+    if (maxet==100.) maxet = -99.;
+    
+    AddEnCorrPerRunEtDep(cat, runMin, runMax, minet, maxet, deltaP);
+    
+  }
+  
+  f_in.close();  
+  
 }
 

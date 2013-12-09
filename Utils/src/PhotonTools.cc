@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.42 2013/06/21 13:11:42 mingyang Exp $
+// $Id: PhotonTools.cc,v 1.43 2013/11/27 23:41:22 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -22,12 +22,7 @@ PhotonTools::eScaleCats PhotonTools::EScaleCat(const Photon *p)
 {
   if (p->SCluster()->AbsEta()<1.0) {
     if (p->R9()>0.94) {
-      Int_t ieta = p->SCluster()->Seed()->IEta();
-      Int_t iphi = p->SCluster()->Seed()->IPhi();      
-      Bool_t central = ( ((std::abs(ieta)-1)/5+1 >= 2 && (std::abs(ieta)-1)/5+1 < 5) || ((std::abs(ieta)-1)/5+1 >= 7 && (std::abs(ieta)-1)/5+1 < 9  ) || ((std::abs(ieta)-1)/5+1 >= 11 && (std::abs(ieta)-1)/5+1 < 13) || ((std::abs(ieta)-1)/5+1 >= 15 && (std::abs(ieta)-1)/5+1 < 17) ) && (iphi %20) > 5 && (iphi%20) <16;
-      
-      if (central) return kEBlowEtaGoldCenter;
-      else return kEBlowEtaGoldGap;
+      return kEBlowEtaGold;
     }
     else return kEBlowEtaBad;
   }
@@ -46,36 +41,15 @@ PhotonTools::eScaleCats PhotonTools::EScaleCat(const Photon *p)
   
 }
 
-PhotonTools::eScaleCats PhotonTools::EScaleCatHCP(const Photon *p)
-{
-  if (p->SCluster()->AbsEta()<1.0) {
-    Int_t ieta = p->SCluster()->Seed()->IEta();
-    Int_t iphi = p->SCluster()->Seed()->IPhi();      
-    Bool_t central = ( ((std::abs(ieta)-1)/5+1 >= 2 && (std::abs(ieta)-1)/5+1 < 5) || ((std::abs(ieta)-1)/5+1 >= 7 && (std::abs(ieta)-1)/5+1 < 9  ) || ((std::abs(ieta)-1)/5+1 >= 11 && (std::abs(ieta)-1)/5+1 < 13) || ((std::abs(ieta)-1)/5+1 >= 15 && (std::abs(ieta)-1)/5+1 < 17) ) && (iphi %20) > 5 && (iphi%20) <16;
-    if(p->R9()>0.94 && central) return kEBlowEtaGoldCenter;
-    else if(p->R9()>0.94 && (!central)) return kEBlowEtaGoldGap;
-    else if(p->R9()<=0.94 && central) return kEBlowEtaBadCenter;
-    else return kEBlowEtaBadGap;
-  }
-  else if (p->SCluster()->AbsEta()<1.5) {
-    if (p->R9()>0.94) return kEBhighEtaGold;
-    else return kEBhighEtaBad;    
-  }
-  else if (p->SCluster()->AbsEta()<2.0) {
-    if (p->R9()>0.94) return kEElowEtaGold;
-    else return kEElowEtaBad;    
-  }
-  else {
-    if (p->R9()>0.94) return kEEhighEtaGold;
-    else return kEEhighEtaBad;    
-  }  
-  
-}
 
 void PhotonTools::ScalePhoton(Photon* p, Double_t scale) {
   if( !p ) return;
   FourVectorM mom = p->Mom();
   p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
+  
+  double oldscale = std::max(0.,p->EnergyScale());
+  
+  p->SetEnergyScale(oldscale*scale);
   
 }
 

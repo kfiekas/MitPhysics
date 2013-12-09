@@ -71,11 +71,8 @@ namespace mithep {
      };     
      
      enum eScaleCats {
-       kEBlowEtaGoldCenter = 0,
-       kEBlowEtaGoldGap,
+       kEBlowEtaGold = 0,
        kEBlowEtaBad,
-       kEBlowEtaBadCenter,
-       kEBlowEtaBadGap,
        kEBhighEtaGold,
        kEBhighEtaBad,
        kEElowEtaGold,
@@ -91,7 +88,6 @@ namespace mithep {
      };
 
     static eScaleCats EScaleCat(const Photon *p);
-    static eScaleCats EScaleCatHCP(const Photon *p);
 
     // Methods for scaling/smearing Photons
     static void ScalePhoton(Photon* p, Double_t scale);
