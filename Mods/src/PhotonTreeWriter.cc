@@ -2373,14 +2373,19 @@ const Muon* PhotonTreeWriter::GetLeptonTagMuon(const Photon *phHard,
     }
     cout << "++ Exiting GetLeptonTagMuon ..." << endl;
   }
-  if (fLeptonTagMuons->GetEntries() > 0                       &&
-      fLeptonTagMuons->At(0) != 0                             &&
-      MathUtils::DeltaR(fLeptonTagMuons->At(0), phHard) >= 1.0 && 
-      MathUtils::DeltaR(fLeptonTagMuons->At(0), phSoft) >= 1.0) {
-    return fLeptonTagMuons->At(0);
-  } else {
-    return 0;
+  
+  for (unsigned int imu=0; imu<fLeptonTagMuons->GetEntries(); ++imu) {
+    const Muon *mu = fLeptonTagMuons->At(imu);
+    if (fLeptonTagMuons->GetEntries() > 0                       &&
+        fLeptonTagMuons->At(0) != 0                             &&
+        MathUtils::DeltaR(mu, phHard) >= 1.0 && 
+        MathUtils::DeltaR(mu, phSoft) >= 1.0) {
+      return mu;
+    }
   }
+    
+  return 0;
+  
 } // const Muon* PhotonTreeWriter::GetLeptonTagMuon(..)
   
   
@@ -2453,18 +2458,23 @@ const Electron* PhotonTreeWriter::GetLeptonTagElectron(const Photon *phHard,
      cout << "++ Exiting GetLeptonTagElectron ..." << endl;
   }
   
-  if (fLeptonTagElectrons->GetEntries() > 0                          &&
-      fLeptonTagElectrons->At(0) != 0                                &&
-      PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
-      PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
-      PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          && 
-      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1          &&     
-      MathUtils::DeltaR(fLeptonTagElectrons->At(0), phHard) >= 1     &&
-      MathUtils::DeltaR(fLeptonTagElectrons->At(0), phSoft) >= 1){
-    return fLeptonTagElectrons->At(0);
-  } else {
-    return 0;
+  //loop over all electrons
+  for (unsigned int iele=0; iele<fLeptonTagElectrons->GetEntries(); ++iele) {
+    const Electron *ele = fLeptonTagElectrons->At(iele);
+    if (fLeptonTagElectrons->GetEntries() > 0                          &&
+        fLeptonTagElectrons->At(0) != 0                                &&
+        PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
+        PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
+        PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          && 
+        PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1          &&     
+        MathUtils::DeltaR(ele, phHard) >= 1     &&
+        MathUtils::DeltaR(ele, phSoft) >= 1){
+      return ele;
+    } 
   }
+    
+  return 0;
+  
 } // const Electron* PhotonTreeWriter::GetLeptonTagElectron(..)
 
   
@@ -2496,6 +2506,8 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
   // TODO: Set the selected vertex to the lepton vertex if tagged as a
   //       VH(lep) event.
   
+  //printf("ApplyVHLepTag: electrons = %i, softelectrons = %i, muons = %i, softmuons = %i\n",fLeptonTagElectrons->GetEntries(), fLeptonTagSoftElectrons->GetEntries(), fLeptonTagMuons->GetEntries(), fLeptonTagSoftMuons->GetEntries());
+  
   if (fVerbosityLevel > 90) {
     cout << "+ Entering ApplyVHLepTag ..." << endl
          << "+ fElectrons->GetEntries(): " << fElectrons->GetEntries() << endl
@@ -2505,6 +2517,7 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
          << fLeptonTagMuons->GetEntries() << endl
          << "+ corrpfmet: " << fDiphotonEvent->corrpfmet << endl;
   }
+
   fDiphotonEvent->VHLepTag = 0; // non-lepton event
   bool isVHLepLoose = false;
   bool isVHLepTight = false;
@@ -2515,12 +2528,16 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
   if (fDiphotonEvent->leptonTag < 0) {
     ApplyLeptonTag(phHard, phSoft, selvtx);
   }
+  
+  //printf("check dilepton, tight = %i\n",int(isVHLepTight));
 
   const Muon *muon = GetLeptonTagMuon(phHard, phSoft);
   if (muon && VHLepNumberOfJets(phHard, phSoft, selvtx, muon) <= 2) {
     if (fDiphotonEvent->corrpfmet > 45.) isVHLepTight = true; // high MET event
     else                                 isVHLepLoose = true; // low MET event
   } // Found a good VH(lep) tag muon.
+  
+  //printf("check muon, tight  = %i, loose = %i\n",int(isVHLepTight),int(isVHLepLoose));
   
   const Electron *electron = GetLeptonTagElectron(phHard, phSoft);
   if (electron && VHLepNumberOfJets(phHard, phSoft, selvtx, electron) <= 2) {
@@ -2532,6 +2549,8 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
     } // Low MET event.
   } // Found a good VH(lep) tag electron.
 
+  //printf("check electron, tight  = %i, loose = %i\n",int(isVHLepTight),int(isVHLepLoose));
+  
   if (isVHLepLoose) fDiphotonEvent->VHLepTag += 1;
   if (isVHLepTight) fDiphotonEvent->VHLepTag += 2;
 
@@ -2766,6 +2785,9 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
   }
   
   
+  //printf("ApplyTTHLepTag: electrons = %i, softelectrons = %i, muons = %i, softmuons = %i\n",fLeptonTagElectrons->GetEntries(), fLeptonTagSoftElectrons->GetEntries(), fLeptonTagMuons->GetEntries(), fLeptonTagSoftMuons->GetEntries());
+  
+  
   fDiphotonEvent->tthTag = 0;
   
   // Selection taken from the AN2012_480_V6 of 24 April 2013 further
@@ -2775,6 +2797,8 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
 
   const Particle *lepton = TTHSelectLepton(phHard, phSoft, selvtx);
 
+  //printf("lepton = %p\n",(void*)lepton);
+  
   // Init jet object counters
   UInt_t nJets = 0;
   UInt_t nBJets = 0;
@@ -3000,12 +3024,10 @@ PhotonTreeWriter::TTHSelectElectron(const Photon *phHard,
          <<      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) << endl;
   }   
   
-  const Electron *selectedElectron = 0;
   if (PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
       PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
       PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          &&
       PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1){
-    double maxIdMva = -999.;
     // Loop over electrons, apply all cuts, find the one wiht hightes ID MVA
     for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {
       const Electron *ele = fLeptonTagElectrons->At(iele);
@@ -3022,33 +3044,39 @@ PhotonTreeWriter::TTHSelectElectron(const Photon *phHard,
              << "+++ MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10): " 
              <<      MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10) << endl
              << "+++ MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10): " 
-             <<      MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10) << endl
-             << "+++ GetElectronIdMva(ele): " << GetElectronIdMva(ele) << endl;
+             <<      MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10) << endl;
+             //<< "+++ GetElectronIdMva(ele): " << GetElectronIdMva(ele) << endl;
       }   
       
       // Apply kinematic cuts, see L133 and L134 of the AN
-      if (ele->Pt() < 20. || ele->AbsEta() < 2.5) continue;
+      //(JOSH: In fact these are already applied in the ElectronIDMod as we have configured it)
+      //if (ele->Pt() < 20. || ele->AbsEta() > 2.5) continue;
+      //keep Pt cut here in any case we reorganize logic later
+      if (ele->Pt()<20.) continue;
+      
       // Require separation between this electron and both photons,
       // see the slide 7, bullet 2
       if (MathUtils::DeltaR(ele, phHard) < 0.5) continue;
       if (MathUtils::DeltaR(ele, phSoft) < 0.5) continue;
       // Require electron-photon mass outside of a 20 GeV window around MZ
-      if (MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10)) continue;
-      if (MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10)) continue;
+      //JOSH: Shouldn't be applied for ttH category
+//       if (MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10)) continue;
+//       if (MassOfPairIsWithinWindowAroundMZ(ele, phSoft, 10)) continue;
       // Electron ID MVA arbitration (private discussion with
       // Francesco Micheli on 26 Nov 2013)
-      double idMva = GetElectronIdMva(ele);
-      if (idMva > maxIdMva) {
-        maxIdMva = idMva;
-        selectedElectron = ele;
-      }
+//       double idMva = GetElectronIdMva(ele);
+//       if (idMva > maxIdMva) {
+//         maxIdMva = idMva;
+//         selectedElectron = ele;
+//       }
+      //JOSH: electrons here are already sorted by mva output, so can just take the first one and break
+      //(in fact the call to GetElectronIdMva was segfaulting for a reason which I didn't care to debug)
+      return ele;
     } // Loop over electrons
   }
-  if (fVerbosityLevel > 90) {
-    cout << "+++ selectedElectron: " << selectedElectron << endl
-         << "+++ Exiting TTHSelectElectron ..." << endl << flush;
-  }   
-  return selectedElectron;
+
+  return 0;
+  
 } // TTHSelectElectron
 
 
