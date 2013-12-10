@@ -154,7 +154,6 @@ namespace mithep
       Float_t eerrsmeared;
       Float_t esmearing;
       Float_t eerrsmearing;
-      Float_t escale;
       Float_t idmva;
       Float_t ecalisodr03;
       Float_t hcalisodr03;
@@ -785,7 +784,7 @@ namespace mithep
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
     void                SetApplyPFMetCorr(Bool_t b)       { fApplyPFMetCorrections = b;  }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
-    void                SetVerbosityLevel(Bool_t b)       { fVerbosityLevel = b;         }
+    void                SetVerbosityLevel(Int_t b)       { fVerbosityLevel = b;         }
 
 
 
