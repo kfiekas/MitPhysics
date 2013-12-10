@@ -1,4 +1,4 @@
-// $Id: ElectronIDMod.cc,v 1.139 2013/10/18 15:17:34 ceballos Exp $
+// $Id: ElectronIDMod.cc,v 1.140 2013/11/28 18:04:13 veverka Exp $
 
 #include "MitPhysics/Mods/interface/ElectronIDMod.h"
 #include "MitAna/DataTree/interface/StableData.h"
@@ -637,6 +637,8 @@ void ElectronIDMod::Process()
   int NPass = 0;
 
 
+  std::vector<std::pair<double, int> > elemvaidxs;
+  
   //printf("\n");
   //printf("ming sync check number of electrons:%d\n",fElectrons->GetEntries());
 
@@ -789,12 +791,9 @@ void ElectronIDMod::Process()
     if(fElIdType == ElectronTools::kHggLeptonTagId2012HCP){
       MVAValue = EvaluateMVAID(e, ElectronTools::kHggLeptonTagId2012HCP, fVertices->At(closestVtx), fPFCandidates, fPileupEnergyDensity);
       idcut = PassIDCut(e, fElIdType, fVertices->At(closestVtx));
-      if(MVAValue>MVAValueMax){
-        MVAValueMax = MVAValue;
-        NElectronMVAValueMax = i;
-      } else if (MVAValue > MVAValueSubMax){
-        MVAValueSubMax = MVAValue;
-        NElectronMVAValueSubMax = i;
+      if (idcut) {
+        //fill temp vector of indexes and mva values for sorting
+        elemvaidxs.push_back(std::make_pair(MVAValue,i));
       }
     } else {
       idcut = PassIDCut(e, fElIdType, fVertices->At(0));
@@ -802,7 +801,7 @@ void ElectronIDMod::Process()
 
     if (!idcut) 
       continue;
-
+    
     // apply charge filter
     if(fChargeFilter == kTRUE) {
       Bool_t passChargeFilter = ElectronTools::PassChargeFilter(e);
@@ -828,11 +827,12 @@ void ElectronIDMod::Process()
   GoodElectrons->Sort();
 
   if(fElIdType == ElectronTools::kHggLeptonTagId2012HCP) {
-    if (NPass > 0) {
-      GoodElectrons->Add(fElectrons->At(NElectronMVAValueMax));
-    }
-    if (NPass > 1) {
-      GoodElectrons->Add(fElectrons->At(NElectronMVAValueSubMax));
+    //sort by mva value (in descending order)
+    std::sort(elemvaidxs.begin(), elemvaidxs.end(), std::greater<std::pair<double, int> >());
+    
+    //fill final list of electrons
+    for (std::vector<std::pair<double,int> >::const_iterator it=elemvaidxs.begin(); it!=elemvaidxs.end(); ++it) {
+      GoodElectrons->Add(fElectrons->At(it->second));
     }
   }
 
