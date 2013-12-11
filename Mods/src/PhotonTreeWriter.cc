@@ -2464,10 +2464,10 @@ const Electron* PhotonTreeWriter::GetLeptonTagElectron(const Photon *phHard,
     const Electron *ele = fLeptonTagElectrons->At(iele);
     if (fLeptonTagElectrons->GetEntries() > 0                          &&
         fLeptonTagElectrons->At(0) != 0                                &&
-        PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          && 
-        PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1          &&     
-        MathUtils::DeltaR(ele, phHard) >= 1     &&
-        MathUtils::DeltaR(ele, phSoft) >= 1){
+        PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1.         && 
+        PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1.         &&     
+        MathUtils::DeltaR(ele, phHard) >= 1.     &&
+        MathUtils::DeltaR(ele, phSoft) >= 1.){
       return ele;
     } 
   }
@@ -2631,8 +2631,8 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
                                           const Photon *phSoft) {
   if (fLeptonTagSoftElectrons->GetEntries() < 2) return false;
   
-  if (PhotonTools::ElectronVetoCiC(phHard, fElectrons)              < 1 || 
-      PhotonTools::ElectronVetoCiC(phSoft, fElectrons)              < 1) {
+  if (PhotonTools::ElectronVetoCiC(phHard, fElectrons)              < 1. || 
+      PhotonTools::ElectronVetoCiC(phSoft, fElectrons)              < 1.) {
     return false;
   }
 
@@ -2641,8 +2641,8 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
   // Loop over electrons.
   for (UInt_t iele=0; iele < fLeptonTagSoftElectrons->GetEntries(); ++iele){
     const Electron *ele = fLeptonTagSoftElectrons->At(iele);
-    if (MathUtils::DeltaR(ele, phHard) < 0.5) continue;
-    if (MathUtils::DeltaR(ele, phSoft) < 0.5) continue;
+    if (MathUtils::DeltaR(ele, phHard) < 1.0) continue;
+    if (MathUtils::DeltaR(ele, phSoft) < 1.0) continue;
     goodElectrons.push_back(iele);
   }
   
@@ -3013,8 +3013,8 @@ PhotonTreeWriter::TTHSelectElectron(const Photon *phHard,
          <<      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) << endl;
   }   
   
-  if (PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          &&
-      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1){
+  if (PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1.          &&
+      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1.){
     // Loop over electrons, apply all cuts, find the one wiht hightes ID MVA
     for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {
       const Electron *ele = fLeptonTagElectrons->At(iele);
@@ -3043,8 +3043,8 @@ PhotonTreeWriter::TTHSelectElectron(const Photon *phHard,
       
       // Require separation between this electron and both photons,
       // see the slide 7, bullet 2
-      if (MathUtils::DeltaR(ele, phHard) < 0.5) continue;
-      if (MathUtils::DeltaR(ele, phSoft) < 0.5) continue;
+      if (MathUtils::DeltaR(ele, phHard) < 1.) continue;
+      if (MathUtils::DeltaR(ele, phSoft) < 1.) continue;
       // Require electron-photon mass outside of a 20 GeV window around MZ
       //JOSH: Shouldn't be applied for ttH category
 //       if (MassOfPairIsWithinWindowAroundMZ(ele, phHard, 10)) continue;

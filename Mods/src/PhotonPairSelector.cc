@@ -425,6 +425,9 @@ void PhotonPairSelector::Process()
   std::vector<int> leptag;
   leptag.resize(numPairs);
 
+  //bool extraprint = TString(GetName())==TString("PhotonPairSelectorPresel");
+  bool extraprint = false;
+  
   for (unsigned int iPair = 0; iPair < numPairs; ++iPair) {
     // first we need a hard copy of the incoming photons
     fixPh1st.push_back(new Photon(*preselPh->At(idx1st[iPair])));
@@ -522,6 +525,9 @@ void PhotonPairSelector::Process()
       for (unsigned int imu = 0; imu<fLeptonTagMuons->GetEntries(); ++imu) {
         const Muon *mu = fLeptonTagMuons->At(imu);
         if ( MathUtils::DeltaR(*mu,*fixPh1st[iPair]) >= 0.5 && MathUtils::DeltaR(*mu,*fixPh2nd[iPair]) >= 0.5) {
+          
+          if (extraprint) printf("muon %i eta = %5f, phi = %5f\n",imu,mu->Eta(),mu->Phi());
+          
           if (mu->Pt()>20.) ++nmusingle;
           if (mu->Pt()>10.) ++nmudouble;
         }
@@ -531,8 +537,12 @@ void PhotonPairSelector::Process()
       int neledouble = 0;
       for (unsigned int iele = 0; iele<fLeptonTagElectrons->GetEntries(); ++iele) {
         const Electron *ele = fLeptonTagElectrons->At(iele);
-        if ( MathUtils::DeltaR(*ele,*fixPh1st[iPair]) >= 0.5 && MathUtils::DeltaR(*ele,*fixPh2nd[iPair]) >= 0.5
-              && PhotonTools::ElectronVetoCiC(fixPh1st[iPair], fElectrons) && PhotonTools::ElectronVetoCiC(fixPh2nd[iPair], fElectrons) ) {
+        if ( MathUtils::DeltaR(*ele,*fixPh1st[iPair]) >= 1.0 && MathUtils::DeltaR(*ele,*fixPh2nd[iPair]) >= 1.0
+              && PhotonTools::ElectronVetoCiC(fixPh1st[iPair], fElectrons)>1. && PhotonTools::ElectronVetoCiC(fixPh2nd[iPair], fElectrons)>1. ) {
+          
+          if (extraprint) printf("electron %i eta = %5f, phi = %5f\n",iele, ele->Eta(), ele->Phi());
+          if (extraprint) printf("isecaldriven = %i, expectedinnerhits = %i\n",ele->IsEcalDriven(),ele->GsfTrk()->NExpectedHitsInner()==0);
+          
           if (ele->Pt()>20.) ++nelesingle;
           if (ele->Pt()>10.) ++neledouble;
         }
@@ -981,6 +991,9 @@ void PhotonPairSelector::Process()
   int maxleptag = 0;
   for (unsigned int iPair=0; iPair<passPairs.size(); ++iPair) {
     double sumEt  = fixPh1st[passPairs[iPair]]->Et()+fixPh2nd[passPairs[iPair]]->Et();
+    
+    if (extraprint) printf("pair %i: ph1eta = %5f, ph1phi = %5f, ph2eta = %5f, ph2phi = %5f, sumEt = %5f, leptag = %i\n",iPair,fixPh1st[passPairs[iPair]]->Eta(),fixPh1st[passPairs[iPair]]->Phi(),fixPh2nd[passPairs[iPair]]->Eta(), fixPh2nd[passPairs[iPair]]->Phi(),sumEt, leptag[passPairs[iPair]]);
+    
     //if (((sumEt > maxSumEt) && leptag[iPair] == maxleptag) || (leptag[iPair] > maxleptag)) {
     if (((sumEt > maxSumEt) && leptag[passPairs[iPair]] == maxleptag) || (leptag[passPairs[iPair]] > maxleptag)) {
       maxSumEt = sumEt;
