@@ -510,6 +510,7 @@ void PhotonTreeWriter::Process()
         if (jet->AbsEta()<4.7 && MathUtils::DeltaR(jet,p1)>0.5 && MathUtils::DeltaR(jet,p2)>0.5) {
           const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
           if (!pfjet) continue;
+          //if (!JetTools::passPFLooseId(pfjet)) continue;
           if (fApplyJetId && !fJetId.passCut(pfjet,selvtx,fPV)) continue;
           if (!jet1) jet1 = jet;
           else if (!jet2) jet2 = jet;
@@ -2463,8 +2464,6 @@ const Electron* PhotonTreeWriter::GetLeptonTagElectron(const Photon *phHard,
     const Electron *ele = fLeptonTagElectrons->At(iele);
     if (fLeptonTagElectrons->GetEntries() > 0                          &&
         fLeptonTagElectrons->At(0) != 0                                &&
-        PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
-        PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
         PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          && 
         PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1          &&     
         MathUtils::DeltaR(ele, phHard) >= 1     &&
@@ -2632,9 +2631,7 @@ bool PhotonTreeWriter::VHLepHasDielectron(const Photon *phHard,
                                           const Photon *phSoft) {
   if (fLeptonTagSoftElectrons->GetEntries() < 2) return false;
   
-  if (PhotonTools::ElectronVetoCiC(phHard, fLeptonTagSoftElectrons) < 1 ||
-      PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagSoftElectrons) < 1 ||
-      PhotonTools::ElectronVetoCiC(phHard, fElectrons)              < 1 || 
+  if (PhotonTools::ElectronVetoCiC(phHard, fElectrons)              < 1 || 
       PhotonTools::ElectronVetoCiC(phSoft, fElectrons)              < 1) {
     return false;
   }
@@ -2749,11 +2746,9 @@ UInt_t PhotonTreeWriter::VHLepNumberOfJets(const Photon *phHard,
     // Make sure we have a PF jet
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
-    if (!JetTools::passPFLooseId(pfjet)) continue;
+    //if (!JetTools::passPFLooseId(pfjet)) continue;
     // Apply the jet ID / pileup removal as given in Table 4
-    Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
-    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
-    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+    if (fApplyJetId && !fJetId.passCut(pfjet,selvtx,fPV)) continue;
     // this jet passes, count it in
     ++nJets;
   } // End of loop over jets  
@@ -2818,11 +2813,9 @@ void PhotonTreeWriter::ApplyTTHTag(const Photon *phHard,
     // Make sure we have a PF jet
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
-    if (!JetTools::passPFLooseId(pfjet)) continue;
+    //if (!JetTools::passPFLooseId(pfjet)) continue;
     // Apply the jet ID as given in Table 4
-    Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
-    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
-    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+    if (fApplyJetId && !fJetId.passCut(pfjet,selvtx,fPV)) continue;
     // this jet passes, count it in
     ++nJets;
     // Select b-jets that pass the CSV medium working point, see L128 of the AN
@@ -2871,11 +2864,9 @@ UInt_t PhotonTreeWriter::NumberOfJets(const Photon *phHard,
     // Make sure we have a PF jet
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
-    if (!JetTools::passPFLooseId(pfjet)) continue;
+    //if (!JetTools::passPFLooseId(pfjet)) continue;
     // Apply the jet ID / pileup removal as given in Table 4
-    Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
-    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
-    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+    if (fApplyJetId && !fJetId.passCut(pfjet,selvtx,fPV)) continue;
     // this jet passes, count it in
     ++nJets;
   } // End of loop over jets
@@ -2954,11 +2945,9 @@ UInt_t PhotonTreeWriter::NumberOfBJets(const Photon *phHard,
     // Make sure we have a PF jet
     const PFJet *pfjet = dynamic_cast<const PFJet*>(jet);
     if (!pfjet) continue;
-    if (!JetTools::passPFLooseId(pfjet)) continue;
+    //if (!JetTools::passPFLooseId(pfjet)) continue;
     // Apply the jet ID / pileup removal as given in Table 4
-    Double_t betaStar = JetTools::betaStarClassic(pfjet, selvtx, fPV);
-    if (betaStar > 0.2 * log(fPV->GetEntries() - 0.64)) continue;
-    if (JetTools::dR2Mean(pfjet, -1) > 0.065) continue;
+    if (fApplyJetId && !fJetId.passCut(pfjet,selvtx,fPV)) continue;
     // Select b-jets that pass the CSV medium working point, see L128 of the AN
     // and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
     if (jet->CombinedSecondaryVertexBJetTagsDisc() < 0.679) continue;
@@ -3024,9 +3013,7 @@ PhotonTreeWriter::TTHSelectElectron(const Photon *phHard,
          <<      PhotonTools::ElectronVetoCiC(phSoft, fElectrons) << endl;
   }   
   
-  if (PhotonTools::ElectronVetoCiC(phHard, fLeptonTagElectrons) >= 1 &&
-      PhotonTools::ElectronVetoCiC(phSoft, fLeptonTagElectrons) >= 1 &&
-      PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          &&
+  if (PhotonTools::ElectronVetoCiC(phHard, fElectrons) >= 1          &&
       PhotonTools::ElectronVetoCiC(phSoft, fElectrons) >= 1){
     // Loop over electrons, apply all cuts, find the one wiht hightes ID MVA
     for (UInt_t iele=0; iele < fLeptonTagElectrons->GetEntries(); ++iele) {

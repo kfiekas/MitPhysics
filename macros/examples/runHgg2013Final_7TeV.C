@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_7TeV.C,v 1.3 2013/12/02 11:50:07 mingyang Exp $
+// $Id: runHgg2013Final_7TeV.C,v 1.4 2013/12/09 17:55:52 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -382,8 +382,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   //photcic->SetRescaledBeamspotWidth(5.0);
   photcic->SetIsData(isData);
   photcic->SetApplyLeptonTag(kTRUE);
-  photcic->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-  photcic->SetLeptonTagMuonsName("HggLeptonTagMuons");  
+  photcic->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+  photcic->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");  
   photcic->SetIdMVAType("2013FinalIdMVA_7TeV");
   
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
@@ -418,8 +418,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   //photcicnoeleveto->SetRescaledBeamspotWidth(5.0);
   photcicnoeleveto->SetIsData(isData);
   photcicnoeleveto->SetApplyLeptonTag(kTRUE);
-  photcicnoeleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-  photcicnoeleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");  
+  photcicnoeleveto->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+  photcicnoeleveto->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");  
   photcicnoeleveto->SetIdMVAType("2013FinalIdMVA_7TeV");
  
   PhotonPairSelector         *photpresel = new PhotonPairSelector("PhotonPairSelectorPresel");
@@ -450,8 +450,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   //photpresel->SetRescaledBeamspotWidth(5.0);
   photpresel->SetIsData(isData);
   photpresel->SetApplyLeptonTag(kTRUE);
-  photpresel->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-  photpresel->SetLeptonTagMuonsName("HggLeptonTagMuons");  
+  photpresel->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+  photpresel->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");  
  
   PhotonPairSelector         *photpreselinverteleveto = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVeto");
   photpreselinverteleveto->SetOutputName("GoodPhotonsPreselInvertEleVeto");
@@ -482,8 +482,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   //photpreselinverteleveto->SetRescaledBeamspotWidth(5.0);   
   photpreselinverteleveto->SetIsData(isData);
   photpreselinverteleveto->SetApplyLeptonTag(kTRUE);
-  photpreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-  photpreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");    
+  photpreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+  photpreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");    
   photpreselinverteleveto->SetLeadingPtMin(20.);
   photpreselinverteleveto->SetTrailingPtMin(20.);
 
@@ -505,8 +505,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    //photpreselnosmear->SetRescaledBeamspotWidth(5.0);      
    photpreselnosmear->SetIsData(isData);  
    photpreselnosmear->SetApplyLeptonTag(kTRUE);
-   photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    photpreselnosmear->DoMCSmear(kFALSE);
    photpreselnosmear->DoMCEneSmear(kFALSE);
    photpreselnosmear->DoEneErrSmear(kTRUE);
@@ -533,8 +533,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    //photcicnosmear->SetRescaledBeamspotWidth(5.0);
    photcicnosmear->SetIsData(isData);
    photcicnosmear->SetApplyLeptonTag(kTRUE);
-   photcicnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   photcicnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");  
+   photcicnosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   photcicnosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");  
    
    PhotonPairSelector         *photpreselinvertelevetonosmear = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVetoNoSmear");
    photpreselinvertelevetonosmear->SetOutputName("GoodPhotonsPreselInvertEleVetoNoSmear");
@@ -555,8 +555,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    //photpreselinvertelevetonosmear->SetRescaledBeamspotWidth(5.0);      
    photpreselinvertelevetonosmear->SetIsData(isData);  
    photpreselinvertelevetonosmear->SetApplyLeptonTag(kTRUE);
-   photpreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   photpreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   photpreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   photpreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    photpreselinvertelevetonosmear->DoMCSmear(kFALSE);
    photpreselinvertelevetonosmear->DoDataEneCorr(kFALSE);
    photpreselinvertelevetonosmear->SetApplyEleVeto(kFALSE);
@@ -580,8 +580,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecic->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
    phottreecic->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    //phottreecic->SetApplyLeptonTag(kTRUE);
-   //phottreecic->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   //phottreecic->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   //phottreecic->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   //phottreecic->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    //phottreecic->SetApplyVBFTag(kTRUE);
    phottreecic->SetApplyPFMetCorr(kTRUE);
    phottreecic->SetApplyVHLepTag(kTRUE);
@@ -610,8 +610,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecicnoeleveto->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
    phottreecicnoeleveto->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    //phottreecicnoeleveto->SetApplyLeptonTag(kTRUE);
-   //phottreecicnoeleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   //phottreecicnoeleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   //phottreecicnoeleveto->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   //phottreecicnoeleveto->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    //phottreecicnoeleveto->SetApplyVBFTag(kTRUE);
    phottreecicnoeleveto->SetApplyPFMetCorr(kTRUE);
    phottreecicnoeleveto->SetApplyVHLepTag(kTRUE);
@@ -640,8 +640,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepresel->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    phottreepresel->SetDoSynching(kTRUE);
    // phottreepresel->SetApplyLeptonTag(kTRUE);
-   // phottreepresel->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   // phottreepresel->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   // phottreepresel->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   // phottreepresel->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    // phottreepresel->SetApplyVBFTag(kTRUE);
     phottreepresel->SetApplyPFMetCorr(kTRUE);
     phottreepresel->SetApplyVHLepTag(kTRUE);
@@ -670,8 +670,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselinverteleveto->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
    phottreepreselinverteleveto->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    //  phottreepreselinverteleveto->SetApplyLeptonTag(kTRUE);
-   //  phottreepreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   //  phottreepreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   //  phottreepreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   //  phottreepreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    //  phottreepreselinverteleveto->SetApplyVBFTag(kTRUE);
    phottreepreselinverteleveto->SetApplyPFMetCorr(kTRUE);
    phottreepreselinverteleveto->SetApplyVHLepTag(kTRUE);
@@ -700,8 +700,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselnosmear->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    phottreepreselnosmear->SetDoSynching(kTRUE);
    //  phottreepreselnosmear->SetApplyLeptonTag(kTRUE);
-   //  phottreepreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   //  phottreepreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   //  phottreepreselnosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   //  phottreepreselnosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    //  phottreepreselnosmear->SetApplyVBFTag(kTRUE);
    phottreepreselnosmear->SetApplyPFMetCorr(kTRUE);
    phottreepreselnosmear->SetApplyVHLepTag(kTRUE);
@@ -729,8 +729,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecicnosmear->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
    phottreecicnosmear->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    //  phottreecicnosmear->SetApplyLeptonTag(kTRUE);
-   //  phottreecicnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   //  phottreecicnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   //  phottreecicnosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   //  phottreecicnosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    //  phottreecicnosmear->SetApplyVBFTag(kTRUE);
    phottreecicnosmear->SetApplyPFMetCorr(kTRUE);
    phottreecicnosmear->SetApplyVHLepTag(kTRUE);
@@ -759,8 +759,8 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet1Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat5.weights.xml")))); 
   phottreepreselinvertelevetonosmear->SetElectronMVAWeightsSubdet2Pt20ToInf(TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/ElectronMVAWeights/ElectronID_BDTG_EGamma2012NonTrigV0_Cat6.weights.xml"))));
    // phottreepreselinvertelevetonosmear->SetApplyLeptonTag(kTRUE);
-   // phottreepreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   // phottreepreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   // phottreepreselinvertelevetonosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   // phottreepreselinvertelevetonosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    // phottreepreselinvertelevetonosmear->SetApplyVBFTag(kTRUE);
   phottreepreselinvertelevetonosmear->SetApplyPFMetCorr(kTRUE);
   phottreepreselinvertelevetonosmear->SetApplyVHLepTag(kTRUE);

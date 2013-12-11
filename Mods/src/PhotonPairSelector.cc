@@ -511,65 +511,38 @@ void PhotonPairSelector::Process()
       }
     }
 
-    // lepton tag for this pair -- ming
+    // lepton tag for this pair
+    // Josh: simplified single/double lepton selection to ensure getting the right photon pair given combinatorics
+    // This may result in losing an event from the untagged categories in rare cases
     leptag[iPair] = -1;
     if(fApplyLeptonTag){
       leptag[iPair] = 0;
-      if ( fLeptonTagMuons->GetEntries() > 0 ) {
-	//printf("ming sync check muonpt0:%f\n",fLeptonTagMuons->At(0)->Pt());
-	//printf("ming sync check muonpt1:%f\n",fLeptonTagMuons->At(1)->Pt());
-	//printf("ming sync check ipair:%d deltar1:%f deltar2:%f\n",iPair,MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh1st[iPair]),MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh2nd[iPair]));
-	if( (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh1st[iPair]) >= 1.0) && 
-	    (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh2nd[iPair]) >= 1.0) 
-	    ){
-	  leptag[iPair] = 2;
-	}
+      int nmusingle = 0;
+      int nmudouble = 0;
+      for (unsigned int imu = 0; imu<fLeptonTagMuons->GetEntries(); ++imu) {
+        const Muon *mu = fLeptonTagMuons->At(imu);
+        if ( MathUtils::DeltaR(*mu,*fixPh1st[iPair]) >= 0.5 && MathUtils::DeltaR(*mu,*fixPh2nd[iPair]) >= 0.5) {
+          if (mu->Pt()>20.) ++nmusingle;
+          if (mu->Pt()>10.) ++nmudouble;
+        }
       }
       
-      if(leptag[iPair] <1){
-	if( fLeptonTagElectrons->GetEntries() > 0 ){
-	  if( (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh1st[iPair]) >= 1) &&
-	      (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh2nd[iPair]) >= 1) &&
-	      (PhotonTools::ElectronVetoCiC(fixPh1st[iPair],fLeptonTagElectrons) >= 1) &&
-	      (PhotonTools::ElectronVetoCiC(fixPh2nd[iPair],fLeptonTagElectrons) >= 1) &&
-	      (TMath::Abs( (fixPh1st[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
-	      (TMath::Abs( (fixPh2nd[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10)
-	      //((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
-	      //((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120))){
-	      ){
-	    /*int ph1passeveto=1;
-	    int ph2passeveto=1;
-	    
-	    for(UInt_t k=0;k<fElectrons->GetEntries();k++){
-	      if(fElectrons->At(k)->BestTrk()->NMissingHits()==0){
-		if((fElectrons->At(k)->SCluster()==fixPh1st[iPair]->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*fixPh1st[iPair]) < 1)){
-		  ph1passeveto=0;
-		}
-		if((fElectrons->At(k)->SCluster()==fixPh2nd[iPair]->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*fixPh2nd[iPair]) < 1)){
-		  ph2passeveto=0;
-		}
-	      }
-	    }
-	    
-	    if(ph1passeveto==1 && ph2passeveto==1){
-	      leptag[iPair] = 1;
-	      }*/
-
-	    /*if(PhotonTools::PassElectronVeto(fixPh1st[iPair], fElectrons) && PhotonTools::PassElectronVeto(fixPh2nd[iPair], fElectrons)){
-	      leptag[iPair] = 1;
-	      }*/
-
-	    /*if(PhotonTools::PassElectronVeto(fixPh1st[iPair], fElectrons) && PhotonTools::PassElectronVeto(fixPh2nd[iPair], fElectrons)){
-	      leptag[iPair] = 1;
-	      }*/
-	    
-	    if(PhotonTools::ElectronVetoCiC(fixPh1st[iPair], fElectrons)>=1 && PhotonTools::ElectronVetoCiC(fixPh2nd[iPair], fElectrons)>=1){
-	      leptag[iPair] = 1;
-	    }
-	    
-	  }
-	}
+      int nelesingle = 0;
+      int neledouble = 0;
+      for (unsigned int iele = 0; iele<fLeptonTagElectrons->GetEntries(); ++iele) {
+        const Electron *ele = fLeptonTagElectrons->At(iele);
+        if ( MathUtils::DeltaR(*ele,*fixPh1st[iPair]) >= 0.5 && MathUtils::DeltaR(*ele,*fixPh2nd[iPair]) >= 0.5
+              && PhotonTools::ElectronVetoCiC(fixPh1st[iPair], fElectrons) && PhotonTools::ElectronVetoCiC(fixPh2nd[iPair], fElectrons) ) {
+          if (ele->Pt()>20.) ++nelesingle;
+          if (ele->Pt()>10.) ++neledouble;
+        }
       }
+      
+      if (nmudouble>=2) leptag[iPair] = 4;
+      else if (neledouble>=2) leptag[iPair] = 3;
+      else if (nmusingle>=1) leptag[iPair] = 2;
+      else if (nelesingle>=1) leptag[iPair] = 1;
+      
     }
     
     //probability that selected vertex is the correct one

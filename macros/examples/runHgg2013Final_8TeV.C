@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_8TeV.C,v 1.7 2013/12/02 11:37:24 mingyang Exp $
+// $Id: runHgg2013Final_8TeV.C,v 1.8 2013/12/09 17:55:52 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -67,7 +67,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
 			  //const char *book       = "t2mit/filefi/031",
 			  const char *catalogDir = "/home/cmsprod/catalog",
 			  const char *outputName = "hgg",
-			  int         nEvents    = 5000)
+			  int         nEvents    = -1)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -457,8 +457,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   //photcic->SetRescaledBeamspotWidth(5.0);
   photcic->SetIsData(isData);
   photcic->SetApplyLeptonTag(kTRUE);
-  photcic->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-  photcic->SetLeptonTagMuonsName("HggLeptonTagMuons");  
+  photcic->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+  photcic->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");  
   photcic->SetIdMVAType("2013FinalIdMVA_8TeV");
   
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
@@ -533,8 +533,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   //photpresel->SetRescaledBeamspotWidth(5.0);
   photpresel->SetIsData(isData);
   photpresel->SetApplyLeptonTag(kTRUE);
-  photpresel->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-  photpresel->SetLeptonTagMuonsName("HggLeptonTagMuons");  
+  photpresel->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+  photpresel->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");  
   //
 
  
@@ -571,8 +571,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   //photpreselinverteleveto->SetRescaledBeamspotWidth(5.0);   
   photpreselinverteleveto->SetIsData(isData);
   photpreselinverteleveto->SetApplyLeptonTag(kTRUE);
-  photpreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-  photpreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagMuons");    
+  photpreselinverteleveto->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+  photpreselinverteleveto->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");    
   photpreselinverteleveto->SetLeadingPtMin(20.);
   photpreselinverteleveto->SetTrailingPtMin(20.);
 
@@ -594,8 +594,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    //photpreselnosmear->SetRescaledBeamspotWidth(5.0);
    photpreselnosmear->SetIsData(isData);
    photpreselnosmear->SetApplyLeptonTag(kTRUE);
-   photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");
+   photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
    photpreselnosmear->DoMCSmear(kFALSE);
    photpreselnosmear->DoMCEneSmear(kFALSE);
    photpreselnosmear->DoEneErrSmear(kTRUE);
@@ -622,8 +622,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    //photcicnosmear->SetRescaledBeamspotWidth(5.0);
    photcicnosmear->SetIsData(isData);
    photcicnosmear->SetApplyLeptonTag(kTRUE);
-   photcicnosmear->SetLeptonTagElectronsName("HggLeptonTagElectrons");
-   photcicnosmear->SetLeptonTagMuonsName("HggLeptonTagMuons");  
+   photcicnosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+   photcicnosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");  
    
    PhotonPairSelector         *photpreselinvertelevetonosmear = new PhotonPairSelector("PhotonPairSelectorPreselInvertEleVetoNoSmear");
    photpreselinvertelevetonosmear->SetOutputName("GoodPhotonsPreselInvertEleVetoNoSmear");
@@ -1008,6 +1008,10 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
     d = c->FindDataset(bookstr,skimdataset.Data(),fileset,caching);
 
   ana->AddDataset(d);
+    
+  //ana->AddFile("root://xrootd.cmsaf.mit.edu//store/user/paus/filefi/029/r12c-dph-j22-v1/BC4184B7-B270-E211-AB38-003048679010.root");  
+  //ana->AddFile("root://xrootd.cmsaf.mit.edu//store/user/paus/filefi/029/r12d-dph-j22-v1/5C867B4C-0882-E211-9266-00A0D1EE8ECC.root");  
+  
   //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12a-pho-j13-v1/385B77DE-58D0-E111-B925-001E67396928.root");//79737729
   //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12b-dph-j13-v1/FE308E0A-23D2-E111-8B2D-00266CFAE7D0.root");//871378986
   //ana->AddFile("/mnt/hadoop/cmsprod/filefi/029/r12d-dph-pr-v1/54E239DC-2725-E211-A52C-003048D373F6.root");//528937923
