@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_7TeV.C,v 1.4 2013/12/09 17:55:52 bendavid Exp $
+// $Id: runHgg2013Final_7TeV.C,v 1.5 2013/12/11 00:43:04 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -566,7 +566,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecic->SetPhotonsFromBranch(kFALSE);
    phottreecic->SetInputPhotonsName(photcic->GetOutputName());
    phottreecic->SetEnableJets(kTRUE);
-   phottreecic->SetApplyJetId(kTRUE);
+   phottreecic->SetApplyJetId(kFALSE);
    phottreecic->SetPFJetsFromBranch(kFALSE);
    phottreecic->SetPFJetName(jetCorr->GetOutputName());
    phottreecic->SetExcludeDoublePrompt(excludedoubleprompt);
@@ -595,7 +595,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecicnoeleveto->SetPhotonsFromBranch(kFALSE);
    phottreecicnoeleveto->SetInputPhotonsName(photcicnoeleveto->GetOutputName());
    phottreecicnoeleveto->SetEnableJets(kTRUE);
-   phottreecicnoeleveto->SetApplyJetId(kTRUE);  
+   phottreecicnoeleveto->SetApplyJetId(kFALSE);  
    phottreecicnoeleveto->SetPFJetsFromBranch(kFALSE);
    phottreecicnoeleveto->SetPFJetName(jetCorr->GetOutputName());
    phottreecicnoeleveto->SetApplyElectronVeto(kFALSE);
@@ -625,7 +625,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepresel->SetPhotonsFromBranch(kFALSE);
    phottreepresel->SetInputPhotonsName(photpresel->GetOutputName());
    phottreepresel->SetEnableJets(kTRUE);
-   phottreepresel->SetApplyJetId(kTRUE);    
+   phottreepresel->SetApplyJetId(kFALSE);    
    phottreepresel->SetPFJetsFromBranch(kFALSE);
    phottreepresel->SetPFJetName(jetCorr->GetOutputName());  
    phottreepresel->SetExcludeDoublePrompt(excludedoubleprompt);  
@@ -655,7 +655,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselinverteleveto->SetPhotonsFromBranch(kFALSE);
    phottreepreselinverteleveto->SetInputPhotonsName(photpreselinverteleveto->GetOutputName());
    phottreepreselinverteleveto->SetEnableJets(kTRUE);
-   phottreepreselinverteleveto->SetApplyJetId(kTRUE);    
+   phottreepreselinverteleveto->SetApplyJetId(kFALSE);    
    phottreepreselinverteleveto->SetPFJetsFromBranch(kFALSE);
    phottreepreselinverteleveto->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselinverteleveto->SetApplyElectronVeto(kFALSE);  
@@ -685,7 +685,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselnosmear->SetPhotonsFromBranch(kFALSE);
    phottreepreselnosmear->SetInputPhotonsName(photpreselnosmear->GetOutputName());
    phottreepreselnosmear->SetEnableJets(kTRUE);
-   phottreepreselnosmear->SetApplyJetId(kTRUE);  
+   phottreepreselnosmear->SetApplyJetId(kFALSE);  
    phottreepreselnosmear->SetPFJetsFromBranch(kFALSE);
    phottreepreselnosmear->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselnosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
@@ -715,7 +715,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecicnosmear->SetPhotonsFromBranch(kFALSE);
    phottreecicnosmear->SetInputPhotonsName(photcicnosmear->GetOutputName());
    phottreecicnosmear->SetEnableJets(kTRUE);
-   phottreecicnosmear->SetApplyJetId(kTRUE);
+   phottreecicnosmear->SetApplyJetId(kFALSE);
    phottreecicnosmear->SetPFJetsFromBranch(kFALSE);
    phottreecicnosmear->SetPFJetName(jetCorr->GetOutputName());
    phottreecicnosmear->SetExcludeDoublePrompt(excludedoubleprompt);
@@ -744,7 +744,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselinvertelevetonosmear->SetPhotonsFromBranch(kFALSE);
    phottreepreselinvertelevetonosmear->SetInputPhotonsName(photpreselinvertelevetonosmear->GetOutputName());
    phottreepreselinvertelevetonosmear->SetEnableJets(kTRUE);
-   phottreepreselinvertelevetonosmear->SetApplyJetId(kTRUE);  
+   phottreepreselinvertelevetonosmear->SetApplyJetId(kFALSE);  
    phottreepreselinvertelevetonosmear->SetPFJetsFromBranch(kFALSE);
    phottreepreselinvertelevetonosmear->SetPFJetName(jetCorr->GetOutputName());  
    phottreepreselinvertelevetonosmear->SetExcludeDoublePrompt(excludedoubleprompt);  
