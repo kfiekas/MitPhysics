@@ -2301,39 +2301,39 @@ void PhotonTreeWriter::ApplyLeptonTag(const Photon *phHard,
     // electron tagged
     fDiphotonEvent->leptonTag = 1;
     
-    fDiphotonEvent-> elePt = fLeptonTagElectrons->At(0)->Pt();
-    fDiphotonEvent-> eleEta = fLeptonTagElectrons->At(0)->Eta();
-    fDiphotonEvent-> elePhi = fLeptonTagElectrons->At(0)->Phi();
-    fDiphotonEvent-> eleSCEta = fLeptonTagElectrons->At(0)->SCluster()->Eta();
-    fDiphotonEvent-> eleIso1 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+    fDiphotonEvent-> elePt = electron->Pt();
+    fDiphotonEvent-> eleEta = electron->Eta();
+    fDiphotonEvent-> elePhi = electron->Phi();
+    fDiphotonEvent-> eleSCEta = electron->SCluster()->Eta();
+    fDiphotonEvent-> eleIso1 = (electron->TrackIsolationDr03() + electron->EcalRecHitIsoDr03() + electron->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoRandomLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
     
     fDiphotonEvent-> eleIso2 = -99.;
     
     if ( fDoSynching ) {
       Double_t distVtx = 999.0;
       for(UInt_t nv=0; nv<fPV->GetEntries(); nv++){
-        double dz = TMath::Abs(fLeptonTagElectrons->At(0)->GsfTrk()->DzCorrected(*fPV->At(nv)));
+        double dz = TMath::Abs(electron->GsfTrk()->DzCorrected(*fPV->At(nv)));
         if(dz < distVtx) {
           distVtx    = dz;
           closestVtx = nv;
         }
       }
-      fDiphotonEvent-> eleIdMva = fElectronIDMVA->MVAValue(fLeptonTagElectrons->At(0), fPV->At(closestVtx));
+      fDiphotonEvent-> eleIdMva = fElectronIDMVA->MVAValue(electron, fPV->At(closestVtx));
     }
     
     
-    fDiphotonEvent-> eleIso3 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-    fDiphotonEvent-> eleIso4 = (fLeptonTagElectrons->At(0)->TrackIsolationDr03() + fLeptonTagElectrons->At(0)->EcalRecHitIsoDr03() + fLeptonTagElectrons->At(0)->HcalTowerSumEtDr03() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
-    fDiphotonEvent-> eleDist = fLeptonTagElectrons->At(0)->ConvPartnerDist();
-    fDiphotonEvent-> eleDcot = fLeptonTagElectrons->At(0)->ConvPartnerDCotTheta();
-    fDiphotonEvent-> eleCoviee = fLeptonTagElectrons->At(0)->CoviEtaiEta();
-    fDiphotonEvent-> eleDphiin = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaPhiSuperClusterTrackAtVtx());
-    fDiphotonEvent-> eleDetain = TMath::Abs(fLeptonTagElectrons->At(0)->DeltaEtaSuperClusterTrackAtVtx());
-    fDiphotonEvent-> eleDR1 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phHard);
-    fDiphotonEvent-> eleDR2 = MathUtils::DeltaR(fLeptonTagElectrons->At(0),phSoft);
-    fDiphotonEvent-> eleMass1 = (phHard->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
-    fDiphotonEvent-> eleMass2 = (phSoft->Mom()+fLeptonTagElectrons->At(0)->Mom()).M();
-    fDiphotonEvent-> eleNinnerHits =      fLeptonTagElectrons->At(0)->Trk()->NExpectedHitsInner();
+    fDiphotonEvent-> eleIso3 = (electron->TrackIsolationDr03() + electron->EcalRecHitIsoDr03() + electron->HcalTowerSumEtDr03() - fPileUpDen->At(0)->RhoLowEta() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+    fDiphotonEvent-> eleIso4 = (electron->TrackIsolationDr03() + electron->EcalRecHitIsoDr03() + electron->HcalTowerSumEtDr03() - fPileUpDen->At(0)->Rho() * TMath::Pi() * 0.3 * 0.3)/fDiphotonEvent-> elePt;
+    fDiphotonEvent-> eleDist = electron->ConvPartnerDist();
+    fDiphotonEvent-> eleDcot = electron->ConvPartnerDCotTheta();
+    fDiphotonEvent-> eleCoviee = electron->CoviEtaiEta();
+    fDiphotonEvent-> eleDphiin = TMath::Abs(electron->DeltaPhiSuperClusterTrackAtVtx());
+    fDiphotonEvent-> eleDetain = TMath::Abs(electron->DeltaEtaSuperClusterTrackAtVtx());
+    fDiphotonEvent-> eleDR1 = MathUtils::DeltaR(electron,phHard);
+    fDiphotonEvent-> eleDR2 = MathUtils::DeltaR(electron,phSoft);
+    fDiphotonEvent-> eleMass1 = (phHard->Mom()+electron->Mom()).M();
+    fDiphotonEvent-> eleMass2 = (phSoft->Mom()+electron->Mom()).M();
+    fDiphotonEvent-> eleNinnerHits =      electron->Trk()->NExpectedHitsInner();
   } // electron tagged
   
   if(false){
@@ -2547,6 +2547,9 @@ void PhotonTreeWriter::ApplyVHLepTag(const Photon *phHard,
                !MassOfPairIsWithinWindowAroundMZ(phSoft, electron, 10)) {
       isVHLepLoose = true;   // low MET event
     } // Low MET event.
+    fDiphotonEvent->elePt  = electron->Pt ();
+    fDiphotonEvent->eleEta = electron->Eta();
+    fDiphotonEvent->elePhi = electron->Phi();
   } // Found a good VH(lep) tag electron.
 
   //printf("check electron, tight  = %i, loose = %i\n",int(isVHLepTight),int(isVHLepLoose));
