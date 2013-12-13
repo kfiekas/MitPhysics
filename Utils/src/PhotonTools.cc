@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.43 2013/11/27 23:41:22 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.44 2013/12/09 17:55:51 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -90,10 +90,10 @@ void PhotonTools::SmearPhotonError(Photon* p, Double_t width) {
   
   Double_t err = p->EnergyErrSmeared();
   if (err>=0.0) {
-    p->SetEnergyErrSmeared(TMath::Sqrt(err*err + width*width*p->E()*p->E()));
+    p->SetEnergyErrSmeared(TMath::Sqrt(err*err + width*width));
     
     Double_t smear = p->EnergyErrSmearing();    
-    p->SetEnergyErrSmearing(TMath::Sqrt(smear*smear+width*width*p->E()*p->E()));    
+    p->SetEnergyErrSmearing(TMath::Sqrt(smear*smear+width*width));    
   }
   
 }

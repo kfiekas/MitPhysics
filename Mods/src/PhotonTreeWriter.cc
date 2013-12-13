@@ -626,8 +626,8 @@ void PhotonTreeWriter::Process()
       _cosdphiMetgg = TMath::Cos(_dphiMetgg);
       _dphiPhPh = MathUtils::DeltaPhi((phHard->Mom()).Phi(),(phSoft->Mom()).Phi());
       _mass = (phHard->Mom()+phSoft->Mom()).M();
-      _masserr = 0.5*_mass*TMath::Sqrt(phHard->EnergyErr()*phHard->EnergyErr()/phHard->E()/phHard->E() + phSoft->EnergyErr()*phSoft->EnergyErr()/phSoft->E()/phSoft->E());
-      _masserrsmeared = 0.5*_mass*TMath::Sqrt(phHard->EnergyErrSmeared()*phHard->EnergyErrSmeared()/phHard->E()/phHard->E() + phSoft->EnergyErrSmeared()*phSoft->EnergyErrSmeared()/phSoft->E()/phSoft->E());
+      _masserr = 0.5*TMath::Sqrt(phHard->EnergyErr()*phHard->EnergyErr() + phSoft->EnergyErr()*phSoft->EnergyErr());
+      _masserrsmeared = 0.5*TMath::Sqrt(phHard->EnergyErrSmeared()*phHard->EnergyErrSmeared() + phSoft->EnergyErrSmeared()*phSoft->EnergyErrSmeared());
       _ptgg = (phHard->Mom()+phSoft->Mom()).Pt();
       _etagg = (phHard->Mom()+phSoft->Mom()).Eta();
       _phigg = (phHard->Mom()+phSoft->Mom()).Phi();
@@ -635,7 +635,7 @@ void PhotonTreeWriter::Process()
       _evtcat = PhotonTools::DiphotonR9EtaPtCat(phHard,phSoft);
       
       const Double_t dz = sqrt(2.0)*fBeamspotWidth;
-      Double_t deltamvtx = _mass*VertexTools::DeltaMassVtx(phHard->CaloPos().X(),
+      Double_t deltamvtx = VertexTools::DeltaMassVtx(phHard->CaloPos().X(),
 							   phHard->CaloPos().Y(),
 							   phHard->CaloPos().Z(),
 							   phSoft->CaloPos().X(),

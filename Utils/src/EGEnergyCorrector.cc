@@ -1,4 +1,4 @@
-// $Id: EGEnergyCorrector.cc,v 1.13 2013/10/26 17:40:48 bendavid Exp $
+// $Id: EGEnergyCorrector.cc,v 1.14 2013/11/13 20:51:33 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/EGEnergyCorrector.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -228,8 +228,8 @@ void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs,
       FourVectorM mom = p->Mom();
       double scale = ecor/mom.E();
       p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
-      p->SetEnergyErr(sigma*ecor);
-      p->SetEnergyErrSmeared(sigma*ecor);    
+      p->SetEnergyErr(sigma);
+      p->SetEnergyErrSmeared(sigma);    
     }
     if (version>=6 && version<=8) {
       double ecor,sigEoverE,mean,sigma,alpha1,n1,alpha2,n2,peakpdfval;
@@ -247,8 +247,8 @@ void EGEnergyCorrector::CorrectEnergyWithError(Photon *p, const VertexCol *vtxs,
       FourVectorM mom = p->Mom();
       double scale = ecor/mom.E();
       p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
-      p->SetEnergyErr(sigEoverE*ecor);
-      p->SetEnergyErrSmeared(sigEoverE*ecor);    
+      p->SetEnergyErr(sigEoverE);
+      p->SetEnergyErrSmeared(sigEoverE);    
     }    
     
   }
