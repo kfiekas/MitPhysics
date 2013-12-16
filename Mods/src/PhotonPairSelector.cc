@@ -188,8 +188,13 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // ------------------------------------------------------
   fStochasticSmear               (kFALSE),
   
-  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS)
+  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS),
 
+  fdor9rescale                   (false),
+  fp0b                           (0.),
+  fp1b                           (1.),
+  fp0e                           (0.),
+  fp1e                           (1.)
 {
   // Constructor.
 }
@@ -832,13 +837,15 @@ void PhotonPairSelector::Process()
 	  PhotonTools::PassSinglePhotonPreselPFISONoEcal(fixPh2nd[iPair],fElectrons,fConversions,bsp,
 	  //PhotonTools::PassSinglePhotonPreselPFISO(fixPh2nd[iPair],fElectrons,fConversions,bsp,
 					      fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
-					      fInvertElectronVeto);      
+					      fInvertElectronVeto); 
+
+      if (!fIsData) fdor9rescale = false;     
       
       pass1 = pass1 && PhotonTools::PassCiCPFIsoSelection(fixPh1st[iPair], theVtx[iPair], fPFCands,
-                                             fPV, rho2012, leadptcut);
+							  fPV, rho2012, leadptcut,fdor9rescale,fp0b,fp1b,fp0e,fp1e);
       if (pass1)
         pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
-                                               fPV, rho2012, trailptcut);
+                                               fPV, rho2012, trailptcut,fdor9rescale,fp0b,fp1b,fp0e,fp1e);
       break;      
 
       // --------------------------------------------------------------------
@@ -859,10 +866,10 @@ void PhotonPairSelector::Process()
 					      fInvertElectronVeto);      
       
       pass1 = pass1 && PhotonTools::PassCiCPFIsoSelection(fixPh1st[iPair], theVtx[iPair], fPFCands,
-                                             fPV, rho2012, leadptcut);
+                                             fPV, rho2012, leadptcut,fdor9rescale,fp0b,fp1b,fp0e,fp1e);
       if (pass1)
         pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
-                                               fPV, rho2012, trailptcut);
+                                               fPV, rho2012, trailptcut,fdor9rescale,fp0b,fp1b,fp0e,fp1e);
       break;      
       
       // --------------------------------------------------------------------

@@ -131,6 +131,13 @@ PhotonTreeWriter::PhotonTreeWriter(const char *name, const char *title) :
   fElectronMVAWeights_Subdet2Pt20ToInf(""),
 
   fTheRhoType(RhoUtilities::DEFAULT),
+
+  fdor9rescale                   (false),
+  fp0b                           (0.),
+  fp1b                           (1.),
+  fp0e                           (0.),
+  fp1e                           (1.),
+
   fProcessedEvents(0)
 
 {
@@ -903,14 +910,14 @@ void PhotonTreeWriter::Process()
                                        fPhfixph, fPhfixele, fTracks, fPV,
                                        fPFCands, rho, fFillClusterArrays,
                                        fPhotons, fPFSuperClusters,
-                                       fElectrons, fConversions, bsp,
+                                       fElectrons, fConversions, bsp,fIsData, fdor9rescale, fp0b, fp1b,fp0e,fp1e,
                                        fApplyElectronVeto, realVtx);
     fDiphotonEvent->photons[1].SetVars(phSoft, conv2, ele2, pfsc2, phgen2,
                                        fPhfixph, fPhfixele, fTracks, fPV,
                                        fPFCands, rho, fFillClusterArrays,
                                        fPhotons, fPFSuperClusters,
                                        fElectrons, fConversions,
-                                       bsp, fApplyElectronVeto, realVtx);
+                                       bsp,fIsData, fdor9rescale, fp0b, fp1b,fp0e,fp1e, fApplyElectronVeto, realVtx);
     
     Float_t ph1ecor    = fDiphotonEvent->photons[0].Ecor();
     Float_t ph1ecorerr = fDiphotonEvent->photons[0].Ecorerr();
@@ -1132,7 +1139,7 @@ void PhotonTreeWriter::Process()
     fSinglePhoton->SetVars(ph, conv, ele, pfsc, phgen, fPhfixph, fPhfixele,
                            fTracks, fPV, fPFCands, rho, fFillClusterArrays,
                            fPhotons, fPFSuperClusters, fElectrons, fConversions,
-                           bsp, fApplyElectronVeto);
+                           bsp, fIsData, fdor9rescale, fp0b, fp1b,fp0e,fp1e, fApplyElectronVeto);
     hCiCTupleSingle->Fill();
   }
 
@@ -1422,7 +1429,8 @@ PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p,
                                        const SuperClusterCol* scs,
                                        const ElectronCol* els,
                                        const DecayParticleCol *convs,
-                                       const BaseVertex *bs,
+                                       const BaseVertex *bs,bool isdata,
+				       bool dor9rescale, double p0b, double p1b, double  p0e,  double  p1e,
                                        Bool_t applyElectronVeto,
                                        const Vertex* realVtx)
 {
@@ -1515,7 +1523,7 @@ PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p,
     // -----------------------------------------------------
     // PF-CiC4 Debug Stuff
     std::vector<double> debugVals;
-    PhotonTools::PassCiCPFIsoSelection(p, vtx, fPFCands, vtxCol, rho, 20., &debugVals);
+    PhotonTools::PassCiCPFIsoSelection(p, vtx, fPFCands, vtxCol, rho, 20., dor9rescale,p0b,p1b,p0e,p1e,&debugVals);
     if( debugVals.size() == 13 ) {
       pfcic4_tIso1   = debugVals[0];
       pfcic4_tIso2   = debugVals[1];
@@ -1577,6 +1585,14 @@ PhotonTreeWriterPhoton<NClus>::SetVars(const Photon *p,
     combiso2 = -99.;
   }
 
+  if(dor9rescale &&  !isdata){
+    if(s->AbsEta()<1.5){
+      r9 = p0b + p1b * r9;
+    }else{
+      r9 = p0e + p1e * r9;
+    }
+  }
+  
   // TODO: fix the bug with supercluster index
   scindex = PhotonTreeWriter::IndexOfNearestSuperClusterInCollection(s, scs);
   /// DEBUG

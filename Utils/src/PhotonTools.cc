@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.44 2013/12/09 17:55:51 bendavid Exp $
+// $Id: PhotonTools.cc,v 1.45 2013/12/13 01:06:00 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -578,7 +578,7 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
 					const Vertex* vtx, 
 					const PFCandidateCol*    pfCol,
 					const VertexCol*   vtxCol,
-					double rho, double ptmin,
+					double rho, double ptmin,bool dor9rescale, double p0b, double p1b,double p0e, double p1e, 
 					std::vector<double>* kin  // store variables for debugging...
 					) {
   
@@ -618,6 +618,14 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
   double HoE = ph->HadOverEm();
   
   double R9 = ph->R9();
+
+  if(dor9rescale){
+    if(isbarrel){
+      R9 = p0b + p1b * R9;
+    }else{
+      R9 = p0e + p1e * R9;
+    }
+  }
   
   // check which category it is ...
   int _tCat = 1;

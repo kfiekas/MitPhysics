@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.40 2013/11/11 00:47:56 mingyang Exp $
+// $Id: PhotonIDMod.cc,v 1.41 2013/12/09 17:55:50 bendavid Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -314,7 +314,7 @@ void PhotonIDMod::Process()
     }
     
     if(fPhIdType == kBaseLineCiCPF) {
-      if( PhotonTools::PassSinglePhotonPreselPFISO(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) && PhotonTools::PassCiCPFIsoSelection(ph, fPV->At(0), fPFCands, fPV, rho2012, fPhotonPtMin) )
+      if( PhotonTools::PassSinglePhotonPreselPFISO(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) && PhotonTools::PassCiCPFIsoSelection(ph, fPV->At(0), fPFCands, fPV, rho2012, fPhotonPtMin, false,0.,1.,0.,1.) )
 	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }    

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.50 2013/12/10 14:00:29 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.51 2013/12/12 17:14:08 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -112,7 +112,8 @@ namespace mithep
                  const SuperClusterCol* scs,
                  const ElectronCol* els,
                  const DecayParticleCol *convs,
-                 const BaseVertex *bs,
+                 const BaseVertex *bs,bool isdata,
+		 bool dor9rescale, double p0b, double p1b, double  p0e,  double  p1e,
                  Bool_t applyElectronVeto=kTRUE,
                  const Vertex* realVtx = NULL);
       Float_t Ecor()    const { return ecor;    };
@@ -852,6 +853,8 @@ namespace mithep
 
     static FourVectorM  SuperClusterFourVectorM(const SuperCluster *sc1);
 
+    void                SetR9Rescale(bool dor9rescale, double p0b, double p1b, double  p0e,  double  p1e) {fdor9rescale = dor9rescale; fp0b = p0b; fp1b = p1b; fp0e = p0e; fp1e = p1e;}
+
   protected:
     void                Process();
     void                SlaveBegin();
@@ -1068,6 +1071,13 @@ namespace mithep
     TString                   fElectronMVAWeights_Subdet0Pt20ToInf;
     TString                   fElectronMVAWeights_Subdet1Pt20ToInf;
     TString                   fElectronMVAWeights_Subdet2Pt20ToInf;
+
+    //R9 rescale
+    bool                  fdor9rescale;                   
+    double                fp0b;                          
+    double                fp1b;                          
+    double                fp0e;                          
+    double                fp1e;     
 
     RhoUtilities::RhoType    fTheRhoType;
     UInt_t                         fProcessedEvents;

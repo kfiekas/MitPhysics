@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------
 // M.Yang 2011/10/12
-// $Id: PhotonPairSelector.h,v 1.36 2013/11/27 23:41:21 bendavid Exp $
+// $Id: PhotonPairSelector.h,v 1.37 2013/12/09 17:55:50 bendavid Exp $
 //
 // PhotonPairSelector
 //
@@ -253,6 +253,8 @@ namespace mithep
     void                SetLeptonTagElectronsName(TString name) { fLeptonTagElectronsName = name; }
     void                SetLeptonTagMuonsName    (TString name) { fLeptonTagMuonsName     = name; }
 
+    void                SetR9Rescale(bool dor9rescale, double p0b, double p1b, double  p0e,  double  p1e) {fdor9rescale = dor9rescale; fp0b = p0b; fp1b = p1b; fp0e = p0e; fp1e = p1e;}
+
   protected:
     void                Process();
     void                SlaveBegin();
@@ -425,6 +427,13 @@ namespace mithep
     Bool_t                fRelativePtCuts;
     
     MVAMet                fMVAMet;
+
+    //R9 rescale
+    bool                  fdor9rescale;                   
+    double                fp0b;                          
+    double                fp1b;                          
+    double                fp0e;                          
+    double                fp1e;                          
     
     RhoUtilities::RhoType fRhoType;
 
