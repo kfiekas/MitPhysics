@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_7TeV.C,v 1.5 2013/12/11 00:43:04 bendavid Exp $
+// $Id: runHgg2013Final_7TeV.C,v 1.6 2013/12/11 19:09:45 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -354,13 +354,14 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
 
   
   PhotonPairSelector         *photcic = new PhotonPairSelector("PhotonPairSelectorCiC");
+  photcic->SetR9Rescale(true, 0.000854, 1.00153, 0.001231,1.0005);
   photcic->SetOutputName("GoodPhotonsCIC");
   photcic->SetOutputVtxName("OutVtxCiC");        
   photcic->SetPhotonSelType("CiCPFSelection");
   photcic->SetVertexSelType("CiCMVASelection");
   photcic->SetUseSingleLegConversions(kFALSE);
   photcic->DoMCSmear(kTRUE);
-  photcic->DoDataEneCorr(kFALSE);
+  photcic->DoDataEneCorr(kTRUE);
   photcic->SetPhotonsFromBranch(kFALSE);
   photcic->SetInputPhotonsName(photreg->GetOutputName());
   
@@ -387,13 +388,14 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   photcic->SetIdMVAType("2013FinalIdMVA_7TeV");
   
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
+  photcicnoeleveto->SetR9Rescale(true, 0.000854, 1.00153, 0.001231,1.0005);
   photcicnoeleveto->SetOutputName("GoodPhotonsCICNoEleVeto");
   photcicnoeleveto->SetOutputVtxName("OutVtxCiCInvertEleVeto");      
   photcicnoeleveto->SetPhotonSelType("CiCPFSelection");
   photcicnoeleveto->SetVertexSelType("CiCMVASelection");
   photcicnoeleveto->SetUseSingleLegConversions(kFALSE);
   photcicnoeleveto->DoMCSmear(kTRUE);
-  photcicnoeleveto->DoDataEneCorr(kFALSE);
+  photcicnoeleveto->DoDataEneCorr(kTRUE);
   photcicnoeleveto->SetPhotonsFromBranch(kFALSE);
   photcicnoeleveto->SetInputPhotonsName(photreg->GetOutputName());
   
@@ -461,14 +463,14 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
   //photpreselinverteleveto->SetVertexSelType("CiCMVA2012Selection");//ming change
   photpreselinverteleveto->SetUseSingleLegConversions(kFALSE);
   photpreselinverteleveto->DoMCSmear(kTRUE);
-  photpreselinverteleveto->DoDataEneCorr(kFALSE);
+  photpreselinverteleveto->DoDataEneCorr(kTRUE);
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
   photpreselinverteleveto->SetMCSmearFactors(0.0068, 0.0096, 0.0101, 0.0185, 0.0158, 0.0185, 0.0201, 0.0183);
-
+  
   photpreselinverteleveto->AddEnCorrFromFile(encorrfilename);
-
+  
   
   //-----------------------------------------------------------------------------------------------------------------
   photpreselinverteleveto->SetShowerShapeType("2011ShowerShape");
@@ -513,6 +515,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    photpreselnosmear->DoDataEneCorr(kFALSE);
 
    PhotonPairSelector         *photcicnosmear = new PhotonPairSelector("PhotonPairSelectorCiCNoSmear");
+   photcicnosmear->SetR9Rescale(true, 0.000854, 1.00153, 0.001231,1.0005);
    photcicnosmear->SetOutputName("GoodPhotonsCICNoSmear");
    photcicnosmear->SetOutputVtxName("OutVtxCiCNoSmear");        
    photcicnosmear->SetPhotonSelType("CiCPFSelection");
@@ -563,6 +566,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    photpreselinvertelevetonosmear->SetInvertElectronVeto(kTRUE);
    
    PhotonTreeWriter *phottreecic = new PhotonTreeWriter("PhotonTreeWriterCiC");
+   phottreecic->SetR9Rescale(true, 0.000854, 1.00153, 0.001231,1.0005);
    phottreecic->SetPhotonsFromBranch(kFALSE);
    phottreecic->SetInputPhotonsName(photcic->GetOutputName());
    phottreecic->SetEnableJets(kTRUE);
@@ -592,6 +596,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreecic->SetApplyTTHTag(kTRUE);
    
    PhotonTreeWriter *phottreecicnoeleveto = new PhotonTreeWriter("PhotonTreeWriterCiCInvertEleVeto");
+   phottreecicnoeleveto->SetR9Rescale(true, 0.000854, 1.00153, 0.001231,1.0005);
    phottreecicnoeleveto->SetPhotonsFromBranch(kFALSE);
    phottreecicnoeleveto->SetInputPhotonsName(photcicnoeleveto->GetOutputName());
    phottreecicnoeleveto->SetEnableJets(kTRUE);
@@ -712,6 +717,7 @@ void runHgg2013Final_7TeV(const char *fileset    = "0000",
    phottreepreselnosmear->SetApplyTTHTag(kTRUE);
 
    PhotonTreeWriter *phottreecicnosmear = new PhotonTreeWriter("PhotonTreeWriterCiCNoSmear");
+   phottreecicnosmear->SetR9Rescale(true, 0.000854, 1.00153, 0.001231,1.0005);
    phottreecicnosmear->SetPhotonsFromBranch(kFALSE);
    phottreecicnosmear->SetInputPhotonsName(photcicnosmear->GetOutputName());
    phottreecicnosmear->SetEnableJets(kTRUE);
