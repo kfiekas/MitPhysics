@@ -1,4 +1,4 @@
-// $Id: runHgg2013Final_8TeV.C,v 1.8 2013/12/09 17:55:52 bendavid Exp $
+// $Id: runHgg2013Final_8TeV.C,v 1.9 2013/12/11 00:43:04 bendavid Exp $
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TSystem.h>
 #include <TProfile.h>
@@ -67,7 +67,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
 			  //const char *book       = "t2mit/filefi/031",
 			  const char *catalogDir = "/home/cmsprod/catalog",
 			  const char *outputName = "hgg",
-			  int         nEvents    = -1)
+			  int         nEvents    = 1000)
 {
   //------------------------------------------------------------------------------------------------
   // some parameters get passed through the environment
@@ -424,13 +424,14 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
 
   
   PhotonPairSelector         *photcic = new PhotonPairSelector("PhotonPairSelectorCiC");
+  photcic->SetR9Rescale(true, 0.000740, 1.00139, -0.000399, 1.00016);
   photcic->SetOutputName("GoodPhotonsCIC");
   photcic->SetOutputVtxName("OutVtxCiC");        
   photcic->SetPhotonSelType("CiCPFSelection");
   photcic->SetVertexSelType("CiCMVA2012Selection");
   photcic->SetUseSingleLegConversions(kFALSE);
   photcic->DoMCSmear(kTRUE);
-  photcic->DoDataEneCorr(kFALSE);
+  photcic->DoDataEneCorr(kTRUE);
   photcic->SetPhotonsFromBranch(kFALSE);
   photcic->SetInputPhotonsName(photreg->GetOutputName());
   
@@ -462,13 +463,14 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photcic->SetIdMVAType("2013FinalIdMVA_8TeV");
   
   PhotonPairSelector         *photcicnoeleveto = new PhotonPairSelector("PhotonPairSelectorCiCInvertEleVeto");
+  photcicnoeleveto->SetR9Rescale(true, 0.000740, 1.00139, -0.000399, 1.00016);
   photcicnoeleveto->SetOutputName("GoodPhotonsCICNoEleVeto");
   photcicnoeleveto->SetOutputVtxName("OutVtxCiCInvertEleVeto");      
   photcicnoeleveto->SetPhotonSelType("CiCPFSelection");
   photcicnoeleveto->SetVertexSelType("CiCMVA2012Selection");
   photcicnoeleveto->SetUseSingleLegConversions(kFALSE);
   photcicnoeleveto->DoMCSmear(kTRUE);
-  photcicnoeleveto->DoDataEneCorr(kFALSE);
+  photcicnoeleveto->DoDataEneCorr(kTRUE);
   photcicnoeleveto->SetPhotonsFromBranch(kFALSE);
   photcicnoeleveto->SetInputPhotonsName(photreg->GetOutputName());
   
@@ -546,12 +548,12 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   //photpreselinverteleveto->SetVertexSelType("CiCMVA2012Selection");//ming change
   photpreselinverteleveto->SetUseSingleLegConversions(kFALSE);
   photpreselinverteleveto->DoMCSmear(kTRUE);
-  photpreselinverteleveto->DoDataEneCorr(kFALSE);
+  photpreselinverteleveto->DoDataEneCorr(kTRUE);
   photpreselinverteleveto->SetPhotonsFromBranch(kFALSE);
   photpreselinverteleveto->SetInputPhotonsName(photreg->GetOutputName());
   //------------------------------------------2012 HCP--------------------------------------------------------------
   photpreselinverteleveto->SetMCSmearFactors(0.0075,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
-
+  
   photpreselinverteleveto->SetMCStochasticPivot(6.60119,6.7276,6.52397,6.73261);
   photpreselinverteleveto->SetMCStochasticRho(7.4e-3,7.7e-3,1.12e-2,1.26e-2);
   photpreselinverteleveto->SetMCStochasticPhi(0.,0.,0.,0.);
@@ -576,32 +578,33 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
   photpreselinverteleveto->SetLeadingPtMin(20.);
   photpreselinverteleveto->SetTrailingPtMin(20.);
 
-   PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
-   photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
-   photpreselnosmear->SetPhotonSelType("MITPFSelectionNoEcal");
-   photpreselnosmear->SetVertexSelType("CiCMVA2012Selection");
-   photpreselnosmear->SetUseSingleLegConversions(kFALSE);
-   photpreselnosmear->SetIdMVAType("2013FinalIdMVA_8TeV");
-   photpreselnosmear->SetShowerShapeType("2012ShowerShape");
-   photpreselnosmear->SetDoShowerShapeScaling(kFALSE);
-   photpreselnosmear->SetPhotonsFromBranch(kFALSE);
-   photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
-   photpreselnosmear->SetMCSmearFactors(0.0075,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
-   photpreselnosmear->SetJetsName(jetCorr->GetOutputName());
-   photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");
-   photpreselnosmear->SetLeadingPtMin(30.);
-   photpreselnosmear->SetTrailingPtMin(22.);
-   //photpreselnosmear->SetRescaledBeamspotWidth(5.0);
-   photpreselnosmear->SetIsData(isData);
-   photpreselnosmear->SetApplyLeptonTag(kTRUE);
-   photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
-   photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
-   photpreselnosmear->DoMCSmear(kFALSE);
-   photpreselnosmear->DoMCEneSmear(kFALSE);
-   photpreselnosmear->DoEneErrSmear(kTRUE);
-   photpreselnosmear->DoDataEneCorr(kFALSE);
-
+  PhotonPairSelector         *photpreselnosmear = new PhotonPairSelector("PhotonPairSelectorPreselNoSmear");
+  photpreselnosmear->SetOutputName("GoodPhotonsPreselNoSmear");
+  photpreselnosmear->SetPhotonSelType("MITPFSelectionNoEcal");
+  photpreselnosmear->SetVertexSelType("CiCMVA2012Selection");
+  photpreselnosmear->SetUseSingleLegConversions(kFALSE);
+  photpreselnosmear->SetIdMVAType("2013FinalIdMVA_8TeV");
+  photpreselnosmear->SetShowerShapeType("2012ShowerShape");
+  photpreselnosmear->SetDoShowerShapeScaling(kFALSE);
+  photpreselnosmear->SetPhotonsFromBranch(kFALSE);
+  photpreselnosmear->SetInputPhotonsName(photreg->GetOutputName());
+  photpreselnosmear->SetMCSmearFactors(0.0075,0.0086,0.0122,0.0188,0.0163,0.0198,0.0186,0.0192);
+  photpreselnosmear->SetJetsName(jetCorr->GetOutputName());
+  photpreselnosmear->SetOutputVtxName("OutVtxNoSmear");
+  photpreselnosmear->SetLeadingPtMin(30.);
+  photpreselnosmear->SetTrailingPtMin(22.);
+  //photpreselnosmear->SetRescaledBeamspotWidth(5.0);
+  photpreselnosmear->SetIsData(isData);
+  photpreselnosmear->SetApplyLeptonTag(kTRUE);
+  photpreselnosmear->SetLeptonTagElectronsName("HggLeptonTagSoftElectrons");
+  photpreselnosmear->SetLeptonTagMuonsName("HggLeptonTagSoftMuons");
+  photpreselnosmear->DoMCSmear(kFALSE);
+  photpreselnosmear->DoMCEneSmear(kFALSE);
+  photpreselnosmear->DoEneErrSmear(kTRUE);
+  photpreselnosmear->DoDataEneCorr(kFALSE);
+  
    PhotonPairSelector         *photcicnosmear = new PhotonPairSelector("PhotonPairSelectorCiCNoSmear");
+   photcicnosmear->SetR9Rescale(true, 0.000740, 1.00139, -0.000399, 1.00016);
    photcicnosmear->SetOutputName("GoodPhotonsCICNoSmear");
    photcicnosmear->SetOutputVtxName("OutVtxCiCNoSmear");        
    photcicnosmear->SetPhotonSelType("CiCPFSelection");
@@ -652,6 +655,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    photpreselinvertelevetonosmear->SetInvertElectronVeto(kTRUE);
    
    PhotonTreeWriter *phottreecic = new PhotonTreeWriter("PhotonTreeWriterCiC");
+   phottreecic->SetR9Rescale(true, 0.000740, 1.00139, -0.000399, 1.00016);
+   phottreecic->SetDoSynching(kTRUE);
    phottreecic->SetPhotonsFromBranch(kFALSE);
    phottreecic->SetInputPhotonsName(photcic->GetOutputName());
    phottreecic->SetEnableJets(kTRUE);
@@ -682,6 +687,7 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
    phottreecic->SetApplyTTHTag(kTRUE);
    
    PhotonTreeWriter *phottreecicnoeleveto = new PhotonTreeWriter("PhotonTreeWriterCiCInvertEleVeto");
+   phottreecicnoeleveto->SetR9Rescale(true, 0.000740, 1.00139, -0.000399, 1.00016);
    phottreecicnoeleveto->SetPhotonsFromBranch(kFALSE);
    phottreecicnoeleveto->SetInputPhotonsName(photcicnoeleveto->GetOutputName());
    phottreecicnoeleveto->SetEnableJets(kTRUE);
@@ -807,6 +813,8 @@ void runHgg2013Final_8TeV(const char *fileset    = "0000",
     phottreepreselnosmear->SetApplyTTHTag(kTRUE);
 
    PhotonTreeWriter *phottreecicnosmear = new PhotonTreeWriter("PhotonTreeWriterCiCNoSmear");
+   phottreecicnosmear->SetR9Rescale(true, 0.000740, 1.00139, -0.000399, 1.00016);
+   phottreecicnosmear->SetDoSynching(kTRUE);
    phottreecicnosmear->SetPhotonsFromBranch(kFALSE);
    phottreecicnosmear->SetInputPhotonsName(photcicnosmear->GetOutputName());
    phottreecicnosmear->SetEnableJets(kTRUE);
