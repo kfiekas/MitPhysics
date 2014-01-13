@@ -1,0 +1,16 @@
+Package for more specific MitPhysics tools
+==========================================
+
+ - general bambu tools are available in MitAna
+ - these are really for more specific analyses like
+   - electron, muon ID, special jet corrections etc.
+
+ - this package also relies on some data that are not stored in GITHUB
+   as they are too large
+ - please bootstrap this package, therefore do:
+
+   git clone -b $MIT_TAG https://github.com/cpausmit/MitPhysics.git
+   ./MitPhysics/bin/updateData.sh
+
+ - data will be pulled in and are automatically unpacked in the expected
+   directory: MitPhysics/data
