@@ -25,6 +25,7 @@ const char *ModNames::gkGoodMuonsName          = "GoodMuons";
 const char *ModNames::gkGoodPhotonsName        = "GoodPhotons";
 const char *ModNames::gkGoodTausName           = "GoodTaus";
 const char *ModNames::gkGoodPFTausName         = "GoodPFTaus";
+const char *ModNames::gkGoodVTagsName          = "GoodVTags";
 const char *ModNames::gkGoodVertexesName       = "GoodVertexes";
 const char *ModNames::gkMCAllLeptonsName       = "MCAllLeptons";
 const char *ModNames::gkMCBosonsName           = "MCBosons";
