@@ -8,6 +8,7 @@
 <use   name="MitPhysics/ElectronLikelihood"/>
 <use   name="CondFormats/JetMETObjects"/>
 <use   name="FWCore/ParameterSet"/>
+<use   name="fastjet"/>
 <use   name="lhapdf"/>
 <use   name="root"/>
 <use   name="roottmva"/>
