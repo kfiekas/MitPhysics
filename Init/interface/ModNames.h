@@ -38,6 +38,7 @@ namespace mithep
       static const char *gkGoodPhotonsName;
       static const char *gkGoodTausName;
       static const char *gkGoodPFTausName;
+      static const char *gkGoodVTagsName;
       static const char *gkGoodVertexesName;
       static const char *gkMCAllLeptonsName;
       static const char *gkMCBosonsName;
