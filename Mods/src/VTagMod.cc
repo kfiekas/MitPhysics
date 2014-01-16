@@ -5,8 +5,8 @@
 
 #include "fastjet/PseudoJet.hh"
 
-// #include "Nsubjettiness/Njettiness.hh"
-// #include "Nsubjettiness/Nsubjettiness.hh"
+#include "fastjet/contrib/Njettiness.hh"
+#include "fastjet/contrib/Nsubjettiness.hh"
 
 using namespace mithep;
 
@@ -59,11 +59,11 @@ void VTagMod::Process()
     printf(" VTagsMod::Process - no output jets.\n");
   }
 
-  //// Compute the the tau 1 and tau 2 variables : 
-  //double tau1 = GetTau(lJet,1,1);
-  //double tau2 = GetTau(lJet,2,1);
-  //
-  //printf(" VTagsMod::Process - tau1, tau2: %10.4e, %10.4e\n",tau1,tau2);
+  // Compute the the tau 1 and tau 2 variables : 
+  double tau1 = GetTau(lJet,1,1);
+  double tau2 = GetTau(lJet,2,1);
+
+  printf(" VTagsMod::Process - tau1, tau2: %10.4e, %10.4e\n",tau1,tau2);
 
   delete lClustering;
 
@@ -79,9 +79,8 @@ void VTagMod::SlaveBegin()
 
   ReqEventObject(fPFCandidatesName, fPFCandidates, kTRUE);
 
-
   //Default pruning parameters
-  fPruner          = new fastjet::Pruner( fastjet::cambridge_algorithm, 0.1, 0.5); //CMS Default      
+  fPruner          = new fastjet::Pruner(fastjet::cambridge_algorithm,0.1,0.5);       // CMS Default
   
   //CA constructor (fConeSize = 0.8 for CA8)
   fCAJetDef       = new fastjet::JetDefinition(fastjet::cambridge_algorithm, fConeSize);
@@ -103,10 +102,11 @@ void VTagMod::Terminate()
 }
 
 //--------------------------------------------------------------------------------------------------
-//float VTagMod::GetTau(fastjet::PseudoJet &iJet,int iN, float iKappa)
-//{
-//  // Calculate the tau variable for the given pseudojet
-//  fastjet::contrib::Nsubjettiness nSubNKT(iN,fastjet::contrib::Njettiness::onepass_kt_axes,iKappa,fConeSize,fConeSize);
-//  
-//  return nSubNKT(iJet);
-//}
+float VTagMod::GetTau(fastjet::PseudoJet &iJet,int iN, float iKappa)
+{
+  // Calculate the tau variable for the given pseudojet
+  fastjet::contrib::Nsubjettiness 
+    nSubNKT(iN,fastjet::contrib::Njettiness::onepass_kt_axes,iKappa,fConeSize,fConeSize);
+  
+  return nSubNKT(iJet);
+}
