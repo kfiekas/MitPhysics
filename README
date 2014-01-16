@@ -6,11 +6,13 @@ Package for more specific MitPhysics tools
    - electron, muon ID, special jet corrections etc.
 
  - this package also relies on some data that are not stored in GITHUB
-   as they are too large
+   as they are too large and on some packages as fastjet and its
+   contributions
  - please bootstrap this package, therefore do:
 
    git clone -b $MIT_TAG https://github.com/cpausmit/MitPhysics.git
-   ./MitPhysics/bin/updateData.sh
+   ./MitPhysics/bin/setup.sh
 
  - data will be pulled in and are automatically unpacked in the expected
    directory: MitPhysics/data
+ - $CMSSW_BASE/config/toolbox/... will be updated
