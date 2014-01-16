@@ -9,12 +9,13 @@
 #---------------------------------------------------------------------------------------------------
 function configureScram {
   FASTJET_VAR=$1
+  EXTERNAL=$2
   # add local fastjet external to scarm config
   mv $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/fastjet.xml \
      $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/fastjet.xml-last.$$
   echo \
 '
-  <tool name="fastjet" version="xxx">
+  <tool name="fastjet" version="xx-VERSION-xx">
     <info url="http://www.lpthe.jussieu.fr/~salam/fastjet/"/>
     <lib name="fastjetplugins"/>
     <lib name="fastjettools"/>
@@ -23,12 +24,13 @@ function configureScram {
     <lib name="fastjet"/>
     <lib name="fastjetcontrib"/>
     <client>
-      <environment name="FASTJET_BASE" default="/home/paus/cms/external"/>
+      <environment name="FASTJET_BASE" default="xx-PATH-xx"/>
       <environment name="LIBDIR" default="$FASTJET_BASE/lib"/>
       <environment name="INCLUDE" default="$FASTJET_BASE/include"/>
     </client>
   </tool>
-' | sed "s/xxx/$FASTJET_VER/" > $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/fastjet.xml
+' | sed "s/xx-VERSION-xx/$FASTJET_VER/"  | sed "s#xx-PATH-xx#$EXTERNAL#" \
+> $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/fastjet.xml
 
   # commit the scram config changes
   cd $CMSSW_BASE/src
@@ -65,7 +67,7 @@ then
   echo ""
   # use existing location just adjust scram configuration
   FASTJET_VER=`ls -1 $EXTERNAL | grep fastjet | tail -1 |cut -d '-' -f2`
-  configureScram $FASTJET_VER
+  configureScram $FASTJET_VER $EXTERNAL
   exit 0
 else
   EXTERNAL="/home/$USER/cms/external"
@@ -153,6 +155,6 @@ make install
 g++ -shared -fPIC -o $EXTERNAL/lib/libfastjetcontrib.so $FJCONTRIB_DIR/*/[A-Z]*.o 
 
 # final adjustment to scram configuration
-configureScram $FASTJET_VER
+configureScram $FASTJET_VER $EXTERNAL
 
 exit 0
