@@ -31,7 +31,7 @@ git clone -b $MIT_TAG https://github.com/cpausmit/MitPhysics.git
 git clone -b $MIT_TAG https://github.com/cpausmit/MitPlots.git
 
 # Initialize the production software
-source $CMSSW_BASE/src/MitAna/Processing/bin/mitana.sh
+source $CMSSW_BASE/src/MitAna/bin/mitana.sh
 
 # Apply MIT specific patches
 ./MitPhysics/bin/setup.sh
