@@ -30,6 +30,8 @@ git clone -b $MIT_TAG https://github.com/cpausmit/MitAna.git
 git clone -b $MIT_TAG https://github.com/cpausmit/MitPhysics.git
 git clone -b $MIT_TAG https://github.com/cpausmit/MitPlots.git
 
+git clone -b hggpaperV6 https://github.com/bendavid/GBRLikelihood.git HiggsAnalysis/GBRLikelihood
+
 # Initialize the production software
 source $CMSSW_BASE/src/MitAna/bin/mitana.sh
 
