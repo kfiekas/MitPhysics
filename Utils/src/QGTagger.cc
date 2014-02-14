@@ -7,7 +7,7 @@ using namespace mithep;
  
 QGTagger::QGTagger(bool useCHS)
 {
-   // Constructor
+  // Constructor
   qgLikelihood = new QGLikelihoodCalculator("MitPhysics/data/", useCHS);
 }
 
@@ -43,6 +43,7 @@ void QGTagger::CalculateVariables(const PFJet *jet, const VertexCol *vertices){
   // global quantities
   Float_t sumWeight = 0., sumDeltaEta = 0., sumDeltaPhi = 0., sumDeltaEta2 = 0., sumDeltaPhi2 = 0., sumDeltaEtaDeltaPhi = 0., sumPt = 0.;
 
+
   // loop over constituents
   for(UInt_t i=0;i<jet->NPFCands();i++){
 
@@ -63,11 +64,13 @@ void QGTagger::CalculateVariables(const PFJet *jet, const VertexCol *vertices){
       
       // assume the first vertex is the good one 
       if (closestVertexIndex == 0 and track->Quality().Quality(TrackQuality::highPurity)) {
+	deltaZ = fabs(track->DzCorrected(*vertices->At(0)));
 	Float_t deltaZErr = sqrt(pow(track->DszErr(),2) + pow(vertices->At(0)->ZErr(),2));
 	if (deltaZ/deltaZErr < 5) {
 	  isGoodForAxis = true;
+	  Float_t deltaXY = track->D0Corrected(*vertices->At(0));
 	  Float_t deltaXYErr = sqrt(pow(track->DxyErr(),2) + pow(vertices->At(0)->XErr(),2) + pow(vertices->At(0)->YErr(),2));
-	  if ( fabs(track->D0Corrected(*vertices->At(0)))/deltaXYErr < 5) chargedMultiplicity++;
+	  if ( fabs(deltaXY)/deltaXYErr < 5) chargedMultiplicity++;
 	}
       }
     }
@@ -80,7 +83,7 @@ void QGTagger::CalculateVariables(const PFJet *jet, const VertexCol *vertices){
 
     // update global quantities
     Float_t deltaEta = jet->PFCand(i)->Eta() - jet->Eta();
-    Float_t deltaPhi = 2*atan(tan(jet->PFCand(i)->Phi() - jet->Phi()));
+    Float_t deltaPhi = 2*atan( tan( (jet->PFCand(i)->Phi() - jet->Phi())/2 ) );
     Float_t weight = pow(jet->PFCand(i)->Pt(),2);
     if (isGoodForAxis){
       sumWeight += weight;
@@ -116,3 +119,8 @@ void QGTagger::CalculateVariables(const PFJet *jet, const VertexCol *vertices){
 
 
 }
+
+Float_t QGTagger::GetPtD()   { return variables["ptD"];   }
+Float_t QGTagger::GetAxis1() { return variables["axis1"]; }
+Float_t QGTagger::GetAxis2() { return variables["axis2"]; }
+Float_t QGTagger::GetMult()  { return variables["mult"];  }

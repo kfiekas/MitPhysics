@@ -1,5 +1,5 @@
 
-// $Id: PhotonIDMod.cc,v 1.41 2013/12/09 17:55:50 bendavid Exp $
+// $Id: PhotonIDMod.cc,v 1.39 2013/07/30 21:07:36 mingyang Exp $
 
 #include "TDataMember.h"
 #include "TTree.h"
@@ -110,8 +110,11 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fDoShowerShapeScaling          (false),
 
   // ---------------------------------------
-  fDataEnCorr_EBlowEta_hR9       (0.),
+  fDataEnCorr_EBlowEta_hR9central(0.),
+  fDataEnCorr_EBlowEta_hR9gap    (0.),
   fDataEnCorr_EBlowEta_lR9       (0.),
+  fDataEnCorr_EBlowEta_lR9central(0.),
+  fDataEnCorr_EBlowEta_lR9gap    (0.),
   fDataEnCorr_EBhighEta_hR9      (0.),
   fDataEnCorr_EBhighEta_lR9      (0.),
   fDataEnCorr_EElowEta_hR9       (0.),
@@ -121,8 +124,11 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fRunStart                      (0),
   fRunEnd                        (0),
 
-  fMCSmear_EBlowEta_hR9          (0.),
+  fMCSmear_EBlowEta_hR9central   (0.),
+  fMCSmear_EBlowEta_hR9gap       (0.),
   fMCSmear_EBlowEta_lR9          (0.),
+  fMCSmear_EBlowEta_lR9central   (0.),
+  fMCSmear_EBlowEta_lR9gap       (0.),
   fMCSmear_EBhighEta_hR9         (0.),
   fMCSmear_EBhighEta_lR9         (0.),
   fMCSmear_EElowEta_hR9          (0.),
@@ -131,7 +137,8 @@ PhotonIDMod::PhotonIDMod(const char *name, const char *title) :
   fMCSmear_EEhighEta_lR9         (0.),
  
   fRng                           (new TRandom3()),
-  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS)
+  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS),
+  f2012HCP                       (kFALSE)
 
 {
   // Constructor.
@@ -250,7 +257,12 @@ void PhotonIDMod::Process()
     
     PhotonTools::eScaleCats escalecat;
 
-    escalecat = PhotonTools::EScaleCat(ph);
+
+    if(f2012HCP){
+      escalecat = PhotonTools::EScaleCatHCP(ph);
+    }else{
+      escalecat = PhotonTools::EScaleCat(ph);
+    }
 
     // now we dicide if we either scale (Data) or Smear (MC) the Photons
     if (fIsData) {
@@ -270,8 +282,12 @@ void PhotonIDMod::Process()
 
       double width = 0;
       
-      width = GetMCSmearFac(escalecat);
-      
+      if(f2012HCP){
+	width = GetMCSmearFacHCP(escalecat);
+      }else {
+	width = GetMCSmearFac(escalecat);
+      }
+
       if (!fIsData) {
         // get the seed to do deterministic smearing...
         UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
@@ -286,7 +302,6 @@ void PhotonIDMod::Process()
     // ---------------------------------------------------------------------
     // set the photonIdMVA value of requested...
     double idMvaVal = fTool.GetMVAbdtValue(ph,fPV->At(0),fTracks, fPV, theRho, fPFCands, fElectrons, fApplyElectronVeto);
-
     ph->SetIdMva(idMvaVal);
 
     // ---------------------------------------------------------------------
@@ -314,7 +329,7 @@ void PhotonIDMod::Process()
     }
     
     if(fPhIdType == kBaseLineCiCPF) {
-      if( PhotonTools::PassSinglePhotonPreselPFISO(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) && PhotonTools::PassCiCPFIsoSelection(ph, fPV->At(0), fPFCands, fPV, rho2012, fPhotonPtMin, false,0.,1.,0.,1.) )
+      if( PhotonTools::PassSinglePhotonPreselPFISO(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) && PhotonTools::PassCiCPFIsoSelection(ph, fPV->At(0), fPFCands, fPV, rho2012, fPhotonPtMin) )
 	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }    
@@ -533,27 +548,6 @@ void PhotonIDMod::SlaveBegin()
     ReqBranch(fPileUpName,            fPileUp);
     ReqBranch(fMCParticleName,        fMCParticles);
   }   
-
-  if(fIdMVATypeName.CompareTo("2011IdMVA") == 0)
-    fIdMVAType =       MVATools::k2011IdMVA;
-  else if (fIdMVATypeName.CompareTo("2012IdMVA_globe") == 0)
-    fIdMVAType =       MVATools::k2012IdMVA_globe;
-  else if (fIdMVATypeName.CompareTo("2012IdMVA") == 0)
-    fIdMVAType =       MVATools::k2012IdMVA;
-  else if (fIdMVATypeName.CompareTo("2013FinalIdMVA_8TeV") == 0)
-    fIdMVAType =       MVATools::k2013FinalIdMVA_8TeV;
-  else if (fIdMVATypeName.CompareTo("2013FinalIdMVA_7TeV") == 0)
-    fIdMVAType =       MVATools::k2013FinalIdMVA_7TeV;
-  else if (fIdMVATypeName.CompareTo("2011IdMVA_HZg") == 0)
-    fIdMVAType =       MVATools::k2011IdMVA_HZg;
-  else if (fIdMVATypeName.CompareTo("None") == 0)
-    fIdMVAType =       MVATools::kNone;
-  else {
-    std::cerr<<" Id MVA "<<fIdMVATypeName<<" not implemented."<<std::endl;
-    return;
-  }
-
-  fTool.InitializeMVA(fIdMVAType);
   
   if (fPhotonIDType.CompareTo("Tight") == 0) 
     fPhIdType = kTight;
@@ -638,6 +632,28 @@ void PhotonIDMod::SlaveBegin()
     return;
   }
   
+  if      (fIdMVATypeName.CompareTo("2011IdMVA") == 0)
+    fIdMVAType =       MVATools::k2011IdMVA;
+  else if (fIdMVATypeName.CompareTo("2012IdMVA_globe") == 0)
+    fIdMVAType =       MVATools::k2012IdMVA_globe;
+  else if (fIdMVATypeName.CompareTo("2012IdMVA") == 0)
+    fIdMVAType =       MVATools::k2012IdMVA;
+  else if (fIdMVATypeName.CompareTo("2013FinalIdMVA") == 0)
+    fIdMVAType =       MVATools::k2013FinalIdMVA;
+  else if (fIdMVATypeName.CompareTo("2011IdMVA_HZg") == 0)
+    fIdMVAType =       MVATools::k2011IdMVA_HZg;
+  else if (fIdMVATypeName.CompareTo("None") == 0)
+    fIdMVAType =       MVATools::kNone;
+  else {
+    std::cerr<<" Id MVA "<<fIdMVATypeName<<" not implemented."<<std::endl;
+    return;
+  }
+
+  // ------------------------------------------------------------------------------------
+  // we fill ALWAYS the bdt varible with some value... so initialize the BDT if not set to 'None' (will be handeled by MVATools)   (fab)
+  fTool.InitializeMVA(fIdMVAType);
+  // ------------------------------------------------------------------------------------
+
 }
 
 
@@ -663,8 +679,10 @@ Double_t PhotonIDMod::GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat)
     return fDataEnCorr_EBhighEta_hR9[runRange];
   case PhotonTools::kEBhighEtaBad:
     return fDataEnCorr_EBhighEta_lR9[runRange];
-  case PhotonTools::kEBlowEtaGold:
-    return fDataEnCorr_EBlowEta_hR9[runRange];
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fDataEnCorr_EBlowEta_hR9central[runRange];
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fDataEnCorr_EBlowEta_hR9gap[runRange];
   case PhotonTools::kEBlowEtaBad:
     return fDataEnCorr_EBlowEta_lR9[runRange];
   case PhotonTools::kEEhighEtaGold:
@@ -688,8 +706,10 @@ Double_t PhotonIDMod::GetMCSmearFac(PhotonTools::eScaleCats cat)
     return fMCSmear_EBhighEta_hR9;
   case PhotonTools::kEBhighEtaBad:
     return fMCSmear_EBhighEta_lR9;
-  case PhotonTools::kEBlowEtaGold:
-    return fMCSmear_EBlowEta_hR9;
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fMCSmear_EBlowEta_hR9central;
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fMCSmear_EBlowEta_hR9gap;
   case PhotonTools::kEBlowEtaBad:
     return fMCSmear_EBlowEta_lR9;
   case PhotonTools::kEEhighEtaGold:
@@ -705,3 +725,61 @@ Double_t PhotonIDMod::GetMCSmearFac(PhotonTools::eScaleCats cat)
   }
 }
 
+Double_t PhotonIDMod::GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat)
+{
+  switch (cat) {
+  case PhotonTools::kEBhighEtaGold:
+    return fDataEnCorr_EBhighEta_hR9[runRange];
+  case PhotonTools::kEBhighEtaBad:
+    return fDataEnCorr_EBhighEta_lR9[runRange];
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fDataEnCorr_EBlowEta_hR9central[runRange];
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fDataEnCorr_EBlowEta_hR9gap[runRange];
+  case PhotonTools::kEBlowEtaBadCenter:
+    return fDataEnCorr_EBlowEta_lR9central[runRange];
+  case PhotonTools::kEBlowEtaBadGap:
+    return fDataEnCorr_EBlowEta_lR9gap[runRange];
+  case PhotonTools::kEEhighEtaGold:
+    return fDataEnCorr_EEhighEta_hR9[runRange];
+  case PhotonTools::kEEhighEtaBad:
+    return fDataEnCorr_EEhighEta_lR9[runRange];
+  case PhotonTools::kEElowEtaGold:
+    return fDataEnCorr_EElowEta_hR9[runRange];
+  case PhotonTools::kEElowEtaBad:
+    return fDataEnCorr_EElowEta_lR9[runRange];
+  default:
+    return 1.;
+  }
+}
+
+//---------------------------------------------------------------------------------------------------
+Double_t PhotonIDMod::GetMCSmearFacHCP(PhotonTools::eScaleCats cat)
+{
+
+  switch (cat) {
+    case PhotonTools::kEBhighEtaGold:
+      return fMCSmear_EBhighEta_hR9;
+    case PhotonTools::kEBhighEtaBad:
+      return fMCSmear_EBhighEta_lR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmear_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmear_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaBadCenter:
+      return fMCSmear_EBlowEta_lR9central;
+    case PhotonTools::kEBlowEtaBadGap:
+      return fMCSmear_EBlowEta_lR9gap;
+    case PhotonTools::kEEhighEtaGold:
+      return fMCSmear_EEhighEta_hR9;
+    case PhotonTools::kEEhighEtaBad:
+      return fMCSmear_EEhighEta_lR9;
+    case PhotonTools::kEElowEtaGold:
+      return fMCSmear_EElowEta_hR9;
+    case PhotonTools::kEElowEtaBad:
+      return fMCSmear_EElowEta_lR9;
+    default:
+      return 1.;
+    }
+
+}

@@ -85,9 +85,25 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fJets                          (0),
   fPFMet                         (0),
   // ---------------------------------------
+  fDataEnCorr_EBlowEta_hR9central(0.),
+  fDataEnCorr_EBlowEta_hR9gap    (0.),
+  fDataEnCorr_EBlowEta_lR9       (0.),
+  fDataEnCorr_EBlowEta_lR9central(0.),
+  fDataEnCorr_EBlowEta_lR9gap    (0.),
+  fDataEnCorr_EBhighEta_hR9      (0.),
+  fDataEnCorr_EBhighEta_lR9      (0.),
+  fDataEnCorr_EElowEta_hR9       (0.),
+  fDataEnCorr_EElowEta_lR9       (0.),
+  fDataEnCorr_EEhighEta_hR9      (0.),
+  fDataEnCorr_EEhighEta_lR9      (0.),
+  fRunStart                      (0),
+  fRunEnd                        (0),
 
-  fMCSmear_EBlowEta_hR9          (0.),
+  fMCSmear_EBlowEta_hR9central   (0.),
+  fMCSmear_EBlowEta_hR9gap       (0.),
   fMCSmear_EBlowEta_lR9          (0.),
+  fMCSmear_EBlowEta_lR9central   (0.),
+  fMCSmear_EBlowEta_lR9gap       (0.),
   fMCSmear_EBhighEta_hR9         (0.),
   fMCSmear_EBhighEta_lR9         (0.),
   fMCSmear_EElowEta_hR9          (0.),
@@ -95,29 +111,18 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCSmear_EEhighEta_hR9         (0.),
   fMCSmear_EEhighEta_lR9         (0.),
 
-  fMCSmearMVA_EBlowEta_hR9       (0.),
+  fMCSmearMVA_EBlowEta_hR9central(0.),
+  fMCSmearMVA_EBlowEta_hR9gap    (0.),
   fMCSmearMVA_EBlowEta_lR9       (0.),
+  fMCSmearMVA_EBlowEta_lR9central(0.),
+  fMCSmearMVA_EBlowEta_lR9gap    (0.),
   fMCSmearMVA_EBhighEta_hR9      (0.),
   fMCSmearMVA_EBhighEta_lR9      (0.),
   fMCSmearMVA_EElowEta_hR9       (0.),
   fMCSmearMVA_EElowEta_lR9       (0.),
   fMCSmearMVA_EEhighEta_hR9      (0.),
   fMCSmearMVA_EEhighEta_lR9      (0.),
-  
-  fMCStochasticPivot_EBlowEta_hR9(0.),
-  fMCStochasticPivot_EBlowEta_lR9(0.),
-  fMCStochasticPivot_EBhighEta_hR9(0.),
-  fMCStochasticPivot_EBhighEta_lR9(0.),    
-  
-  fMCStochasticRho_EBlowEta_hR9(0.),
-  fMCStochasticRho_EBlowEta_lR9(0.),
-  fMCStochasticRho_EBhighEta_hR9(0.),
-  fMCStochasticRho_EBhighEta_lR9(0.),    
-  
-  fMCStochasticPhi_EBlowEta_hR9(0.),
-  fMCStochasticPhi_EBlowEta_lR9(0.),
-  fMCStochasticPhi_EBhighEta_hR9(0.),
-  fMCStochasticPhi_EBhighEta_lR9(0.),      
+
 
   // ---------------------------------------
   fRng                           (new TRandom3()),
@@ -126,8 +131,6 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   // ---------------------------------------
   fDoDataEneCorr                 (true),
   fDoMCSmear                     (true),
-  fDoMCEneSmear                  (true),
-  fDoEneErrSmear                 (true),
   fUseSpecialSmearForDPMVA       (false),
   fDoVtxSelection                (true),
   fApplyEleVeto                  (true),
@@ -178,6 +181,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fMCErrScaleEE                  (1.0),
   fRelativePtCuts                (kFALSE),
   
+  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS),
+  
   // ---------------------------------------------------------------------------
   fApplyLeptonTag                (kFALSE),
   fLeptonTagElectronsName        ("HggLeptonTagElectrons"),
@@ -186,15 +191,8 @@ PhotonPairSelector::PhotonPairSelector(const char *name, const char *title) :
   fLeptonTagMuons                (0),
   
   // ------------------------------------------------------
-  fStochasticSmear               (kFALSE),
+  f2012HCP                       (kFALSE)
   
-  fRhoType                       (RhoUtilities::CMS_RHO_RHOKT6PFJETS),
-
-  fdor9rescale                   (false),
-  fp0b                           (0.),
-  fp1b                           (1.),
-  fp0e                           (0.),
-  fp1e                           (1.)
 {
   // Constructor.
 }
@@ -430,9 +428,6 @@ void PhotonPairSelector::Process()
   std::vector<int> leptag;
   leptag.resize(numPairs);
 
-  //bool extraprint = TString(GetName())==TString("PhotonPairSelectorPresel");
-  bool extraprint = false;
-  
   for (unsigned int iPair = 0; iPair < numPairs; ++iPair) {
     // first we need a hard copy of the incoming photons
     fixPh1st.push_back(new Photon(*preselPh->At(idx1st[iPair])));
@@ -450,8 +445,13 @@ void PhotonPairSelector::Process()
     PhotonTools::eScaleCats escalecat1;
     PhotonTools::eScaleCats escalecat2;
 
-    escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
-    escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);
+    if(f2012HCP){
+      escalecat1 = PhotonTools::EScaleCatHCP(fixPh1st[iPair]);
+      escalecat2 = PhotonTools::EScaleCatHCP(fixPh2nd[iPair]);
+    }else{
+      escalecat1 = PhotonTools::EScaleCat(fixPh1st[iPair]);
+      escalecat2 = PhotonTools::EScaleCat(fixPh2nd[iPair]);
+    }
     
     // now we dicide if we either scale (Data) or Smear (MC) the Photons
     if (fIsData) {
@@ -461,103 +461,129 @@ void PhotonPairSelector::Process()
         double scaleFac2 = 1.;
 	
         //eta-dependent corrections
+	
+        // checking the run Rangees ...
+        Int_t runRange = FindRunRangeIdx(runNumber);
 
-	scaleFac1 *= GetDataEnCorr(runNumber, fixPh1st[iPair]);
-	scaleFac2 *= GetDataEnCorr(runNumber, fixPh2nd[iPair]);
-        
+        if(runRange > -1) {
+	  if(f2012HCP){
+	    scaleFac1 *= GetDataEnCorrHCP(runRange, escalecat1);
+	    scaleFac2 *= GetDataEnCorrHCP(runRange, escalecat2);
+	  }else{
+	    scaleFac1 *= GetDataEnCorr(runRange, escalecat1);
+	    scaleFac2 *= GetDataEnCorr(runRange, escalecat2);
+	  }
+        }
+        else {
+	  printf("Error: Run Range not found for data energy scale correction\n");
+	  assert(0);
+	}
         PhotonTools::ScalePhoton(fixPh1st[iPair], scaleFac1);
         PhotonTools::ScalePhoton(fixPh2nd[iPair], scaleFac2);
       }
     }
-
+ 
     if (fDoMCSmear) {
-      fDoMCEneSmear = true;
-      fDoEneErrSmear = true;
-    }
-
-    if (fDoMCEneSmear || fDoEneErrSmear) {
 
       double width1 = 0.;
       double width2 = 0.;
       
-      width1 = GetMCSmearFac(escalecat1);
-      width2 = GetMCSmearFac(escalecat2);
-      
-      double ewidth1 = width1;
-      double ewidth2 = width2;
-      
-      //replace smearing (for photon energy only!) with stochastic smearing (only applies to EB for now)
-      if (fStochasticSmear) {
-        if (fixPh1st[iPair]->SCluster()->AbsEta()<1.5) {
-          ewidth1 = GetMCSmearFacStochastic(fixPh1st[iPair]);
-        }
-        if (fixPh2nd[iPair]->SCluster()->AbsEta()<1.5) {
-          ewidth2 = GetMCSmearFacStochastic(fixPh2nd[iPair]);
-        }
+      if(f2012HCP){
+	width1 = GetMCSmearFacHCP(escalecat1);
+	width2 = GetMCSmearFacHCP(escalecat2);
+      }else {
+	width1 = GetMCSmearFac(escalecat1);
+	width2 = GetMCSmearFac(escalecat2);
       }
       
-      if (!fIsData && fDoMCEneSmear) {
+      if (!fIsData) {
         // get the seed to do deterministic smearing...
         UInt_t seedBase = (UInt_t) evtNum + (UInt_t) _runNum + (UInt_t) _lumiSec;
-        UInt_t seed1    = seedBase + 100000*(UInt_t) (TMath::Abs(100.*fixPh1st[iPair]->SCluster()->Phi())) +
-          1000*(UInt_t) (TMath::Abs(100.*fixPh1st[iPair]->SCluster()->Eta()));
-        UInt_t seed2    = seedBase + 100000*(UInt_t) (TMath::Abs(100.*fixPh2nd[iPair]->SCluster()->Phi())) +
-          1000*(UInt_t) (TMath::Abs(100.*fixPh2nd[iPair]->SCluster()->Eta()));
+        UInt_t seed1    = seedBase + (UInt_t) fixPh1st[iPair]->E() +
+          (UInt_t) (TMath::Abs(10.*fixPh1st[iPair]->SCluster()->Eta()));
+        UInt_t seed2    = seedBase + (UInt_t) fixPh2nd[iPair]->E() +
+          (UInt_t) (TMath::Abs(10.*fixPh2nd[iPair]->SCluster()->Eta()));
         // get the smearing for MC photons..
-        PhotonTools::SmearPhoton(fixPh1st[iPair], fRng, ewidth1, seed1);
-        PhotonTools::SmearPhoton(fixPh2nd[iPair], fRng, ewidth2, seed2);
+        PhotonTools::SmearPhoton(fixPh1st[iPair], fRng, width1, seed1);
+        PhotonTools::SmearPhoton(fixPh2nd[iPair], fRng, width2, seed2);
       }
 
       // in case we want to use specail smearing factors for Error computation, recompute widths
       if( fUseSpecialSmearForDPMVA ) {
-        width1 = GetMCSmearFac(escalecat1, true);
-        width2 = GetMCSmearFac(escalecat2, true); 
+	
+	if(f2012HCP){
+	  width1 = GetMCSmearFacHCP(escalecat1, true);
+	  width2 = GetMCSmearFacHCP(escalecat2, true);
+	}else {
+	  width1 = GetMCSmearFac(escalecat1, true);
+	  width2 = GetMCSmearFac(escalecat2, true);
+	}
+	 
       }
-      if (fDoEneErrSmear) {
-        PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
-        PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
-      }
+      
+      PhotonTools::SmearPhotonError(fixPh1st[iPair], width1);
+      PhotonTools::SmearPhotonError(fixPh2nd[iPair], width2);
     }
 
-    // lepton tag for this pair
-    // Josh: simplified single/double lepton selection to ensure getting the right photon pair given combinatorics
-    // This may result in losing an event from the untagged categories in rare cases
+    // lepton tag for this pair -- ming
     leptag[iPair] = -1;
     if(fApplyLeptonTag){
       leptag[iPair] = 0;
-      int nmusingle = 0;
-      int nmudouble = 0;
-      for (unsigned int imu = 0; imu<fLeptonTagMuons->GetEntries(); ++imu) {
-        const Muon *mu = fLeptonTagMuons->At(imu);
-        if ( MathUtils::DeltaR(*mu,*fixPh1st[iPair]) >= 0.5 && MathUtils::DeltaR(*mu,*fixPh2nd[iPair]) >= 0.5) {
-          
-          if (extraprint) printf("muon %i eta = %5f, phi = %5f\n",imu,mu->Eta(),mu->Phi());
-          
-          if (mu->Pt()>20.) ++nmusingle;
-          if (mu->Pt()>10.) ++nmudouble;
-        }
+      if ( fLeptonTagMuons->GetEntries() > 0 ) {
+	//printf("ming sync check muonpt0:%f\n",fLeptonTagMuons->At(0)->Pt());
+	//printf("ming sync check muonpt1:%f\n",fLeptonTagMuons->At(1)->Pt());
+	//printf("ming sync check ipair:%d deltar1:%f deltar2:%f\n",iPair,MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh1st[iPair]),MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh2nd[iPair]));
+	if( (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh1st[iPair]) >= 1.0) && 
+	    (MathUtils::DeltaR(*fLeptonTagMuons->At(0),*fixPh2nd[iPair]) >= 1.0) 
+	    ){
+	  leptag[iPair] = 2;
+	}
       }
       
-      int nelesingle = 0;
-      int neledouble = 0;
-      for (unsigned int iele = 0; iele<fLeptonTagElectrons->GetEntries(); ++iele) {
-        const Electron *ele = fLeptonTagElectrons->At(iele);
-        if ( MathUtils::DeltaR(*ele,*fixPh1st[iPair]) >= 1.0 && MathUtils::DeltaR(*ele,*fixPh2nd[iPair]) >= 1.0
-              && PhotonTools::ElectronVetoCiC(fixPh1st[iPair], fElectrons)>1. && PhotonTools::ElectronVetoCiC(fixPh2nd[iPair], fElectrons)>1. ) {
-          
-          if (extraprint) printf("electron %i eta = %5f, phi = %5f\n",iele, ele->Eta(), ele->Phi());
-          if (extraprint) printf("isecaldriven = %i, expectedinnerhits = %i\n",ele->IsEcalDriven(),ele->GsfTrk()->NExpectedHitsInner()==0);
-          
-          if (ele->Pt()>20.) ++nelesingle;
-          if (ele->Pt()>10.) ++neledouble;
-        }
+      if(leptag[iPair] <1){
+	if( fLeptonTagElectrons->GetEntries() > 0 ){
+	  if( (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh1st[iPair]) >= 1) &&
+	      (MathUtils::DeltaR(*fLeptonTagElectrons->At(0),*fixPh2nd[iPair]) >= 1) &&
+	      (PhotonTools::ElectronVetoCiC(fixPh1st[iPair],fLeptonTagElectrons) >= 1) &&
+	      (PhotonTools::ElectronVetoCiC(fixPh2nd[iPair],fLeptonTagElectrons) >= 1) &&
+	      (TMath::Abs( (fixPh1st[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10) && 
+	      (TMath::Abs( (fixPh2nd[iPair]->Mom()+fLeptonTagElectrons->At(0)->Mom()).M()-91.19 ) >= 10)
+	      //((fixPh1st[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(45/120)) && 
+	      //((fixPh2nd[iPair]->Pt()/(fixPh1st[iPair]->Mom() + fixPh2nd[iPair]->Mom()).M())>(30/120))){
+	      ){
+	    /*int ph1passeveto=1;
+	    int ph2passeveto=1;
+	    
+	    for(UInt_t k=0;k<fElectrons->GetEntries();k++){
+	      if(fElectrons->At(k)->BestTrk()->NMissingHits()==0){
+		if((fElectrons->At(k)->SCluster()==fixPh1st[iPair]->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*fixPh1st[iPair]) < 1)){
+		  ph1passeveto=0;
+		}
+		if((fElectrons->At(k)->SCluster()==fixPh2nd[iPair]->SCluster()) && (MathUtils::DeltaR(*fElectrons->At(k)->BestTrk(),*fixPh2nd[iPair]) < 1)){
+		  ph2passeveto=0;
+		}
+	      }
+	    }
+	    
+	    if(ph1passeveto==1 && ph2passeveto==1){
+	      leptag[iPair] = 1;
+	      }*/
+
+	    /*if(PhotonTools::PassElectronVeto(fixPh1st[iPair], fElectrons) && PhotonTools::PassElectronVeto(fixPh2nd[iPair], fElectrons)){
+	      leptag[iPair] = 1;
+	      }*/
+
+	    /*if(PhotonTools::PassElectronVeto(fixPh1st[iPair], fElectrons) && PhotonTools::PassElectronVeto(fixPh2nd[iPair], fElectrons)){
+	      leptag[iPair] = 1;
+	      }*/
+	    
+	    if(PhotonTools::ElectronVetoCiC(fixPh1st[iPair], fElectrons)>=1 && PhotonTools::ElectronVetoCiC(fixPh2nd[iPair], fElectrons)>=1){
+	      leptag[iPair] = 1;
+	    }
+	    
+	  }
+	}
       }
-      
-      if (nmudouble>=2) leptag[iPair] = 4;
-      else if (neledouble>=2) leptag[iPair] = 3;
-      else if (nmusingle>=1) leptag[iPair] = 2;
-      else if (nelesingle>=1) leptag[iPair] = 1;
-      
     }
     
     //probability that selected vertex is the correct one
@@ -837,15 +863,13 @@ void PhotonPairSelector::Process()
 	  PhotonTools::PassSinglePhotonPreselPFISONoEcal(fixPh2nd[iPair],fElectrons,fConversions,bsp,
 	  //PhotonTools::PassSinglePhotonPreselPFISO(fixPh2nd[iPair],fElectrons,fConversions,bsp,
 					      fTracks,theVtx[iPair],rho2012,fPFCands,fApplyEleVeto,
-					      fInvertElectronVeto); 
-
-      if (!fIsData) fdor9rescale = false;     
+					      fInvertElectronVeto);      
       
       pass1 = pass1 && PhotonTools::PassCiCPFIsoSelection(fixPh1st[iPair], theVtx[iPair], fPFCands,
-							  fPV, rho2012, leadptcut,fdor9rescale,fp0b,fp1b,fp0e,fp1e);
+                                             fPV, rho2012, leadptcut);
       if (pass1)
         pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
-                                               fPV, rho2012, trailptcut,fdor9rescale,fp0b,fp1b,fp0e,fp1e);
+                                               fPV, rho2012, trailptcut);
       break;      
 
       // --------------------------------------------------------------------
@@ -866,10 +890,10 @@ void PhotonPairSelector::Process()
 					      fInvertElectronVeto);      
       
       pass1 = pass1 && PhotonTools::PassCiCPFIsoSelection(fixPh1st[iPair], theVtx[iPair], fPFCands,
-                                             fPV, rho2012, leadptcut,fdor9rescale,fp0b,fp1b,fp0e,fp1e);
+                                             fPV, rho2012, leadptcut);
       if (pass1)
         pass2 = pass2 && PhotonTools::PassCiCPFIsoSelection(fixPh2nd[iPair], theVtx[iPair], fPFCands,
-                                               fPV, rho2012, trailptcut,fdor9rescale,fp0b,fp1b,fp0e,fp1e);
+                                               fPV, rho2012, trailptcut);
       break;      
       
       // --------------------------------------------------------------------
@@ -998,9 +1022,6 @@ void PhotonPairSelector::Process()
   int maxleptag = 0;
   for (unsigned int iPair=0; iPair<passPairs.size(); ++iPair) {
     double sumEt  = fixPh1st[passPairs[iPair]]->Et()+fixPh2nd[passPairs[iPair]]->Et();
-    
-    if (extraprint) printf("pair %i: ph1eta = %5f, ph1phi = %5f, ph2eta = %5f, ph2phi = %5f, sumEt = %5f, leptag = %i\n",iPair,fixPh1st[passPairs[iPair]]->Eta(),fixPh1st[passPairs[iPair]]->Phi(),fixPh2nd[passPairs[iPair]]->Eta(), fixPh2nd[passPairs[iPair]]->Phi(),sumEt, leptag[passPairs[iPair]]);
-    
     //if (((sumEt > maxSumEt) && leptag[iPair] == maxleptag) || (leptag[iPair] > maxleptag)) {
     if (((sumEt > maxSumEt) && leptag[passPairs[iPair]] == maxleptag) || (leptag[passPairs[iPair]] > maxleptag)) {
       maxSumEt = sumEt;
@@ -1138,10 +1159,8 @@ void PhotonPairSelector::SlaveBegin()
     fIdType =       MVATools::k2012IdMVA_globe;
   else if (fIdMVAType.CompareTo("2012IdMVA") == 0)
     fIdType =       MVATools::k2012IdMVA;
-  else if (fIdMVAType.CompareTo("2013FinalIdMVA_8TeV") == 0)
-    fIdType =       MVATools::k2013FinalIdMVA_8TeV;
-  else if (fIdMVAType.CompareTo("2013FinalIdMVA_7TeV") == 0)
-    fIdType =       MVATools::k2013FinalIdMVA_7TeV;
+  else if (fIdMVAType.CompareTo("2013FinalIdMVA") == 0)
+    fIdType =       MVATools::k2013FinalIdMVA;
   else if (fIdMVAType.CompareTo("2011IdMVA_HZg") == 0)
     fIdType =       MVATools::k2011IdMVA_HZg;
   else if (fIdMVAType.CompareTo("None") == 0)
@@ -1233,41 +1252,44 @@ void PhotonPairSelector::FindHiggsPtAndZ(Float_t& pt, Float_t& decayZ, Float_t& 
 }
 
 //---------------------------------------------------------------------------------------------------
-Double_t PhotonPairSelector::GetDataEnCorr(UInt_t run, const Photon *p)
+Int_t PhotonPairSelector::FindRunRangeIdx(UInt_t run)
 {
-  
-  PhotonTools::eScaleCats cat = PhotonTools::EScaleCat(p);
-  
-  int nmatch = 0;  
-  double scale = 1.;
-  
-  for (std::vector<EnergyCorrection>::const_iterator it=fDataEnCorr.begin(); it!=fDataEnCorr.end(); ++it) {
-    if (cat==it->fCat && run>=it->fMinRun && run<=it->fMaxRun) {
-      if (it->fMinEt<0. && it->fMaxEt<0.) {
-        //non-et dependent scale
-        scale = it->fCorr;
-        ++nmatch;
-      }
-      else {
-        //et dependent scale
-        //use Et from supercluster position to avoid vertex selection dependence (consistent with stochastic smearing)
-        double etorigin = p->E()/cosh(p->SCluster()->Eta());
-        if (etorigin>=it->fMinEt && (etorigin<it->fMaxEt || it->fMaxEt<0.)) {
-          scale = it->fCorr;
-          ++nmatch;
-        }
-      }    
+  // this routine looks for the idx of the run-range
+  Int_t runRange=-1;
+  for (UInt_t iRun = 0; iRun<fRunStart.size(); ++iRun) {
+    if (run >= fRunStart[iRun] && run <= fRunEnd[iRun]) {
+      runRange = (Int_t) iRun;
+      return runRange;
     }
   }
-  
-  if (nmatch!=1) {
-    printf("ERROR: Number of matching energy scale corrections = %i (should be exactly 1)\n",nmatch);
-    printf("run = %i, cat = %i, ncortotal = %i\n",int(run),int(cat),int(fDataEnCorr.size()));
-    assert(0);
+  return runRange;
+}
+
+//---------------------------------------------------------------------------------------------------
+Double_t PhotonPairSelector::GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat)
+{
+  switch (cat) {
+  case PhotonTools::kEBhighEtaGold:
+    return fDataEnCorr_EBhighEta_hR9[runRange];
+  case PhotonTools::kEBhighEtaBad:
+    return fDataEnCorr_EBhighEta_lR9[runRange];
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fDataEnCorr_EBlowEta_hR9central[runRange];
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fDataEnCorr_EBlowEta_hR9gap[runRange];
+  case PhotonTools::kEBlowEtaBad:
+    return fDataEnCorr_EBlowEta_lR9[runRange];
+  case PhotonTools::kEEhighEtaGold:
+    return fDataEnCorr_EEhighEta_hR9[runRange];
+  case PhotonTools::kEEhighEtaBad:
+    return fDataEnCorr_EEhighEta_lR9[runRange];
+  case PhotonTools::kEElowEtaGold:
+    return fDataEnCorr_EElowEta_hR9[runRange];
+  case PhotonTools::kEElowEtaBad:
+    return fDataEnCorr_EElowEta_lR9[runRange];
+  default:
+    return 1.;
   }
-    
-  return scale;
-  
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -1280,8 +1302,10 @@ Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat, bool use
       return fMCSmear_EBhighEta_hR9;
     case PhotonTools::kEBhighEtaBad:
       return fMCSmear_EBhighEta_lR9;
-    case PhotonTools::kEBlowEtaGold:
-      return fMCSmear_EBlowEta_hR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmear_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmear_EBlowEta_hR9gap;
     case PhotonTools::kEBlowEtaBad:
       return fMCSmear_EBlowEta_lR9;
     case PhotonTools::kEEhighEtaGold:
@@ -1301,8 +1325,10 @@ Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat, bool use
       return fMCSmearMVA_EBhighEta_hR9;
     case PhotonTools::kEBhighEtaBad:
       return fMCSmearMVA_EBhighEta_lR9;
-    case PhotonTools::kEBlowEtaGold:
-      return fMCSmearMVA_EBlowEta_hR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmearMVA_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmearMVA_EBlowEta_hR9gap;
     case PhotonTools::kEBlowEtaBad:
       return fMCSmearMVA_EBlowEta_lR9;
     case PhotonTools::kEEhighEtaGold:
@@ -1320,49 +1346,94 @@ Double_t PhotonPairSelector::GetMCSmearFac(PhotonTools::eScaleCats cat, bool use
   
 }
 
-//---------------------------------------------------------------------------------------------------
-Double_t PhotonPairSelector::GetMCSmearFacStochastic(const Photon *p) const {
- 
-  PhotonTools::eScaleCats cat = PhotonTools::EScaleCat(p);
-  
-  double pivot = 0.;
-  double rho = 0.;
-  double phi = 0.;
-  
-  if (cat == PhotonTools::kEBlowEtaGold) {
-    pivot = fMCStochasticPivot_EBlowEta_hR9;
-    rho = fMCStochasticRho_EBlowEta_hR9;
-    phi = fMCStochasticPhi_EBlowEta_hR9;
+Double_t PhotonPairSelector::GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat)
+{
+  switch (cat) {
+  case PhotonTools::kEBhighEtaGold:
+    return fDataEnCorr_EBhighEta_hR9[runRange];
+  case PhotonTools::kEBhighEtaBad:
+    return fDataEnCorr_EBhighEta_lR9[runRange];
+  case PhotonTools::kEBlowEtaGoldCenter:
+    return fDataEnCorr_EBlowEta_hR9central[runRange];
+  case PhotonTools::kEBlowEtaGoldGap:
+    return fDataEnCorr_EBlowEta_hR9gap[runRange];
+  case PhotonTools::kEBlowEtaBadCenter:
+    return fDataEnCorr_EBlowEta_lR9central[runRange];
+  case PhotonTools::kEBlowEtaBadGap:
+    return fDataEnCorr_EBlowEta_lR9gap[runRange];
+  case PhotonTools::kEEhighEtaGold:
+    return fDataEnCorr_EEhighEta_hR9[runRange];
+  case PhotonTools::kEEhighEtaBad:
+    return fDataEnCorr_EEhighEta_lR9[runRange];
+  case PhotonTools::kEElowEtaGold:
+    return fDataEnCorr_EElowEta_hR9[runRange];
+  case PhotonTools::kEElowEtaBad:
+    return fDataEnCorr_EElowEta_lR9[runRange];
+  default:
+    return 1.;
   }
-  else if (cat == PhotonTools::kEBlowEtaBad) {
-    pivot = fMCStochasticPivot_EBlowEta_lR9;
-    rho = fMCStochasticRho_EBlowEta_lR9;
-    phi = fMCStochasticPhi_EBlowEta_lR9;
-  }  
-  else if (cat == PhotonTools::kEBhighEtaGold) {
-    pivot = fMCStochasticPivot_EBhighEta_hR9;
-    rho = fMCStochasticRho_EBhighEta_hR9;
-    phi = fMCStochasticPhi_EBhighEta_hR9;
-  }  
-  else if (cat == PhotonTools::kEBhighEtaBad) {
-    pivot = fMCStochasticPivot_EBhighEta_lR9;
-    rho = fMCStochasticRho_EBhighEta_lR9;
-    phi = fMCStochasticPhi_EBhighEta_lR9;
-  }    
-  else {
-    return 0.;
-  }
-  
-  double etorigin = p->E()/cosh(p->SCluster()->Eta());
-  double smearconst = rho*sin(phi);
-  double smearstochastic = rho*cos(phi)*pivot/sqrt(etorigin);
-  
-  double smear = sqrt( smearconst*smearconst + smearstochastic*smearstochastic);
-  
-  return smear;
-  
 }
 
+//---------------------------------------------------------------------------------------------------
+Double_t PhotonPairSelector::GetMCSmearFacHCP(PhotonTools::eScaleCats cat, bool useSpecialSmear)
+{
+
+  if(!useSpecialSmear) {
+
+    switch (cat) {
+    case PhotonTools::kEBhighEtaGold:
+      return fMCSmear_EBhighEta_hR9;
+    case PhotonTools::kEBhighEtaBad:
+      return fMCSmear_EBhighEta_lR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmear_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmear_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaBadCenter:
+      return fMCSmear_EBlowEta_lR9central;
+    case PhotonTools::kEBlowEtaBadGap:
+      return fMCSmear_EBlowEta_lR9gap;
+    case PhotonTools::kEEhighEtaGold:
+      return fMCSmear_EEhighEta_hR9;
+    case PhotonTools::kEEhighEtaBad:
+      return fMCSmear_EEhighEta_lR9;
+    case PhotonTools::kEElowEtaGold:
+      return fMCSmear_EElowEta_hR9;
+    case PhotonTools::kEElowEtaBad:
+      return fMCSmear_EElowEta_lR9;
+    default:
+      return 1.;
+    }
+
+  } else {
+
+    switch (cat) {
+    case PhotonTools::kEBhighEtaGold:
+      return fMCSmearMVA_EBhighEta_hR9;
+    case PhotonTools::kEBhighEtaBad:
+      return fMCSmearMVA_EBhighEta_lR9;
+    case PhotonTools::kEBlowEtaGoldCenter:
+      return fMCSmearMVA_EBlowEta_hR9central;
+    case PhotonTools::kEBlowEtaGoldGap:
+      return fMCSmearMVA_EBlowEta_hR9gap;
+    case PhotonTools::kEBlowEtaBadCenter:
+      return fMCSmearMVA_EBlowEta_lR9central;
+    case PhotonTools::kEBlowEtaBadGap:
+      return fMCSmearMVA_EBlowEta_lR9gap;
+    case PhotonTools::kEEhighEtaGold:
+      return fMCSmearMVA_EEhighEta_hR9;
+    case PhotonTools::kEEhighEtaBad:
+      return fMCSmearMVA_EEhighEta_lR9;
+    case PhotonTools::kEElowEtaGold:
+      return fMCSmearMVA_EElowEta_hR9;
+    case PhotonTools::kEElowEtaBad:
+      return fMCSmearMVA_EElowEta_lR9;
+    default:
+      return 1.;
+    }
+
+  }
+}
 
 //---------------------------------------------------------------------------------------------------
 Float_t PhotonPairSelector::GetEventCat(PhotonTools::CiCBaseLineCats cat1,
@@ -1378,91 +1449,5 @@ Float_t PhotonPairSelector::GetEventCat(PhotonTools::CiCBaseLineCats cat1,
     return (ph1IsHR9 && ph2IsHR9 ? 0. : 1.);
 
   return (ph1IsHR9 && ph2IsHR9 ? 2. : 3.);
-}
-
-//---------------------------------------------------------------------------------------------------
-void PhotonPairSelector::AddEnCorrFromFile(TString filename) {
-  
-  ifstream f_in(filename);
-  if(!f_in.good()){
-    std::cerr << "[ERROR] file " << filename << " not readable" << std::endl;
-    exit(1);
-    return;
-  }
-  
-  unsigned int runMin, runMax;
-  TString catstring, dummy;
-  double deltaP, err_deltaP;
-
-  PhotonTools::eScaleCats cat;
-  
-  while (1) {
-    f_in >> catstring >> dummy
-         >> runMin >> runMax
-         >> deltaP >> err_deltaP;
-
-    if (!f_in.good()) break;
-    
-    
-    //set eta-r9 category
-    if (catstring.Contains("absEta_0_1-gold")) {
-      cat = PhotonTools::kEBlowEtaGold;
-    }
-    else if (catstring.Contains("absEta_0_1-bad")) {
-      cat = PhotonTools::kEBlowEtaBad;
-    }
-    else if (catstring.Contains("absEta_1_1.4442-gold")) {
-      cat = PhotonTools::kEBhighEtaGold;
-    }
-    else if (catstring.Contains("absEta_1_1.4442-bad")) {
-      cat = PhotonTools::kEBhighEtaBad;
-    }
-    else if (catstring.Contains("absEta_1.566_2-gold")) {
-      cat = PhotonTools::kEElowEtaGold;
-    }
-    else if (catstring.Contains("absEta_1.566_2-bad")) {
-      cat = PhotonTools::kEElowEtaBad;
-    }
-    else if (catstring.Contains("absEta_2_2.5-gold")) {
-      cat = PhotonTools::kEEhighEtaGold;
-    }
-    else if (catstring.Contains("absEta_2_2.5-bad")) {
-      cat = PhotonTools::kEEhighEtaBad;
-    }    
-    else {
-      printf("ERROR: Category String not matched\n");
-      assert(0);
-    }
-    
-    double minet = -99.;
-    double maxet = -99.;
-    
-    //set Et boundaries if applicable
-    if (catstring.Contains("-Et_")) {
-      TObjArray *substrings = catstring.Tokenize("_");
-      int minetidx = 0;
-      int maxetidx = 0;
-      for (int istr=0; istr<substrings->GetSize(); ++istr) {
-        TString substr = static_cast<TObjString*>(substrings->At(istr))->GetString();
-        if (substr.Contains("-Et")) {
-          minet = static_cast<TObjString*>(substrings->At(istr+1))->GetString().Atof();
-          maxet = static_cast<TObjString*>(substrings->At(istr+2))->GetString().Atof();
-          break;
-        }
-      }
-      delete substrings;
-    }
-    
-    //printf("category = %s, dummy = %s, scalecat = %i, minrun = %i, maxrun = %i, minet = %5f, maxet = %5f, dp = %5f, dperr = %5f\n",catstring.Data(),dummy.Data(),int(cat),runMin,runMax,minet, maxet, deltaP,err_deltaP);
-    
-    if (minet==20.) minet = -99.;
-    if (maxet==100.) maxet = -99.;
-    
-    AddEnCorrPerRunEtDep(cat, runMin, runMax, minet, maxet, deltaP);
-    
-  }
-  
-  f_in.close();  
-  
 }
 

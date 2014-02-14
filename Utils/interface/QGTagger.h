@@ -23,6 +23,10 @@ namespace mithep {
     
     // getters
     Float_t QGValue(); 
+    Float_t GetPtD(); 
+    Float_t GetAxis1(); 
+    Float_t GetAxis2(); 
+    Float_t GetMult(); 
 
   private:
     QGLikelihoodCalculator *qgLikelihood;

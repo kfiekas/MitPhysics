@@ -1,10 +1,9 @@
 // $Id: $
-
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitPhysics/Mods/interface/VTagMod.h"
-
+// fastjet basic
 #include "fastjet/PseudoJet.hh"
-
+// fastjet contributions
 #include "fastjet/contrib/Njettiness.hh"
 #include "fastjet/contrib/Nsubjettiness.hh"
 

@@ -71,8 +71,11 @@ namespace mithep {
      };     
      
      enum eScaleCats {
-       kEBlowEtaGold = 0,
+       kEBlowEtaGoldCenter = 0,
+       kEBlowEtaGoldGap,
        kEBlowEtaBad,
+       kEBlowEtaBadCenter,
+       kEBlowEtaBadGap,
        kEBhighEtaGold,
        kEBhighEtaBad,
        kEElowEtaGold,
@@ -88,6 +91,7 @@ namespace mithep {
      };
 
     static eScaleCats EScaleCat(const Photon *p);
+    static eScaleCats EScaleCatHCP(const Photon *p);
 
     // Methods for scaling/smearing Photons
     static void ScalePhoton(Photon* p, Double_t scale);
@@ -148,7 +152,7 @@ namespace mithep {
 				      const Vertex* vtx, 
 				      const PFCandidateCol*    pfCol,
 				      const VertexCol*   vtxCol,
-				      double rho, double ptmin,bool dor9rescale, double p0b, double p1b,double p0e, double p1e, 
+				      double rho, double ptmin,
 				      std::vector<double>* kin = NULL); 
 
     static bool PassCiCPFIsoSelectionWithEleVeto(const Photon* ph, 
