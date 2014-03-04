@@ -1,13 +1,10 @@
 //--------------------------------------------------------------------------------------------------
-// $Id $
-//
 // JetIDMVA
 //
 // Helper Class for Jet Id MVA
 //
 // Authors: P. Harris
 //--------------------------------------------------------------------------------------------------
-
 #ifndef MITPHYSICS_UTILS_JetIDMVA_H
 #define MITPHYSICS_UTILS_JetIDMVA_H
 
@@ -54,8 +51,8 @@ namespace mithep {
       };
 
       void     Initialize(JetIDMVA::CutType iCutType,
-			  TString           iLowPtWeights ="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
-			  TString           iHighPtWeights="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
+			  TString           iLowPtWeights ="$MIT_DATA/mva_JetID_lowpt.weights.xml",
+			  TString           iHighPtWeights="$MIT_DATA/mva_JetID_highpt.weights.xml",
 			  JetIDMVA::MVAType iType=kBaseline,
 			  TString           iCutFileName  ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py",bool i42=false);
     
@@ -152,7 +149,7 @@ namespace mithep {
       Float_t fDR2Mean  ;
 
       ClassDef(JetIDMVA,0)
-	};
+  };
 }
 
 

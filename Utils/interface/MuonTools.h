@@ -27,8 +27,8 @@
 namespace mithep {
   class MuonTools {
     public:
-      MuonTools(const char *mutemp="$CMSSW_BASE/src/MitPhysics/data/MuonCaloTemplate.root", 
-                const char *pitemp="$CMSSW_BASE/src/MitPhysics/data/PionCaloTemplate.root");
+      MuonTools(const char *mutemp="$MIT_DATA/MuonCaloTemplate.root", 
+                const char *pitemp="$MIT_DATA/PionCaloTemplate.root");
       virtual ~MuonTools();
 
       enum ESelType { 

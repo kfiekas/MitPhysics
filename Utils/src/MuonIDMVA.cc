@@ -14,12 +14,12 @@ using namespace mithep;
 
 //--------------------------------------------------------------------------------------------------
 MuonIDMVA::MuonIDMVA() :
-fMethodname("BDTG method"),
-fIsInitialized(kFALSE),
-fMVAType(MuonIDMVA::kUninitialized),
-fUseBinnedVersion(kTRUE),
-fNMVABins(0),
-fTheRhoType(RhoUtilities::DEFAULT)
+  fMethodname("BDTG method"),
+  fIsInitialized(kFALSE),
+  fMVAType(MuonIDMVA::kUninitialized),
+  fUseBinnedVersion(kTRUE),
+  fNMVABins(0),
+  fTheRhoType(RhoUtilities::DEFAULT)
 {
 }
 
@@ -28,7 +28,8 @@ fTheRhoType(RhoUtilities::DEFAULT)
 MuonIDMVA::~MuonIDMVA()
 {
   for(UInt_t i=0; i<fTMVAReader.size(); ++i) {
-    if (fTMVAReader[i]) delete fTMVAReader[i];
+    if (fTMVAReader[i])
+      delete fTMVAReader[i];
   }
 }
 

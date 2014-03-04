@@ -106,10 +106,10 @@ void JetIDMod::SlaveBegin()
  if(fApplyMVACut == kTRUE){
    fJetIDMVA = new JetIDMVA();
    fJetIDMVA->Initialize(JetIDMVA::kLoose,
-	 		 TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_lowpt.weights.xml"))),
-                         TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/mva_JetID_highpt.weights.xml"))),
+	 		 TString((getenv("MIT_DATA")+string("/mva_JetID_lowpt.weights.xml"))),
+                         TString((getenv("MIT_DATA")+string("/mva_JetID_highpt.weights.xml"))),
                          JetIDMVA::kBaseline,
-                         TString(getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")));
+                         TString( getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")));
  }
 
 }

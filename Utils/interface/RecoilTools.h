@@ -1,16 +1,14 @@
 //--------------------------------------------------------------------------------------------------
-// $Id $
-//
 // Recoil Tools
 //
 // Helper Class for Recoil Tools
 //
 // Authors: P. Harris
 //--------------------------------------------------------------------------------------------------
-
 #ifndef MITPHYSICS_UTILS_RecoilTools_H
 #define MITPHYSICS_UTILS_RecoilTools_H
 
+#include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/PFJetFwd.h"
 #include "MitAna/DataTree/interface/VertexFwd.h"
 #include "MitAna/DataTree/interface/TrackFwd.h"
@@ -20,8 +18,6 @@
 #include "MitAna/DataTree/interface/PFJetCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/PileupEnergyDensityCol.h"
-#include "MitCommon/MathTools/interface/MathUtils.h"
-
 #include "MitPhysics/Utils/interface/JetIDMVA.h"
 
 class TRandom3;
@@ -29,8 +25,8 @@ class TRandom3;
 namespace mithep {
   class RecoilTools {
     public:
-    RecoilTools(TString iJetLowPtMVAFile ="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
-		TString iJetHighPtMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
+    RecoilTools(TString iJetLowPtMVAFile ="$MIT_DATA/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
+		TString iJetHighPtMVAFile="$MIT_DATA/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
 		TString iCutFile         ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py",
 		bool i42=false,JetIDMVA::MVAType iType=JetIDMVA::kBaseline);
     ~RecoilTools();
@@ -38,7 +34,8 @@ namespace mithep {
 
     Met pfRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,const PFCandidateCol *iCands);
     void addType1(FourVectorM &iVec,Double_t &iSumEt,
-                  const PFJetCol *iJets,FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol *iPUEnergyDensity,
+                  const PFJetCol *iJets,FactorizedJetCorrector *iJetCorrector,
+		  const PileupEnergyDensityCol *iPUEnergyDensity,
                   double iPhi1,double iEta1,double iPhi2,double iEta2);
 
     Met pfRecoilType1(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
@@ -48,7 +45,8 @@ namespace mithep {
 
     //Candidate filtered
     Met pfRecoil(double iPhi1,double iEta1,double iPhi2,double iEta2,const PFCandidateCol *iCands);
-    Met pfCone  (double iPhi1,double iEta1,const PFCandidateCol *iCands,const Vertex *iVertex,bool iCharge=false,Double_t iDZCut=0.3);
+    Met pfCone  (double iPhi1,double iEta1,const PFCandidateCol *iCands,const Vertex *iVertex,
+		 bool iCharge=false,Double_t iDZCut=0.3);
 
     Met trackMet(const PFCandidateCol *iCands,const Vertex *iVertex,Double_t iDZCut=0.1);
 

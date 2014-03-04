@@ -1,8 +1,8 @@
-#include "MitPhysics/Utils/interface/JetTools.h"
 #include <algorithm>
 #include <vector>
-#include "TMatrixDSym.h"
-#include "TMatrixDSymEigen.h"
+#include <TMatrixDSym.h>
+#include <TMatrixDSymEigen.h>
+#include "MitPhysics/Utils/interface/JetTools.h"
 
 ClassImp(mithep::JetTools)
 
@@ -20,120 +20,126 @@ JetTools::~JetTools()
 }
 
 //Remember to remove the signal from particles before inputting into the function
-Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets, double Q, double Y){
-  if(particles->GetEntries() <= 0) return 0.0;
+Double_t JetTools::NJettiness(const ParticleOArr *particles, const JetOArr *jets, double Q, double Y)
+{
+  if (particles->GetEntries() <= 0)
+    return 0.0;
 
   Double_t fval = 0.0;
   Double_t fvalpart;
 
-  for(int i=0;i<int(particles->GetEntries());i++){
+  for (int i=0;i<int(particles->GetEntries());i++) {
     fvalpart = (particles->At(i)->Pt()) * TMath::Exp(-TMath::Abs(particles->At(i)->Eta()-Y)); 
 
-    for(int j=0;j<int(jets->GetEntries());j++){
+    for (int j=0;j<int(jets->GetEntries());j++){
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-particles->At(i)->Eta()))
                   - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),particles->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
-
-  fval = fval / Q;
+  fval = fval/Q;
 
   return fval;
 }
 
-Double_t JetTools::NJettiness(const PFCandidateOArr *pfCandidates, const JetOArr *jets, double Q, double Y){
-  if(pfCandidates->GetEntries() <= 0) return 0.0;
+Double_t JetTools::NJettiness(const PFCandidateOArr *pfCandidates, const JetOArr *jets, double Q, double Y)
+{
+  if (pfCandidates->GetEntries() <= 0)
+    return 0.0;
 
   Double_t fval = 0.0;
   Double_t fvalpart;
 
-  for(int i=0;i<int(pfCandidates->GetEntries());i++){
+  for (int i=0;i<int(pfCandidates->GetEntries());i++) {
     fvalpart = (pfCandidates->At(i)->Pt()) * TMath::Exp(-TMath::Abs(pfCandidates->At(i)->Eta()-Y)); 
 
-    for(int j=0;j<int(jets->GetEntries());j++){
+    for (int j=0;j<int(jets->GetEntries());j++) {
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-pfCandidates->At(i)->Eta()))
                   - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),pfCandidates->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
-
-  fval = fval / Q;
+  fval = fval/Q;
 
   return fval;
 }
 
-Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, double Q, double Y){
-  if(tracks->GetEntries() <= 0) return 0.0;
+Double_t JetTools::NJettiness(const TrackOArr *tracks, const JetOArr *jets, double Q, double Y)
+{
+  if (tracks->GetEntries() <= 0)
+    return 0.0;
 
   Double_t fval = 0.0;
   Double_t fvalpart;
 
-  for(int i=0;i<int(tracks->GetEntries());i++){
+  for (int i=0;i<int(tracks->GetEntries());i++) {
     fvalpart = (tracks->At(i)->Pt()) * TMath::Exp(-TMath::Abs(tracks->At(i)->Eta()-Y));     
 
-    for(int j=0;j<int(jets->GetEntries());j++){
+    for (int j=0;j<int(jets->GetEntries());j++) {
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-tracks->At(i)->Eta()))
                   - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),tracks->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
-
-  fval = fval / Q;
+  fval = fval/Q;
   
   return fval;
 }
 
-Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, double Q, double Y){
-  if(jetsS->GetEntries() <= 0) return 0.0;
+Double_t JetTools::NJettiness(const JetOArr *jetsS, const JetOArr *jets, double Q, double Y)
+{
+  if (jetsS->GetEntries() <= 0)
+    return 0.0;
 
   Double_t fval = 0.0;
   Double_t fvalpart;
 
-  for(int i=0;i<int(jetsS->GetEntries());i++){
+  for (int i=0;i<int(jetsS->GetEntries());i++) {
     fvalpart = (jetsS->At(i)->Pt()) * TMath::Exp(-TMath::Abs(jetsS->At(i)->Eta()-Y));     
 
-    for(int j=0;j<int(jets->GetEntries());j++){
+    for (int j=0;j<int(jets->GetEntries());j++) {
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-jetsS->At(i)->Eta()))
                   - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),jetsS->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
-
-  fval = fval / Q;
+  fval = fval/Q;
   
   return fval;
 }
 
-Double_t JetTools::NJettiness(const CaloTowerOArr *calos, const JetOArr *jets, double Q, double Y){
-  if(calos->GetEntries() <= 0) return 0.0;
+Double_t JetTools::NJettiness(const CaloTowerOArr *calos, const JetOArr *jets, double Q, double Y)
+{
+  if (calos->GetEntries() <= 0)
+    return 0.0;
 
   Double_t fval = 0.0;
   Double_t fvalpart;
 
-  for(int i=0;i<int(calos->GetEntries());i++){
+  for (int i=0;i<int(calos->GetEntries());i++) {
     fvalpart = (calos->At(i)->Pt()) * TMath::Exp(-TMath::Abs(calos->At(i)->Eta()-Y));     
 
-    for(int j=0;j<int(jets->GetEntries());j++){
+    for (int j=0;j<int(jets->GetEntries());j++) {
       fvalpart = TMath::Min(fvalpart,(jets->At(j)->Pt()) * 
                  (2 * TMath::CosH(TMath::Abs(jets->At(j)->Eta()-calos->At(i)->Eta()))
                   - 2 * TMath::Cos(fabs(MathUtils::DeltaPhi(jets->At(j)->Phi(),calos->At(i)->Phi())))));
     }
     fval = fval + fvalpart;
   }
-
-  fval = fval / Q;
+  fval = fval/Q;
   
   return fval;
 }
 
 //M_r
-Double_t JetTools::M_r(const ParticleOArr *particles){
-
-  if(particles->GetEntries() < 2) return -999.;
+Double_t JetTools::M_r(const ParticleOArr *particles)
+{
+  if (particles->GetEntries() < 2)
+    return -999.;
 
   Double_t E0  = particles->At(0)->E();
   Double_t E1  = particles->At(1)->E();
@@ -147,8 +153,8 @@ Double_t JetTools::M_r(const ParticleOArr *particles){
 }
 
 //Beta_r
-Double_t JetTools::Beta_r(const ParticleOArr *particles){
-
+Double_t JetTools::Beta_r(const ParticleOArr *particles)
+{
   if(particles->GetEntries() < 2) return -999.;
 
   Double_t E0  = particles->At(0)->E();
@@ -635,11 +641,13 @@ double JetTools::genFrac(const PFJet *iJet) {
   double lTrueFrac = 0;
   for(UInt_t i0 = 0; i0 < fParticles->GetEntries(); i0++) { 
     const MCParticle *p = fParticles->At(i0);
-    if(p->Status() != 1) continue;
+    if(p->Status() != 1)
+      continue;
     double pDEta = iJet->Eta() - p->Eta(); 
     double pDPhi = fabs(iJet->Phi()-p->Phi()); if(pDPhi > 2.*TMath::Pi() - pDPhi) pDPhi =  2.*TMath::Pi() - pDPhi;
     double pDR   = sqrt(pDEta*pDEta + pDPhi*pDPhi);
-    if(pDR > 0.5) continue;
+    if (pDR > 0.5)
+      continue;
     lTrueFrac += p->Pt();
   }
   lTrueFrac/=iJet->Pt();

@@ -246,7 +246,7 @@ namespace mithep {
 
 
     ClassDef(MuonIDMVA, 0) // Muon MVA
-      };
+  };
 }
 
 #endif

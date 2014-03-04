@@ -18,6 +18,7 @@
 #include <TLorentzVector.h>
 
 namespace mithep {
+
   class JetTools {
   public:
     JetTools();
@@ -35,24 +36,28 @@ namespace mithep {
     static Double_t Razor(const ParticleOArr *particles, const Met *met);
     static Double_t CosineOmega(const Particle *particles0, const Particle *particles1);
     static Double_t MtHiggs(const ParticleOArr *leptons, const Met *met, double metFraction[2], int nsel);
-    static Double_t Beta(const TrackCol *tracks, Jet *jet, const Vertex *vertex, Double_t  delta_z, Double_t delta_cone);
+    static Double_t Beta(const TrackCol *tracks, Jet *jet, const Vertex *vertex,
+			 Double_t  delta_z, Double_t delta_cone);
     static Double_t Beta(const PFJet *jet, const Vertex *vertex, Double_t  delta_z);
-    static Bool_t   PassBetaVertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex, const VertexCol *vertices, Double_t delta_z);
+    static Bool_t   PassBetaVertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex,
+						 const VertexCol *vertices, Double_t delta_z);
     static Double_t Beta2(const PFJet *jet, const Vertex *vertex, Double_t  delta_z);
-    static Bool_t   PassBeta2VertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex, const VertexCol *vertices, Double_t delta_z);
+    static Bool_t   PassBeta2VertexAssociationCut(const PFJet *jet, const Vertex *referenceVertex,
+						  const VertexCol *vertices, Double_t delta_z);
     static Int_t    MaxBetaVertexIndex(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);
     static Int_t    MaxBeta2VertexIndex(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);    
     static Int_t    JetToPVAssociation(const PFJet *jet, const VertexCol *vertices, Double_t  delta_z);    
     static Double_t betaStarClassic(const PFJet *iJet,const Vertex *iVertex,const VertexCol* iVertices);
     
     static Double_t           impactParameter(const PFJet *iJet,const Vertex *iVertex,bool iDZ=false);
-    static const PFCandidate* leadCand       (const PFJet *iJet,int iPFType,bool i2nd=false);
-    static Double_t           dRMean         (const PFJet *iJet,int iPFType);
-    static Double_t           dR2Mean        (const PFJet *iJet,int iPFType);
-    static Double_t           frac           (const PFJet *iJet,Double_t iDRMax,Double_t iDRMin,Int_t iPFType);
-    static Double_t           betaStar       (const PFJet *iJet,const Vertex *iVertex,const VertexCol* iVertices,Double_t iDZCut=0.2);
-    static Bool_t             passPFLooseId  (const PFJet *iJet);
-    static double             W              (const PFJet *iJet,int iPFType,int iType);
+    static const PFCandidate* leadCand(const PFJet *iJet,int iPFType,bool i2nd=false);
+    static Double_t           dRMean(const PFJet *iJet,int iPFType);
+    static Double_t           dR2Mean(const PFJet *iJet,int iPFType);
+    static Double_t           frac(const PFJet *iJet,Double_t iDRMax,Double_t iDRMin,Int_t iPFType);
+    static Double_t           betaStar(const PFJet *iJet,const Vertex *iVertex,const VertexCol* iVertices,
+				       Double_t iDZCut=0.2);
+    static Bool_t             passPFLooseId(const PFJet *iJet);
+    static double             W(const PFJet *iJet,int iPFType,int iType);
     ClassDef(JetTools, 0)
   };
 

@@ -1,5 +1,3 @@
-// $Id: MetCorrectionMod.cc,v 1.3 2013/09/26 23:38:59 dimatteo Exp $
-
 #include "MitAna/DataTree/interface/JetCol.h"
 #include "MitPhysics/Mods/interface/MetCorrectionMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"

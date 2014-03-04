@@ -699,23 +699,23 @@ void MuonIDMod::SlaveBegin()
     fMuonTools = new MuonTools();
     fMuonIDMVA = new MuonIDMVA();
     fMuonIDMVA->Initialize("BDTG method",
-                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/BarrelPtBin0_IDIsoCombined_BDTG.weights.xml"))),
-                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/EndcapPtBin0_IDIsoCombined_BDTG.weights.xml"))),
-                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/BarrelPtBin1_IDIsoCombined_BDTG.weights.xml"))),
-                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/EndcapPtBin1_IDIsoCombined_BDTG.weights.xml"))),
-                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/BarrelPtBin2_IDIsoCombined_BDTG.weights.xml"))),
-                           string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/EndcapPtBin2_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("MIT_DATA")+string("/MuonMVAWeights/BarrelPtBin0_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("MIT_DATA")+string("/MuonMVAWeights/EndcapPtBin0_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("MIT_DATA")+string("/MuonMVAWeights/BarrelPtBin1_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("MIT_DATA")+string("/MuonMVAWeights/EndcapPtBin1_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("MIT_DATA")+string("/MuonMVAWeights/BarrelPtBin2_IDIsoCombined_BDTG.weights.xml"))),
+                           string((getenv("MIT_DATA")+string("/MuonMVAWeights/EndcapPtBin2_IDIsoCombined_BDTG.weights.xml"))),
                            MuonIDMVA::kIDIsoCombinedDetIso,
 			   fTheRhoType);
   }
   else if(fMuIsoType == kIsoRingsV0_BDTG_Iso) {
     std::vector<std::string> muonidiso_weightfiles;
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_barrel_lowpt.weights.xml"))));
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_barrel_highpt.weights.xml"))));
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_endcap_lowpt.weights.xml"))));
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_endcap_highpt.weights.xml"))));
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_tracker.weights.xml"))));
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_BDTG_V0_global.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_BDTG_V0_barrel_lowpt.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_BDTG_V0_barrel_highpt.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_BDTG_V0_endcap_lowpt.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_BDTG_V0_endcap_highpt.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_BDTG_V0_tracker.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_BDTG_V0_global.weights.xml"))));
     fMuonTools = new MuonTools();
     fMuonIDMVA = new MuonIDMVA();
     fMuonIDMVA->Initialize("MuonIso_BDTG_IsoRings",
@@ -726,10 +726,10 @@ void MuonIDMod::SlaveBegin()
   }
   else if(fMuIsoType == kIsoDeltaR) {
     std::vector<std::string> muonidiso_weightfiles;
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_santi-V1_LB_BDT.weights.xml"))));
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_santi-V1_LE_BDT.weights.xml"))));
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_santi-V1_HB_BDT.weights.xml"))));
-    muonidiso_weightfiles.push_back(string((getenv("CMSSW_BASE")+string("/src/MitPhysics/data/MuonMVAWeights/MuonIsoMVA_santi-V1_HE_BDT.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_santi-V1_LB_BDT.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_santi-V1_LE_BDT.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_santi-V1_HB_BDT.weights.xml"))));
+    muonidiso_weightfiles.push_back(string((getenv("MIT_DATA")+string("/MuonMVAWeights/MuonIsoMVA_santi-V1_HE_BDT.weights.xml"))));
     fMuonTools = new MuonTools();
     fMuonIDMVA = new MuonIDMVA();
     fMuonIDMVA->Initialize("muonHZZ2012IsoDRMVA",
