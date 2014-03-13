@@ -152,7 +152,7 @@ make check
 make install
 
 # make shared libraries for the contributions
-g++ -shared -fPIC -o $EXTERNAL/lib/libfastjetcontrib.so $FJCONTRIB_DIR/*/[A-Z]*.o 
+g++ -shared -fPIC -o $EXTERNAL/lib/libfastjetcontrib.so -Wl,-soname,libfastjetcontrib.so $FJCONTRIB_DIR/*/[A-Z]*.o 
 
 # final adjustment to scram configuration
 configureScram $FASTJET_VER $EXTERNAL

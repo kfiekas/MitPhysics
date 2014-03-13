@@ -78,7 +78,7 @@ namespace mithep
 			     Double_t ptMin, Double_t  delta_z, Double_t extRadius,
 			     Double_t intRadius);
 
-      // method added by F.Stoeckli: computes the track isolation with NO constrint on the OV-track compatibility
+      // method added by F.Stoeckli: computes the track isolation with NO constraint on the OV-track compatibility
       static Double_t TrackIsolationNoPV(const mithep::Particle*, const BaseVertex*, 
 					 Double_t extRadius, 
 					 Double_t intRadius, 
@@ -143,6 +143,6 @@ namespace mithep
 				double* dRmax = NULL);
       
       ClassDef(IsolationTools, 0) // Isolation tools
-	};
+  };
 }
 #endif

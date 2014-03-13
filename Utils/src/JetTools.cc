@@ -625,15 +625,16 @@ double JetTools::W(const PFJet *iJet,int iPFType,int iType) {
   double lEtaW     = sqrt(lCovMatrix(0,0));
   double lPhiW     = sqrt(lCovMatrix(1,1));
   double lJetW     = 0.5*(lEtaW+lPhiW);
-  TVectorD lEigVals(2); lEigVals = TMatrixDSymEigen(lCovMatrix).GetEigenValues();
+  TVectorD lEigVals(2);
+  lEigVals = TMatrixDSymEigen(lCovMatrix).GetEigenValues();
   double lMajW     = sqrt(fabs(lEigVals(0)));
   double lMinW     = sqrt(fabs(lEigVals(1)));
   
-  if(iType == 1) return lMajW;
-  if(iType == 2) return lMinW;
-  if(iType == 3) return lEtaW;  
-  if(iType == 4) return lPhiW;  
-  if(iType == 5) return lJetW;  
+  if (iType == 1) return lMajW;
+  if (iType == 2) return lMinW;
+  if (iType == 3) return lEtaW;  
+  if (iType == 4) return lPhiW;  
+  if (iType == 5) return lJetW;  
   return lPtD; //ptRMS
 }
 /*
