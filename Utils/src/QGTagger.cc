@@ -34,7 +34,6 @@ Float_t QGTagger::QGValue() {
 void QGTagger::CalculateVariables(const PFJet *jet, const VertexCol *vertices){
 
   // quantities we need to fill: pt, eta, rhoIso, mult, ptD, axis2
- 
   variables["pt"] = jet->Pt(); // no correction applied, assume we get already corrected/calibrated jets
   variables["eta"] = jet->Eta();  
   
@@ -99,7 +98,7 @@ void QGTagger::CalculateVariables(const PFJet *jet, const VertexCol *vertices){
   // calculate axis and ptD
   Float_t a = 0., b = 0., c = 0.;
   Float_t averageDeltaEta = 0., averageDeltaPhi = 0., averageDeltaEta2 = 0., averageDeltaPhi2 = 0.;
-  if(sumWeight > 0){
+  if (sumWeight > 0) {
     variables["ptD"] = sqrt(sumWeight)/sumPt;
     averageDeltaEta = sumDeltaEta/sumWeight;
     averageDeltaPhi = sumDeltaPhi/sumWeight;
@@ -108,19 +107,37 @@ void QGTagger::CalculateVariables(const PFJet *jet, const VertexCol *vertices){
     a = averageDeltaEta2 - averageDeltaEta*averageDeltaEta;                          
     b = averageDeltaPhi2 - averageDeltaPhi*averageDeltaPhi;                          
     c = -(sumDeltaEtaDeltaPhi/sumWeight - averageDeltaEta*averageDeltaPhi);                
-  } else variables["ptD"] = 0;
+  }
+  else
+    variables["ptD"] = 0;
+
   Float_t delta = sqrt(fabs((a-b)*(a-b)+4*c*c));
-  if(a+b+delta > 0) variables["axis1"] = sqrt(0.5*(a+b+delta));
-  else variables["axis1"] = 0.;
-  if(a+b-delta > 0) variables["axis2"] = sqrt(0.5*(a+b-delta));
-  else variables["axis2"] = 0.;
+  if (a+b+delta > 0)
+    variables["axis1"] = sqrt(0.5*(a+b+delta));
+  else
+    variables["axis1"] = 0.;
+  if (a+b-delta > 0)
+    variables["axis2"] = sqrt(0.5*(a+b-delta));
+  else
+    variables["axis2"] = 0.;
 
   variables["mult"] = (chargedMultiplicity + neutralMultiplicity);
-
-
 }
 
-Float_t QGTagger::GetPtD()   { return variables["ptD"];   }
-Float_t QGTagger::GetAxis1() { return variables["axis1"]; }
-Float_t QGTagger::GetAxis2() { return variables["axis2"]; }
-Float_t QGTagger::GetMult()  { return variables["mult"];  }
+Float_t QGTagger::GetPtD()
+{
+  return variables["ptD"];
+}
+
+Float_t QGTagger::GetAxis1()
+{
+  return variables["axis1"];
+}
+
+Float_t QGTagger::GetAxis2() {
+  return variables["axis2"];
+}
+
+Float_t QGTagger::GetMult() {
+  return variables["mult"];
+}
