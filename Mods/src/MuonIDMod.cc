@@ -555,6 +555,7 @@ void MuonIDMod::Process()
     }
 
     // add good muon
+    mu->Mark();
     CleanMuons->Add(mu);
   }
 
