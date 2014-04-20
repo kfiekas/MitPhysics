@@ -572,7 +572,7 @@ void MuonIDMod::SlaveBegin()
   // Run startup code on the computer (slave) doing the actual analysis. Here,
   // we just request the muon collection branch.
 
-  if(fCleanMuonsName.CompareTo("HggLeptonTagMuons") == 0 ){
+  if (fCleanMuonsName.CompareTo("HggLeptonTagMuons") == 0 ){
     ReqEventObject(fPVName,fVertices,true);
   }
 
