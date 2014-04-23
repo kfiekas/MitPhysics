@@ -1,6 +1,5 @@
- // $Id $
-
-#include "MitPhysics/SelMods/interface/WBFExampleAnalysisMod.h"
+#include <TFile.h>
+#include <TTree.h>
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TParameter.h>
@@ -10,8 +9,7 @@
 #include "MitAna/DataCont/interface/ObjArray.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/ParticleCol.h"
-#include "TFile.h"
-#include "TTree.h"
+#include "MitPhysics/SelMods/interface/WBFExampleAnalysisMod.h"
 
 using namespace mithep;
 ClassImp(mithep::WBFExampleAnalysisMod)
@@ -95,7 +93,8 @@ void WBFExampleAnalysisMod::Process()
     return;
   }
 
-  if(CleanJets->GetEntries() < 2) return;
+  if (CleanJets->GetEntries() < 2)
+    return;
 
   //*********************************************************************************************
   //Define Cuts
@@ -104,35 +103,44 @@ void WBFExampleAnalysisMod::Process()
   bool passCut[nCuts] = {false, false, false, false, false, false};
   
   // ptjet max cut
-  if(CleanJets->At(0)->Pt() >  fJetPtMax) 		   passCut[0] = true;
+  if (CleanJets->At(0)->Pt() > fJetPtMax)
+    passCut[0] = true;
 
   // ptjet min cut
-  if(CleanJets->At(1)->Pt() >  fJetPtMin) 		   passCut[1] = true;
+  if (CleanJets->At(1)->Pt() > fJetPtMin)
+    passCut[1] = true;
   
   // this cut is always applied
-  if(CleanJets->At(0)->Eta()*CleanJets->At(1)->Eta() < 0)  passCut[2] = true;
+  if (CleanJets->At(0)->Eta()*CleanJets->At(1)->Eta() < 0)
+    passCut[2] = true;
   
   // deltaEta cut
   double deltaEta = TMath::Abs(CleanJets->At(0)->Eta()-CleanJets->At(1)->Eta());
-  if(deltaEta > fDeltaEtaMin)                              passCut[3] = true;
+  if (deltaEta > fDeltaEtaMin)
+    passCut[3] = true;
   
   // dijet mass cut
   CompositeParticle dijet;
   dijet.AddDaughter(CleanJets->At(0));
   dijet.AddDaughter(CleanJets->At(1));
-  if(dijet.Mass() > fDiJetMassMin)                         passCut[4] = true;
+
+  if (dijet.Mass() > fDiJetMassMin)
+    passCut[4] = true;
   
   // jet veto cut, use of Zeppenfeld variable
   passCut[5] = true;
   double zVarMin = 30.;
-  if(CleanJets->GetEntries() >=2 ){
-    for(UInt_t i=2; i<CleanJets->GetEntries(); i++){
-      if(CleanJets->At(i)->Pt() <= 30.0) return;
+  if (CleanJets->GetEntries() >=2) {
+    for (UInt_t i=2; i<CleanJets->GetEntries(); i++) {
+      if (CleanJets->At(i)->Pt() <= 30.0)
+	return;
       double zVar = TMath::Abs(CleanJets->At(i)->Eta()-(CleanJets->At(0)->Eta()+CleanJets->At(1)->Eta())/2)/
                     TMath::Abs(CleanJets->At(0)->Eta()-CleanJets->At(1)->Eta());
-      if(zVar < zVarMin) zVarMin = zVar;
+      if (zVar < zVarMin)
+	zVarMin = zVar;
     }
-    if(zVarMin < 1) passCut[5] = false;
+    if (zVarMin < 1)
+      passCut[5] = false;
   }
 
   //*********************************************************************************************
@@ -247,7 +255,7 @@ void WBFExampleAnalysisMod::Process()
       double deltaPhiLeptons = MathUtils::DeltaPhi(CleanLeptons->At(0)->Phi(), 
                                                    CleanLeptons->At(1)->Phi())* 180.0 / TMath::Pi();
       
-      if(CleanLeptons->At(0)->Charge() * CleanLeptons->At(1)->Charge() > 0){  // same-sign
+      if (CleanLeptons->At(0)->Charge() * CleanLeptons->At(1)->Charge() > 0){  // same-sign
         fWBFSSMass_afterCuts->Fill(TMath::Min(dilepton.Mass(),399.999),NNLOWeight->GetVal());
         fWBFSSDeltaPhi_afterCuts->Fill(deltaPhiLeptons,NNLOWeight->GetVal());
       }
