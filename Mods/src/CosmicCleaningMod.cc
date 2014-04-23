@@ -1,9 +1,7 @@
-// $Id: CosmicCleaningMod.cc,v 1.0
-
-#include "MitPhysics/Mods/interface/CosmicCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/Track.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/CosmicCleaningMod.h"
 
 using namespace mithep;
 
@@ -54,7 +52,8 @@ void CosmicCleaningMod::Process()
             break;         
           }
         }
-      } else {
+      }
+      else {
         cout << "Warning: GoodMuons collection " << fCleanMuonsName << " was not found.\n";
       }
         
@@ -77,7 +76,8 @@ void CosmicCleaningMod::Process()
       // if no overlaps then add to clean cosmics
       CleanCosTemp.push_back(fCosmics->At(i));   
     } 
-  } else {
+  }
+  else {
     cout << "Warning: fCosmics collection " << fCosmicsName << " was not found.\n";
   }
 
@@ -96,5 +96,4 @@ void CosmicCleaningMod::Process()
 void CosmicCleaningMod::SlaveBegin()
 {
   ReqEventObject(fCosmicsName, fCosmics, kTRUE);
-
 }

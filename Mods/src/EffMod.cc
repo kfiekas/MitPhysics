@@ -1,10 +1,8 @@
-// $Id: EffMod.cc,v 1.2 2009/06/29 08:41:50 loizides Exp $
-
-#include "MitPhysics/Mods/interface/EffMod.h"
+#include <TH1D.h>
+#include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataCont/interface/BaseCollection.h"
 #include "MitPhysics/Init/interface/ModNames.h"
-#include "MitCommon/MathTools/interface/MathUtils.h"
-#include <TH1D.h>
+#include "MitPhysics/Mods/interface/EffMod.h"
 
 using namespace mithep;
 

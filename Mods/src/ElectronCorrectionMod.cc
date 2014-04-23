@@ -1,12 +1,10 @@
-// $Id: ElectronCorrectionMod.cc,v 1.4 2011/01/22 09:17:59 dkralph Exp $
-
-#include "MitPhysics/Mods/interface/ElectronCorrectionMod.h"
 #include <TH1D.h>
 #include <TRandom3.h>
 #include <TNtuple.h>
 #include "MitAna/DataTree/interface/Names.h"
-#include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/ElectronCorrectionMod.h"
 
 using namespace mithep;
 
@@ -30,7 +28,8 @@ ElectronCorrectionMod::ElectronCorrectionMod(const char *name, const char *title
   fRand(0)
 {
   // Constructor.
-  fCorrections = new TNtuple("fCorrections","Scale factors and resolutions for MC -> Data","etaMin:etaMax:scale:resolution");
+  fCorrections = new TNtuple("fCorrections","Scale factors and resolutions for MC -> Data",
+			     "etaMin:etaMax:scale:resolution");
 
 }
 //--------------------------------------------------------------------------------------------------
@@ -56,13 +55,15 @@ void ElectronCorrectionMod::Process()
   CorrectedElectrons->SetName(fCorrectedElectronsName);
 
   Double_t rescaledSmearedPt; //Temporary variable, just for aesthetics
-  //It's is dumb to make this for every event, but I can't get it to work if I put it in slaveterminate
-  //or in the constructor.
+
+  // It is dumb to do this for every event, but I can't get it to work if I put it in slaveterminate
+  // or in the constructor. huh?!
   if(fSmearMC && fIsMC) {
     fRand = new TRandom3();
     fRand->SetSeed();
     rescaledSmearedPt=0.0;
   }
+
   // Copy to new array, correct the Pt
   for(UInt_t i=0; i<fElectrons->GetEntries(); ++i) {
     Electron *el = new Electron(*(fElectrons->At(i)));
@@ -97,8 +98,7 @@ void ElectronCorrectionMod::Process()
 //--------------------------------------------------------------------------------------------------
 void ElectronCorrectionMod::SlaveBegin()
 {
-  ReqEventObject(fInElectronName,   fElectrons, fElectronsFromBranch);
-
+  ReqEventObject(fInElectronName,fElectrons,fElectronsFromBranch);
   fCorrections->ReadFile(fCorrectionFileName);
 }
 
@@ -106,7 +106,6 @@ void ElectronCorrectionMod::SlaveBegin()
 void ElectronCorrectionMod::SlaveTerminate()
 {
   // Run finishing code on the computer (slave) that did the analysis. 
-  
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -116,22 +115,27 @@ void ElectronCorrectionMod::Terminate()
   // anything here.
 }
 
-void ElectronCorrectionMod::SetCorrectionValues(Electron *el) {
-    Float_t etaMin=0.0, etaMax=0.0;
-    fCorrections->SetBranchAddress("etaMin",&etaMin);
-    fCorrections->SetBranchAddress("etaMax",&etaMax);
-    fCorrections->SetBranchAddress("scale",&fScale);
-    fCorrections->SetBranchAddress("resolution",&fResolution);
-    Float_t etaAbs = fabs(el->Eta());
-    UInt_t NBinsEta=fCorrections->GetEntries();
-    for(UInt_t etaBin=0;etaBin<NBinsEta;etaBin++) {
-      fCorrections->GetEntry(etaBin);
-      if(etaAbs>=etaMin && etaAbs<etaMax) break;
-      if(etaBin==NBinsEta-1){
-	fScale=1.0;
-	fResolution=2.5; //Just making this number up . . .
-	SendError(kWarning,"Process",
-		  Form("Electron not in any eta bin! Setting scale to %5f and resolution to %5f",fScale,fResolution));
-      }
+//--------------------------------------------------------------------------------------------------
+void ElectronCorrectionMod::SetCorrectionValues(Electron *el)
+{
+  Float_t etaMin=0.0, etaMax=0.0;
+
+  fCorrections->SetBranchAddress("etaMin",&etaMin);
+  fCorrections->SetBranchAddress("etaMax",&etaMax);
+  fCorrections->SetBranchAddress("scale",&fScale);
+  fCorrections->SetBranchAddress("resolution",&fResolution);
+  Float_t etaAbs = fabs(el->Eta());
+  UInt_t NBinsEta = fCorrections->GetEntries();
+  for (UInt_t etaBin=0;etaBin<NBinsEta;etaBin++) {
+    fCorrections->GetEntry(etaBin);
+    if (etaAbs>=etaMin && etaAbs<etaMax)
+      break;
+    if (etaBin==NBinsEta-1) {
+      fScale = 1.0;
+      fResolution = 2.5; // Just making this number up . . .
+      SendError(kWarning,"Process",
+		Form("Electron not in any eta bin! Setting scale to %5f and resolution to %5f",
+		     fScale,fResolution));
     }
+  }
 }

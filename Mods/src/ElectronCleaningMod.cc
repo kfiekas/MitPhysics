@@ -1,11 +1,9 @@
-// $Id: ElectronCleaningMod.cc,v 1.11 2011/03/27 17:05:55 ceballos Exp $
-
-#include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/Track.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/ElectronCleaningMod.h"
 
 using namespace mithep;
 

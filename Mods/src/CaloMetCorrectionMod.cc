@@ -1,10 +1,8 @@
-// $Id: CaloMetCorrectionMod.cc,v 1.2 2009/09/09 05:41:51 bendavid Exp $
-
-#include "MitPhysics/Mods/interface/CaloMetCorrectionMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/CaloJetCol.h"
 #include "MitAna/DataTree/interface/CaloMetCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/CaloMetCorrectionMod.h"
 
 using namespace mithep;
 

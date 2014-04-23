@@ -115,6 +115,7 @@ void GoodPVFilterMod::Process()
     
     if (!failed.NBitsSet()) {
       goodVertex = kTRUE;
+      v->Mark();
       GoodVertexes->Add(v);
     }
   }
