@@ -1,5 +1,3 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.43 2013/10/09 22:15:06 dimatteo Exp $
-
 #ifndef MITPHYSICS_MODS_LINKDEF_H
 #define MITPHYSICS_MODS_LINKDEF_H
 #include "MitPhysics/Mods/interface/CaloMetCorrectionMod.h"

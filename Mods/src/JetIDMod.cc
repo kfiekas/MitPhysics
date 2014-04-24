@@ -1,5 +1,3 @@
-// $Id: JetIDMod.cc,v 1.28 2012/04/07 11:51:10 ceballos Exp $
-
 #include "MitPhysics/Mods/interface/JetIDMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/JetCol.h"
@@ -35,9 +33,7 @@ void JetIDMod::Process()
 
   const JetCol *inJets = GetObjThisEvt<JetCol>(fJetsName);
   if (!inJets) {
-    SendError(kAbortModule, "Process", 
-              "Pointer to input jet collection %s is null.",
-              fJetsName.Data());
+    SendError(kAbortModule,"Process","Pointer to input jet collection %s null.",fJetsName.Data());
     return;
   }
 
@@ -77,7 +73,8 @@ void JetIDMod::Process()
     const PFJet *pfJet = dynamic_cast<const PFJet*>(jet);     
     Bool_t passBetaCut = kTRUE;
     if (pfJet && fApplyBetaCut == kTRUE) {
-      passBetaCut =  JetTools::PassBetaVertexAssociationCut(dynamic_cast<const PFJet*>(jet), fVertices->At(0), fVertices, 0.2);
+      passBetaCut =  JetTools::PassBetaVertexAssociationCut(dynamic_cast<const PFJet*>(jet),
+							    fVertices->At(0), fVertices, 0.2);
     }
     if(passBetaCut == kFALSE)
       continue;
@@ -99,17 +96,18 @@ void JetIDMod::Process()
 //--------------------------------------------------------------------------------------------------
 void JetIDMod::SlaveBegin()
 {
-  // Run startup code on the computer (slave) doing the actual analysis. Here,
-  // we typically initialize histograms and other analysis objects and request
-  // branches. For this module, we request a branch of the MitTree.
+  // Run startup code on the computer (slave) doing the actual analysis. Here, we typically
+  // initialize histograms and other analysis objects and request branches. For this module, we
+  // request a branch of the MitTree.
 
- if(fApplyMVACut == kTRUE){
+ if (fApplyMVACut == kTRUE) {
    fJetIDMVA = new JetIDMVA();
    fJetIDMVA->Initialize(JetIDMVA::kLoose,
 	 		 TString((getenv("MIT_DATA")+string("/mva_JetID_lowpt.weights.xml"))),
                          TString((getenv("MIT_DATA")+string("/mva_JetID_highpt.weights.xml"))),
                          JetIDMVA::kBaseline,
-                         TString( getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")));
+                         TString( getenv("CMSSW_BASE")+
+				  string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py")));
  }
 
 }
@@ -117,5 +115,6 @@ void JetIDMod::SlaveBegin()
 //--------------------------------------------------------------------------------------------------
 void JetIDMod::SlaveTerminate()
 {
-  if(fApplyMVACut == kTRUE) delete fJetIDMVA;
+  if (fApplyMVACut == kTRUE)
+    delete fJetIDMVA;
 }

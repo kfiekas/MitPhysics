@@ -1,12 +1,10 @@
-// $Id: PartonFlavorHistoryMod.cc,v 1.6 2009/04/30 08:09:32 loizides Exp $
-
-#include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
-#include "MitAna/DataUtil/interface/Debug.h"
-#include "MitCommon/MathTools/interface/MathUtils.h"
-#include "MitAna/DataTree/interface/MCParticleCol.h"
-#include "MitPhysics/Init/interface/ModNames.h"
 #include <TH1D.h>
 #include <TH2D.h>
+#include "MitCommon/MathTools/interface/MathUtils.h"
+#include "MitAna/DataUtil/interface/Debug.h"
+#include "MitAna/DataTree/interface/MCParticleCol.h"
+#include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/PartonFlavorHistoryMod.h"
 
 using namespace mithep;
 
@@ -64,15 +62,15 @@ void PartonFlavorHistoryMod::Process()
              << p->Phi() << " " << endl;
       }
       
-      //matrix element: status 3 parent with precisely 2 grandparents outside of 
-      //initial section (0-5), with same ID as the quark.
-      //flavor excitation: only one outgoing parton
-      //gluon splitting: parent is a quark of different flavor than the quark, 
-      //or parent is a gluon. can be ISR or FSR.
-      //True decay: from resonance like top, higgs, etc.
-      //if the quark has no status 3 partons of same flavor then it is gluon splitting
+      // matrix element:    status 3 parent with precisely 2 grandparents outside of initial
+      //                    section (0-5), with same ID as the quark.
+      // flavor excitation: only one outgoing parton
+      // gluon splitting:   parent is a quark of different flavor than the quark, or parent is a
+      //                    gluon. can be ISR or FSR.
+      // true decay:        from resonance like top, higgs, etc.  if the quark has no status 3
+      //                    partons of same flavor then it is gluon splitting
 
-      //loop over all parents of the quark.
+      // loop over all parents of the quark.
       for (UInt_t j=0; j<parents->GetEntries(); ++j) {
         Int_t parentIndex = -1;
         for (UInt_t k=0; k<fParticles->GetEntries(); ++k) {
@@ -82,48 +80,49 @@ void PartonFlavorHistoryMod::Process()
           }
         }
         
-        MDB(kAnalysis, 4) {
+        MDB(kAnalysis, 4)
           cout << "parents: " << j << " " << parents->At(j)->PdgId() << " " 
                << parents->At(j)->Status() << " " 
                << parents->At(j)->Pt() << " " 
                << parents->At(j)->Eta() << " " 
                << parents->At(j)->Phi() << " " 
                << parentIndex << endl;
-        }
         
-        //matrix element          
+        // matrix element          
         if ((parentIndex > 5) && 
             (parents->At(j)->Status() == 3) && 
             (parents->At(j)->PdgId() == p->PdgId())) {            
           if (FlavorSource == "NULL") 
             FlavorSource = "MatrixElement";  
           FoundProgenitor = kTRUE;
-        } else if ((parents->At(j)->IsGluon()) || 
+        }
+	else if ((parents->At(j)->IsGluon()) || 
                    (parents->At(j)->IsQuark() && parents->At(j)->AbsPdgId() != 6)) {
-          //gluon splitting
+          // gluon splitting
           if (FlavorSource == "NULL") 
             FlavorSource = "GluonSplitting";
           FoundProgenitor = kTRUE;
-        } else if (parents->At(j)->AbsPdgId() == 2212) {
+        }
+	else if (parents->At(j)->AbsPdgId() == 2212) {
           if (FlavorSource == "NULL") 
             FlavorSource = "InitialState";
-        } else if (!parents->At(j)->IsGluon()) {
-          //parent is not a gluon or light quark
+        }
+	else if (!parents->At(j)->IsGluon()) {
+          // parent is not a gluon or light quark
           if (FlavorSource == "NULL") 
             FlavorSource = "FlavorDecay";
           FoundProgenitor = kTRUE;
         }        
-      } //end for all parents
-      
-      MDB(kAnalysis, 4) { 
-        cout << "FlavorSource : " << FlavorSource << " " << FoundProgenitor << endl; 
       }
+
+      MDB(kAnalysis, 4)
+        cout << "FlavorSource : " << FlavorSource << " " << FoundProgenitor << endl; 
   
       ClassificationPartons->Add(p);
       FlavorSources.push_back(FlavorSource);
       delete parents;
-    } // end if : look for status 2 quarks       
-  } //for all particles
+    }
+  }
 
   for (UInt_t i=0; i<ClassificationPartons->GetEntries(); ++i) {
     MCParticle *sister = 0;

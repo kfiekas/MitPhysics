@@ -132,7 +132,6 @@ void GoodPVFilterMod::Process()
         break;
       }
     }
-    
     hNGenVtx->Fill(1 + npu);
     hNPU->Fill(npu);
   }

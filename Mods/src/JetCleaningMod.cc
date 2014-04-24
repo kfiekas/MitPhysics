@@ -107,7 +107,8 @@ void JetCleaningMod::Process()
       }
     }
 
-    if (isPhotonOverlap) continue;
+    if (isPhotonOverlap)
+      continue;
 
     // check for overlap with a tau
     Bool_t isTauOverlap = kFALSE;
@@ -122,7 +123,8 @@ void JetCleaningMod::Process()
       }
     }
 
-    if (isTauOverlap) continue;
+    if (isTauOverlap)
+      continue;
 
     CleanJets->Add(jet);
   }

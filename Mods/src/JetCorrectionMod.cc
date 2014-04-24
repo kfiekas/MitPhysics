@@ -14,18 +14,18 @@ using namespace mithep;
 ClassImp(mithep::JetCorrectionMod)
 
 //--------------------------------------------------------------------------------------------------
-  JetCorrectionMod::JetCorrectionMod(const char *name, const char *title) : 
-    BaseMod(name,title),
-    fJetsName(ModNames::gkPubJetsName),
-    fCorrectedJetsName(ModNames::gkCorrectedJetsName),  
-    fRhoBranchName("Rho"),
-    fPFCandidatesName(Names::gkPFCandidatesBrn),
-    fEnabledL1Correction(kFALSE),
-    rhoEtaMax(5.0),
-    fJetCorrector(0),
-    fEvtHdrName(Names::gkEvtHeaderBrn),
-    fEventHeader(0),
-    fTheRhoType(RhoUtilities::DEFAULT)
+JetCorrectionMod::JetCorrectionMod(const char *name, const char *title) : 
+  BaseMod(name,title),
+  fJetsName(ModNames::gkPubJetsName),
+  fCorrectedJetsName(ModNames::gkCorrectedJetsName),  
+  fRhoBranchName("Rho"),
+  fPFCandidatesName(Names::gkPFCandidatesBrn),
+  fEnabledL1Correction(kFALSE),
+  rhoEtaMax(5.0),
+  fJetCorrector(0),
+  fEvtHdrName(Names::gkEvtHeaderBrn),
+  fEventHeader(0),
+  fTheRhoType(RhoUtilities::DEFAULT)
 {
   // Constructor.
 }
@@ -187,13 +187,18 @@ void JetCorrectionMod::Process()
     }
     
     if (0) {
-      printf("JetCorrectionMod(run/evt/lum/rhoEtaMax): %d %d %d %1f ",fEventHeader->RunNum(),fEventHeader->EvtNum(),fEventHeader->LumiSec(),rhoEtaMax);
+      printf("JetCorrectionMod(run/evt/lum/rhoEtaMax): %d %d %d %1f ",
+	     fEventHeader->RunNum(),fEventHeader->EvtNum(),fEventHeader->LumiSec(),rhoEtaMax);
       printf("In Pt = %5f, Out Pt = %5f ",inJet->Pt(),jet->Pt());
-      printf("In L1 = %5f, Out L1 = %5f ",inJet->L1OffsetCorrectionScale(),jet->L1OffsetCorrectionScale());
-      printf("In L2 = %5f, Out L2 = %5f ",inJet->L2RelativeCorrectionScale(),jet->L2RelativeCorrectionScale());
-      printf("In L3 = %5f, Out L3 = %5f ",inJet->L3AbsoluteCorrectionScale(),jet->L3AbsoluteCorrectionScale());
+      printf("In L1 = %5f, Out L1 = %5f ",
+	     inJet->L1OffsetCorrectionScale(),jet->L1OffsetCorrectionScale());
+      printf("In L2 = %5f, Out L2 = %5f ",
+	     inJet->L2RelativeCorrectionScale(),jet->L2RelativeCorrectionScale());
+      printf("In L3 = %5f, Out L3 = %5f ",
+	     inJet->L3AbsoluteCorrectionScale(),jet->L3AbsoluteCorrectionScale());
       const PileupEnergyDensity *fR = fRho->At(0);
-      printf("Rho(2.5) = %5f, Rho(5.0)  = %5f, Area: %5f\n",fR->Rho(),fR->RhoHighEta(),jet->JetArea());
+      printf("Rho(2.5) = %5f, Rho(5.0)  = %5f, Area: %5f\n",
+	     fR->Rho(),fR->RhoHighEta(),jet->JetArea());
     }
 
     // add corrected jet to collection

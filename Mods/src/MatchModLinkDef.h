@@ -1,5 +1,3 @@
-// $Id: MitPhysicsModsLinkDef.h,v 1.14 2009/04/30 08:09:32 loizides Exp $
-
 #ifndef MITPHYSICS_MODS_MATCHMODLINKDEF_H
 #define MITPHYSICS_MODS_MATCHMODLINKDEF_H
 

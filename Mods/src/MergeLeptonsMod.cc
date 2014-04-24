@@ -1,11 +1,9 @@
-// $Id: MergeLeptonsMod.cc,v 1.3 2009/06/15 15:00:21 loizides Exp $
-
-#include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
+#include <TH1D.h>
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/ParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
-#include <TH1D.h>
+#include "MitPhysics/Mods/interface/MergeLeptonsMod.h"
 
 using namespace mithep;
 
@@ -27,7 +25,6 @@ mithep::MergeLeptonsMod::MergeLeptonsMod(const char *name, const char *title) :
 //--------------------------------------------------------------------------------------------------
 void mithep::MergeLeptonsMod::BeginRun()
 {
-  
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -78,5 +75,4 @@ void mithep::MergeLeptonsMod::SlaveBegin()
 //--------------------------------------------------------------------------------------------------
 void mithep::MergeLeptonsMod::SlaveTerminate()
 {
-
 }

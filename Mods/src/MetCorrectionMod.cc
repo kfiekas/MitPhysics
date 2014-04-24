@@ -28,8 +28,8 @@ ClassImp(mithep::MetCorrectionMod)
     fExprType0("-(-0.703151*x)*(1.0 + TMath::Erf(-0.0303531*TMath::Power(x, 0.909209)))"),
     fExprShiftDataPx("+4.83642e-02 + 2.48870e-01*x"),
     fExprShiftDataPy("-1.50135e-01 - 8.27917e-02*x"),
-    fExprShiftMCPx("+1.62861e-01 - 2.38517e-02*x"),
-    fExprShiftMCPy("+3.60860e-01 - 1.30335e-01*x"),
+    fExprShiftMCPx  ("+1.62861e-01 - 2.38517e-02*x"),
+    fExprShiftMCPy  ("+3.60860e-01 - 1.30335e-01*x"),
     fIsData(kTRUE),
     fPrint(kFALSE),
     fPFMet(0),      
@@ -63,11 +63,11 @@ void MetCorrectionMod::SlaveBegin()
 void MetCorrectionMod::SlaveTerminate()
 {
   // ===== deallocate memory ====
-  delete   fFormulaType0;
-  delete   fFormulaShiftDataPx;
-  delete   fFormulaShiftDataPy;
-  delete   fFormulaShiftMCPx;
-  delete   fFormulaShiftMCPy;
+  delete fFormulaType0;
+  delete fFormulaShiftDataPx;
+  delete fFormulaShiftDataPy;
+  delete fFormulaShiftMCPx;
+  delete fFormulaShiftMCPy;
 
 }
 
@@ -91,20 +91,20 @@ void MetCorrectionMod::Process()
     return;
   }    
 
+  // prepare the storage array for the corrected MET
   MetOArr *CorrectedMetCol = new MetOArr;
   CorrectedMetCol->SetOwner(kTRUE);
   CorrectedMetCol->SetName(fCorrectedMetName);
+
   // initialize the corrected met to the uncorrected one
   Met *CorrectedMet = fPFMet->At(0)->MakeCopy();
   
   // ===== Type 0 corrections, to mitigate pileup ====
   // https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1473/1.html  
   if (fApplyType0) {
-    
     LoadBranch(fPFCandidatesName);
     if (!fPFCandidates) {
-      SendError(kAbortModule, "Process", 
-                "Pointer to input PFCandidates %s is null.",
+      SendError(kAbortModule, "Process","Pointer to input PFCandidates %s is null.",
                 fPFCandidatesName.Data());
       return;
     }
@@ -114,25 +114,30 @@ void MetCorrectionMod::Process()
     // get the Z position of the PV
     Double_t ZofPV = inVertices->At(0)->Z();
 
-    for(UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {      
+    for (UInt_t i=0; i<fPFCandidates->GetEntries(); ++i) {      
+
       const PFCandidate *pfcand = fPFCandidates->At(i);
       // exclude non PU candidates
-      if (fabs(pfcand->SourceVertex().Z() - ZofPV) < fMinDz) continue;
+      if (fabs(pfcand->SourceVertex().Z() - ZofPV) < fMinDz)
+	continue;
       // consider only charged hadrons, electrons and muons
       if (pfcand->PFType() != PFCandidate::eHadron &&
           pfcand->PFType() != PFCandidate::eElectron &&
-          pfcand->PFType() != PFCandidate::eMuon) continue;
+          pfcand->PFType() != PFCandidate::eMuon)
+	continue;
       TLorentzVector thisMom(0,0,0,0);
-      thisMom.SetPtEtaPhiE(pfcand->Mom().Pt(),pfcand->Mom().Eta(),pfcand->Mom().Phi(),pfcand->Mom().E());
+      thisMom.SetPtEtaPhiE(pfcand->Mom().Pt(),pfcand->Mom().Eta(),pfcand->Mom().Phi(),
+			   pfcand->Mom().E());
       sumPUMom += thisMom;
 
       // debug
       if (fPrint) {
-        cout << "PFCand index " << i << " :: this Vtx dZ: " << fabs(pfcand->SourceVertex().Z() - ZofPV) << endl;
+        cout << "PFCand index " << i << " :: this Vtx dZ: "
+	     << fabs(pfcand->SourceVertex().Z() - ZofPV) << endl;
         cout << "PFCand index " << i << " :: sumPUMom Pt: " << sumPUMom.Pt() << endl;
       }
             
-    } //end loop on PFCandidates
+    }
     
     // compute the MET Type 0 correction
     Double_t sumPUPt  = sumPUMom.Pt();
@@ -163,8 +168,8 @@ void MetCorrectionMod::Process()
   // https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#Type_I_Correction
   if (fApplyType1) {
     
-    const JetCol   *inJets     = GetObjThisEvt<JetCol>(fJetsName);
-    const JetCol   *inCorrJets = GetObjThisEvt<JetCol>(fCorrectedJetsName);
+    const JetCol *inJets     = GetObjThisEvt<JetCol>(fJetsName);
+    const JetCol *inCorrJets = GetObjThisEvt<JetCol>(fCorrectedJetsName);
     if (!inJets) {
       SendError(kAbortModule, "Process", 
                 "Pointer to input jet collection %s is null.",
@@ -177,7 +182,7 @@ void MetCorrectionMod::Process()
                 fCorrectedJetsName.Data());
       return;
     }
-    if(inJets->GetEntries() != inCorrJets->GetEntries())  {
+    if (inJets->GetEntries() != inCorrJets->GetEntries())  {
       SendError(kAbortModule, "Process", 
                 "Input corrected and uncorrected jet collections have different size.");
       return;
@@ -186,16 +191,18 @@ void MetCorrectionMod::Process()
     // prepare the 4-mom for the Type1 correction
     TLorentzVector type1Mom(0,0,0,0);
 
-    for(UInt_t i=0; i<inJets->GetEntries(); ++i) {
+    for (UInt_t i=0; i<inJets->GetEntries(); ++i) {
       const Jet *inJet = inJets->At(i);      
       const Jet *inCorrJet = inCorrJets->At(i);      
 
       // do not propagate JEC for soft jets
       if (inCorrJet->Mom().Pt() < 10.) continue;      
       TLorentzVector thisJetMom(0,0,0,0);
-      thisJetMom.SetPtEtaPhiE(inJet->Mom().Pt(),inJet->Mom().Eta(),inJet->Mom().Phi(),inJet->Mom().E());
+      thisJetMom.SetPtEtaPhiE(inJet->Mom().Pt(),inJet->Mom().Eta(),inJet->Mom().Phi(),
+			      inJet->Mom().E());
       TLorentzVector thisCorrJetMom(0,0,0,0);
-      thisCorrJetMom.SetPtEtaPhiE(inCorrJet->Mom().Pt(),inCorrJet->Mom().Eta(),inCorrJet->Mom().Phi(),inCorrJet->Mom().E());
+      thisCorrJetMom.SetPtEtaPhiE(inCorrJet->Mom().Pt(),inCorrJet->Mom().Eta(),
+				  inCorrJet->Mom().Phi(),inCorrJet->Mom().E());
 
       // compute the MET Type 1 correction
       type1Mom = type1Mom + thisJetMom - thisCorrJetMom;
@@ -206,8 +213,7 @@ void MetCorrectionMod::Process()
         cout << "Jet index " << i << " :: cor jet Pt:   " << inCorrJet->Mom().Pt() << endl;
         cout << "Jet index " << i << " :: type1 cor Pt: " << type1Mom.Pt() << endl;
       }
-      
-    } //end loop on Jets
+    }
     
     // correct the MET
     CorrectedMet->SetMex(CorrectedMet->Mex() + type1Mom.Px());
@@ -221,19 +227,16 @@ void MetCorrectionMod::Process()
       cout << "cor Met Pt        : " << CorrectedMet->Pt() << endl;
       cout << "+++++++ End of type 1 correction scope +++++++\n\n" << endl;
     }
-
-  } // end Type 1 correction scope
+  }
 
   // ===== XY Shift correction, to reduce the MET azimuthal modulation ====
   // https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#xy_Shift_Correction
   // NB: the correction in CMSSW is applied with a minus sign, not as noted on the twiki
   if (fApplyShift) {
-    
     // prepare the correction containers
     Double_t xyShiftCorrX, xyShiftCorrY;
     // number of vertices in Double format: to be used in the correction formula
     Double_t nVtx = inVertices->GetEntries() * 1.;
-    
     // compute the XY Shift correction
     if (fIsData) {
       xyShiftCorrX = fFormulaShiftDataPx->Eval(nVtx) * -1.;
@@ -255,8 +258,7 @@ void MetCorrectionMod::Process()
       cout << "cor Met Pt     : " << CorrectedMet->Pt() << endl;
       cout << "+++++++ End of XY shift correction scope +++++++\n\n" << endl;
     }
-
-  } // end XY shift correction scope
+  }
 
   // add corrected met to collection
   CorrectedMetCol->AddOwned(CorrectedMet);

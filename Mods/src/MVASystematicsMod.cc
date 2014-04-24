@@ -1,25 +1,22 @@
-// $Id: MVASystematicsMod.cc,v 1.1 2011/12/13 21:13:23 bendavid Exp $
-
+#include <iostream>
+#include <sstream>
 #include <TMath.h>
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TNtuple.h>
 #include <TRandom3.h>
+#include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataUtil/interface/Debug.h"
 #include "MitAna/DataTree/interface/Names.h"
+#include "MitAna/DataTree/interface/BeamSpotCol.h"
 #include "MitAna/DataTree/interface/TrackCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
-#include "MitPhysics/Mods/interface/MVASystematicsMod.h"
-#include "MitAna/DataTree/interface/BeamSpotCol.h"
-#include "FWCore/ParameterSet/interface/FileInPath.h"
-
 #include "MitPhysics/Utils/interface/IsolationTools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
+#include "MitPhysics/Mods/interface/MVASystematicsMod.h"
 
-#include <iostream>
-#include <sstream>
 
 using namespace mithep;
 
@@ -27,30 +24,23 @@ ClassImp(mithep::MVASystematicsMod)
 
 //--------------------------------------------------------------------------------------------------
 MVASystematicsMod::MVASystematicsMod(const char *name, const char *title) :
-  BaseMod             (name,title),
-
+  BaseMod        (name,title),
   // define all the Branches to load
-  fMCParticleName    (Names::gkMCPartBrn),
-  fPVName            (Names::gkPVBeamSpotBrn),
-  fEBSCName            (Names::gkBarrelSuperClusterBrn),
-  fEESCName            (Names::gkEndcapSuperClusterBrn),  
-
-
-  // ----------------------------------------
-  // collections....
-  fMCParticles       (0),
-  fPV       (0),
-  fEBSC       (0),
-  fEESC       (0),
-  // -------------------------------------------
-  
-  fMCR9ScaleEB(1.0),
-  fMCR9ScaleEE(1.0),
-  
-  fIsData            (false),
-
-  fTupleName("hMVAtuple")
-  
+  fMCParticleName(Names::gkMCPartBrn),
+  fPVName        (Names::gkPVBeamSpotBrn),
+  fEBSCName      (Names::gkBarrelSuperClusterBrn),
+  fEESCName      (Names::gkEndcapSuperClusterBrn),  
+  // -----------------------------------
+  // collections.
+  fMCParticles   (0),
+  fPV            (0),
+  fEBSC          (0),
+  fEESC          (0),
+  // --------------------------------------
+  fMCR9ScaleEB   (1.0),
+  fMCR9ScaleEE   (1.0),
+  fIsData        (false),
+  fTupleName     ("hMVAtuple")
 {
   // Constructor.
 }
@@ -65,7 +55,7 @@ void MVASystematicsMod::Begin()
 void MVASystematicsMod::Process()
 {  
   IncNEventsProcessed();
-  if( !fIsData )
+  if (!fIsData)
     LoadBranch(fMCParticleName);
 
   LoadBranch(fPVName);
@@ -128,14 +118,18 @@ void MVASystematicsMod::Process()
   
   if (sc1) {
     double r9scale;
-    if   (iseb1) r9scale = fMCR9ScaleEB;
-    else r9scale = fMCR9ScaleEE;
+    if   (iseb1)
+      r9scale = fMCR9ScaleEB;
+    else
+      r9scale = fMCR9ScaleEE;
       
     // compute the probe momentum wr to the chosen Vtx
     FourVectorM scmom;  
     ThreeVectorC scp;
-    if (vtx) scp = sc1->Point() - vtx->Position();
-    else scp = sc1->Point();
+    if (vtx)
+      scp = sc1->Point() - vtx->Position();
+    else
+      scp = sc1->Point();
     scp = scp/scp.R();
     scmom.SetXYZT(sc1->Energy()*scp.X(), sc1->Energy()*scp.Y(), sc1->Energy()*scp.Z(), sc1->Energy());
       
@@ -149,14 +143,18 @@ void MVASystematicsMod::Process()
 
   if (sc2) {
     double r9scale;
-    if   (iseb2) r9scale = fMCR9ScaleEB;
-    else r9scale = fMCR9ScaleEE;
+    if (iseb2)
+      r9scale = fMCR9ScaleEB;
+    else
+      r9scale = fMCR9ScaleEE;
       
     // compute the probe momentum wr to the chosen Vtx
     FourVectorM scmom;  
     ThreeVectorC scp;
-    if (vtx) scp = sc2->Point() - vtx->Position();
-    else scp = sc2->Point();
+    if (vtx)
+      scp = sc2->Point() - vtx->Position();
+    else
+      scp = sc2->Point();
     scp = scp/scp.R();
     scmom.SetXYZT(sc2->Energy()*scp.X(), sc2->Energy()*scp.Y(), sc2->Energy()*scp.Z(), sc2->Energy());
       
@@ -182,16 +180,14 @@ void MVASystematicsMod::SlaveBegin()
   // we typically initialize histograms and other analysis objects and request
   // branches or objects created by earlier modules.
 
-  if (!fIsData) {
-    ReqBranch(fMCParticleName,        fMCParticles);
-  }
-  
-  ReqBranch(fPVName,        fPV);
-  ReqBranch(fEBSCName,      fEBSC);
-  ReqBranch(fEESCName,      fEESC);
-  
+  if (!fIsData)
+    ReqBranch(fMCParticleName,fMCParticles);
+  ReqBranch(fPVName,fPV);
+  ReqBranch(fEBSCName,fEBSC);
+  ReqBranch(fEESCName,fEESC);
 
-  hMVAtuple = new TNtuple(fTupleName.Data(),fTupleName.Data(),"hpt:hy:hm:pt1:eta1:phi1:pt2:eta2:phi2:scet1:sceta1:scphi1:scr91:scet2:sceta2:scphi2:scr92");
+  hMVAtuple = new TNtuple(fTupleName.Data(),fTupleName.Data(),
+			  "hpt:hy:hm:pt1:eta1:phi1:pt2:eta2:phi2:scet1:sceta1:scphi1:scr91:scet2:sceta2:scphi2:scr92");
 
   AddOutput(hMVAtuple);
 }
@@ -199,21 +195,19 @@ void MVASystematicsMod::SlaveBegin()
 //--------------------------------------------------------------------------------------------------
 void MVASystematicsMod::SlaveTerminate()
 {
-  // Run finishing code on the computer (slave) that did the analysis. For this
-  // module, we dont do anything here.
+  // Run finishing code on the computer (slave) that did the analysis. For this module, we dont do
+  // anything here.
 }
 
 //--------------------------------------------------------------------------------------------------
 void MVASystematicsMod::Terminate()
 {
-  // Run finishing code on the client computer. For this module, we dont do
-  // anything here.
+  // Run finishing code on the client computer. For this module, we dont do anything here.
 }
 
-// ----------------------------------------------------------------------------------------
-// some helpfer functions....
-const MCParticle *MVASystematicsMod::FindHiggsPtAndY(Float_t& pt, Float_t& Y, Float_t& mass) {
-
+//--------------------------------------------------------------------------------------------------
+const MCParticle *MVASystematicsMod::FindHiggsPtAndY(Float_t& pt, Float_t& Y, Float_t& mass)
+{
   const MCParticle *h = 0;
   
   pt = -999.;
@@ -221,9 +215,9 @@ const MCParticle *MVASystematicsMod::FindHiggsPtAndY(Float_t& pt, Float_t& Y, Fl
   mass = -999.;
 
   // loop over all GEN particles and look for status 1 photons
-  for(UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
+  for (UInt_t i=0; i<fMCParticles->GetEntries(); ++i) {
     const MCParticle* p = fMCParticles->At(i);
-    if( p->Is(MCParticle::kH) ) {
+    if (p->Is(MCParticle::kH)) {
       pt=p->Pt();
       Y = p->Rapidity();
       mass = p->Mass();
@@ -235,19 +229,19 @@ const MCParticle *MVASystematicsMod::FindHiggsPtAndY(Float_t& pt, Float_t& Y, Fl
   return h;
 }
 
-// ----------------------------------------------------------------------------------------
-// some helpfer functions....
-const SuperCluster *MVASystematicsMod::MatchSC(const MCParticle *p, bool &iseb) {
+//--------------------------------------------------------------------------------------------------
+const SuperCluster *MVASystematicsMod::MatchSC(const MCParticle *p, bool &iseb)
+{
 
   iseb = kFALSE;
   
-  for(UInt_t i=0; i<fEBSC->GetEntries(); ++i) {
+  for (UInt_t i=0; i<fEBSC->GetEntries(); ++i) {
     iseb = kTRUE;
     const SuperCluster *sc = fEBSC->At(i);
     if (MathUtils::DeltaR(sc,p)<0.2) return sc;
   }
 
-  for(UInt_t i=0; i<fEESC->GetEntries(); ++i) {
+  for (UInt_t i=0; i<fEESC->GetEntries(); ++i) {
     iseb = kFALSE;
     const SuperCluster *sc = fEESC->At(i);
     if (MathUtils::DeltaR(sc,p)<0.2) return sc;

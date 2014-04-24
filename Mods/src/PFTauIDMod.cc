@@ -8,7 +8,7 @@ using namespace mithep;
 
 ClassImp(mithep::PFTauIDMod)
 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 PFTauIDMod::PFTauIDMod(const char *name, const char *title) : 
   BaseMod(name,title),
   fPFTausName(Names::gkPFTauBrn),
@@ -28,7 +28,7 @@ PFTauIDMod::PFTauIDMod(const char *name, const char *title) :
   // Constructor.
 }
 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void PFTauIDMod::Process()
 {
   // Process entries of the tree. 
@@ -43,13 +43,16 @@ void PFTauIDMod::Process()
 
     // loose Id
     if (fIsLooseId) {
-      if (tau->Pt() < fPtMin) continue;
-      if (fabs(tau->Eta()) > fEtaMax) continue;
-      if (!tau->DiscriminationByDecayModeFinding()) continue;
+      if (tau->Pt() < fPtMin)
+	continue;
+      if (fabs(tau->Eta()) > fEtaMax)
+	continue;
+      if (!tau->DiscriminationByDecayModeFinding())
+	continue;
     }
 
     // non-HPS
-    else if(fIsHPSSel == kFALSE) {
+    else if (fIsHPSSel == kFALSE) {
       if (tau->NSignalPFCands() == 0)
 	continue;
 
@@ -58,7 +61,7 @@ void PFTauIDMod::Process()
       UInt_t nTrk = 0;
       for (UInt_t j=0; j<tau->NSignalPFCands(); ++j) {
 	tauSystem.AddDaughter(tau->SignalPFCand(j));
-	if(tau->SignalPFCand(j) != 0 &&
+	if (tau->SignalPFCand(j) != 0 &&
 	   tau->SignalPFCand(j)->Charge() != 0){
 	  nTrk++;
 	  tauChargedSystem.AddDaughter(tau->SignalPFCand(j));
@@ -74,10 +77,10 @@ void PFTauIDMod::Process()
       if (tauSystem.Pt() <= fPtMin)
 	continue;
 
-      if(!tau->LeadChargedHadronPFCand())
+      if (!tau->LeadChargedHadronPFCand())
 	continue;
 
-      if(tau->LeadChargedHadronPFCand()->Pt() <= fPtLeadChargedHadronPFCandMin)
+      if (tau->LeadChargedHadronPFCand()->Pt() <= fPtLeadChargedHadronPFCandMin)
 	continue;
 
       if (tau->IsoChargedHadronPtSum() >= fIsoChargedHadronPtSumMax)
@@ -91,25 +94,25 @@ void PFTauIDMod::Process()
     }
     // HPS
     else { // if we're doing hps selection:
-      if(tau->Pt() <= fPtMin)
+      if (tau->Pt() <= fPtMin)
 	continue;
-      if(tau->DiscriminationByDecayModeFinding() < 0.5)
+      if (tau->DiscriminationByDecayModeFinding() < 0.5)
         continue;
-      if(tau->DiscriminationAgainstElectron() < 0.5)
+      if (tau->DiscriminationAgainstElectron() < 0.5)
         continue;
-      if(tau->DiscriminationAgainstMuon() < 0.5)
+      if (tau->DiscriminationAgainstMuon() < 0.5)
         continue;
       // "loose" should be default, but others can be used
-      if(fHPSIso.Contains("loose",TString::kIgnoreCase)) {
-	if(tau->DiscriminationByLooseIsolation() < 0.5)
+      if (fHPSIso.Contains("loose",TString::kIgnoreCase)) {
+	if (tau->DiscriminationByLooseIsolation() < 0.5)
 	  continue;
       }
-      else if(fHPSIso.Contains("med",TString::kIgnoreCase)) {
-	if(tau->DiscriminationByMediumIsolation() < 0.5)
+      else if (fHPSIso.Contains("med",TString::kIgnoreCase)) {
+	if (tau->DiscriminationByMediumIsolation() < 0.5)
 	  continue;
       }
-      else if(fHPSIso.Contains("tight",TString::kIgnoreCase)) {
-	if(tau->DiscriminationByTightIsolation() < 0.5)
+      else if (fHPSIso.Contains("tight",TString::kIgnoreCase)) {
+	if (tau->DiscriminationByTightIsolation() < 0.5)
 	  continue;
       }
       else {
@@ -129,16 +132,15 @@ void PFTauIDMod::Process()
   AddObjThisEvt(GoodTaus);  
 }
 
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void PFTauIDMod::SlaveBegin()
 {
-  // Run startup code on the computer (slave) doing the actual analysis. Here,
-  // we just request the Tau collection branch.
+  // Run startup code on the computer (slave) doing the actual analysis. Here, we just request the
+  // Tau collection branch.
 
   // note: for safety, this overrides SetPFTausName
-  if(fIsHPSSel) {
+  if (fIsHPSSel)
     fPFTausName = TString(Names::gkHPSTauBrn);
-  }
   else
     fPFTausName = TString(Names::gkPFTauBrn);
 

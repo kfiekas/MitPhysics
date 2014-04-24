@@ -1,11 +1,9 @@
-// $Id: PFTauCleaningMod.cc,v 1.4 2009/06/15 15:00:21 loizides Exp $
-
-#include "MitPhysics/Mods/interface/PFTauCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/PFTauCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/PFTauCleaningMod.h"
 
 using namespace mithep;
 
@@ -30,7 +28,7 @@ void PFTauCleaningMod::Process()
   // Process entries of the tree.
 
   // get input collections
-  const PFTauCol  *GoodPFTaus = GetObjThisEvt<PFTauCol>(fGoodPFTausName);
+  const PFTauCol *GoodPFTaus = GetObjThisEvt<PFTauCol>(fGoodPFTausName);
   const ElectronCol *CleanElectrons = GetObjThisEvt<ElectronCol>(fCleanElectronsName);
   const MuonCol *CleanMuons = GetObjThisEvt<MuonCol>(fCleanMuonsName);
 

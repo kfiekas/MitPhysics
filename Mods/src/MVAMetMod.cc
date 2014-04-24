@@ -104,7 +104,8 @@ void MVAMetMod::SlaveBegin()
   fMVAMet    = new MVAMet();
   fMVAMet->Initialize(TString((getenv("MIT_DATA")+string("/mva_JetID_lowpt.weights.xml"))),
                       TString((getenv("MIT_DATA")+string("/mva_JetID_highpt.weights.xml"))),
-                      TString((getenv("CMSSW_BASE")+string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py"))),
+                      TString((getenv("CMSSW_BASE")+
+			       string("/src/MitPhysics/Utils/python/JetIdParams_cfi.py"))),
                       TString((getenv("MIT_DATA")+string("/gbrmet_52.root"))),
                       TString((getenv("MIT_DATA")+string("/gbrmetphi_52.root"))),
                       TString((getenv("MIT_DATA")+string("/gbrmetu1cov_52.root"))),

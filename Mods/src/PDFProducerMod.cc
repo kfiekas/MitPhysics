@@ -1,14 +1,12 @@
-// $Id: PDFProducerMod.cc,v 1.3 2010/03/13 20:50:03 ceballos Exp $
-
-#include "MitPhysics/Mods/interface/PDFProducerMod.h"
+#include <TSystem.h>
+#include <TH1D.h>
+#include <TH2D.h>
+#include "LHAPDF/LHAPDF.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/MCEventInfo.h"
 #include "MitAna/DataTree/interface/ParticleCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
-#include <TH1D.h>
-#include <TH2D.h>
-#include <TSystem.h>
-#include "LHAPDF/LHAPDF.h"
+#include "MitPhysics/Mods/interface/PDFProducerMod.h"
 
 using namespace mithep;
 
@@ -36,7 +34,7 @@ void PDFProducerMod::Process()
   UInt_t nmembers = LHAPDF::numberPDF() + 1;
   FArrDouble *PDFArr = new FArrDouble(nmembers);
 
-  if(fIsData == kFALSE){
+  if (fIsData == kFALSE) {
     LoadBranch(fMCEvInfoName);
 
     Double_t Q    = fMCEventInfo->Scale();
@@ -53,14 +51,14 @@ void PDFProducerMod::Process()
       hDPDFHisto[2]->Fill(TMath::Min(pdf2,999.999));
       hDPDFHisto[3]->Fill(TMath::Min(x1,0.999));
       hDPDFHisto[4]->Fill(TMath::Min(x2,0.999));
-      if(x1 + x2 > 0){
+      if (x1 + x2 > 0) {
 	hDPDFHisto[5]->Fill(TMath::Min(x1/(x1+x2),0.999));
       }
     }
 
-    if(fRunPDF == kTRUE){
+    if (fRunPDF == kTRUE) {
       ParticleOArr *leptons = GetObjThisEvt<ParticleOArr>(ModNames::gkMergedLeptonsName);
-      if(leptons->GetEntries() >= 2){ // Nlep >= 2 to fill it
+      if (leptons->GetEntries() >= 2) { // Nlep >= 2 to fill it
 	if (fPrintDebug) 
 	  cout << "Start loop over PDF members:" << endl;
 
@@ -101,7 +99,7 @@ void PDFProducerMod::SlaveBegin()
   LHAPDF::initPDFSet(fPDFName.Data());
   LHAPDF::getDescription();
 
-  if(fIsData == kFALSE){
+  if (fIsData == kFALSE) {
     ReqBranch(fMCEvInfoName, fMCEventInfo);
   }
 
@@ -115,7 +113,7 @@ void PDFProducerMod::SlaveBegin()
     sprintf(sb,"hDPDFHisto_%d", 5); hDPDFHisto[5] = new TH1D(sb,sb,100,0,1); 
     sprintf(sb,"hDPDFHisto_%d", 6); hDPDFHisto[6] = new TH1D(sb,sb,500,0,100); 
     sprintf(sb,"hDPDFHisto_%d", 7); hDPDFHisto[7] = new TH1D(sb,sb,1,0,1); 
-    for(int i=0; i<8; i++){
+    for (int i=0; i<8; i++) {
       AddOutput(hDPDFHisto[i]);
     }
   }
