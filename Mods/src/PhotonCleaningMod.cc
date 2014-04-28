@@ -1,10 +1,8 @@
-// $Id: PhotonCleaningMod.cc,v 1.7 2009/11/02 13:39:23 ceballos Exp $
-
-#include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 #include "MitCommon/MathTools/interface/MathUtils.h"
 #include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/PhotonCleaningMod.h"
 
 using namespace mithep;
 
