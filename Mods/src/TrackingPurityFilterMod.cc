@@ -1,10 +1,8 @@
-// $Id: TrackingPurityFilterMod.cc,v 1.1 2010/01/18 14:43:03 bendavid Exp $
-
-#include "MitPhysics/Mods/interface/TrackingPurityFilterMod.h"
 #include <TFile.h>
 #include <TTree.h>
 #include "MitAna/DataTree/interface/Names.h"
 #include "MitAna/DataTree/interface/Track.h"
+#include "MitPhysics/Mods/interface/TrackingPurityFilterMod.h"
 
 using namespace mithep;
 

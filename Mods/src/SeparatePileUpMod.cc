@@ -1,9 +1,7 @@
-// $Id: SeparatePileUpMod.cc,v 1.2 2012/04/27 22:41:41 ceballos Exp $
-
-#include "MitPhysics/Mods/interface/SeparatePileUpMod.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
 #include "MitAna/DataTree/interface/VertexCol.h"
 #include "MitPhysics/Init/interface/ModNames.h"
+#include "MitPhysics/Mods/interface/SeparatePileUpMod.h"
 
 using namespace mithep;
 
@@ -41,15 +39,15 @@ void SeparatePileUpMod::Process()
 
   LoadBranch(fAllVertexName);
   
-  if(fUseAllVertices == kTRUE) fVertices = fAllVertices;
+  if (fUseAllVertices == kTRUE) fVertices = fAllVertices;
   else                         fVertices = GetObjThisEvt<VertexOArr>(fVertexName);
 
-  for(UInt_t i = 0; i < fPFCandidates->GetEntries(); i++) {
+  for (UInt_t i = 0; i < fPFCandidates->GetEntries(); i++) {
     const PFCandidate *pf = fPFCandidates->At(i);
     assert(pf);
 
-    if(pf->PFType() == PFCandidate::eHadron) {
-      if(pf->HasTrackerTrk() && 
+    if (pf->PFType() == PFCandidate::eHadron) {
+      if (pf->HasTrackerTrk() && 
          fVertices->At(0)->HasTrack(pf->TrackerTrk()) &&
          fVertices->At(0)->TrackWeight(pf->TrackerTrk()) > 0)
       {
@@ -60,11 +58,11 @@ void SeparatePileUpMod::Process()
         const Vertex *closestVtx = 0;
         Double_t dzmin = 10000;
 
-	for(UInt_t j = 0; j < fAllVertices->GetEntries(); j++) {
+	for (UInt_t j = 0; j < fAllVertices->GetEntries(); j++) {
 	  const Vertex *vtx = fAllVertices->At(j);
 	  assert(vtx);
 
-	  if(pf->HasTrackerTrk() && 
+	  if (pf->HasTrackerTrk() && 
 	     vtx->HasTrack(pf->TrackerTrk()) &&
 	     vtx->TrackWeight(pf->TrackerTrk()) > 0) {
 	    vertexFound = kTRUE;
@@ -72,22 +70,22 @@ void SeparatePileUpMod::Process()
 	    break;
 	  }
 	  Double_t dz = fabs(pf->SourceVertex().Z() - vtx->Z());
-	  if(dz < dzmin) {
+	  if (dz < dzmin) {
 	    closestVtx = vtx;
 	    dzmin = dz;
 	  }
 	}
 
-	if(fCheckClosestZVertex) {
+	if (fCheckClosestZVertex) {
 	  // Fallback: if track is not associated with any vertex,
 	  // associate it with the vertex closest in z
-	  if(vertexFound || closestVtx != fVertices->At(0))
+	  if (vertexFound || closestVtx != fVertices->At(0))
 	    pfPileUp->Add(pf);
 	  else
 	    pfNoPileUp->Add(pf);
 	}
 	else {
-	  if(vertexFound && closestVtx != fVertices->At(0))
+	  if (vertexFound && closestVtx != fVertices->At(0))
 	    pfPileUp->Add(pf);
 	  else
 	    pfNoPileUp->Add(pf); // Ridiculous but that's how it is
