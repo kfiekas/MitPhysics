@@ -124,16 +124,16 @@ void MVAMet::Initialize(TString iJetLowPtFile,
 			TString iPhiWeights, 
 			TString iCovU1Weights,
                         TString iCovU2Weights,
-			JetIDMVA::MVAType     iType,bool iOld42) { 
+			JetIDMVA::MVAType     iType,MVAMetType iMETType) { 
   
   fIsInitialized = kTRUE;
   fType          = iType;
   f42            = iU1Weights.Contains("42");
-  fOld42         = iOld42;
-  fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile,fOld42,fType);
-  if(f42) fRecoilTools->fJetIDMVA->f42       = true;
+  fType1         = (iMETType == kUseType1 || iMETType == kUseType1Rho);
+  fOld42         = (iMETType == kOld42);
+  bool lUseRho   = true; if(iMETType == kUseType1Rho || iMETType == kUseRho) lUseRho = false; 
+  fRecoilTools = new RecoilTools(iJetLowPtFile,iJetHighPtFile,iJetCutFile,(iMETType == kOld42),fType,lUseRho);
   if(f42) fRecoilTools->fJetIDMVA->fJetPtMin = 1.;
-  if(f42) std::cout << "====> Using 42 Config : " << std::endl;
 
   ROOT::Cintex::Cintex::Enable();   
   
@@ -157,7 +157,6 @@ void MVAMet::Initialize(TString iJetLowPtFile,
   fPhiVals = new Float_t[23];
   fU1Vals  = new Float_t[25];
   fCovVals = new Float_t[26];
-
 
   fMetLeptonTools = new MetLeptonTools();
 }
@@ -404,10 +403,10 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   
   Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(iPtQ  ,iPhiQ  ,iSumEtQ  ,iCands,iVertex); 
-  Met lNPRec = fRecoilTools->NoPURecoil (iPtQ  ,iPhiQ  ,iSumEtQ  ,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);  
-  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);
+  Met lNPRec = fRecoilTools->NoPURecoil (iPtQ  ,iPhiQ  ,iSumEtQ  ,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);
+  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,fType1);  
   Met lPUMet = fRecoilTools->PUMet      (iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices);
-  
+  if(fType1) lPFRec = fRecoilTools->pfRecoilType1(iPtVis,iPhiVis,iSumEtVis,iCands,iJets,iJetCorrector,iPUEnergyDensity);
 
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 
@@ -542,9 +541,11 @@ Met MVAMet::GetMet(	Bool_t iPhi,
   Met lPFRec = fRecoilTools->pfRecoil   (iPtVis,iPhiVis,iSumEtVis,iCands);
   Met lTKRec = fRecoilTools->trackRecoil(iPtQ  ,iPhiQ  ,iSumEtQ  ,      iCands,iVertex); 
   Met lNPRec = fRecoilTools->NoPURecoil (iPtQ  ,iPhiQ  ,iSumEtQ  ,iJets,iCands,iVertex,iVertices,iRho);  
-  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices,iRho);
+  Met lPCRec = fRecoilTools->PUCRecoil  (iPtVis,iPhiVis,iSumEtVis,iJets,iCands,iVertex,iVertices,iRho,fType1);
   Met lPUMet = fRecoilTools->PUMet      (                         iJets,iCands,iVertex,iVertices,iRho);
-  
+  //FIXME Not yet supported
+  //if(fType1) lPFRec = fRecoilTools->pfRecoilType1(iPtVis,iPhiVis,iSumEtVis,iCands,iJets);
+
   Double_t lPt0 = 0; const PFJet *lLead = 0; 
   Double_t lPt1 = 0; const PFJet *l2nd  = 0; 
   int lNAllJet  = 0;
@@ -720,9 +721,10 @@ Met MVAMet::GetMet(	bool iPhi,
  
   Met lPFRec = fRecoilTools->pfRecoil   (lPtVis       ,lPhiVis,       lSumEtVis,iCands);   
   Met lTKRec = fRecoilTools->trackRecoil(lPtVisQ      ,lPhiVisQ      ,lSumEtQ  ,iCands,iVertex);  
-  Met lNPRec = fRecoilTools->NoPURecoil (lPtVisQ      ,lPhiVisQ      ,lSumEtQ  ,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);    
-  Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis       ,lPhiVis       ,lSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);    
-  Met lPUMet = fRecoilTools->PUMet      (                                       iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,iPhi1,iEta1,iPhi2,iEta2);    
+  Met lNPRec = fRecoilTools->NoPURecoil (lPtVisQ      ,lPhiVisQ      ,lSumEtQ  ,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,       iPhi1,iEta1,iPhi2,iEta2);    
+  Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis       ,lPhiVis       ,lSumEtVis,iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,fType1,iPhi1,iEta1,iPhi2,iEta2);    
+  Met lPUMet = fRecoilTools->PUMet      (                                       iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,       iPhi1,iEta1,iPhi2,iEta2);    
+  if(fType1) lPFRec = fRecoilTools->pfRecoilType1(lPtVis,lPhiVis,lSumEtVis,iCands,iJets,iJetCorrector,iPUEnergyDensity,iPhi1,iEta1,iPhi2,iEta2);
 
   //Met lNPRec1 = fRecoilTools->NoPUMet (iJets,iJetCorrector,iPUEnergyDensity,iCands,iVertex,iVertices,0,0,0,0);
   //std::cout << " ====> PF => " << lPFRec.Pt() << " -- " << lPFRec1.Pt() << std::endl;
@@ -891,9 +893,11 @@ Met MVAMet::GetMet(	Bool_t iPhi,
 
   Met lPFRec = fRecoilTools->pfRecoil   (lPtVis       ,lPhiVis,       lSumEtVis,iCands);   
   Met lTKRec = fRecoilTools->trackRecoil(lPtVisQ      ,lPhiVisQ      ,lSumEtQ  ,iCands,iVertex);  
-  Met lNPRec = fRecoilTools->NoPURecoil (lPtVisQ      ,lPhiVisQ      ,lSumEtQ  ,iJets,iCands,iVertex,iVertices,1.,iPhi1,iEta1,iPhi2,iEta2);    
-  Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis       ,lPhiVis       ,lSumEtVis,iJets,iCands,iVertex,iVertices,1.,iPhi1,iEta1,iPhi2,iEta2);    
-  Met lPUMet = fRecoilTools->PUMet      (                                       iJets,iCands,iVertex,iVertices,1.,iPhi1,iEta1,iPhi2,iEta2);    
+  Met lNPRec = fRecoilTools->NoPURecoil (lPtVisQ      ,lPhiVisQ      ,lSumEtQ  ,iJets,iCands,iVertex,iVertices,1.,       iPhi1,iEta1,iPhi2,iEta2);    
+  Met lPCRec = fRecoilTools->PUCRecoil  (lPtVis       ,lPhiVis       ,lSumEtVis,iJets,iCands,iVertex,iVertices,1.,fType1,iPhi1,iEta1,iPhi2,iEta2);    
+  Met lPUMet = fRecoilTools->PUMet      (                                       iJets,iCands,iVertex,iVertices,1.,       iPhi1,iEta1,iPhi2,iEta2);    
+  //FIXME Not yet supported
+  //if(fType1) lPFRec = fRecoilTools->pfRecoilType1(iPtVis,iPhiVis,iSumEtVis,iCands);
   
   //Met lPFRec = fRecoilTools->pfRecoil   (iPhi1,iEta1,iPhi2,iEta2,      iCands);
   //Met lTKRec = fRecoilTools->trackRecoil(iPhi1,iEta1,iPhi2,iEta2,      iCands,iVertex); 

@@ -32,7 +32,7 @@ namespace mithep {
     RecoilTools(TString iJetLowPtMVAFile ="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_lowpt.weights.xml",
 		TString iJetHighPtMVAFile="$CMSSW_BASE/src/MitPhysics/data/mva_JetID_highpt.weights.xml",
 		TString iCutFile         ="$CMSSW_BASE/src/MitPhysics/Utils/python/JetIdParams_cfi.py",
-		bool i42=false,JetIDMVA::MVAType iType=JetIDMVA::kBaseline);
+		bool i42=false,JetIDMVA::MVAType iType=JetIDMVA::kBaseline,bool iUseRho=true);
     ~RecoilTools();
     JetIDMVA *fJetIDMVA;
 
@@ -44,7 +44,7 @@ namespace mithep {
     Met pfRecoilType1(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
                       const PFCandidateCol *iCands,const PFJetCol *iJets,
                       FactorizedJetCorrector *iJetCorrector,const PileupEnergyDensityCol *iPUEnergyDensity,
-                      double iPhi1,double iEta1,double iPhi2,double iEta2);
+                      double iPhi1=0,double iEta1=0,double iPhi2=0,double iEta2=0);
 
     //Candidate filtered
     Met pfRecoil(double iPhi1,double iEta1,double iPhi2,double iEta2,const PFCandidateCol *iCands);
@@ -108,13 +108,13 @@ namespace mithep {
     //Uncorrected Jets
     Met PUCMet( const PFJetCol       *iJets,FactorizedJetCorrector *iJetCorrector,
 		const PileupEnergyDensityCol *iPileupEnergyDensity,
-		const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
+		const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,bool iUseType1=false,
 		Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		Double_t iDZCut=0.1);
 
     //Corrected Jets
     Met PUCMet( const PFJetCol       *iJets,
-		const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
+		const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,bool iUseType1=false,
 		Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		Double_t iDZCut=0.1);
 
@@ -124,20 +124,20 @@ namespace mithep {
 		   const PFCandidateCol      *iCands,
 		   const Vertex *iVertex,const VertexCol *iVertices,
 		   FactorizedJetCorrector *iJetCorrector=0,
-		   const PileupEnergyDensityCol *iPileupEnergyDensity=0,Double_t iDZCut=0.1);
+		   const PileupEnergyDensityCol *iPileupEnergyDensity=0,bool iUseType1=false,Double_t iDZCut=0.1);
 
     //Uncorrected Jets
     Met PUCRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 		  const PFJetCol       *iJets,FactorizedJetCorrector *iJetCorrector,
 		  const PileupEnergyDensityCol *iPileupEnergyDensity,
-		  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,
+		  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,bool iUseType1=false,
 		  Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		  Double_t iDZCut=0.1);
 
     //Corrected Jets
     Met PUCRecoil(Double_t iVisPt,Double_t iVisPhi,Double_t iVisSumEt,
 		  const PFJetCol       *iJets,
-		  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,
+		  const PFCandidateCol *iCands,const Vertex *iVertex,const VertexCol *iVertices,Double_t iRho,bool iUseType1=false,
 		  Double_t iPhi1=1000,Double_t iEta1=1000,Double_t iPhi2=1000,Double_t iEta2=1000,
 		  Double_t iDZCut=0.1);
 
@@ -178,6 +178,7 @@ namespace mithep {
 		 Double_t iDZCut=0.1);
     
     bool f42;
+    bool fUseRho;
     ClassDef(RecoilTools, 0) // Recoil tools
   };
 }
