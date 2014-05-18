@@ -1,5 +1,3 @@
-// $Id: PFTauIDMod.cc,v 1.5 2011/03/09 14:56:46 dkralph Exp $
-
 #include "MitPhysics/Mods/interface/PFTauIDMod.h"
 #include "MitPhysics/Init/interface/ModNames.h"
 #include "MitAna/DataTree/interface/PFTauCol.h"
@@ -121,6 +119,7 @@ void PFTauIDMod::Process()
     }
 
     // add good tau to output collection
+    tau->Mark();
     GoodTaus->Add(tau);
     
   }

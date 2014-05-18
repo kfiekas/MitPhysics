@@ -258,16 +258,16 @@ void PhotonIDMod::Process()
 
     // ---------------------------------------------------------------------
     // check if we use the Vgamma2011 Selection. If yes, bypass all the below...
-    if (fPhIdType == kTrivialSelection ) {
-      if (ph->Pt() > fPhotonPtMin && ph->SCluster()->AbsEta() <= fAbsEtaMax )
+    if (fPhIdType == kTrivialSelection) {
+      if (ph->Pt() > fPhotonPtMin && ph->SCluster()->AbsEta() <= fAbsEtaMax)
 	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }
     
     // ---------------------------------------------------------------------
     // check if we use the Vgamma2011 Selection. If yes, bypass all the below...
-    if (fPhIdType == kVgamma2011Selection ) {
-      if (ph->Pt() > fPhotonPtMin && ph->SCluster()->AbsEta() <= fAbsEtaMax && PhotonTools::PassVgamma2011Selection(ph, _tRho) )
+    if (fPhIdType == kVgamma2011Selection) {
+      if (ph->Pt() > fPhotonPtMin && ph->SCluster()->AbsEta() <= fAbsEtaMax && PhotonTools::PassVgamma2011Selection(ph, _tRho))
 	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }
@@ -275,7 +275,7 @@ void PhotonIDMod::Process()
     // ---------------------------------------------------------------------
     // check if we use the CiC Selection. If yes, bypass all the below...
     if (fPhIdType == kBaseLineCiC) {
-      if (PhotonTools::PassCiCSelection(ph, fPV->At(0), fTracks, fElectrons, fPV, _tRho, fPhotonPtMin, fApplyElectronVeto) )
+      if (PhotonTools::PassCiCSelection(ph, fPV->At(0), fTracks, fElectrons, fPV, _tRho, fPhotonPtMin, fApplyElectronVeto))
 	GoodPhotons->AddOwned(ph);
       continue; // go to next Photons
     }
@@ -298,7 +298,7 @@ void PhotonIDMod::Process()
     // ---------------------------------------------------------------------
 
     // loose photon preselection for subsequent mva
-    if (fPhIdType == kMITPhSelection ) {
+    if (fPhIdType == kMITPhSelection) {
       if (ph->Pt()>fPhotonPtMin &&
 	  PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,
 					      fApplyElectronVeto,fInvertElectronVeto)) {
@@ -308,8 +308,8 @@ void PhotonIDMod::Process()
     }
 
     // loose photon preselection for subsequent mva
-    if (fPhIdType == kMITPFPhSelection ) {
-      if (ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPreselPFISO(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto) ) {
+    if (fPhIdType == kMITPFPhSelection) {
+      if (ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPreselPFISO(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),rho2012,fPFCands,fApplyElectronVeto,fInvertElectronVeto)) {
         GoodPhotons->AddOwned(ph);
       }
       continue;
@@ -326,7 +326,7 @@ void PhotonIDMod::Process()
     }   
     
     // loose photon preselection for subsequent mva
-    if (fPhIdType == kMITPFPhSelection_NoTrigger ) {
+    if (fPhIdType == kMITPFPhSelection_NoTrigger) {
       if (ph->Pt()>fPhotonPtMin &&
 	  PhotonTools::PassSinglePhotonPreselPFISO_NoTrigger(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),
 							     rho2012,fPFCands,fApplyElectronVeto,
@@ -340,9 +340,9 @@ void PhotonIDMod::Process()
     Bool_t isbarrel = ph->SCluster()->AbsEta()<1.5;
     
     // add MingMings MVA ID on single Photon level
-    if (fPhIdType == kMITMVAId ) {
+    if (fPhIdType == kMITMVAId) {
       // we compute the bdt val already before, so use it ...
-      //if (ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _t_TRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto) ) {
+      //if (ph->Pt()>fPhotonPtMin && PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),_tRho,fApplyElectronVeto) && fTool.PassMVASelection(ph, fPV->At(0) ,fTracks, fPV, _t_TRho,fbdtCutBarrel,fbdtCutEndcap, fElectrons, fApplyElectronVeto)) {
 	
       if (ph->Pt()>fPhotonPtMin &&
 	  PhotonTools::PassSinglePhotonPresel(ph,fElectrons,fConversions,bsp,fTracks,fPV->At(0),
@@ -582,13 +582,13 @@ void PhotonIDMod::SlaveBegin()
     return;
   }
 
-  if (fPhotonIsoType.CompareTo("NoIso") == 0 )
+  if (fPhotonIsoType.CompareTo("NoIso") == 0)
     fPhIsoType = kNoIso;
-  else if (fPhotonIsoType.CompareTo("CombinedIso") == 0 )
+  else if (fPhotonIsoType.CompareTo("CombinedIso") == 0)
     fPhIsoType = kCombinedIso;
-  else if (fPhotonIsoType.CompareTo("Custom") == 0 )
+  else if (fPhotonIsoType.CompareTo("Custom") == 0)
     fPhIsoType = kCustomIso;
-  else if (fPhotonIsoType.CompareTo("MITPUCorrected") == 0 )
+  else if (fPhotonIsoType.CompareTo("MITPUCorrected") == 0)
     fPhIsoType = kMITPUCorrected;
   else {
     SendError(kAbortAnalysis, "SlaveBegin",
