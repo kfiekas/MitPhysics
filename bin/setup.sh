@@ -11,7 +11,4 @@ $CMSSW_BASE/src/MitPhysics/bin/updateData.sh
 # check for existing fastjet+contribution directory or install it
 $CMSSW_BASE/src/MitPhysics/bin/installFastjetAndContrib.sh
 
-# update fastjet+contribution links  
-$CMSSW_BASE/src/MitPhysics/bin/updateFastjetAndContrib.sh
-
 exit 0

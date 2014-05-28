@@ -120,7 +120,7 @@ make install
 #------------------------------------------
 
 # define all relevant variables
-FJCONTRIB_URL="http://t3serv001.mit.edu/~dimatteo"
+FJCONTRIB_URL="http://t3serv001.mit.edu/~cmsprod"
 FJCONTRIB_TGZ="fjcontrib-1.011_nsub-2.0.0-rc3.tar.gz"
 FJCONTRIB_DIR=`echo $EXTERNAL/$FJCONTRIB_TGZ | sed 's/.tar.gz//'`
 
