@@ -120,8 +120,8 @@ make install
 #------------------------------------------
 
 # define all relevant variables
-FJCONTRIB_URL="http://fastjet.hepforge.org/contrib/downloads"
-FJCONTRIB_TGZ="fjcontrib-1.008.tar.gz"
+FJCONTRIB_URL="http://t3serv001.mit.edu/~cmsprod"
+FJCONTRIB_TGZ="fjcontrib-1.011_nsub-2.0.0-rc3.tar.gz"
 FJCONTRIB_DIR=`echo $EXTERNAL/$FJCONTRIB_TGZ | sed 's/.tar.gz//'`
 
 # in the right location
@@ -146,7 +146,7 @@ rm -rf $FJCONTRIB_TGZ
 echo " INFO - installing"
 echo ""
 cd `echo $FJCONTRIB_TGZ | sed 's/.tar.gz//'`
-./configure --fastjet-config=$FASTJET_DIR/fastjet-config --prefix=$EXTERNAL CXXFLAGS="-O3 -Wall -Woverloaded-virtual -g -fPIC -I/home/cmsprod/cms/external/include"
+./configure --fastjet-config=$FASTJET_DIR/fastjet-config --prefix=$EXTERNAL CXXFLAGS="-O3 -Wall -Woverloaded-virtual -g -fPIC -I$EXTERNAL/include"
 make
 make check
 make install
