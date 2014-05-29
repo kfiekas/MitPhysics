@@ -64,7 +64,8 @@ then
   exit 0
 else
   EXTERNAL="/home/$USER/cms/external"
-  echo " INFO - default external location ($EXTERNAL_DEF) not found make own external at: $EXTERNAL"
+  echo " INFO - default external location ($EXTERNAL_DEF/Qjets) not found."
+  echo "        make own external at: $EXTERNAL/Qjets"
   echo ""
 fi
 
@@ -74,7 +75,8 @@ export FASTJET_DIR=`ls -d $EXTERNAL/fastjet-*`
 if [ -z "$FASTJET_DIR" ]
 then
   echo ""
-  echo " ERROR - fastjet source code not found in $EXTERNAL. Please set it up with installFastjetAndContrib.sh ."
+  echo " ERROR - fastjet source code not found in $EXTERNAL."
+  echo "         Please set it up with installFastjetAndContrib.sh."
   echo ""
   exit 1
 fi
