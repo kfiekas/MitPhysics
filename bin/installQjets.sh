@@ -53,11 +53,11 @@ fi
 
 # the default location
 EXTERNAL_DEF="/home/cmsprod/cms/external"
-if [ -d "$EXTERNAL_DEF" ]
+if [ -d "$EXTERNAL_DEF/Qjets" ]
 then
   EXTERNAL="$EXTERNAL_DEF"
   echo ""
-  echo " INFO - found external location at: $EXTERNAL"
+  echo " INFO - found external location at: $EXTERNAL/Qjets"
   echo ""
   # use existing location just adjust scram configuration
   configureScram $EXTERNAL
@@ -67,8 +67,6 @@ else
   echo " INFO - default external location ($EXTERNAL_DEF) not found make own external at: $EXTERNAL"
   echo ""
 fi
-
-EXTERNAL="/home/$USER/cms/external"
 
 # make sure fastjet source code is installed locally
 # export the variable as it will be used in the plugin installation
