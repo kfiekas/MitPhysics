@@ -38,9 +38,12 @@ namespace mithep {
   public:
     MVAMet();
     ~MVAMet();
-    enum MVAType {
-      kBaseline = 0,
-      kOld42    = 4
+    enum MVAMetType {
+      kBaseline    = 0,
+      kUseType1    = 1,
+      kUseRho      = 2,
+      kUseType1Rho = 3,
+      kOld42       = 4
     };
 
     //void    setVariables(TMVA::Reader *iReader,bool iScale);
@@ -58,7 +61,7 @@ namespace mithep {
 		       TString iPhiWeights   ="$CMSSW_BASE/src/MitPhysics/data/gbrmetphi.root",
 		       TString iCovU1Weights   ="$CMSSW_BASE/src/MitPhysics/data/gbrcovu1_52.root",
 		       TString iCovU2Weights   ="$CMSSW_BASE/src/MitPhysics/data/gbrcovu2_52.root",
-		       JetIDMVA::MVAType  iType=JetIDMVA::kBaseline,bool iOld42=false);
+		       JetIDMVA::MVAType  iType=JetIDMVA::kBaseline,MVAMetType iMETType=kBaseline);
         
     Bool_t   IsInitialized() const { return fIsInitialized; }
     Float_t* getVals();
@@ -157,10 +160,11 @@ namespace mithep {
     TString      fCovU1MethodName;
     TString      fCovU2MethodName;
     Bool_t       fIsInitialized;
-    JetIDMVA::MVAType      fType;
     Bool_t       f42;
     Bool_t       fOld42;
-    
+    Bool_t       fType1;
+    JetIDMVA::MVAType fType;
+
     Float_t fSumEt  ;
     Float_t fU      ;
     Float_t fUPhi   ;
