@@ -5,7 +5,7 @@
 # This situation should be temporary but for now it is required to work with the contributions to
 # fastjet and the most up to date versions.
 #
-#                                                                   Jan 13, 2014 - V0 Christoph Paus
+#                                                              May 29, 2014 - V0 Leonardo Di Matteo
 #---------------------------------------------------------------------------------------------------
 function configureScram {
   EXTERNAL=$1
