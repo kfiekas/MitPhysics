@@ -92,25 +92,25 @@ void PFTauIDMod::Process()
     }
     // HPS
     else { // if we're doing hps selection:
-      if(tau->Pt() <= fPtMin)
+      if (tau->Pt() <= fPtMin)
 	continue;
-      if(tau->DiscriminationByDecayModeFinding() < 0.5)
+      if (tau->DiscriminationByDecayModeFinding() < 0.5)
         continue;
-      if(tau->DiscriminationByLooseElectronRejection() < 0.5)
+      if (tau->DiscriminationAgainstElectron() < 0.5)
         continue;
-      if(tau->DiscriminationByLooseMuonRejection() < 0.5)
+      if (tau->DiscriminationAgainstMuon() < 0.5)
         continue;
       // "loose" should be default, but others can be used
-      if(fHPSIso.Contains("loose",TString::kIgnoreCase)) {
-	if(!tau->LooseCombinedIsolationDBSumPtCorr3Hits())
+      if (fHPSIso.Contains("loose",TString::kIgnoreCase)) {
+	if (tau->DiscriminationByLooseIsolation() < 0.5)
 	  continue;
       }
-      else if(fHPSIso.Contains("med",TString::kIgnoreCase)) {
-	if(!tau->MediumCombinedIsolationDBSumPtCorr3Hits())
+      else if (fHPSIso.Contains("med",TString::kIgnoreCase)) {
+	if (tau->DiscriminationByMediumIsolation() < 0.5)
 	  continue;
       }
-      else if(fHPSIso.Contains("tight",TString::kIgnoreCase)) {
-	if(!tau->TightCombinedIsolationDBSumPtCorr3Hits())
+      else if (fHPSIso.Contains("tight",TString::kIgnoreCase)) {
+	if (tau->DiscriminationByTightIsolation() < 0.5)
 	  continue;
       }
       else {
