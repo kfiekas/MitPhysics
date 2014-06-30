@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// $Id: PhotonTreeWriter.h,v 1.39 2013/10/07 12:47:49 veverka Exp $
+// $Id: PhotonTreeWriter.h,v 1.51 2013/12/12 17:14:08 veverka Exp $
 //
 // PhotonTreeWriter
 //
@@ -17,6 +17,9 @@
 #ifndef MITPHYSICS_MODS_PHOTONTREEWRITER_H
 #define MITPHYSICS_MODS_PHOTONTREEWRITER_H
 
+
+#include <utility>  // provides std::pair
+#include <vector>
 #include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/PhotonFwd.h"
 #include "MitAna/DataTree/interface/TrackCol.h"
@@ -50,6 +53,8 @@ class TRandom3;
 
 namespace mithep 
 {
+
+  class PhotonTreeWriterDiphotonEvent;
   
   class PhotonTreeWriterVtx
   {
@@ -107,7 +112,8 @@ namespace mithep
                  const SuperClusterCol* scs,
                  const ElectronCol* els,
                  const DecayParticleCol *convs,
-                 const BaseVertex *bs,
+                 const BaseVertex *bs,bool isdata,
+		 bool dor9rescale, double p0b, double p1b, double  p0e,  double  p1e,
                  Bool_t applyElectronVeto=kTRUE,
                  const Vertex* realVtx = NULL);
       Float_t Ecor()    const { return ecor;    };
@@ -148,13 +154,15 @@ namespace mithep
       Float_t eerr;
       Float_t eerrsmeared;
       Float_t esmearing;
+      Float_t eerrsmearing;
+      Float_t escale;
       Float_t idmva;
       Float_t ecalisodr03;
       Float_t hcalisodr03;
       Float_t trkisohollowdr03;
       Float_t ecalisodr04;
       Float_t hcalisodr04;
-      Float_t trkisohollowdr04;      
+      Float_t trkisohollowdr04;
       Float_t trackiso1;
       Float_t trackiso2;
       Float_t combiso1;
@@ -530,6 +538,7 @@ namespace mithep
       // ---------- MUON STUFF --------------------
       Float_t muonPt;
       Float_t muonEta;
+      Float_t muonPhi;
       Float_t muDR1;
       Float_t muDR2;
       Float_t muIso1;
@@ -542,10 +551,19 @@ namespace mithep
       Float_t muChi2;
       Int_t muNpixhits;
       Int_t muNegs;
-      Int_t muNMatch;      
+      Int_t muNMatch;
+      // ------------ DIMUON STUFF ---------------
+      Float_t mu1Pt;
+      Float_t mu1Eta;
+      Float_t mu1Phi;
+      Float_t mu2Pt;
+      Float_t mu2Eta;
+      Float_t mu2Phi;
+
       // ----------- ELECTRON STUFF --------------
       Float_t elePt;
       Float_t eleEta;
+      Float_t elePhi;
       Float_t eleSCEta;     
       Float_t eleIso1;
       Float_t eleIso2;
@@ -562,6 +580,13 @@ namespace mithep
       Float_t eleMass2;
       Int_t eleNinnerHits;     
       Float_t eleIdMva;
+      // ------------ DIELECTRON STUFF -------------
+      Float_t ele1Pt;
+      Float_t ele1Eta;
+      Float_t ele1Phi;
+      Float_t ele2Pt;
+      Float_t ele2Eta;
+      Float_t ele2Phi;
       // -----------------------------------------
       Float_t rho;
       Float_t rho25;
@@ -640,12 +665,18 @@ namespace mithep
       
       Double_t spfMet;
 
+      // ----------- VH HAD TAG STUFF -----------
+      Float_t costhetastar;
+
       // ----------- VBF TAG STUFF -------------
       Int_t vbfTag;
       Float_t vbfbdt;
 
       // ----------- TTH TAG STUFF -------------
       Int_t tthTag;
+      Int_t numJets;
+      Int_t numBJets;
+      Float_t bjetcsv;
       
       // ----------------------------------------
       UChar_t  ismc;
@@ -714,8 +745,11 @@ namespace mithep
   {
   public:
     enum CounterFlag {kCountNotDefined = -1};
-    PhotonTreeWriter(const char *name ="PhotonTreeWriter", 
-		       const char *title="Selecting PhotonPairs");
+    typedef std::pair<const Particle*, double>  DeltaRVeto;
+    typedef std::vector<DeltaRVeto>             DeltaRVetoVector;
+    typedef std::vector<const PFJet*>           PFJetVector;
+    PhotonTreeWriter(const char *name ="PhotonTreeWriter",
+		     const char *title="Selecting PhotonPairs");
     
     ~PhotonTreeWriter();
 
@@ -752,7 +786,7 @@ namespace mithep
     void                SetApplyBTag(Bool_t b)            { fApplyBTag = b;              }
     void                SetApplyPFMetCorr(Bool_t b)       { fApplyPFMetCorrections = b;  }
     void                SetPhFixDataFile(const char *n)   { fPhFixDataFile = n;          }
-    void                SetVerbosityLevel(Bool_t b)       { fVerbosityLevel = b;         }
+    void                SetVerbosityLevel(Int_t b)       { fVerbosityLevel = b;         }
 
 
 
@@ -760,7 +794,8 @@ namespace mithep
     // set basic Cut variables (FOR PRE-SELECTION)
 
     // is Data Or Not?
-    void                SetIsData (Bool_t b)                 { fIsData = b; };
+    void                SetIsData     (Bool_t b)             { fIsData = b; };
+    void                SetIsCutBased (Bool_t b)             { fIsCutBased = b; };
     
 
     void                SetApplyElectronVeto(Bool_t b)   { fApplyElectronVeto = b;     }          
@@ -806,6 +841,20 @@ namespace mithep
                           const Collection *collection
                           );
 
+    static UInt_t       IndexOfNearestSuperClusterInCollection(
+                          const SuperCluster    *element,
+                          const SuperClusterCol *collection
+                          );
+
+    static double       SuperClusterPairMass(
+                          const SuperCluster *sc1,
+                          const SuperCluster *sc2
+                          );
+
+    static FourVectorM  SuperClusterFourVectorM(const SuperCluster *sc1);
+
+    void                SetR9Rescale(bool dor9rescale, double p0b, double p1b, double  p0e,  double  p1e) {fdor9rescale = dor9rescale; fp0b = p0b; fp1b = p1b; fp0e = p0e; fp1e = p1e;}
+
   protected:
     void                Process();
     void                SlaveBegin();
@@ -836,28 +885,46 @@ namespace mithep
                                       const Vertex *selvtx);
     void                ApplyVHHadTag(const Photon *phHard,
                                       const Photon *phSoft,
-                                      const Vertex *selvtx);
+                                      const Vertex *selvtx,
+                                      const Jet    *jet1,
+                                      const Jet    *jet2);
     void                ApplyTTHTag(const Photon *phHard, 
                                     const Photon *phSoft,
                                     const Vertex *selvtx);
     bool                VHLepHasDielectron(const Photon *phHard,
                                            const Photon *phSoft);
     bool                VHLepHasDimuon(const Photon *phHard,
-                                       const Photon *phSoft);
+                                      const Photon *phSoft);
     UInt_t              VHLepNumberOfJets(const Photon *phHard,
                                           const Photon *phSoft,
                                           const Vertex *selvtx,
                                           const Particle *lepton);
-    bool                VHHadPassesCommonCuts(const Photon *phHard,
-                                              const Photon *phSoft,
-                                              const Vertex *selvtx);
-    UInt_t              VHHadNumberOfJets(const Photon *phHard,
+    UInt_t              NumberOfJets(const Photon *phHard,
+                                     const Photon *phSoft,
+                                     const Vertex *selvtx,
+                                     const double minJetPt,
+                                     const double maxAbsEta);
+    UInt_t              NumberOfBJets(const Photon *phHard,
+                                      const Photon *phSoft,
+                                      const Vertex *selvtx,
+                                      const double minJetPt,
+                                      const double maxAbsEta);
+    PFJetVector *      GetSelectedPFJets(const DeltaRVetoVector &drVetos,
+                                         const Vertex &vertex,
+                                         const double minJetPt,
+                                         const double maxJetAbsEta);
+    PFJetVector *      GetSelectedPFBJets(const PFJetVector &pfjets);
+    const Particle *    TTHSelectLepton(const Photon *phHard,
+                                        const Photon *phSoft,
+                                        const Vertex *selvtx);
+    const Electron *    TTHSelectElectron(const Photon *phHard,
                                           const Photon *phSoft,
                                           const Vertex *selvtx);
-    UInt_t              VHHadNumberOfBJets(const Photon *phHard,
-                                           const Photon *phSoft,
-                                           const Vertex *selvtx);
-
+    const Muon *        TTHSelectMuon(const Photon *phHard,
+                                      const Photon *phSoft,
+                                      const Vertex *selvtx);
+    void                LogEventInfo();
+    double              GetElectronIdMva(const Electron *electron);
     // Names for the input Collections
     TString             fPhotonBranchName;
     TString             fPFPhotonName;
@@ -892,6 +959,8 @@ namespace mithep
     
     // is it Data or MC?
     Bool_t              fIsData;
+    // Is it cut-based? "false" means mass-factorized.
+    Bool_t              fIsCutBased;
     
     // in case there's some PV pre-selection
     Bool_t              fPhotonsFromBranch;
@@ -965,7 +1034,7 @@ namespace mithep
     Double_t                       fBeamspotWidth;
     
     TFile                          *fTmpFile;
-    
+
     // --------------------------------
     // variables for vbf
     float jet1pt_vbf;
@@ -1003,7 +1072,15 @@ namespace mithep
     TString                   fElectronMVAWeights_Subdet1Pt20ToInf;
     TString                   fElectronMVAWeights_Subdet2Pt20ToInf;
 
+    //R9 rescale
+    bool                  fdor9rescale;                   
+    double                fp0b;                          
+    double                fp1b;                          
+    double                fp0e;                          
+    double                fp1e;     
+
     RhoUtilities::RhoType    fTheRhoType;
+    UInt_t                         fProcessedEvents;
 
     ClassDef(PhotonTreeWriter, 1) // Photon identification module
       };

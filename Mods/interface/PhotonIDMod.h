@@ -1,14 +1,18 @@
 //--------------------------------------------------------------------------------------------------
+// $Id: PhotonIDMod.h,v 1.33 2013/06/26 21:44:21 mingyang Exp $
+//
 // PhotonIDMod
 //
-// This module applies photon identification criteria and exports a pointer to a collection of "good
-// photons" according to the specified identification scheme.
+// This module applies photon identification criteria and exports a pointer to a collection
+// of "good photons" according to the specified identification scheme.
 //
 // Authors: S.Xie, C.Loizides
 //--------------------------------------------------------------------------------------------------
+
 #ifndef MITPHYSICS_MODS_PHOTONIDMOD_H
 #define MITPHYSICS_MODS_PHOTONIDMOD_H
 
+#include "MitAna/TreeMod/interface/BaseMod.h" 
 #include "MitAna/DataTree/interface/PhotonFwd.h"
 #include "MitAna/DataTree/interface/TrackCol.h"
 #include "MitAna/DataTree/interface/BeamSpotCol.h"
@@ -20,7 +24,7 @@
 #include "MitAna/DataTree/interface/PileupInfoCol.h"
 #include "MitAna/DataTree/interface/MCParticleCol.h"
 #include "MitAna/DataTree/interface/PFCandidateCol.h"
-#include "MitAna/TreeMod/interface/BaseMod.h" 
+
 #include "MitPhysics/Utils/interface/MVATools.h"
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/RhoUtilities.h"
@@ -32,8 +36,8 @@ namespace mithep
   class PhotonIDMod : public BaseMod
   {
     public:
-      PhotonIDMod(const char *name  = "PhotonIDMod", 
-                  const char *title = "Photon identification module");
+      PhotonIDMod(const char *name="PhotonIDMod", 
+                  const char *title="Photon identification module");
 
       Bool_t              GetApplySpikeRemoval()      const { return fApplySpikeRemoval;   }
       Bool_t              GetApplyPixelSeed()         const { return fApplyPixelSeed;      }
@@ -49,29 +53,29 @@ namespace mithep
       Double_t            GetEtaWidthEB()	      const { return fEtaWidthEB;	   }
       Double_t            GetEtaWidthEE()	      const { return fEtaWidthEE;	   }
       Double_t            GetAbsEtaMax()	      const { return fAbsEtaMax;	   }
-      void                SetApplySpikeRemoval(Bool_t b)    { fApplySpikeRemoval = b; }
-      void                SetApplyPixelSeed(Bool_t b)       { fApplyPixelSeed = b; }
-      void                SetApplyElectronVeto(Bool_t b)    { fApplyElectronVeto = b; }
-      void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b; }      
+      void                SetApplySpikeRemoval(Bool_t b)    { fApplySpikeRemoval  = b;     }
+      void                SetApplyPixelSeed(Bool_t b)       { fApplyPixelSeed  = b;        }
+      void                SetApplyElectronVeto(Bool_t b)    { fApplyElectronVeto = b;      }
+      void                SetInvertElectronVeto(Bool_t b)   { fInvertElectronVeto = b;     }      
       void                SetApplyElectronVetoConvRecovery(Bool_t b) { fApplyElectronVetoConvRecovery = b; }
-      void                SetApplyConversionId(Bool_t b)             { fApplyConversionId = b; }
-      void                SetApplyTriggerMatching(Bool_t b)          { fApplyTriggerMatching = b; }   
-      void                SetGoodName(const char *n)        { SetGoodPhotonsName(n); }   
-      void                SetGoodPhotonsName(const char *n) { fGoodPhotonsName = n; }   
-      void                SetHadOverEmMax(Double_t hoe)     { fHadOverEmMax = hoe; }
-      void                SetIDType(const char *type)       { fPhotonIDType = type; }
-      void                SetInputName(const char *n)       { fPhotonBranchName = n; }   
-      void                SetTrackName(const char *n)       { fTrackBranchName = n; }   
-      void                SetBeamspotName(const char *n)    { fBeamspotBranchName = n; }   
-      void                SetIsoType(const char *type)      { fPhotonIsoType = type; }
-      void                SetOutputName(const char *n)      { SetGoodPhotonsName(n); }    
-      void                SetPtMin(Double_t pt)             { fPhotonPtMin = pt; }
-      void                SetR9Min(Double_t x)              { fPhotonR9Min = x; }
-      void                SetEtaWidthEB(Double_t x)	    { fEtaWidthEB = x; }
-      void                SetEtaWidthEE(Double_t x)         { fEtaWidthEE = x; }
-      void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax = x; }
-      void                SetApplyR9Min(Bool_t b)           { fApplyR9Min = b; }
-      void                SetApplyFiduciality(Bool_t b)     { fFiduciality = b; }
+      void                SetApplyConversionId(Bool_t b)    { fApplyConversionId = b;      }
+      void                SetApplyTriggerMatching(Bool_t b)      { fApplyTriggerMatching = b;  }      
+      void                SetGoodName(const char *n)        { SetGoodPhotonsName(n);       }   
+      void                SetGoodPhotonsName(const char *n) { fGoodPhotonsName = n;        }   
+      void                SetHadOverEmMax(Double_t hoe)     { fHadOverEmMax    = hoe;      }
+      void                SetIDType(const char *type)       { fPhotonIDType    = type;     }
+      void                SetInputName(const char *n)       { fPhotonBranchName= n;        }   
+      void                SetTrackName(const char *n)       { fTrackBranchName = n;        }   
+      void                SetBeamspotName(const char *n)    { fBeamspotBranchName = n;     }   
+      void                SetIsoType(const char *type)      { fPhotonIsoType   = type;     }
+      void                SetOutputName(const char *n)      { SetGoodPhotonsName(n);       }    
+      void                SetPtMin(Double_t pt)             { fPhotonPtMin     = pt;       }
+      void                SetR9Min(Double_t x)              { fPhotonR9Min     = x;        }
+      void                SetEtaWidthEB(Double_t x)	    { fEtaWidthEB      = x;	   }
+      void                SetEtaWidthEE(Double_t x)         { fEtaWidthEE      = x;	   }
+      void                SetAbsEtaMax(Double_t x)          { fAbsEtaMax       = x;	   }
+      void                SetApplyR9Min(Bool_t b)           { fApplyR9Min      = b;        }
+      void                SetApplyFiduciality(Bool_t b)     { fFiduciality = b;            }      
       void                SetEffAreas(Double_t ecal, Double_t hcal, Double_t track) { 
 	fEffAreaEcalEE = ecal; fEffAreaHcalEE = hcal; fEffAreaTrackEE = track;
 	fEffAreaEcalEB = ecal; fEffAreaHcalEB = hcal; fEffAreaTrackEB = track;
@@ -81,150 +85,109 @@ namespace mithep
 	fEffAreaEcalEE = ecalEE; fEffAreaHcalEE = hcalEE; fEffAreaTrackEE = trackEE;
 	fEffAreaEcalEB = ecalEB; fEffAreaHcalEB = hcalEB; fEffAreaTrackEB = trackEB;
       }
-      void                SetTriggerObjectsName(const char *n) { fTrigObjectsName = n; }
-      void                SetPhotonsFromBranch(bool b)         { fPhotonsFromBranch = b; }
-      void                SetPVName(const char *n)             { fPVName = n; }
-      void                SetPVFromBranch(bool b)              { fPVFromBranch = b; }
-      void                SetIsData (Bool_t b)                 { fIsData = b; }
-      void                Set2012HCP (Bool_t b)                { f2012HCP = b; }
-      void                SetShowerShapeType(const char *type) { fShowerShapeType = type; } 
-  
-          // methods to set the MC smearing/energy correction values
-      void                AddEnCorrPerRun(UInt_t sRun, UInt_t eRun,
-					  Double_t corr_EBlowEta_hR9central,
-					  Double_t corr_EBlowEta_hR9gap,
-					  Double_t corr_EBlowEta_lR9,
-					  Double_t corr_EBhighEta_hR9,
-					  Double_t corr_EBhighEta_lR9,                                         
-					  Double_t corr_EElowEta_hR9,
-					  Double_t corr_EElowEta_lR9,
-					  Double_t corr_EEhighEta_hR9,
-					  Double_t corr_EEhighEta_lR9) {
-	
-        fDataEnCorr_EBlowEta_hR9central.push_back(corr_EBlowEta_hR9central);
-        fDataEnCorr_EBlowEta_hR9gap.push_back(corr_EBlowEta_hR9gap);
-        fDataEnCorr_EBlowEta_lR9.push_back(corr_EBlowEta_lR9);
-        fDataEnCorr_EBhighEta_hR9.push_back(corr_EBhighEta_hR9);
-        fDataEnCorr_EBhighEta_lR9.push_back(corr_EBhighEta_lR9);      
-        fDataEnCorr_EElowEta_hR9.push_back(corr_EElowEta_hR9);
-        fDataEnCorr_EElowEta_lR9.push_back(corr_EElowEta_lR9);      
-        fDataEnCorr_EEhighEta_hR9.push_back(corr_EEhighEta_hR9);
-        fDataEnCorr_EEhighEta_lR9.push_back(corr_EEhighEta_lR9);       
-        fRunStart.push_back         (sRun);
-        fRunEnd.push_back           (eRun);
-      };
-  
-      void                SetMCSmearFactors(Double_t _EBlowEta_hR9central,
-                                            Double_t _EBlowEta_hR9gap, 
-					    Double_t _EBlowEta_lR9,
-                                            Double_t _EBhighEta_hR9, 
-                                            Double_t _EBhighEta_lR9,
-					    Double_t _EElowEta_hR9, 
-					    Double_t _EElowEta_lR9,
-                                            Double_t _EEhighEta_hR9,
-                                            Double_t _EEhighEta_lR9) {
-        fMCSmear_EBlowEta_hR9central = _EBlowEta_hR9central;
-        fMCSmear_EBlowEta_hR9gap = _EBlowEta_hR9gap;
-        fMCSmear_EBlowEta_lR9 = _EBlowEta_lR9;
-        fMCSmear_EBhighEta_hR9 = _EBhighEta_hR9;
-        fMCSmear_EBhighEta_lR9 = _EBhighEta_lR9;      
-        fMCSmear_EElowEta_hR9 = _EElowEta_hR9;
-        fMCSmear_EElowEta_lR9 = _EElowEta_lR9;
-        fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
-        fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
-      };
-  
-  
-      void                AddEnCorrPerRun2012HCP(UInt_t sRun, UInt_t eRun,
-						 Double_t corr_EBlowEta_hR9central,
-						 Double_t corr_EBlowEta_hR9gap,
-						 Double_t corr_EBlowEta_lR9central,
-						 Double_t corr_EBlowEta_lR9gap,
-						 Double_t corr_EBhighEta_hR9,
-						 Double_t corr_EBhighEta_lR9,                                         
-						 Double_t corr_EElowEta_hR9,
-						 Double_t corr_EElowEta_lR9,
-						 Double_t corr_EEhighEta_hR9,
-						 Double_t corr_EEhighEta_lR9) {
-        fDataEnCorr_EBlowEta_hR9central.push_back(corr_EBlowEta_hR9central);
-        fDataEnCorr_EBlowEta_hR9gap.push_back(corr_EBlowEta_hR9gap);
-        fDataEnCorr_EBlowEta_lR9central.push_back(corr_EBlowEta_lR9central);
-        fDataEnCorr_EBlowEta_lR9gap.push_back(corr_EBlowEta_lR9gap);
-        fDataEnCorr_EBhighEta_hR9.push_back(corr_EBhighEta_hR9);
-        fDataEnCorr_EBhighEta_lR9.push_back(corr_EBhighEta_lR9);      
-        fDataEnCorr_EElowEta_hR9.push_back(corr_EElowEta_hR9);
-        fDataEnCorr_EElowEta_lR9.push_back(corr_EElowEta_lR9);      
-        fDataEnCorr_EEhighEta_hR9.push_back(corr_EEhighEta_hR9);
-        fDataEnCorr_EEhighEta_lR9.push_back(corr_EEhighEta_lR9);       
-        fRunStart.push_back(sRun);
-        fRunEnd.push_back(eRun);
-      };
-  
-      void SetMCSmearFactors2012HCP(Double_t _EBlowEta_hR9central,
-  				  Double_t _EBlowEta_hR9gap, 
-  				  Double_t _EBlowEta_lR9central,
-  				  Double_t _EBlowEta_lR9gap,
-  				  Double_t _EBhighEta_hR9, 
-  				  Double_t _EBhighEta_lR9,
-  				  Double_t _EElowEta_hR9, 
-  				  Double_t _EElowEta_lR9,
-  				  Double_t _EEhighEta_hR9,
-  				  Double_t _EEhighEta_lR9) {
-        fMCSmear_EBlowEta_hR9central = _EBlowEta_hR9central;
-        fMCSmear_EBlowEta_hR9gap = _EBlowEta_hR9gap;
-        fMCSmear_EBlowEta_lR9central = _EBlowEta_lR9central;
-        fMCSmear_EBlowEta_lR9gap = _EBlowEta_lR9gap;
-        fMCSmear_EBhighEta_hR9 = _EBhighEta_hR9;
-        fMCSmear_EBhighEta_lR9 = _EBhighEta_lR9;      
-        fMCSmear_EElowEta_hR9 = _EElowEta_hR9;
-        fMCSmear_EElowEta_lR9 = _EElowEta_lR9;
-        fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
-        fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
-      };
-  
-  
-      void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
-      void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
-  
-      void                SetBdtCutBarrel(double a) {fbdtCutBarrel = a; }
-      void                SetBdtCutEndcap(double a) {fbdtCutEndcap = a; }
-  
-  
-      void                DoDataEneCorr(bool a)              { fDoDataEneCorr = a; }
-      void                DoMCSmear(bool a)                  { fDoMCSmear     = a; }
-      void                SetDoShowerShapeScaling(Bool_t b)  { fDoShowerShapeScaling = b; }
-      void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
-      void                SetMCErrScale(Double_t ebscale,
-					Double_t eescale)    { fMCErrScaleEB = ebscale;
-                                                               fMCErrScaleEE = eescale; }
-      void                SetIdMVAType(const char *type)     { fIdMVATypeName = type; } 
-  
-      void                SetRhoType(RhoUtilities::RhoType type) { fRhoType = type ; }
-      
-      enum EPhIdType {
-	kIdUndef = 0,                //not defined
-	kTight,                      //"Tight"
-	kLoose,                      //"Loose"
-	kLooseEM,                    //"LooseEM"
-  	kBaseLineCiC,                //"2011" Hgg BaseLine CiC
-  	kBaseLineCiCPF,              //"2012" Hgg BaseLine CiC
-  	kBaseLineCiCPFNoPresel,      //"2012" Hgg BaseLine CiC plus eleveto -- for mono photon
-  	kMITMVAId,                   // MingMing MVA ID
-  	kMITPhSelection,             //MIT loose preselection (for mva)
-  	kMITPFPhSelection,           //MIT loose preselection (for mva)
-	kMITPFPhSelectionNoEcal,
-  	kMITPFPhSelection_NoTrigger, //MIT loose preselection (for mva, no Trigger)
-  	kVgamma2011Selection,        // Vgamma 2011 Photon ID
-  	kTrivialSelection,           // only pt & eta cuts
-	kCustomId                    //"Custom"
-      };
+      void                SetTriggerObjectsName(const char *n)   { fTrigObjectsName = n;       }
     
+
+    void                SetPhotonsFromBranch(bool b)           { fPhotonsFromBranch = b;           }
+
+    void                SetPVName(const char *n)          { fPVName = n;                 }
+    void                SetPVFromBranch(bool b)           { fPVFromBranch = b;           }
+    void                SetIsData (Bool_t b) { fIsData = b;}
+
+    void                SetShowerShapeType(const char *type) { fShowerShapeType        = type;    } 
+
+        // methods to set the MC smearing/energy correction values
+    void                AddEnCorrPerRun( UInt_t sRun, UInt_t eRun,
+					 Double_t corr_EBlowEta_hR9,
+					 Double_t corr_EBlowEta_lR9,
+                                         Double_t corr_EBhighEta_hR9,
+                                         Double_t corr_EBhighEta_lR9,                                         
+					 Double_t corr_EElowEta_hR9,
+					 Double_t corr_EElowEta_lR9,
+                                         Double_t corr_EEhighEta_hR9,
+                                         Double_t corr_EEhighEta_lR9) {
+
+      fDataEnCorr_EBlowEta_hR9.push_back(corr_EBlowEta_hR9);
+      fDataEnCorr_EBlowEta_lR9.push_back(corr_EBlowEta_lR9);
+      fDataEnCorr_EBhighEta_hR9.push_back(corr_EBhighEta_hR9);
+      fDataEnCorr_EBhighEta_lR9.push_back(corr_EBhighEta_lR9);      
+      fDataEnCorr_EElowEta_hR9.push_back(corr_EElowEta_hR9);
+      fDataEnCorr_EElowEta_lR9.push_back(corr_EElowEta_lR9);      
+      fDataEnCorr_EEhighEta_hR9.push_back(corr_EEhighEta_hR9);
+      fDataEnCorr_EEhighEta_lR9.push_back(corr_EEhighEta_lR9);       
+      fRunStart.push_back         (sRun);
+      fRunEnd.push_back           (eRun);
+    };
+
+    void                SetMCSmearFactors(Double_t _EBlowEta_hR9,
+					  Double_t _EBlowEta_lR9,
+                                          Double_t _EBhighEta_hR9, 
+                                          Double_t _EBhighEta_lR9,
+					  Double_t _EElowEta_hR9, 
+					  Double_t _EElowEta_lR9,
+                                          Double_t _EEhighEta_hR9,
+                                          Double_t _EEhighEta_lR9) {
+      fMCSmear_EBlowEta_hR9 = _EBlowEta_hR9;
+      fMCSmear_EBlowEta_lR9 = _EBlowEta_lR9;
+      fMCSmear_EBhighEta_hR9 = _EBhighEta_hR9;
+      fMCSmear_EBhighEta_lR9 = _EBhighEta_lR9;      
+      fMCSmear_EElowEta_hR9 = _EElowEta_hR9;
+      fMCSmear_EElowEta_lR9 = _EElowEta_lR9;
+      fMCSmear_EEhighEta_hR9 = _EEhighEta_hR9;
+      fMCSmear_EEhighEta_lR9 = _EEhighEta_lR9;      
+    };
+
+
+
+
+    void                SetGoodElectronsFromBranch(Bool_t b) { fGoodElectronsFromBranch = b; }
+    void                SetGoodElectronName(TString name) { fGoodElectronName = name; }
+
+    void                SetBdtCutBarrel(double a) {fbdtCutBarrel = a; }
+    void                SetBdtCutEndcap(double a) {fbdtCutEndcap = a; }
+
+
+    void                DoDataEneCorr(bool a)              { fDoDataEneCorr = a; }
+    void                DoMCSmear(bool a)                  { fDoMCSmear     = a; }
+    void                SetDoShowerShapeScaling(Bool_t b)  { fDoShowerShapeScaling = b; }
+
+    // replaced by ShowerShapeScaling (fab)
+/*     void                SetDoMCR9Scaling(Bool_t b)        { fDoMCR9Scaling = b; } */
+/*     void                SetMCR9Scale(Double_t ebscale, Double_t eescale) { fMCR9ScaleEB = ebscale; fMCR9ScaleEE = eescale; } */
+/*     void                SetDoMCSigIEtaIEtaScaling(Bool_t b)        { fDoMCSigIEtaIEtaScaling = b; } */
+/*     void                SetDoMCWidthScaling(Bool_t b)        { fDoMCWidthScaling = b; } */
+
+    void                SetDoMCErrScaling(Bool_t b)        { fDoMCErrScaling = b; }
+    void                SetMCErrScale(Double_t ebscale, Double_t eescale) { fMCErrScaleEB = ebscale; fMCErrScaleEE = eescale; }
+
+    void                SetIdMVAType(const char *type)    { fIdMVATypeName        = type;    } 
+
+    void                SetRhoType(RhoUtilities::RhoType type) { fRhoType = type ; }
+    
+    enum EPhIdType {
+        kIdUndef = 0,       //not defined
+        kTight,             //"Tight"
+        kLoose,             //"Loose"
+        kLooseEM,           //"LooseEM"
+	kBaseLineCiC,         //"2011" Hgg BaseLine CiC
+	kBaseLineCiCPF,       //"2012" Hgg BaseLine CiC
+	kBaseLineCiCPFNoPresel,       //"2012" Hgg BaseLine CiC plus eleveto -- for mono photon
+	kMITMVAId,            // MingMing MVA ID
+	kMITPhSelection,      //MIT loose preselection (for mva)
+	kMITPFPhSelection,    //MIT loose preselection (for mva)
+        kMITPFPhSelectionNoEcal,
+	kMITPFPhSelection_NoTrigger,    //MIT loose preselection (for mva, no Trigger)
+	kVgamma2011Selection, // Vgamma 2011 Photon ID
+	kTrivialSelection,    // only pt & eta cuts
+        kCustomId             //"Custom"
+      };
+
       enum EPhIsoType {
-	kIsoUndef = 0,      //not defined        
-	kNoIso,             //"NoIso"
-	kCombinedIso,       //"CombinedIso"
-	kCustomIso,         //"Custom"
-  	kMITPUCorrected     //PileUp Corrected Hgg Isolation
+        kIsoUndef = 0,      //not defined        
+        kNoIso,             //"NoIso"
+        kCombinedIso,       //"CombinedIso"
+        kCustomIso,         //"Custom"
+	kMITPUCorrected     //PileUp Corrected Hgg Isolation
       };
 
     protected:
@@ -234,8 +197,6 @@ namespace mithep
       Int_t               FindRunRangeIdx(UInt_t run);
       Double_t            GetDataEnCorr(Int_t runRange, PhotonTools::eScaleCats cat);
       Double_t            GetMCSmearFac(PhotonTools::eScaleCats cat);   // last flag in case of special smearing for error computation
-      Double_t            GetDataEnCorrHCP(Int_t runRange, PhotonTools::eScaleCats cat);
-      Double_t            GetMCSmearFacHCP(PhotonTools::eScaleCats cat);   // last flag in case of special smearing for error computation
       
       TString             fPhotonBranchName;     //name of photon collection (input)
       TString             fGoodPhotonsName;      //name of exported "good photon" collection
@@ -291,18 +252,25 @@ namespace mithep
       Double_t fbdtCutBarrel;
       Double_t fbdtCutEndcap;
 
+      // ----------------------------------------------------------------
+      // these guys should go away.... (let MVATools handle this)   (fab)
+      int                         fVariableType;
+      TString                     fEndcapWeights;
+      TString                     fBarrelWeights;
+      // ----------------------------------------------------------------
       MVATools                    fTool;
       TString                     fIdMVATypeName;
       MVATools::IdMVAType         fIdMVAType;
+      // ----------------------------------------------------------------
 
-      Bool_t   fDoMCR9Scaling;
+      Bool_t fDoMCR9Scaling;
       Double_t fMCR9ScaleEB;
       Double_t fMCR9ScaleEE;
       
-      Bool_t   fDoMCSigIEtaIEtaScaling;
-      Bool_t   fDoMCWidthScaling;
+      Bool_t fDoMCSigIEtaIEtaScaling;
+      Bool_t fDoMCWidthScaling;
       
-      Bool_t   fDoMCErrScaling;
+      Bool_t fDoMCErrScaling;
       Double_t fMCErrScaleEB;
       Double_t fMCErrScaleEE;    
 
@@ -310,9 +278,6 @@ namespace mithep
       Bool_t              fPVFromBranch;
       Bool_t              fGoodElectronsFromBranch;
       Bool_t              fIsData;
-
-      Bool_t              f2012HCP;
-
 
       // showershape
       TString                                fShowerShapeType;
@@ -322,12 +287,10 @@ namespace mithep
       bool                  fDoMCSmear;
       Bool_t                fDoShowerShapeScaling; 
 
-      // Vectors to hold smearing/correction factors
-      std::vector<Double_t> fDataEnCorr_EBlowEta_hR9central;
-      std::vector<Double_t> fDataEnCorr_EBlowEta_hR9gap;
+
+      // Vectroes to hols smeraring/correction factors
+      std::vector<Double_t> fDataEnCorr_EBlowEta_hR9;
       std::vector<Double_t> fDataEnCorr_EBlowEta_lR9;
-      std::vector<Double_t> fDataEnCorr_EBlowEta_lR9central;
-      std::vector<Double_t> fDataEnCorr_EBlowEta_lR9gap;
       std::vector<Double_t> fDataEnCorr_EBhighEta_hR9;
       std::vector<Double_t> fDataEnCorr_EBhighEta_lR9;    
       std::vector<Double_t> fDataEnCorr_EElowEta_hR9;
@@ -338,11 +301,8 @@ namespace mithep
       std::vector<UInt_t>   fRunStart;
       std::vector<UInt_t>   fRunEnd;
       
-      Double_t              fMCSmear_EBlowEta_hR9central;
-      Double_t              fMCSmear_EBlowEta_hR9gap;
+      Double_t              fMCSmear_EBlowEta_hR9;
       Double_t              fMCSmear_EBlowEta_lR9;
-      Double_t              fMCSmear_EBlowEta_lR9central;
-      Double_t              fMCSmear_EBlowEta_lR9gap;
       Double_t              fMCSmear_EBhighEta_hR9;
       Double_t              fMCSmear_EBhighEta_lR9;    
       Double_t              fMCSmear_EElowEta_hR9;
@@ -350,7 +310,7 @@ namespace mithep
       Double_t              fMCSmear_EEhighEta_hR9;
       Double_t              fMCSmear_EEhighEta_lR9;    
       
-      TRandom3             *fRng;
+      TRandom3* fRng;
 
       RhoUtilities::RhoType fRhoType;
 
