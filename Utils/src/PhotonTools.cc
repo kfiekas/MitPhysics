@@ -1,4 +1,4 @@
-// $Id: PhotonTools.cc,v 1.42 2013/06/21 13:11:42 mingyang Exp $
+// $Id: PhotonTools.cc,v 1.45 2013/12/13 01:06:00 bendavid Exp $
 
 #include "MitPhysics/Utils/interface/PhotonTools.h"
 #include "MitPhysics/Utils/interface/ElectronTools.h"
@@ -22,12 +22,7 @@ PhotonTools::eScaleCats PhotonTools::EScaleCat(const Photon *p)
 {
   if (p->SCluster()->AbsEta()<1.0) {
     if (p->R9()>0.94) {
-      Int_t ieta = p->SCluster()->Seed()->IEta();
-      Int_t iphi = p->SCluster()->Seed()->IPhi();      
-      Bool_t central = ( ((std::abs(ieta)-1)/5+1 >= 2 && (std::abs(ieta)-1)/5+1 < 5) || ((std::abs(ieta)-1)/5+1 >= 7 && (std::abs(ieta)-1)/5+1 < 9  ) || ((std::abs(ieta)-1)/5+1 >= 11 && (std::abs(ieta)-1)/5+1 < 13) || ((std::abs(ieta)-1)/5+1 >= 15 && (std::abs(ieta)-1)/5+1 < 17) ) && (iphi %20) > 5 && (iphi%20) <16;
-      
-      if (central) return kEBlowEtaGoldCenter;
-      else return kEBlowEtaGoldGap;
+      return kEBlowEtaGold;
     }
     else return kEBlowEtaBad;
   }
@@ -46,36 +41,15 @@ PhotonTools::eScaleCats PhotonTools::EScaleCat(const Photon *p)
   
 }
 
-PhotonTools::eScaleCats PhotonTools::EScaleCatHCP(const Photon *p)
-{
-  if (p->SCluster()->AbsEta()<1.0) {
-    Int_t ieta = p->SCluster()->Seed()->IEta();
-    Int_t iphi = p->SCluster()->Seed()->IPhi();      
-    Bool_t central = ( ((std::abs(ieta)-1)/5+1 >= 2 && (std::abs(ieta)-1)/5+1 < 5) || ((std::abs(ieta)-1)/5+1 >= 7 && (std::abs(ieta)-1)/5+1 < 9  ) || ((std::abs(ieta)-1)/5+1 >= 11 && (std::abs(ieta)-1)/5+1 < 13) || ((std::abs(ieta)-1)/5+1 >= 15 && (std::abs(ieta)-1)/5+1 < 17) ) && (iphi %20) > 5 && (iphi%20) <16;
-    if(p->R9()>0.94 && central) return kEBlowEtaGoldCenter;
-    else if(p->R9()>0.94 && (!central)) return kEBlowEtaGoldGap;
-    else if(p->R9()<=0.94 && central) return kEBlowEtaBadCenter;
-    else return kEBlowEtaBadGap;
-  }
-  else if (p->SCluster()->AbsEta()<1.5) {
-    if (p->R9()>0.94) return kEBhighEtaGold;
-    else return kEBhighEtaBad;    
-  }
-  else if (p->SCluster()->AbsEta()<2.0) {
-    if (p->R9()>0.94) return kEElowEtaGold;
-    else return kEElowEtaBad;    
-  }
-  else {
-    if (p->R9()>0.94) return kEEhighEtaGold;
-    else return kEEhighEtaBad;    
-  }  
-  
-}
 
 void PhotonTools::ScalePhoton(Photon* p, Double_t scale) {
   if( !p ) return;
   FourVectorM mom = p->Mom();
   p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
+  
+  double oldscale = std::max(0.,p->EnergyScale());
+  
+  p->SetEnergyScale(oldscale*scale);
   
 }
 
@@ -87,17 +61,19 @@ void PhotonTools::SmearPhoton(Photon* p, TRandom3* rng, Double_t width, UInt_t i
 
   rng->SetSeed(iSeed);
   FourVectorM mom = p->Mom();
-  Double_t scale = rng->Gaus(1.,width);
+  Double_t scale = -1.;
 
-  if( scale > 0) {
-    p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
-
-    // moved here from SmearPhotonError, in order to being able to
-    // use different smearing for Error and actual Momentum (any reason not to? Josh?)
-    Double_t smear = p->EnergySmearing();
-    p->SetEnergySmearing(TMath::Sqrt(smear*smear+width*width*p->E()*p->E()));
-    
+  while (scale<0.) {
+    scale = rng->Gaus(1.,width);
   }
+  
+  p->SetMom(scale*mom.X(), scale*mom.Y(), scale*mom.Z(), scale*mom.E());
+
+  // moved here from SmearPhotonError, in order to being able to
+  // use different smearing for Error and actual Momentum (any reason not to? Josh?)
+  Double_t smear = p->EnergySmearing();
+  p->SetEnergySmearing(TMath::Sqrt(smear*smear+width*width*p->E()*p->E()));
+    
 
   return;
 }
@@ -114,7 +90,10 @@ void PhotonTools::SmearPhotonError(Photon* p, Double_t width) {
   
   Double_t err = p->EnergyErrSmeared();
   if (err>=0.0) {
-    p->SetEnergyErrSmeared(TMath::Sqrt(err*err + width*width*p->E()*p->E()));
+    p->SetEnergyErrSmeared(TMath::Sqrt(err*err + width*width));
+    
+    Double_t smear = p->EnergyErrSmearing();    
+    p->SetEnergyErrSmearing(TMath::Sqrt(smear*smear+width*width));    
   }
   
 }
@@ -599,7 +578,7 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
 					const Vertex* vtx, 
 					const PFCandidateCol*    pfCol,
 					const VertexCol*   vtxCol,
-					double rho, double ptmin,
+					double rho, double ptmin,bool dor9rescale, double p0b, double p1b,double p0e, double p1e, 
 					std::vector<double>* kin  // store variables for debugging...
 					) {
   
@@ -639,6 +618,14 @@ bool PhotonTools::PassCiCPFIsoSelection(const Photon* ph,
   double HoE = ph->HadOverEm();
   
   double R9 = ph->R9();
+
+  if(dor9rescale){
+    if(isbarrel){
+      R9 = p0b + p1b * R9;
+    }else{
+      R9 = p0e + p1e * R9;
+    }
+  }
   
   // check which category it is ...
   int _tCat = 1;
